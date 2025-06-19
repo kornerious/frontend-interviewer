@@ -20,9 +20,25 @@ export const useUserStore = create<UserState>((set) => ({
     username: '',
     aiReviewer: 'both',
   },
-  setAuthenticated: (isAuthenticated, uid) => set({ isAuthenticated, uid }),
-  setSettings: (settings) => set({ settings }),
-  logout: () => set({ isAuthenticated: false, uid: null }),
+  setAuthenticated: (isAuthenticated, uid) => {
+    console.log('Setting authenticated state:', { isAuthenticated, uid });
+    return set({ isAuthenticated, uid });
+  },
+  setSettings: (settings) => {
+    console.log('Setting user settings:', settings);
+    return set({ settings });
+  },
+  logout: () => {
+    console.log('Logging out user');
+    return set({ 
+      isAuthenticated: false, 
+      uid: null,
+      settings: {
+        username: '',
+        aiReviewer: 'both',
+      }
+    });
+  },
 }));
 
 // Data store for modules, theory, questions, and tasks

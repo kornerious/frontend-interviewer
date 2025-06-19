@@ -16,7 +16,8 @@ import {
 } from '@mui/material';
 import Layout from '@/components/layout/Layout';
 import { useUserStore } from '@/store';
-import { updateUserSettings } from '@/services/firestoreService';
+import { doc, setDoc, getDoc } from 'firebase/firestore';
+import { db, auth } from '@/services/firebase';
 import { useRouter } from 'next/router';
 
 const SettingsPage = () => {
@@ -50,20 +51,60 @@ const SettingsPage = () => {
     setSuccess(false);
     setError('');
     
+    console.log('Settings form submitted');
+    console.log('Current auth state:', { isAuthenticated, uid });
+    
     try {
-      if (!uid) {
+      // Check if user is authenticated
+      if (!auth.currentUser) {
+        console.error('ERROR: No authenticated user');
         throw new Error('User not authenticated');
       }
       
+      const currentUid = auth.currentUser.uid;
+      console.log('Current authenticated user:', currentUid);
+      
       const updatedSettings = {
         username,
-        aiReviewer: aiReviewer as 'deepseek' | 'gemini' | 'both'
+        aiReviewer: aiReviewer as 'deepseek' | 'gemini' | 'both',
+        updatedAt: new Date().toISOString()
       };
       
-      await updateUserSettings(uid, updatedSettings);
-      setSettings(updatedSettings);
-      setSuccess(true);
+      console.log('About to update settings for user:', currentUid);
+      console.log('New settings:', updatedSettings);
+      
+      // Get reference to user document
+      const userDocRef = doc(db, 'users', currentUid);
+      
+      try {
+        // Check if document exists
+        const docSnap = await getDoc(userDocRef);
+        
+        if (docSnap.exists()) {
+          console.log('User document exists, updating settings');
+          // Update only the settings field
+          await setDoc(userDocRef, { settings: updatedSettings }, { merge: true });
+        } else {
+          console.log('User document does not exist, creating it');
+          // Create new user document with settings
+          await setDoc(userDocRef, {
+            settings: updatedSettings,
+            progress: {},
+            submissions: [],
+            sessions: [],
+            exams: []
+          });
+        }
+        
+        console.log('Settings updated successfully in Firestore');
+        setSettings(updatedSettings);
+        setSuccess(true);
+      } catch (updateError: any) {
+        console.error('Firebase error:', updateError.code, updateError.message);
+        throw updateError;
+      }
     } catch (err: any) {
+      console.error('Settings update failed:', err);
       setError(err.message || 'Failed to update settings');
     } finally {
       setLoading(false);

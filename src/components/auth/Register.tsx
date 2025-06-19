@@ -57,7 +57,19 @@ const Register: React.FC = () => {
       useUserStore.getState().setSettings({ username, aiReviewer: 'both' });
       router.push('/');
     } catch (error: any) {
-      setError(error.message || 'Failed to register. Please try again.');
+      console.error('Registration error:', error);
+      // Extract Firebase error code and provide more specific error messages
+      if (error.code === 'auth/email-already-in-use') {
+        setError('This email is already registered. Please use a different email or login.');
+      } else if (error.code === 'auth/weak-password') {
+        setError('Password is too weak. Please use at least 6 characters.');
+      } else if (error.code === 'auth/invalid-email') {
+        setError('Invalid email address format.');
+      } else if (error.code === 'permission-denied') {
+        setError('Missing or insufficient permissions. Please check Firebase rules.');
+      } else {
+        setError(error.message || 'Failed to register. Please try again.');
+      }
     } finally {
       setLoading(false);
     }

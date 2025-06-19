@@ -2,52 +2,17 @@ import React, { useState, useEffect } from 'react';
 import { 
   Box, 
   Typography, 
-  Button, 
-  Paper, 
-  Tabs, 
-  Tab,
-  CircularProgress,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  SelectChangeEvent,
-  Chip
+  Button
 } from '@mui/material';
 import { Refresh as RefreshIcon } from '@mui/icons-material';
 import Layout from '@/components/layout/Layout';
-import QuizCard from '@/components/questions/QuizCard';
-import TaskRunner from '@/components/tasks/TaskRunner';
-import TheoryCard from '@/components/theory/TheoryCard';
-import TheoryView from '@/components/theory/TheoryView';
+import RandomFilters from '@/components/random/RandomFilters';
+import RandomContent from '@/components/random/RandomContent';
 import { useDataStore } from '@/store';
 import { TheoryItem, QuestionItem, TaskItem } from '../../index';
+import { SelectChangeEvent } from '@mui/material';
 
-interface TabPanelProps {
-  children?: React.ReactNode;
-  index: number;
-  value: number;
-}
 
-const TabPanel = (props: TabPanelProps) => {
-  const { children, value, index, ...other } = props;
-
-  return (
-    <div
-      role="tabpanel"
-      hidden={value !== index}
-      id={`random-tabpanel-${index}`}
-      aria-labelledby={`random-tab-${index}`}
-      {...other}
-    >
-      {value === index && (
-        <Box sx={{ py: 3 }}>
-          {children}
-        </Box>
-      )}
-    </div>
-  );
-};
 
 const RandomPage = () => {
   const [tabValue, setTabValue] = useState(0);
@@ -126,136 +91,25 @@ const RandomPage = () => {
           </Button>
         </Box>
         
-        <Paper sx={{ p: 2, mb: 3 }}>
-          <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
-            <FormControl size="small" sx={{ minWidth: 200 }}>
-              <InputLabel>Technology</InputLabel>
-              <Select
-                value={technology}
-                label="Technology"
-                onChange={handleTechnologyChange}
-              >
-                <MenuItem value="all">All Technologies</MenuItem>
-                {technologies.map((tech) => (
-                  <MenuItem key={tech} value={tech}>{tech}</MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-            
-            <FormControl size="small" sx={{ minWidth: 200 }}>
-              <InputLabel>Difficulty</InputLabel>
-              <Select
-                value={difficulty}
-                label="Difficulty"
-                onChange={handleDifficultyChange}
-              >
-                <MenuItem value="all">All Difficulties</MenuItem>
-                <MenuItem value="easy">Easy</MenuItem>
-                <MenuItem value="medium">Medium</MenuItem>
-                <MenuItem value="hard">Hard</MenuItem>
-              </Select>
-            </FormControl>
-            
-            <Box sx={{ display: 'flex', alignItems: 'center', ml: 'auto' }}>
-              <Typography variant="body2" color="text.secondary" sx={{ mr: 1 }}>
-                Filters apply to new random items
-              </Typography>
-              <Chip 
-                label="Strictly Random" 
-                color="secondary" 
-                size="small" 
-                variant="outlined"
-              />
-            </Box>
-          </Box>
-        </Paper>
+        <RandomFilters
+          technology={technology}
+          difficulty={difficulty}
+          technologies={technologies}
+          onTechnologyChange={handleTechnologyChange}
+          onDifficultyChange={handleDifficultyChange}
+        />
         
-        <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-          <Tabs 
-            value={tabValue} 
-            onChange={handleTabChange} 
-            aria-label="random content tabs"
-            variant="fullWidth"
-          >
-            <Tab 
-              label="Theory" 
-              id="random-tab-0" 
-              aria-controls="random-tabpanel-0" 
-            />
-            <Tab 
-              label="Question" 
-              id="random-tab-1" 
-              aria-controls="random-tabpanel-1" 
-            />
-            <Tab 
-              label="Task" 
-              id="random-tab-2" 
-              aria-controls="random-tabpanel-2" 
-            />
-          </Tabs>
-        </Box>
-        
-        {loading ? (
-          <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
-            <CircularProgress />
-          </Box>
-        ) : (
-          <>
-            <TabPanel value={tabValue} index={0}>
-              {randomTheory ? (
-                viewFullTheory ? (
-                  <Box>
-                    <Box sx={{ mb: 2 }}>
-                      <Typography 
-                        variant="body2" 
-                        sx={{ 
-                          cursor: 'pointer', 
-                          color: 'primary.main',
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          '&:hover': { textDecoration: 'underline' }
-                        }}
-                        onClick={handleBackToTheory}
-                      >
-                        ← Back to Theory Card
-                      </Typography>
-                    </Box>
-                    <TheoryView theory={randomTheory} />
-                  </Box>
-                ) : (
-                  <TheoryCard 
-                    theory={randomTheory} 
-                    onClick={handleTheoryClick} 
-                  />
-                )
-              ) : (
-                <Typography variant="body1" color="text.secondary" sx={{ textAlign: 'center', py: 4 }}>
-                  No theory items available for the selected filters.
-                </Typography>
-              )}
-            </TabPanel>
-            
-            <TabPanel value={tabValue} index={1}>
-              {randomQuestion ? (
-                <QuizCard question={randomQuestion} />
-              ) : (
-                <Typography variant="body1" color="text.secondary" sx={{ textAlign: 'center', py: 4 }}>
-                  No questions available for the selected filters.
-                </Typography>
-              )}
-            </TabPanel>
-            
-            <TabPanel value={tabValue} index={2}>
-              {randomTask ? (
-                <TaskRunner task={randomTask} />
-              ) : (
-                <Typography variant="body1" color="text.secondary" sx={{ textAlign: 'center', py: 4 }}>
-                  No tasks available for the selected filters.
-                </Typography>
-              )}
-            </TabPanel>
-          </>
-        )}
+        <RandomContent
+          tabValue={tabValue}
+          loading={loading}
+          randomTheory={randomTheory}
+          randomQuestion={randomQuestion}
+          randomTask={randomTask}
+          viewFullTheory={viewFullTheory}
+          onTabChange={handleTabChange}
+          onTheoryClick={handleTheoryClick}
+          onBackToTheory={handleBackToTheory}
+        />
       </Box>
     </Layout>
   );

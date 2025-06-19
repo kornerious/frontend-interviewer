@@ -10,24 +10,28 @@ import {
   getDocs,
   Timestamp
 } from 'firebase/firestore';
-import { db } from './firebaseService';
+import { db, auth } from './firebase';
 import type { UserSettings, UserSubmission, MockExam } from '@/types';
 
 // User settings
 export const getUserSettings = async (uid: string): Promise<UserSettings> => {
   try {
-    const docRef = doc(db, 'users', uid, 'settings', 'userSettings');
+    // Get the main user document which contains settings
+    const docRef = doc(db, 'users', uid);
     const docSnap = await getDoc(docRef);
     
-    if (docSnap.exists()) {
-      return docSnap.data() as UserSettings;
+    if (docSnap.exists() && docSnap.data().settings) {
+      return docSnap.data().settings as UserSettings;
     } else {
       // Create default settings if they don't exist
       const defaultSettings: UserSettings = {
         username: 'User',
-        aiReviewer: 'both'
+        aiReviewer: 'both',
+        createdAt: new Date().toISOString()
       };
-      await setDoc(docRef, defaultSettings);
+      
+      // Update the main user document with settings
+      await updateDoc(docRef, { settings: defaultSettings });
       return defaultSettings;
     }
   } catch (error) {
@@ -37,17 +41,79 @@ export const getUserSettings = async (uid: string): Promise<UserSettings> => {
 };
 
 export const updateUserSettings = async (uid: string, settings: UserSettings): Promise<void> => {
+  console.log('Starting updateUserSettings with uid:', uid);
+  console.log('Current auth state:', auth.currentUser?.uid);
+  
+  if (!uid) {
+    console.error('ERROR: No UID provided to updateUserSettings');
+    throw new Error('No UID provided');
+  }
+  
+  if (!auth.currentUser) {
+    console.error('ERROR: No authenticated user found when updating settings');
+    throw new Error('User not authenticated');
+  }
+  
+  if (auth.currentUser.uid !== uid) {
+    console.error(`ERROR: UID mismatch. Provided: ${uid}, Current: ${auth.currentUser.uid}`);
+    throw new Error('UID mismatch');
+  }
+  
   try {
-    const docRef = doc(db, 'users', uid, 'settings', 'userSettings');
-    await updateDoc(docRef, settings as { [key: string]: any });
-  } catch (error) {
-    console.error('Error updating user settings:', error);
+    // Reference to the user document
+    const docRef = doc(db, 'users', uid);
+    console.log('Document reference created for path:', `users/${uid}`);
+    
+    // Check if the document exists first
+    console.log('Checking if document exists...');
+    const docSnap = await getDoc(docRef);
+    console.log('Document exists:', docSnap.exists());
+    
+    // Add timestamp to settings
+    const updatedSettings = {
+      ...settings,
+      updatedAt: new Date().toISOString()
+    };
+    
+    console.log('Updating user settings for uid:', uid);
+    console.log('Settings data:', JSON.stringify(updatedSettings));
+    
+    if (docSnap.exists()) {
+      // Document exists, update it
+      console.log('Document exists, updating settings field');
+      try {
+        await updateDoc(docRef, { settings: updatedSettings });
+        console.log('Settings updated successfully');
+      } catch (updateError: any) {
+        console.error('ERROR updating document:', updateError.code, updateError.message);
+        throw updateError;
+      }
+    } else {
+      // Document doesn't exist, create it
+      console.log('Document does not exist, creating new document');
+      try {
+        await setDoc(docRef, {
+          settings: updatedSettings,
+          progress: {},
+          submissions: [],
+          sessions: [],
+          exams: []
+        });
+        console.log('New document created successfully with settings');
+      } catch (setError: any) {
+        console.error('ERROR creating document:', setError.code, setError.message);
+        throw setError;
+      }
+    }
+  } catch (error: any) {
+    console.error('Error in updateUserSettings:', error.code, error.message);
+    console.error('Error details:', error);
     throw error;
   }
 };
 
 // Progress tracking
-export const updateItemProgress = async (uid: string, itemId: string, itemType: 'theory' | 'question' | 'task', status: 'pending' | 'complete') => {
+export const updateItemProgress = async (uid: string, itemId: string, itemType: 'theory' | 'question' | 'task', status: 'pending' | 'complete' | 'irrelevant') => {
   try {
     const docRef = doc(db, 'users', uid, 'progress', itemId);
     await setDoc(docRef, {

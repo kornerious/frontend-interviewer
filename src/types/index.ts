@@ -23,6 +23,8 @@ export interface Module {
 export interface UserSettings {
   username: string;
   aiReviewer: 'deepseek' | 'gemini' | 'both';
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface UserProgress {

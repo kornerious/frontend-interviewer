@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   AppBar, 
   Toolbar, 
@@ -18,8 +18,17 @@ import { logoutUser } from '@/services/authService';
 
 const Header: React.FC = () => {
   const router = useRouter();
-  const { isAuthenticated, uid, settings } = useUserStore();
+  const { isAuthenticated, uid, settings } = useUserStore(state => ({
+    isAuthenticated: state.isAuthenticated,
+    uid: state.uid,
+    settings: state.settings
+  }));
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  
+  // Debug authentication state
+  useEffect(() => {
+    console.log('Header auth state:', { isAuthenticated, uid });
+  }, [isAuthenticated, uid]);
   
   const handleMenu = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
@@ -75,7 +84,7 @@ const Header: React.FC = () => {
               color="inherit"
             >
               <Avatar sx={{ width: 32, height: 32, bgcolor: 'primary.main' }}>
-                {settings.displayName.charAt(0).toUpperCase()}
+                {(settings?.username || 'U').charAt(0).toUpperCase()}
               </Avatar>
             </IconButton>
             <Menu

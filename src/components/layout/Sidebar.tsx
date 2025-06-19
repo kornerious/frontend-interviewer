@@ -17,6 +17,7 @@ import {
   Refresh as RefreshIcon,
   Warning as WarningIcon,
   Assignment as AssignmentIcon,
+  Settings as SettingsIcon,
   ExpandLess,
   ExpandMore
 } from '@mui/icons-material';
@@ -103,62 +104,68 @@ const Sidebar: React.FC = () => {
             </ListItemIcon>
             <ListItemText primary="Mock Exams" />
           </ListItem>
+          
+          <ListItem 
+            button 
+            component={Link} 
+            href="/settings"
+            selected={router.pathname === '/settings'}
+          >
+            <ListItemIcon>
+              <SettingsIcon color="info" />
+            </ListItemIcon>
+            <ListItemText primary="Settings" />
+          </ListItem>
         </List>
         
         <Divider sx={{ my: 2 }} />
         
-        {/* Learning Modules */}
-        <Typography variant="subtitle2" sx={{ px: 2, py: 1, color: 'text.secondary' }}>
+        {/* Learning Modules Label - Non-clickable */}
+        <Box sx={{ 
+          bgcolor: '#2196f3', // Blue background
+          color: 'white',
+          px: 2, 
+          py: 0.5,
+          mx: 2,
+          borderRadius: 1,
+          fontSize: '0.875rem',
+          fontWeight: 'medium',
+          textAlign: 'center'
+        }}>
           Learning Modules
-        </Typography>
+        </Box>
         
         <List>
-          {/* Learning Paths */}
-          {groupedModules.map((group) => (
-            <React.Fragment key={group.path}>
-              <ListItem 
-                button 
-                onClick={() => handleModuleClick(group.path)}
-              >
-                <ListItemIcon>
-                  <SchoolIcon color="primary" />
-                </ListItemIcon>
-                <ListItemText 
-                  primary={group.path.charAt(0).toUpperCase() + group.path.slice(1)} 
-                  primaryTypographyProps={{ noWrap: true }}
-                />
-                {openModules[group.path] ? <ExpandLess /> : <ExpandMore />}
-              </ListItem>
-              
-              <Collapse in={openModules[group.path]} timeout="auto" unmountOnExit>
-                <List component="div" disablePadding>
-                  {group.modules.map((module) => (
-                    <ListItem 
-                      key={module.id}
-                      button 
-                      component={Link}
-                      href={`/modules/${module.id}`}
-                      selected={router.asPath.startsWith(`/modules/${module.id}`)}
-                      sx={{ pl: 4 }}
-                    >
-                      <ListItemIcon>
-                        {module.technology === 'React' || module.technology === 'Next.js' ? (
-                          <CodeIcon color="info" />
-                        ) : module.technology === 'JavaScript' || module.technology === 'TypeScript' ? (
-                          <SchoolIcon color="warning" />
-                        ) : (
-                          <QuestionIcon color="success" />
-                        )}
-                      </ListItemIcon>
-                      <ListItemText 
-                        primary={module.title} 
-                        primaryTypographyProps={{ noWrap: true, fontSize: '0.9rem' }}
-                      />
-                    </ListItem>
-                  ))}
-                </List>
-              </Collapse>
-            </React.Fragment>
+          {/* Add Module Detail Page as a main page */}
+          <ListItem 
+            button 
+            component={Link} 
+            href="/modules"
+            selected={router.pathname === '/modules'}
+          >
+            <ListItemIcon>
+              <SchoolIcon color="primary" />
+            </ListItemIcon>
+            <ListItemText primary="Module Detail" />
+          </ListItem>
+          
+          {/* Learning Paths - simplified, non-expandable list */}
+          {groupedModules.slice(0, 5).map((group) => (
+            <ListItem 
+              key={group.path}
+              button 
+              component={Link}
+              href={`/modules/${group.modules[0]?.id || ''}`}
+              sx={{ pl: 4 }}
+            >
+              <ListItemIcon>
+                <CodeIcon color="info" />
+              </ListItemIcon>
+              <ListItemText 
+                primary={group.path.charAt(0).toUpperCase() + group.path.slice(1)} 
+                primaryTypographyProps={{ noWrap: true, fontSize: '0.9rem' }}
+              />
+            </ListItem>
           ))}
         </List>
       </Box>

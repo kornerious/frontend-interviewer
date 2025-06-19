@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Card, 
   CardContent, 
@@ -10,14 +10,13 @@ import {
   FormControlLabel,
   Checkbox,
   Collapse,
-  CircularProgress,
-  Divider
+  CircularProgress
 } from '@mui/material';
-import Editor from '@monaco-editor/react';
 import { TaskItem } from '../../../index';
 import { useUserStore, useProgressStore } from '@/store';
-import { updateItemProgress, saveSubmission } from '@/services/firestoreService';
+import { updateItemProgress, saveSubmission, getItemProgress } from '@/services/firestoreService';
 import { reviewCode } from '@/services/aiService';
+import TaskContent from './TaskContent';
 
 interface TaskRunnerProps {
   task: TaskItem;
@@ -34,7 +33,26 @@ const TaskRunner: React.FC<TaskRunnerProps> = ({ task }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [aiResponse, setAiResponse] = useState<string>('');
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
-  const [isIrrelevant, setIsIrrelevant] = useState(task.irrelevant || false);
+  // Initialize with false since TaskItem doesn't have irrelevant property
+  const [isIrrelevant, setIsIrrelevant] = useState(false);
+  
+  // Check if this item is marked as irrelevant in user progress
+  useEffect(() => {
+    const checkIrrelevantStatus = async () => {
+      if (isAuthenticated && uid) {
+        try {
+          const progress = await getItemProgress(uid, task.id);
+          if (progress && progress.status === 'irrelevant') {
+            setIsIrrelevant(true);
+          }
+        } catch (error) {
+          console.error('Error fetching irrelevant status:', error);
+        }
+      }
+    };
+    
+    checkIrrelevantStatus();
+  }, [isAuthenticated, uid, task.id]);
 
   const handleExpandClick = () => {
     setExpanded(!expanded);
@@ -97,11 +115,21 @@ const TaskRunner: React.FC<TaskRunnerProps> = ({ task }) => {
   };
 
   const handleIrrelevantChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    setIsIrrelevant(event.target.checked);
+    const newValue = event.target.checked;
+    setIsIrrelevant(newValue);
+    
     // Update in Firebase if authenticated
     if (isAuthenticated && uid) {
-      // This would require updating the task in the database
-      // For now, we'll just track it in the local state
+      try {
+        await updateItemProgress(
+          uid,
+          task.id,
+          'task',
+          newValue ? 'irrelevant' : 'pending'
+        );
+      } catch (error) {
+        console.error('Error updating irrelevant status:', error);
+      }
     }
   };
 
@@ -154,93 +182,18 @@ const TaskRunner: React.FC<TaskRunnerProps> = ({ task }) => {
         </Box>
         
         <Collapse in={expanded} timeout="auto" unmountOnExit>
-          <Box sx={{ mb: 3 }}>
-            {/* Render markdown description as HTML */}
-            <div 
-              dangerouslySetInnerHTML={{ 
-                __html: task.description
-                  .replace(/\n/g, '<br />')
-                  .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-                  .replace(/\*(.*?)\*/g, '<em>$1</em>')
-              }} 
-            />
-          </Box>
-          
-          <Box sx={{ mb: 3 }}>
-            <Typography variant="subtitle1" gutterBottom>
-              Code Editor
-            </Typography>
-            <Editor
-              height="300px"
-              defaultLanguage="javascript"
-              value={code}
-              onChange={handleCodeChange}
-              theme="vs-dark"
-              options={{
-                minimap: { enabled: false },
-                scrollBeyondLastLine: false,
-                fontSize: 14,
-                tabSize: 2
-              }}
-            />
-          </Box>
-          
-          {task.hints.length > 0 && (
-            <Box sx={{ mb: 3 }}>
-              <Button 
-                variant="outlined" 
-                color="info" 
-                size="small" 
-                onClick={() => setShowHints(!showHints)}
-              >
-                {showHints ? 'Hide Hints' : 'Show Hints'}
-              </Button>
-              
-              <Collapse in={showHints} timeout="auto" unmountOnExit>
-                <Box sx={{ mt: 2, p: 2, bgcolor: 'background.paper', borderRadius: 1 }}>
-                  <Typography variant="subtitle2" gutterBottom>
-                    Hint {currentHintIndex + 1} of {task.hints.length}:
-                  </Typography>
-                  <Typography variant="body2">
-                    {task.hints[currentHintIndex]}
-                  </Typography>
-                  
-                  {currentHintIndex < task.hints.length - 1 && (
-                    <Button 
-                      size="small" 
-                      color="primary" 
-                      onClick={handleShowNextHint}
-                      sx={{ mt: 1 }}
-                    >
-                      Next Hint
-                    </Button>
-                  )}
-                </Box>
-              </Collapse>
-            </Box>
-          )}
-          
-          {aiResponse && (
-            <Box sx={{ mt: 3 }}>
-              <Divider sx={{ mb: 2 }} />
-              <Typography variant="h6" gutterBottom>
-                AI Review Result: {isCorrect ? '✅ Correct' : '❌ Needs Improvement'}
-              </Typography>
-              <Box 
-                sx={{ 
-                  p: 2, 
-                  bgcolor: 'background.paper', 
-                  borderRadius: 1,
-                  border: 1,
-                  borderColor: isCorrect ? 'success.main' : 'error.main'
-                }}
-              >
-                <Typography variant="body2" component="pre" sx={{ whiteSpace: 'pre-wrap' }}>
-                  {aiResponse}
-                </Typography>
-              </Box>
-            </Box>
-          )}
+          <TaskContent
+            description={task.description}
+            code={code}
+            hints={task.hints}
+            showHints={showHints}
+            currentHintIndex={currentHintIndex}
+            aiResponse={aiResponse}
+            isCorrect={isCorrect}
+            onCodeChange={handleCodeChange}
+            onShowHintsToggle={() => setShowHints(!showHints)}
+            onNextHint={handleShowNextHint}
+          />
         </Collapse>
       </CardContent>
       

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Card, 
   CardContent, 
@@ -9,16 +9,14 @@ import {
   Box,
   FormControlLabel,
   Checkbox,
-  Radio,
-  RadioGroup,
-  FormControl,
-  TextField,
-  Collapse
+  Collapse,
+  CircularProgress
 } from '@mui/material';
 import { QuestionItem } from '../../../index';
 import { useUserStore, useProgressStore } from '@/store';
-import { updateItemProgress, saveSubmission } from '@/services/firestoreService';
+import { updateItemProgress, saveSubmission, getItemProgress } from '@/services/firestoreService';
 import { reviewCode } from '@/services/aiService';
+import QuizCardContent from './QuizCardContent';
 
 interface QuizCardProps {
   question: QuestionItem;
@@ -35,7 +33,25 @@ const QuizCard: React.FC<QuizCardProps> = ({ question }) => {
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
   const [aiFeedback, setAiFeedback] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isIrrelevant, setIsIrrelevant] = useState(question.irrelevant || false);
+  const [isIrrelevant, setIsIrrelevant] = useState(false);
+  
+  // Check if this item is marked as irrelevant in user progress
+  useEffect(() => {
+    const checkIrrelevantStatus = async () => {
+      if (isAuthenticated && uid) {
+        try {
+          const progress = await getItemProgress(uid, question.id);
+          if (progress && progress.status === 'irrelevant') {
+            setIsIrrelevant(true);
+          }
+        } catch (error) {
+          console.error('Error fetching irrelevant status:', error);
+        }
+      }
+    };
+    
+    checkIrrelevantStatus();
+  }, [isAuthenticated, uid, question.id]);
 
   const handleExpandClick = () => {
     setExpanded(!expanded);
@@ -109,91 +125,21 @@ const QuizCard: React.FC<QuizCardProps> = ({ question }) => {
   };
 
   const handleIrrelevantChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    setIsIrrelevant(event.target.checked);
+    const newValue = event.target.checked;
+    setIsIrrelevant(newValue);
+    
     // Update in Firebase if authenticated
     if (isAuthenticated && uid) {
-      // This would require updating the question in the database
-      // For now, we'll just track it in the local state
-    }
-  };
-
-  const renderQuestionContent = () => {
-    switch (question.type) {
-      case 'mcq':
-        return (
-          <Box>
-            <Typography variant="body1" gutterBottom>
-              {question.question}
-            </Typography>
-            
-            <FormControl component="fieldset" sx={{ mt: 2 }}>
-              <RadioGroup value={selectedOption} onChange={handleOptionChange}>
-                {question.options.map((option, index) => (
-                  <FormControlLabel
-                    key={index}
-                    value={option}
-                    control={<Radio />}
-                    label={option}
-                    disabled={showAnswer}
-                  />
-                ))}
-              </RadioGroup>
-            </FormControl>
-          </Box>
+      try {
+        await updateItemProgress(
+          uid,
+          question.id,
+          'question',
+          newValue ? 'irrelevant' : 'pending'
         );
-        
-      case 'flashcard':
-        return (
-          <Box>
-            <Typography variant="body1" gutterBottom>
-              {question.question}
-            </Typography>
-            
-            <Collapse in={showAnswer}>
-              <Box sx={{ mt: 2, p: 2, bgcolor: 'background.paper', borderRadius: 1 }}>
-                <Typography variant="body1">
-                  {question.answer}
-                </Typography>
-              </Box>
-            </Collapse>
-          </Box>
-        );
-        
-      case 'open':
-      case 'code':
-        return (
-          <Box>
-            <Typography variant="body1" gutterBottom>
-              {question.question}
-            </Typography>
-            
-            <TextField
-              fullWidth
-              multiline
-              rows={4}
-              variant="outlined"
-              placeholder="Type your answer here..."
-              value={userAnswer}
-              onChange={handleAnswerChange}
-              disabled={showAnswer}
-              sx={{ mt: 2 }}
-            />
-            
-            {showAnswer && aiFeedback && (
-              <Box sx={{ mt: 2, p: 2, bgcolor: 'background.paper', borderRadius: 1 }}>
-                <Typography variant="subtitle1" gutterBottom>
-                  AI Feedback:
-                </Typography>
-                <Typography variant="body2">
-                  {aiFeedback}
-                </Typography>
-              </Box>
-            )}
-          </Box>
-        );
-        
-      default:
-        return null;
+      } catch (error) {
+        console.error('Error updating irrelevant status:', error);
+      }
     }
   };
 
@@ -246,28 +192,16 @@ const QuizCard: React.FC<QuizCardProps> = ({ question }) => {
         </Box>
         
         <Collapse in={expanded} timeout="auto" unmountOnExit>
-          {renderQuestionContent()}
-          
-          {showAnswer && isCorrect !== null && (
-            <Box 
-              sx={{ 
-                mt: 2, 
-                p: 2, 
-                bgcolor: isCorrect ? 'success.dark' : 'error.dark',
-                borderRadius: 1
-              }}
-            >
-              <Typography variant="body1" color="white">
-                {isCorrect ? 'Correct!' : 'Incorrect!'}
-              </Typography>
-              
-              {question.type === 'mcq' && (
-                <Typography variant="body2" color="white" sx={{ mt: 1 }}>
-                  Correct answer: {question.options[parseInt(question.answer)]}
-                </Typography>
-              )}
-            </Box>
-          )}
+          <QuizCardContent 
+            question={question}
+            selectedOption={selectedOption}
+            userAnswer={userAnswer}
+            showAnswer={showAnswer}
+            isCorrect={isCorrect}
+            aiFeedback={aiFeedback}
+            onOptionChange={handleOptionChange}
+            onAnswerChange={handleAnswerChange}
+          />
         </Collapse>
       </CardContent>
       
@@ -291,6 +225,7 @@ const QuizCard: React.FC<QuizCardProps> = ({ question }) => {
                 (question.type === 'mcq' && !selectedOption) ||
                 ((question.type === 'open' || question.type === 'code') && !userAnswer)
               }
+              startIcon={isSubmitting ? <CircularProgress size={16} /> : null}
             >
               {isSubmitting ? 'Submitting...' : 'Submit'}
             </Button>
