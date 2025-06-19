@@ -7,6 +7,9 @@ interface LayoutProps {
   children: ReactNode;
 }
 
+// Sidebar width defined in Sidebar.tsx
+const drawerWidth = 240;
+
 const Layout: React.FC<LayoutProps> = ({ children }) => {
   return (
     <Box sx={{ display: 'flex', minHeight: '100vh' }}>
@@ -17,15 +20,25 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         component="main"
         sx={{
           flexGrow: 1,
-          pt: 8,
-          px: 2,
-          pb: 4,
-          bgcolor: 'background.default',
+          pt: 0, // Remove padding top
+          pb: 2,
+          width: `calc(100% - ${drawerWidth}px)`,
+          marginLeft: `120px`,
+          bgcolor: '#121212', // Darker background for content area
+          display: 'flex',
+          flexDirection: 'column'
         }}
       >
-        <Container maxWidth="lg" sx={{ mt: 4 }}>
+        <Box sx={{ 
+          width: '100%', 
+          maxWidth: '100%', 
+          px: 3, 
+          pt: 3, // Move padding to inner content box for header space
+          pb: 2,
+          flexGrow: 1
+        }}>
           {children}
-        </Container>
+        </Box>
       </Box>
     </Box>
   );

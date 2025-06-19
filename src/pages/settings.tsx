@@ -117,12 +117,26 @@ const SettingsPage = () => {
   
   return (
     <Layout>
-      <Box sx={{ py: 4 }}>
-        <Typography variant="h4" component="h1" gutterBottom>
+      <Box sx={{ 
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        width: '100%',
+        py: 4
+      }}>
+        <Typography variant="h4" component="h1" gutterBottom align="center">
           Settings
         </Typography>
         
-        <Paper sx={{ p: 3, mt: 3 }}>
+        <Paper sx={{ 
+          p: 4, 
+          mt: 3,
+          width: '100%',
+          maxWidth: '800px',
+          mx: 'auto',
+          borderRadius: 2,
+          boxShadow: '0 4px 20px rgba(0,0,0,0.1)'
+        }}>
           {success && (
             <Alert severity="success" sx={{ mb: 3 }}>
               Settings updated successfully!
@@ -137,12 +151,12 @@ const SettingsPage = () => {
           
           <form onSubmit={handleSubmit}>
             <Box sx={{ mb: 4 }}>
-              <Typography variant="h6" gutterBottom>
+              <Typography variant="h6" gutterBottom fontWeight="500" color="primary.main">
                 Profile Settings
               </Typography>
               
               <TextField
-                label="Username"
+                label="Username *"
                 fullWidth
                 margin="normal"
                 value={username}
@@ -150,48 +164,67 @@ const SettingsPage = () => {
                 required
                 disabled={loading}
                 helperText="This name will be displayed in your profile"
+                variant="outlined"
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    '&:hover fieldset': {
+                      borderColor: 'primary.main',
+                    },
+                  },
+                  maxWidth: '100%'
+                }}
               />
             </Box>
             
             <Divider sx={{ my: 3 }} />
             
             <Box sx={{ mb: 4 }}>
-              <Typography variant="h6" gutterBottom>
+              <Typography variant="h6" gutterBottom fontWeight="500" color="primary.main">
                 AI Reviewer Settings
               </Typography>
               
-              <FormControl component="fieldset">
-                <FormLabel component="legend">Choose AI Reviewer</FormLabel>
+              <FormControl component="fieldset" sx={{ width: '100%', mt: 2 }}>
+                <FormLabel component="legend" sx={{ color: 'text.secondary', mb: 1 }}>Choose AI Reviewer</FormLabel>
                 <RadioGroup
                   value={aiReviewer}
                   onChange={handleAiReviewerChange}
+                  sx={{ '& .MuiFormControlLabel-root': { my: 0.5 } }}
                 >
                   <FormControlLabel 
                     value="deepseek" 
-                    control={<Radio />} 
+                    control={<Radio sx={{ color: 'primary.main' }} />} 
                     label="DeepSeek R1 (Faster, more concise feedback)"
                   />
                   <FormControlLabel 
                     value="gemini" 
-                    control={<Radio />} 
+                    control={<Radio sx={{ color: 'primary.main' }} />} 
                     label="Gemini 2.5 Flash (More detailed feedback)"
                   />
                   <FormControlLabel 
                     value="both" 
-                    control={<Radio />} 
+                    control={<Radio sx={{ color: 'primary.main' }} />} 
                     label="Both (Compare feedback from both models)"
                   />
                 </RadioGroup>
               </FormControl>
             </Box>
             
-            <Box sx={{ mt: 4 }}>
+            <Box sx={{ mt: 5, display: 'flex', justifyContent: 'center' }}>
               <Button
                 type="submit"
                 variant="contained"
                 color="primary"
                 disabled={loading}
                 startIcon={loading ? <CircularProgress size={20} /> : null}
+                sx={{ 
+                  px: 4, 
+                  py: 1, 
+                  borderRadius: 2,
+                  boxShadow: '0 3px 5px rgba(33, 150, 243, 0.3)',
+                  '&:hover': {
+                    boxShadow: '0 4px 8px rgba(33, 150, 243, 0.4)'
+                  }
+                }}
               >
                 {loading ? 'Saving...' : 'Save Settings'}
               </Button>

@@ -19,7 +19,8 @@ import {
   Assignment as AssignmentIcon,
   Settings as SettingsIcon,
   ExpandLess,
-  ExpandMore
+  ExpandMore,
+  DesktopMac as DesktopMacIcon
 } from '@mui/icons-material';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
@@ -53,22 +54,93 @@ const Sidebar: React.FC = () => {
   };
 
   return (
-    <Drawer
-      variant="permanent"
+    <Box
       sx={{
         width: drawerWidth,
-        flexShrink: 0,
-        '& .MuiDrawer-paper': {
-          width: drawerWidth,
-          boxSizing: 'border-box',
-          bgcolor: 'background.paper',
-          pt: 8,
-        },
+        position: 'fixed',
+        top: 0,
+        bottom: 0,
+        left: 0,
+        zIndex: (theme) => theme.zIndex.drawer,
+        bgcolor: 'background.paper',
+        boxShadow: '2px 0 10px rgba(0,0,0,0.1)',
+        display: 'flex',
+        flexDirection: 'column',
       }}
     >
-      <Box sx={{ overflow: 'auto', mt: 2 }}>
+      {/* Logo and App Name */}
+      <Box sx={{ 
+        display: 'flex', 
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        py: 2,
+        mb: 1,
+        position: 'relative',
+        '&::after': {
+          content: '""',
+          position: 'absolute',
+          bottom: 0,
+          left: '10%',
+          width: '80%',
+          height: '1px',
+          boxShadow: '0 1px 2px rgba(0,0,0,0.1)',
+          background: 'rgba(255,255,255,0.05)'
+        }
+      }}>
+        <Box 
+          sx={{ 
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            background: '#2196F3',
+            borderRadius: '50%',
+            p: 1.5,
+            mb: 1.5,
+            width: 56,
+            height: 56,
+            boxShadow: '0 3px 5px rgba(0,0,0,0.2)'
+          }}
+        >
+          <DesktopMacIcon 
+            sx={{ 
+              fontSize: 32, 
+              color: 'white'
+            }} 
+          />
+        </Box>
+        <Typography 
+          variant="h6" 
+          component="div" 
+          sx={{ 
+            fontWeight: 'bold',
+            background: 'linear-gradient(45deg, #2196F3 30%, #21CBF3 90%)',
+            backgroundClip: 'text',
+            textFillColor: 'transparent',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent'
+          }}
+        >
+          Frontend Interviewer
+        </Typography>
+      </Box>
+      
+      <Box sx={{ overflow: 'auto' }}>
         <List>
           {/* Special Pages */}
+          {/* Curriculum (renamed from Module Detail) moved to top */}
+          <ListItem 
+            button 
+            component={Link} 
+            href="/modules"
+            selected={router.pathname === '/modules'}
+          >
+            <ListItemIcon>
+              <SchoolIcon color="primary" />
+            </ListItemIcon>
+            <ListItemText primary="Curriculum" />
+          </ListItem>
+          
           <ListItem 
             button 
             component={Link} 
@@ -118,58 +190,9 @@ const Sidebar: React.FC = () => {
           </ListItem>
         </List>
         
-        <Divider sx={{ my: 2 }} />
-        
-        {/* Learning Modules Label - Non-clickable */}
-        <Box sx={{ 
-          bgcolor: '#2196f3', // Blue background
-          color: 'white',
-          px: 2, 
-          py: 0.5,
-          mx: 2,
-          borderRadius: 1,
-          fontSize: '0.875rem',
-          fontWeight: 'medium',
-          textAlign: 'center'
-        }}>
-          Learning Modules
-        </Box>
-        
-        <List>
-          {/* Add Module Detail Page as a main page */}
-          <ListItem 
-            button 
-            component={Link} 
-            href="/modules"
-            selected={router.pathname === '/modules'}
-          >
-            <ListItemIcon>
-              <SchoolIcon color="primary" />
-            </ListItemIcon>
-            <ListItemText primary="Module Detail" />
-          </ListItem>
-          
-          {/* Learning Paths - simplified, non-expandable list */}
-          {groupedModules.slice(0, 5).map((group) => (
-            <ListItem 
-              key={group.path}
-              button 
-              component={Link}
-              href={`/modules/${group.modules[0]?.id || ''}`}
-              sx={{ pl: 4 }}
-            >
-              <ListItemIcon>
-                <CodeIcon color="info" />
-              </ListItemIcon>
-              <ListItemText 
-                primary={group.path.charAt(0).toUpperCase() + group.path.slice(1)} 
-                primaryTypographyProps={{ noWrap: true, fontSize: '0.9rem' }}
-              />
-            </ListItem>
-          ))}
-        </List>
+        {/* Learning Modules section removed */}
       </Box>
-    </Drawer>
+    </Box>
   );
 };
 

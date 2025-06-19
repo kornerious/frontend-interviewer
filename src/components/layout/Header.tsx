@@ -55,7 +55,16 @@ const Header: React.FC = () => {
   };
 
   return (
-    <AppBar position="fixed">
+    <AppBar 
+      position="fixed" 
+      elevation={0}
+      sx={{
+        bgcolor: 'background.paper',
+        borderBottom: 'none',
+        boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
+        color: 'text.primary'
+      }}
+    >
       <Toolbar>
         <IconButton
           size="large"
@@ -67,8 +76,23 @@ const Header: React.FC = () => {
           <MenuIcon />
         </IconButton>
         
-        <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-          <Link href="/" passHref style={{ textDecoration: 'none', color: 'inherit' }}>
+        <Typography 
+          variant="h6" 
+          component="div" 
+          sx={{ 
+            flexGrow: 1,
+            fontWeight: 'bold',
+            '& a': {
+              textDecoration: 'none',
+              background: 'linear-gradient(45deg, #2196F3 30%, #21CBF3 90%)',
+              backgroundClip: 'text',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              textFillColor: 'transparent'
+            }
+          }}
+        >
+          <Link href="/" passHref style={{ textDecoration: 'none' }}>
             Frontend Interviewer
           </Link>
         </Typography>
@@ -108,8 +132,30 @@ const Header: React.FC = () => {
           </Box>
         ) : (
           <Box>
-            <Button color="inherit" onClick={() => router.push('/login')}>Login</Button>
-            <Button color="secondary" variant="contained" onClick={() => router.push('/register')}>
+            <Button 
+              color="primary" 
+              onClick={() => router.push('/login')}
+              sx={{
+                color: '#2196F3',
+                mr: 1,
+                '&:hover': {
+                  backgroundColor: 'rgba(33, 150, 243, 0.08)'
+                }
+              }}
+            >
+              Login
+            </Button>
+            <Button 
+              color="primary" 
+              variant="contained" 
+              onClick={() => router.push('/register')}
+              sx={{
+                boxShadow: '0 3px 5px rgba(33, 150, 243, 0.3)',
+                '&:hover': {
+                  boxShadow: '0 4px 8px rgba(33, 150, 243, 0.4)'
+                }
+              }}
+            >
               Register
             </Button>
           </Box>
