@@ -49,7 +49,7 @@ export const useDataStore = create<DataState>((set, get) => ({
   loadData: async () => {
     try {
       // Load data from database.json file in the root directory
-      const response = await fetch('/database.json');
+      const response = await fetch('/api/database');
       const data = await response.json();
       
       // Process the data into modules

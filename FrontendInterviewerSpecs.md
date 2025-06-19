@@ -192,15 +192,14 @@ This phase runs first, ingesting the entire database to build global data struct
 
 - **Step 1: Comprehensive Metadata Extraction**
   - 
-  - **Action:** A pure TypeScript function ingests the database.json array. It iterates through every TheoryItem, QuestionItem, and TaskItem, extracting their complete metadata while preserving their original array indexes.
-  - **Specific Fields Extracted:**
-    - 
+  - **Action:** A pure TypeScript function ingests the database.json array. It iterates through every TheoryItem, QuestionItem, and TaskItem, extracting their complete metadata while preserving their original array indexes, and create new metadata.json file in folder where database.json is.
+ !!! FIELDS TO BE EXTRACTED: 
     - **TheoryItem**: relatedQuestions, relatedTasks, tags, technology, prerequisites, complexity, interviewRelevance, learningPath, requiredFor.
     - **QuestionItem**: topic, level, type, analysisPoints, keyConcepts, evaluationCriteria, tags, complexity, interviewFrequency, learningPath.
     - **TaskItem**: difficulty, tags, prerequisites, complexity, interviewRelevance, learningPath, relatedConcepts.
 - **Step 2: Building Global Foundational Graphs**
   - 
-  - **Action:** Using the fully extracted metadata from Step 1, the system constructs two critical, global graphs.
+  - **Action:** Using the fully extracted metadata from Step 1 - metadata.json file, the system constructs two critical, global graphs.
   - **Graph 1 (Dependency Graph):** Creates directed edges "A → B" if item A is listed in item B's prerequisites field, or if item B is listed in item A's requiredFor field. This maps all inviolable prerequisite chains.
   - **Graph 2 (Similarity Graph):** Creates undirected edges between items. Edges are weighted based on shared tags, technology, relatedConcepts, and keyConcepts. The weight is given a significant boost if items also share the same learningPath.
 - **Step 3: Initial Deterministic Scoring**
@@ -214,9 +213,8 @@ This phase runs first, ingesting the entire database to build global data struct
 
 #### **Phase 2: AI-Assisted Clustering & Sequencing (Microservice)**
 
-This phase uses the **AI-Assisted Curriculum-Builder Service**, a dedicated TypeScript microservice leveraging **Google Gemini 1.5 Flash Preview**, to analyze the content and define the curriculum's high-level structure.
+This phase uses the **AI-Assisted Curriculum-Builder Service**, a dedicated TypeScript microservice leveraging **Google Gemini 2.5 Flash 05-20**, to analyze the content and define the curriculum's high-level structure.
 
-- 
 
 - **Step 4: Stream and Chunk the Database (ChunkManager)**
 
