@@ -1,6 +1,7 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import path from 'path';
 import fs from 'fs';
+import { CurriculumPaths } from '@/curriculum/utils/curriculumPaths';
 import { MetadataExtractor } from '@/curriculum/metadata/extractor';
 
 /**
@@ -21,10 +22,9 @@ export default async function handler(
   try {
     console.log('API: Starting test metadata extraction process');
     
-    // Define paths for database.json and metadata.json
-    const rootDir = process.cwd();
-    const databasePath = path.join(rootDir, 'database.json');
-    const outputPath = path.join(rootDir, 'metadata.json');
+    // Define paths for database.json
+    const databasePath = CurriculumPaths.getDatabasePath();
+    const outputPath = CurriculumPaths.getMetadataPath();
     
     // Check if database.json exists
     if (!fs.existsSync(databasePath)) {

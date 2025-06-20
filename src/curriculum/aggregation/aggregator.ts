@@ -9,6 +9,7 @@
 
 import fs from 'fs';
 import path from 'path';
+import { CurriculumPaths } from '../utils/curriculumPaths';
 
 // Define types for our data structures
 export interface AggregatedItem {
@@ -42,10 +43,10 @@ export class Aggregator {
     outputDir: string;
     maxChunks?: number;
   }) {
-    this.chunksDir = config.chunksDir;
-    this.chunksProcessedPath = config.chunksProcessedPath || path.join(process.cwd(), 'curriculum', 'chunks-processed.json');
-    this.graphsPath = config.graphsPath || path.join(process.cwd(), 'graphs.json');
-    this.outputDir = config.outputDir;
+    this.chunksDir = config.chunksDir || CurriculumPaths.getChunksDir();
+    this.chunksProcessedPath = config.chunksProcessedPath || CurriculumPaths.getChunksProcessedPath();
+    this.graphsPath = config.graphsPath || CurriculumPaths.getGraphsPath();
+    this.outputDir = config.outputDir || CurriculumPaths.getCurriculumDir();
     this.maxChunks = config.maxChunks || 10; // Default to 10 chunks max
   }
 
@@ -96,7 +97,7 @@ export class Aggregator {
         chunksProcessedContent = await fs.promises.readFile(this.chunksProcessedPath, 'utf-8');
       } else {
         // Fall back to checking the root directory
-        const rootChunksProcessedPath = path.join(process.cwd(), 'chunks-processed.json');
+        const rootChunksProcessedPath = path.join(process.cwd(), 'chunks-processed.json'); // Legacy path
         if (fs.existsSync(rootChunksProcessedPath)) {
           console.log(`Aggregator: Using chunks-processed.json from root directory`);
           chunksProcessedContent = await fs.promises.readFile(rootChunksProcessedPath, 'utf-8');
@@ -132,8 +133,8 @@ export class Aggregator {
         // Try multiple possible locations for chunk files
         const possibleChunkPaths = [
           path.join(this.chunksDir, `${chunkId}.json`),
-          path.join(process.cwd(), 'curriculum', 'chunks', `${chunkId}.json`),
-          path.join(process.cwd(), 'curriculum', 'results', `${chunkId}.json`)
+          path.join(CurriculumPaths.getChunksDir(), `${chunkId}.json`),
+          path.join(CurriculumPaths.getCurriculumDir(), 'results', `${chunkId}.json`)
         ];
         
         let chunkPath = '';

@@ -10,6 +10,7 @@
 import fs from 'fs';
 import path from 'path';
 import { AggregatedItem } from './aggregator';
+import { CurriculumPaths } from '../utils/curriculumPaths';
 
 // Interface for database item structure
 interface DatabaseItem {

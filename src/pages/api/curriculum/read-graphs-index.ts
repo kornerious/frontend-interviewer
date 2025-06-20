@@ -4,6 +4,7 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import fs from 'fs';
 import path from 'path';
+import { CurriculumPaths } from '@/curriculum/utils/curriculumPaths';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   // Only allow GET requests
@@ -15,11 +16,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     console.log('API: Reading graphs index file');
     
     // Define path to graphs.json
-    const rootDir = process.cwd();
-    const graphsPath = path.join(rootDir, 'graphs.json');
+    const graphsPath = path.join(CurriculumPaths.getCurriculumDir(), 'graphs-dependency.json');
+    const similarityPath = path.join(CurriculumPaths.getCurriculumDir(), 'graphs-similarity.json');
+    const indexPath = CurriculumPaths.getGraphsPath();
     
     // Check if file exists
-    if (!fs.existsSync(graphsPath)) {
+    if (!fs.existsSync(indexPath)) {
       console.log('API: Graphs index file not found');
       return res.status(404).json({ 
         success: false, 

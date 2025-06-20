@@ -1,6 +1,7 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import fs from 'fs';
 import path from 'path';
+import { CurriculumPaths } from '@/curriculum/utils/curriculumPaths';
 
 /**
  * API endpoint for getting metadata stats
@@ -17,7 +18,7 @@ export default async function handler(
 
   try {
     // Check if metadata.json exists
-    const metadataPath = path.join(process.cwd(), 'metadata.json');
+    const metadataPath = CurriculumPaths.getMetadataPath();
     console.log('API: Checking metadata file at', metadataPath);
     
     if (!fs.existsSync(metadataPath)) {

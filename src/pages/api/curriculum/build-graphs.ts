@@ -2,7 +2,9 @@
  * API endpoint for building dependency and similarity graphs
  */
 import { NextApiRequest, NextApiResponse } from 'next';
+import fs from 'fs';
 import path from 'path';
+import { CurriculumPaths } from '@/curriculum/utils/curriculumPaths';
 import { GraphBuilder } from '../../../curriculum/graphs/graphBuilder';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -15,9 +17,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     console.log('API: Starting graph building process');
     
     // Define paths
-    const rootDir = process.cwd();
-    const metadataPath = path.join(rootDir, 'metadata.json');
-    const graphsPath = path.join(rootDir, 'graphs.json');
+    const metadataPath = CurriculumPaths.getMetadataPath();
+    const graphsPath = CurriculumPaths.getGraphsPath();
     
     // Create GraphBuilder instance
     const graphBuilder = new GraphBuilder(metadataPath, graphsPath);

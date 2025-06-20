@@ -5,6 +5,7 @@
  */
 import fs from 'fs';
 import path from 'path';
+import { CurriculumPaths } from '../utils/curriculumPaths';
 import { ChunkManager, ChunkMetadata } from '../chunks/chunkManager';
 import { PromptBuilder } from './promptBuilder';
 import { AIClient } from './aiClient';
@@ -26,9 +27,9 @@ export interface AIClusteringConfig {
  * Default configuration
  */
 const DEFAULT_CONFIG: AIClusteringConfig = {
-  databasePath: path.join(process.cwd(), 'database.json'),
-  chunksOutputDir: path.join(process.cwd(), 'curriculum', 'chunks'),
-  resultsOutputDir: path.join(process.cwd(), 'curriculum', 'results'),
+  databasePath: CurriculumPaths.getDatabasePath(),
+  chunksOutputDir: CurriculumPaths.getChunksDir(),
+  resultsOutputDir: path.join(CurriculumPaths.getCurriculumDir(), 'results'),
   chunkPrefix: 'chunk',
   apiKey: process.env.NEXT_PUBLIC_GEMINI_API_KEY || '',
   model: 'gemini-2.5-flash-preview-05-20'
@@ -251,16 +252,16 @@ export class AIClusteringService {
         'utf-8'
       );
       
-      // Also write a copy to the root directory for easy detection
-      const rootSummaryPath = path.join(process.cwd(), 'chunks-processed.json');
+      // Write chunks-processed.json to the curriculum directory
+      const chunksProcessedPath = CurriculumPaths.getChunksProcessedPath();
       fs.writeFileSync(
-        rootSummaryPath,
+        chunksProcessedPath,
         JSON.stringify(summary, null, 2),
         'utf-8'
       );
       
       console.log(`AIClusteringService: Completed clustering process at ${new Date().toISOString()}`);
-      console.log(`AIClusteringService: Summary saved to ${summaryPath} and ${rootSummaryPath}`);
+      console.log(`AIClusteringService: Summary saved to ${summaryPath} and ${chunksProcessedPath}`);
       
       return {
         chunkCount: chunks.length,

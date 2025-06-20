@@ -1,6 +1,7 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import fs from 'fs';
 import path from 'path';
+import fs from 'fs';
+import { CurriculumPaths } from '@/curriculum/utils/curriculumPaths';
 
 /**
  * API endpoint for testing database.json access
@@ -13,7 +14,7 @@ export default async function handler(
   
   try {
     // Get the absolute path to database.json
-    const databasePath = path.join(process.cwd(), 'database.json');
+    const databasePath = CurriculumPaths.getDatabasePath();
     console.log('API: Database path:', databasePath);
     
     // Check if file exists

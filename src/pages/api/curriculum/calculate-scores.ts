@@ -3,6 +3,7 @@
  */
 import { NextApiRequest, NextApiResponse } from 'next';
 import path from 'path';
+import { CurriculumPaths } from '@/curriculum/utils/curriculumPaths';
 import { ScoreCalculator } from '../../../curriculum/scoring/scoreCalculator';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -15,10 +16,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     console.log('API: Starting score calculation process');
     
     // Define paths
-    const rootDir = process.cwd();
-    const metadataPath = path.join(rootDir, 'metadata.json');
-    const graphsPath = path.join(rootDir, 'graphs.json');
-    const scoresPath = path.join(rootDir, 'scores.json');
+    const metadataPath = CurriculumPaths.getMetadataPath();
+    const graphsPath = CurriculumPaths.getGraphsPath();
+    const scoresPath = CurriculumPaths.getScoresPath();
     
     // Create ScoreCalculator instance
     const scoreCalculator = new ScoreCalculator(metadataPath, graphsPath, scoresPath);

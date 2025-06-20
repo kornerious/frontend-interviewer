@@ -27,6 +27,7 @@ const CurriculumCreatePage: React.FC = () => {
   const [activeStep, setActiveStep] = useState(0);
   const [processing, setProcessing] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [batchProcessing, setBatchProcessing] = useState(false);
   const [metadata, setMetadata] = useState<any | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [metadataStats, setMetadataStats] = useState<{
@@ -167,9 +168,11 @@ const CurriculumCreatePage: React.FC = () => {
       setMetadataStats(result.stats);
       
       setActiveStep(1);
+      return true; // Successful completion
     } catch (err: any) {
       setError(`Failed to extract metadata: ${err.message || 'Unknown error'}`);
       console.error(err);
+      return false; // Failed
     } finally {
       setProcessing(false);
     }
@@ -187,9 +190,11 @@ const CurriculumCreatePage: React.FC = () => {
       setGraphStats(result);
       
       setActiveStep(2);
+      return true; // Successful completion
     } catch (err: any) {
       setError(`Failed to build graphs: ${err.message || 'Unknown error'}`);
       console.error(err);
+      return false; // Failed
     } finally {
       setProcessing(false);
     }
@@ -207,9 +212,11 @@ const CurriculumCreatePage: React.FC = () => {
       setScoreStats(result);
       
       setActiveStep(3);
+      return true; // Successful completion
     } catch (err: any) {
       setError(`Failed to calculate scores: ${err.message || 'Unknown error'}`);
       console.error(err);
+      return false; // Failed
     } finally {
       setProcessing(false);
     }
@@ -227,9 +234,11 @@ const CurriculumCreatePage: React.FC = () => {
       setChunkStats(result);
       
       setActiveStep(4);
+      return true; // Successful completion
     } catch (err: any) {
       setError(`Failed to process chunks with AI: ${err.message || 'Unknown error'}`);
       console.error(err);
+      return false; // Failed
     } finally {
       setProcessing(false);
     }
@@ -254,18 +263,89 @@ const CurriculumCreatePage: React.FC = () => {
         console.log('Aggregation completed successfully:', data.message);
         // Move to the next step
         setActiveStep(prevStep => Math.min(prevStep + 1, steps.length - 1));
+        return true; // Successful completion
       } else {
         console.error('Aggregation failed:', data.error);
         setError(`Failed to aggregate curriculum: ${data.error}`);
+        return false; // Failed
       }
     } catch (err: any) {
       console.error('Error during aggregation:', err);
       setError(`Error: ${err.message || 'Unknown error occurred'}`);
+      return false; // Failed
     } finally {
       setLoading(false);
     }
   };
 
+  const handleBatchGeneration = async () => {
+    try {
+      setBatchProcessing(true);
+      setError(null);
+      console.log('Starting batch generation process for all curriculum steps...');
+      
+      // Step 1: Extract Metadata
+      console.log('Batch: Step 1 - Extracting metadata...');
+      const metadataSuccess = await handleExtractMetadata();
+      if (!metadataSuccess) {
+        console.error('Batch process failed at metadata extraction');
+        return;
+      }
+      
+      // Small delay to ensure UI updates
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      // Step 2: Build Dependency Graphs
+      console.log('Batch: Step 2 - Building dependency graphs...');
+      const graphsSuccess = await handleBuildGraphs();
+      if (!graphsSuccess) {
+        console.error('Batch process failed at graph building');
+        return;
+      }
+      
+      // Small delay to ensure UI updates
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      // Step 3: Calculate Scores
+      console.log('Batch: Step 3 - Calculating scores...');
+      const scoresSuccess = await handleCalculateScores();
+      if (!scoresSuccess) {
+        console.error('Batch process failed at score calculation');
+        return;
+      }
+      
+      // Small delay to ensure UI updates
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      // Step 4: Process Chunks
+      console.log('Batch: Step 4 - Processing chunks...');
+      const chunksSuccess = await handleProcessChunks();
+      if (!chunksSuccess) {
+        console.error('Batch process failed at chunk processing');
+        return;
+      }
+      
+      // Small delay to ensure UI updates
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      // Step 5: Run Aggregation
+      console.log('Batch: Step 5 - Running aggregation...');
+      const aggregationSuccess = await handleNextStep();
+      if (!aggregationSuccess) {
+        console.error('Batch process failed at curriculum aggregation');
+        return;
+      }
+      
+      console.log('Batch generation completed successfully!');
+      
+    } catch (err: any) {
+      console.error('Error during batch generation:', err);
+      setError(`Batch generation error: ${err.message || 'Unknown error occurred'}`);
+    } finally {
+      setBatchProcessing(false);
+    }
+  };
+  
   const handleCancel = () => {
     router.push('/modules');
   };
@@ -335,20 +415,33 @@ const CurriculumCreatePage: React.FC = () => {
                   <Button 
                     variant="outlined" 
                     onClick={handleCancel}
-                    disabled={processing}
+                    disabled={processing || batchProcessing}
                   >
                     Cancel
                   </Button>
                   
-                  <Button 
-                    variant="contained" 
-                    color="primary"
-                    onClick={handleExtractMetadata}
-                    disabled={processing}
-                    startIcon={processing && <CircularProgress size={20} color="inherit" />}
-                  >
-                    {processing ? 'Extracting...' : 'Extract Metadata'}
-                  </Button>
+                  <Box>
+                    <Button 
+                      variant="contained" 
+                      color="secondary"
+                      onClick={handleBatchGeneration}
+                      disabled={processing || batchProcessing}
+                      startIcon={batchProcessing && <CircularProgress size={20} color="inherit" />}
+                      sx={{ mr: 2 }}
+                    >
+                      {batchProcessing ? 'Generating...' : 'Batch Generation'}
+                    </Button>
+                    
+                    <Button 
+                      variant="contained" 
+                      color="primary"
+                      onClick={handleExtractMetadata}
+                      disabled={processing || batchProcessing}
+                      startIcon={processing && <CircularProgress size={20} color="inherit" />}
+                    >
+                      {processing ? 'Extracting...' : 'Extract Metadata'}
+                    </Button>
+                  </Box>
                 </Box>
               </Box>
             ) : activeStep === 1 ? (

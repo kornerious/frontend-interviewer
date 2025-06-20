@@ -19,22 +19,22 @@ export class CurriculumPaths {
   
   // Database paths
   static getDatabasePath(): string {
-    return path.join(this.getRootDir(), 'database.json');
+    return path.join(this.getCurriculumDir(), 'database.json');
   }
   
   // Metadata paths
   static getMetadataPath(): string {
-    return path.join(this.getRootDir(), 'metadata.json');
+    return path.join(this.getCurriculumDir(), 'metadata.json');
   }
   
   // Graph paths
   static getGraphsPath(): string {
-    return path.join(this.getRootDir(), 'graphs.json');
+    return path.join(this.getCurriculumDir(), 'graphs.json');
   }
   
   // Scores paths
   static getScoresPath(): string {
-    return path.join(this.getRootDir(), 'scores.json');
+    return path.join(this.getCurriculumDir(), 'scores.json');
   }
   
   // Chunks paths

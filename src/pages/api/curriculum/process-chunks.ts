@@ -4,7 +4,8 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import path from 'path';
 import fs from 'fs';
-import { AIClusteringService } from '../../../curriculum/ai/aiClusteringService';
+import { CurriculumPaths } from '@/curriculum/utils/curriculumPaths';
+import { AIClusteringService } from '@/curriculum/ai/aiClusteringService';
 
 /**
  * Process chunks with AI
@@ -40,10 +41,10 @@ export default async function handler(
       });
     }
     
-    // Set up paths
-    const databasePath = path.join(process.cwd(), 'database.json');
-    const chunksOutputDir = path.join(process.cwd(), 'curriculum', 'chunks');
-    const resultsOutputDir = path.join(process.cwd(), 'curriculum', 'results');
+    // Get database path and check if it exists
+    const databasePath = CurriculumPaths.getDatabasePath();
+    const chunksOutputDir = CurriculumPaths.getChunksDir();
+    const resultsOutputDir = path.join(CurriculumPaths.getCurriculumDir(), 'results');
     
     console.log('API: Paths configuration:');
     console.log('  - Database path:', databasePath);

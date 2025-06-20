@@ -4,6 +4,7 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import fs from 'fs';
 import path from 'path';
+import { CurriculumPaths } from '@/curriculum/utils/curriculumPaths';
 
 /**
  * API endpoint for checking if graph files exist
@@ -17,8 +18,8 @@ export default async function handler(
   }
 
   try {
-    // Check if graphs-dependency.json exists
-    const graphsPath = path.join(process.cwd(), 'graphs-dependency.json');
+    // Check if graphs files exist
+    const graphsPath = path.join(CurriculumPaths.getCurriculumDir(), 'graphs-dependency.json');
     const exists = fs.existsSync(graphsPath);
     
     // Return result

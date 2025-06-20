@@ -1,6 +1,7 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import fs from 'fs';
 import path from 'path';
+import { CurriculumPaths } from '@/curriculum/utils/curriculumPaths';
 
 /**
  * API endpoint for getting score statistics
@@ -15,7 +16,7 @@ export default async function handler(
 
   try {
     // Check if scores.json exists
-    const scoresPath = path.join(process.cwd(), 'scores.json');
+    const scoresPath = CurriculumPaths.getScoresPath();
     
     if (!fs.existsSync(scoresPath)) {
       return res.status(404).json({
