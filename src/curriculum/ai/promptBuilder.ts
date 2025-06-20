@@ -25,25 +25,49 @@ const DEFAULT_PROMPT_CONFIG: PromptConfig = {
     'id', 'type', 'title', 'tags', 'technology', 'prerequisites', 
     'complexity', 'interviewRelevance', 'interviewFrequency', 'learningPath'
   ],
-  promptTemplate: `You are an expert curriculum designer for frontend development interviews.
+  promptTemplate: `You are an expert curriculum designer for frontend development interviews with deep knowledge of learning progressions.
 You have {itemCount} content items (indexes {startIndex}–{endIndex}), each with these metadata fields: {metadataFields}.
 
-Your task:
-1. Identify prerequisite chains in these items.
-2. Group them into natural thematic clusters (e.g., Event Loop, React State, CSS Layout).
-3. Propose an ordered learning sequence from beginner to expert for each cluster.
+Your task is to create an optimized learning curriculum by:
+
+1. CLUSTERING: Group items into 8-12 focused thematic clusters (like "JavaScript Closures", "React Hooks", "CSS Grid Systems")
+
+2. PRECISE SEQUENCING: Within each cluster, create a carefully ordered learning sequence from absolute beginner (1) to expert (5) levels
+
+3. DEPENDENCY MAPPING: Create a comprehensive dependency graph by identifying:
+   - INTERNAL dependencies: prerequisite items within the same cluster
+   - EXTERNAL dependencies: crucial prerequisites from other thematic clusters
+   - TECHNOLOGY dependencies: underlying technical requirements
+
+4. COMPLEXITY DIFFERENTIATION: Assign each item a specific complexity score (1-5) where:
+   - Level 1: Complete beginner concepts (first exposure topics)
+   - Level 2: Basic practical application (fundamentals)
+   - Level 3: Intermediate working knowledge (standard patterns)
+   - Level 4: Advanced applications (optimizations, edge cases)
+   - Level 5: Expert mastery (deep internals, novel applications)
 
 Return a JSON response with this exact structure:
 {
   "clusters": [
     {
-      "name": "Cluster name",
-      "description": "Brief description of this thematic cluster",
+      "name": "Cluster name - be specific and focused",
+      "description": "Detailed description explaining scope and importance",
+      "recommendedSequence": "Suggested study order (e.g., 'Start with X, then Y, finally master Z')",
       "items": [
         {
           "index": 123,
           "id": "item_id",
-          "reason": "Brief explanation of why this item belongs in this position"
+          "complexity": 1-5,
+          "clusterPositionReason": "Why this belongs in THIS specific position within its cluster",
+          "prerequisiteItems": ["id1", "id2"],
+          "externalPrerequisites": [
+            {
+              "cluster": "Name of prerequisite cluster",
+              "conceptId": "id123",
+              "reason": "Why this external concept is necessary before learning this item"
+            }
+          ],
+          "learningOutcomes": ["What the learner will gain from this item"]
         }
       ]
     }
@@ -51,11 +75,14 @@ Return a JSON response with this exact structure:
 }
 
 Important guidelines:
-- Every item must be assigned to exactly one cluster
-- Respect prerequisite relationships
-- Order items from foundational to advanced within each cluster
-- Focus on creating a natural learning progression
-- Ensure your response is valid JSON`
+- Every item must be assigned to exactly ONE most-relevant cluster
+- Use varied, meaningful descriptions - avoid formulaic patterns
+- Create true progressive difficulty (mix of levels 1-5) within each cluster
+- CRITICAL: Every non-beginner item MUST have at least one cross-cluster dependency identified
+- Cross-cluster dependencies should be precisely mapped with cluster name, concept ID, and justification
+- Pay special attention to identifying conceptual prerequisites across technology boundaries (e.g., JS fundamentals before React)
+- Provide actionable learning pathways a student could follow
+- Ensure your response is valid JSON with ALL required fields`
 };
 
 /**

@@ -25,10 +25,9 @@ const callGeminiAPI = async (prompt: string): Promise<string> => {
           }
         ],
         generationConfig: {
-          temperature: 0.2,
-          topK: 40,
+          temperature: 1,
           topP: 0.95,
-          maxOutputTokens: 8192
+          maxOutputTokens: 62000
         }
       })
     });

@@ -130,19 +130,80 @@ export class AIClusteringService {
           );
           console.log(`AIClusteringService: Built prompt, length: ${prompt.length} characters`);
           
-          // Process with AI
+          // Process with AI with validation and retry logic
           console.log(`AIClusteringService: Sending prompt to AI at ${new Date().toISOString()}`);
-          const aiResponse = await this.aiClient.processPrompt(prompt);
-          console.log(`AIClusteringService: Received AI response at ${new Date().toISOString()}`);
           
-          // Analyze response
-          console.log('AIClusteringService: Analyzing AI response');
-          const processedResult = this.analyzer.processChunkResponse(
-            aiResponse,
-            chunk.chunkId,
-            chunk.startIndex,
-            chunk.endIndex
-          );
+          let aiResponse;
+          let processedResult;
+          let isValidResponse = false;
+          let attemptCount = 0;
+          const MAX_ATTEMPTS = 3; // Initial attempt + 2 retries
+          
+          // Expected number of items in this chunk
+          const expectedItemCount = chunk.endIndex - chunk.startIndex + 1;
+          console.log(`AIClusteringService: Expecting ${expectedItemCount} items in response`);
+          
+          while (!isValidResponse && attemptCount < MAX_ATTEMPTS) {
+            attemptCount++;
+            console.log(`AIClusteringService: Attempt ${attemptCount} of ${MAX_ATTEMPTS}`);
+            
+            // Send the prompt to the AI
+            aiResponse = await this.aiClient.processPrompt(prompt);
+            console.log(`AIClusteringService: Received AI response at ${new Date().toISOString()}`);
+            
+            try {
+              // Try to analyze the response
+              processedResult = this.analyzer.processChunkResponse(
+                aiResponse,
+                chunk.chunkId,
+                chunk.startIndex,
+                chunk.endIndex
+              );
+              
+              // Get all indexes from the response
+              const includedIndexes = this.analyzer.extractOrderedIndexes(processedResult);
+              
+              // Verify all expected indexes are present
+              if (includedIndexes.length === expectedItemCount) {
+                // Create a Set of all indexes for O(1) lookup
+                const indexSet = new Set(includedIndexes);
+                
+                // Check if all indexes in range are present
+                let missingIndexes = [];
+                for (let idx = chunk.startIndex; idx <= chunk.endIndex; idx++) {
+                  if (!indexSet.has(idx)) {
+                    missingIndexes.push(idx);
+                  }
+                }
+                
+                if (missingIndexes.length === 0) {
+                  console.log(`AIClusteringService: Response validation successful - all ${expectedItemCount} items present`);
+                  isValidResponse = true;
+                } else {
+                  console.warn(`AIClusteringService: Response missing indexes: ${missingIndexes.join(', ')}`);
+                }
+              } else {
+                console.warn(`AIClusteringService: Response has ${includedIndexes.length} items, expected ${expectedItemCount}`);
+              }
+            } catch (error) {
+              console.error(`AIClusteringService: Error analyzing response (attempt ${attemptCount}):`, error);
+            }
+            
+            // If response is not valid and we have attempts left, try again
+            if (!isValidResponse && attemptCount < MAX_ATTEMPTS) {
+              console.log(`AIClusteringService: Retrying AI request (attempt ${attemptCount + 1} of ${MAX_ATTEMPTS})`);
+            }
+          }
+          
+          // If we've exhausted all attempts and still don't have a valid response, throw an error
+          if (!isValidResponse || !processedResult) {
+            throw new Error(`Failed to get valid response after ${MAX_ATTEMPTS} attempts. Response missing required items.`);
+          }
+          
+          console.log(`AIClusteringService: Successfully validated response after ${attemptCount} attempt(s)`);
+          
+          // Analysis already completed during validation
+          console.log('AIClusteringService: Analysis completed during validation');
           
           // Save result
           console.log(`AIClusteringService: Saving result to ${this.config.resultsOutputDir}`);
