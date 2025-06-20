@@ -56,104 +56,98 @@ export class ChunkManager {
    */
   public async createChunks(): Promise<ChunkMetadata[]> {
     console.log(`ChunkManager: Starting to chunk database from ${this.databasePath}`);
+    console.log(`ChunkManager: Output directory: ${this.outputDir}`);
+    console.log(`ChunkManager: Chunk prefix: ${this.chunkPrefix}`);
+    
+    // Check if database file exists
+    if (!fs.existsSync(this.databasePath)) {
+      console.error(`ChunkManager: ERROR - Database file not found at ${this.databasePath}`);
+      throw new Error(`Database file not found at ${this.databasePath}`);
+    }
+    
+    console.log(`ChunkManager: Database file exists, size: ${(fs.statSync(this.databasePath).size / (1024 * 1024)).toFixed(2)} MB`);
     
     // Ensure output directory exists
     if (!fs.existsSync(this.outputDir)) {
+      console.log(`ChunkManager: Creating output directory: ${this.outputDir}`);
       fs.mkdirSync(this.outputDir, { recursive: true });
     }
     
-    // Create a stream to read the database file
-    const readStream = fs.createReadStream(this.databasePath, { 
-      encoding: 'utf-8',
-      highWaterMark: 1024 * 1024 // 1MB buffer
-    });
+    // Read the entire file at once instead of streaming
+    console.log(`ChunkManager: Reading database file...`);
+    const fileContent = fs.readFileSync(this.databasePath, 'utf-8');
+    console.log(`ChunkManager: Parsing JSON...`);
     
-    // Parse the JSON stream
-    const jsonParser = JSONStream.parse('*');
+    let data: any[];
+    try {
+      data = JSON.parse(fileContent);
+      console.log(`ChunkManager: Successfully parsed JSON, found ${data.length} items`);
+    } catch (error) {
+      console.error(`ChunkManager: ERROR parsing JSON:`, error);
+      throw error;
+    }
     
     // Create chunks
     const chunks: ChunkMetadata[] = [];
     let currentChunk: any[] = [];
     let currentChunkSize = 0;
     let chunkIndex = 0;
-    let itemIndex = 0;
     let startIndex = 0;
     
-    // Process each item from the stream
-    const itemProcessor = new Transform({
-      objectMode: true,
-      transform(item, encoding, callback) {
-        // Add item to current chunk
-        currentChunk.push(item);
-        
-        // Estimate size (rough approximation)
-        const itemSize = JSON.stringify(item).length;
-        currentChunkSize += itemSize;
-        
-        // If chunk is full, save it
-        if (currentChunkSize >= MAX_CHUNK_SIZE || currentChunk.length >= 1000) {
-          const chunkId = `${this.chunkPrefix}-${chunkIndex}`;
-          const chunkPath = path.join(this.outputDir, `${chunkId}.json`);
-          
-          // Write chunk to file
-          fs.writeFileSync(
-            chunkPath,
-            JSON.stringify(currentChunk, null, 2),
-            'utf-8'
-          );
-          
-          // Create chunk metadata
-          const chunkMeta: ChunkMetadata = {
-            chunkId,
-            itemCount: currentChunk.length,
-            startIndex,
-            endIndex: itemIndex,
-            filePath: chunkPath,
-            sizeBytes: currentChunkSize
-          };
-          
-          chunks.push(chunkMeta);
-          console.log(`ChunkManager: Created chunk ${chunkId} with ${currentChunk.length} items (${(currentChunkSize / (1024 * 1024)).toFixed(2)} MB)`);
-          
-          // Reset for next chunk
-          currentChunk = [];
-          currentChunkSize = 0;
-          chunkIndex++;
-          startIndex = itemIndex + 1;
-        }
-        
-        itemIndex++;
-        callback(null, item);
+    console.log(`ChunkManager: Starting to process items...`);
+    
+    // Process each item
+    for (let i = 0; i < data.length; i++) {
+      const item = data[i];
+      
+      // Log first few items and then every 100th item
+      if (i < 5 || i % 100 === 0) {
+        console.log(`ChunkManager: Processing item #${i}, id: ${item.id || 'unknown'}`);
       }
-    });
-    
-    // Run the pipeline
-    const pipelineAsync = promisify(pipeline);
-    await pipelineAsync(readStream, jsonParser, itemProcessor);
-    
-    // Save any remaining items as the last chunk
-    if (currentChunk.length > 0) {
-      const chunkId = `${this.chunkPrefix}-${chunkIndex}`;
-      const chunkPath = path.join(this.outputDir, `${chunkId}.json`);
       
-      fs.writeFileSync(
-        chunkPath,
-        JSON.stringify(currentChunk, null, 2),
-        'utf-8'
-      );
+      // Add item to current chunk
+      currentChunk.push(item);
       
-      const chunkMeta: ChunkMetadata = {
-        chunkId,
-        itemCount: currentChunk.length,
-        startIndex,
-        endIndex: itemIndex - 1,
-        filePath: chunkPath,
-        sizeBytes: currentChunkSize
-      };
+      // Estimate size (rough approximation)
+      const itemSize = JSON.stringify(item).length;
+      currentChunkSize += itemSize;
       
-      chunks.push(chunkMeta);
-      console.log(`ChunkManager: Created final chunk ${chunkId} with ${currentChunk.length} items (${(currentChunkSize / (1024 * 1024)).toFixed(2)} MB)`);
+      // If chunk is full, save it
+      if (currentChunkSize >= MAX_CHUNK_SIZE || currentChunk.length >= 1000 || i === data.length - 1) {
+        const chunkId = `${this.chunkPrefix}-${chunkIndex}`;
+        const chunkPath = path.join(this.outputDir, `${chunkId}.json`);
+        
+        // Write chunk to file
+        fs.writeFileSync(
+          chunkPath,
+          JSON.stringify(currentChunk, null, 2),
+          'utf-8'
+        );
+        
+        // Create chunk metadata
+        const chunkMeta: ChunkMetadata = {
+          chunkId,
+          itemCount: currentChunk.length,
+          startIndex,
+          endIndex: i,
+          filePath: chunkPath,
+          sizeBytes: currentChunkSize
+        };
+        
+        chunks.push(chunkMeta);
+        console.log(`ChunkManager: Created chunk ${chunkId} with ${currentChunk.length} items (${(currentChunkSize / (1024 * 1024)).toFixed(2)} MB)`);
+        
+        // Reset for next chunk
+        currentChunk = [];
+        currentChunkSize = 0;
+        chunkIndex++;
+        startIndex = i + 1;
+      }
     }
+    
+    console.log(`ChunkManager: Finished processing all items`);
+    
+    // We don't need this anymore since we handle the last chunk in the loop
     
     // Create a summary file with chunk metadata
     const summaryPath = path.join(this.outputDir, 'chunks-summary.json');
@@ -161,13 +155,13 @@ export class ChunkManager {
       summaryPath,
       JSON.stringify({
         totalChunks: chunks.length,
-        totalItems: itemIndex,
+        totalItems: data.length,
         chunks
       }, null, 2),
       'utf-8'
     );
     
-    console.log(`ChunkManager: Completed chunking. Created ${chunks.length} chunks with ${itemIndex} total items.`);
+    console.log(`ChunkManager: Completed chunking. Created ${chunks.length} chunks with ${data.length} total items.`);
     
     return chunks;
   }
