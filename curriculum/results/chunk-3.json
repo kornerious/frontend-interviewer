@@ -2,24 +2,208 @@
   "chunkId": "chunk-3",
   "clusters": [
     {
-      "name": "JavaScript Execution Model",
-      "description": "This cluster focuses on the fundamental mechanisms of how JavaScript code is executed, including synchronous flow, the call stack, execution contexts, and the asynchronous event loop. Mastery of these concepts is crucial for understanding JavaScript's behavior, especially in browser environments, and for debugging common issues.",
+      "name": "Foundational Web Technologies (HTML & CSS)",
+      "description": "This cluster covers the core building blocks of the web: semantic HTML, styling with CSS, modern layout techniques, and responsive design principles.",
       "items": [
         {
-          "index": 7,
-          "id": "7de717d6-b9cc-4698-9f91-2dc19f734b4c",
-          "reason": "Assumed to cover 'JavaScript Execution Context and Call Stack'. This is the foundational concept for understanding how JS code runs synchronously, manages function calls, and handles variables, making it a prerequisite for understanding asynchronous mechanisms."
+          "index": 102,
+          "id": "b4d4cd08-7d9b-4a3e-b104-f723825b567f",
+          "reason": "Foundational for any web development, understanding HTML structure and semantic tags is the first step."
         },
         {
-          "index": 8,
-          "id": "b759b889-bdef-436c-8e39-9fcae28ac9b8",
-          "reason": "Assumed to cover 'Understanding the JavaScript Event Loop'. This topic directly builds upon the knowledge of the call stack and execution context to explain how JavaScript handles asynchronous operations (like timers, network requests, and user events) in a non-blocking manner. It is a more advanced concept requiring a prior grasp of the synchronous execution model."
+          "index": 103,
+          "id": "5bd720eb-0888-42b4-9712-9e2ac43b9bea",
+          "reason": "Understanding how to target and apply styles is fundamental before delving into advanced CSS properties."
+        },
+        {
+          "index": 104,
+          "id": "1b6683e1-07cd-482a-8295-68db72aa08ac",
+          "reason": "Essential for understanding how elements occupy space and interact on a page, a prerequisite for layout."
+        },
+        {
+          "index": 105,
+          "id": "f42160fa-b85b-48be-8c9b-5e8d88c23bfd",
+          "reason": "A modern and highly relevant technique for one-dimensional layouts, building on basic CSS display properties."
+        },
+        {
+          "index": 106,
+          "id": "72e8450d-5365-4a81-aad4-572b40b7e390",
+          "reason": "An advanced and powerful technique for two-dimensional layouts, often learned after mastering Flexbox or foundational CSS."
+        },
+        {
+          "index": 107,
+          "id": "5e05e678-a3c2-41d6-900a-836eaa400f4d",
+          "reason": "Crucial for building modern web pages that adapt to various screen sizes, requires knowledge of layout techniques."
+        }
+      ]
+    },
+    {
+      "name": "JavaScript Core Concepts",
+      "description": "This cluster explores the fundamental syntax, paradigms, and advanced features of JavaScript, essential for any frontend developer role.",
+      "items": [
+        {
+          "index": 108,
+          "id": "135b9b5c-1aa9-4283-a8ee-0df0fb5b6daf",
+          "reason": "The absolute entry point to JavaScript, covering basic syntax and data manipulation."
+        },
+        {
+          "index": 109,
+          "id": "6500d195-cf03-478b-8850-3e7d7d7e4ac4",
+          "reason": "Builds on basic syntax, introducing core programming constructs and the concept of variable accessibility."
+        },
+        {
+          "index": 110,
+          "id": "ae283dab-4a07-41f5-9615-89f841951e4f",
+          "reason": "A critical and often misunderstood concept in JavaScript, requiring a good grasp of functions and execution context."
+        },
+        {
+          "index": 111,
+          "id": "6c987e9c-e1c8-4cf9-a05c-752a9c9f3df6",
+          "reason": "An advanced concept that builds directly on the understanding of functions and lexical scope."
+        },
+        {
+          "index": 112,
+          "id": "8c0b0b1b-085e-42da-9e44-457e26480dc0",
+          "reason": "Deep dive into JavaScript's object model and inheritance, essential for understanding how objects work under the hood."
+        },
+        {
+          "index": 113,
+          "id": "9488c877-bddd-4269-a80a-c6a63cd764c9",
+          "reason": "Introduces modern JavaScript syntax that improves readability and functionality, best learned after core JS concepts."
+        }
+      ]
+    },
+    {
+      "name": "Asynchronous JavaScript & Browser APIs",
+      "description": "This cluster covers how JavaScript handles asynchronous operations and interacts with the browser environment, including DOM manipulation, event handling, and network requests.",
+      "items": [
+        {
+          "index": 114,
+          "id": "3eac5140-5d9e-44ed-a769-0fd09c50ab37",
+          "reason": "Fundamental to understanding how JavaScript executes code, especially crucial before diving into asynchronous patterns."
+        },
+        {
+          "index": 115,
+          "id": "2c0770ec-5e50-4cb5-9d1b-d3465360c6a2",
+          "reason": "Introduces the primary patterns for handling asynchronous operations, a prerequisite for modern data fetching."
+        },
+        {
+          "index": 116,
+          "id": "e6c0a01e-3ea4-4ccd-992d-a1624e048389",
+          "reason": "A more readable and modern syntax for Promises, building directly on the understanding of Promises."
+        },
+        {
+          "index": 117,
+          "id": "07eb964b-c4fc-4aca-b401-86f57f7715d6",
+          "reason": "The core of interactive web pages, enabling JavaScript to modify HTML and CSS on the fly."
+        },
+        {
+          "index": 118,
+          "id": "1111efac-9fec-4735-81b0-1e73c145a4fd",
+          "reason": "Crucial for efficient and robust user interaction handling in the browser, building on DOM manipulation."
+        },
+        {
+          "index": 119,
+          "id": "335856c4-4f49-4c58-b3f1-c2aa7ce61f04",
+          "reason": "Covers client-side data persistence mechanisms, a common browser API topic."
+        },
+        {
+          "index": 120,
+          "id": "e508a269-88ad-4265-86f3-d0e691df2ddf",
+          "reason": "The primary method for making network requests from the browser, relies heavily on asynchronous JavaScript concepts."
+        }
+      ]
+    },
+    {
+      "name": "React Fundamentals & Advanced Concepts",
+      "description": "This cluster focuses on the React library, from basic component structure and state management to hooks, context, routing, and performance optimization.",
+      "items": [
+        {
+          "index": 121,
+          "id": "460ee28e-203f-4b26-bf47-da77a1ba06fc",
+          "reason": "The introductory step to React, covering the core ideas of components and declarative UI."
+        },
+        {
+          "index": 122,
+          "id": "ca0a4a2b-e6c2-490f-95bd-053e03016a43",
+          "reason": "Fundamental to React's data flow, enabling dynamic and interactive components."
+        },
+        {
+          "index": 123,
+          "id": "0e0505ae-25f5-4faf-b0be-73ac61d29917",
+          "reason": "Provides historical context and understanding of component behavior, relevant for legacy codebases or complex interactions."
+        },
+        {
+          "index": 124,
+          "id": "d365ecc1-1663-4b97-859c-422b59bd7dbe",
+          "reason": "Introduces the most commonly used React Hooks, revolutionizing state and side effect management in functional components. Builds on state/props understanding."
+        },
+        {
+          "index": 125,
+          "id": "01a040f1-77d2-4b87-9848-49d27e4565fa",
+          "reason": "Covers more specialized hooks for advanced patterns, building on the knowledge of `useState` and `useEffect`."
+        },
+        {
+          "index": 126,
+          "id": "99d9606f-4142-4fc9-9a87-6944c74a8151",
+          "reason": "A built-in React solution for global state, providing an alternative to prop drilling, best understood after component basics."
+        },
+        {
+          "index": 127,
+          "id": "bb43606f-e5b4-4560-9ce0-bdbcc4418039",
+          "reason": "Essential for building multi-page applications or complex navigation within a Single Page Application (SPA)."
+        },
+        {
+          "index": 128,
+          "id": "aa13ee3a-31c9-4cb0-9751-8af930ef54cd",
+          "reason": "Explores techniques to optimize React application performance, requiring a deep understanding of component lifecycle and rendering."
+        },
+        {
+          "index": 129,
+          "id": "926ec145-0d15-49eb-8c97-6944c74a8151",
+          "reason": "Introduces patterns for managing complex application state outside of component-local state, a common advanced React topic."
+        }
+      ]
+    },
+    {
+      "name": "Web Development Ecosystem & Best Practices",
+      "description": "This cluster covers cross-cutting concerns crucial for modern web development, including performance optimization, accessibility, network communication, testing, and essential build tooling.",
+      "items": [
+        {
+          "index": 133,
+          "id": "0763bedd-5fe3-467b-a8f8-4ead965fd59e",
+          "reason": "Fundamental for understanding how web clients and servers communicate, and how APIs are structured."
+        },
+        {
+          "index": 132,
+          "id": "2291dfcd-50cf-4a3f-becb-ef644635536b",
+          "reason": "A common network security concept directly related to HTTP requests and responses, building on networking basics."
+        },
+        {
+          "index": 131,
+          "id": "f1e636d4-59e1-42c6-8b6c-85e3bafe5480",
+          "reason": "Crucial for building inclusive web experiences; should be integrated throughout the development process."
+        },
+        {
+          "index": 130,
+          "id": "a581fd75-a75e-478e-b491-c01cc45db54d",
+          "reason": "Focuses on optimizing loading and runtime performance, a critical aspect of modern web applications."
+        },
+        {
+          "index": 135,
+          "id": "d0fe0128-9b35-4729-9645-3ec65ea2b24d",
+          "reason": "Understanding how modern JavaScript code is transpiled and bundled is essential for real-world projects."
+        },
+        {
+          "index": 134,
+          "id": "78267e58-be43-481c-b514-df0c4e26f988",
+          "reason": "Covers methodologies for ensuring code quality and reliability, a vital practice in professional development."
         }
       ]
     }
   ],
-  "itemCount": 2,
-  "clusterCount": 1,
-  "startIndex": 7,
-  "endIndex": 8
+  "itemCount": 34,
+  "clusterCount": 5,
+  "startIndex": 102,
+  "endIndex": 135
 }

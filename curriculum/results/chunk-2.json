@@ -2,24 +2,220 @@
   "chunkId": "chunk-2",
   "clusters": [
     {
-      "name": "Core JavaScript Concepts",
-      "description": "This cluster covers foundational and advanced concepts in JavaScript, crucial for understanding how the language works and for tackling common frontend interview questions related to execution, data flow, and asynchronous operations.",
+      "name": "JavaScript Fundamentals",
+      "description": "This cluster covers the core syntax, data structures, and fundamental concepts of the JavaScript language, which are essential prerequisites for any advanced frontend topic.",
       "items": [
         {
-          "index": 5,
-          "id": "ab704af7-a36c-4098-9c2d-a7e4d43abdbc",
-          "reason": "This item is placed first as it represents fundamental JavaScript knowledge (e.g., Scopes, Closures, Hoisting). A solid grasp of these concepts is a prerequisite for understanding more complex JavaScript patterns and interview topics."
+          "index": 68,
+          "id": "3a25c798-a73d-4e5f-a7d8-25481a1caaf2",
+          "reason": "Foundational: Covers basic data types and operators, the absolute building blocks of JavaScript."
         },
         {
-          "index": 6,
-          "id": "d26bdc0e-3d15-4e30-8986-f93d6425d6fe",
-          "reason": "Building upon basic JavaScript, this item covers Asynchronous JavaScript (Promises, Async/Await, Event Loop). Understanding how JavaScript handles async operations is a direct extension of its single-threaded nature, making foundational JS knowledge a prerequisite."
+          "index": 69,
+          "id": "b527fff4-a1d1-449f-88cb-b9696f82b8d6",
+          "reason": "Next step: Teaches how to control program flow and perform repetitive tasks."
+        },
+        {
+          "index": 70,
+          "id": "8b3ad7cc-20bc-447e-a23a-d4157e939e65",
+          "reason": "Introduces modularity and variable visibility, critical for writing organized code."
+        },
+        {
+          "index": 71,
+          "id": "b1122714-e010-4527-9dbe-583fbd983829",
+          "reason": "Covers JavaScript's primary complex data structures, used extensively in all applications."
+        },
+        {
+          "index": 72,
+          "id": "e4724474-f6ad-4077-b33e-5eddbd5efbeb",
+          "reason": "Explores the dynamic `this` keyword and execution context, often a challenging but crucial concept."
+        },
+        {
+          "index": 73,
+          "id": "b8bb88ed-5083-46df-9253-27cb03f023b5",
+          "reason": "Delves into closures, an advanced scope concept that powers many JS patterns and frameworks."
+        },
+        {
+          "index": 74,
+          "id": "6b8c3a34-bfe2-408a-a8b5-0adc285072a0",
+          "reason": "Explains JavaScript's unique object-oriented model, building on object understanding."
+        },
+        {
+          "index": 75,
+          "id": "d68744a5-1545-46e0-85c0-08df297781c7",
+          "reason": "Introduces modern syntax and features that enhance productivity and readability, building on all prior JS knowledge."
+        }
+      ]
+    },
+    {
+      "name": "Asynchronous JavaScript & Browser Runtime",
+      "description": "This cluster explores how JavaScript handles non-blocking operations, the browser's event loop, and techniques for managing asynchronous code execution.",
+      "items": [
+        {
+          "index": 76,
+          "id": "8bfac07b-3b21-4611-9bb0-b21da9585e34",
+          "reason": "Fundamental: Explains the single-threaded nature of JS and how asynchronous tasks are managed in the browser."
+        },
+        {
+          "index": 77,
+          "id": "504016ce-30d4-4af1-bb18-d2bf41698cfc",
+          "reason": "Introduces a standard pattern for handling asynchronous results, building on event loop understanding."
+        },
+        {
+          "index": 78,
+          "id": "d91f1bd6-65a9-4e3a-916d-303a86a7932f",
+          "reason": "Syntactic sugar for Promises, making asynchronous code look more synchronous and easier to read."
+        },
+        {
+          "index": 80,
+          "id": "238b3766-4940-4bc2-b8e5-18a0ac701bb2",
+          "reason": "A deeper dive into the specific queues within the event loop, crucial for understanding execution order."
+        },
+        {
+          "index": 79,
+          "id": "d461bcda-2b30-4814-a1d4-8877f6233bfc",
+          "reason": "Introduces a browser API for truly concurrent execution, leveraging async knowledge to prevent UI blocking."
+        }
+      ]
+    },
+    {
+      "name": "DOM Manipulation & Browser APIs",
+      "description": "This cluster focuses on how to interact with the Document Object Model (DOM) to dynamically change web page content and use various built-in browser APIs.",
+      "items": [
+        {
+          "index": 81,
+          "id": "d8d7291e-88b1-4694-9b1c-2e47cd738d47",
+          "reason": "Foundational: Understanding the hierarchical structure of a web page and how to access its elements."
+        },
+        {
+          "index": 82,
+          "id": "656c3660-aa83-4268-9eb8-285546e832b2",
+          "reason": "Essential for making web pages interactive by responding to user actions, building on DOM knowledge."
+        },
+        {
+          "index": 83,
+          "id": "20ef4a66-a599-4844-b72b-87e393b9bfff",
+          "reason": "Covers mechanisms for client-side data persistence, useful for simple state management."
+        },
+        {
+          "index": 84,
+          "id": "ec766fc1-c053-48c6-b515-3b9d04a5d79c",
+          "reason": "Explains a critical browser security feature related to network requests, relevant for communicating with APIs."
+        },
+        {
+          "index": 85,
+          "id": "0b24fd70-cf6b-459f-ab09-8e7416e8fbbf",
+          "reason": "Introduces a more advanced browser API for real-time, persistent communication, building on general network understanding."
+        }
+      ]
+    },
+    {
+      "name": "React Core Concepts",
+      "description": "This cluster covers the fundamental building blocks of React, including components, state management, and the lifecycle of React applications.",
+      "items": [
+        {
+          "index": 86,
+          "id": "6221f1ec-688e-4529-a980-2295af964123",
+          "reason": "Foundational: Introduces the primary unit of a React application and how data is passed between them."
+        },
+        {
+          "index": 87,
+          "id": "31d16560-f230-4ca5-9111-56410d0aaf82",
+          "reason": "Covers internal component data management and execution phases using the traditional class component approach."
+        },
+        {
+          "index": 88,
+          "id": "830b8cbb-f581-40dd-9fe5-d76bd86e725b",
+          "reason": "Introduces the modern and preferred way to manage state and side effects in functional components, building on prior state concepts."
+        },
+        {
+          "index": 89,
+          "id": "26a4487d-c86e-4363-99b5-742b685fa2f4",
+          "reason": "Explains a pattern for global state management, addressing prop drilling in larger applications."
+        }
+      ]
+    },
+    {
+      "name": "Advanced React & Performance",
+      "description": "This cluster delves into the deeper mechanics of React, strategies for optimizing application performance, and advanced rendering patterns.",
+      "items": [
+        {
+          "index": 90,
+          "id": "8971a1bf-00f9-490a-8b78-52fe32f8460c",
+          "reason": "Essential for understanding how React efficiently updates the actual DOM and why performance optimizations work."
+        },
+        {
+          "index": 91,
+          "id": "c319ce57-59e6-4eb8-9dad-1f099bb5692a",
+          "reason": "Applies knowledge of the Virtual DOM and Hooks to implement specific performance enhancements."
+        },
+        {
+          "index": 92,
+          "id": "49312892-80a3-490e-9487-dda935993edd",
+          "reason": "Covers a robust way to catch and handle JavaScript errors within the React component tree."
+        },
+        {
+          "index": 93,
+          "id": "c08a9f74-fa83-457a-a59a-7b0704e2564c",
+          "reason": "Explores advanced rendering techniques and a popular framework (Next.js) that implements them for improved performance and SEO."
+        }
+      ]
+    },
+    {
+      "name": "CSS Layout & Responsive Design",
+      "description": "This cluster focuses on modern CSS techniques for arranging elements on a page, creating flexible designs, and adapting layouts to different screen sizes.",
+      "items": [
+        {
+          "index": 94,
+          "id": "6794ade6-7a42-4322-95f1-c1106ed265e8",
+          "reason": "Foundational: Understanding how elements occupy space and how to control their basic behavior is crucial for any layout."
+        },
+        {
+          "index": 95,
+          "id": "cce4b293-95e9-4b43-97dd-b7bdff101156",
+          "reason": "Introduces a powerful one-dimensional layout system, building on basic display properties."
+        },
+        {
+          "index": 96,
+          "id": "578b9412-9b8a-4262-97c4-aa16c8a737d4",
+          "reason": "Covers a robust two-dimensional layout system, often used in conjunction with or as an alternative to Flexbox."
+        },
+        {
+          "index": 97,
+          "id": "bce6ed23-ed5c-4631-a3e5-e530f5d25581",
+          "reason": "Combines all previous layout knowledge to create adaptive designs that look good on various devices."
+        }
+      ]
+    },
+    {
+      "name": "Web Performance & Bundling",
+      "description": "This cluster covers general web performance optimization strategies, how browsers render content, and the role of modern build tools in frontend development.",
+      "items": [
+        {
+          "index": 98,
+          "id": "c1b1dacc-d6d7-4844-aa19-856b759d84d1",
+          "reason": "Fundamental: Understanding the steps a browser takes to render a page is key to identifying performance bottlenecks."
+        },
+        {
+          "index": 99,
+          "id": "fa6bfc6c-5475-4e6a-99e9-4e1e16383e0f",
+          "reason": "Introduces techniques to reduce initial load times by delivering code and assets only when needed."
+        },
+        {
+          "index": 100,
+          "id": "73f67bde-2821-44c1-b9ea-58b85347ce72",
+          "reason": "Explores how browsers store and reuse assets to speed up subsequent visits to a website."
+        },
+        {
+          "index": 101,
+          "id": "f528a09e-2260-4b92-8c53-aba659f19373",
+          "reason": "Covers the essential tools and processes for preparing modern JavaScript applications for deployment, enabling many optimization techniques."
         }
       ]
     }
   ],
-  "itemCount": 2,
-  "clusterCount": 1,
-  "startIndex": 5,
-  "endIndex": 6
+  "itemCount": 34,
+  "clusterCount": 7,
+  "startIndex": 68,
+  "endIndex": 101
 }

@@ -2,29 +2,226 @@
   "chunkId": "chunk-0",
   "clusters": [
     {
-      "name": "Uncategorized Items (Insufficient Data)",
-      "description": "These items could not be categorized into thematic clusters, ordered by prerequisites, or placed into a learning sequence due to the absence of essential metadata (e.g., title, tags, technology, prerequisites, complexity). Comprehensive metadata is required to perform expert curriculum design tasks.",
+      "name": "HTML & Accessibility Fundamentals",
+      "description": "Foundational concepts for structuring web content and ensuring it is accessible to all users.",
       "items": [
         {
           "index": 0,
           "id": "8602e28f-de57-433a-b42d-db72ef760a09",
-          "reason": "Metadata such as 'title', 'tags', 'technology', and 'prerequisites' is missing, preventing thematic clustering and ordering."
+          "reason": "Basic understanding of semantic HTML is fundamental before diving into advanced accessibility."
         },
+        {
+          "index": 27,
+          "id": "0df84cf5-e861-42ae-9360-8d0826784d37",
+          "reason": "Advanced accessibility topics like WAI-ARIA build upon a solid understanding of basic HTML semantics and accessibility principles."
+        }
+      ]
+    },
+    {
+      "name": "Core CSS Concepts & Layout",
+      "description": "Essential knowledge for styling web pages, understanding box model, and mastering modern layout techniques like Flexbox and Grid.",
+      "items": [
         {
           "index": 1,
           "id": "78e4b679-6da5-4d51-818d-03c853484d41",
-          "reason": "Metadata such as 'title', 'tags', 'technology', and 'prerequisites' is missing, preventing thematic clustering and ordering."
+          "reason": "The CSS Box Model is the most foundational concept for understanding how elements are rendered and spaced on a page."
         },
+        {
+          "index": 8,
+          "id": "b759b889-bdef-436c-8e39-9fcae28ac9b8",
+          "reason": "Understanding CSS Specificity and the Cascade is crucial for predicting and controlling how styles are applied, building on basic styling."
+        },
+        {
+          "index": 3,
+          "id": "54df5f6d-c31c-47d7-b3fb-3c5d22ebdb41",
+          "reason": "Flexbox is a primary modern layout technique, often introduced after fundamental CSS properties."
+        },
+        {
+          "index": 6,
+          "id": "d26bdc0e-3d15-4e30-8986-f93d6425d6fe",
+          "reason": "CSS Grid provides another powerful layout system, typically learned after or alongside Flexbox for more complex 2D layouts."
+        },
+        {
+          "index": 32,
+          "id": "813fc626-6d3d-42b0-a407-590768e8b398",
+          "reason": "Advanced CSS features like animations and transitions build upon a strong understanding of core styling and layout principles."
+        }
+      ]
+    },
+    {
+      "name": "JavaScript Fundamentals",
+      "description": "Core JavaScript principles including data types, scope, closures, and object-oriented concepts.",
+      "items": [
         {
           "index": 2,
           "id": "100bf5d7-a836-4e5a-8bc3-aa83cea7f416",
-          "reason": "Metadata such as 'title', 'tags', 'technology', and 'prerequisites' is missing, preventing thematic clustering and ordering."
+          "reason": "Understanding JavaScript data types and operators is the absolute first step in learning the language."
+        },
+        {
+          "index": 4,
+          "id": "9eef224e-890b-49e4-8b7f-b86c4699f2b0",
+          "reason": "Scope and Closures are fundamental concepts for understanding how variables are accessed and functions behave in JavaScript."
+        },
+        {
+          "index": 9,
+          "id": "afa36072-8a29-4ac1-a18c-d3345bf9e4f1",
+          "reason": "The 'this' keyword can be complex and is best understood after gaining familiarity with basic function execution and scope."
+        },
+        {
+          "index": 26,
+          "id": "b36e3e91-e1b7-4efb-b48d-563618570d6f",
+          "reason": "Understanding JavaScript Prototypes and Inheritance provides deeper insight into JS's object model and is an advanced fundamental concept."
+        }
+      ]
+    },
+    {
+      "name": "Asynchronous JavaScript & Browser APIs",
+      "description": "Concepts related to handling asynchronous operations, managing browser events, and interacting with browser-specific APIs.",
+      "items": [
+        {
+          "index": 5,
+          "id": "ab704af7-a36c-4098-9c2d-a7e4d43abdbc",
+          "reason": "DOM manipulation and event handling are essential for making interactive web pages and often precede asynchronous interactions."
+        },
+        {
+          "index": 7,
+          "id": "7de717d6-b9cc-4698-9f91-2dc19f734b4c",
+          "reason": "Callbacks are the most basic pattern for asynchronous operations, a foundational prerequisite for Promises and Async/Await."
+        },
+        {
+          "index": 10,
+          "id": "b0abeb96-1032-4163-b37e-7ce0a9262e1f",
+          "reason": "Promises are a modern and more manageable way to handle asynchronous operations, building on the concepts introduced by callbacks."
+        },
+        {
+          "index": 15,
+          "id": "db25c3e5-24ef-4958-be3e-e589f32cd20e",
+          "reason": "Async/Await provides syntactic sugar over Promises, making asynchronous code more readable and easier to write, hence it follows Promises."
+        },
+        {
+          "index": 11,
+          "id": "379b2724-4a0c-425e-8037-012d98906d04",
+          "reason": "The Event Loop explains the underlying mechanism of how JavaScript handles asynchronous operations; best understood after experiencing async patterns."
+        },
+        {
+          "index": 17,
+          "id": "fac2bbd6-07b6-4fa0-8d23-f952c04b99e8",
+          "reason": "Web Storage APIs are common browser-side data storage mechanisms, often used in conjunction with JavaScript and asynchronous operations."
+        }
+      ]
+    },
+    {
+      "name": "React Core Concepts",
+      "description": "Fundamental principles of React, including components, state, props, and the rendering lifecycle.",
+      "items": [
+        {
+          "index": 12,
+          "id": "df8fca82-2fab-48c2-853c-a851712f7495",
+          "reason": "Introduction to React Components is the starting point for learning React, establishing the basic building blocks."
+        },
+        {
+          "index": 14,
+          "id": "0ce2b077-a4ec-48ad-a2b6-9188b8c4f2de",
+          "reason": "Understanding Props is crucial for passing data down to components and enabling component communication."
+        },
+        {
+          "index": 13,
+          "id": "3cec5d31-0f91-45c6-9896-a858df622bf6",
+          "reason": "Managing State with useState is fundamental for creating dynamic and interactive React components."
+        },
+        {
+          "index": 16,
+          "id": "8ed9b91d-cd21-49e3-ab49-c93d7f748a64",
+          "reason": "The useEffect Hook and lifecycle methods are essential for handling side effects and component lifecycle events, building on state and props."
+        },
+        {
+          "index": 22,
+          "id": "46d67387-9346-40d4-8c93-c7a4a333d06e",
+          "reason": "Understanding React Reconciliation and the Virtual DOM provides deeper insight into React's rendering mechanism, often covered after basic usage."
+        }
+      ]
+    },
+    {
+      "name": "Advanced React & State Management",
+      "description": "Advanced React patterns, state management solutions beyond local state, and routing.",
+      "items": [
+        {
+          "index": 19,
+          "id": "35a33fd1-3f87-4ae5-a5ec-f1ef7f0bc4fd",
+          "reason": "React Context API is a step up from prop drilling for state management, following core state concepts."
+        },
+        {
+          "index": 25,
+          "id": "b7e9d11f-9e0b-4684-8674-c025b11e7b2e",
+          "reason": "Custom React Hooks allow for logic reuse and build on the understanding of built-in hooks and state/effects."
+        },
+        {
+          "index": 21,
+          "id": "ea875451-4590-4345-ae70-694522064542",
+          "reason": "Redux or other global state management solutions are for more complex applications, building on basic state management patterns."
+        },
+        {
+          "index": 20,
+          "id": "5b3f79a8-86e0-4b5d-a48c-65f527cac722",
+          "reason": "React Router is essential for building multi-page applications (SPAs) and is typically learned after core component concepts."
+        },
+        {
+          "index": 31,
+          "id": "8267bb57-6695-4b81-a0bd-f1b1d911fd37",
+          "reason": "React Performance Optimization techniques (memo, useCallback) are advanced topics best understood after grasping React's rendering cycle."
+        }
+      ]
+    },
+    {
+      "name": "Web Performance & Networking",
+      "description": "Topics covering how web applications communicate over the network and strategies for optimizing their performance.",
+      "items": [
+        {
+          "index": 18,
+          "id": "550b85bd-efb1-47df-a9c0-14c1601a1cc3",
+          "reason": "HTTP/HTTPS basics are fundamental for understanding how web applications communicate with servers."
+        },
+        {
+          "index": 24,
+          "id": "f2eb5d98-8397-4336-a544-6545b075da2b",
+          "reason": "CORS is a common networking issue in web development, building on basic HTTP knowledge."
+        },
+        {
+          "index": 28,
+          "id": "9b1a3405-fa73-4124-bedd-7912f9063ff8",
+          "reason": "Browser Caching Mechanisms are important for understanding web performance and reducing network requests."
+        },
+        {
+          "index": 23,
+          "id": "89dacb29-049f-4c79-ab08-6c3bbbe8ea1f",
+          "reason": "Frontend Performance Optimization techniques are practical applications of networking and browser rendering knowledge."
+        }
+      ]
+    },
+    {
+      "name": "Frontend Architecture & Tooling",
+      "description": "Covers essential development tools, security considerations, and testing methodologies for robust frontend applications.",
+      "items": [
+        {
+          "index": 30,
+          "id": "134b0e16-02b4-4f7f-891c-05645559f4f0",
+          "reason": "Webpack and module bundling are core to modern frontend build processes, typically learned after core language and framework concepts."
+        },
+        {
+          "index": 29,
+          "id": "fa1da733-f612-4535-bd59-00038b677ddd",
+          "reason": "Frontend security topics like XSS/CSRF are crucial for building secure applications and often require a broad understanding of web interactions."
+        },
+        {
+          "index": 33,
+          "id": "019fc46f-d6dc-4e84-94c6-f7ff512f50ef",
+          "reason": "Testing React Components is vital for quality assurance and comes after proficiency in building components themselves."
         }
       ]
     }
   ],
-  "itemCount": 3,
-  "clusterCount": 1,
+  "itemCount": 34,
+  "clusterCount": 8,
   "startIndex": 0,
-  "endIndex": 2
+  "endIndex": 33
 }

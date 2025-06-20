@@ -1,0 +1,34 @@
+{
+  "timestamp": "2025-06-20T06:49:45.628Z",
+  "chunkCount": 5,
+  "processedChunks": 5,
+  "totalItems": 168,
+  "totalClusters": 36,
+  "chunks": [
+    {
+      "chunkId": "chunk-0",
+      "itemCount": 34,
+      "clusterCount": 8
+    },
+    {
+      "chunkId": "chunk-1",
+      "itemCount": 34,
+      "clusterCount": 11
+    },
+    {
+      "chunkId": "chunk-2",
+      "itemCount": 34,
+      "clusterCount": 7
+    },
+    {
+      "chunkId": "chunk-3",
+      "itemCount": 34,
+      "clusterCount": 5
+    },
+    {
+      "chunkId": "chunk-4",
+      "itemCount": 32,
+      "clusterCount": 5
+    }
+  ]
+}

@@ -2,24 +2,198 @@
   "chunkId": "chunk-4",
   "clusters": [
     {
-      "name": "Uncategorized Frontend Concepts",
-      "description": "Due to the absence of essential metadata (e.g., title, tags, technology, and critically, prerequisites) for the provided items, it is impossible to perform a meaningful curriculum design. This includes identifying prerequisite chains, grouping items into natural thematic clusters, or establishing an ordered learning sequence. These items are placed in a single, generic cluster, and their order is arbitrary.",
+      "name": "JavaScript Fundamentals & Asynchronicity",
+      "description": "This cluster covers the bedrock of frontend development: core JavaScript syntax, execution context, object-oriented concepts, and the crucial aspects of asynchronous programming patterns like the Event Loop, Promises, and Async/Await.",
       "items": [
         {
-          "index": 9,
-          "id": "afa36072-8a29-4ac1-a18c-d3345bf9e4f1",
-          "reason": "This item's metadata is entirely missing. Its inclusion in this cluster and its position within it are arbitrary, as no thematic or prerequisite relationships could be determined from the provided data."
+          "index": 136,
+          "id": "c0a1c00b-740e-4ca8-ad6e-eb034b19a51b",
+          "reason": "Foundational: Introduces basic JavaScript syntax, variables, and data types, serving as the absolute prerequisite for any JavaScript learning."
         },
         {
-          "index": 10,
-          "id": "b0abeb96-1032-4163-b37e-7ce0a9262e1f",
-          "reason": "This item's metadata is entirely missing. Its inclusion in this cluster and its position within it are arbitrary, as no thematic or prerequisite relationships could be determined from the provided data."
+          "index": 137,
+          "id": "5d100d10-74ee-45f1-b151-bccda1809f34",
+          "reason": "Core building block: Covers functions and their lexical scope, essential for understanding how code executes and for subsequent advanced topics like closures."
+        },
+        {
+          "index": 139,
+          "id": "dd44c0ce-fc65-4f0e-ac33-66cd780b10aa",
+          "reason": "Intermediate concept: Explores the dynamic behavior of 'this', requiring a solid grasp of functions and execution context for proper understanding."
+        },
+        {
+          "index": 138,
+          "id": "ade35d3f-c53f-4798-b113-2d73e4c21b8c",
+          "reason": "Advanced functional concept: Closures build directly on the understanding of functions and scope, demonstrating powerful patterns for data encapsulation."
+        },
+        {
+          "index": 140,
+          "id": "6b5c7815-567c-47b5-812c-60fe268133e2",
+          "reason": "Object-Oriented JavaScript: Explains JavaScript's prototype-based inheritance, which is better grasped after understanding 'this' and functions."
+        },
+        {
+          "index": 141,
+          "id": "11b51687-0a07-43c6-a331-9ab5f08e5839",
+          "reason": "Asynchronicity foundation: Crucial for understanding how JavaScript handles non-blocking operations, a prerequisite for Promises and Async/Await."
+        },
+        {
+          "index": 142,
+          "id": "552ca4b8-c6b9-40db-97e1-f286fbeaeb06",
+          "reason": "Handling async results: Introduces traditional callbacks and then the Promise object as a more structured way to manage asynchronous operations, building on the Event Loop."
+        },
+        {
+          "index": 143,
+          "id": "eb4903ef-5790-4609-af3d-5c019ef392e9",
+          "reason": "Modern async syntax: Provides a cleaner, more readable way to work with Promises, directly building on their understanding."
+        },
+        {
+          "index": 144,
+          "id": "4e67808c-4909-4910-9cd5-348c12fc637a",
+          "reason": "Robustness in async code: Focuses on techniques to gracefully handle errors that occur in asynchronous JavaScript operations, following the introduction of async patterns."
+        }
+      ]
+    },
+    {
+      "name": "Browser Environment & Web APIs",
+      "description": "This cluster explores how JavaScript interacts with the web browser, covering Document Object Model (DOM) manipulation, event handling, client-side storage, and making network requests, along with more advanced browser features.",
+      "items": [
+        {
+          "index": 145,
+          "id": "06754615-bba5-4907-9d23-b466fdbe02bd",
+          "reason": "Fundamental browser interaction: Teaches how to access and modify HTML elements, requiring basic JavaScript knowledge for execution."
+        },
+        {
+          "index": 146,
+          "id": "f6f06285-929d-4e61-9a70-9efbcfa470d0",
+          "reason": "Efficient event handling: Builds on basic DOM manipulation by introducing a best practice for managing events, especially in complex UIs."
+        },
+        {
+          "index": 147,
+          "id": "bbe7a56f-477d-45f5-92a3-25cee6c82a8e",
+          "reason": "Client-side data persistence: Introduces browser-based storage mechanisms, a standalone but essential browser API that assumes basic JS functions."
+        },
+        {
+          "index": 148,
+          "id": "5732f524-f1a9-45c6-89c2-b6fa9a99a40c",
+          "reason": "Asynchronous data fetching: Covers the modern way to make HTTP requests from the browser, requiring a solid understanding of Async/Await patterns."
+        },
+        {
+          "index": 149,
+          "id": "03f49844-e9cf-44db-867e-2550f5e64414",
+          "reason": "Background processing: Introduces multi-threading in the browser environment for computationally intensive tasks, relying on asynchronous concepts."
+        },
+        {
+          "index": 150,
+          "id": "316dfaf9-9fc9-4727-822d-5903ac2afc29",
+          "reason": "Offline capabilities & performance: More advanced, builds on network requests and background processing for creating Progressive Web Apps (PWAs)."
+        }
+      ]
+    },
+    {
+      "name": "Core CSS Layout & Styling",
+      "description": "This cluster covers essential CSS concepts for structuring and styling web pages, from the foundational box model and positioning to modern layout techniques like Flexbox and Grid, and principles of responsive design.",
+      "items": [
+        {
+          "index": 151,
+          "id": "477d0362-2e8e-4697-831e-1828e1f125f8",
+          "reason": "Foundational CSS: Explains the fundamental model for all HTML elements, crucial for understanding layout, sizing, and spacing."
+        },
+        {
+          "index": 152,
+          "id": "ad81f9a5-126b-4c5d-aaf5-3682307740a3",
+          "reason": "Element placement: Builds on the box model by teaching how to precisely control element position relative to the document flow or other elements."
+        },
+        {
+          "index": 153,
+          "id": "652cd6da-ccd6-4837-9a62-dfebd41cdd6f",
+          "reason": "Modern 1D layout: Introduces a powerful and widely used CSS layout module for aligning and distributing items efficiently within a single dimension."
+        },
+        {
+          "index": 154,
+          "id": "c0998467-3109-4f04-b332-06ee7ec8d2da",
+          "reason": "Modern 2D layout: Provides a robust grid-based system for two-dimensional layouts, offering advanced control over rows and columns, complementing Flexbox."
+        },
+        {
+          "index": 155,
+          "id": "86533d9a-4bcf-47c4-9c31-377c497659fd",
+          "reason": "Adaptable UI design: Teaches how to create layouts that respond gracefully to different screen sizes and devices, leveraging techniques like Flexbox and Grid."
+        }
+      ]
+    },
+    {
+      "name": "React Core Concepts",
+      "description": "This cluster introduces the foundational building blocks of React applications, including JSX, components, props, state management using both class components and modern Hooks, the Context API, and handling DOM interactions within React.",
+      "items": [
+        {
+          "index": 157,
+          "id": "85e0dc8a-aba1-40ae-889e-2f05bc3dfc88",
+          "reason": "Entry point to React: Explains JSX syntax and how React renders elements, requiring basic JavaScript knowledge as a prerequisite."
+        },
+        {
+          "index": 158,
+          "id": "819633ea-131d-4d83-a01b-9f4da3f7dabd",
+          "reason": "Fundamental UI units: Introduces reusable UI components and how to pass data between them using props, building directly on JSX."
+        },
+        {
+          "index": 159,
+          "id": "d1c2e95e-c011-4e02-acc9-df947baa837d",
+          "reason": "Traditional state management: Covers how state is managed within class components, providing essential context for understanding React's reactive paradigm."
+        },
+        {
+          "index": 160,
+          "id": "fc01bbfd-4217-41a5-8f6b-34fe201ee2b4",
+          "reason": "Modern state and side effects: Introduces the primary way to manage state and lifecycle in functional components, a crucial modern React topic."
+        },
+        {
+          "index": 161,
+          "id": "90b026f2-44aa-4400-acba-c556271a6c4c",
+          "reason": "Global state management: Explains a built-in React solution for managing state across components without prop drilling, building on Hooks knowledge."
+        },
+        {
+          "index": 162,
+          "id": "83f753cd-3157-413f-95d7-78fdd3f0a630",
+          "reason": "Direct DOM interaction: Teaches how to access underlying DOM elements directly in React, requiring knowledge of both React components and basic DOM manipulation."
+        },
+        {
+          "index": 165,
+          "id": "14eaab9c-4864-4090-a403-69a74653ee18",
+          "reason": "Rendering outside component tree: Explains a pattern for rendering children into a different DOM node, useful for elements like modals or tooltips, requiring DOM and React knowledge."
+        },
+        {
+          "index": 156,
+          "id": "439ce207-65d1-45be-84d5-3fe416b6d723",
+          "reason": "Styling in React: Introduces a popular method for writing CSS directly within JavaScript, assuming basic CSS knowledge and understanding of React components."
+        },
+        {
+          "index": 164,
+          "id": "76447370-0415-49aa-916f-aec1cb21075c",
+          "reason": "Robust error handling: Explains a React feature for gracefully catching and displaying errors within the component tree, essential for production applications."
+        }
+      ]
+    },
+    {
+      "name": "Advanced React & External State Management",
+      "description": "This cluster delves into optimizing React application performance, extending component logic with custom hooks, and understanding external state management solutions like Redux for more complex applications.",
+      "items": [
+        {
+          "index": 163,
+          "id": "d232b8b8-83f4-4108-9e64-d2b27dc41e25",
+          "reason": "Performance optimization: Teaches techniques to prevent unnecessary re-renders in React functional components, requiring a deep understanding of Hooks and component lifecycle."
+        },
+        {
+          "index": 166,
+          "id": "b3e19102-619b-40ca-9c46-a39d7f0c7bd3",
+          "reason": "Reusable logic: Explains how to abstract and share stateful logic across components, building on the foundation and patterns of React Hooks."
+        },
+        {
+          "index": 167,
+          "id": "6f16e5a4-298a-442c-bdad-381eb23e875d",
+          "reason": "Scalable state management: Introduces a popular external library for managing complex, application-wide state, typically learned after React's built-in state solutions like Context."
         }
       ]
     }
   ],
-  "itemCount": 2,
-  "clusterCount": 1,
-  "startIndex": 9,
-  "endIndex": 10
+  "itemCount": 32,
+  "clusterCount": 5,
+  "startIndex": 136,
+  "endIndex": 167
 }

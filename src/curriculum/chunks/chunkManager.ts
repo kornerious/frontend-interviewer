@@ -7,8 +7,8 @@
 import fs from 'fs';
 import path from 'path';
 
-// Target number of chunks to create
-const TARGET_CHUNKS = 5;
+// Fixed number of chunks to create - enforced maximum
+const MAX_CHUNKS = 5;
 
 // Token estimation factors
 // A rough approximation: 1 token ≈ 4 characters in English text
@@ -63,7 +63,7 @@ export class ChunkManager {
     console.log(`ChunkManager: Starting to chunk database from ${this.databasePath}`);
     console.log(`ChunkManager: Output directory: ${this.outputDir}`);
     console.log(`ChunkManager: Chunk prefix: ${this.chunkPrefix}`);
-    console.log(`ChunkManager: Token-based chunking: Target ~${TARGET_CHUNKS} chunks, limit ~${OUTPUT_TOKEN_LIMIT} tokens per chunk`);
+    console.log(`ChunkManager: Token-based chunking: Target ~${MAX_CHUNKS} chunks, limit ~${OUTPUT_TOKEN_LIMIT} tokens per chunk`);
     
     // Check if database file exists
     if (!fs.existsSync(this.databasePath)) {
@@ -100,104 +100,61 @@ export class ChunkManager {
     
     console.log(`ChunkManager: Estimated total tokens: ${estimatedTotalTokens} (${totalCharCount} characters)`);
     
-    // Calculate tokens per chunk, allowing for some overhead
-    // Target is slightly fewer than output limit to allow for prompt + completion
-    const tokenSafetyMargin = 0.8; // Use 80% of the limit to be safe
-    const tokensPerChunk = Math.min(
-      Math.ceil(estimatedTotalTokens / TARGET_CHUNKS),
-      Math.floor(OUTPUT_TOKEN_LIMIT * tokenSafetyMargin)
-    );
-    
-    console.log(`ChunkManager: Target tokens per chunk: ${tokensPerChunk}`);
+    // Calculate items per chunk to ensure exactly MAX_CHUNKS (or fewer if data is small)
+    const itemsPerChunk = Math.ceil(data.length / MAX_CHUNKS);
+    console.log(`ChunkManager: Total items: ${data.length}, dividing into exactly ${MAX_CHUNKS} chunks`);
+    console.log(`ChunkManager: Target items per chunk: ${itemsPerChunk}`);
     
     // Create chunks
     const chunks: ChunkMetadata[] = [];
-    let currentChunk: any[] = [];
-    let currentTokenCount = 0;
     let chunkIndex = 0;
     let startIndex = 0;
     
     console.log(`ChunkManager: Starting to process items...`);
     
-    // Process each item
-    for (let i = 0; i < data.length; i++) {
-      const item = data[i];
+    // Process in exactly MAX_CHUNKS chunks by dividing items evenly
+    for (let chunkIndex = 0; chunkIndex < MAX_CHUNKS; chunkIndex++) {
+      const startItemIndex = chunkIndex * itemsPerChunk;
+      const endItemIndex = Math.min((chunkIndex + 1) * itemsPerChunk - 1, data.length - 1);
       
-      // Log first few items and then every 100th item
-      if (i < 5 || i % 100 === 0) {
-        console.log(`ChunkManager: Processing item #${i}, id: ${item.id || 'unknown'}`);
+      if (startItemIndex > data.length - 1) {
+        // We've already processed all items
+        break;
       }
       
-      // Estimate tokens for this item
-      const itemString = JSON.stringify(item);
-      const itemCharCount = itemString.length;
-      const estimatedItemTokens = Math.ceil(itemCharCount / CHARS_PER_TOKEN);
+      const chunkItems = data.slice(startItemIndex, endItemIndex + 1);
       
-      // If adding this item would exceed the token limit and we already have items,
-      // save the current chunk before adding this item
-      if (currentTokenCount > 0 && 
-          (currentTokenCount + estimatedItemTokens > tokensPerChunk || i === data.length - 1)) {
-        
-        // Save current chunk
-        const chunkId = `${this.chunkPrefix}-${chunkIndex}`;
-        const chunkPath = path.join(this.outputDir, `${chunkId}.json`);
-        
-        // Write chunk to file
-        fs.writeFileSync(
-          chunkPath,
-          JSON.stringify(currentChunk, null, 2),
-          'utf-8'
-        );
-        
-        // Create chunk metadata
-        const chunkMeta: ChunkMetadata = {
-          chunkId,
-          itemCount: currentChunk.length,
-          startIndex,
-          endIndex: i - 1, // We haven't added item i yet
-          filePath: chunkPath,
-          sizeBytes: Buffer.byteLength(JSON.stringify(currentChunk))
-        };
-        
-        chunks.push(chunkMeta);
-        console.log(`ChunkManager: Created chunk ${chunkId} with ${currentChunk.length} items (est. ${currentTokenCount} tokens)`);
-        
-        // Reset for next chunk
-        currentChunk = [];
-        currentTokenCount = 0;
-        chunkIndex++;
-        startIndex = i;
-      }
+      // Log chunk details
+      console.log(`ChunkManager: Processing chunk #${chunkIndex}, items ${startItemIndex} to ${endItemIndex}`);
       
-      // Add item to current chunk
-      currentChunk.push(item);
-      currentTokenCount += estimatedItemTokens;
+      // Estimate tokens for this chunk
+      const chunkString = JSON.stringify(chunkItems);
+      const chunkCharCount = chunkString.length;
+      const estimatedChunkTokens = Math.ceil(chunkCharCount / CHARS_PER_TOKEN);
       
-      // Handle the last item if we haven't written yet
-      if (i === data.length - 1 && currentChunk.length > 0) {
-        const chunkId = `${this.chunkPrefix}-${chunkIndex}`;
-        const chunkPath = path.join(this.outputDir, `${chunkId}.json`);
-        
-        // Write chunk to file
-        fs.writeFileSync(
-          chunkPath,
-          JSON.stringify(currentChunk, null, 2),
-          'utf-8'
-        );
-        
-        // Create chunk metadata
-        const chunkMeta: ChunkMetadata = {
-          chunkId,
-          itemCount: currentChunk.length,
-          startIndex,
-          endIndex: i,
-          filePath: chunkPath,
-          sizeBytes: Buffer.byteLength(JSON.stringify(currentChunk))
-        };
-        
-        chunks.push(chunkMeta);
-        console.log(`ChunkManager: Created final chunk ${chunkId} with ${currentChunk.length} items (est. ${currentTokenCount} tokens)`);
-      }
+      // Save current chunk
+      const chunkId = `${this.chunkPrefix}-${chunkIndex}`;
+      const chunkPath = path.join(this.outputDir, `${chunkId}.json`);
+      
+      // Write chunk to file
+      fs.writeFileSync(
+        chunkPath,
+        JSON.stringify(chunkItems, null, 2),
+        'utf-8'
+      );
+      
+      // Create chunk metadata
+      const chunkMeta: ChunkMetadata = {
+        chunkId,
+        itemCount: chunkItems.length,
+        startIndex: startItemIndex,
+        endIndex: endItemIndex,
+        filePath: chunkPath,
+        sizeBytes: Buffer.byteLength(chunkString)
+      };
+      
+      chunks.push(chunkMeta);
+      console.log(`ChunkManager: Created chunk ${chunkId} with ${chunkItems.length} items (est. ${estimatedChunkTokens} tokens)`);
     }
     
     console.log(`ChunkManager: Finished processing all items`);
@@ -210,7 +167,7 @@ export class ChunkManager {
         totalChunks: chunks.length,
         totalItems: data.length,
         estimatedTotalTokens,
-        tokensPerChunk,
+        itemsPerChunk,
         chunks
       }, null, 2),
       'utf-8'
