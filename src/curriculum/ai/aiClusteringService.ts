@@ -182,7 +182,7 @@ export class AIClusteringService {
       if (!fs.existsSync(this.config.resultsOutputDir)) {
         fs.mkdirSync(this.config.resultsOutputDir, { recursive: true });
       }
-      
+
       const summaryPath = path.join(this.config.resultsOutputDir, 'clustering-summary.json');
       fs.writeFileSync(
         summaryPath,

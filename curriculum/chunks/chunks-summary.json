@@ -1,48 +1,16 @@
 {
-  "totalChunks": 5,
+  "totalChunks": 1,
   "totalItems": 168,
   "estimatedTotalTokens": 3312173,
-  "itemsPerChunk": 34,
+  "itemsPerChunk": 168,
   "chunks": [
     {
       "chunkId": "chunk-0",
-      "itemCount": 34,
+      "itemCount": 168,
       "startIndex": 0,
-      "endIndex": 33,
-      "filePath": "/Users/alex/Downloads/Interview/frontend-interviewer/curriculum/chunks/chunk-0.json",
-      "sizeBytes": 2600701
-    },
-    {
-      "chunkId": "chunk-1",
-      "itemCount": 34,
-      "startIndex": 34,
-      "endIndex": 67,
-      "filePath": "/Users/alex/Downloads/Interview/frontend-interviewer/curriculum/chunks/chunk-1.json",
-      "sizeBytes": 2795169
-    },
-    {
-      "chunkId": "chunk-2",
-      "itemCount": 34,
-      "startIndex": 68,
-      "endIndex": 101,
-      "filePath": "/Users/alex/Downloads/Interview/frontend-interviewer/curriculum/chunks/chunk-2.json",
-      "sizeBytes": 2363037
-    },
-    {
-      "chunkId": "chunk-3",
-      "itemCount": 34,
-      "startIndex": 102,
-      "endIndex": 135,
-      "filePath": "/Users/alex/Downloads/Interview/frontend-interviewer/curriculum/chunks/chunk-3.json",
-      "sizeBytes": 2779953
-    },
-    {
-      "chunkId": "chunk-4",
-      "itemCount": 32,
-      "startIndex": 136,
       "endIndex": 167,
-      "filePath": "/Users/alex/Downloads/Interview/frontend-interviewer/curriculum/chunks/chunk-4.json",
-      "sizeBytes": 2710482
+      "filePath": "/Users/alex/Downloads/Interview/frontend-interviewer/curriculum/chunks/chunk-0.json",
+      "sizeBytes": 13249338
     }
   ]
 }

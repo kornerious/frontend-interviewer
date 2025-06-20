@@ -7,8 +7,8 @@
 import fs from 'fs';
 import path from 'path';
 
-// Fixed number of chunks to create - enforced maximum
-const MAX_CHUNKS = 5;
+// Configuration for chunking
+const MAX_CHUNKS = 1;
 
 // Token estimation factors
 // A rough approximation: 1 token ≈ 4 characters in English text
@@ -63,7 +63,7 @@ export class ChunkManager {
     console.log(`ChunkManager: Starting to chunk database from ${this.databasePath}`);
     console.log(`ChunkManager: Output directory: ${this.outputDir}`);
     console.log(`ChunkManager: Chunk prefix: ${this.chunkPrefix}`);
-    console.log(`ChunkManager: Token-based chunking: Target ~${MAX_CHUNKS} chunks, limit ~${OUTPUT_TOKEN_LIMIT} tokens per chunk`);
+    console.log(`ChunkManager: Using ${MAX_CHUNKS} single chunk to process entire database`);
     
     // Check if database file exists
     if (!fs.existsSync(this.databasePath)) {

@@ -1,34 +1,14 @@
 {
-  "timestamp": "2025-06-20T06:49:45.628Z",
-  "chunkCount": 5,
-  "processedChunks": 5,
-  "totalItems": 168,
-  "totalClusters": 36,
+  "timestamp": "2025-06-20T07:11:41.425Z",
+  "chunkCount": 1,
+  "processedChunks": 1,
+  "totalItems": 344,
+  "totalClusters": 11,
   "chunks": [
     {
       "chunkId": "chunk-0",
-      "itemCount": 34,
-      "clusterCount": 8
-    },
-    {
-      "chunkId": "chunk-1",
-      "itemCount": 34,
+      "itemCount": 344,
       "clusterCount": 11
-    },
-    {
-      "chunkId": "chunk-2",
-      "itemCount": 34,
-      "clusterCount": 7
-    },
-    {
-      "chunkId": "chunk-3",
-      "itemCount": 34,
-      "clusterCount": 5
-    },
-    {
-      "chunkId": "chunk-4",
-      "itemCount": 32,
-      "clusterCount": 5
     }
   ]
 }

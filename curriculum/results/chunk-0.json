@@ -2,226 +2,1794 @@
   "chunkId": "chunk-0",
   "clusters": [
     {
-      "name": "HTML & Accessibility Fundamentals",
-      "description": "Foundational concepts for structuring web content and ensuring it is accessible to all users.",
+      "name": "HTML & Core Web",
+      "description": "Covers foundational HTML concepts, web standards, and basic web components for structuring web content and ensuring accessibility.",
       "items": [
         {
-          "index": 0,
-          "id": "8602e28f-de57-433a-b42d-db72ef760a09",
-          "reason": "Basic understanding of semantic HTML is fundamental before diving into advanced accessibility."
+          "index": 12,
+          "id": "df8fca82-8fab-48c2-853c-a851712f7495",
+          "reason": "Covers html document structure. Complexity: easy. Builds on: none. It's foundational for advanced topics in this cluster."
         },
         {
-          "index": 27,
-          "id": "0df84cf5-e861-42ae-9360-8d0826784d37",
-          "reason": "Advanced accessibility topics like WAI-ARIA build upon a solid understanding of basic HTML semantics and accessibility principles."
+          "index": 105,
+          "id": "99d9606f-4142-4fc9-9a87-6944c74a8151",
+          "reason": "Covers html global attributes. Complexity: easy. Builds on: HTML Document Structure. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 164,
+          "id": "css_flex_gap",
+          "reason": "Covers html data attributes. Complexity: easy. Builds on: HTML Document Structure. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 158,
+          "id": "dsa_sorting_algorithms",
+          "reason": "Covers html media elements. Complexity: easy. Builds on: HTML Document Structure. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 156,
+          "id": "js_rxjs_intro",
+          "reason": "Covers html forms and input types. Complexity: easy. Builds on: Semantic HTML Elements. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 71,
+          "id": "20ef4a66-a599-4844-b72b-87e393b9bfff",
+          "reason": "Covers semantic html elements. Complexity: easy. Builds on: HTML Document Structure. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 108,
+          "id": "a581fd75-a75e-478e-b491-c01cc45db54d",
+          "reason": "Covers responsive images (srcset, sizes, picture). Complexity: medium. Builds on: HTML Document Structure. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 140,
+          "id": "html_svg_basics",
+          "reason": "Covers introduction to svg. Complexity: medium. Builds on: HTML Document Structure. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 161,
+          "id": "html_svg_responsive",
+          "reason": "Covers responsive svg techniques. Complexity: medium. Builds on: Introduction to SVG, Responsive Design with Media Queries. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 99,
+          "id": "e6c0a01e-3ea4-4ccd-992d-a1624e048389",
+          "reason": "Covers seo and meta tags. Complexity: medium. Builds on: HTML Document Structure. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 113,
+          "id": "78267e58-be43-481c-b514-df0c4e26f988",
+          "reason": "Covers script loading strategies (defer, async). Complexity: medium. Builds on: HTML Document Structure, Browser Rendering Process (Critical Rendering Path). It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 143,
+          "id": "dsa_deep_clone_object",
+          "reason": "Covers the `picture` element for art direction. Complexity: medium. Builds on: Responsive Images (srcset, sizes, picture). It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 17,
+          "id": "fac2bbd6-07b6-4fa0-8d23-f952c04b99e8",
+          "reason": "Covers introduction to web accessibility (aria, semantics). Complexity: medium. Builds on: Semantic HTML Elements. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 11,
+          "id": "379b2724-4a0c-425e-8037-012d98906d04",
+          "reason": "Covers introduction to web components. Complexity: hard. Builds on: Semantic HTML Elements, DOM Manipulation (createElement, appendChild). It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 154,
+          "id": "dsa_tree_traversal_algo",
+          "reason": "Covers web component lifecycle callbacks. Complexity: medium. Builds on: Introduction to Web Components. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 142,
+          "id": "tooling_build_pipelines_monorepo",
+          "reason": "Covers styling shadow dom (css custom properties, ::part). Complexity: hard. Builds on: Shadow DOM, Templates, and Slots, CSS Variables (Custom Properties). It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 107,
+          "id": "0763bedd-5fe3-467b-a8f8-4ead965fd59e",
+          "reason": "Covers shadow dom, templates, and slots. Complexity: hard. Builds on: Introduction to Web Components. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 147,
+          "id": "html_svg_animations",
+          "reason": "Covers animating svg with css and js. Complexity: hard. Builds on: Introduction to SVG, CSS Transitions and Animations, Web Animations API. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 54,
+          "id": "b60bd1fa-5e7f-4763-a19e-7da6e5ce6011",
+          "reason": "Covers web component frameworks (lit, stencil). Complexity: hard. Builds on: Introduction to Web Components. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 139,
+          "id": "html_webgl_intro",
+          "reason": "Covers introduction to webgl. Complexity: expert. Builds on: HTML Canvas API. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 145,
+          "id": "js_custom_elements_advanced",
+          "reason": "Covers advanced custom elements (forms, lifecycle). Complexity: expert. Builds on: Web Component Lifecycle Callbacks. It's foundational for advanced topics in this cluster."
         }
       ]
     },
     {
-      "name": "Core CSS Concepts & Layout",
-      "description": "Essential knowledge for styling web pages, understanding box model, and mastering modern layout techniques like Flexbox and Grid.",
+      "name": "CSS & Styling",
+      "description": "Focuses on CSS layout techniques, styling properties, responsiveness, and advanced styling concepts.",
       "items": [
         {
-          "index": 1,
-          "id": "78e4b679-6da5-4d51-818d-03c853484d41",
-          "reason": "The CSS Box Model is the most foundational concept for understanding how elements are rendered and spaced on a page."
+          "index": 5,
+          "id": "ab704af7-a36c-4098-9c2d-a7e4d43abdbc",
+          "reason": "Covers css selectors and specificity. Complexity: easy. Builds on: HTML Document Structure. It's foundational for advanced topics in this cluster."
         },
         {
-          "index": 8,
-          "id": "b759b889-bdef-436c-8e39-9fcae28ac9b8",
-          "reason": "Understanding CSS Specificity and the Cascade is crucial for predicting and controlling how styles are applied, building on basic styling."
+          "index": 67,
+          "id": "e4724474-f6ad-4077-b33e-5eddbd5efbeb",
+          "reason": "Covers css background properties. Complexity: easy. Builds on: CSS Box Model and Sizing. It's foundational for advanced topics in this cluster."
         },
         {
-          "index": 3,
-          "id": "54df5f6d-c31c-47d7-b3fb-3c5d22ebdb41",
-          "reason": "Flexbox is a primary modern layout technique, often introduced after fundamental CSS properties."
+          "index": 144,
+          "id": "css_aspect_ratio",
+          "reason": "Covers css `aspect-ratio` property. Complexity: easy. Builds on: CSS Box Model and Sizing. It's foundational for advanced topics in this cluster."
         },
         {
-          "index": 6,
-          "id": "d26bdc0e-3d15-4e30-8986-f93d6425d6fe",
-          "reason": "CSS Grid provides another powerful layout system, typically learned after or alongside Flexbox for more complex 2D layouts."
+          "index": 70,
+          "id": "d91f1bd6-65a9-4e3a-916d-303a86a7932f",
+          "reason": "Covers css box model and sizing. Complexity: easy. Builds on: CSS Selectors and Specificity. It's foundational for advanced topics in this cluster."
         },
         {
-          "index": 32,
-          "id": "813fc626-6d3d-42b0-a407-590768e8b398",
-          "reason": "Advanced CSS features like animations and transitions build upon a strong understanding of core styling and layout principles."
+          "index": 60,
+          "id": "4902befb-a321-47ad-97f8-8baff6e7b398",
+          "reason": "Covers display property (block, inline, inline-block). Complexity: easy. Builds on: CSS Box Model and Sizing. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 13,
+          "id": "3cec5d31-0f91-45c6-9896-a858df622bf6",
+          "reason": "Covers css units (px, em, rem, vw, vh) and values. Complexity: easy. Builds on: CSS Box Model and Sizing. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 159,
+          "id": "css_flex_gap",
+          "reason": "Covers flexbox gap property. Complexity: easy. Builds on: Flexbox Fundamentals. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 78,
+          "id": "ec766fc1-c053-48c6-b515-3b9d04a5d79c",
+          "reason": "Covers flexbox fundamentals. Complexity: medium. Builds on: Display Property (block, inline, inline-block). It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 103,
+          "id": "01a040f1-77d2-4b87-9848-49d27e4565fa",
+          "reason": "Covers css gradients (linear, radial, conic). Complexity: medium. Builds on: CSS Background Properties. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 48,
+          "id": "8a9ce561-4860-4372-a2b6-889b2e9662bb",
+          "reason": "Covers css grid layout fundamentals. Complexity: medium. Builds on: Display Property (block, inline, inline-block). It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 160,
+          "id": "css_grid_auto_placement",
+          "reason": "Covers css grid auto placement and implicit grid. Complexity: medium. Builds on: CSS Grid Layout Fundamentals. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 52,
+          "id": "fa01e8b0-1fc1-4e16-a16b-6acd0002ad67",
+          "reason": "Covers css positioning (static, relative, absolute, fixed, sticky). Complexity: medium. Builds on: CSS Box Model and Sizing. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 74,
+          "id": "26a4487d-c86e-4363-99b5-742b685fa2f4",
+          "reason": "Covers css transitions and animations. Complexity: medium. Builds on: CSS Selectors and Specificity. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 29,
+          "id": "fa1da733-f612-4535-bd59-00038b677ddd",
+          "reason": "Covers css variables (custom properties). Complexity: medium. Builds on: CSS Selectors and Specificity. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 149,
+          "id": "css_custom_properties_js",
+          "reason": "Covers using css custom properties with javascript. Complexity: medium. Builds on: CSS Variables (Custom Properties), DOM Manipulation (createElement, appendChild). It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 92,
+          "id": "ae283dab-4a07-41f5-9615-89f841951e4f",
+          "reason": "Covers z-index and stacking context. Complexity: medium. Builds on: CSS Positioning (static, relative, absolute, fixed, sticky). It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 150,
+          "id": "css_mix_blend_mode",
+          "reason": "Covers css mix-blend-mode and filter. Complexity: medium. Builds on: CSS Transitions and Animations. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 162,
+          "id": "css_backdrop_filter",
+          "reason": "Covers css backdrop-filter. Complexity: medium. Builds on: CSS Mix-Blend-Mode and Filter. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 110,
+          "id": "d0fe0128-9b35-4729-9645-3ec65ea2b24d",
+          "reason": "Covers responsive design with media queries. Complexity: medium. Builds on: Flexbox Fundamentals, CSS Grid Layout Fundamentals. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 155,
+          "id": "css_print_stylesheets",
+          "reason": "Covers print stylesheets. Complexity: medium. Builds on: Responsive Design with Media Queries. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 9,
+          "id": "afa36072-8a29-4ac1-a18c-d3345bf9e4f1",
+          "reason": "Covers css preprocessors (sass/less). Complexity: medium. Builds on: CSS Variables (Custom Properties). It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 163,
+          "id": "css_scroll_snapping",
+          "reason": "Covers css scroll snapping. Complexity: medium. Builds on: CSS Transitions and Animations. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 55,
+          "id": "51703075-3e77-4075-b54c-616e396df6bb",
+          "reason": "Covers css-in-js (e.g., styled components). Complexity: medium. Builds on: none. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 53,
+          "id": "f5b48cca-63de-4855-b694-e79e62ebf099",
+          "reason": "Covers css modules and styled components. Complexity: medium. Builds on: CSS-in-JS (e.g., Styled Components), CSS Preprocessors (Sass/LESS). It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 130,
+          "id": "ad81f9a5-126b-4c5d-aaf5-3682307740a3",
+          "reason": "Covers advanced pseudo-elements (::before, ::after). Complexity: medium. Builds on: CSS Selectors and Specificity. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 42,
+          "id": "24e2797c-36a4-4004-88b8-52a028a351a1",
+          "reason": "Covers advanced flexbox concepts. Complexity: hard. Builds on: Flexbox Fundamentals. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 68,
+          "id": "6b8c3a34-bfe2-408a-a8b5-0adc285072a0",
+          "reason": "Covers advanced css grid concepts. Complexity: hard. Builds on: CSS Grid Layout Fundamentals. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 109,
+          "id": "2291dfcd-50cf-4a3f-becb-ef644635536b",
+          "reason": "Covers css container queries. Complexity: hard. Builds on: Responsive Design with Media Queries. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 141,
+          "id": "css_custom_shapes",
+          "reason": "Covers css custom shapes (clip-path, shape-outside). Complexity: hard. Builds on: Advanced Pseudo-elements (::before, ::after). It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 151,
+          "id": "css_logical_properties_advanced",
+          "reason": "Covers advanced css logical properties. Complexity: hard. Builds on: CSS Logical Properties and Values. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 153,
+          "id": "css_grid_subgrid",
+          "reason": "Covers css subgrid. Complexity: hard. Builds on: Advanced CSS Grid Concepts. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 146,
+          "id": "css_masking",
+          "reason": "Covers css masking. Complexity: hard. Builds on: Introduction to SVG. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 102,
+          "id": "d365ecc1-1663-4b97-859c-422b59bd7dbe",
+          "reason": "Covers css houdini. Complexity: expert. Builds on: CSS Variables (Custom Properties). It's foundational for advanced topics in this cluster."
         }
       ]
     },
     {
       "name": "JavaScript Fundamentals",
-      "description": "Core JavaScript principles including data types, scope, closures, and object-oriented concepts.",
+      "description": "Builds a strong base in JavaScript core concepts, syntax, and fundamental programming paradigms.",
       "items": [
-        {
-          "index": 2,
-          "id": "100bf5d7-a836-4e5a-8bc3-aa83cea7f416",
-          "reason": "Understanding JavaScript data types and operators is the absolute first step in learning the language."
-        },
-        {
-          "index": 4,
-          "id": "9eef224e-890b-49e4-8b7f-b86c4699f2b0",
-          "reason": "Scope and Closures are fundamental concepts for understanding how variables are accessed and functions behave in JavaScript."
-        },
-        {
-          "index": 9,
-          "id": "afa36072-8a29-4ac1-a18c-d3345bf9e4f1",
-          "reason": "The 'this' keyword can be complex and is best understood after gaining familiarity with basic function execution and scope."
-        },
-        {
-          "index": 26,
-          "id": "b36e3e91-e1b7-4efb-b48d-563618570d6f",
-          "reason": "Understanding JavaScript Prototypes and Inheritance provides deeper insight into JS's object model and is an advanced fundamental concept."
-        }
-      ]
-    },
-    {
-      "name": "Asynchronous JavaScript & Browser APIs",
-      "description": "Concepts related to handling asynchronous operations, managing browser events, and interacting with browser-specific APIs.",
-      "items": [
-        {
-          "index": 5,
-          "id": "ab704af7-a36c-4098-9c2d-a7e4d43abdbc",
-          "reason": "DOM manipulation and event handling are essential for making interactive web pages and often precede asynchronous interactions."
-        },
-        {
-          "index": 7,
-          "id": "7de717d6-b9cc-4698-9f91-2dc19f734b4c",
-          "reason": "Callbacks are the most basic pattern for asynchronous operations, a foundational prerequisite for Promises and Async/Await."
-        },
         {
           "index": 10,
           "id": "b0abeb96-1032-4163-b37e-7ce0a9262e1f",
-          "reason": "Promises are a modern and more manageable way to handle asynchronous operations, building on the concepts introduced by callbacks."
+          "reason": "Covers variables (var, let, const) and data types. Complexity: easy. Builds on: none. It's foundational for advanced topics in this cluster."
         },
         {
-          "index": 15,
-          "id": "db25c3e5-24ef-4958-be3e-e589f32cd20e",
-          "reason": "Async/Await provides syntactic sugar over Promises, making asynchronous code more readable and easier to write, hence it follows Promises."
-        },
-        {
-          "index": 11,
-          "id": "379b2724-4a0c-425e-8037-012d98906d04",
-          "reason": "The Event Loop explains the underlying mechanism of how JavaScript handles asynchronous operations; best understood after experiencing async patterns."
-        },
-        {
-          "index": 17,
-          "id": "fac2bbd6-07b6-4fa0-8d23-f952c04b99e8",
-          "reason": "Web Storage APIs are common browser-side data storage mechanisms, often used in conjunction with JavaScript and asynchronous operations."
-        }
-      ]
-    },
-    {
-      "name": "React Core Concepts",
-      "description": "Fundamental principles of React, including components, state, props, and the rendering lifecycle.",
-      "items": [
-        {
-          "index": 12,
-          "id": "df8fca82-2fab-48c2-853c-a851712f7495",
-          "reason": "Introduction to React Components is the starting point for learning React, establishing the basic building blocks."
-        },
-        {
-          "index": 14,
-          "id": "0ce2b077-a4ec-48ad-a2b6-9188b8c4f2de",
-          "reason": "Understanding Props is crucial for passing data down to components and enabling component communication."
-        },
-        {
-          "index": 13,
-          "id": "3cec5d31-0f91-45c6-9896-a858df622bf6",
-          "reason": "Managing State with useState is fundamental for creating dynamic and interactive React components."
+          "index": 106,
+          "id": "bb43606f-e5b4-4560-9ce0-bdbcc4418039",
+          "reason": "Covers bigint in javascript. Complexity: easy. Builds on: Variables (var, let, const) and Data Types. It's foundational for advanced topics in this cluster."
         },
         {
           "index": 16,
           "id": "8ed9b91d-cd21-49e3-ab49-c93d7f748a64",
-          "reason": "The useEffect Hook and lifecycle methods are essential for handling side effects and component lifecycle events, building on state and props."
+          "reason": "Covers strict mode. Complexity: easy. Builds on: Variables (var, let, const) and Data Types. It's foundational for advanced topics in this cluster."
         },
         {
-          "index": 22,
-          "id": "46d67387-9346-40d4-8c93-c7a4a333d06e",
-          "reason": "Understanding React Reconciliation and the Virtual DOM provides deeper insight into React's rendering mechanism, often covered after basic usage."
-        }
-      ]
-    },
-    {
-      "name": "Advanced React & State Management",
-      "description": "Advanced React patterns, state management solutions beyond local state, and routing.",
-      "items": [
-        {
-          "index": 19,
-          "id": "35a33fd1-3f87-4ae5-a5ec-f1ef7f0bc4fd",
-          "reason": "React Context API is a step up from prop drilling for state management, following core state concepts."
+          "index": 76,
+          "id": "238b3766-4940-4bc2-b8e5-18a0ac701bb2",
+          "reason": "Covers core data structures (arrays, objects) in js. Complexity: easy. Builds on: Variables (var, let, const) and Data Types. It's foundational for advanced topics in this cluster."
         },
         {
-          "index": 25,
-          "id": "b7e9d11f-9e0b-4684-8674-c025b11e7b2e",
-          "reason": "Custom React Hooks allow for logic reuse and build on the understanding of built-in hooks and state/effects."
+          "index": 62,
+          "id": "f6c5f866-13e0-4184-98a2-063323ed2131",
+          "reason": "Covers operators and expressions. Complexity: easy. Builds on: Variables (var, let, const) and Data Types. It's foundational for advanced topics in this cluster."
         },
         {
-          "index": 21,
-          "id": "ea875451-4590-4345-ae70-694522064542",
-          "reason": "Redux or other global state management solutions are for more complex applications, building on basic state management patterns."
+          "index": 37,
+          "id": "e51c3a6f-4f35-470b-b485-1fd99e46d080",
+          "reason": "Covers control flow (conditionals, loops). Complexity: easy. Builds on: Operators and Expressions. It's foundational for advanced topics in this cluster."
         },
         {
           "index": 20,
           "id": "5b3f79a8-86e0-4b5d-a48c-65f527cac722",
-          "reason": "React Router is essential for building multi-page applications (SPAs) and is typically learned after core component concepts."
+          "reason": "Covers functions (declaration, expression, arrow). Complexity: easy. Builds on: Control Flow (conditionals, loops). It's foundational for advanced topics in this cluster."
         },
         {
-          "index": 31,
-          "id": "8267bb57-6695-4b81-a0bd-f1b1d911fd37",
-          "reason": "React Performance Optimization techniques (memo, useCallback) are advanced topics best understood after grasping React's rendering cycle."
-        }
-      ]
-    },
-    {
-      "name": "Web Performance & Networking",
-      "description": "Topics covering how web applications communicate over the network and strategies for optimizing their performance.",
-      "items": [
-        {
-          "index": 18,
-          "id": "550b85bd-efb1-47df-a9c0-14c1601a1cc3",
-          "reason": "HTTP/HTTPS basics are fundamental for understanding how web applications communicate with servers."
+          "index": 136,
+          "id": "js_private_class_features",
+          "reason": "Covers private class features (#fields, #methods). Complexity: medium. Builds on: Prototypes and ES6 Classes. It's foundational for advanced topics in this cluster."
         },
         {
-          "index": 24,
-          "id": "f2eb5d98-8397-4336-a544-6545b075da2b",
-          "reason": "CORS is a common networking issue in web development, building on basic HTTP knowledge."
+          "index": 66,
+          "id": "b1122714-e010-4527-9dbe-583fbd983829",
+          "reason": "Covers the `this` keyword. Complexity: medium. Builds on: Functions (declaration, expression, arrow). It's foundational for advanced topics in this cluster."
         },
         {
-          "index": 28,
-          "id": "9b1a3405-fa73-4124-bedd-7912f9063ff8",
-          "reason": "Browser Caching Mechanisms are important for understanding web performance and reducing network requests."
+          "index": 69,
+          "id": "d68744a5-1545-46e0-85c0-08df297781c7",
+          "reason": "Covers prototypes and es6 classes. Complexity: medium. Builds on: The `this` Keyword. It's foundational for advanced topics in this cluster."
         },
         {
-          "index": 23,
-          "id": "89dacb29-049f-4c79-ab08-6c3bbbe8ea1f",
-          "reason": "Frontend Performance Optimization techniques are practical applications of networking and browser rendering knowledge."
-        }
-      ]
-    },
-    {
-      "name": "Frontend Architecture & Tooling",
-      "description": "Covers essential development tools, security considerations, and testing methodologies for robust frontend applications.",
-      "items": [
-        {
-          "index": 30,
-          "id": "134b0e16-02b4-4f7f-891c-05645559f4f0",
-          "reason": "Webpack and module bundling are core to modern frontend build processes, typically learned after core language and framework concepts."
-        },
-        {
-          "index": 29,
-          "id": "fa1da733-f612-4535-bd59-00038b677ddd",
-          "reason": "Frontend security topics like XSS/CSRF are crucial for building secure applications and often require a broad understanding of web interactions."
+          "index": 27,
+          "id": "0df84cf5-e861-42ae-9360-8d0826784d37",
+          "reason": "Covers scope and hoisting. Complexity: medium. Builds on: Functions (declaration, expression, arrow). It's foundational for advanced topics in this cluster."
         },
         {
           "index": 33,
           "id": "019fc46f-d6dc-4e84-94c6-f7ff512f50ef",
-          "reason": "Testing React Components is vital for quality assurance and comes after proficiency in building components themselves."
+          "reason": "Covers closures. Complexity: medium. Builds on: Scope and Hoisting. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 22,
+          "id": "46d67387-9346-40d4-8c93-c7a4a333d06e",
+          "reason": "Covers array methods (map, filter, reduce). Complexity: medium. Builds on: Functions (declaration, expression, arrow). It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 28,
+          "id": "9b1a3405-fa73-4124-bedd-7912f9063ff8",
+          "reason": "Covers object methods (keys, values, entries). Complexity: medium. Builds on: Functions (declaration, expression, arrow). It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 34,
+          "id": "94af5f9b-4c14-49e5-b46c-3298aed31646",
+          "reason": "Covers es6+ features (destructuring, spread/rest). Complexity: medium. Builds on: Array Methods (map, filter, reduce), Object Methods (keys, values, entries). It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 104,
+          "id": "c0a1c00b-740e-4ca8-ad6e-eb034b19a51b",
+          "reason": "Covers symbols in javascript. Complexity: medium. Builds on: ES6+ Features (destructuring, spread/rest). It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 101,
+          "id": "0e0505ae-25f5-4faf-b0be-73ac61d29917",
+          "reason": "Covers javascript modules (es modules vs commonjs). Complexity: medium. Builds on: ES6+ Features (destructuring, spread/rest). It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 19,
+          "id": "35a33fd1-3f87-4ae5-a5ec-f1ef7f0bc4fd",
+          "reason": "Covers error handling (try...catch, error objects). Complexity: medium. Builds on: Control Flow (conditionals, loops). It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 64,
+          "id": "8535c6f5-6cbf-4926-ae76-4e4900fe37ee",
+          "reason": "Covers higher-order functions. Complexity: medium. Builds on: Functions (declaration, expression, arrow). It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 49,
+          "id": "4f07cbeb-e572-419a-97a0-563bc61e4192",
+          "reason": "Covers pure functions and immutability. Complexity: medium. Builds on: Higher-Order Functions. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 87,
+          "id": "6794ade6-7a42-4322-95f1-c1106ed265e8",
+          "reason": "Covers map, set, weakmap, weakset. Complexity: medium. Builds on: Object Methods (keys, values, entries). It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 82,
+          "id": "830b8cbb-f581-40dd-9fe5-d76bd86e725b",
+          "reason": "Covers type checking and introduction to typescript. Complexity: medium. Builds on: Variables (var, let, const) and Data Types, Functions (declaration, expression, arrow). It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 57,
+          "id": "a92d8f16-1886-485d-acf5-abdb71e84f43",
+          "reason": "Covers type coercion and equality (== vs ===). Complexity: medium. Builds on: Variables (var, let, const) and Data Types. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 73,
+          "id": "268fd6b8-c384-42e6-b131-ccc273800cdd",
+          "reason": "Covers object-oriented programming in javascript. Complexity: medium. Builds on: Prototypes and ES6 Classes. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 100,
+          "id": "ca0a4a2b-e6c2-490f-95bd-053e03016a43",
+          "reason": "Covers introduction to functional programming concepts. Complexity: hard. Builds on: Pure Functions and Immutability. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 50,
+          "id": "3ed597f2-5003-45ed-a919-b53494560025",
+          "reason": "Covers javascript garbage collection. Complexity: hard. Builds on: Scope and Hoisting. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 7,
+          "id": "7de717d6-b9cc-4698-9f91-2dc19f734b4c",
+          "reason": "Covers generators and iterators. Complexity: hard. Builds on: ES6+ Features (destructuring, spread/rest). It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 44,
+          "id": "7179922c-a12a-4675-8c25-3dae01672c05",
+          "reason": "Covers memoization. Complexity: hard. Builds on: Higher-Order Functions. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 80,
+          "id": "31d16560-f230-4ca5-9111-56410d0aaf82",
+          "reason": "Covers currying and partial application. Complexity: hard. Builds on: Higher-Order Functions. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 15,
+          "id": "db25c3e5-24ef-4958-be3e-e589f32cd20e",
+          "reason": "Covers proxies and reflect api. Complexity: hard. Builds on: Object Methods (keys, values, entries). It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 65,
+          "id": "7693f2a5-396a-4ef5-9d31-e0f6c21e1415",
+          "reason": "Covers composition vs inheritance. Complexity: hard. Builds on: Object-Oriented Programming in JavaScript, Introduction to Functional Programming Concepts. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 63,
+          "id": "1666d4a1-21b8-4c60-8aca-764f10e4e81f",
+          "reason": "Covers introduction to javascript design patterns. Complexity: hard. Builds on: Object-Oriented Programming in JavaScript, Introduction to Functional Programming Concepts. It's foundational for advanced topics in this cluster."
+        }
+      ]
+    },
+    {
+      "name": "Browser APIs & DOM",
+      "description": "Explores how JavaScript interacts with the browser environment and manipulates the Document Object Model.",
+      "items": [
+        {
+          "index": 3,
+          "id": "54df5f6d-c31c-47d7-b3fb-3c5d22ebdb41",
+          "reason": "Covers dom manipulation (createnode, appendchild). Complexity: medium. Builds on: HTML Document Structure, Functions (declaration, expression, arrow). It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 165,
+          "id": "js_settimeout_interval_dom",
+          "reason": "Covers settimeout/setinterval with dom interaction. Complexity: medium. Builds on: DOM Manipulation (createElement, appendChild), Callbacks and Callback Hell. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 90,
+          "id": "6500d195-cf03-478b-8850-3e7d7d7e4ac4",
+          "reason": "Covers javascript event handling. Complexity: medium. Builds on: DOM Manipulation (createElement, appendChild). It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 21,
+          "id": "ea875451-4590-4345-ae70-694522064542",
+          "reason": "Covers local storage and session storage. Complexity: easy. Builds on: DOM Manipulation (createElement, appendChild). It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 120,
+          "id": "js_file_api",
+          "reason": "Covers file api. Complexity: medium. Builds on: DOM Manipulation (createElement, appendChild). It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 128,
+          "id": "js_blob_filereader",
+          "reason": "Covers blob and filereader api. Complexity: medium. Builds on: File API. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 122,
+          "id": "js_drag_drop_api",
+          "reason": "Covers drag and drop api. Complexity: medium. Builds on: JavaScript Event Handling. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 112,
+          "id": "7de717d6-b9cc-4698-9f91-2dc19f734b4c",
+          "reason": "Covers event delegation. Complexity: medium. Builds on: JavaScript Event Handling. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 85,
+          "id": "c1b1dacc-d6d7-4844-aa19-856b759d84d1",
+          "reason": "Covers javascript event model (capturing, bubbling). Complexity: medium. Builds on: JavaScript Event Handling. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 157,
+          "id": "js_web_midi_api",
+          "reason": "Covers web midi api. Complexity: medium. Builds on: Promises (Pending, Fulfilled, Rejected). It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 123,
+          "id": "js_payment_request_api",
+          "reason": "Covers payment request api. Complexity: medium. Builds on: Promises (Pending, Fulfilled, Rejected). It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 118,
+          "id": "js_geolocation_api",
+          "reason": "Covers geolocation api. Complexity: medium. Builds on: Promises (Pending, Fulfilled, Rejected). It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 152,
+          "id": "js_device_orientation_api",
+          "reason": "Covers device orientation api. Complexity: medium. Builds on: JavaScript Event Handling. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 114,
+          "id": "5d100d10-74ee-45f1-b151-bccda1809f34",
+          "reason": "Covers intersection observer api. Complexity: medium. Builds on: DOM Manipulation (createElement, appendChild). It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 151,
+          "id": "js_clipboard_api",
+          "reason": "Covers clipboard api. Complexity: medium. Builds on: Promises (Pending, Fulfilled, Rejected). It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 96,
+          "id": "2c0770ec-5e50-4cb5-9d1b-d3465360c6a2",
+          "reason": "Covers resize observer api. Complexity: medium. Builds on: DOM Manipulation (createElement, appendChild). It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 45,
+          "id": "a0930fb8-7690-4c3d-a834-760c9a8c7cc2",
+          "reason": "Covers html canvas api. Complexity: medium. Builds on: HTML Document Structure, DOM Manipulation (createElement, appendChild). It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 124,
+          "id": "js_web_audio_api_basics",
+          "reason": "Covers web audio api basics. Complexity: medium. Builds on: DOM Manipulation (createElement, appendChild). It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 125,
+          "id": "js_web_animations_api",
+          "reason": "Covers web animations api. Complexity: medium. Builds on: DOM Manipulation (createElement, appendChild). It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 93,
+          "id": "8c0b0b1b-085e-42da-9e44-457e26480dc0",
+          "reason": "Covers mutation observer. Complexity: hard. Builds on: DOM Manipulation (createElement, appendChild). It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 119,
+          "id": "js_web_notifications_api",
+          "reason": "Covers web notifications api. Complexity: medium. Builds on: Service Workers and PWA Basics. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 126,
+          "id": "js_broadcast_channel_api",
+          "reason": "Covers broadcast channel api. Complexity: medium. Builds on: DOM Manipulation (createElement, appendChild). It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 8,
+          "id": "b759b889-bdef-436c-8e39-9fcae28ac9b8",
+          "reason": "Covers service workers and pwa basics. Complexity: hard. Builds on: Promises (Pending, Fulfilled, Rejected), Fetch API. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 107,
+          "id": "0763bedd-5fe3-467b-a8f8-4ead965fd59e",
+          "reason": "Covers indexeddb api. Complexity: hard. Builds on: Promises (Pending, Fulfilled, Rejected). It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 35,
+          "id": "95c3d04e-9528-42b0-bc0d-990dd359c4ab",
+          "reason": "Covers web workers. Complexity: hard. Builds on: Event Loop, Call Stack, and Message Queue (Deep Dive). It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 116,
+          "id": "552ca4b8-c6b9-40db-97e1-f286fbeaeb06",
+          "reason": "Covers structured clone algorithm and `postmessage`. Complexity: hard. Builds on: Structured Clone Algorithm, Web Workers. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 121,
+          "id": "js_web_workers_advanced",
+          "reason": "Covers advanced web workers (shared, service worker communication). Complexity: expert. Builds on: Web Workers. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 152,
+          "id": "js_worker_pools",
+          "reason": "Covers implementing worker pools. Complexity: expert. Builds on: Advanced Web Workers (Shared, Service Worker Communication). It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 127,
+          "id": "js_web_audio_api_advanced",
+          "reason": "Covers advanced web audio api. Complexity: expert. Builds on: Web Audio API Basics. It's foundational for advanced topics in this cluster."
+        }
+      ]
+    },
+    {
+      "name": "Asynchronous JS & Networking",
+      "description": "Deep dives into asynchronous programming patterns and web networking protocols.",
+      "items": [
+        {
+          "index": 0,
+          "id": "8602e28f-de57-433a-b42d-db72ef760a09",
+          "reason": "Covers http/https fundamentals (methods, status codes). Complexity: easy. Builds on: none. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 77,
+          "id": "d8d7291e-88b1-4694-9b1c-2e47cd738d47",
+          "reason": "Covers url parsing and components. Complexity: easy. Builds on: HTTP/HTTPS Fundamentals (Methods, Status Codes). It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 117,
+          "id": "06754615-bba5-4907-9d23-b466fdbe02bd",
+          "reason": "Covers url and urlsearchparams api. Complexity: easy. Builds on: URL Parsing and Components. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 14,
+          "id": "0ce2b077-a4ec-48ad-a2b6-9188b8c4f2de",
+          "reason": "Covers dns resolution process. Complexity: medium. Builds on: HTTP/HTTPS Fundamentals (Methods, Status Codes). It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 43,
+          "id": "490712d0-c1e6-4e05-a990-a4acc94397b7",
+          "reason": "Covers http caching mechanisms. Complexity: medium. Builds on: HTTP/HTTPS Fundamentals (Methods, Status Codes). It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 18,
+          "id": "550b85bd-efb1-47df-a9c0-14c1601a1cc3",
+          "reason": "Covers callbacks and callback hell. Complexity: medium. Builds on: Functions (declaration, expression, arrow). It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 24,
+          "id": "f2eb5d98-8397-4336-a544-6545b075da2b",
+          "reason": "Covers promises (pending, fulfilled, rejected). Complexity: medium. Builds on: Callbacks and Callback Hell. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 25,
+          "id": "b7e9d11f-9e0b-4684-8674-c025b11e7b2e",
+          "reason": "Covers async/await syntax. Complexity: medium. Builds on: Promises (Pending, Fulfilled, Rejected). It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 115,
+          "id": "f6f06285-929d-4e61-9a70-9efbcfa470d0",
+          "reason": "Covers long polling and server-sent events (sse). Complexity: medium. Builds on: HTTP/HTTPS Fundamentals (Methods, Status Codes). It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 47,
+          "id": "a06b08ae-b726-4420-b06e-425d85b96e3b",
+          "reason": "Covers fetch api. Complexity: medium. Builds on: Async/Await Syntax. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 46,
+          "id": "750bddfc-a945-4c8a-b673-ca40a0faeeea",
+          "reason": "Covers xmlhttprequest (xhr). Complexity: medium. Builds on: Callbacks and Callback Hell. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 38,
+          "id": "dac5694d-d623-4dc4-8968-de83d980e021",
+          "reason": "Covers cors and same-origin policy. Complexity: medium. Builds on: HTTP/HTTPS Fundamentals (Methods, Status Codes), Fetch API. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 133,
+          "id": "browser_http_2_3",
+          "reason": "Covers http/2 and http/3 differences. Complexity: hard. Builds on: HTTP/HTTPS Fundamentals (Methods, Status Codes). It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 79,
+          "id": "0b24fd70-cf6b-459f-ab09-8e7416e8fbbf",
+          "reason": "Covers web sockets. Complexity: hard. Builds on: HTTP/HTTPS Fundamentals (Methods, Status Codes). It's foundational for advanced topics in this cluster."
+        }
+      ]
+    },
+    {
+      "name": "JavaScript Advanced",
+      "description": "Covers advanced JavaScript features, patterns, and internal mechanisms like the Event Loop.",
+      "items": [
+        {
+          "index": 106,
+          "id": "bb43606f-e5b4-4560-9ce0-bdbcc4418039",
+          "reason": "Covers structured clone algorithm. Complexity: medium. Builds on: Variables (var, let, const) and Data Types. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 164,
+          "id": "js_temporal_api",
+          "reason": "Covers temporal api for date/time. Complexity: medium. Builds on: Variables (var, let, const) and Data Types. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 165,
+          "id": "js_pipeline_operator",
+          "reason": "Covers pipeline operator (proposal). Complexity: medium. Builds on: Introduction to Functional Programming Concepts. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 166,
+          "id": "js_record_tuple",
+          "reason": "Covers record and tuple (proposal). Complexity: medium. Builds on: Pure Functions and Immutability. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 56,
+          "id": "2f957036-eb34-437c-bcd0-a40628a380f4",
+          "reason": "Covers throttling and debouncing. Complexity: medium. Builds on: JavaScript Event Handling, Closures. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 84,
+          "id": "c08a9f74-fa83-457a-a59a-7b0704e2564c",
+          "reason": "Covers event propagation phases (target, capturing, bubbling). Complexity: medium. Builds on: JavaScript Event Model (Capturing, Bubbling). It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 138,
+          "id": "js_web_assembly_basics",
+          "reason": "Covers webassembly (wasm) basics. Complexity: hard. Builds on: Variables (var, let, const) and Data Types. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 135,
+          "id": "js_type_script_advanced",
+          "reason": "Covers advanced typescript features (generics, decorators). Complexity: hard. Builds on: Type Checking and Introduction to TypeScript. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 131,
+          "id": "js_advanced_decorators",
+          "reason": "Covers javascript decorators. Complexity: hard. Builds on: Prototypes and ES6 Classes. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 147,
+          "id": "js_decorators_usage",
+          "reason": "Covers decorators for logging/validation. Complexity: hard. Builds on: JavaScript Decorators. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 132,
+          "id": "js_proxy_pattern",
+          "reason": "Covers proxy pattern in javascript. Complexity: hard. Builds on: Proxies and Reflect API. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 105,
+          "id": "99d9606f-4142-4fc9-9a87-6944c74a8151",
+          "reason": "Covers practical use cases for proxies. Complexity: hard. Builds on: Proxies and Reflect API. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 111,
+          "id": "78e4b679-6da5-4d51-818d-03c853484d41",
+          "reason": "Covers event loop, call stack, and message queue (deep dive). Complexity: hard. Builds on: Callbacks and Callback Hell. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 141,
+          "id": "js_microtask_macrotask_queue",
+          "reason": "Covers microtask vs macrotask queue. Complexity: expert. Builds on: Event Loop, Call Stack, and Message Queue (Deep Dive). It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 134,
+          "id": "js_module_bundlers_internals",
+          "reason": "Covers module bundlers internals (webpack, rollup). Complexity: expert. Builds on: Webpack Basics (Entry, Output, Loaders, Plugins), JavaScript Modules (ES Modules vs CommonJS). It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 148,
+          "id": "js_wasm_interop",
+          "reason": "Covers javascript-webassembly interoperability. Complexity: expert. Builds on: WebAssembly (Wasm) Basics. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 160,
+          "id": "js_web_assembly_advanced",
+          "reason": "Covers advanced webassembly use cases. Complexity: expert. Builds on: JavaScript-WebAssembly Interoperability. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 137,
+          "id": "js_virtual_dom_implement",
+          "reason": "Covers implementing a mini virtual dom. Complexity: expert. Builds on: DOM Manipulation (createElement, appendChild), Core Data Structures (Arrays, Objects) in JS. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 157,
+          "id": "js_prototype_chain_deep_dive",
+          "reason": "Covers javascript prototype chain deep dive. Complexity: hard. Builds on: Prototypes and ES6 Classes. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 162,
+          "id": "js_weakref_finalizationregistry",
+          "reason": "Covers weakref and finalizationregistry. Complexity: expert. Builds on: JavaScript Garbage Collection. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 156,
+          "id": "js_rxjs_intro",
+          "reason": "Covers introduction to rxjs (reactive programming). Complexity: expert. Builds on: Higher-Order Functions, Async/Await Syntax. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 161,
+          "id": "js_rx_state_management",
+          "reason": "Covers rxjs for state management. Complexity: expert. Builds on: Introduction to RxJS (Reactive Programming). It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 166,
+          "id": "js_structured_clone_errors",
+          "reason": "Covers structured clone algorithm limitations (functions, symbols). Complexity: expert. Builds on: Structured Clone Algorithm. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 133,
+          "id": "js_runtime_optimization",
+          "reason": "Covers javascript runtime optimization techniques. Complexity: expert. Builds on: JavaScript Garbage Collection, Event Loop, Call Stack, and Message Queue (Deep Dive). It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 155,
+          "id": "js_proxy_observer_pattern",
+          "reason": "Covers implementing observer pattern with proxies. Complexity: expert. Builds on: Proxies and Reflect API, Introduction to JavaScript Design Patterns. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 168,
+          "id": "js_observable_pattern",
+          "reason": "Covers implementing observable pattern (from scratch). Complexity: expert. Builds on: Introduction to JavaScript Design Patterns, Introduction to RxJS (Reactive Programming). It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 163,
+          "id": "js_composition_api_vue_react",
+          "reason": "Covers composition api (vue) vs hooks (react). Complexity: hard. Builds on: Introduction to Functional Programming Concepts, Creating Custom Hooks. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 137,
+          "id": "js_design_patterns_factory",
+          "reason": "Covers factory and singleton design patterns. Complexity: medium. Builds on: Introduction to JavaScript Design Patterns. It's foundational for advanced topics in this cluster."
+        }
+      ]
+    },
+    {
+      "name": "React Ecosystem",
+      "description": "Comprehensive coverage of React, from core concepts to advanced hooks, state management, and ecosystem tools.",
+      "items": [
+        {
+          "index": 4,
+          "id": "9eef224e-890b-49e4-8b7f-b86c4699f2b0",
+          "reason": "Covers introduction to react and components. Complexity: medium. Builds on: ES6+ Features (destructuring, spread/rest), HTML Document Structure, DOM Manipulation (createElement, appendChild). It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 2,
+          "id": "100bf5d7-a836-4e5a-8bc3-aa83cea7f416",
+          "reason": "Covers jsx syntax. Complexity: easy. Builds on: Introduction to React and Components. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 26,
+          "id": "b36e3e91-e1b7-4efb-b48d-563618570d6f",
+          "reason": "Covers props in react. Complexity: easy. Builds on: JSX Syntax. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 36,
+          "id": "681ba99a-be4b-44b6-ac61-e7ee1f8365bb",
+          "reason": "Covers component composition in react. Complexity: medium. Builds on: Props in React. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 61,
+          "id": "ccff1b1a-8105-4c5d-814d-851301c7bcee",
+          "reason": "Covers state management with `usestate` hook. Complexity: medium. Builds on: Props in React. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 89,
+          "id": "135b9b5c-1aa9-4283-a8ee-0df0fb5b6daf",
+          "reason": "Covers conditional rendering in react. Complexity: medium. Builds on: State Management with `useState` Hook. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 154,
+          "id": "react_strictmode",
+          "reason": "Covers react strictmode. Complexity: medium. Builds on: Introduction to React and Components. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 88,
+          "id": "5e05e678-a3c2-41d6-900a-836eaa400f4d",
+          "reason": "Covers event handling in react. Complexity: medium. Builds on: State Management with `useState` Hook, JavaScript Event Handling. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 30,
+          "id": "134b0e16-02b4-4f7f-891c-05645559f4f0",
+          "reason": "Covers rendering lists and keys. Complexity: medium. Builds on: Conditional Rendering in React, Array Methods (map, filter, reduce). It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 86,
+          "id": "c319ce57-59e6-4eb8-9dad-1f099bb5692a",
+          "reason": "Covers forms: controlled and uncontrolled components. Complexity: medium. Builds on: Event Handling in React, HTML Forms and Input Types. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 81,
+          "id": "6221f1ec-688e-4529-a980-2295af964123",
+          "reason": "Covers react router (basic navigation). Complexity: medium. Builds on: Introduction to React and Components. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 97,
+          "id": "07eb964b-c4fc-4aca-b401-86f57f7715d6",
+          "reason": "Covers basic react testing (react testing library). Complexity: medium. Builds on: Introduction to React and Components. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 125,
+          "id": "react_testing_jest_enzyme",
+          "reason": "Covers react testing with jest and enzyme (legacy). Complexity: medium. Builds on: Basic React Testing (React Testing Library). It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 147,
+          "id": "react_testing_snapshot",
+          "reason": "Covers react snapshot testing. Complexity: medium. Builds on: Basic React Testing (React Testing Library). It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 129,
+          "id": "react_nextjs_basics",
+          "reason": "Covers introduction to next.js (pages, routing). Complexity: medium. Builds on: Introduction to React and Components, React Router (Basic Navigation). It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 110,
+          "id": "d0fe0128-9b35-4729-9645-3ec65ea2b24d",
+          "reason": "Covers `useref` hook and dom refs. Complexity: medium. Builds on: `useEffect` Hook and Component Lifecycle. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 72,
+          "id": "8971a1bf-00f9-490a-8b78-52fe32f8460c",
+          "reason": "Covers `usereducer` hook. Complexity: medium. Builds on: State Management with `useState` Hook, `useEffect` Hook and Component Lifecycle. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 156,
+          "id": "react_patterns_state_reducer",
+          "reason": "Covers state reducer pattern in react. Complexity: hard. Builds on: `useReducer` Hook. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 157,
+          "id": "react_patterns_compound_components",
+          "reason": "Covers compound components pattern in react. Complexity: hard. Builds on: Context API for State Management. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 109,
+          "id": "2291dfcd-50cf-4a3f-becb-ef644635536b",
+          "reason": "Covers `useeffect` hook and component lifecycle. Complexity: hard. Builds on: State Management with `useState` Hook, Promises (Pending, Fulfilled, Rejected). It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 98,
+          "id": "1111efac-9fec-4735-81b0-1e73c145a4fd",
+          "reason": "Covers `usecallback` and `usememo` for performance. Complexity: hard. Builds on: `useEffect` Hook and Component Lifecycle, Memoization. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 140,
+          "id": "react_render_optimizations_purecomponent",
+          "reason": "Covers react render optimizations (purecomponent, memo). Complexity: medium. Builds on: `useCallback` and `useMemo` for Performance. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 162,
+          "id": "react_context_api_performance",
+          "reason": "Covers context api performance considerations. Complexity: hard. Builds on: Context API for State Management, React Reconciliation and Virtual DOM. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 94,
+          "id": "9488c877-bddd-4269-a80a-c6a63cd764c9",
+          "reason": "Covers creating custom hooks. Complexity: hard. Builds on: State Management with `useState` Hook, `useEffect` Hook and Component Lifecycle, `useRef` Hook and DOM Refs. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 167,
+          "id": "react_use_id_use_sync_external_store",
+          "reason": "Covers react `useid`, `usesyncexternalstore` hooks. Complexity: hard. Builds on: Creating Custom Hooks. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 124,
+          "id": "react_hooks_ecosystem",
+          "reason": "Covers exploring react hooks ecosystem (react-use, ahooks). Complexity: hard. Builds on: Creating Custom Hooks. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 155,
+          "id": "react_testing_hooks",
+          "reason": "Covers testing react hooks. Complexity: hard. Builds on: Basic React Testing (React Testing Library), Creating Custom Hooks. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 75,
+          "id": "3a25c798-a73d-4e5f-a7d8-25481a1caaf2",
+          "reason": "Covers react reconciliation and virtual dom. Complexity: hard. Builds on: JSX Syntax, DOM Manipulation (createElement, appendChild). It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 91,
+          "id": "6c987e9c-e1c8-4cf9-a05c-752a9c9f3df6",
+          "reason": "Covers `forwardref`. Complexity: medium. Builds on: `useRef` Hook and DOM Refs. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 59,
+          "id": "c7a239e2-4465-46c6-bde9-1837b3d335a7",
+          "reason": "Covers react portals. Complexity: hard. Builds on: `useRef` Hook and DOM Refs. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 39,
+          "id": "59fc381d-1589-4a63-8766-4f40e6aba3fa",
+          "reason": "Covers context api for state management. Complexity: hard. Builds on: `useEffect` Hook and Component Lifecycle. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 40,
+          "id": "e4fbbc01-c6ff-4ee2-ab4e-695915cf88ef",
+          "reason": "Covers higher-order components (hocs) and render props. Complexity: hard. Builds on: Context API for State Management. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 32,
+          "id": "813fc626-6d3d-42b0-a407-590768e8b398",
+          "reason": "Covers introduction to redux. Complexity: hard. Builds on: Context API for State Management. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 31,
+          "id": "8267bb57-6695-4b81-a0bd-f1b1d911fd37",
+          "reason": "Covers redux thunk and redux saga (middleware). Complexity: hard. Builds on: Introduction to Redux, Async/Await Syntax. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 128,
+          "id": "react_state_management_recoil",
+          "reason": "Covers recoil state management. Complexity: hard. Builds on: React State Management Patterns (Zustand, Jotai, Recoil). It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 129,
+          "id": "react_state_management_zustand",
+          "reason": "Covers zustand state management. Complexity: hard. Builds on: React State Management Patterns (Zustand, Jotai, Recoil). It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 130,
+          "id": "react_state_management_jotai",
+          "reason": "Covers jotai state management. Complexity: hard. Builds on: React State Management Patterns (Zustand, Jotai, Recoil). It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 127,
+          "id": "react_state_management_patterns",
+          "reason": "Covers react state management patterns (zustand, jotai, recoil). Complexity: hard. Builds on: Context API for State Management. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 95,
+          "id": "3eac5140-5d9e-44ed-a769-0fd09c50ab37",
+          "reason": "Covers react.lazy and suspense. Complexity: hard. Builds on: Introduction to React and Components. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 118,
+          "id": "react_lazy_loading_components",
+          "reason": "Covers lazy loading react components. Complexity: medium. Builds on: React.lazy and Suspense. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 119,
+          "id": "react_suspense_data_fetching",
+          "reason": "Covers suspense for data fetching. Complexity: expert. Builds on: React.lazy and Suspense, Data Fetching Libraries (React Query, SWR). It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 126,
+          "id": "react_data_fetching_libraries",
+          "reason": "Covers data fetching libraries (react query, swr). Complexity: hard. Builds on: `useEffect` Hook and Component Lifecycle, Fetch API. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 58,
+          "id": "2f957036-eb34-437c-bcd0-a40628a380f4",
+          "reason": "Covers react reconciliation and virtual dom. Complexity: hard. Builds on: JSX Syntax, DOM Manipulation (createElement, appendChild). It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 149,
+          "id": "react_fiber_architecture",
+          "reason": "Covers react fiber architecture. Complexity: expert. Builds on: React Reconciliation and Virtual DOM. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 150,
+          "id": "react_concurrent_mode",
+          "reason": "Covers react concurrent mode and strictmode. Complexity: expert. Builds on: React Fiber Architecture. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 155,
+          "id": "react_concurrent_features_suspense_transition",
+          "reason": "Covers react concurrent features (usetransition, usedeferredvalue). Complexity: expert. Builds on: React Concurrent Mode and StrictMode, Suspense for Data Fetching. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 102,
+          "id": "d365ecc1-1663-4b97-859c-422b59bd7dbe",
+          "reason": "Covers server-side rendering (ssr) with react. Complexity: hard. Builds on: SSR vs CSR vs SSG Comparison, Introduction to React and Components. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 117,
+          "id": "react_server_side_rendering_hydration",
+          "reason": "Covers ssr hydration issues and solutions. Complexity: hard. Builds on: Server-Side Rendering (SSR) with React. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 120,
+          "id": "react_server_components",
+          "reason": "Covers react server components (rsc). Complexity: expert. Builds on: Introduction to React and Components, SSR vs CSR vs SSG Comparison. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 154,
+          "id": "react_server_components_data_flow",
+          "reason": "Covers data flow in react server components. Complexity: expert. Builds on: React Server Components (RSC). It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 159,
+          "id": "react_server_actions",
+          "reason": "Covers react server actions. Complexity: expert. Builds on: React Server Components (RSC). It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 108,
+          "id": "a581fd75-a75e-478e-b491-c01cc45db54d",
+          "reason": "Covers static site generation (ssg) with react. Complexity: hard. Builds on: SSR vs CSR vs SSG Comparison, Introduction to React and Components. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 131,
+          "id": "react_nextjs_data_fetching",
+          "reason": "Covers next.js data fetching (ssr, ssg, isr). Complexity: hard. Builds on: Introduction to Next.js (Pages, Routing), SSR vs CSR vs SSG Comparison. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 121,
+          "id": "react_accessibility_best_practices",
+          "reason": "Covers react accessibility best practices. Complexity: hard. Builds on: Introduction to React and Components, Introduction to Web Accessibility (ARIA, Semantics). It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 6,
+          "id": "d26bdc0e-3d15-4e30-8986-f93d6425d6fe",
+          "reason": "Covers error boundaries in react. Complexity: hard. Builds on: Introduction to React and Components, Error Handling (try...catch, Error objects). It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 155,
+          "id": "react_error_reporting_strategies",
+          "reason": "Covers error reporting strategies in react applications. Complexity: expert. Builds on: React Error Logging Tools (Sentry, Bugsnag), Advanced Error Boundary Patterns. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 167,
+          "id": "react_error_boundary_patterns",
+          "reason": "Covers advanced error boundary patterns. Complexity: hard. Builds on: Error Boundaries in React, Error Monitoring and Logging (Sentry). It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 159,
+          "id": "react_error_logging_tools",
+          "reason": "Covers react error logging tools (sentry, bugsnag). Complexity: medium. Builds on: Error Boundaries in React. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 153,
+          "id": "react_profiling",
+          "reason": "Covers react profiling with devtools. Complexity: hard. Builds on: Optimizing React Application Performance. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 154,
+          "id": "react_profiler_api",
+          "reason": "Covers react profiler api (devtools). Complexity: hard. Builds on: Optimizing React Application Performance. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 152,
+          "id": "react_optimizing_performance",
+          "reason": "Covers optimizing react application performance. Complexity: expert. Builds on: `useCallback` and `useMemo` for Performance, React Reconciliation and Virtual DOM, Measuring and Improving Runtime Performance. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 151,
+          "id": "react_design_patterns",
+          "reason": "Covers advanced react design patterns. Complexity: expert. Builds on: Higher-Order Components (HOCs) and Render Props, Creating Custom Hooks. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 146,
+          "id": "react_testing_advanced",
+          "reason": "Covers advanced react testing (mocks, spies). Complexity: hard. Builds on: Basic React Testing (React Testing Library), Jest for Unit Testing (JS). It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 164,
+          "id": "react_testing_component_libraries",
+          "reason": "Covers testing react component libraries. Complexity: expert. Builds on: Advanced React Testing (Mocks, Spies), Designing a Reusable Component Library. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 132,
+          "id": "react_styling_solutions",
+          "reason": "Covers react styling solutions (css modules, styled components). Complexity: medium. Builds on: CSS Modules and Styled Components, CSS Preprocessors (Sass/LESS). It's foundational for advanced topics in this cluster."
+        }
+      ]
+    },
+    {
+      "name": "Web Performance & Optimization",
+      "description": "Strategies and tools for optimizing web application speed and user experience.",
+      "items": [
+        {
+          "index": 41,
+          "id": "9f907456-bdef-4313-855f-6f398f6b2d8c",
+          "reason": "Covers types of browser storage. Complexity: easy. Builds on: none. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 145,
+          "id": "css_font_display",
+          "reason": "Covers `font-display` for font loading optimization. Complexity: medium. Builds on: Web Font Optimization. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 10,
+          "id": "b0abeb96-1032-4163-b37e-7ce0a9262e1f",
+          "reason": "Covers web font optimization. Complexity: medium. Builds on: none. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 108,
+          "id": "a581fd75-a75e-478e-b491-c01cc45db54d",
+          "reason": "Covers image optimization techniques. Complexity: medium. Builds on: Responsive Images (srcset, sizes, picture). It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 119,
+          "id": "perf_lazy_loading_images",
+          "reason": "Covers lazy loading images and videos. Complexity: medium. Builds on: Image Optimization Techniques, Intersection Observer API. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 134,
+          "id": "perf_web_p_avif",
+          "reason": "Covers webp and avif image formats. Complexity: medium. Builds on: Image Optimization Techniques. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 158,
+          "id": "perf_image_sprites",
+          "reason": "Covers image sprites and svg sprites. Complexity: medium. Builds on: Introduction to SVG, CSS Background Properties. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 139,
+          "id": "js_render_blocking_resources",
+          "reason": "Covers render-blocking resources. Complexity: hard. Builds on: Browser Rendering Process (Critical Rendering Path). It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 69,
+          "id": "d68744a5-1545-46e0-85c0-08df297781c7",
+          "reason": "Covers browser rendering process (critical rendering path). Complexity: hard. Builds on: HTML Document Structure, CSS Box Model and Sizing, DOM Manipulation (createElement, appendChild). It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 67,
+          "id": "e4724474-f6ad-4077-b33e-5eddbd5efbeb",
+          "reason": "Covers reflow and repaint. Complexity: hard. Builds on: Browser Rendering Process (Critical Rendering Path). It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 83,
+          "id": "49312892-80a3-490e-9487-dda935993edd",
+          "reason": "Covers web performance metrics. Complexity: hard. Builds on: Browser Rendering Process (Critical Rendering Path). It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 121,
+          "id": "perf_web_vitals_optimization",
+          "reason": "Covers optimizing for core web vitals (lcp, fid, cls). Complexity: expert. Builds on: Core Web Vitals and Performance Metrics, Critical CSS, Image Optimization Techniques. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 123,
+          "id": "perf_lighthouse_audits",
+          "reason": "Covers using lighthouse for performance audits. Complexity: medium. Builds on: Core Web Vitals and Performance Metrics. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 122,
+          "id": "perf_web_vitals_tools",
+          "reason": "Covers tools for measuring web vitals (pagespeed insights, chrome devtools). Complexity: medium. Builds on: Using Lighthouse for Performance Audits. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 153,
+          "id": "perf_resource_hints",
+          "reason": "Covers resource hints (dns-prefetch, preconnect). Complexity: medium. Builds on: DNS Resolution Process. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 163,
+          "id": "perf_preload_prefetch",
+          "reason": "Covers preload, prefetch, preconnect for resource loading. Complexity: medium. Builds on: Resource Hints (dns-prefetch, preconnect). It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 164,
+          "id": "perf_server_timing",
+          "reason": "Covers server timing api. Complexity: medium. Builds on: HTTP/HTTPS Fundamentals (Methods, Status Codes). It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 73,
+          "id": "268fd6b8-c384-42e6-b131-ccc273800cdd",
+          "reason": "Covers measuring and improving runtime performance. Complexity: hard. Builds on: Reflow and Repaint, Using Browser Developer Tools Effectively. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 90,
+          "id": "6500d195-cf03-478b-8850-3e7d7d7e4ac4",
+          "reason": "Covers `requestanimationframe` for smooth animations. Complexity: hard. Builds on: DOM Manipulation (createElement, appendChild), Browser Rendering Process (Critical Rendering Path). It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 51,
+          "id": "268fd6b8-c384-42e6-b131-ccc273800cdd",
+          "reason": "Covers critical css. Complexity: hard. Builds on: CSS Selectors and Specificity, Browser Rendering Process (Critical Rendering Path). It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 133,
+          "id": "perf_prerendering_hydrating",
+          "reason": "Covers prerendering and hydration. Complexity: hard. Builds on: Browser Rendering Process (Critical Rendering Path), SSR vs CSR vs SSG Comparison. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 100,
+          "id": "ca0a4a2b-e6c2-490f-95bd-053e03016a43",
+          "reason": "Covers tree shaking and dead code elimination. Complexity: hard. Builds on: JavaScript Modules (ES Modules vs CommonJS), Webpack Basics (Entry, Output, Loaders, Plugins). It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 79,
+          "id": "0b24fd70-cf6b-459f-ab09-8e7416e8fbbf",
+          "reason": "Covers webpack performance optimizations. Complexity: hard. Builds on: Webpack Basics (Entry, Output, Loaders, Plugins). It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 77,
+          "id": "d8d7291e-88b1-4694-9b1c-2e47cd738d47",
+          "reason": "Covers bundle analysis and size reduction. Complexity: hard. Builds on: Webpack Performance Optimizations. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 122,
+          "id": "perf_code_splitting_lazy_loading",
+          "reason": "Covers code splitting and lazy loading. Complexity: hard. Builds on: JavaScript Modules (ES Modules vs CommonJS). It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 148,
+          "id": "perf_code_splitting_strategies",
+          "reason": "Covers advanced code splitting strategies. Complexity: hard. Builds on: Code Splitting and Lazy Loading. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 139,
+          "id": "perf_font_loading_strategy",
+          "reason": "Covers advanced font loading strategies. Complexity: hard. Builds on: Web Font Optimization. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 160,
+          "id": "perf_code_minification",
+          "reason": "Covers code minification and uglification. Complexity: medium. Builds on: Webpack Performance Optimizations. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 154,
+          "id": "perf_code_optimization_strategies",
+          "reason": "Covers general code optimization strategies (minification, compression). Complexity: medium. Builds on: Webpack Performance Optimizations. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 133,
+          "id": "perf_asset_delivery_strategies",
+          "reason": "Covers asset delivery strategies (preload, prefetch, preconnect). Complexity: hard. Builds on: HTTP Caching Mechanisms. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 153,
+          "id": "perf_critical_rendering_path_opt",
+          "reason": "Covers optimizing critical rendering path. Complexity: expert. Builds on: Browser Rendering Process (Critical Rendering Path), Critical CSS, Script Loading Strategies (defer, async). It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 156,
+          "id": "perf_web_workers_performance",
+          "reason": "Covers web workers for performance critical tasks. Complexity: expert. Builds on: Advanced Web Workers (Shared, Service Worker Communication). It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 155,
+          "id": "perf_web_assembly_optimization",
+          "reason": "Covers optimizing with webassembly. Complexity: expert. Builds on: WebAssembly (Wasm) Basics. It's foundational for advanced topics in this cluster."
+        }
+      ]
+    },
+    {
+      "name": "Tooling & Best Practices",
+      "description": "Essential development tools, build processes, testing strategies, and workflow best practices.",
+      "items": [
+        {
+          "index": 1,
+          "id": "78e4b679-6da5-4d51-818d-03c853484d41",
+          "reason": "Covers npm and yarn (package managers). Complexity: easy. Builds on: none. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 135,
+          "id": "tooling_package_json",
+          "reason": "Covers understanding package.json and npm scripts. Complexity: easy. Builds on: npm and Yarn (Package Managers). It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 136,
+          "id": "tooling_dependency_management",
+          "reason": "Covers dependency management (lock files, semver). Complexity: medium. Builds on: Understanding package.json and npm scripts. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 159,
+          "id": "tooling_package_managers_pnpm_bun",
+          "reason": "Covers alternative package managers (pnpm, bun). Complexity: medium. Builds on: npm and Yarn (Package Managers). It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 92,
+          "id": "ae283dab-4a07-41f5-9615-89f841951e4f",
+          "reason": "Covers eslint and prettier. Complexity: easy. Builds on: Variables (var, let, const) and Data Types. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 156,
+          "id": "tooling_linting_with_type_checking",
+          "reason": "Covers advanced linting with type checking (typescript eslint). Complexity: hard. Builds on: ESLint and Prettier, Type Checking and Introduction to TypeScript. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 71,
+          "id": "20ef4a66-a599-4844-b72b-87e393b9bfff",
+          "reason": "Covers git and version control basics. Complexity: easy. Builds on: none. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 104,
+          "id": "c0a1c00b-740e-4ca8-ad6e-eb034b19a51b",
+          "reason": "Covers webpack basics (entry, output, loaders, plugins). Complexity: medium. Builds on: npm and Yarn (Package Managers), JavaScript Modules (ES Modules vs CommonJS). It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 95,
+          "id": "3eac5140-5d9e-44ed-a769-0fd09c50ab37",
+          "reason": "Covers babel transpilation. Complexity: medium. Builds on: Webpack Basics (Entry, Output, Loaders, Plugins), ES6+ Features (destructuring, spread/rest). It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 167,
+          "id": "tooling_transpilers_compilers",
+          "reason": "Covers transpilers vs compilers. Complexity: medium. Builds on: Babel Transpilation. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 134,
+          "id": "tooling_vite_basics",
+          "reason": "Covers vite basics (development server, build process). Complexity: medium. Builds on: npm and Yarn (Package Managers). It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 154,
+          "id": "tooling_module_resolution",
+          "reason": "Covers node.js module resolution algorithm. Complexity: medium. Builds on: JavaScript Modules (ES Modules vs CommonJS). It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 101,
+          "id": "0e0505ae-25f5-4faf-b0be-73ac61d29917",
+          "reason": "Covers jest for unit testing (js). Complexity: medium. Builds on: Functions (declaration, expression, arrow). It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 112,
+          "id": "tooling_lint_staged_husky",
+          "reason": "Covers lint-staged and husky for git hooks. Complexity: medium. Builds on: ESLint and Prettier, Git and Version Control Basics. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 113,
+          "id": "tooling_storybook",
+          "reason": "Covers storybook for component development. Complexity: medium. Builds on: Designing a Reusable Component Library. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 128,
+          "id": "tooling_jest_basics",
+          "reason": "Covers introduction to ci/cd. Complexity: medium. Builds on: Git and Version Control Basics, Webpack Basics (Entry, Output, Loaders, Plugins). It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 129,
+          "id": "tooling_docker_basics",
+          "reason": "Covers docker basics for frontend development. Complexity: medium. Builds on: Introduction to CI/CD. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 130,
+          "id": "tooling_e2e_testing_cypress_playwright",
+          "reason": "Covers end-to-end testing (cypress, playwright). Complexity: hard. Builds on: Jest for Unit Testing (JS). It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 159,
+          "id": "tooling_playwright_testing",
+          "reason": "Covers playwright for browser automation and e2e testing. Complexity: hard. Builds on: End-to-End Testing (Cypress, Playwright). It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 136,
+          "id": "tooling_monorepos",
+          "reason": "Covers monorepos (lerna, nx). Complexity: hard. Builds on: npm and Yarn (Package Managers). It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 157,
+          "id": "tooling_turborepo",
+          "reason": "Covers turborepo for faster monorepo builds. Complexity: hard. Builds on: Monorepos (Lerna, Nx). It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 142,
+          "id": "tooling_build_pipelines_monorepo",
+          "reason": "Covers optimizing build pipelines for monorepos. Complexity: expert. Builds on: Monorepos (Lerna, Nx), Webpack Basics (Entry, Output, Loaders, Plugins). It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 105,
+          "id": "js_error_monitoring_sentry",
+          "reason": "Covers error monitoring and logging (sentry). Complexity: medium. Builds on: Error Handling (try...catch, Error objects). It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 114,
+          "id": "tooling_web_vitals_monitoring",
+          "reason": "Covers web vitals monitoring (rum tools). Complexity: hard. Builds on: Core Web Vitals and Performance Metrics, Using Lighthouse for Performance Audits. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 149,
+          "id": "tooling_biome",
+          "reason": "Covers biome (linter, formatter, bundler). Complexity: hard. Builds on: ESLint and Prettier, Webpack Basics (Entry, Output, Loaders, Plugins). It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 154,
+          "id": "tooling_server_side_bundling",
+          "reason": "Covers server-side bundling considerations. Complexity: hard. Builds on: Webpack Basics (Entry, Output, Loaders, Plugins), Server-Side Rendering (SSR) with React. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 135,
+          "id": "tooling_bundler_comparison",
+          "reason": "Covers bundler comparison (webpack, rollup, vite). Complexity: hard. Builds on: Webpack Basics (Entry, Output, Loaders, Plugins). It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 164,
+          "id": "tooling_build_system_optimization",
+          "reason": "Covers optimizing build system performance. Complexity: expert. Builds on: Webpack Performance Optimizations, Module Bundlers Internals (Webpack, Rollup). It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 156,
+          "id": "tooling_testing_strategy",
+          "reason": "Covers frontend testing strategy (unit, integration, e2e). Complexity: hard. Builds on: Jest for Unit Testing (JS), End-to-End Testing (Cypress, Playwright). It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 131,
+          "id": "tooling_module_federation",
+          "reason": "Covers webpack module federation. Complexity: expert. Builds on: Webpack Basics (Entry, Output, Loaders, Plugins), Micro-Frontends Architecture. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 163,
+          "id": "tooling_micro_frontend_orchestration",
+          "reason": "Covers micro-frontend orchestration tools. Complexity: expert. Builds on: Webpack Module Federation. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 133,
+          "id": "tooling_ssr_frameworks",
+          "reason": "Covers ssr frameworks (next.js, remix). Complexity: hard. Builds on: Server-Side Rendering (SSR) with React, Webpack Basics (Entry, Output, Loaders, Plugins). It's foundational for advanced topics in this cluster."
+        }
+      ]
+    },
+    {
+      "name": "Architecture & System Design",
+      "description": "Principles and patterns for designing scalable, maintainable, and secure frontend systems.",
+      "items": [
+        {
+          "index": 82,
+          "id": "830b8cbb-f581-40dd-9fe5-d76bd86e725b",
+          "reason": "Covers internationalization (i18n) and localization (l10n). Complexity: medium. Builds on: none. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 167,
+          "id": "design_design_for_dark_mode",
+          "reason": "Covers designing for dark mode. Complexity: medium. Builds on: CSS Variables (Custom Properties). It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 104,
+          "id": "c0a1c00b-740e-4ca8-ad6e-eb034b19a51b",
+          "reason": "Covers mvc, mvvm, mvp design patterns. Complexity: medium. Builds on: Object-Oriented Programming in JavaScript. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 126,
+          "id": "design_design_tokens",
+          "reason": "Covers design tokens. Complexity: medium. Builds on: CSS Variables (Custom Properties). It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 167,
+          "id": "design_atomic_design",
+          "reason": "Covers atomic design methodology. Complexity: medium. Builds on: Designing a Reusable Component Library. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 141,
+          "id": "design_progressive_enhancement",
+          "reason": "Covers progressive enhancement vs graceful degradation. Complexity: medium. Builds on: DOM Manipulation (createElement, appendChild). It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 125,
+          "id": "design_api_design_graphql",
+          "reason": "Covers graphql basics and usage. Complexity: medium. Builds on: Fetch API. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 134,
+          "id": "design_headless_cms_frontend",
+          "reason": "Covers integrating with headless cms. Complexity: medium. Builds on: API Integration Patterns (BFF, GraphQL, REST). It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 79,
+          "id": "0b24fd70-cf6b-459f-ab09-8e7416e8fbbf",
+          "reason": "Covers browser security (csrf, xss). Complexity: medium. Builds on: HTTP/HTTPS Fundamentals (Methods, Status Codes). It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 78,
+          "id": "ec766fc1-c053-48c6-b515-3b9d04a5d79c",
+          "reason": "Covers content security policy (csp). Complexity: hard. Builds on: Browser Security (CSRF, XSS). It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 128,
+          "id": "design_component_library",
+          "reason": "Covers designing a reusable component library. Complexity: hard. Builds on: Introduction to React and Components, CSS Variables (Custom Properties). It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 140,
+          "id": "design_feature_flags",
+          "reason": "Covers feature flags and a/b testing. Complexity: hard. Builds on: Introduction to CI/CD. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 120,
+          "id": "design_micro_frontends",
+          "reason": "Covers micro-frontends architecture. Complexity: hard. Builds on: Designing a Reusable Component Library, Webpack Basics (Entry, Output, Loaders, Plugins). It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 121,
+          "id": "design_scalable_frontend",
+          "reason": "Covers designing scalable frontend applications. Complexity: hard. Builds on: Designing a Reusable Component Library, HTTP Caching Mechanisms. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 68,
+          "id": "6b8c3a34-bfe2-408a-a8b5-0adc285072a0",
+          "reason": "Covers frontend security best practices. Complexity: hard. Builds on: CORS and Same-Origin Policy, Browser Security (CSRF, XSS). It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 129,
+          "id": "design_offline_first",
+          "reason": "Covers offline-first applications. Complexity: hard. Builds on: Service Workers and PWA Basics, IndexedDB API. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 150,
+          "id": "design_resilient_frontend",
+          "reason": "Covers designing resilient frontend applications. Complexity: expert. Builds on: Offline-First Applications, Frontend Security Best Practices. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 102,
+          "id": "d365ecc1-1663-4b97-859c-422b59bd7dbe",
+          "reason": "Covers ssr vs csr vs ssg comparison. Complexity: hard. Builds on: Introduction to Server-Side Rendering (SSR), Introduction to Static Site Generation (SSG), Introduction to React and Components. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 137,
+          "id": "design_universal_applications",
+          "reason": "Covers universal (isomorphic) applications. Complexity: hard. Builds on: SSR vs CSR vs SSG Comparison, Server-Side Rendering (SSR) with React. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 139,
+          "id": "design_api_integration_patterns",
+          "reason": "Covers api integration patterns (bff, graphql, rest). Complexity: expert. Builds on: Fetch API. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 165,
+          "id": "design_ssr_data_fetching",
+          "reason": "Covers data fetching strategies for ssr. Complexity: hard. Builds on: Server-Side Rendering (SSR) with React, API Integration Patterns (BFF, GraphQL, REST). It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 130,
+          "id": "design_accessibility_best_practices",
+          "reason": "Covers advanced accessibility best practices. Complexity: hard. Builds on: Introduction to Web Accessibility (ARIA, Semantics). It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 135,
+          "id": "design_design_for_accessibility",
+          "reason": "Covers designing for accessibility (advanced ux). Complexity: expert. Builds on: Advanced Accessibility Best Practices. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 150,
+          "id": "design_serverless_frontend",
+          "reason": "Covers serverless frontend architectures. Complexity: expert. Builds on: Designing Scalable Frontend Applications. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 138,
+          "id": "design_data_flow_patterns",
+          "reason": "Covers frontend data flow patterns. Complexity: expert. Builds on: Introduction to Redux, Introduction to JavaScript Design Patterns. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 161,
+          "id": "design_state_management_strategies",
+          "reason": "Covers choosing a state management strategy. Complexity: expert. Builds on: Introduction to Redux, React State Management Patterns (Zustand, Jotai, Recoil). It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 162,
+          "id": "design_design_system_scaling",
+          "reason": "Covers scaling a design system. Complexity: expert. Builds on: Designing a Reusable Component Library, Design Tokens. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 140,
+          "id": "design_caching_strategies",
+          "reason": "Covers frontend caching strategies. Complexity: expert. Builds on: HTTP Caching Mechanisms, Local Storage and Session Storage, Service Workers and PWA Basics. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 158,
+          "id": "design_real_time_updates",
+          "reason": "Covers real-time updates in frontend (websockets, sse). Complexity: hard. Builds on: Web Sockets, Long Polling and Server-Sent Events (SSE). It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 160,
+          "id": "design_observability",
+          "reason": "Covers frontend observability (logging, monitoring, tracing). Complexity: expert. Builds on: Error Monitoring and Logging (Sentry), Web Vitals Monitoring (RUM tools). It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 158,
+          "id": "design_testing_strategies",
+          "reason": "Covers comprehensive frontend testing strategies. Complexity: expert. Builds on: Frontend Testing Strategy (Unit, Integration, E2E), Frontend Observability (Logging, Monitoring, Tracing). It's foundational for advanced topics in this cluster."
+        }
+      ]
+    },
+    {
+      "name": "Algorithms & Problem Solving",
+      "description": "Covers common algorithms and data structures, and their application in frontend interview problems.",
+      "items": [
+        {
+          "index": 134,
+          "id": "js_big_o_notation",
+          "reason": "Covers big o notation (for javascript algorithms). Complexity: easy. Builds on: none. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 165,
+          "id": "dsa_recursion_memoization_basics",
+          "reason": "Covers recursion and basic memoization. Complexity: medium. Builds on: Functions (declaration, expression, arrow). It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 142,
+          "id": "dsa_array_string_manipulation",
+          "reason": "Covers common array and string manipulation algorithms. Complexity: medium. Builds on: Array Methods (map, filter, reduce). It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 159,
+          "id": "dsa_sorting_algorithms",
+          "reason": "Covers common sorting algorithms (bubble, merge, quick sort). Complexity: medium. Builds on: Array Methods (map, filter, reduce). It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 143,
+          "id": "dsa_dom_traversal",
+          "reason": "Covers dom tree traversal algorithms. Complexity: medium. Builds on: DOM Manipulation (createElement, appendChild), Core Data Structures (Arrays, Objects) in JS. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 144,
+          "id": "dsa_deep_clone_object",
+          "reason": "Covers implement deep clone of an object. Complexity: hard. Builds on: Core Data Structures (Arrays, Objects) in JS, Structured Clone Algorithm. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 145,
+          "id": "dsa_flatten_array",
+          "reason": "Covers flatten a nested array. Complexity: medium. Builds on: Array Methods (map, filter, reduce). It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 105,
+          "id": "dsa_implement_settimeout_setinterval",
+          "reason": "Covers implement settimeout and setinterval. Complexity: hard. Builds on: Event Loop, Call Stack, and Message Queue (Deep Dive). It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 104,
+          "id": "dsa_implement_bind_call_apply",
+          "reason": "Covers implement `bind`, `call`, and `apply`. Complexity: hard. Builds on: The `this` Keyword, Functions (declaration, expression, arrow). It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 140,
+          "id": "dsa_implement_promise_all",
+          "reason": "Covers implement promise.all, promise.race. Complexity: hard. Builds on: Promises (Pending, Fulfilled, Rejected). It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 141,
+          "id": "dsa_implement_event_loop_concept",
+          "reason": "Covers simulate event loop behavior. Complexity: expert. Builds on: Event Loop, Call Stack, and Message Queue (Deep Dive). It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 138,
+          "id": "dsa_throttling_debouncing_impl",
+          "reason": "Covers implement throttling and debouncing. Complexity: hard. Builds on: Throttling and Debouncing, Closures. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 143,
+          "id": "dsa_debounce_throttle_advanced",
+          "reason": "Covers advanced debounce and throttle implementations. Complexity: expert. Builds on: Implement Throttling and Debouncing. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 146,
+          "id": "dsa_design_a_custom_event_emitter",
+          "reason": "Covers design a custom event emitter. Complexity: hard. Builds on: JavaScript Event Handling, Functions (declaration, expression, arrow). It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 147,
+          "id": "dsa_event_emitter_advanced",
+          "reason": "Covers advanced event emitter patterns. Complexity: expert. Builds on: Design a Custom Event Emitter. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 148,
+          "id": "dsa_memoization_impl",
+          "reason": "Covers implement memoization function. Complexity: hard. Builds on: Memoization, Closures. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 149,
+          "id": "dsa_tree_traversal_algo",
+          "reason": "Covers binary tree traversal (inorder, preorder, postorder). Complexity: hard. Builds on: Core Data Structures (Arrays, Objects) in JS. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 139,
+          "id": "dsa_linked_list_impl",
+          "reason": "Covers implement a singly linked list. Complexity: hard. Builds on: Prototypes and ES6 Classes. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 150,
+          "id": "dsa_graph_traversal_algo",
+          "reason": "Covers graph traversal (bfs, dfs) for ui problems. Complexity: hard. Builds on: Binary Tree Traversal (Inorder, Preorder, Postorder). It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 153,
+          "id": "dsa_implement_event_target",
+          "reason": "Covers implement an eventtarget (browser api). Complexity: expert. Builds on: JavaScript Event Model (Capturing, Bubbling), Design a Custom Event Emitter. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 157,
+          "id": "dsa_backtracking_algorithms",
+          "reason": "Covers backtracking algorithms. Complexity: expert. Builds on: Recursion and Basic Memoization. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 135,
+          "id": "dsa_lru_cache_implementation",
+          "reason": "Covers implement an lru cache. Complexity: expert. Builds on: Map, Set, WeakMap, WeakSet. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 127,
+          "id": "dsa_memoize_implementation",
+          "reason": "Covers implement a generic memoize function. Complexity: hard. Builds on: Memoization, Implement Deep Clone of an Object. It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 136,
+          "id": "dsa_tree_data_structures",
+          "reason": "Covers tree data structures (binary search trees). Complexity: expert. Builds on: Binary Tree Traversal (Inorder, Preorder, Postorder). It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 161,
+          "id": "dsa_graph_data_structures",
+          "reason": "Covers graph data structures. Complexity: expert. Builds on: Tree Data Structures (Binary Search Trees). It's foundational for advanced topics in this cluster."
+        },
+        {
+          "index": 163,
+          "id": "dsa_dynamic_programming_intro",
+          "reason": "Covers introduction to dynamic programming. Complexity: expert. Builds on: Recursion and Basic Memoization. It's foundational for advanced topics in this cluster."
         }
       ]
     }
   ],
-  "itemCount": 34,
-  "clusterCount": 8,
+  "itemCount": 344,
+  "clusterCount": 11,
   "startIndex": 0,
-  "endIndex": 33
+  "endIndex": 167
 }
