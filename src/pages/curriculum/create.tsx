@@ -33,6 +33,8 @@ const CurriculumCreatePage: React.FC = () => {
     taskItems: number;
     totalItems: number;
   } | null>(null);
+  const [graphStats, setGraphStats] = useState<any | null>(null);
+  const [scoreStats, setScoreStats] = useState<any | null>(null);
 
   const steps = [
     'Extract Metadata',
@@ -93,6 +95,46 @@ const CurriculumCreatePage: React.FC = () => {
     }
   };
 
+  const handleBuildGraphs = async () => {
+    try {
+      setProcessing(true);
+      setError(null);
+      
+      // Call the graph building service
+      const result = await MetadataService.buildGraphs();
+      
+      // Update graph stats
+      setGraphStats(result);
+      
+      setActiveStep(2);
+    } catch (err: any) {
+      setError(`Failed to build graphs: ${err.message || 'Unknown error'}`);
+      console.error(err);
+    } finally {
+      setProcessing(false);
+    }
+  };
+  
+  const handleCalculateScores = async () => {
+    try {
+      setProcessing(true);
+      setError(null);
+      
+      // Call the score calculation service
+      const result = await MetadataService.calculateScores();
+      
+      // Update score stats
+      setScoreStats(result);
+      
+      setActiveStep(3);
+    } catch (err: any) {
+      setError(`Failed to calculate scores: ${err.message || 'Unknown error'}`);
+      console.error(err);
+    } finally {
+      setProcessing(false);
+    }
+  };
+  
   const handleNextStep = () => {
     // In a real implementation, this would trigger the next step in the process
     // For now, we'll just increment the active step
@@ -187,18 +229,18 @@ const CurriculumCreatePage: React.FC = () => {
             ) : activeStep === 1 ? (
               <Box>
                 <Typography variant="h5" gutterBottom>
-                  Metadata Extraction Complete
+                  Step 2: Build Global Foundational Graphs
                 </Typography>
                 
-                <Alert severity="success" sx={{ mb: 3 }}>
-                  Successfully extracted metadata from database.json
+                <Alert severity="info" sx={{ mb: 3 }}>
+                  This step will build dependency and similarity graphs from the extracted metadata.
                 </Alert>
                 
-                {metadataStats ? (
+                {metadataStats && (
                   <Card variant="outlined" sx={{ mb: 3 }}>
                     <CardContent>
                       <Typography variant="subtitle1" gutterBottom>
-                        Extraction Statistics:
+                        Metadata Statistics:
                       </Typography>
                       
                       <Box sx={{ display: 'flex', justifyContent: 'space-around', mb: 2 }}>
@@ -222,18 +264,124 @@ const CurriculumCreatePage: React.FC = () => {
                           <Typography variant="body2">Total Items</Typography>
                         </Box>
                       </Box>
+                    </CardContent>
+                  </Card>
+                )}
+                
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 3 }}>
+                  <Button 
+                    variant="outlined" 
+                    onClick={handleCancel}
+                  >
+                    Back to Modules
+                  </Button>
+                  
+                  <Button 
+                    variant="contained" 
+                    color="primary"
+                    onClick={handleBuildGraphs}
+                    disabled={processing}
+                    startIcon={processing && <CircularProgress size={20} color="inherit" />}
+                  >
+                    {processing ? 'Building Graphs...' : 'Build Graphs'}
+                  </Button>
+                </Box>
+              </Box>
+            ) : activeStep === 2 ? (
+              <Box>
+                <Typography variant="h5" gutterBottom>
+                  Step 3: Calculate Initial Deterministic Scores
+                </Typography>
+                
+                {graphStats && (
+                  <Alert severity="success" sx={{ mb: 3 }}>
+                    Successfully built dependency and similarity graphs
+                  </Alert>
+                )}
+                
+                {graphStats && (
+                  <Card variant="outlined" sx={{ mb: 3 }}>
+                    <CardContent>
+                      <Typography variant="subtitle1" gutterBottom>
+                        Graph Building Statistics:
+                      </Typography>
+                      
+                      <Box sx={{ mb: 2 }}>
+                        <Typography variant="body2">Dependency Graph Nodes: {graphStats.stats?.nodeCount || 0}</Typography>
+                        <Typography variant="body2">Dependency Graph Edges: {graphStats.stats?.dependencyEdgeCount || 0}</Typography>
+                        <Typography variant="body2">Similarity Graph Nodes: {graphStats.stats?.nodeCount || 0}</Typography>
+                        <Typography variant="body2">Similarity Graph Edges: {graphStats.stats?.similarityEdgeCount || 0}</Typography>
+                      </Box>
                       
                       <Divider sx={{ my: 2 }} />
                       
                       <Typography variant="body2">
-                        Metadata has been saved to metadata.json in the project root directory.
+                        Graphs have been saved to separate files referenced by {graphStats.graphsPath}
                       </Typography>
                     </CardContent>
                   </Card>
-                ) : (
-                  <Alert severity="warning" sx={{ mb: 3 }}>
-                    Metadata has been extracted but statistics are not available.
+                )}
+                
+                <Typography variant="body1" paragraph>
+                  This step will calculate composite scores for each curriculum item based on:
+                </Typography>
+                
+                <ul>
+                  <li>Prerequisite Depth (via topological sort)</li>
+                  <li>Difficulty and Relevance (weighted sum of complexity, difficulty, level, etc.)</li>
+                  <li>Thematic Cohesion (heuristic based on learning path and technology)</li>
+                </ul>
+                
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 3 }}>
+                  <Button 
+                    variant="outlined" 
+                    onClick={handleCancel}
+                  >
+                    Back to Modules
+                  </Button>
+                  
+                  <Button 
+                    variant="contained" 
+                    color="primary"
+                    onClick={handleCalculateScores}
+                    disabled={processing}
+                    startIcon={processing && <CircularProgress size={20} color="inherit" />}
+                  >
+                    {processing ? 'Calculating Scores...' : 'Calculate Scores'}
+                  </Button>
+                </Box>
+              </Box>
+            ) : activeStep === 3 ? (
+              <Box>
+                <Typography variant="h5" gutterBottom>
+                  Score Calculation Complete
+                </Typography>
+                
+                {scoreStats && (
+                  <Alert severity="success" sx={{ mb: 3 }}>
+                    Successfully calculated scores for {scoreStats.itemsScored || 0} curriculum items
                   </Alert>
+                )}
+                
+                {scoreStats && (
+                  <Card variant="outlined" sx={{ mb: 3 }}>
+                    <CardContent>
+                      <Typography variant="subtitle1" gutterBottom>
+                        Score Calculation Results:
+                      </Typography>
+                      
+                      <Box sx={{ mb: 2 }}>
+                        <Typography variant="body2">Items Scored: {scoreStats.itemsScored || 0}</Typography>
+                        <Typography variant="body2">Scores File: {scoreStats.scoresPath || 'scores.json'}</Typography>
+                      </Box>
+                      
+                      <Divider sx={{ my: 2 }} />
+                      
+                      <Typography variant="body2">
+                        Items have been scored and ordered by composite score in {scoreStats.scoresPath || 'scores.json'}
+                      </Typography>
+                    </CardContent>
+                  </Card>
                 )}
                 
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 3 }}>
@@ -249,7 +397,7 @@ const CurriculumCreatePage: React.FC = () => {
                     color="primary"
                     onClick={handleNextStep}
                   >
-                    Continue to Step 2: Build Dependency Graphs
+                    Continue to Step 4: AI-Assisted Clustering
                   </Button>
                 </Box>
               </Box>

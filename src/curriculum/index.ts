@@ -4,11 +4,17 @@
  * Main entry point for the curriculum generation process
  * Implements a multi-phase pipeline:
  * 1. Metadata extraction and initial analysis
- * 2. AI-assisted clustering and sequencing
- * 3. Final aggregation and curriculum assembly
- * 4. Runtime adaptation
+ * 2. Building global foundational graphs
+ * 3. Initial deterministic scoring
+ * 4. AI-assisted clustering and sequencing
+ * 5. Final aggregation and curriculum assembly
+ * 6. Runtime adaptation
  */
+import path from 'path';
+import fs from 'fs';
 import { MetadataExtractor } from './metadata/extractor';
+import { GraphBuilder } from './graphs/graphBuilder';
+import { ScoreCalculator } from './scoring/scoreCalculator';
 import { ExtractedMetadata } from './types/metadata';
 
 /**
@@ -45,12 +51,79 @@ export class CurriculumGenerator {
   }
   
   /**
-   * Phase 2: AI-assisted clustering and sequencing
-   * - Not implemented yet
-   * - Will use Gemini 2.5 Flash API to analyze chunks of the database
+   * Step 2: Build global foundational graphs
+   * Creates dependency and similarity graphs from metadata
+   */
+  public static async buildGraphs(): Promise<any> {
+    console.log('CurriculumGenerator: Starting Step 2 - Building Global Foundational Graphs');
+    
+    try {
+      // Define paths
+      const rootDir = process.cwd();
+      const metadataPath = path.join(rootDir, 'metadata.json');
+      const graphsPath = path.join(rootDir, 'graphs.json');
+      
+      // Create GraphBuilder instance
+      const graphBuilder = new GraphBuilder(metadataPath, graphsPath);
+      
+      // Build graphs
+      const result = await graphBuilder.buildGraphs();
+      
+      // Read the graphs index file
+      const graphsIndexContent = await fs.promises.readFile(graphsPath, 'utf-8');
+      const graphsIndex = JSON.parse(graphsIndexContent);
+      
+      console.log('CurriculumGenerator: Completed Step 2 - Building Global Foundational Graphs');
+      
+      return {
+        graphsIndex,
+        graphsPath
+      };
+    } catch (error) {
+      console.error('CurriculumGenerator: Error during graph building:', error);
+      throw error;
+    }
+  }
+  
+  /**
+   * Step 3: Calculate initial deterministic scores
+   * Assigns composite scores to items based on prerequisite depth, difficulty, relevance, and thematic cohesion
+   */
+  public static async calculateScores(): Promise<any> {
+    console.log('CurriculumGenerator: Starting Step 3 - Initial Deterministic Scoring');
+    
+    try {
+      // Define paths
+      const rootDir = process.cwd();
+      const metadataPath = path.join(rootDir, 'metadata.json');
+      const graphsPath = path.join(rootDir, 'graphs.json');
+      const scoresPath = path.join(rootDir, 'scores.json');
+      
+      // Create score calculator
+      const scoreCalculator = new ScoreCalculator(metadataPath, graphsPath, scoresPath);
+      
+      // Calculate scores
+      const scores = await scoreCalculator.calculateScores();
+      
+      console.log('CurriculumGenerator: Score calculation complete');
+      
+      return {
+        itemsScored: Object.keys(scores).length,
+        scoresPath
+      };
+    } catch (error) {
+      console.error('CurriculumGenerator: Error during score calculation:', error);
+      throw error;
+    }
+  }
+  
+  /**
+   * Step 4: AI-assisted clustering and sequencing
+   * Uses Gemini 2.5 Flash to analyze chunks of the database
+   * Not implemented yet
    */
   public static async processChunks(): Promise<void> {
-    console.log('Phase 2: AI-assisted clustering not yet implemented');
+    console.log('CurriculumGenerator: Step 4 - AI-assisted clustering not yet implemented');
     // This will be implemented in a future update
   }
   
@@ -77,21 +150,44 @@ export class CurriculumGenerator {
   /**
    * Run the full curriculum generation pipeline
    */
-  public static async generateCurriculum(): Promise<void> {
+  public static async generateCurriculum(): Promise<{
+    metadata: any;
+    graphs: any;
+    scores: any;
+  }> {
     try {
-      // Phase 1: Metadata extraction
-      const metadata = await this.extractMetadata();
+      // Step 1: Metadata extraction
+      console.log('CurriculumGenerator: Starting full curriculum generation pipeline');
+      const metadataResult = await this.extractMetadata();
+      console.log('Step 1 complete:', metadataResult);
       
-      // Phase 2: AI-assisted clustering (placeholder)
+      // Step 2: Building global foundational graphs
+      const graphsResult = await this.buildGraphs();
+      console.log('Step 2 complete:', graphsResult);
+      
+      // Step 3: Initial deterministic scoring
+      const scoresResult = await this.calculateScores();
+      console.log('Step 3 complete:', scoresResult);
+      
+      // Step 4: AI-assisted clustering (placeholder)
       await this.processChunks();
+      console.log('Step 4 placeholder complete');
       
-      // Phase 3: Aggregation and assembly (placeholder)
+      // Step 5: Aggregation and assembly (placeholder)
       await this.aggregateAndAssemble();
+      console.log('Step 5 placeholder complete');
       
-      // Phase 4: Runtime adaptation (placeholder)
+      // Step 6: Runtime adaptation (placeholder)
       await this.adaptToUserProgress();
+      console.log('Step 6 placeholder complete');
       
       console.log('Curriculum generation complete');
+      
+      return {
+        metadata: metadataResult,
+        graphs: graphsResult,
+        scores: scoresResult
+      };
     } catch (error) {
       console.error('Error generating curriculum:', error);
       throw error;
