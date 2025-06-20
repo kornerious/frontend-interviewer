@@ -1,0 +1,30 @@
+{
+  "chunkId": "chunk-14",
+  "clusters": [
+    {
+      "name": "JavaScript Asynchronous Programming & Event Loop",
+      "description": "This cluster covers fundamental and advanced concepts of asynchronous JavaScript, focusing on the Event Loop, Call Stack, and various async patterns like Callbacks, Promises, and Async/Await, culminating in a detailed understanding of microtask and macrotask queues.",
+      "items": [
+        {
+          "index": 0,
+          "id": "9b1a3405-fa73-4124-bedd-7912f9063ff8",
+          "reason": "This item introduces the foundational concepts of the JavaScript Call Stack and Event Loop, which are essential prerequisites for understanding any asynchronous behavior in JavaScript. It should be learned first to establish core knowledge."
+        },
+        {
+          "index": 1,
+          "id": "fa1da733-f612-4535-bd59-00038b677ddd",
+          "reason": "Building upon the basics of the Event Loop, this item delves into practical asynchronous patterns like Callbacks, Promises, and Async/Await. A solid understanding of how the Event Loop functions (from the previous item) is critical to grasp how these patterns operate under the hood."
+        },
+        {
+          "index": 2,
+          "id": "134b0e16-02b4-4f7f-891c-05645559f4f0",
+          "reason": "This item provides a deep dive into the more nuanced aspects of the Event Loop, specifically microtasks and macrotasks. It requires a prior understanding of both the basic Event Loop mechanics and practical async patterns, making it an advanced topic that clarifies subtle behaviors and performance implications of async JavaScript."
+        }
+      ]
+    }
+  ],
+  "itemCount": 3,
+  "clusterCount": 1,
+  "startIndex": 28,
+  "endIndex": 30
+}

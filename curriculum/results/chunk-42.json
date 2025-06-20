@@ -1,0 +1,25 @@
+{
+  "chunkId": "chunk-42",
+  "clusters": [
+    {
+      "name": "JavaScript Scope & Closures",
+      "description": "Essential JavaScript core concepts covering how variables are accessed and retained, forming the basis for advanced functional programming patterns.",
+      "items": [
+        {
+          "index": 84,
+          "id": "ec766fc1-c053-48c6-b515-3b9d04a5d79c",
+          "reason": "Understanding the different types of scope (lexical, global, function, block) is fundamental for grasping how JavaScript manages variable access and forms the necessary prerequisite for understanding closures."
+        },
+        {
+          "index": 83,
+          "id": "20ef4a66-a599-4844-b72b-87e393b9bfff",
+          "reason": "Closures build directly upon the concept of lexical scope. Learning about closures after mastering scope allows for a deeper understanding of function factories, private variables, and maintaining state in functional programming."
+        }
+      ]
+    }
+  ],
+  "itemCount": 2,
+  "clusterCount": 1,
+  "startIndex": 83,
+  "endIndex": 84
+}

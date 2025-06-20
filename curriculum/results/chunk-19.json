@@ -1,0 +1,30 @@
+{
+  "chunkId": "chunk-19",
+  "clusters": [
+    {
+      "name": "Asynchronous JavaScript & Concurrency",
+      "description": "This cluster covers the core mechanisms and modern patterns for handling asynchronous operations in JavaScript, from understanding the Event Loop to advanced Promise-based techniques.",
+      "items": [
+        {
+          "index": 37,
+          "id": "e51c3a6f-4f35-470b-b485-1fd99e46d080",
+          "reason": "This item (Conceptual: JavaScript Event Loop) is foundational. Understanding how JavaScript's single-threaded nature manages asynchronous tasks is a prerequisite for grasping any asynchronous programming pattern."
+        },
+        {
+          "index": 38,
+          "id": "dac5694d-d623-4dc4-8968-de83d980e021",
+          "reason": "This item (Conceptual: Callbacks, Promises, and Async/Await) naturally follows the Event Loop. These are the primary tools and patterns used to write asynchronous code, which relies on the Event Loop for execution. Understanding the underlying mechanism first makes these concepts much clearer."
+        },
+        {
+          "index": 39,
+          "id": "59fc381d-1589-4a63-8766-4f40e6aba3fa",
+          "reason": "This item (Question: Implementing a Custom Promise.all) is an advanced application that requires a deep understanding of Promises and asynchronous patterns. It serves as an excellent test of the concepts learned in the previous items, particularly the nuances of Promise behavior and concurrency."
+        }
+      ]
+    }
+  ],
+  "itemCount": 3,
+  "clusterCount": 1,
+  "startIndex": 37,
+  "endIndex": 39
+}

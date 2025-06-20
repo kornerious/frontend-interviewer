@@ -1,0 +1,30 @@
+{
+  "chunkId": "chunk-0",
+  "clusters": [
+    {
+      "name": "Uncategorized Items (Insufficient Data)",
+      "description": "These items could not be categorized into thematic clusters, ordered by prerequisites, or placed into a learning sequence due to the absence of essential metadata (e.g., title, tags, technology, prerequisites, complexity). Comprehensive metadata is required to perform expert curriculum design tasks.",
+      "items": [
+        {
+          "index": 0,
+          "id": "8602e28f-de57-433a-b42d-db72ef760a09",
+          "reason": "Metadata such as 'title', 'tags', 'technology', and 'prerequisites' is missing, preventing thematic clustering and ordering."
+        },
+        {
+          "index": 1,
+          "id": "78e4b679-6da5-4d51-818d-03c853484d41",
+          "reason": "Metadata such as 'title', 'tags', 'technology', and 'prerequisites' is missing, preventing thematic clustering and ordering."
+        },
+        {
+          "index": 2,
+          "id": "100bf5d7-a836-4e5a-8bc3-aa83cea7f416",
+          "reason": "Metadata such as 'title', 'tags', 'technology', and 'prerequisites' is missing, preventing thematic clustering and ordering."
+        }
+      ]
+    }
+  ],
+  "itemCount": 3,
+  "clusterCount": 1,
+  "startIndex": 0,
+  "endIndex": 2
+}

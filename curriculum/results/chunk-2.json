@@ -1,0 +1,25 @@
+{
+  "chunkId": "chunk-2",
+  "clusters": [
+    {
+      "name": "Core JavaScript Concepts",
+      "description": "This cluster covers foundational and advanced concepts in JavaScript, crucial for understanding how the language works and for tackling common frontend interview questions related to execution, data flow, and asynchronous operations.",
+      "items": [
+        {
+          "index": 5,
+          "id": "ab704af7-a36c-4098-9c2d-a7e4d43abdbc",
+          "reason": "This item is placed first as it represents fundamental JavaScript knowledge (e.g., Scopes, Closures, Hoisting). A solid grasp of these concepts is a prerequisite for understanding more complex JavaScript patterns and interview topics."
+        },
+        {
+          "index": 6,
+          "id": "d26bdc0e-3d15-4e30-8986-f93d6425d6fe",
+          "reason": "Building upon basic JavaScript, this item covers Asynchronous JavaScript (Promises, Async/Await, Event Loop). Understanding how JavaScript handles async operations is a direct extension of its single-threaded nature, making foundational JS knowledge a prerequisite."
+        }
+      ]
+    }
+  ],
+  "itemCount": 2,
+  "clusterCount": 1,
+  "startIndex": 5,
+  "endIndex": 6
+}

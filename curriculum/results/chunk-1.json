@@ -1,0 +1,25 @@
+{
+  "chunkId": "chunk-1",
+  "clusters": [
+    {
+      "name": "Insufficient Data for Curriculum Design",
+      "description": "Unable to perform requested analysis (identify prerequisite chains, group into thematic clusters, or propose an ordered learning sequence). The provided content items are missing all essential metadata fields (e.g., 'type', 'title', 'tags', 'technology', 'prerequisites', 'complexity', 'interviewRelevance', 'interviewFrequency', 'learningPath'). Only the 'id' field was supplied for each item.",
+      "items": [
+        {
+          "index": 0,
+          "id": "54df5f6d-c31c-47d7-b3fb-3c5d22ebdb41",
+          "reason": "This item lacks the necessary metadata (title, tags, prerequisites, complexity, etc.) to determine its thematic cluster, establish dependencies, or place it within a learning progression."
+        },
+        {
+          "index": 1,
+          "id": "9eef224e-890b-49e4-8b7f-b86c4699f2b0",
+          "reason": "This item lacks the necessary metadata (title, tags, prerequisites, complexity, etc.) to determine its thematic cluster, establish dependencies, or place it within a learning progression."
+        }
+      ]
+    }
+  ],
+  "itemCount": 2,
+  "clusterCount": 1,
+  "startIndex": 3,
+  "endIndex": 4
+}

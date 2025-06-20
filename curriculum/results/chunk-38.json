@@ -1,0 +1,30 @@
+{
+  "chunkId": "chunk-38",
+  "clusters": [
+    {
+      "name": "JavaScript Event Loop & Asynchronous Programming",
+      "description": "This cluster covers the fundamental and advanced concepts of the JavaScript Event Loop, crucial for understanding asynchronous code execution, and includes a common interview question to test comprehensive understanding.",
+      "items": [
+        {
+          "index": 73,
+          "id": "b8bb88ed-5083-46df-9253-27cb03f023b5",
+          "reason": "This item introduces the foundational concepts of the JavaScript Event Loop, including the call stack, Web APIs, and callback queue. It is the necessary starting point for understanding how asynchronous code executes in JavaScript."
+        },
+        {
+          "index": 74,
+          "id": "6b8c3a34-bfe2-408a-a8b5-0adc285072a0",
+          "reason": "Building directly on the basic Event Loop understanding, this item delves into the more nuanced distinction and execution order of microtasks (e.g., Promises) and macrotasks (e.g., setTimeout). This advanced detail is critical for accurate prediction of complex asynchronous behavior and is a prerequisite for a thorough interview explanation."
+        },
+        {
+          "index": 75,
+          "id": "d68744a5-1545-46e0-85c0-08df297781c7",
+          "reason": "This item represents a common interview question that assesses a candidate's full grasp of the JavaScript Event Loop, requiring them to explain not only the basic mechanism but also the intricacies of microtasks and macrotasks. It serves as an application and synthesis of knowledge gained from the previous two items."
+        }
+      ]
+    }
+  ],
+  "itemCount": 3,
+  "clusterCount": 1,
+  "startIndex": 73,
+  "endIndex": 75
+}

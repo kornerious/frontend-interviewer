@@ -1,0 +1,25 @@
+{
+  "chunkId": "chunk-34",
+  "clusters": [
+    {
+      "name": "Browser Event Handling and Performance",
+      "description": "This cluster covers the fundamental mechanisms of how events propagate in the browser DOM and advanced techniques for optimizing event handling to improve application responsiveness and efficiency.",
+      "items": [
+        {
+          "index": 63,
+          "id": "b9fbc0e9-c05e-4aff-a54a-fc9c2bd8ea8e",
+          "reason": "This item (Understanding Event Bubbling and Capturing) provides foundational knowledge of how events propagate through the DOM, which is essential before addressing more advanced event-related topics. It explains the core mechanics necessary for all subsequent event handling."
+        },
+        {
+          "index": 64,
+          "id": "1666d4a1-21b8-4c60-8aca-764f10e4e81f",
+          "reason": "This item (Debouncing and Throttling Event Handlers) builds directly upon the understanding of basic event handling and propagation. It introduces critical performance optimization patterns that are applied to event listeners, making it a natural progression after learning the fundamentals of how events work."
+        }
+      ]
+    }
+  ],
+  "itemCount": 2,
+  "clusterCount": 1,
+  "startIndex": 63,
+  "endIndex": 64
+}

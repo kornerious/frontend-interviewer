@@ -384,7 +384,7 @@ firebaseConfig = {
   measurementId: "G-T2J7ZZ408S"
 };
 
-NEXT_PUBLIC_GEMINI_API_KEY = AIzaSyCrdk1AF66U1RR41GjRCucmcF16FPWpowo
+NEXT_PUBLIC_GEMINI_API_KEY = AIzaSyD5IilNslYoSorqi3BkkaprKGLhT2GzRGU
 
 openrouter key = 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
 

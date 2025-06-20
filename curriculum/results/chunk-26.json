@@ -1,0 +1,25 @@
+{
+  "chunkId": "chunk-26",
+  "clusters": [
+    {
+      "name": "JavaScript Core Concepts: Scope & Closures",
+      "description": "This cluster covers fundamental JavaScript concepts related to variable visibility, execution context, and how functions retain access to their lexical environment, which are crucial for understanding advanced patterns and common interview questions.",
+      "items": [
+        {
+          "index": 49,
+          "id": "4f07cbeb-e572-419a-97a0-563bc61e4192",
+          "reason": "This item introduces the foundational concept of JavaScript scopes (lexical, function, block), which dictate variable accessibility and lifetime. A solid understanding here is a direct prerequisite for grasping closures."
+        },
+        {
+          "index": 50,
+          "id": "3ed597f2-5003-45ed-a919-b53494560025",
+          "reason": "This item directly builds upon the understanding of JavaScript scopes. Closures demonstrate how functions 'remember' their lexical environment, allowing them to access variables from their creation context even after that context has closed. It's a natural and advanced follow-up to the scopes topic."
+        }
+      ]
+    }
+  ],
+  "itemCount": 2,
+  "clusterCount": 1,
+  "startIndex": 49,
+  "endIndex": 50
+}

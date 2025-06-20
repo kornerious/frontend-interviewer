@@ -1,0 +1,25 @@
+{
+  "chunkId": "chunk-11",
+  "clusters": [
+    {
+      "name": "Uncategorized Items (Missing Metadata)",
+      "description": "These items could not be properly categorized, grouped into thematic clusters, or ordered into a learning sequence. The provided input only contained the 'id' field for each item, missing crucial metadata such as 'type', 'title', 'tags', 'prerequisites', 'complexity', 'interviewRelevance', 'interviewFrequency', and 'learningPath'. Without this information, it is impossible to identify prerequisite chains, determine thematic relevance, or propose a natural learning progression.",
+      "items": [
+        {
+          "index": 0,
+          "id": "ea875451-4590-4345-ae70-694522064542",
+          "reason": "This item cannot be properly placed or ordered as its detailed metadata (e.g., title, tags, prerequisites) is missing from the input."
+        },
+        {
+          "index": 1,
+          "id": "46d67387-9346-40d4-8c93-c7a4a333d06e",
+          "reason": "This item cannot be properly placed or ordered as its detailed metadata (e.g., title, tags, prerequisites) is missing from the input."
+        }
+      ]
+    }
+  ],
+  "itemCount": 2,
+  "clusterCount": 1,
+  "startIndex": 21,
+  "endIndex": 22
+}

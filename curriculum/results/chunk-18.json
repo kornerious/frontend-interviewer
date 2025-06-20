@@ -1,0 +1,20 @@
+{
+  "chunkId": "chunk-18",
+  "clusters": [
+    {
+      "name": "Uncategorized Topics",
+      "description": "This cluster contains content items for which insufficient metadata (e.g., title, tags, technology, prerequisites, complexity) was provided. As a result, it is not possible to accurately identify thematic groupings, prerequisite chains, or propose a meaningful ordered learning sequence for interview preparation.",
+      "items": [
+        {
+          "index": 36,
+          "id": "681ba99a-be4b-44b6-ac61-e7ee1f8365bb",
+          "reason": "This item was included as per the input, but due to the lack of descriptive metadata (such as title, tags, technology, prerequisites, or complexity), it cannot be accurately categorized into a specific thematic cluster or placed within a natural learning progression. It is listed here as the only item provided in an 'Uncategorized' cluster."
+        }
+      ]
+    }
+  ],
+  "itemCount": 1,
+  "clusterCount": 1,
+  "startIndex": 36,
+  "endIndex": 36
+}

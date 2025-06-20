@@ -1,0 +1,25 @@
+{
+  "chunkId": "chunk-43",
+  "clusters": [
+    {
+      "name": "JavaScript Asynchronous Concepts",
+      "description": "This cluster covers the fundamental mechanisms and common patterns for handling asynchronous operations in JavaScript, crucial for understanding modern web development.",
+      "items": [
+        {
+          "index": 85,
+          "id": "0b24fd70-cf6b-459f-ab09-8e7416e8fbbf",
+          "reason": "This item is foundational for understanding how JavaScript executes code asynchronously. A solid grasp of the Event Loop is a prerequisite for correctly comprehending subsequent asynchronous patterns."
+        },
+        {
+          "index": 86,
+          "id": "6221f1ec-688e-4529-a980-2295af964123",
+          "reason": "Building directly on the Event Loop, this item introduces the primary patterns for managing asynchronous operations (callbacks, Promises, Async/Await), which are essential for writing non-blocking and maintainable JavaScript code."
+        }
+      ]
+    }
+  ],
+  "itemCount": 2,
+  "clusterCount": 1,
+  "startIndex": 85,
+  "endIndex": 86
+}

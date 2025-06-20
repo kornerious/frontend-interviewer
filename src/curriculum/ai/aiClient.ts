@@ -3,7 +3,8 @@
  * 
  * Handles communication with Gemini API for curriculum generation
  */
-import { GoogleGenerativeAI, GenerativeModel, HarmCategory, HarmBlockThreshold } from '@google/generative-ai';
+import { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold } from '@google/generative-ai';
+import axios from 'axios';
 
 /**
  * Configuration for AI client
@@ -35,7 +36,6 @@ const DEFAULT_CONFIG: AIClientConfig = {
 export class AIClient {
   private config: AIClientConfig;
   private genAI: GoogleGenerativeAI;
-  private model: GenerativeModel;
   
   /**
    * Constructor
@@ -49,7 +49,6 @@ export class AIClient {
     }
     
     this.genAI = new GoogleGenerativeAI(this.config.apiKey);
-    this.model = this.genAI.getGenerativeModel({ model: this.config.model });
     
     console.log(`AIClient: Initialized with model ${this.config.model}`);
   }
@@ -61,66 +60,113 @@ export class AIClient {
    */
   async sendPrompt(prompt: string): Promise<any> {
     try {
-      console.log(`AIClient: Sending prompt to ${this.model}`);
+      console.log(`AIClient: Sending prompt to Gemini API (direct axios call)`);
       console.log('AIClient: Full prompt:', prompt);
       
-      const generationConfig = {
-        temperature: 1.0,
-        topP: 0.95,
-        maxOutputTokens: 60000,
+      // Define the Gemini API URL
+      const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent`;
+      
+      // Build the request payload
+      const requestPayload = {
+        contents: [
+          { 
+            role: "user",
+            parts: [
+              {
+                text: prompt
+              }
+            ]
+          }
+        ],
+        generationConfig: {
+          temperature: 1.0,
+          maxOutputTokens: 65000,
+          topP: 0.95,
+        },
       };
       
-      console.log('AIClient: Generation config:', JSON.stringify(generationConfig));
-      
-      const safetySettings = [
-        {
-          category: HarmCategory.HARM_CATEGORY_HARASSMENT,
-          threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
-        },
-        {
-          category: HarmCategory.HARM_CATEGORY_HATE_SPEECH,
-          threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
-        },
-        {
-          category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
-          threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
-        },
-        {
-          category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
-          threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
-        },
-      ];
-      
       console.log('AIClient: Starting API request at:', new Date().toISOString());
-
-      console.log("prompt: "+prompt);
-      // Send the request
-      const result = await this.model.generateContent({
-        contents: [{ role: 'user', parts: [{ text: prompt }] }],
-        generationConfig,
-        safetySettings,
-      });
+      console.log('AIClient: Request URL:', `${GEMINI_API_URL}?key=[API_KEY_REDACTED]`);
+      console.log('AIClient: Request payload:', JSON.stringify(requestPayload, null, 2));
+      
+      // Send the request via axios
+      const response = await axios.post(
+        `${GEMINI_API_URL}?key=${this.config.apiKey}`,
+        requestPayload,
+        {
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          timeout: 600000 // 10 minute timeout
+        }
+      );
       
       console.log('AIClient: Completed API request at:', new Date().toISOString());
+      console.log('AIClient: Response status:', response.status);
       
-      const response = result.response;
-      const text = response.text();
+      // Extract the text from the response
+      const responseData = response.data;
+      let text = '';
       
-      console.log(`AIClient: Received response from ${this.model}`);
-      console.log('AIClient: Raw response:', text.substring(0, 500) + '...' + text.substring(text.length - 500));
+      // Extract text from the Gemini response format
+      if (responseData.candidates && 
+          responseData.candidates[0] && 
+          responseData.candidates[0].content && 
+          responseData.candidates[0].content.parts) {
+        text = responseData.candidates[0].content.parts[0].text || '';
+      }
       
-      // Parse the response as JSON
+      console.log('AIClient: Received response from Gemini API');
+      console.log('AIClient: Raw response:', text.substring(0, 500) + '...' + (text.length > 1000 ? text.substring(text.length - 500) : ''));
+      
+      // Try to extract JSON from a code block in the response if direct parsing fails
       try {
-        const parsedResponse = JSON.parse(text);
-        console.log('AIClient: Parsed response structure:', JSON.stringify(Object.keys(parsedResponse)));
-        return parsedResponse;
+        let jsonContent = text;
+        
+        // First try to parse the response directly as JSON
+        try {
+          const parsedResponse = JSON.parse(jsonContent);
+          console.log('AIClient: Successfully parsed direct JSON response');
+          console.log('AIClient: Parsed response structure:', JSON.stringify(Object.keys(parsedResponse)));
+          return parsedResponse;
+        } catch (directParseError) {
+          console.log('AIClient: Direct JSON parsing failed, trying to extract from markdown code blocks');
+          
+          // If direct parsing fails, try to extract JSON from markdown code blocks
+          const jsonBlockMatch = text.match(/```(?:json)?\n([\s\S]*?)\n```/);
+          if (jsonBlockMatch && jsonBlockMatch[1]) {
+            console.log('AIClient: Found JSON code block in response');
+            jsonContent = jsonBlockMatch[1].trim();
+            
+            try {
+              const parsedResponse = JSON.parse(jsonContent);
+              console.log('AIClient: Successfully parsed JSON from code block');
+              console.log('AIClient: Parsed response structure:', JSON.stringify(Object.keys(parsedResponse)));
+              return parsedResponse;
+            } catch (blockParseError) {
+              console.error('AIClient: Failed to parse extracted code block as JSON:', blockParseError);
+              throw new Error('Failed to parse extracted JSON code block');
+            }
+          } else {
+            console.error('AIClient: No JSON code block found in response');
+            console.log('AIClient: Full raw response:', text);
+            throw new Error('No JSON code block found in AI response');
+          }
+        }
       } catch (parseError) {
-        console.error('AIClient: Failed to parse response as JSON:', parseError);
+        console.error('AIClient: All JSON parsing attempts failed:', parseError);
         console.log('AIClient: Full raw response:', text);
-        throw new Error('Failed to parse AI response as JSON');
+        throw new Error('Failed to extract or parse JSON from AI response');
       }
     } catch (error) {
       console.error('AIClient: Error sending prompt:', error);
+      if (axios.isAxiosError(error)) {
+        console.error('AIClient: Axios error details:', {
+          status: error.response?.status,
+          statusText: error.response?.statusText,
+          data: error.response?.data
+        });
+      }
       throw error;
     }
   }
@@ -172,7 +218,6 @@ export class AIClient {
     // Reinitialize the client if the API key or model changed
     if (config.apiKey || config.model) {
       this.genAI = new GoogleGenerativeAI(this.config.apiKey);
-      this.model = this.genAI.getGenerativeModel({ model: this.config.model });
     }
   }
 }

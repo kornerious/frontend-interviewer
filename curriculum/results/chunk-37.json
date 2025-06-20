@@ -1,0 +1,30 @@
+{
+  "chunkId": "chunk-37",
+  "clusters": [
+    {
+      "name": "CSS Layout & Responsive Design",
+      "description": "This cluster covers modern CSS layout techniques, including Flexbox and Grid, essential for structuring web pages, and culminates in the principles for creating responsive designs that adapt gracefully across different devices and screen sizes.",
+      "items": [
+        {
+          "index": 70,
+          "id": "8b3ad7cc-20bc-447e-a23a-d4157e939e65",
+          "reason": "This item (assumed 'CSS Flexbox Fundamentals') introduces a foundational modern CSS layout technique, which is a prerequisite for understanding more complex layouts and responsive design. It's an excellent starting point for building adaptable UIs."
+        },
+        {
+          "index": 71,
+          "id": "b1122714-e010-4527-9dbe-583fbd983829",
+          "reason": "This item (assumed 'CSS Grid Layout for Complex Designs') builds upon the understanding of CSS layout, typically taught after or alongside Flexbox. It enables more complex, two-dimensional layout structures and often complements Flexbox for comprehensive design solutions."
+        },
+        {
+          "index": 72,
+          "id": "e4724474-f6ad-4077-b33e-5eddbd5efbeb",
+          "reason": "This item (assumed 'Responsive Web Design Principles') synthesizes the knowledge gained from Flexbox and Grid. Understanding how to use these layout methods is crucial for implementing responsive design principles, such as media queries and fluid layouts, to ensure websites look good on all devices."
+        }
+      ]
+    }
+  ],
+  "itemCount": 3,
+  "clusterCount": 1,
+  "startIndex": 70,
+  "endIndex": 72
+}

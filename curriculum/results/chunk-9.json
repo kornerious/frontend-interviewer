@@ -1,0 +1,25 @@
+{
+  "chunkId": "chunk-9",
+  "clusters": [
+    {
+      "name": "JavaScript Event Loop & Asynchronicity",
+      "description": "This cluster explores the core mechanisms of JavaScript's asynchronous execution, from the foundational event loop concept to the intricate distinctions between microtasks and macrotasks.",
+      "items": [
+        {
+          "index": 18,
+          "id": "550b85bd-efb1-47df-a9c0-14c1601a1cc3",
+          "reason": "As a foundational concept for JavaScript concurrency, 'Understanding the JavaScript Event Loop' serves as the entry point. It's crucial for grasping how non-blocking operations are managed before diving into more granular details."
+        },
+        {
+          "index": 19,
+          "id": "35a33fd1-3f87-4ae5-a5ec-f1ef7f0bc4fd",
+          "reason": "Building directly upon the foundational knowledge of the Event Loop, 'Microtasks vs Macrotasks in JavaScript' delves into the more advanced scheduling nuances. Understanding the basic Event Loop is a prerequisite for comprehending why and how these different task queues operate."
+        }
+      ]
+    }
+  ],
+  "itemCount": 2,
+  "clusterCount": 1,
+  "startIndex": 18,
+  "endIndex": 19
+}

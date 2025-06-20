@@ -1,0 +1,20 @@
+{
+  "chunkId": "chunk-5",
+  "clusters": [
+    {
+      "name": "Core Frontend Principles",
+      "description": "This cluster is a placeholder for foundational frontend development concepts. Due to the absence of detailed metadata (title, tags, prerequisites, complexity) for the provided item, a precise thematic grouping, prerequisite chain identification, and ordered learning sequence are not possible. The item is placed here as a general core concept.",
+      "items": [
+        {
+          "index": 11,
+          "id": "379b2724-4a0c-425e-8037-012d98906d04",
+          "reason": "This item is included as the sole content item. Without additional metadata such as title, tags, and prerequisites, its specific topic, complexity, and dependencies cannot be determined. It is positioned as a foundational element given the lack of further context, awaiting more detailed information for proper categorization and sequencing."
+        }
+      ]
+    }
+  ],
+  "itemCount": 1,
+  "clusterCount": 1,
+  "startIndex": 11,
+  "endIndex": 11
+}

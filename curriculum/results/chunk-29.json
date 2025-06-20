@@ -1,0 +1,20 @@
+{
+  "chunkId": "chunk-29",
+  "clusters": [
+    {
+      "name": "Uncategorized Topics (Missing Metadata)",
+      "description": "This cluster serves as a placeholder for content items that lack sufficient metadata (title, tags, technology, prerequisites, complexity, etc.) required to accurately identify thematic clusters, establish prerequisite chains, or propose a meaningful learning order. Items in this cluster cannot be properly integrated into a structured curriculum without further details.",
+      "items": [
+        {
+          "index": 53,
+          "id": "f5b48cca-63de-4855-b694-e79e62ebf099",
+          "reason": "This item's content, thematic relevance, complexity, and prerequisites cannot be determined as all metadata fields other than 'id' are missing. It is placed here as a placeholder until full item details are available."
+        }
+      ]
+    }
+  ],
+  "itemCount": 1,
+  "clusterCount": 1,
+  "startIndex": 53,
+  "endIndex": 53
+}

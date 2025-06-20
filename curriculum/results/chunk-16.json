@@ -1,0 +1,25 @@
+{
+  "chunkId": "chunk-16",
+  "clusters": [
+    {
+      "name": "JavaScript Concurrency & Performance",
+      "description": "This cluster covers foundational concepts of JavaScript's execution model, focusing on asynchronous operations and techniques to optimize event handling and application performance.",
+      "items": [
+        {
+          "index": 33,
+          "id": "019fc46f-d6dc-4e84-94c6-f7ff512f50ef",
+          "reason": "This item (inferred to be 'Understanding the JavaScript Event Loop') is foundational for grasping how JavaScript handles asynchronous code and processes tasks. It's a prerequisite for understanding more advanced performance optimization techniques."
+        },
+        {
+          "index": 34,
+          "id": "94af5f9b-4c14-49e5-b4c6-3298aed31646",
+          "reason": "This item (inferred to be 'Debouncing and Throttling in JavaScript') builds directly on the understanding of the Event Loop and asynchronous callbacks. It demonstrates practical application of these concepts for optimizing user interface responsiveness and preventing excessive function calls."
+        }
+      ]
+    }
+  ],
+  "itemCount": 2,
+  "clusterCount": 1,
+  "startIndex": 33,
+  "endIndex": 34
+}
