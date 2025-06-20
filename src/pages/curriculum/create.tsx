@@ -26,6 +26,7 @@ const CurriculumCreatePage: React.FC = () => {
   const router = useRouter();
   const [activeStep, setActiveStep] = useState(0);
   const [processing, setProcessing] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [metadata, setMetadata] = useState<any | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [metadataStats, setMetadataStats] = useState<{
@@ -234,10 +235,35 @@ const CurriculumCreatePage: React.FC = () => {
     }
   };
   
-  const handleNextStep = () => {
-    // In a real implementation, this would trigger the next step in the process
-    // For now, we'll just increment the active step
-    setActiveStep(prevStep => Math.min(prevStep + 1, steps.length - 1));
+  const handleNextStep = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      // Call the aggregation API to run Step 5
+      const response = await fetch('/api/curriculum/run-aggregation', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      
+      const data = await response.json();
+      
+      if (response.ok) {
+        console.log('Aggregation completed successfully:', data.message);
+        // Move to the next step
+        setActiveStep(prevStep => Math.min(prevStep + 1, steps.length - 1));
+      } else {
+        console.error('Aggregation failed:', data.error);
+        setError(`Failed to aggregate curriculum: ${data.error}`);
+      }
+    } catch (err: any) {
+      console.error('Error during aggregation:', err);
+      setError(`Error: ${err.message || 'Unknown error occurred'}`);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleCancel = () => {
@@ -552,10 +578,17 @@ const CurriculumCreatePage: React.FC = () => {
                   and create a cohesive curriculum sequence.
                 </Typography>
                 
+                {error && (
+                  <Alert severity="error" sx={{ mt: 2, mb: 2 }}>
+                    {error}
+                  </Alert>
+                )}
+
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 3 }}>
                   <Button 
                     variant="outlined" 
                     onClick={handleCancel}
+                    disabled={loading}
                   >
                     Back to Modules
                   </Button>
@@ -564,8 +597,10 @@ const CurriculumCreatePage: React.FC = () => {
                     variant="contained" 
                     color="primary"
                     onClick={handleNextStep}
+                    disabled={loading}
+                    startIcon={loading ? <CircularProgress size={20} color="inherit" /> : null}
                   >
-                    Continue to Step 5: Merge & Resolve Dependencies
+                    {loading ? 'Processing...' : 'Continue to Step 5: Merge & Resolve Dependencies'}
                   </Button>
                 </Box>
               </Box>

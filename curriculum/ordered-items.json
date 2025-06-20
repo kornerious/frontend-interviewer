@@ -1,0 +1,2292 @@
+[
+  {
+    "id": "theory_array_iteration",
+    "index": 14,
+    "moduleId": "javascript",
+    "complexity": 4,
+    "tags": [
+      "Array Methods",
+      "Iteration",
+      "JavaScript Fundamentals",
+      "ES6"
+    ]
+  },
+  {
+    "id": "theory_string_consecutive_char",
+    "index": 153,
+    "moduleId": "javascript",
+    "complexity": 4,
+    "tags": [
+      "string-manipulation",
+      "algorithms",
+      "iteration",
+      "data-processing"
+    ]
+  },
+  {
+    "id": "theory_iife",
+    "index": 6,
+    "moduleId": "javascript",
+    "complexity": 5,
+    "tags": [
+      "JavaScript",
+      "Functions",
+      "Scope",
+      "IIFE",
+      "Closures",
+      "Module Pattern"
+    ]
+  },
+  {
+    "id": "theory_array_modification_methods",
+    "index": 12,
+    "moduleId": "javascript",
+    "complexity": 5,
+    "tags": [
+      "Array Methods",
+      "Mutation",
+      "Non-Mutation",
+      "Data Manipulation",
+      "JavaScript Basics"
+    ]
+  },
+  {
+    "id": "theory_event_propagation",
+    "index": 18,
+    "moduleId": "javascript",
+    "complexity": 5,
+    "tags": [
+      "DOM",
+      "Events",
+      "Event Handling",
+      "JavaScript Fundamentals"
+    ]
+  },
+  {
+    "id": "theory_es6_classes",
+    "index": 21,
+    "moduleId": "javascript",
+    "complexity": 5,
+    "tags": [
+      "ES6",
+      "Classes",
+      "OOP",
+      "JavaScript",
+      "Frontend"
+    ]
+  },
+  {
+    "id": "theory_object_getters_setters",
+    "index": 22,
+    "moduleId": "javascript",
+    "complexity": 5,
+    "tags": [
+      "objects",
+      "properties",
+      "getters",
+      "setters",
+      "javascript_basics"
+    ]
+  },
+  {
+    "id": "theory_pure_functions_and_side_effects",
+    "index": 24,
+    "moduleId": "javascript",
+    "complexity": 5,
+    "tags": [
+      "functional-programming",
+      "pure-functions",
+      "side-effects",
+      "predictability",
+      "testability",
+      "javascript"
+    ]
+  },
+  {
+    "id": "theory_redux_actions",
+    "index": 88,
+    "moduleId": "javascript",
+    "complexity": 5,
+    "tags": [
+      "Redux",
+      "Actions",
+      "Action Creators",
+      "State Management",
+      "Frontend Architecture"
+    ]
+  },
+  {
+    "id": "theory_immutable_basics",
+    "index": 97,
+    "moduleId": "javascript",
+    "complexity": 5,
+    "tags": [
+      "Immutable.js",
+      "Redux",
+      "State Management",
+      "Immutability",
+      "fromJS",
+      "set"
+    ]
+  },
+  {
+    "id": "theory_web_storage_event_listener",
+    "index": 108,
+    "moduleId": "javascript",
+    "complexity": 5,
+    "tags": [
+      "web-storage",
+      "browser-api",
+      "event-listener",
+      "frontend",
+      "synchronization"
+    ]
+  },
+  {
+    "id": "theory_canvas_fundamentals",
+    "index": 113,
+    "moduleId": "javascript",
+    "complexity": 5,
+    "tags": [
+      "Canvas API",
+      "HTML",
+      "JavaScript",
+      "Graphics",
+      "Drawing",
+      "Animation"
+    ]
+  },
+  {
+    "id": "theory_grunt_task_runner",
+    "index": 125,
+    "moduleId": "javascript",
+    "complexity": 5,
+    "tags": [
+      "Grunt",
+      "Task Runner",
+      "Build Tools",
+      "Automation",
+      "Frontend Development"
+    ]
+  },
+  {
+    "id": "theory_js_fundamentals_datatypes_and_scope",
+    "index": 144,
+    "moduleId": "javascript",
+    "complexity": 5,
+    "tags": [
+      "JavaScript",
+      "Fundamentals",
+      "Data Types",
+      "Variables",
+      "Scope",
+      "Temporal Dead Zone",
+      "Primitives",
+      "Objects"
+    ]
+  },
+  {
+    "id": "theory_local_maxima",
+    "index": 150,
+    "moduleId": "javascript",
+    "complexity": 5,
+    "tags": [
+      "array",
+      "algorithm",
+      "traversal",
+      "local maximum",
+      "peak finding"
+    ]
+  },
+  {
+    "id": "theory_oop_fundamentals_vehicle_parkinglot_structure",
+    "index": 155,
+    "moduleId": "javascript",
+    "complexity": 5,
+    "tags": [
+      "OOP",
+      "Classes",
+      "Constructor",
+      "this",
+      "JavaScript",
+      "Fundamentals"
+    ]
+  },
+  {
+    "id": "theory_decorator_pattern",
+    "index": 3,
+    "moduleId": "javascript",
+    "complexity": 6,
+    "tags": [
+      "design-patterns",
+      "structural-patterns",
+      "javascript",
+      "object-oriented-programming",
+      "flexibility"
+    ]
+  },
+  {
+    "id": "theory_array_group_by_reduce",
+    "index": 15,
+    "moduleId": "javascript",
+    "complexity": 6,
+    "tags": [
+      "Array.prototype.reduce",
+      "functional programming",
+      "data transformation",
+      "JavaScript",
+      "array methods"
+    ]
+  },
+  {
+    "id": "theory_redux_core_concepts",
+    "index": 86,
+    "moduleId": "javascript",
+    "complexity": 6,
+    "tags": [
+      "Redux",
+      "State Management",
+      "Core Concepts",
+      "Action",
+      "Reducer",
+      "Store",
+      "Dispatch",
+      "Selector"
+    ]
+  },
+  {
+    "id": "theory_immutable_js_collections",
+    "index": 106,
+    "moduleId": "javascript",
+    "complexity": 6,
+    "tags": [
+      "Immutable.js",
+      "Data Structures",
+      "Immutability",
+      "Functional Programming",
+      "State Management"
+    ]
+  },
+  {
+    "id": "theory_dom_events",
+    "index": 109,
+    "moduleId": "javascript",
+    "complexity": 6,
+    "tags": [
+      "DOM",
+      "Events",
+      "Event Handling",
+      "Event Delegation",
+      "Custom Events",
+      "JavaScript"
+    ]
+  },
+  {
+    "id": "theory_transpilers_babel",
+    "index": 126,
+    "moduleId": "javascript",
+    "complexity": 6,
+    "tags": [
+      "JavaScript",
+      "Transpilers",
+      "Babel",
+      "ES6+",
+      "Build Tools"
+    ]
+  },
+  {
+    "id": "theory_fetch_api_promises",
+    "index": 149,
+    "moduleId": "javascript",
+    "complexity": 6,
+    "tags": [
+      "asynchronous-javascript",
+      "fetch-api",
+      "promises",
+      "error-handling",
+      "web-apis"
+    ]
+  },
+  {
+    "id": "theory_vanilla_js_spreadsheet",
+    "index": 159,
+    "moduleId": "javascript",
+    "complexity": 6,
+    "tags": [
+      "Vanilla JS",
+      "DOM Manipulation",
+      "Classes",
+      "Data Structures",
+      "Frontend Architecture",
+      "Event Handling"
+    ]
+  },
+  {
+    "id": "theory_javascript_engine_execution_context",
+    "index": 0,
+    "moduleId": "javascript",
+    "complexity": 7,
+    "tags": [
+      "JavaScript Core",
+      "Execution Context",
+      "Call Stack",
+      "Scope",
+      "This"
+    ]
+  },
+  {
+    "id": "theory_event_loop",
+    "index": 1,
+    "moduleId": "javascript",
+    "complexity": 7,
+    "tags": [
+      "JavaScript",
+      "Asynchronous",
+      "Event Loop",
+      "Concurrency",
+      "Web APIs",
+      "Promises",
+      "setTimeout"
+    ]
+  },
+  {
+    "id": "theory_singleton_pattern",
+    "index": 2,
+    "moduleId": "javascript",
+    "complexity": 7,
+    "tags": [
+      "design-patterns",
+      "creational-patterns",
+      "javascript",
+      "architecture",
+      "state-management"
+    ]
+  },
+  {
+    "id": "theory_strategy_pattern",
+    "index": 4,
+    "moduleId": "javascript",
+    "complexity": 7,
+    "tags": [
+      "design-patterns",
+      "behavioral-patterns",
+      "oop",
+      "javascript"
+    ]
+  },
+  {
+    "id": "theory_type_coercion",
+    "index": 5,
+    "moduleId": "javascript",
+    "complexity": 7,
+    "tags": [
+      "type-coercion",
+      "javascript-fundamentals",
+      "operators",
+      "equality",
+      "NaN",
+      "infinity"
+    ]
+  },
+  {
+    "id": "theory_memoization",
+    "index": 7,
+    "moduleId": "javascript",
+    "complexity": 7,
+    "tags": [
+      "optimization",
+      "performance",
+      "caching",
+      "higher-order functions",
+      "closures"
+    ]
+  },
+  {
+    "id": "theory_this_context_es5",
+    "index": 8,
+    "moduleId": "javascript",
+    "complexity": 7,
+    "tags": [
+      "javascript",
+      "this",
+      "context",
+      "es5",
+      "bind",
+      "closure",
+      "scope",
+      "function-prototype"
+    ]
+  },
+  {
+    "id": "theory_prototype_inheritance_es5",
+    "index": 9,
+    "moduleId": "javascript",
+    "complexity": 7,
+    "tags": [
+      "JavaScript",
+      "Inheritance",
+      "Prototypes",
+      "ES5",
+      "Object.create",
+      "Constructor",
+      "OOP"
+    ]
+  },
+  {
+    "id": "theory_private_members_js",
+    "index": 10,
+    "moduleId": "javascript",
+    "complexity": 7,
+    "tags": [
+      "JavaScript",
+      "OOP",
+      "Encapsulation",
+      "Closures",
+      "Symbols",
+      "ES6"
+    ]
+  },
+  {
+    "id": "theory_object_composition",
+    "index": 11,
+    "moduleId": "javascript",
+    "complexity": 7,
+    "tags": [
+      "object-oriented-programming",
+      "composition",
+      "javascript",
+      "design-patterns",
+      "functional-programming",
+      "factories"
+    ]
+  },
+  {
+    "id": "theory_array_mutating_methods",
+    "index": 13,
+    "moduleId": "javascript",
+    "complexity": 7,
+    "tags": [
+      "array methods",
+      "mutation",
+      "in-place",
+      "splice",
+      "sort",
+      "reverse",
+      "fill",
+      "copyWithin"
+    ]
+  },
+  {
+    "id": "theory_promise_combinators",
+    "index": 16,
+    "moduleId": "javascript",
+    "complexity": 7,
+    "tags": [
+      "Promises",
+      "Asynchronous JavaScript",
+      "Promise Combinators",
+      "ES2020"
+    ]
+  },
+  {
+    "id": "theory_event_loop_async",
+    "index": 17,
+    "moduleId": "javascript",
+    "complexity": 7,
+    "tags": [
+      "JavaScript",
+      "Asynchronous",
+      "Event Loop",
+      "Promises",
+      "setTimeout",
+      "Microtasks",
+      "Macrotasks"
+    ]
+  },
+  {
+    "id": "theory_async_timeout_abortcontroller",
+    "index": 19,
+    "moduleId": "javascript",
+    "complexity": 7,
+    "tags": [
+      "async",
+      "fetch",
+      "AbortController",
+      "timeout",
+      "error-handling",
+      "web-apis"
+    ]
+  },
+  {
+    "id": "theory_async_fetch_retry",
+    "index": 20,
+    "moduleId": "javascript",
+    "complexity": 7,
+    "tags": [
+      "async",
+      "promises",
+      "error-handling",
+      "network",
+      "api-calls",
+      "resilience"
+    ]
+  },
+  {
+    "id": "theory_currying",
+    "index": 23,
+    "moduleId": "javascript",
+    "complexity": 7,
+    "tags": [
+      "functional-programming",
+      "closures",
+      "currying",
+      "partial-application",
+      "javascript"
+    ]
+  },
+  {
+    "id": "theory_js_object_methods",
+    "index": 25,
+    "moduleId": "javascript",
+    "complexity": 7,
+    "tags": [
+      "JavaScript",
+      "Objects",
+      "Mutability",
+      "Cloning",
+      "ES6"
+    ]
+  },
+  {
+    "id": "theory_immutable_js_structural_sharing",
+    "index": 98,
+    "moduleId": "javascript",
+    "complexity": 7,
+    "tags": [
+      "Immutable.js",
+      "Structural Sharing",
+      "Persistent Data Structures",
+      "Immutability",
+      "Performance",
+      "React",
+      "Redux"
+    ]
+  },
+  {
+    "id": "theory_immutable_js_intro",
+    "index": 105,
+    "moduleId": "javascript",
+    "complexity": 7,
+    "tags": [
+      "Immutable.js",
+      "Immutability",
+      "Functional Programming",
+      "Performance",
+      "React"
+    ]
+  },
+  {
+    "id": "theory_event_loop_async_js",
+    "index": 107,
+    "moduleId": "javascript",
+    "complexity": 7,
+    "tags": [
+      "JavaScript",
+      "Asynchronous",
+      "Event Loop",
+      "Concurrency",
+      "Web APIs"
+    ]
+  },
+  {
+    "id": "theory_web_workers_intro",
+    "index": 111,
+    "moduleId": "javascript",
+    "complexity": 7,
+    "tags": [
+      "JavaScript",
+      "Web Workers",
+      "Concurrency",
+      "Performance",
+      "Frontend Architecture"
+    ]
+  },
+  {
+    "id": "theory_webpack_fundamentals",
+    "index": 129,
+    "moduleId": "javascript",
+    "complexity": 7,
+    "tags": [
+      "Webpack",
+      "Bundler",
+      "Configuration",
+      "Frontend Build",
+      "JavaScript",
+      "Tools"
+    ]
+  },
+  {
+    "id": "theory_array_prototype_extension_flatten",
+    "index": 145,
+    "moduleId": "javascript",
+    "complexity": 7,
+    "tags": [
+      "Array",
+      "Prototype",
+      "Polyfill",
+      "Recursion",
+      "Data Structures",
+      "Functional Programming"
+    ]
+  },
+  {
+    "id": "theory_data_manipulation",
+    "index": 146,
+    "moduleId": "javascript",
+    "complexity": 7,
+    "tags": [
+      "JavaScript",
+      "Array Methods",
+      "Data Manipulation",
+      "Filtering",
+      "Sorting",
+      "Aggregation",
+      "Functional Programming"
+    ]
+  },
+  {
+    "id": "theory_async_data_processing",
+    "index": 147,
+    "moduleId": "javascript",
+    "complexity": 7,
+    "tags": [
+      "asynchronous-javascript",
+      "promises",
+      "async-await",
+      "array-methods",
+      "data-transformation",
+      "error-handling",
+      "frontend-architecture"
+    ]
+  },
+  {
+    "id": "theory_custom_array_methods",
+    "index": 148,
+    "moduleId": "javascript",
+    "complexity": 7,
+    "tags": [
+      "JavaScript",
+      "Array Methods",
+      "Polyfill",
+      "Functional Programming",
+      "Higher-Order Functions"
+    ]
+  },
+  {
+    "id": "theory_matrix_transformations",
+    "index": 152,
+    "moduleId": "javascript",
+    "complexity": 7,
+    "tags": [
+      "matrix",
+      "algorithms",
+      "in-place",
+      "traversal",
+      "array",
+      "data-structures"
+    ]
+  },
+  {
+    "id": "theory_tree_preorder_traversal",
+    "index": 154,
+    "moduleId": "javascript",
+    "complexity": 7,
+    "tags": [
+      "data-structures",
+      "trees",
+      "traversal",
+      "algorithms",
+      "stack",
+      "interview-prep"
+    ]
+  },
+  {
+    "id": "theory_https_setup",
+    "index": 36,
+    "moduleId": "react",
+    "complexity": 2,
+    "tags": [
+      "React",
+      "Development",
+      "HTTPS",
+      "Environment Variables",
+      "CLI",
+      "Web Security"
+    ]
+  },
+  {
+    "id": "theory_jsx_fundamentals",
+    "index": 26,
+    "moduleId": "react",
+    "complexity": 3,
+    "tags": [
+      "JSX",
+      "React",
+      "Frontend",
+      "Syntax",
+      "Beginner"
+    ]
+  },
+  {
+    "id": "theory_presentational_components",
+    "index": 29,
+    "moduleId": "react",
+    "complexity": 4,
+    "tags": [
+      "React",
+      "Components",
+      "Presentational",
+      "UI",
+      "Functional Components",
+      "Props"
+    ]
+  },
+  {
+    "id": "theory_component_lifecycle_overview",
+    "index": 43,
+    "moduleId": "react",
+    "complexity": 4,
+    "tags": [
+      "react",
+      "lifecycle",
+      "fundamentals",
+      "rendering"
+    ]
+  },
+  {
+    "id": "theory_jsx_fragments",
+    "index": 27,
+    "moduleId": "react",
+    "complexity": 5,
+    "tags": [
+      "React",
+      "JSX",
+      "Fragments",
+      "DOM",
+      "Performance",
+      "Semantic HTML",
+      "Frontend"
+    ]
+  },
+  {
+    "id": "theory_react_component_props_conditional_rendering",
+    "index": 33,
+    "moduleId": "react",
+    "complexity": 5,
+    "tags": [
+      "React",
+      "Props",
+      "Conditional Rendering",
+      "JSX",
+      "Functional Components"
+    ]
+  },
+  {
+    "id": "theory_class_component_state_basics",
+    "index": 34,
+    "moduleId": "react",
+    "complexity": 5,
+    "tags": [
+      "React",
+      "Class Components",
+      "State Management",
+      "setState",
+      "Asynchronous",
+      "Batching"
+    ]
+  },
+  {
+    "id": "theory_react_event_handling_basics",
+    "index": 37,
+    "moduleId": "react",
+    "complexity": 5,
+    "tags": [
+      "React",
+      "Events",
+      "Event Handling",
+      "Synthetic Events",
+      "DOM"
+    ]
+  },
+  {
+    "id": "theory_react_refs_overview",
+    "index": 39,
+    "moduleId": "react",
+    "complexity": 5,
+    "tags": [
+      "React",
+      "Refs",
+      "DOM",
+      "Imperative Programming",
+      "Component Interaction"
+    ]
+  },
+  {
+    "id": "theory_uncontrolled_components",
+    "index": 40,
+    "moduleId": "react",
+    "complexity": 5,
+    "tags": [
+      "React",
+      "Forms",
+      "Uncontrolled Components",
+      "Refs",
+      "DOM Interaction"
+    ]
+  },
+  {
+    "id": "theory_react_testing_overview",
+    "index": 50,
+    "moduleId": "react",
+    "complexity": 5,
+    "tags": [
+      "react",
+      "testing",
+      "frontend-development",
+      "best-practices"
+    ]
+  },
+  {
+    "id": "theory_jest_react_basics",
+    "index": 53,
+    "moduleId": "react",
+    "complexity": 5,
+    "tags": [
+      "Jest",
+      "React Testing Library",
+      "Unit Testing",
+      "Frontend Testing",
+      "TDD",
+      "Accessibility"
+    ]
+  },
+  {
+    "id": "theory_react_state_forms",
+    "index": 56,
+    "moduleId": "react",
+    "complexity": 5,
+    "tags": [
+      "React",
+      "Hooks",
+      "State Management",
+      "Forms",
+      "useState",
+      "Controlled Components",
+      "Event Handling"
+    ]
+  },
+  {
+    "id": "theory_strict_mode",
+    "index": 61,
+    "moduleId": "react",
+    "complexity": 5,
+    "tags": [
+      "React",
+      "StrictMode",
+      "Development",
+      "Debugging",
+      "Side Effects",
+      "Performance"
+    ]
+  },
+  {
+    "id": "theory_react_form_handling_class_components",
+    "index": 63,
+    "moduleId": "react",
+    "complexity": 5,
+    "tags": [
+      "React",
+      "Forms",
+      "Class Components",
+      "State Management",
+      "Controlled Components"
+    ]
+  },
+  {
+    "id": "theory_react_hooks_introduction",
+    "index": 68,
+    "moduleId": "react",
+    "complexity": 5,
+    "tags": [
+      "React",
+      "Hooks",
+      "Introduction",
+      "Functional Components",
+      "State Management"
+    ]
+  },
+  {
+    "id": "theory_lazy_initial_state",
+    "index": 69,
+    "moduleId": "react",
+    "complexity": 5,
+    "tags": [
+      "React",
+      "useState",
+      "Hooks",
+      "Performance",
+      "Optimization"
+    ]
+  },
+  {
+    "id": "theory_use_effect_basics_and_cleanup",
+    "index": 70,
+    "moduleId": "react",
+    "complexity": 5,
+    "tags": [
+      "React",
+      "Hooks",
+      "useEffect",
+      "Side Effects",
+      "Cleanup",
+      "Lifecycle"
+    ]
+  },
+  {
+    "id": "theory_react_context_fundamentals",
+    "index": 74,
+    "moduleId": "react",
+    "complexity": 5,
+    "tags": [
+      "React",
+      "Context API",
+      "Hooks",
+      "State Management",
+      "Prop Drilling"
+    ]
+  },
+  {
+    "id": "theory_client_components",
+    "index": 78,
+    "moduleId": "react",
+    "complexity": 5,
+    "tags": [
+      "React",
+      "Client-side",
+      "Frontend",
+      "useState",
+      "Interactivity"
+    ]
+  },
+  {
+    "id": "theory_useref",
+    "index": 82,
+    "moduleId": "react",
+    "complexity": 5,
+    "tags": [
+      "React Hooks",
+      "useRef",
+      "DOM manipulation",
+      "Imperative programming"
+    ]
+  },
+  {
+    "id": "theory_use_debug_value",
+    "index": 83,
+    "moduleId": "react",
+    "complexity": 5,
+    "tags": [
+      "React Hooks",
+      "Debugging",
+      "Developer Tools",
+      "Custom Hooks"
+    ]
+  },
+  {
+    "id": "theory_react_component_basics",
+    "index": 119,
+    "moduleId": "react",
+    "complexity": 5,
+    "tags": [
+      "React",
+      "Hooks",
+      "useState",
+      "Functional Components",
+      "JSX",
+      "State Management"
+    ]
+  },
+  {
+    "id": "theory_react_key_best_practices",
+    "index": 130,
+    "moduleId": "react",
+    "complexity": 5,
+    "tags": [
+      "React",
+      "Performance",
+      "Best Practices",
+      "Lists",
+      "Keys"
+    ]
+  },
+  {
+    "id": "theory_arrow_functions_this_binding",
+    "index": 135,
+    "moduleId": "react",
+    "complexity": 5,
+    "tags": [
+      "React",
+      "JavaScript",
+      "this",
+      "Arrow Functions",
+      "Class Components",
+      "ES6"
+    ]
+  },
+  {
+    "id": "theory_basic_react_forms_useref",
+    "index": 139,
+    "moduleId": "react",
+    "complexity": 5,
+    "tags": [
+      "React",
+      "Forms",
+      "Hooks",
+      "useRef",
+      "Uncontrolled Components",
+      "DOM Manipulation"
+    ]
+  },
+  {
+    "id": "theory_form_field_component",
+    "index": 157,
+    "moduleId": "react",
+    "complexity": 5,
+    "tags": [
+      "React",
+      "Components",
+      "Forms",
+      "Dynamic Forms",
+      "JSX",
+      "Conditional Rendering"
+    ]
+  },
+  {
+    "id": "theory_render_props",
+    "index": 31,
+    "moduleId": "react",
+    "complexity": 6,
+    "tags": [
+      "React",
+      "Design Patterns",
+      "Render Props",
+      "Composition",
+      "Reusability",
+      "State Management"
+    ]
+  },
+  {
+    "id": "theory_immutable_state_updates",
+    "index": 35,
+    "moduleId": "react",
+    "complexity": 6,
+    "tags": [
+      "React",
+      "State Management",
+      "Immutability",
+      "JavaScript",
+      "ES6"
+    ]
+  },
+  {
+    "id": "theory_lifting_state_up",
+    "index": 38,
+    "moduleId": "react",
+    "complexity": 6,
+    "tags": [
+      "React",
+      "State Management",
+      "Component Communication",
+      "Unidirectional Data Flow",
+      "Best Practices"
+    ]
+  },
+  {
+    "id": "theory_react_update_lifecycle_overview",
+    "index": 46,
+    "moduleId": "react",
+    "complexity": 6,
+    "tags": [
+      "React",
+      "Lifecycle",
+      "Updating Phase",
+      "Component",
+      "Class Component"
+    ]
+  },
+  {
+    "id": "theory_debouncing_and_useeffect",
+    "index": 58,
+    "moduleId": "react",
+    "complexity": 6,
+    "tags": [
+      "React",
+      "useEffect",
+      "Hooks",
+      "Debouncing",
+      "Performance",
+      "Side Effects",
+      "Frontend Optimization",
+      "Cleanup Function"
+    ]
+  },
+  {
+    "id": "theory_use_reducer_basics",
+    "index": 75,
+    "moduleId": "react",
+    "complexity": 6,
+    "tags": [
+      "React Hooks",
+      "State Management",
+      "useReducer",
+      "Functional Components",
+      "Reducer Pattern"
+    ]
+  },
+  {
+    "id": "theory_react_animations_overview",
+    "index": 85,
+    "moduleId": "react",
+    "complexity": 6,
+    "tags": [
+      "React",
+      "Animations",
+      "Frontend",
+      "UI/UX",
+      "Performance"
+    ]
+  },
+  {
+    "id": "theory_react_class_components",
+    "index": 99,
+    "moduleId": "react",
+    "complexity": 6,
+    "tags": [
+      "React",
+      "Class Components",
+      "State Management",
+      "Props",
+      "Controlled Components",
+      "Forms"
+    ]
+  },
+  {
+    "id": "theory_react_code_splitting",
+    "index": 122,
+    "moduleId": "react",
+    "complexity": 6,
+    "tags": [
+      "React",
+      "Performance",
+      "Code Splitting",
+      "Lazy Loading",
+      "Webpack",
+      "Frontend Optimization"
+    ]
+  },
+  {
+    "id": "theory_react_re_rendering",
+    "index": 134,
+    "moduleId": "react",
+    "complexity": 6,
+    "tags": [
+      "React",
+      "re-render",
+      "props",
+      "state",
+      "setState",
+      "forceUpdate",
+      "lifecycle"
+    ]
+  },
+  {
+    "id": "theory_controlled_components",
+    "index": 138,
+    "moduleId": "react",
+    "complexity": 6,
+    "tags": [
+      "React",
+      "Forms",
+      "Controlled Components",
+      "State Management",
+      "Frontend Development"
+    ]
+  },
+  {
+    "id": "theory_react_purecomponent_memo",
+    "index": 167,
+    "moduleId": "react",
+    "complexity": 6,
+    "tags": [
+      "React",
+      "Performance",
+      "Optimization",
+      "PureComponent",
+      "React.memo",
+      "shouldComponentUpdate",
+      "Shallow Comparison",
+      "HOC"
+    ]
+  },
+  {
+    "id": "theory_hoc",
+    "index": 30,
+    "moduleId": "react",
+    "complexity": 7,
+    "tags": [
+      "React",
+      "HOC",
+      "Design Patterns",
+      "Reusability",
+      "Composition"
+    ]
+  },
+  {
+    "id": "theory_compound_components",
+    "index": 32,
+    "moduleId": "react",
+    "complexity": 7,
+    "tags": [
+      "React",
+      "Design Patterns",
+      "Component Composition",
+      "Context API",
+      "Frontend Architecture"
+    ]
+  },
+  {
+    "id": "theory_react_forward_ref",
+    "index": 41,
+    "moduleId": "react",
+    "complexity": 7,
+    "tags": [
+      "React",
+      "Refs",
+      "forwardRef",
+      "HOCs",
+      "Composition"
+    ]
+  },
+  {
+    "id": "theory_high_order_components",
+    "index": 42,
+    "moduleId": "react",
+    "complexity": 7,
+    "tags": [
+      "React",
+      "HOC",
+      "Higher-Order Components",
+      "Component Patterns",
+      "Code Reuse",
+      "State Management",
+      "Prop Manipulation",
+      "Best Practices"
+    ]
+  },
+  {
+    "id": "theory_component_lifecycle_flow",
+    "index": 44,
+    "moduleId": "react",
+    "complexity": 7,
+    "tags": [
+      "React",
+      "Component Lifecycle",
+      "Mounting",
+      "Updating",
+      "Unmounting",
+      "Class Components"
+    ]
+  },
+  {
+    "id": "theory_mounting_phase",
+    "index": 45,
+    "moduleId": "react",
+    "complexity": 7,
+    "tags": [
+      "React",
+      "Lifecycle Methods",
+      "Mounting",
+      "Class Components",
+      "State",
+      "Props",
+      "Side Effects"
+    ]
+  },
+  {
+    "id": "theory_react_error_boundaries_overview",
+    "index": 47,
+    "moduleId": "react",
+    "complexity": 7,
+    "tags": [
+      "React",
+      "Error Handling",
+      "Class Components",
+      "Component Lifecycle"
+    ]
+  },
+  {
+    "id": "theory_lifecycle_best_practices",
+    "index": 48,
+    "moduleId": "react",
+    "complexity": 7,
+    "tags": [
+      "React",
+      "Class Components",
+      "Lifecycle Methods",
+      "componentDidMount",
+      "componentDidUpdate",
+      "getDerivedStateFromProps",
+      "shouldComponentUpdate",
+      "Performance Optimization",
+      "State Management"
+    ]
+  },
+  {
+    "id": "theory_react_hooks_state_effects_memoization",
+    "index": 49,
+    "moduleId": "react",
+    "complexity": 7,
+    "tags": [
+      "React",
+      "Hooks",
+      "useState",
+      "useEffect",
+      "useMemo",
+      "Side Effects",
+      "Memoization",
+      "Data Fetching",
+      "Functional Components",
+      "Lifecycle"
+    ]
+  },
+  {
+    "id": "theory_react_testing_best_practices",
+    "index": 51,
+    "moduleId": "react",
+    "complexity": 7,
+    "tags": [
+      "testing",
+      "react",
+      "jest",
+      "react-testing-library",
+      "best-practices",
+      "snapshot-testing"
+    ]
+  },
+  {
+    "id": "theory_react_performance_hooks",
+    "index": 52,
+    "moduleId": "react",
+    "complexity": 7,
+    "tags": [
+      "React",
+      "Hooks",
+      "useMemo",
+      "useCallback",
+      "Performance",
+      "Optimization",
+      "Frontend"
+    ]
+  },
+  {
+    "id": "theory_use_fetch_hook",
+    "index": 57,
+    "moduleId": "react",
+    "complexity": 7,
+    "tags": [
+      "React",
+      "Hooks",
+      "useEffect",
+      "useState",
+      "Data Fetching",
+      "Asynchronous",
+      "API Integration",
+      "Custom Hooks",
+      "Error Handling",
+      "Loading States",
+      "Memory Leaks"
+    ]
+  },
+  {
+    "id": "theory_react_context_reducer_hooks",
+    "index": 59,
+    "moduleId": "react",
+    "complexity": 7,
+    "tags": [
+      "React",
+      "Hooks",
+      "Context API",
+      "useReducer",
+      "State Management",
+      "Custom Hooks",
+      "Redux Pattern"
+    ]
+  },
+  {
+    "id": "theory_react_portals",
+    "index": 60,
+    "moduleId": "react",
+    "complexity": 7,
+    "tags": [
+      "React",
+      "Portals",
+      "DOM",
+      "Event Bubbling",
+      "Context",
+      "UI/UX",
+      "Advanced React"
+    ]
+  },
+  {
+    "id": "theory_react_router_v6_navigation",
+    "index": 62,
+    "moduleId": "react",
+    "complexity": 7,
+    "tags": [
+      "React Router",
+      "v6",
+      "Navigation",
+      "Link",
+      "NavLink",
+      "useNavigate",
+      "Hooks"
+    ]
+  },
+  {
+    "id": "theory_react_router_v5_vs_v6_navigation",
+    "index": 65,
+    "moduleId": "react",
+    "complexity": 7,
+    "tags": [
+      "React Router",
+      "React Hooks",
+      "SPA",
+      "Navigation",
+      "Authentication",
+      "Frontend Architecture"
+    ]
+  },
+  {
+    "id": "theory_async_data_fetching_react",
+    "index": 71,
+    "moduleId": "react",
+    "complexity": 7,
+    "tags": [
+      "React",
+      "Hooks",
+      "Class Components",
+      "Data Fetching",
+      "Fetch API",
+      "useEffect",
+      "componentDidMount",
+      "State Management",
+      "Async/Await",
+      "Promises",
+      "Error Handling",
+      "Conditional Rendering"
+    ]
+  },
+  {
+    "id": "theory_async_best_practices",
+    "index": 72,
+    "moduleId": "react",
+    "complexity": 7,
+    "tags": [
+      "React",
+      "Asynchronous Operations",
+      "State Management",
+      "Error Handling",
+      "Data Fetching",
+      "Best Practices",
+      "Functional Components",
+      "Class Components",
+      "useEffect",
+      "useState",
+      "Axios",
+      "Fetch API"
+    ]
+  },
+  {
+    "id": "theory_provider_pattern_context_api",
+    "index": 73,
+    "moduleId": "react",
+    "complexity": 7,
+    "tags": [
+      "React",
+      "Context API",
+      "Provider Pattern",
+      "State Management",
+      "Hooks",
+      "Frontend Architecture",
+      "Prop Drilling"
+    ]
+  },
+  {
+    "id": "theory_react_context_reducer_pattern",
+    "index": 76,
+    "moduleId": "react",
+    "complexity": 7,
+    "tags": [
+      "React",
+      "State Management",
+      "Hooks",
+      "useReducer",
+      "useContext",
+      "Context API",
+      "Redux Pattern"
+    ]
+  },
+  {
+    "id": "theory_concurrent_mode_suspense",
+    "index": 77,
+    "moduleId": "react",
+    "complexity": 7,
+    "tags": [
+      "React",
+      "Concurrent Mode",
+      "Suspense",
+      "SuspenseList",
+      "Performance",
+      "User Experience",
+      "React 18"
+    ]
+  },
+  {
+    "id": "theory_react_memoization_usecallback_and_react_memo",
+    "index": 79,
+    "moduleId": "react",
+    "complexity": 7,
+    "tags": [
+      "React Hooks",
+      "Performance Optimization",
+      "Memoization",
+      "useCallback",
+      "React.memo",
+      "State Management"
+    ]
+  },
+  {
+    "id": "theory_usecallback",
+    "index": 80,
+    "moduleId": "react",
+    "complexity": 7,
+    "tags": [
+      "React",
+      "Hooks",
+      "Performance",
+      "Optimization",
+      "useCallback",
+      "Frontend"
+    ]
+  },
+  {
+    "id": "theory_react_memoization_hooks",
+    "index": 81,
+    "moduleId": "react",
+    "complexity": 7,
+    "tags": [
+      "React",
+      "Hooks",
+      "useMemo",
+      "useCallback",
+      "Performance",
+      "Optimization",
+      "Memoization"
+    ]
+  },
+  {
+    "id": "theory_fetching_data_hooks",
+    "index": 84,
+    "moduleId": "react",
+    "complexity": 7,
+    "tags": [
+      "React Hooks",
+      "useEffect",
+      "Data Fetching",
+      "Async/Await",
+      "Axios",
+      "Side Effects"
+    ]
+  },
+  {
+    "id": "theory_react_memoization",
+    "index": 123,
+    "moduleId": "react",
+    "complexity": 7,
+    "tags": [
+      "React",
+      "Performance",
+      "Optimization",
+      "Hooks",
+      "useMemo",
+      "useCallback",
+      "React.memo",
+      "Memoization"
+    ]
+  },
+  {
+    "id": "theory_class_method_binding",
+    "index": 131,
+    "moduleId": "react",
+    "complexity": 7,
+    "tags": [
+      "React",
+      "Class Components",
+      "ES6",
+      "Binding",
+      "this context",
+      "Performance"
+    ]
+  },
+  {
+    "id": "theory_react_error_boundaries",
+    "index": 137,
+    "moduleId": "react",
+    "complexity": 7,
+    "tags": [
+      "React",
+      "Error Handling",
+      "Error Boundaries",
+      "Component Lifecycle",
+      "Class Components",
+      "Functional Components"
+    ]
+  },
+  {
+    "id": "theory_form_best_practices",
+    "index": 141,
+    "moduleId": "react",
+    "complexity": 7,
+    "tags": [
+      "Forms",
+      "React",
+      "Validation",
+      "Accessibility",
+      "UX",
+      "Controlled Components"
+    ]
+  },
+  {
+    "id": "theory_react_hooks_window_dimensions",
+    "index": 142,
+    "moduleId": "react",
+    "complexity": 7,
+    "tags": [
+      "React",
+      "Hooks",
+      "useState",
+      "useEffect",
+      "Lifecycle",
+      "Event Handling",
+      "Performance",
+      "Custom Hooks"
+    ]
+  },
+  {
+    "id": "theory_react_component_design_data_polling",
+    "index": 156,
+    "moduleId": "react",
+    "complexity": 7,
+    "tags": [
+      "React",
+      "Hooks",
+      "useEffect",
+      "useState",
+      "Data Fetching",
+      "Polling",
+      "Component Design",
+      "Error Handling",
+      "Conditional Rendering"
+    ]
+  },
+  {
+    "id": "theory_react_dynamic_form",
+    "index": 158,
+    "moduleId": "react",
+    "complexity": 7,
+    "tags": [
+      "React",
+      "Forms",
+      "State Management",
+      "Controlled Components",
+      "Component Composition",
+      "Frontend Development"
+    ]
+  },
+  {
+    "id": "theory_react_state_and_hooks",
+    "index": 160,
+    "moduleId": "react",
+    "complexity": 7,
+    "tags": [
+      "React",
+      "Hooks",
+      "State Management",
+      "useEffect",
+      "useState",
+      "useRef"
+    ]
+  },
+  {
+    "id": "theory_virtual_dom",
+    "index": 28,
+    "moduleId": "default",
+    "complexity": 5,
+    "tags": []
+  },
+  {
+    "id": "theory_redux_dispatch_hooks",
+    "index": 133,
+    "moduleId": "default",
+    "complexity": 5,
+    "tags": []
+  },
+  {
+    "id": "theory_react_hooks_testing",
+    "index": 54,
+    "moduleId": "react, jest, testing library",
+    "complexity": 7,
+    "tags": [
+      "React Hooks",
+      "Testing",
+      "react-hooks-testing-library",
+      "Unit Testing",
+      "JavaScript"
+    ]
+  },
+  {
+    "id": "theory_styled_components",
+    "index": 55,
+    "moduleId": "react, typescript",
+    "complexity": 6,
+    "tags": [
+      "React",
+      "CSS-in-JS",
+      "Styling",
+      "Frontend",
+      "Styled Components"
+    ]
+  },
+  {
+    "id": "theory_react_router_v6_private_routes",
+    "index": 64,
+    "moduleId": "react, typescript",
+    "complexity": 6,
+    "tags": [
+      "React",
+      "React Router v6",
+      "Authentication",
+      "Private Routes",
+      "Context API",
+      "Hooks"
+    ]
+  },
+  {
+    "id": "theory_react_user_search",
+    "index": 161,
+    "moduleId": "react, typescript",
+    "complexity": 7,
+    "tags": [
+      "React",
+      "Hooks",
+      "State Management",
+      "Conditional Rendering",
+      "List Rendering",
+      "Frontend Development",
+      "JavaScript"
+    ]
+  },
+  {
+    "id": "theory_react_router_basics_nested_routes",
+    "index": 66,
+    "moduleId": "react, react router dom",
+    "complexity": 6,
+    "tags": [
+      "React Router",
+      "Routing",
+      "Nested Routes",
+      "UI Layout",
+      "Outlet",
+      "React"
+    ]
+  },
+  {
+    "id": "theory_action_creator",
+    "index": 87,
+    "moduleId": "typescript",
+    "complexity": 4,
+    "tags": [
+      "Redux",
+      "Actions",
+      "Action Creator",
+      "State Management",
+      "Frontend Architecture"
+    ]
+  },
+  {
+    "id": "theory_redux_thunk_overview_and_benefits",
+    "index": 92,
+    "moduleId": "typescript",
+    "complexity": 6,
+    "tags": [
+      "Redux",
+      "Redux Thunk",
+      "Middleware",
+      "Asynchronous Actions",
+      "State Management",
+      "Frontend Architecture"
+    ]
+  },
+  {
+    "id": "theory_redux_thunk_intro",
+    "index": 93,
+    "moduleId": "typescript",
+    "complexity": 6,
+    "tags": [
+      "Redux",
+      "Redux Thunk",
+      "Middleware",
+      "Asynchronous Programming",
+      "State Management"
+    ]
+  },
+  {
+    "id": "theory_redux_toolkit_configure_store",
+    "index": 101,
+    "moduleId": "typescript",
+    "complexity": 6,
+    "tags": [
+      "Redux",
+      "Redux Toolkit",
+      "State Management",
+      "configureStore",
+      "Frontend Architecture"
+    ]
+  },
+  {
+    "id": "theory_redux_router_setup",
+    "index": 67,
+    "moduleId": "typescript",
+    "complexity": 7,
+    "tags": [
+      "Redux",
+      "React-Router-Redux",
+      "Store Configuration",
+      "Middleware",
+      "DevTools",
+      "React"
+    ]
+  },
+  {
+    "id": "theory_redux_saga",
+    "index": 96,
+    "moduleId": "typescript",
+    "complexity": 7,
+    "tags": [
+      "Redux",
+      "Redux Saga",
+      "Middleware",
+      "Side Effects",
+      "Generators",
+      "Asynchronous Programming"
+    ]
+  },
+  {
+    "id": "theory_array_shuffling",
+    "index": 151,
+    "moduleId": "typescript",
+    "complexity": 7,
+    "tags": [
+      "array",
+      "algorithm",
+      "shuffling",
+      "randomization",
+      "in-place",
+      "data-structures"
+    ]
+  },
+  {
+    "id": "theory_redux_selectors_basics",
+    "index": 90,
+    "moduleId": "redux",
+    "complexity": 4,
+    "tags": [
+      "Redux",
+      "Selectors",
+      "State Management",
+      "Data Extraction",
+      "Encapsulation"
+    ]
+  },
+  {
+    "id": "theory_map_dispatch_to_props",
+    "index": 91,
+    "moduleId": "react, redux",
+    "complexity": 6,
+    "tags": [
+      "Redux",
+      "React-Redux",
+      "State Management",
+      "mapDispatchToProps",
+      "Connect HOC"
+    ]
+  },
+  {
+    "id": "theory_redux_react_integration",
+    "index": 100,
+    "moduleId": "react, redux",
+    "complexity": 7,
+    "tags": [
+      "Redux",
+      "React",
+      "State Management",
+      "Provider",
+      "Connect",
+      "Actions",
+      "Reducers",
+      "Store"
+    ]
+  },
+  {
+    "id": "theory_redux_saga_introduction",
+    "index": 94,
+    "moduleId": "typescript, redux, redux saga",
+    "complexity": 7,
+    "tags": [
+      "Redux Saga",
+      "Asynchronous JavaScript",
+      "Generators",
+      "Middleware",
+      "Redux"
+    ]
+  },
+  {
+    "id": "theory_git_staging_area",
+    "index": 102,
+    "moduleId": "git",
+    "complexity": 4,
+    "tags": [
+      "Git",
+      "Version Control",
+      "Staging Area",
+      "git add",
+      "Fundamentals"
+    ]
+  },
+  {
+    "id": "theory_git_remote_management",
+    "index": 103,
+    "moduleId": "git",
+    "complexity": 4,
+    "tags": [
+      "Git",
+      "Remote",
+      "Repository",
+      "Collaboration",
+      "Setup"
+    ]
+  },
+  {
+    "id": "theory_advanced_git_techniques",
+    "index": 104,
+    "moduleId": "git",
+    "complexity": 7,
+    "tags": [
+      "Git",
+      "Version Control",
+      "Workflow",
+      "Branching",
+      "Rebase",
+      "Git Hooks",
+      "Submodules",
+      "Collaboration",
+      "Best Practices"
+    ]
+  },
+  {
+    "id": "theory_indexeddb",
+    "index": 110,
+    "moduleId": "web apis",
+    "complexity": 7,
+    "tags": [
+      "IndexedDB",
+      "Client-Side Storage",
+      "Offline",
+      "Persistence",
+      "Database",
+      "NoSQL"
+    ]
+  },
+  {
+    "id": "theory_serviceworker_caching_deduplication",
+    "index": 166,
+    "moduleId": "web apis",
+    "complexity": 7,
+    "tags": [
+      "Service Worker",
+      "PWA",
+      "Caching",
+      "Offline First",
+      "Web Performance",
+      "Network Requests",
+      "Background Sync",
+      "Deduplication"
+    ]
+  },
+  {
+    "id": "theory_html_form_overrides",
+    "index": 112,
+    "moduleId": "html",
+    "complexity": 4,
+    "tags": [
+      "HTML",
+      "Forms",
+      "Web Development",
+      "Frontend Basics",
+      "Attributes"
+    ]
+  },
+  {
+    "id": "theory_html_whitespace_minification",
+    "index": 163,
+    "moduleId": "html",
+    "complexity": 5,
+    "tags": [
+      "HTML",
+      "Performance Optimization",
+      "Minification",
+      "Web Performance",
+      "Frontend Optimization"
+    ]
+  },
+  {
+    "id": "theory_css_selectors",
+    "index": 114,
+    "moduleId": "css",
+    "complexity": 5,
+    "tags": [
+      "CSS",
+      "Selectors",
+      "Pseudo-classes",
+      "Pseudo-elements",
+      "Combinators"
+    ]
+  },
+  {
+    "id": "theory_css_grid_fundamentals",
+    "index": 116,
+    "moduleId": "css",
+    "complexity": 5,
+    "tags": [
+      "CSS Grid",
+      "Layout",
+      "Frontend",
+      "Responsive Design",
+      "Grid-template-columns",
+      "Grid-template-rows",
+      "Gap"
+    ]
+  },
+  {
+    "id": "theory_css_flex_alignment",
+    "index": 143,
+    "moduleId": "css",
+    "complexity": 5,
+    "tags": [
+      "CSS",
+      "Flexbox",
+      "Layout",
+      "Alignment",
+      "Frontend Basics"
+    ]
+  },
+  {
+    "id": "theory_css_centering",
+    "index": 115,
+    "moduleId": "css3",
+    "complexity": 6,
+    "tags": [
+      "CSS",
+      "Layout",
+      "Centering",
+      "Flexbox",
+      "Grid",
+      "Position",
+      "Table Layout",
+      "UI/UX"
+    ]
+  },
+  {
+    "id": "theory_css_grid",
+    "index": 117,
+    "moduleId": "css3",
+    "complexity": 7,
+    "tags": [
+      "CSS",
+      "Layout",
+      "Grid",
+      "Responsive Design"
+    ]
+  },
+  {
+    "id": "theory_sass_extend_inheritance",
+    "index": 118,
+    "moduleId": "sass",
+    "complexity": 5,
+    "tags": [
+      "SASS",
+      "CSS Preprocessors",
+      "Extend",
+      "Inheritance",
+      "Styling",
+      "DRY"
+    ]
+  },
+  {
+    "id": "theory_bundle_analyzer_plugin",
+    "index": 120,
+    "moduleId": "webpack",
+    "complexity": 5,
+    "tags": [
+      "webpack",
+      "bundle-optimization",
+      "tooling",
+      "performance"
+    ]
+  },
+  {
+    "id": "theory_deployment_checklist",
+    "index": 121,
+    "moduleId": "web performance",
+    "complexity": 7,
+    "tags": [
+      "performance",
+      "deployment",
+      "optimization",
+      "build-process",
+      "web-essentials"
+    ]
+  },
+  {
+    "id": "theory_npm_basics",
+    "index": 124,
+    "moduleId": "node.js, npm",
+    "complexity": 4,
+    "tags": [
+      "NPM",
+      "Package Manager",
+      "Node.js",
+      "Dependencies",
+      "DevOps",
+      "Frontend Build Tools"
+    ]
+  },
+  {
+    "id": "theory_pwa_manifest",
+    "index": 127,
+    "moduleId": "web",
+    "complexity": 4,
+    "tags": [
+      "PWA",
+      "Web App Manifest",
+      "Frontend Fundamentals",
+      "Web Development"
+    ]
+  },
+  {
+    "id": "theory_sop_cors",
+    "index": 162,
+    "moduleId": "web",
+    "complexity": 7,
+    "tags": [
+      "security",
+      "networking",
+      "browser-apis",
+      "http",
+      "frontend-basics"
+    ]
+  },
+  {
+    "id": "theory_web_app_production_readiness",
+    "index": 165,
+    "moduleId": "web",
+    "complexity": 7,
+    "tags": [
+      "frontend",
+      "deployment",
+      "performance",
+      "CI/CD",
+      "monitoring",
+      "optimization",
+      "production"
+    ]
+  },
+  {
+    "id": "theory_graphql_client_operations",
+    "index": 128,
+    "moduleId": "graphql",
+    "complexity": 6,
+    "tags": [
+      "GraphQL",
+      "API",
+      "Data Fetching",
+      "Mutations",
+      "Queries",
+      "Apollo Client"
+    ]
+  },
+  {
+    "id": "theory_default_props_type_checking",
+    "index": 136,
+    "moduleId": "react, javascript, flow, typescript",
+    "complexity": 6,
+    "tags": [
+      "React",
+      "defaultProps",
+      "PropTypes",
+      "Flow",
+      "TypeScript",
+      "type checking",
+      "static analysis",
+      "runtime analysis",
+      "frontend development"
+    ]
+  },
+  {
+    "id": "theory_redux_form_reinitialize",
+    "index": 140,
+    "moduleId": "react, redux, redux-form",
+    "complexity": 7,
+    "tags": [
+      "Redux-Form",
+      "Forms",
+      "State Management",
+      "React",
+      "Reinitialization"
+    ]
+  },
+  {
+    "id": "theory_lazy_loading_images_intersection_observer",
+    "index": 164,
+    "moduleId": "react, typescript, web apis",
+    "complexity": 7,
+    "tags": [
+      "React",
+      "Performance",
+      "Lazy Loading",
+      "IntersectionObserver",
+      "Frontend",
+      "Web APIs"
+    ]
+  }
+]

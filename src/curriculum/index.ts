@@ -16,6 +16,7 @@ import { MetadataExtractor } from './metadata/extractor';
 import { GraphBuilder } from './graphs/graphBuilder';
 import { ScoreCalculator } from './scoring/scoreCalculator';
 import { ExtractedMetadata } from './types/metadata';
+import { CurriculumPaths } from './utils/curriculumPaths';
 
 /**
  * Main class for curriculum generation
@@ -30,10 +31,9 @@ export class CurriculumGenerator {
     console.log('CurriculumGenerator: Starting Phase 1: Metadata Extraction');
     
     try {
-      // Define paths for database.json and metadata.json
-      const rootDir = process.cwd();
-      const databasePath = `${rootDir}/database.json`;
-      const outputPath = `${rootDir}/metadata.json`;
+      // Get paths from CurriculumPaths utility
+      const databasePath = CurriculumPaths.getDatabasePath();
+      const outputPath = CurriculumPaths.getMetadataPath();
       
       console.log('CurriculumGenerator: Creating MetadataExtractor instance');
       const extractor = new MetadataExtractor(databasePath, outputPath);
@@ -58,10 +58,9 @@ export class CurriculumGenerator {
     console.log('CurriculumGenerator: Starting Step 2 - Building Global Foundational Graphs');
     
     try {
-      // Define paths
-      const rootDir = process.cwd();
-      const metadataPath = path.join(rootDir, 'metadata.json');
-      const graphsPath = path.join(rootDir, 'graphs.json');
+      // Get paths from CurriculumPaths utility
+      const metadataPath = CurriculumPaths.getMetadataPath();
+      const graphsPath = CurriculumPaths.getGraphsPath();
       
       // Create GraphBuilder instance
       const graphBuilder = new GraphBuilder(metadataPath, graphsPath);
@@ -93,11 +92,10 @@ export class CurriculumGenerator {
     console.log('CurriculumGenerator: Starting Step 3 - Initial Deterministic Scoring');
     
     try {
-      // Define paths
-      const rootDir = process.cwd();
-      const metadataPath = path.join(rootDir, 'metadata.json');
-      const graphsPath = path.join(rootDir, 'graphs.json');
-      const scoresPath = path.join(rootDir, 'scores.json');
+      // Get paths from CurriculumPaths utility
+      const metadataPath = CurriculumPaths.getMetadataPath();
+      const graphsPath = CurriculumPaths.getGraphsPath();
+      const scoresPath = CurriculumPaths.getScoresPath();
       
       // Create score calculator
       const scoreCalculator = new ScoreCalculator(metadataPath, graphsPath, scoresPath);
@@ -129,12 +127,86 @@ export class CurriculumGenerator {
   
   /**
    * Phase 3: Final aggregation and curriculum assembly
-   * - Not implemented yet
-   * - Will merge chunk results and resolve dependencies
+   * - Merge AI-processed chunks
+   * - Deduplicate items
+   * - Resolve cross-chunk dependencies
+   * - Optionally refine with AI
+   * - Apply rule-based ordering
+   * - Interleave related content
+   * - Map indexes back to full objects
+   * - Generate final curriculum.json
    */
   public static async aggregateAndAssemble(): Promise<void> {
-    console.log('Phase 3: Aggregation and assembly not yet implemented');
-    // This will be implemented in a future update
+    console.log('CurriculumGenerator: Starting Phase 3 - Final Aggregation and Assembly');
+    
+    try {
+      // Ensure curriculum folder structure exists
+      CurriculumPaths.ensureCurriculumStructure();
+      
+      const MAX_CHUNKS = 10; // Maximum number of chunks to process
+      
+      // Step 1: Merge chunks and resolve dependencies
+      console.log('CurriculumGenerator: Step 1 - Merging chunks and resolving dependencies');
+      const aggregator = new (await import('./aggregation/aggregator')).Aggregator({
+        chunksProcessedPath: CurriculumPaths.getChunksProcessedPath(),
+        chunksDir: CurriculumPaths.getChunksDir(),
+        outputDir: CurriculumPaths.getCurriculumDir(),
+        graphsPath: CurriculumPaths.getGraphsPath(),
+        maxChunks: MAX_CHUNKS
+      });
+      
+      await aggregator.aggregate();
+      console.log('CurriculumGenerator: Chunks aggregated successfully');
+      
+      // Step 2: Optional AI refinement
+      console.log('CurriculumGenerator: Step 2 - Optional AI refinement');
+      const sequencer = new (await import('./aggregation/sequencer')).Sequencer({
+        aggregatedItemsPath: CurriculumPaths.getAggregatedItemsPath(),
+        outputDir: CurriculumPaths.getCurriculumDir()
+      });
+      
+      await sequencer.refine();
+      console.log('CurriculumGenerator: AI refinement complete');
+      
+      // Step 3: Rule-based ordering within modules
+      console.log('CurriculumGenerator: Step 3 - Rule-based ordering');
+      const orderer = new (await import('./aggregation/ruleBasedOrderer')).RuleBasedOrderer({
+        itemsPath: CurriculumPaths.getRefinedItemsPath(),
+        metadataPath: CurriculumPaths.getMetadataPath(),
+        graphsPath: CurriculumPaths.getGraphsPath(),
+        outputDir: CurriculumPaths.getCurriculumDir()
+      });
+      
+      await orderer.order();
+      console.log('CurriculumGenerator: Rule-based ordering complete');
+      
+      // Step 4: Content interleaving for pedagogical flow
+      console.log('CurriculumGenerator: Step 4 - Content interleaving');
+      const interleaver = new (await import('./aggregation/contentInterleaver')).ContentInterleaver({
+        itemsPath: CurriculumPaths.getOrderedItemsPath(),
+        metadataPath: CurriculumPaths.getMetadataPath(),
+        outputDir: CurriculumPaths.getCurriculumDir()
+      });
+      
+      await interleaver.interleave();
+      console.log('CurriculumGenerator: Content interleaving complete');
+      
+      // Step 5: Final curriculum assembly
+      console.log('CurriculumGenerator: Step 5 - Final curriculum assembly');
+      const writer = new (await import('./aggregation/curriculumWriter')).CurriculumWriter({
+        itemsPath: CurriculumPaths.getInterleavedItemsPath(),
+        databasePath: CurriculumPaths.getDatabasePath(),
+        outputPath: CurriculumPaths.getCurriculumPath()
+      });
+      
+      await writer.writeCurriculum();
+      console.log('CurriculumGenerator: Final curriculum generated successfully');
+      
+      console.log('CurriculumGenerator: Phase 3 completed successfully');
+    } catch (error) {
+      console.error('CurriculumGenerator: Error during aggregation and assembly:', error);
+      throw error;
+    }
   }
   
   /**

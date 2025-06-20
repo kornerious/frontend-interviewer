@@ -1,7 +1,7 @@
 import { AIReviewRequest, AIReviewResponse, QuestionItem, TaskItem } from '@/types';
 
 // Gemini API service
-const callGeminiAPI = async (prompt: string): Promise<string> => {
+export const callGeminiAPI = async (prompt: string): Promise<string> => {
   try {
     const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
     if (!apiKey) {
