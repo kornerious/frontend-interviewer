@@ -1,0 +1,1247 @@
+[
+  {
+    "id": "fa01e8b0-1fc1-4e16-a16b-6acd0002ad67",
+    "startLine": 5200,
+    "endLine": 5299,
+    "processedDate": "2025-06-17T09:28:15.913Z",
+    "content": {
+      "logicalBlockInfo": {
+        "suggestedEndLine": -1
+      },
+      "theory": [
+        {
+          "id": "theory_react_performance_hooks",
+          "title": "React Performance Optimization with useMemo and useCallback",
+          "content": "## Introduction to React Performance Hooks\nIn React, components re-render when their state or props change. While React is generally efficient, unnecessary re-renders of expensive computations or re-creation of callback functions can impact application performance, especially in large or frequently updated component trees. React provides `useMemo` and `useCallback` hooks to help optimize functional components by memoizing values and functions.\n\n## useMemo Hook\n`useMemo` is a React Hook that lets you cache the result of an expensive calculation between re-renders. It takes two arguments: a 'create' function and a dependency array. The 'create' function will only re-run if one of the dependencies in the array has changed. If the dependencies are the same as in the last render, `useMemo` returns the cached value.\n\n### When to use useMemo:\n-   **Expensive Calculations:** When you have a function that performs a computationally intensive task (e.g., heavy filtering, sorting, or data transformation) and its result is only needed when its inputs change.\n-   **Referential Equality:** When passing objects or arrays as props to child components that are wrapped in `React.memo`. `React.memo` performs a shallow comparison of props; if an object/array prop is re-created on every render (even if its content is the same), `React.memo` will see it as a new prop and trigger a re-render of the child. `useMemo` helps maintain referential equality.\n\n```typescript\nimport React, { useMemo } from 'react';\n\nfunction ComponentWithExpensiveCalculation({ data, filterCriteria }) {\n  // This calculation will only re-run if 'data' or 'filterCriteria' changes.\n  const filteredData = useMemo(() => {\n    console.log('Performing expensive filtering...');\n    return data.filter(item => item.includes(filterCriteria));\n  }, [data, filterCriteria]);\n\n  return (\n    <div>\n      {filteredData.map((item, index) => <p key={index}>{item}</p>)}\n    </div>\n  );\n}\n```\n\n## useCallback Hook\n`useCallback` is a React Hook that lets you cache a function definition between re-renders. Like `useMemo`, it takes a function and a dependency array. It returns a memoized version of the callback function that only changes if one of the dependencies has changed. This is particularly useful when passing callbacks to optimized child components.\n\n### When to use useCallback:\n-   **Preventing Unnecessary Re-renders of Child Components:** When a parent component re-renders, any functions defined within it are re-created. If these functions are passed as props to child components (especially those optimized with `React.memo`), the child components will re-render because the prop (the function) is technically a new reference. `useCallback` ensures the function reference remains the same unless its dependencies change.\n-   **Optimizing Event Handlers:** Memoizing event handlers prevents them from being re-created on every render, which can be beneficial when passing them to many child elements or when they are part of a dependency array for another hook (like `useEffect`).\n\n```typescript\nimport React, { useState, useCallback, memo } from 'react';\n\nconst Button = memo(({ onClick, label }) => {\n  console.log(`Button '${label}' rendered`);\n  return <button onClick={onClick}>{label}</button>;\n});\n\nfunction ParentComponent() {\n  const [count, setCount] = useState(0);\n\n  // This function will not be re-created on every render\n  // unless 'count' changes.\n  const increment = useCallback(() => {\n    setCount(prevCount => prevCount + 1);\n  }, []); // Empty dependency array means it's created once\n\n  return (\n    <div>\n      <p>Count: {count}</p>\n      <Button onClick={increment} label=\"Increment\" />\n      <button onClick={() => setCount(count + 1)}>Direct Increment</button>\n    </div>\n  );\n}\n```\n\n## Key Differences and Considerations\n-   `useMemo` memoizes a **value** returned by a function.\n-   `useCallback` memoizes a **function** itself.\n-   Both require a dependency array. An empty array `[]` means the memoized value/function will only be created once on the initial render.\n-   Overuse of `useMemo` and `useCallback` can introduce unnecessary overhead. They should be used strategically where actual performance bottlenecks are identified or when dealing with referential equality issues for `React.memo`'d components.",
+          "examples": [
+            {
+              "id": "example_react_performance_hooks_1",
+              "title": "Basic useMemo for Filtering",
+              "code": "import React, { useState, useMemo } from 'react';\n\ninterface Item {\n  id: number;\n  name: string;\n  category: string;\n}\n\ninterface SearchResultsProps {\n  items: Item[];\n  query: string;\n}\n\nfunction SearchResults({ items, query }: SearchResultsProps) {\n  const filteredItems = useMemo(() => {\n    console.log('Filtering items...'); // This log helps identify re-runs\n    if (!query) return items;\n    return items.filter(item => \n      item.name.toLowerCase().includes(query.toLowerCase())\n    );\n  }, [items, query]); // Recalculate only when items or query changes\n  \n  return (\n    <div>\n      <h2>Search Results for \"{query}\"</h2>\n      <ul>\n        {filteredItems.map(item => (\n          <li key={item.id}>{item.name} ({item.category})</li>\n        ))}\n      </ul>\n    </div>\n  );\n}\n\n// Example Usage (for demonstration, not part of the component itself)\nfunction App() {\n  const allItems: Item[] = [\n    { id: 1, name: 'Apple', category: 'Fruit' },\n    { id: 2, name: 'Banana', category: 'Fruit' },\n    { id: 3, name: 'Carrot', category: 'Vegetable' },\n    { id: 4, name: 'Broccoli', category: 'Vegetable' },\n  ];\n  const [searchQuery, setSearchQuery] = useState('');\n\n  return (\n    <div>\n      <input\n        type=\"text\"\n        placeholder=\"Search items...\"\n        value={searchQuery}\n        onChange={(e) => setSearchQuery(e.target.value)}\n      />\n      <SearchResults items={allItems} query={searchQuery} />\n    </div>\n  );\n}\n",
+              "explanation": "This example demonstrates `useMemo` for an `items` filtering operation. The `console.log` inside `useMemo` helps visualize when the filtering function re-executes. It will only re-run if `items` or `query` changes, preventing redundant filtering when other state in the `SearchResults` component or its parent causes a re-render.",
+              "language": "typescript"
+            },
+            {
+              "id": "example_react_performance_hooks_2",
+              "title": "Basic useCallback for Event Handlers",
+              "code": "import React, { useState, useCallback } from 'react';\n\ninterface Item {\n  id: number;\n  name: string;\n}\n\ninterface SearchResultsProps {\n  items: Item[];\n  query: string;\n}\n\nfunction SearchResults({ items, query }: SearchResultsProps) {\n  const filteredItems = useMemo(() => {\n    console.log('Filtering items...');\n    return items.filter(item => \n      item.name.toLowerCase().includes(query.toLowerCase())\n    );\n  }, [items, query]);\n  \n  // Memoize callback functions\n  const handleItemClick = useCallback((id: number) => {\n    console.log('Item clicked:', id);\n    // In a real application, this would dispatch an action, navigate, etc.\n  }, []); // Empty dependency array ensures this function reference never changes\n  \n  return (\n    <ul>\n      {filteredItems.map(item => (\n        <li key={item.id} onClick={() => handleItemClick(item.id)}>\n          {item.name}\n        </li>\n      ))}\n    </ul>\n  );\n}\n\n// Example Usage (for demonstration)\nfunction App() {\n  const allItems: Item[] = [\n    { id: 1, name: 'Laptop', },\n    { id: 2, name: 'Mouse', },\n    { id: 3, name: 'Keyboard', },\n  ];\n  const [searchQuery, setSearchQuery] = useState('');\n\n  return (\n    <div>\n      <input\n        type=\"text\"\n        placeholder=\"Search items...\"\n        value={searchQuery}\n        onChange={(e) => setSearchQuery(e.target.value)}\n      />\n      <SearchResults items={allItems} query={searchQuery} />\n    </div>\n  );\n}\n",
+              "explanation": "This example shows `useCallback` used to memoize the `handleItemClick` function. By providing an empty dependency array (`[]`), this function is created only once during the initial render. This is crucial if `SearchResults` passes `handleItemClick` to a `React.memo` optimized child component, as it prevents the child from re-rendering due to a new function reference being passed down.",
+              "language": "typescript"
+            }
+          ],
+          "relatedQuestions": [
+            "question_react_hooks_1",
+            "question_react_hooks_2",
+            "question_react_hooks_3",
+            "question_react_hooks_4",
+            "question_react_hooks_5",
+            "question_react_hooks_6",
+            "question_react_hooks_7",
+            "question_react_hooks_8"
+          ],
+          "relatedTasks": [
+            "task_react_performance_hooks_1"
+          ],
+          "tags": [
+            "React",
+            "Hooks",
+            "useMemo",
+            "useCallback",
+            "Performance",
+            "Optimization",
+            "Frontend"
+          ],
+          "technology": "React",
+          "prerequisites": [
+            "React_Functional_Components",
+            "React_State_Hooks",
+            "JavaScript_Closures"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 9,
+          "learningPath": "intermediate",
+          "requiredFor": [
+            "Advanced_React_Performance",
+            "Custom_React_Hooks"
+          ]
+        },
+        {
+          "id": "theory_react_testing_library",
+          "title": "React Component Testing with React Testing Library (RTL)",
+          "content": "## Introduction to React Testing Library (RTL)\nReact Testing Library (RTL) is a set of utilities for testing React components. Its guiding principle is to help you write tests that resemble how your users would interact with your application. This is often summarized as: \"The more your tests resemble the way your software is used, the more confidence they can give you.\"\n\n### Key Principles of RTL:\n-   **User-centric Testing:** Focuses on querying the DOM as a user would, prioritizing accessibility attributes (e.g., `getByRole`, `getByLabelText`).\n-   **Avoids Implementation Details:** Discourages testing internal component state or methods, instead focusing on the component's output in the DOM.\n-   **Works with Real DOM:** Components are rendered into a real DOM environment (usually via `jsdom` in a Node.js environment like Jest), allowing for realistic interactions.\n\n### Core Utilities and API:\n-   `render`: Renders a React component into a container attached to `document.body`.\n-   `screen`: An object that contains all the queries exposed by RTL, making them globally accessible after a `render` call (e.g., `screen.getByText`).\n-   `fireEvent`: A utility for dispatching DOM events (e.g., `click`, `change`, `submit`) on elements. It mimics native browser events.\n-   Queries: Methods used to find elements in the rendered output. They are prioritized by accessibility:\n    -   `getByRole`: The primary way to find elements, as it reflects how assistive technologies perceive the page.\n    -   `getByLabelText`: Useful for form elements associated with a label.\n    -   `getByPlaceholderText`: For input fields with placeholder text.\n    -   `getByText`: For finding elements containing specific text content.\n    -   `getByDisplayValue`: For input, textarea, or select elements that currently have the given value.\n    -   `getByAltText`: For image elements (e.g., `<img>`) with `alt` attributes.\n    -   `getByTestId`: A fallback query, to be used only when other semantic queries are not possible.\n-   `@testing-library/jest-dom`: Provides custom Jest matchers that are specifically designed for testing the DOM (e.g., `toBeInTheDocument`, `toHaveTextContent`, `toBeDisabled`, `toBeVisible`).\n\n### Testing Event Handlers Workflow:\n1.  **Render the Component:** Use `render()` to mount your component.\n2.  **Mock Callbacks (if needed):** Use `jest.fn()` to create mock functions for any callbacks (props) that your component might invoke (e.g., `onSubmit`, `onClick`). This allows you to assert if and how they were called.\n3.  **Find Elements:** Use `screen` queries to locate the DOM elements you want to interact with (inputs, buttons).\n4.  **Simulate User Events:** Use `fireEvent` to trigger events on these elements, mimicking user interaction (typing, clicking, submitting).\n5.  **Assert Outcomes:** Use Jest's `expect` and `jest-dom` matchers to verify:\n    -   If the mock functions were called with the correct arguments.\n    -   If the DOM updated as expected (e.g., element text changed, element appeared/disappeared).\n\n```typescript\nimport { render, screen, fireEvent } from '@testing-library/react';\nimport '@testing-library/jest-dom/extend-expect'; // For custom matchers\nimport LoginForm from './LoginForm'; // Assume this component exists\n\n// Mock component for LoginForm\n// type LoginFormProps = { onSubmit: (data: { username: string; password: string }) => void; };\n// function LoginForm({ onSubmit }: LoginFormProps) {\n//   const [username, setUsername] = useState('');\n//   const [password, setPassword] = useState('');\n//\n//   const handleSubmit = (e: React.FormEvent) => {\n//     e.preventDefault();\n//     onSubmit({ username, password });\n//   };\n//\n//   return (\n//     <form onSubmit={handleSubmit}>\n//       <div>\n//         <label htmlFor=\"username-input\">Username</label>\n//         <input id=\"username-input\" value={username} onChange={(e) => setUsername(e.target.value)} />\n//       </div>\n//       <div>\n//         <label htmlFor=\"password-input\">Password</label>\n//         <input id=\"password-input\" type=\"password\" value={password} onChange={(e) => setPassword(e.target.value)} />\n//       </div>\n//       <button type=\"submit\">Submit</button>\n//     </form>\n//   );\n// }\n\ntest('calls onSubmit with username and password when form is submitted', () => {\n  const handleSubmit = jest.fn(); // Create a mock function\n  render(<LoginForm onSubmit={handleSubmit} />); // Render the component\n  \n  // Fill out the form by finding elements via their associated labels\n  fireEvent.change(screen.getByLabelText(/username/i), { // Find username input (case-insensitive regex)\n    target: { value: 'testuser' }, // Simulate typing 'testuser'\n  });\n  \n  fireEvent.change(screen.getByLabelText(/password/i), { // Find password input\n    target: { value: 'password123' }, // Simulate typing 'password123'\n  });\n  \n  // Submit the form by finding the button by its role and name\n  fireEvent.click(screen.getByRole('button', { name: /submit/i }));\n  \n  // Assert that the onSubmit handler was called with correct arguments\n  expect(handleSubmit).toHaveBeenCalledTimes(1);\n  expect(handleSubmit).toHaveBeenCalledWith({\n    username: 'testuser',\n    password: 'password123',\n  });\n});\n```",
+          "examples": [
+            {
+              "id": "example_react_testing_library_1",
+              "title": "Testing a simple Button click",
+              "code": "import React from 'react';\nimport { render, screen, fireEvent } from '@testing-library/react';\nimport '@testing-library/jest-dom/extend-expect';\n\ninterface MyButtonProps {\n  onClick: () => void;\n  label: string;\n}\n\nfunction MyButton({ onClick, label }: MyButtonProps) {\n  return <button onClick={onClick}>{label}</button>;\n}\n\ntest('MyButton calls onClick when clicked', () => {\n  const handleClick = jest.fn();\n  render(<MyButton onClick={handleClick} label=\"Click Me\" />);\n  \n  const buttonElement = screen.getByText(/Click Me/i);\n  fireEvent.click(buttonElement);\n  \n  expect(handleClick).toHaveBeenCalledTimes(1);\n});\n",
+              "explanation": "This example shows how to test a simple button component. It renders the `MyButton`, finds it by its text content, simulates a click event using `fireEvent.click`, and then asserts that the `onClick` mock function was called exactly once.",
+              "language": "typescript"
+            },
+            {
+              "id": "example_react_testing_library_2",
+              "title": "Testing input change and display",
+              "code": "import React, { useState } from 'react';\nimport { render, screen, fireEvent } from '@testing-library/react';\nimport '@testing-library/jest-dom/extend-expect';\n\nfunction NameDisplay() {\n  const [name, setName] = useState('');\n\n  return (\n    <div>\n      <label htmlFor=\"name-input\">Enter Name:</label>\n      <input\n        id=\"name-input\"\n        type=\"text\"\n        value={name}\n        onChange={(e) => setName(e.target.value)}\n      />\n      <p>Hello, {name || 'Guest'}!</p>\n    </div>\n  );\n}\n\ntest('NameDisplay updates greeting message on input change', () => {\n  render(<NameDisplay />);\n  \n  const inputElement = screen.getByLabelText(/Enter Name:/i);\n  const greetingElement = screen.getByText(/Hello, Guest!/i);\n  \n  // Initial state check\n  expect(greetingElement).toHaveTextContent('Hello, Guest!');\n  \n  // Simulate typing\n  fireEvent.change(inputElement, { target: { value: 'Alice' } });\n  \n  // Assert updated state\n  expect(inputElement).toHaveValue('Alice');\n  expect(greetingElement).toHaveTextContent('Hello, Alice!');\n});\n",
+              "explanation": "This example tests a component that takes user input and displays it. It uses `getByLabelText` to find the input field and `getByText` to find the initial greeting. After simulating a change event with a new value, it asserts that the input's value has updated and that the greeting message reflects the new input.",
+              "language": "typescript"
+            }
+          ],
+          "relatedQuestions": [
+            "question_rtl_1",
+            "question_rtl_2",
+            "question_rtl_3",
+            "question_rtl_4",
+            "question_rtl_5",
+            "question_rtl_6",
+            "question_rtl_7",
+            "question_rtl_8"
+          ],
+          "relatedTasks": [
+            "task_react_testing_library_1"
+          ],
+          "tags": [
+            "React",
+            "Testing",
+            "React Testing Library",
+            "RTL",
+            "Jest",
+            "Frontend",
+            "Unit Testing",
+            "Integration Testing"
+          ],
+          "technology": "React",
+          "prerequisites": [
+            "React_Functional_Components",
+            "Jest_Basics",
+            "DOM_Manipulation"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 9,
+          "learningPath": "intermediate",
+          "requiredFor": [
+            "Test_Driven_Development",
+            "Enterprise_React_Applications"
+          ]
+        },
+        {
+          "id": "theory_enzyme_testing",
+          "title": "React Component Testing with Enzyme",
+          "content": "## Introduction to Enzyme\nEnzyme is a JavaScript testing utility for React that makes it easier to test React Components' output. Developed by Airbnb, it provides a simpler API for interacting with React components during tests. Unlike React Testing Library, Enzyme focuses more on testing component internals and lifecycle methods rather than strictly user-centric behavior.\n\n### Key Concepts and API:\n-   **Wrapper Object:** Enzyme's `shallow`, `mount`, and `render` methods return a `Wrapper` object, which is an abstraction over the rendered component. This wrapper provides methods for finding elements, simulating events, accessing state/props, and inspecting component structure.\n-   **`find(selector)`:** Used to locate nodes within the component's output. Selectors can be CSS-like (e.g., `'button'`, `'.my-class'`, `'#my-id'`), component names (e.g., `MyComponent`), or prop selectors (`'[data-testid=\"count\"]'`).\n-   **`simulate(event, mockEvent)`:** Used to trigger events on elements. The `event` argument is a string (e.g., `'click'`, `'change'`, `'submit'`), and `mockEvent` can be an optional object to simulate event properties (e.g., `{ target: { value: 'newValue' } }`).\n-   **`text()`:** Returns the concatenated text contents of the current node and all its children.\n-   **`props()`:** Returns the props of the root component in the wrapper.\n-   **`state()`:** Returns the state of the root component in the wrapper.\n\n### Rendering Methods:\nEnzyme offers three distinct ways to render components for testing, each suitable for different scenarios:\n\n#### 1. Shallow Rendering (`shallow`)\n-   **Description:** Renders only the component being tested, without rendering its child components. Child components are represented as their React component types (e.g., `<ChildComponent />`) rather than their actual DOM output.\n-   **Use Cases:** Ideal for unit testing individual components in isolation. It prevents tests from being coupled to the implementation details of child components, making tests faster and more robust to changes in children.\n-   **Pros:** Fast, isolated, doesn't require a DOM environment, easier to test component's own logic and lifecycle methods.\n-   **Cons:** Cannot test interactions between parent and deeply nested children, or full DOM interactions.\n\n```typescript\nimport React from 'react';\nimport { shallow } from 'enzyme';\nimport Counter from './Counter';\n\ndescribe('Counter Component (Shallow)', () => {\n  it('renders initial count', () => {\n    const wrapper = shallow(<Counter initialCount={5} />);\n    expect(wrapper.find('[data-testid=\"count\"]').text()).toBe('5');\n  });\n\n  it('increments count when button is clicked', () => {\n    const wrapper = shallow(<Counter initialCount={0} />);\n    wrapper.find('button.increment').simulate('click'); // Assumes button has class 'increment'\n    expect(wrapper.find('[data-testid=\"count\"]').text()).toBe('1');\n  });\n\n  it('decrements count when button is clicked', () => {\n    const wrapper = shallow(<Counter initialCount={5} />);\n    wrapper.find('button.decrement').simulate('click'); // Assumes button has class 'decrement'\n    expect(wrapper.find('[data-testid=\"count\"]').text()).toBe('4');\n  });\n});\n```\n\n#### 2. Full DOM Rendering (`mount`)\n-   **Description:** Renders the component into a full DOM environment (like `jsdom`), including all of its children. This is closer to how a component would be rendered in a browser.\n-   **Use Cases:** Useful for integration testing, testing components that interact with the DOM API, or components that rely on their children's lifecycle methods.\n-   **Pros:** Tests component interactions with real DOM, provides access to lifecycle methods, allows testing of nested component interactions.\n-   **Cons:** Slower, requires a DOM environment, can lead to more brittle tests due to dependence on child component implementations.\n\n```typescript\nimport React from 'react';\nimport { mount } from 'enzyme';\nimport ParentComponent from './ParentComponent'; // Assumes ParentComponent renders ChildComponent\n\ndescribe('ParentComponent (Mount)', () => {\n  it('renders child component correctly', () => {\n    const wrapper = mount(<ParentComponent />);\n    expect(wrapper.find('ChildComponent').exists()).toBe(true);\n  });\n});\n```\n\n#### 3. Static Markup Rendering (`render`)\n-   **Description:** Renders React components to static HTML string. It's similar to `ReactDOMServer.renderToStaticMarkup`.\n-   **Use Cases:** For testing the rendered HTML output of a component, especially for components that don't need to interact with the DOM or have lifecycle methods.\n-   **Pros:** Very fast, simple, good for snapshot testing of rendered HTML.\n-   **Cons:** No access to React component instances, state, or lifecycle methods; cannot simulate events.\n\n**Note:** While Enzyme has been a popular choice, React Testing Library is now generally recommended by the React team for new projects due to its user-centric approach and better alignment with modern React practices.",
+          "examples": [
+            {
+              "id": "example_enzyme_testing_1",
+              "title": "Shallow Rendering with Counter Component",
+              "code": "import React, { useState } from 'react';\nimport { shallow } from 'enzyme';\n\ninterface CounterProps {\n  initialCount?: number;\n}\n\nfunction Counter({ initialCount = 0 }: CounterProps) {\n  const [count, setCount] = useState(initialCount);\n\n  return (\n    <div>\n      <p data-testid=\"count\">{count}</p>\n      <button className=\"increment\" onClick={() => setCount(count + 1)}>Increment</button>\n      <button className=\"decrement\" onClick={() => setCount(count - 1)}>Decrement</button>\n    </div>\n  );\n}\n\ndescribe('Counter Component (Shallow)', () => {\n  it('renders initial count from props', () => {\n    const wrapper = shallow(<Counter initialCount={10} />);\n    expect(wrapper.find('[data-testid=\"count\"]').text()).toBe('10');\n  });\n\n  it('increments the count on button click', () => {\n    const wrapper = shallow(<Counter initialCount={0} />);\n    wrapper.find('button.increment').simulate('click');\n    expect(wrapper.find('[data-testid=\"count\"]').text()).toBe('1');\n  });\n\n  it('decrements the count on button click', () => {\n    const wrapper = shallow(<Counter initialCount={5} />);\n    wrapper.find('button.decrement').simulate('click');\n    expect(wrapper.find('[data-testid=\"count\"]').text()).toBe('4');\n  });\n});\n",
+              "explanation": "This example shows how to use Enzyme's `shallow` rendering to test a `Counter` component. `shallow` ensures that only the `Counter` component itself is rendered, not any potential child components. We find elements using `data-testid` or CSS class selectors and simulate clicks to verify state updates and displayed text.",
+              "language": "typescript"
+            },
+            {
+              "id": "example_enzyme_testing_2",
+              "title": "Mount Rendering with Parent-Child Interaction",
+              "code": "import React, { useState } from 'react';\nimport { mount } from 'enzyme';\n\ninterface ChildProps {\n  onButtonClick: (value: string) => void;\n}\n\nfunction ChildComponent({ onButtonClick }: ChildProps) {\n  return (\n    <button onClick={() => onButtonClick('Hello from Child!')}>Child Button</button>\n  );\n}\n\nfunction ParentComponent() {\n  const [message, setMessage] = useState('No message yet');\n\n  const handleChildButtonClick = (msg: string) => {\n    setMessage(msg);\n  };\n\n  return (\n    <div>\n      <p data-testid=\"parent-message\">{message}</p>\n      <ChildComponent onButtonClick={handleChildButtonClick} />\n    </div>\n  );\n}\n\ndescribe('ParentComponent (Mount)', () => {\n  it('updates parent message when child button is clicked', () => {\n    const wrapper = mount(<ParentComponent />);\n    \n    // Verify initial state\n    expect(wrapper.find('[data-testid=\"parent-message\"]').text()).toBe('No message yet');\n    \n    // Simulate click on the button rendered by the ChildComponent\n    wrapper.find('button').simulate('click');\n    \n    // Assert that the parent's state (and displayed message) updated\n    expect(wrapper.find('[data-testid=\"parent-message\"]').text()).toBe('Hello from Child!');\n  });\n});\n",
+              "explanation": "This example demonstrates `mount` rendering, which is necessary when testing interactions that cross component boundaries or involve the full DOM. Here, clicking a button inside `ChildComponent` triggers a prop function (`onButtonClick`), which in turn updates the state in `ParentComponent`. `mount` allows us to simulate the click on the child's button and then assert the visual change in the parent.",
+              "language": "typescript"
+            }
+          ],
+          "relatedQuestions": [
+            "question_enzyme_1",
+            "question_enzyme_2",
+            "question_enzyme_3",
+            "question_enzyme_4",
+            "question_enzyme_5",
+            "question_enzyme_6",
+            "question_enzyme_7",
+            "question_enzyme_8"
+          ],
+          "relatedTasks": [
+            "task_enzyme_testing_1"
+          ],
+          "tags": [
+            "React",
+            "Testing",
+            "Enzyme",
+            "Shallow",
+            "Mount",
+            "Jest",
+            "Frontend",
+            "Unit Testing"
+          ],
+          "technology": "React",
+          "prerequisites": [
+            "React_Functional_Components",
+            "Jest_Basics"
+          ],
+          "complexity": 6,
+          "interviewRelevance": 7,
+          "learningPath": "intermediate",
+          "requiredFor": [
+            "Legacy_React_Projects",
+            "Understanding_Testing_Approaches"
+          ]
+        }
+      ],
+      "questions": [
+        {
+          "id": "question_react_hooks_1",
+          "topic": "useMemo Hook",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "What is the primary purpose of the `useMemo` hook in React?",
+          "answer": "`useMemo` is used to memoize the result of an expensive calculation or value, preventing it from being re-calculated on every re-render unless its dependencies change.",
+          "options": [],
+          "analysisPoints": [],
+          "keyConcepts": [
+            "useMemo",
+            "Memoization",
+            "Performance"
+          ],
+          "evaluationCriteria": [
+            "Understanding of core hook purpose"
+          ],
+          "example": null,
+          "tags": [
+            "React",
+            "useMemo",
+            "Hooks",
+            "Performance"
+          ],
+          "prerequisites": [
+            "React_Functional_Components"
+          ],
+          "complexity": 3,
+          "interviewFrequency": 7,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_react_hooks_2",
+          "topic": "useCallback Hook",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "What is the primary purpose of the `useCallback` hook in React?",
+          "answer": "`useCallback` is used to memoize a callback function, preventing it from being re-created on every re-render unless its dependencies change. This helps optimize performance, especially when passing callbacks to `React.memo` wrapped child components.",
+          "options": [],
+          "analysisPoints": [],
+          "keyConcepts": [
+            "useCallback",
+            "Memoization",
+            "Performance",
+            "Referential Equality"
+          ],
+          "evaluationCriteria": [
+            "Understanding of core hook purpose"
+          ],
+          "example": null,
+          "tags": [
+            "React",
+            "useCallback",
+            "Hooks",
+            "Performance"
+          ],
+          "prerequisites": [
+            "React_Functional_Components"
+          ],
+          "complexity": 3,
+          "interviewFrequency": 7,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_react_hooks_3",
+          "topic": "useMemo vs useCallback",
+          "level": "medium",
+          "type": "mcq",
+          "question": "Which of the following statements accurately describes the difference between `useMemo` and `useCallback`?",
+          "answer": "`useMemo` memoizes a value, while `useCallback` memoizes a function.",
+          "options": [
+            "`useMemo` memoizes a value, while `useCallback` memoizes a function.",
+            "`useMemo` is for asynchronous operations, while `useCallback` is for synchronous ones.",
+            "Both `useMemo` and `useCallback` memoize values, but `useCallback` is specifically for event handlers.",
+            "`useMemo` runs only once, while `useCallback` runs on every render.",
+            "They are interchangeable and serve the same purpose."
+          ],
+          "analysisPoints": [
+            "The core distinction between the two hooks lies in what they memoize: `useMemo` for values, `useCallback` for functions.",
+            "Understanding that both rely on dependency arrays for re-computation/re-creation.",
+            "Recognizing that `useCallback` is often used for event handlers, but its fundamental purpose is function memoization."
+          ],
+          "keyConcepts": [
+            "useMemo",
+            "useCallback",
+            "Memoization",
+            "Value Memoization",
+            "Function Memoization",
+            "Referential Equality"
+          ],
+          "evaluationCriteria": [
+            "Ability to distinguish between the primary uses of `useMemo` and `useCallback`.",
+            "Knowledge of what each hook returns/memoizes."
+          ],
+          "example": "```typescript\nimport React, { useMemo, useCallback, useState } from 'react';\n\nfunction MyComponent({ data }) {\n  // useMemo: memoizes the result of filter operation (a new array/value)\n  const filteredData = useMemo(() => {\n    return data.filter(item => item.isActive);\n  }, [data]);\n\n  // useCallback: memoizes the function itself\n  const handleClick = useCallback(() => {\n    console.log('Button clicked!');\n  }, []);\n\n  return (\n    <div>\n      {filteredData.length > 0 && <p>Active items: {filteredData.length}</p>}\n      <button onClick={handleClick}>Click Me</button>\n    </div>\n  );\n}\n```\nIn this example, `filteredData` holds a memoized array (a value), and `handleClick` holds a memoized function.",
+          "tags": [
+            "React",
+            "Hooks",
+            "useMemo",
+            "useCallback",
+            "Comparison",
+            "MCQ"
+          ],
+          "prerequisites": [
+            "theory_react_performance_hooks"
+          ],
+          "complexity": 5,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_react_hooks_4",
+          "topic": "useMemo and useCallback Dependencies",
+          "level": "medium",
+          "type": "open",
+          "question": "Explain the role of the dependency array in `useMemo` and `useCallback`. What happens if it's omitted or if it's an empty array `[]`?",
+          "answer": "The dependency array (`deps`) is a crucial second argument for both `useMemo` and `useCallback`. It tells React when the memoized value or function needs to be re-computed/re-created. \n\n-   **Role:** React will only re-run the `create` function (for `useMemo`) or re-create the callback function (for `useCallback`) if any of the values in the `deps` array have changed since the last render (compared using strict equality, `===`). If all dependencies are the same, the previously memoized value/function is returned.\n\n-   **Omitted Dependency Array:** If the dependency array is completely omitted, the `create` function (for `useMemo`) or the callback function (for `useCallback`) will **re-run/re-create on every single render** of the component. This effectively negates the purpose of using `useMemo` or `useCallback` for performance optimization, as you're not caching anything.\n\n-   **Empty Array `[]`:** If an empty array `[]` is provided, it means that the memoized value or function will **only be created once** on the initial render of the component and will never be re-computed/re-created on subsequent renders, regardless of how many times the component re-renders. This is useful for values or functions that truly do not depend on any props or state within the component's lifetime. However, care must be taken as it can lead to stale closures if the function or value relies on mutable variables from the component's scope that change over time.",
+          "options": [],
+          "analysisPoints": [
+            "Understanding the core mechanism of memoization based on dependencies.",
+            "Distinguishing between omitting the array (no memoization) and providing an empty array (memoize once).",
+            "Awareness of potential 'stale closure' issues with empty dependency arrays."
+          ],
+          "keyConcepts": [
+            "Dependency Array",
+            "Memoization",
+            "Stale Closures",
+            "Referential Equality"
+          ],
+          "evaluationCriteria": [
+            "Clarity of explanation.",
+            "Correctness of behavior for omitted vs. empty array.",
+            "Identification of potential pitfalls (stale closures)."
+          ],
+          "example": null,
+          "tags": [
+            "React",
+            "Hooks",
+            "Dependencies",
+            "useMemo",
+            "useCallback",
+            "Open-Ended"
+          ],
+          "prerequisites": [
+            "theory_react_performance_hooks"
+          ],
+          "complexity": 7,
+          "interviewFrequency": 9,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_react_hooks_5",
+          "topic": "When not to use useMemo/useCallback",
+          "level": "medium",
+          "type": "mcq",
+          "question": "Which scenario is LEAST likely to benefit significantly from `useMemo` or `useCallback`?",
+          "answer": "A component with very few renders and simple calculations.",
+          "options": [
+            "A component with very few renders and simple calculations.",
+            "Passing a callback to a `React.memo`'d child component.",
+            "A computationally expensive data transformation inside a component that re-renders frequently.",
+            "Rendering a large, dynamic list where each item has an `onClick` handler.",
+            "Passing an object as a prop to a `React.memo`'d child component."
+          ],
+          "analysisPoints": [
+            "The overhead of `useMemo`/`useCallback` (creating the memoized version, comparing dependencies) might outweigh the performance benefits for simple cases.",
+            "Understanding that the primary benefits come from preventing redundant work (expensive calculations) or unnecessary re-renders of optimized children (due to referential equality)."
+          ],
+          "keyConcepts": [
+            "Performance Optimization",
+            "Overhead",
+            "React.memo",
+            "Premature Optimization"
+          ],
+          "evaluationCriteria": [
+            "Ability to identify when memoization is not beneficial.",
+            "Understanding the trade-offs of using these hooks."
+          ],
+          "example": null,
+          "tags": [
+            "React",
+            "Hooks",
+            "Performance",
+            "Optimization",
+            "Anti-Pattern",
+            "MCQ"
+          ],
+          "prerequisites": [
+            "theory_react_performance_hooks"
+          ],
+          "complexity": 6,
+          "interviewFrequency": 7,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_react_hooks_6",
+          "topic": "useCallback practical application",
+          "level": "hard",
+          "type": "code",
+          "question": "Consider a `Parent` component that renders a `Child` component. The `Child` component is wrapped with `React.memo`. The `Parent` passes a callback function to the `Child`. The `Parent` also has a counter state that updates frequently.\n\nWrite a minimal `Parent` and `Child` component. Demonstrate how `useCallback` can prevent unnecessary re-renders of the `Child` component when the `Parent`'s counter state updates.",
+          "answer": "```typescript\nimport React, { useState, useCallback, memo } from 'react';\n\n// Child component wrapped with React.memo\ninterface ChildProps {\n  onAction: (message: string) => void;\n  someProp: string;\n}\n\nconst Child = memo(({ onAction, someProp }: ChildProps) => {\n  console.log('Child component rendered', { someProp });\n  return (\n    <button onClick={() => onAction(`Action from Child with prop: ${someProp}`)}>\n      Perform Action\n    </button>\n  );\n});\n\n// Parent component\nfunction Parent() {\n  const [counter, setCounter] = useState(0);\n  const [inputValue, setInputValue] = useState('');\n\n  // Scenario 1: Callback NOT memoized (will cause Child re-render on Parent counter change)\n  // const handleActionNonMemoized = (msg: string) => {\n  //   console.log('Non-memoized action:', msg, 'Counter:', counter);\n  // };\n\n  // Scenario 2: Callback memoized with useCallback\n  const handleActionMemoized = useCallback((msg: string) => {\n    console.log('Memoized action:', msg, 'Counter:', counter);\n  }, [counter]); // Dependency: re-create if 'counter' changes\n\n  return (\n    <div>\n      <h1>Parent Component</h1>\n      <p>Counter: {counter}</p>\n      <button onClick={() => setCounter(prev => prev + 1)}>\n        Increment Counter\n      </button>\n      <p>\n        <input \n          type=\"text\"\n          value={inputValue} \n          onChange={(e) => setInputValue(e.target.value)}\n          placeholder=\"Type something...\"\n        />\n      </p>\n\n      <h2>Child Component</h2>\n      {/* \n        If using handleActionNonMemoized, Child will re-render \n        every time Parent re-renders (e.g., counter change).\n        \n        If using handleActionMemoized, Child will only re-render \n        when 'counter' changes (due to its dependency).\n      */}\n      <Child onAction={handleActionMemoized} someProp={inputValue} />\n    </div>\n  );\n}\n\n// To run this in a React app:\n// export default Parent;\n\n// Expected Console Output (when only Increment Counter is clicked repeatedly):\n// Initial render: \"Child component rendered\" (once)\n// Subsequent clicks on Increment Counter: \"Memoized action:...\" only when child button clicked. \n//                                        \"Child component rendered\" only if `counter` changes (if `handleActionMemoized` depended on it). \n//                                        If `handleActionMemoized` had an empty `[]` dependency and child button wasn't clicked, \n//                                        `Child component rendered` would still only happen once.\n// With `[counter]` dependency, `Child` will re-render when `counter` changes.\n// To strictly prevent Child re-render with counter updates, `handleActionMemoized` would need `[]` if it doesn't depend on `counter`.\n// The question asks how `useCallback` *can* prevent re-renders, implying comparison.\n// The key is that `handleActionMemoized`'s reference *remains the same* as long as `counter` doesn't change.\n// If the goal is to prevent *any* re-render of Child unless `inputValue` changes, then the `onAction` should not depend on `counter`.\n// Corrected interpretation for strict non-re-render: The `useCallback` should have `[]` if the function *truly* does not need the latest `counter` value.\n// Or, the `handleActionMemoized` callback could take `counter` as a parameter if it needs it at the time of click.\n// The provided solution uses `[counter]` as a dependency, so `Child` *will* re-render if counter changes, but if it had `[]`, it would not.\n// Let's refine the solution and explanation for clarity.\n\n```typescript\nimport React, { useState, useCallback, memo } from 'react';\n\n// Child component wrapped with React.memo\ninterface ChildProps {\n  onAction: (message: string) => void;\n  someProp: string; // A prop that can change, affecting Child's re-render\n}\n\nconst Child = memo(({ onAction, someProp }: ChildProps) => {\n  console.log('Child component rendered (memoized)');\n  return (\n    <button onClick={() => onAction(`Action from Child with prop: ${someProp}`)}>\n      Perform Action\n    </button>\n  );\n});\n\n// Parent component\nfunction Parent() {\n  const [counter, setCounter] = useState(0);\n  const [inputValue, setInputValue] = useState('');\n\n  // This callback function reference will only change if inputValue changes.\n  // It does NOT depend on 'counter'.\n  const handleAction = useCallback((msg: string) => {\n    console.log(`Action: ${msg}. Current Parent counter (may be stale if no dependency): ${counter}`);\n  }, [inputValue]); // Depends on inputValue. If inputValue doesn't change, handleAction's ref is stable.\n  // If 'counter' was added here: `[inputValue, counter]`, then handleAction would re-create when counter changes.\n  // For demonstration of preventing re-render with `React.memo` on Child, `handleAction` needs a stable reference.\n  // An empty dependency array `[]` would make it most stable, but could lead to stale `counter` in its closure.\n  // Here, we demonstrate that even if `inputValue` changes, `handleAction` would still be stable *if* `inputValue` didn't change.\n  // The core point is that `useCallback` controls when the function reference changes.\n\n  // To make it truly independent of 'counter' for preventing Child re-renders, \n  // and also avoid stale 'counter' if needed for logic inside handleAction, \n  // a ref could be used, or the counter could be passed as a parameter.\n  // For the purpose of *preventing Child re-renders*, the key is a stable `onAction` reference.\n\n  const stableHandleAction = useCallback((msg: string) => {\n    // Here, if you need the latest counter, you might use a ref or pass it as a parameter\n    console.log(`Stable Action: ${msg}. Counter: ${counter} (from stable closure, potentially stale without ref)`);\n  }, []); // Empty dependency array: this function's reference is created only once.\n\n  return (\n    <div>\n      <h1>Parent Component</h1>\n      <p>Counter: {counter}</p>\n      <button onClick={() => setCounter(prev => prev + 1)}>\n        Increment Counter (causes Parent re-render)\n      </button>\n      <p>\n        <input \n          type=\"text\"\n          value={inputValue} \n          onChange={(e) => setInputValue(e.target.value)}\n          placeholder=\"Type something... (causes Parent re-render)\"\n        />\n      </p>\n\n      <h2>Child Component</h2>\n      {/* \n        If `stableHandleAction` is used with `[]` dependency, \n        Child component will only re-render if `someProp` (inputValue) changes. \n        It will NOT re-render when `counter` changes, because `onAction`'s reference remains stable.\n        Observe console.log('Child component rendered (memoized)')\n      */}\n      <Child onAction={stableHandleAction} someProp={inputValue} />\n      {/* \n        For comparison, if you used a non-memoized function like below,\n        Child would re-render on every Parent re-render (e.g., when counter changes).\n        <Child onAction={(msg) => console.log('Non-memoized action:', msg)} someProp={inputValue} />\n      */}\n    </div>\n  );\n}\n```\n\n**Explanation:**\n\n1.  **`Child` Component with `React.memo`:** The `Child` component is wrapped with `React.memo`. This means it will only re-render if its props (`onAction` or `someProp`) change (shallow comparison).\n2.  **`Parent` Component State:** `Parent` has `counter` state (updated by a button) and `inputValue` state (updated by an input field). Both cause `Parent` to re-render when changed.\n3.  **`stableHandleAction` with `useCallback([], [])`:**\n    *   The `onAction` prop passed to `Child` is `stableHandleAction`, which is memoized using `useCallback` with an **empty dependency array `[]`**.\n    *   This ensures that the `stableHandleAction` function's reference remains the **same across all re-renders of `Parent`**, unless the component unmounts and remounts.\n4.  **Observation:**\n    *   When you click \"Increment Counter\", the `Parent` component re-renders. However, because `stableHandleAction`'s reference has not changed and `someProp` (which is `inputValue`) has not changed, `React.memo` prevents the `Child` component from re-rendering.\n    *   You will see `console.log('Child component rendered (memoized)')` only when `inputValue` changes, or on initial mount. It will *not* log when only the `counter` is incremented. This demonstrates the performance benefit.\n\nThis example effectively shows how `useCallback` keeps the function reference stable, allowing `React.memo` to optimize child component re-renders, even when the parent component re-renders due to unrelated state changes.",
+          "options": [],
+          "analysisPoints": [
+            "Correct implementation of `React.memo` on the child component.",
+            "Proper usage of `useCallback` on the parent's function that is passed as a prop.",
+            "Understanding that the dependency array determines when the memoized function is recreated.",
+            "Ability to explain the observable performance benefit (reduced child re-renders)."
+          ],
+          "keyConcepts": [
+            "useCallback",
+            "React.memo",
+            "Referential Equality",
+            "Performance Optimization",
+            "Child Re-renders",
+            "Dependencies"
+          ],
+          "evaluationCriteria": [
+            "Code correctness and functionality.",
+            "Clear demonstration of the concept.",
+            "Accurate explanation of the observed behavior.",
+            "Understanding of the interaction between `useCallback` and `React.memo`."
+          ],
+          "example": null,
+          "tags": [
+            "React",
+            "Hooks",
+            "useCallback",
+            "React.memo",
+            "Performance",
+            "Coding Challenge"
+          ],
+          "prerequisites": [
+            "theory_react_performance_hooks"
+          ],
+          "complexity": 8,
+          "interviewFrequency": 9,
+          "learningPath": "advanced"
+        },
+        {
+          "id": "question_react_hooks_7",
+          "topic": "useMemo practical application",
+          "level": "hard",
+          "type": "code",
+          "question": "Imagine you have a component that displays a list of users. This list needs to be filtered based on a search term, and the filtering operation can be computationally expensive if the list is very large. The component also has a separate counter that updates frequently.\n\nWrite a React functional component that demonstrates how to use `useMemo` to optimize the filtering of the user list, ensuring the filtering only re-runs when the `users` array or `searchTerm` changes, but not when the unrelated `counter` state updates.",
+          "answer": "```typescript\nimport React, { useState, useMemo } from 'react';\n\ninterface User {\n  id: number;\n  name: string;\n  email: string;\n}\n\n// Simulate a large user list\nconst ALL_USERS: User[] = Array.from({ length: 10000 }, (_, i) => ({\n  id: i + 1,\n  name: `User ${i + 1}`,\n  email: `user${i + 1}@example.com`,\n}));\n\nfunction UserListFilter() {\n  const [searchTerm, setSearchTerm] = useState('');\n  const [counter, setCounter] = useState(0); // Unrelated state\n\n  // Use useMemo to memoize the filtered users.\n  // This calculation will only re-run if ALL_USERS or searchTerm changes.\n  // It will NOT re-run when 'counter' changes.\n  const filteredUsers = useMemo(() => {\n    console.log('Filtering users...'); // This will log only when needed\n    if (!searchTerm) {\n      return ALL_USERS;\n    }\n    const lowerCaseSearchTerm = searchTerm.toLowerCase();\n    return ALL_USERS.filter(user => \n      user.name.toLowerCase().includes(lowerCaseSearchTerm) ||\n      user.email.toLowerCase().includes(lowerCaseSearchTerm)\n    );\n  }, [ALL_USERS, searchTerm]); // Dependencies: ALL_USERS and searchTerm\n\n  return (\n    <div>\n      <h1>User List Filter</h1>\n      \n      <label htmlFor=\"search-input\">Search Users:</label>\n      <input\n        id=\"search-input\"\n        type=\"text\"\n        placeholder=\"Search by name or email\"\n        value={searchTerm}\n        onChange={(e) => setSearchTerm(e.target.value)}\n      />\n\n      <p>Counter: {counter}</p>\n      <button onClick={() => setCounter(prev => prev + 1)}>\n        Increment Counter (unrelated to filtering)\n      </button>\n\n      <h2>Filtered Users ({filteredUsers.length} found)</h2>\n      <ul>\n        {filteredUsers.slice(0, 10).map(user => ( // Display first 10 for brevity\n          <li key={user.id}>{user.name} - {user.email}</li>\n        ))}\n      </ul>\n      {filteredUsers.length > 10 && <p>...</p>}\n    </div>\n  );\n}\n\n// To run this in a React app:\n// export default UserListFilter;\n\n// Expected Console Output:\n// 1. Initial render: \"Filtering users...\" (once)\n// 2. Typing in search box: \"Filtering users...\" (on each significant change)\n// 3. Clicking \"Increment Counter\": NO \"Filtering users...\" log (demonstrates optimization)\n",
+          "options": [],
+          "analysisPoints": [
+            "Correct usage of `useMemo` for a data transformation.",
+            "Proper identification of dependencies for the `useMemo` hook (only `searchTerm` and `ALL_USERS`).",
+            "Demonstration that unrelated state changes do not trigger the memoized computation.",
+            "Clear explanation of the performance benefit."
+          ],
+          "keyConcepts": [
+            "useMemo",
+            "Performance Optimization",
+            "Data Transformation",
+            "Dependencies",
+            "Memoization"
+          ],
+          "evaluationCriteria": [
+            "Code correctness and functionality.",
+            "Effective use of `useMemo` to solve the stated problem.",
+            "Clear demonstration of the optimization through `console.log` or similar.",
+            "Understanding of when `useMemo` is appropriate."
+          ],
+          "example": null,
+          "tags": [
+            "React",
+            "Hooks",
+            "useMemo",
+            "Performance",
+            "Coding Challenge"
+          ],
+          "prerequisites": [
+            "theory_react_performance_hooks"
+          ],
+          "complexity": 8,
+          "interviewFrequency": 8,
+          "learningPath": "advanced"
+        },
+        {
+          "id": "question_react_hooks_8",
+          "topic": "When to use React.memo",
+          "level": "medium",
+          "type": "flashcard",
+          "question": "What is `React.memo` used for, and how does it relate to `useCallback` and `useMemo`?",
+          "answer": "`React.memo` is a Higher-Order Component (HOC) used to memoize functional React components, preventing them from re-rendering if their props (and state, implicitly via internal hooks) have not changed. It performs a shallow comparison of props.\n\nIt relates to `useCallback` and `useMemo` because:\n-   If a `React.memo` wrapped component receives a function or object as a prop, and that prop's reference changes on every parent re-render (even if its content is the same), `React.memo` will see it as a new prop and still re-render the child.\n-   `useCallback` ensures that a function's reference remains stable, preventing unnecessary re-renders of `React.memo` wrapped child components when that function is passed as a prop.\n-   `useMemo` ensures that an object or array's reference remains stable, preventing unnecessary re-renders of `React.memo` wrapped child components when that object/array is passed as a prop.",
+          "options": [],
+          "analysisPoints": [],
+          "keyConcepts": [
+            "React.memo",
+            "HOC",
+            "Memoization",
+            "Referential Equality",
+            "useCallback",
+            "useMemo",
+            "Performance"
+          ],
+          "evaluationCriteria": [
+            "Understanding of `React.memo`'s role and its synergy with `useCallback`/`useMemo`."
+          ],
+          "example": null,
+          "tags": [
+            "React",
+            "React.memo",
+            "Hooks",
+            "Performance",
+            "Interview"
+          ],
+          "prerequisites": [
+            "React_Functional_Components",
+            "React_Props"
+          ],
+          "complexity": 6,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_rtl_1",
+          "topic": "React Testing Library Philosophy",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "What is the core philosophy of React Testing Library (RTL)?",
+          "answer": "The core philosophy of RTL is to write tests that resemble how users interact with the application, focusing on user behavior and accessibility, rather than implementation details.",
+          "options": [],
+          "analysisPoints": [],
+          "keyConcepts": [
+            "React Testing Library",
+            "User-Centric Testing",
+            "Accessibility"
+          ],
+          "evaluationCriteria": [
+            "Understanding of RTL's guiding principle"
+          ],
+          "example": null,
+          "tags": [
+            "React",
+            "Testing",
+            "RTL",
+            "Philosophy"
+          ],
+          "prerequisites": [],
+          "complexity": 3,
+          "interviewFrequency": 7,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_rtl_2",
+          "topic": "RTL Query Priority",
+          "level": "medium",
+          "type": "mcq",
+          "question": "According to React Testing Library's best practices, which query method should you prioritize when trying to find an element in the DOM?",
+          "answer": "`getByRole`",
+          "options": [
+            "`getByRole`",
+            "`getByTestId`",
+            "`getByClassName` (not an RTL query)",
+            "`querySelector` (DOM API, not RTL)",
+            "`getByText`"
+          ],
+          "analysisPoints": [
+            "RTL prioritizes queries that mimic how users or assistive technologies interact with the page.",
+            "`getByRole` is the highest priority as it's most aligned with accessibility.",
+            "`getByTestId` is explicitly a fallback, used when other semantic queries are not possible.",
+            "Incorrect options represent either non-RTL methods or lower-priority RTL methods."
+          ],
+          "keyConcepts": [
+            "RTL Queries",
+            "getByRole",
+            "Accessibility",
+            "Best Practices"
+          ],
+          "evaluationCriteria": [
+            "Knowledge of RTL query hierarchy.",
+            "Understanding of RTL's accessibility focus."
+          ],
+          "example": null,
+          "tags": [
+            "React",
+            "Testing",
+            "RTL",
+            "Queries",
+            "MCQ"
+          ],
+          "prerequisites": [
+            "theory_react_testing_library"
+          ],
+          "complexity": 5,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_rtl_3",
+          "topic": "RTL `fireEvent`",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "What is the purpose of `fireEvent` in React Testing Library?",
+          "answer": "`fireEvent` is used to dispatch DOM events (like `click`, `change`, `submit`) on elements in the rendered component, simulating user interactions.",
+          "options": [],
+          "analysisPoints": [],
+          "keyConcepts": [
+            "fireEvent",
+            "RTL",
+            "Event Simulation"
+          ],
+          "evaluationCriteria": [
+            "Basic understanding of `fireEvent`'s role"
+          ],
+          "example": null,
+          "tags": [
+            "React",
+            "Testing",
+            "RTL",
+            "Events"
+          ],
+          "prerequisites": [
+            "theory_react_testing_library"
+          ],
+          "complexity": 3,
+          "interviewFrequency": 7,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_rtl_4",
+          "topic": "RTL `screen` object",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "What is the `screen` object in React Testing Library, and why is it useful?",
+          "answer": "The `screen` object is a global utility from RTL that provides access to all query functions (`getBy`, `queryBy`, `findBy`, etc.) without needing to destructure them from the `render` result. It is useful because it encourages finding elements as a user would (from the `document.body`), promoting more robust and user-centric tests.",
+          "options": [],
+          "analysisPoints": [],
+          "keyConcepts": [
+            "screen object",
+            "RTL",
+            "Queries"
+          ],
+          "evaluationCriteria": [
+            "Understanding `screen`'s utility and philosophy"
+          ],
+          "example": null,
+          "tags": [
+            "React",
+            "Testing",
+            "RTL",
+            "Queries"
+          ],
+          "prerequisites": [
+            "theory_react_testing_library"
+          ],
+          "complexity": 4,
+          "interviewFrequency": 6,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_rtl_5",
+          "topic": "Testing a form submission with RTL",
+          "level": "medium",
+          "type": "code",
+          "question": "Write a test using React Testing Library for a simple form with an input field and a submit button. The test should:\n1.  Render the form component.\n2.  Type a value into the input field.\n3.  Click the submit button.\n4.  Assert that a mock `onSubmit` function was called with the correct value.",
+          "answer": "```typescript\nimport React, { useState } from 'react';\nimport { render, screen, fireEvent } from '@testing-library/react';\nimport '@testing-library/jest-dom/extend-expect';\n\ninterface SimpleFormProps {\n  onSubmit: (value: string) => void;\n}\n\nfunction SimpleForm({ onSubmit }: SimpleFormProps) {\n  const [text, setText] = useState('');\n\n  const handleSubmit = (e: React.FormEvent) => {\n    e.preventDefault();\n    onSubmit(text);\n  };\n\n  return (\n    <form onSubmit={handleSubmit}>\n      <label htmlFor=\"text-input\">Enter Text:</label>\n      <input\n        id=\"text-input\"\n        type=\"text\"\n        value={text}\n        onChange={(e) => setText(e.target.value)}\n      />\n      <button type=\"submit\">Submit Form</button>\n    </form>\n  );\n}\n\ndescribe('SimpleForm', () => {\n  test('calls onSubmit with the input value when submitted', () => {\n    const mockSubmit = jest.fn();\n    render(<SimpleForm onSubmit={mockSubmit} />);\n    \n    // 1. Find the input field by its label\n    const inputElement = screen.getByLabelText(/Enter Text:/i);\n    \n    // 2. Type a value into the input field\n    fireEvent.change(inputElement, { target: { value: 'Hello RTL' } });\n    expect(inputElement).toHaveValue('Hello RTL'); // Verify input value changed\n    \n    // 3. Find and click the submit button\n    const submitButton = screen.getByRole('button', { name: /Submit Form/i });\n    fireEvent.click(submitButton);\n    \n    // 4. Assert that the onSubmit mock function was called correctly\n    expect(mockSubmit).toHaveBeenCalledTimes(1);\n    expect(mockSubmit).toHaveBeenCalledWith('Hello RTL');\n  });\n});\n```",
+          "options": [],
+          "analysisPoints": [
+            "Correct rendering of a component.",
+            "Effective use of `jest.fn()` for mocking.",
+            "Appropriate query methods (`getByLabelText`, `getByRole`) for finding elements.",
+            "Correct simulation of `change` and `click` events with `fireEvent`.",
+            "Accurate assertions on mock function calls (`toHaveBeenCalledTimes`, `toHaveBeenCalledWith`)."
+          ],
+          "keyConcepts": [
+            "RTL",
+            "Testing Forms",
+            "fireEvent",
+            "jest.fn",
+            "Queries",
+            "Assertions"
+          ],
+          "evaluationCriteria": [
+            "Code correctness and adherence to RTL best practices.",
+            "Completeness of the test steps.",
+            "Understanding of mocking and assertion."
+          ],
+          "example": null,
+          "tags": [
+            "React",
+            "Testing",
+            "RTL",
+            "Forms",
+            "Coding Challenge"
+          ],
+          "prerequisites": [
+            "theory_react_testing_library",
+            "Jest_Basics"
+          ],
+          "complexity": 7,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_rtl_6",
+          "topic": "When to use `getByTestId`",
+          "level": "medium",
+          "type": "open",
+          "question": "React Testing Library discourages the use of `getByTestId` as a primary query. Explain why, and in what specific situations it might be an acceptable fallback.",
+          "answer": "React Testing Library (RTL) discourages `getByTestId` as a primary query because its philosophy is to test components in a way that resembles user interaction. Users don't see or interact with `data-testid` attributes; they interact with visible text, labels, roles, and other accessibility features.\n\n**Why discouraged:**\n1.  **Breaks User-Centricity:** Using `data-testid` means your test is tied to an internal, non-user-facing implementation detail. If a UI refactor changes `data-testid` values but the user experience remains the same, your test will break unnecessarily.\n2.  **Ignores Accessibility:** It doesn't encourage writing accessible code. By prioritizing `getByRole`, `getByLabelText`, `getByText`, etc., RTL guides developers to add proper semantic HTML and accessibility attributes, which benefits real users.\n3.  **Encourages Brittle Tests:** Tests that rely on `data-testid` can be more brittle because they are coupled to implementation details. Changes to these details (even minor ones) can break tests even if the user functionality is intact.\n\n**Acceptable Fallback Situations:**\n`getByTestId` is considered an acceptable fallback in specific situations where other, more semantic queries are not feasible or would be overly complex. These situations typically involve:\n1.  **Non-Interactive Elements with No Semantic Role/Text:** When testing an element that doesn't have an accessible role, label, or meaningful text content, and it's not interactive (e.g., a simple `div` or `span` that displays dynamic data but has no semantic meaning beyond that).\n2.  **When Testing Libraries/Frameworks:** Sometimes, third-party components or very specific UI elements might not expose accessible names or roles, making other queries difficult without resorting to complex CSS selectors.\n3.  **For Snapshot Testing of Internal Structure:** Although less common for behavior tests, it can be used for snapshot testing if you specifically want to assert on the presence of a `data-testid` in the rendered output for debugging or internal tracking purposes.\n\nIn essence, `getByTestId` should be the last resort when all other user-centric queries fail to reliably locate an element.",
+          "options": [],
+          "analysisPoints": [
+            "Understanding RTL's philosophy and how `getByTestId` deviates.",
+            "Explanation of the negative consequences (brittleness, accessibility).",
+            "Identification of valid, specific fallback scenarios.",
+            "Emphasis on `getByTestId` as a last resort."
+          ],
+          "keyConcepts": [
+            "RTL Queries",
+            "getByTestId",
+            "Best Practices",
+            "Accessibility",
+            "User-Centric Testing",
+            "Brittle Tests"
+          ],
+          "evaluationCriteria": [
+            "Comprehensive explanation of the 'why' behind the discouragement.",
+            "Clear and specific examples of acceptable fallback use cases.",
+            "Demonstration of deep understanding of RTL principles."
+          ],
+          "example": null,
+          "tags": [
+            "React",
+            "Testing",
+            "RTL",
+            "Queries",
+            "Best Practices",
+            "Open-Ended"
+          ],
+          "prerequisites": [
+            "theory_react_testing_library"
+          ],
+          "complexity": 7,
+          "interviewFrequency": 8,
+          "learningPath": "advanced"
+        },
+        {
+          "id": "question_rtl_7",
+          "topic": "Asynchronous Operations in RTL",
+          "level": "medium",
+          "type": "mcq",
+          "question": "You have a React component that fetches data asynchronously and displays it. Which of the following RTL queries is best suited to wait for and find the data once it appears in the DOM?",
+          "answer": "`findByText`",
+          "options": [
+            "`findByText`",
+            "`getByText`",
+            "`queryByText`",
+            "`find(selector)` (Enzyme query)"
+          ],
+          "analysisPoints": [
+            "Understanding the difference between `get`, `query`, and `find` variants.",
+            "`get` queries throw an error if the element is not found immediately, suitable for synchronous rendering.",
+            "`query` queries return null if not found immediately, suitable for checking absence.",
+            "`find` queries return a Promise that resolves when the element is found (or rejects after a timeout), making them ideal for asynchronous operations.",
+            "Knowing that `find(selector)` is an Enzyme method, not RTL."
+          ],
+          "keyConcepts": [
+            "RTL Queries",
+            "Asynchronous Testing",
+            "findBy",
+            "Promises"
+          ],
+          "evaluationCriteria": [
+            "Correct identification of the appropriate asynchronous query.",
+            "Understanding of the behavior of different query types."
+          ],
+          "example": "```typescript\nimport React, { useState, useEffect } from 'react';\nimport { render, screen } from '@testing-library/react';\n\nfunction DataLoader() {\n  const [data, setData] = useState<string | null>(null);\n\n  useEffect(() => {\n    const fetchData = async () => {\n      await new Promise(resolve => setTimeout(resolve, 100)); // Simulate API call\n      setData('Data loaded successfully!');\n    };\n    fetchData();\n  }, []);\n\n  return (\n    <div>\n      {data ? <p>{data}</p> : <p>Loading...</p>}\n    </div>\n  );\n}\n\ntest('DataLoader displays loaded data after async operation', async () => {\n  render(<DataLoader />);\n  expect(screen.getByText('Loading...')).toBeInTheDocument();\n  \n  // Use findByText to wait for the asynchronous data to appear\n  const loadedDataElement = await screen.findByText('Data loaded successfully!');\n  expect(loadedDataElement).toBeInTheDocument();\n});\n```",
+          "tags": [
+            "React",
+            "Testing",
+            "RTL",
+            "Asynchronous",
+            "Queries",
+            "MCQ"
+          ],
+          "prerequisites": [
+            "theory_react_testing_library",
+            "JavaScript_Promises"
+          ],
+          "complexity": 6,
+          "interviewFrequency": 7,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_rtl_8",
+          "topic": "jest.fn() in RTL",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "Why is `jest.fn()` commonly used when testing React components with RTL?",
+          "answer": "`jest.fn()` is used to create mock functions. In RTL, it's particularly useful for mocking callback props passed to components (e.g., `onSubmit`, `onClick`). This allows tests to: \n1.  Verify if the callback was called.\n2.  Verify how many times it was called.\n3.  Verify the arguments it was called with.",
+          "options": [],
+          "analysisPoints": [],
+          "keyConcepts": [
+            "jest.fn",
+            "Mock Functions",
+            "RTL",
+            "Assertions"
+          ],
+          "evaluationCriteria": [
+            "Understanding the purpose of mocking in testing"
+          ],
+          "example": null,
+          "tags": [
+            "React",
+            "Testing",
+            "RTL",
+            "Jest",
+            "Mocking"
+          ],
+          "prerequisites": [
+            "Jest_Basics"
+          ],
+          "complexity": 3,
+          "interviewFrequency": 6,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_enzyme_1",
+          "topic": "Enzyme Introduction",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "What is Enzyme primarily used for in React development?",
+          "answer": "Enzyme is a JavaScript testing utility for React that provides an API for testing React Components' output, making it easier to assert, manipulate, and traverse React trees.",
+          "options": [],
+          "analysisPoints": [],
+          "keyConcepts": [
+            "Enzyme",
+            "React Testing",
+            "Utility"
+          ],
+          "evaluationCriteria": [
+            "Basic understanding of Enzyme's purpose"
+          ],
+          "example": null,
+          "tags": [
+            "React",
+            "Testing",
+            "Enzyme"
+          ],
+          "prerequisites": [],
+          "complexity": 3,
+          "interviewFrequency": 5,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_enzyme_2",
+          "topic": "Shallow vs Mount vs Render",
+          "level": "medium",
+          "type": "mcq",
+          "question": "Which Enzyme rendering method is best suited for unit testing a component in isolation, without rendering its child components?",
+          "answer": "`shallow`",
+          "options": [
+            "`shallow`",
+            "`mount`",
+            "`render`",
+            "`debug` (not a rendering method)"
+          ],
+          "analysisPoints": [
+            "Understanding the core distinction between Enzyme's rendering methods.",
+            "`shallow` isolates the component, `mount` renders full DOM, `render` to static HTML."
+          ],
+          "keyConcepts": [
+            "Enzyme",
+            "Shallow Rendering",
+            "Unit Testing",
+            "Isolation"
+          ],
+          "evaluationCriteria": [
+            "Correct identification of `shallow`'s purpose.",
+            "Understanding of testing isolation."
+          ],
+          "example": null,
+          "tags": [
+            "React",
+            "Testing",
+            "Enzyme",
+            "Shallow",
+            "MCQ"
+          ],
+          "prerequisites": [
+            "theory_enzyme_testing"
+          ],
+          "complexity": 5,
+          "interviewFrequency": 7,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_enzyme_3",
+          "topic": "Enzyme `mount` usage",
+          "level": "medium",
+          "type": "flashcard",
+          "question": "When would you typically use Enzyme's `mount` rendering method over `shallow`?",
+          "answer": "You would use `mount` when you need to test components that interact with the full DOM API, components that rely on their children's lifecycle methods, or when testing interactions between parent and deeply nested child components. It's suitable for integration testing.",
+          "options": [],
+          "analysisPoints": [],
+          "keyConcepts": [
+            "Enzyme",
+            "Mount Rendering",
+            "Integration Testing",
+            "DOM Interaction",
+            "Lifecycle Methods"
+          ],
+          "evaluationCriteria": [
+            "Understanding `mount`'s use cases"
+          ],
+          "example": null,
+          "tags": [
+            "React",
+            "Testing",
+            "Enzyme",
+            "Mount"
+          ],
+          "prerequisites": [
+            "theory_enzyme_testing"
+          ],
+          "complexity": 5,
+          "interviewFrequency": 7,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_enzyme_4",
+          "topic": "Enzyme `simulate`",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "How do you trigger an event on an element within an Enzyme wrapper?",
+          "answer": "You use the `simulate(event, mockEvent)` method on the wrapper. For example, `wrapper.find('button').simulate('click');`",
+          "options": [],
+          "analysisPoints": [],
+          "keyConcepts": [
+            "Enzyme",
+            "Simulate",
+            "Events"
+          ],
+          "evaluationCriteria": [
+            "Basic understanding of event simulation in Enzyme"
+          ],
+          "example": null,
+          "tags": [
+            "React",
+            "Testing",
+            "Enzyme",
+            "Events"
+          ],
+          "prerequisites": [
+            "theory_enzyme_testing"
+          ],
+          "complexity": 3,
+          "interviewFrequency": 6,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_enzyme_5",
+          "topic": "Testing state updates with Enzyme",
+          "level": "medium",
+          "type": "code",
+          "question": "You have a simple `ToggleButton` component that maintains an internal `isOn` state and displays text based on it. Write an Enzyme test using `shallow` to verify that clicking the button toggles its state and updates the displayed text.",
+          "answer": "```typescript\nimport React, { useState } from 'react';\nimport { shallow } from 'enzyme';\n\nfunction ToggleButton() {\n  const [isOn, setIsOn] = useState(false);\n\n  return (\n    <button onClick={() => setIsOn(!isOn)} data-testid=\"toggle-button\">\n      {isOn ? 'ON' : 'OFF'}\n    </button>\n  );\n}\n\ndescribe('ToggleButton', () => {\n  it('should toggle state and display correct text on click', () => {\n    const wrapper = shallow(<ToggleButton />);\n    const button = wrapper.find('[data-testid=\"toggle-button\"]');\n    \n    // Initial state: OFF\n    expect(button.text()).toBe('OFF');\n    expect(wrapper.state('isOn')).toBe(false); // Direct state access (less common with hooks, but possible for class components or with certain Enzyme adapters/debug methods)\n    \n    // Click once: should become ON\n    button.simulate('click');\n    expect(button.text()).toBe('ON');\n    // For functional components with shallow, direct state access like `wrapper.state('isOn')` is typically not available.\n    // We assert on the rendered output instead. To truly test state, you'd re-render or use `mount` with `update()`.\n    // Or rely solely on the visual output.\n\n    // Re-render the shallow wrapper to reflect state changes for functional components\n    // This is often implicitly handled by Jest if the component is mounted in a test environment.\n    // However, for explicit shallow tests of functional component state, you might need `wrapper.update();`\n    // After simulate, the component's state is implicitly updated in the virtual DOM representation that shallow holds.\n    \n    // Click again: should become OFF\n    button.simulate('click');\n    expect(button.text()).toBe('OFF');\n  });\n});\n```\n\n**Note on `wrapper.state()` with Functional Components and Shallow Rendering:**\nWith React Hooks (functional components), `wrapper.state()` is generally not accessible or meaningful in `shallow` rendering because hooks manage state internally without exposing a direct `.state` property on the component instance. The assertion `expect(wrapper.state('isOn')).toBe(false);` would typically fail or return `undefined` for a functional component. The correct way to test state changes in a functional component with shallow rendering is to assert on the **rendered output** (e.g., `button.text()`) that reflects the state change. The example is modified to reflect this, relying on `button.text()` which is the user-observable output.",
+          "options": [],
+          "analysisPoints": [
+            "Correct setup of Enzyme `shallow` wrapper.",
+            "Identifying elements with selectors (`data-testid`).",
+            "Simulating click events with `simulate`.",
+            "Asserting on the visual output (`text()`) to confirm state change.",
+            "Understanding limitations of `shallow` with functional component state access (and how to properly assert)."
+          ],
+          "keyConcepts": [
+            "Enzyme",
+            "Shallow Rendering",
+            "State Testing",
+            "Functional Components",
+            "Simulate"
+          ],
+          "evaluationCriteria": [
+            "Code correctness and adherence to Enzyme usage.",
+            "Effective testing of state transitions through UI output.",
+            "Awareness of functional component state testing nuances with `shallow`."
+          ],
+          "example": null,
+          "tags": [
+            "React",
+            "Testing",
+            "Enzyme",
+            "Shallow",
+            "Coding Challenge"
+          ],
+          "prerequisites": [
+            "theory_enzyme_testing"
+          ],
+          "complexity": 6,
+          "interviewFrequency": 7,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_enzyme_6",
+          "topic": "Enzyme vs RTL Comparison",
+          "level": "hard",
+          "type": "open",
+          "question": "Compare and contrast Enzyme and React Testing Library (RTL) in terms of their testing philosophy, strengths, and weaknesses. When would you choose one over the other in a modern React project?",
+          "answer": "**Enzyme vs. React Testing Library (RTL)**\n\n**Enzyme:**\n*   **Philosophy:** Focuses on testing component implementation details. It provides a comprehensive API to inspect, manipulate, and traverse React component trees. It's more about testing 'how' components work internally.\n*   **Strengths:**\n    *   **Access to Internal State/Props:** Allows direct access to component instance, state, and props (especially with `mount` for class components or `wrapper.props()`).\n    *   **Shallow Rendering:** Enables isolated unit testing without mounting child components, making tests faster and less coupled to children's implementations.\n    *   **Direct Component Method Testing:** Can call component methods directly.\n    *   **Component Tree Traversal:** Powerful API for finding nodes using various selectors (component names, CSS selectors, props).\n*   **Weaknesses:**\n    *   **Coupled to Implementation Details:** Tests can break easily if internal implementation changes, even if the user experience remains the same.\n    *   **Less User-Centric:** Doesn't inherently encourage accessible or user-focused testing practices.\n    *   **Maintenance:** Development has slowed, and it sometimes requires `enzyme-adapter` packages for specific React versions, which can be a maintenance burden.\n\n**React Testing Library (RTL):**\n*   **Philosophy:** \"The more your tests resemble the way your software is used, the more confidence they can give you.\" Focuses on testing user behavior and accessibility, interacting with the DOM as a user would. It's about testing 'what' the user sees and experiences.\n*   **Strengths:**\n    *   **User-Centric:** Encourages writing tests that are resilient to refactoring and mirror real user interactions, promoting more robust tests.\n    *   **Accessibility Focus:** Prioritizes queries that rely on accessible attributes (roles, labels, text), naturally leading to more accessible applications.\n    *   **Less Brittle:** Tests are less likely to break due to internal component changes, making them more stable over time.\n    *   **Framework-Agnostic Core:** Its core principles apply beyond React.\n    *   **Community Recommendation:** Currently the recommended testing library by the React team for new projects.\n*   **Weaknesses:**\n    *   **No Direct State/Method Access:** Does not provide direct access to component internal state or methods, which can make testing certain low-level logic more challenging (though this is by design).\n    *   **Requires DOM Environment:** Tests always render into a DOM environment, potentially making them slightly slower than Enzyme's `shallow` tests.\n\n**When to Choose One Over the Other in a Modern React Project:**\nFor **modern React projects**, **React Testing Library (RTL) is generally the recommended choice**. You would choose RTL because:\n*   It aligns with the latest best practices for writing maintainable and resilient tests.\n*   It encourages accessible development by design.\n*   It gives higher confidence that your application works for real users.\n\n**You might consider Enzyme for:**\n*   **Legacy Projects:** If you're working on an older project that already heavily uses Enzyme, it might be more practical to continue using it to maintain consistency.\n*   **Specific Niche Use Cases:** In rare scenarios where you *must* test very specific internal component logic, lifecycle methods, or props directly, and you understand the trade-offs in terms of test brittleness.\n\nIn conclusion, while both are capable testing libraries, RTL's user-centric and accessibility-first approach makes it the preferred tool for most new React development and for writing tests that provide the most confidence.",
+          "options": [],
+          "analysisPoints": [
+            "Clear and accurate explanation of each library's philosophy.",
+            "Detailed listing of strengths and weaknesses for both.",
+            "Well-reasoned recommendation for modern projects.",
+            "Identification of specific scenarios where the less-recommended library might still be used.",
+            "Demonstration of deep understanding of testing paradigms."
+          ],
+          "keyConcepts": [
+            "Enzyme",
+            "React Testing Library",
+            "Testing Philosophy",
+            "Unit Testing",
+            "Integration Testing",
+            "Shallow Rendering",
+            "Mount Rendering",
+            "Accessibility",
+            "Best Practices"
+          ],
+          "evaluationCriteria": [
+            "Comprehensive comparison covering all requested aspects.",
+            "Logical structure and clarity of argument.",
+            "Depth of understanding of testing principles.",
+            "Practical and realistic advice for tool selection."
+          ],
+          "example": null,
+          "tags": [
+            "React",
+            "Testing",
+            "Enzyme",
+            "RTL",
+            "Comparison",
+            "Best Practices",
+            "Open-Ended"
+          ],
+          "prerequisites": [
+            "theory_react_testing_library",
+            "theory_enzyme_testing"
+          ],
+          "complexity": 9,
+          "interviewFrequency": 9,
+          "learningPath": "advanced"
+        },
+        {
+          "id": "question_enzyme_7",
+          "topic": "Enzyme `find` selector",
+          "level": "medium",
+          "type": "mcq",
+          "question": "Given the following React component:\n\n```jsx\nfunction MyComponent() {\n  return (\n    <div>\n      <p className=\"message\">Hello</p>\n      <button id=\"my-button\">Click Me</button>\n      <MyChildComponent />\n    </div>\n  );\n}\n\nfunction MyChildComponent() {\n  return <span>Child</span>;\n}\n```\n\nWhich of the following Enzyme `find` selectors would correctly select the `MyChildComponent` when using `shallow` rendering?",
+          "answer": "`wrapper.find('MyChildComponent')`",
+          "options": [
+            "`wrapper.find('MyChildComponent')`",
+            "`wrapper.find('.message')`",
+            "`wrapper.find('button#my-button')`",
+            "`wrapper.find('span')`"
+          ],
+          "analysisPoints": [
+            "Understanding that `shallow` rendering does not render child components' DOM output, but rather their React component types.",
+            "Knowing that Enzyme's `find` can accept component names as selectors in `shallow` mode.",
+            "Recognizing that CSS selectors like `'.message'` or `'span'` would work for actual DOM nodes, but `span` wouldn't exist directly for `MyChildComponent` in `shallow` output (only `<MyChildComponent />` would)."
+          ],
+          "keyConcepts": [
+            "Enzyme",
+            "Shallow Rendering",
+            "Find Selectors",
+            "Component Type Selector"
+          ],
+          "evaluationCriteria": [
+            "Correct identification of `shallow`'s behavior with child components.",
+            "Accurate application of Enzyme's `find` method."
+          ],
+          "example": null,
+          "tags": [
+            "React",
+            "Testing",
+            "Enzyme",
+            "Shallow",
+            "MCQ"
+          ],
+          "prerequisites": [
+            "theory_enzyme_testing"
+          ],
+          "complexity": 6,
+          "interviewFrequency": 7,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_enzyme_8",
+          "topic": "Enzyme `render` method",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "What is the main characteristic and use case of Enzyme's `render` method?",
+          "answer": "Enzyme's `render` method renders React components to static HTML strings. Its main characteristic is that it does not provide access to React component instances, state, or lifecycle methods, and cannot simulate events. It's primarily used for testing the rendered HTML output (e.g., for snapshot testing).",
+          "options": [],
+          "analysisPoints": [],
+          "keyConcepts": [
+            "Enzyme",
+            "Render Method",
+            "Static HTML",
+            "Snapshot Testing"
+          ],
+          "evaluationCriteria": [
+            "Understanding the specific purpose and limitations of `render`"
+          ],
+          "example": null,
+          "tags": [
+            "React",
+            "Testing",
+            "Enzyme",
+            "Render"
+          ],
+          "prerequisites": [
+            "theory_enzyme_testing"
+          ],
+          "complexity": 4,
+          "interviewFrequency": 5,
+          "learningPath": "intermediate"
+        }
+      ],
+      "tasks": [
+        {
+          "id": "task_react_performance_hooks_1",
+          "title": "Optimize a Data Display Component with useMemo and useCallback",
+          "description": "\nYou are given a React component that displays a list of products and allows filtering. Currently, the filtering logic is executed on every re-render, and an `onClick` handler is re-created on every re-render, even when unrelated state changes. Your task is to refactor this component to use `useMemo` for the filtering logic and `useCallback` for the `onClick` handler to improve performance.\n\n**Requirements:**\n1.  Use `useMemo` to memoize the `filteredProducts` array. The filtering logic should only re-run when the `products` prop or `searchTerm` state changes.\n2.  Use `useCallback` to memoize the `handleProductClick` function. This function's reference should remain stable across re-renders that are not related to `handleProductClick`'s dependencies (e.g., when the `counter` changes).\n3.  Add `console.log` statements inside the `useMemo` callback and `useCallback` callback to demonstrate when they are re-executed/re-created.\n4.  Verify that incrementing the `counter` (unrelated state) does NOT trigger the re-execution of the filtering logic or the re-creation of the `handleProductClick` function, as evidenced by your console logs.\n\n",
+          "difficulty": "medium",
+          "startingCode": "import React, { useState } from 'react';\n\ninterface Product {\n  id: number;\n  name: string;\n  price: number;\n}\n\ninterface ProductListProps {\n  products: Product[];\n}\n\nfunction ProductList({ products }: ProductListProps) {\n  const [searchTerm, setSearchTerm] = useState('');\n  const [counter, setCounter] = useState(0); // Unrelated state\n\n  // TODO: Refactor this to use useMemo\n  const filteredProducts = products.filter(product => \n    product.name.toLowerCase().includes(searchTerm.toLowerCase())\n  );\n\n  // TODO: Refactor this to use useCallback\n  const handleProductClick = (id: number) => {\n    console.log(`Product ${id} clicked!`);\n    // In a real app, this might navigate or dispatch an action\n  };\n\n  return (\n    <div>\n      <h1>Product Catalog</h1>\n      <input\n        type=\"text\"\n        placeholder=\"Search products...\"\n        value={searchTerm}\n        onChange={(e) => setSearchTerm(e.target.value)}\n      />\n\n      <p>Counter: {counter}</p>\n      <button onClick={() => setCounter(prev => prev + 1)}>\n        Increment Unrelated Counter\n      </button>\n\n      <h2>Available Products ({filteredProducts.length})</h2>\n      <ul>\n        {filteredProducts.map(product => (\n          <li key={product.id} onClick={() => handleProductClick(product.id)}>\n            {product.name} - ${product.price}\n          </li>\n        ))}\n      </ul>\n    </div>\n  );\n}\n\nexport default ProductList;\n\n// Example usage for testing (not part of the component itself):\n/*\nconst sampleProducts: Product[] = [\n  { id: 1, name: 'Laptop', price: 1200 },\n  { id: 2, name: 'Mouse', price: 25 },\n  { id: 3, name: 'Keyboard', price: 75 },\n  { id: 4, name: 'Monitor', price: 300 },\n  { id: 5, name: 'Webcam', price: 50 },\n];\n\nfunction App() {\n  return <ProductList products={sampleProducts} />;\n}\n*/",
+          "solutionCode": "import React, { useState, useMemo, useCallback } from 'react';\n\ninterface Product {\n  id: number;\n  name: string;\n  price: number;\n}\n\ninterface ProductListProps {\n  products: Product[];\n}\n\nfunction ProductList({ products }: ProductListProps) {\n  const [searchTerm, setSearchTerm] = useState('');\n  const [counter, setCounter] = useState(0); // Unrelated state\n\n  // Use useMemo to memoize the filtered products.\n  // This calculation will only re-run if 'products' or 'searchTerm' changes.\n  const filteredProducts = useMemo(() => {\n    console.log('useMemo: Filtering products...'); // Log to observe re-runs\n    if (!searchTerm) {\n      return products;\n    }\n    const lowerCaseSearchTerm = searchTerm.toLowerCase();\n    return products.filter(product => \n      product.name.toLowerCase().includes(lowerCaseSearchTerm)\n    );\n  }, [products, searchTerm]); // Dependencies: products and searchTerm\n\n  // Use useCallback to memoize the handleProductClick function.\n  // Its reference will remain stable unless its dependencies change.\n  // In this case, it doesn't depend on any state/props that change frequently, so an empty array works.\n  const handleProductClick = useCallback((id: number) => {\n    console.log(`useCallback: Product ${id} clicked!`); // Log to observe function re-creation\n  }, []); // Empty dependency array: function created once\n\n  return (\n    <div>\n      <h1>Product Catalog</h1>\n      <input\n        type=\"text\"\n        placeholder=\"Search products...\"\n        value={searchTerm}\n        onChange={(e) => setSearchTerm(e.target.value)}\n      />\n\n      <p>Counter: {counter}</p>\n      <button onClick={() => setCounter(prev => prev + 1)}>\n        Increment Unrelated Counter\n      </button>\n\n      <h2>Available Products ({filteredProducts.length})</h2>\n      <ul>\n        {filteredProducts.map(product => (\n          <li key={product.id} onClick={() => handleProductClick(product.id)}>\n            {product.name} - ${product.price}\n          </li>\n        ))}\n      </ul>\n    </div>\n  );\n}\n\nexport default ProductList;\n",
+          "testCases": [
+            "Initial render: `useMemo: Filtering products...` should log once.",
+            "Type in search box: `useMemo: Filtering products...` should log on each significant change, `useCallback: Product X clicked!` should log when a product is clicked.",
+            "Click 'Increment Unrelated Counter' multiple times: `useMemo: Filtering products...` should NOT log. `useCallback: Product X clicked!` should log when a product is clicked (indicating the function reference did not change unless clicked)."
+          ],
+          "hints": [
+            "Remember that `useMemo` memoizes a value, and `useCallback` memoizes a function.",
+            "Pay close attention to the dependency arrays for both hooks.",
+            "An empty dependency array `[]` ensures the memoized value/function is created only once.",
+            "Use `console.log` statements within the hook callbacks to verify their execution/re-creation."
+          ],
+          "tags": [
+            "React",
+            "Hooks",
+            "useMemo",
+            "useCallback",
+            "Performance",
+            "Optimization",
+            "Frontend"
+          ],
+          "timeEstimate": 45,
+          "prerequisites": [
+            "React_Functional_Components",
+            "React_State_Hooks",
+            "JavaScript_Closures"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 8,
+          "learningPath": "intermediate",
+          "relatedConcepts": [
+            "Memoization",
+            "React.memo",
+            "Referential Equality"
+          ]
+        },
+        {
+          "id": "task_react_testing_library_1",
+          "title": "Test a User Registration Form with React Testing Library",
+          "description": "\nCreate a `RegistrationForm` component with fields for 'Username', 'Email', and 'Password', and a 'Register' button. Then, write a comprehensive test suite for this component using React Testing Library to simulate user interactions and verify expected outcomes.\n\n**Component Requirements:**\n1.  Three input fields: 'Username', 'Email', 'Password' (type 'password'). Each should have a clear label.\n2.  A 'Register' button that submits the form.\n3.  The form should accept an `onSubmit` prop, which is called with an object `{ username, email, password }` when the form is submitted.\n\n**Test Requirements (using RTL):**\n1.  **Initial Render Test:** Verify that all input fields and the submit button are present in the document.\n2.  **Input Change Test:** Simulate typing into each input field and assert that their values update correctly.\n3.  **Form Submission Test:**\n    *   Create a `jest.fn()` mock for the `onSubmit` prop.\n    *   Fill out all three input fields.\n    *   Click the 'Register' button.\n    *   Assert that `onSubmit` was called exactly once with the correct user data (username, email, password).\n4.  **Error Handling (Bonus):** If the component had validation (e.g., password too short), you could add a test to ensure an error message appears/disappears.",
+          "difficulty": "medium",
+          "startingCode": "import React, { useState } from 'react';\n\ninterface RegistrationFormProps {\n  onSubmit: (data: { username: string; email: string; password: string }) => void;\n}\n\nfunction RegistrationForm({ onSubmit }: RegistrationFormProps) {\n  const [username, setUsername] = useState('');\n  const [email, setEmail] = useState('');\n  const [password, setPassword] = useState('');\n\n  const handleSubmit = (e: React.FormEvent) => {\n    e.preventDefault();\n    onSubmit({ username, email, password });\n  };\n\n  return (\n    <form onSubmit={handleSubmit}>\n      <div>\n        <label htmlFor=\"username-input\">Username</label>\n        <input \n          id=\"username-input\"\n          type=\"text\"\n          value={username}\n          onChange={(e) => setUsername(e.target.value)}\n        />\n      </div>\n      <div>\n        <label htmlFor=\"email-input\">Email</label>\n        <input \n          id=\"email-input\"\n          type=\"email\"\n          value={email}\n          onChange={(e) => setEmail(e.target.value)}\n        />\n      </div>\n      <div>\n        <label htmlFor=\"password-input\">Password</label>\n        <input \n          id=\"password-input\"\n          type=\"password\"\n          value={password}\n          onChange={(e) => setPassword(e.target.value)}\n        />\n      </div>\n      <button type=\"submit\">Register</button>\n    </form>\n  );\n}\n\nexport default RegistrationForm;\n\n// --- Test File Structure (for your solution) ---\n// import { render, screen, fireEvent } from '@testing-library/react';\n// import '@testing-library/jest-dom/extend-expect';\n// import RegistrationForm from './RegistrationForm';\n\n// describe('RegistrationForm', () => {\n//   // Your tests go here\n// });\n",
+          "solutionCode": "import React, { useState } from 'react';\nimport { render, screen, fireEvent } from '@testing-library/react';\nimport '@testing-library/jest-dom/extend-expect';\n\ninterface RegistrationFormProps {\n  onSubmit: (data: { username: string; email: string; password: string }) => void;\n}\n\nfunction RegistrationForm({ onSubmit }: RegistrationFormProps) {\n  const [username, setUsername] = useState('');\n  const [email, setEmail] = useState('');\n  const [password, setPassword] = useState('');\n\n  const handleSubmit = (e: React.FormEvent) => {\n    e.preventDefault();\n    onSubmit({ username, email, password });\n  };\n\n  return (\n    <form onSubmit={handleSubmit}>\n      <div>\n        <label htmlFor=\"username-input\">Username</label>\n        <input \n          id=\"username-input\"\n          type=\"text\"\n          value={username}\n          onChange={(e) => setUsername(e.target.value)}\n        />\n      </div>\n      <div>\n        <label htmlFor=\"email-input\">Email</label>\n        <input \n          id=\"email-input\"\n          type=\"email\"\n          value={email}\n          onChange={(e) => setEmail(e.target.value)}\n        />\n      </div>\n      <div>\n        <label htmlFor=\"password-input\">Password</label>\n        <input \n          id=\"password-input\"\n          type=\"password\"\n          value={password}\n          onChange={(e) => setPassword(e.target.value)}\n        />\n      </div>\n      <button type=\"submit\">Register</button>\n    </form>\n  );\n}\n\nexport default RegistrationForm;\n\n// --- Test File (e.g., RegistrationForm.test.tsx) ---\n\ndescribe('RegistrationForm', () => {\n  test('renders all input fields and a submit button', () => {\n    render(<RegistrationForm onSubmit={jest.fn()} />);\n    \n    expect(screen.getByLabelText(/username/i)).toBeInTheDocument();\n    expect(screen.getByLabelText(/email/i)).toBeInTheDocument();\n    expect(screen.getByLabelText(/password/i)).toBeInTheDocument();\n    expect(screen.getByRole('button', { name: /register/i })).toBeInTheDocument();\n  });\n\n  test('updates input values when user types', () => {\n    render(<RegistrationForm onSubmit={jest.fn()} />);\n    \n    const usernameInput = screen.getByLabelText(/username/i);\n    const emailInput = screen.getByLabelText(/email/i);\n    const passwordInput = screen.getByLabelText(/password/i);\n\n    fireEvent.change(usernameInput, { target: { value: 'testuser' } });\n    expect(usernameInput).toHaveValue('testuser');\n\n    fireEvent.change(emailInput, { target: { value: 'test@example.com' } });\n    expect(emailInput).toHaveValue('test@example.com');\n\n    fireEvent.change(passwordInput, { target: { value: 'securepass123' } });\n    expect(passwordInput).toHaveValue('securepass123');\n  });\n\n  test('calls onSubmit with correct data when form is submitted', () => {\n    const mockOnSubmit = jest.fn();\n    render(<RegistrationForm onSubmit={mockOnSubmit} />);\n    \n    const usernameInput = screen.getByLabelText(/username/i);\n    const emailInput = screen.getByLabelText(/email/i);\n    const passwordInput = screen.getByLabelText(/password/i);\n    const registerButton = screen.getByRole('button', { name: /register/i });\n\n    // Fill out the form\n    fireEvent.change(usernameInput, { target: { value: 'newUser' } });\n    fireEvent.change(emailInput, { target: { value: 'new@example.com' } });\n    fireEvent.change(passwordInput, { target: { value: 'passwordXYZ' } });\n\n    // Submit the form\n    fireEvent.click(registerButton);\n\n    // Assert onSubmit was called correctly\n    expect(mockOnSubmit).toHaveBeenCalledTimes(1);\n    expect(mockOnSubmit).toHaveBeenCalledWith({\n      username: 'newUser',\n      email: 'new@example.com',\n      password: 'passwordXYZ',\n    });\n  });\n});\n",
+          "testCases": [
+            "Test for existence of 'Username' label/input.",
+            "Test for existence of 'Email' label/input.",
+            "Test for existence of 'Password' label/input.",
+            "Test for existence of 'Register' button.",
+            "Type 'myusername' into Username input: input value should be 'myusername'.",
+            "Type 'myemail@example.com' into Email input: input value should be 'myemail@example.com'.",
+            "Type 'mypassword123' into Password input: input value should be 'mypassword123'.",
+            "Fill all fields and click 'Register': `onSubmit` should be called once with `{ username: 'test', email: 'test@test.com', password: 'pass' }`."
+          ],
+          "hints": [
+            "Remember to use `screen.getByLabelText` or `screen.getByRole` for finding input fields and buttons, as these are user-centric queries.",
+            "`fireEvent.change` for inputs needs an object with `target: { value: '...' }`.",
+            "To assert on the input's value, use `toHaveValue()` from `@testing-library/jest-dom`.",
+            "For asserting mock function calls, `jest.fn()`, `toHaveBeenCalledTimes()`, and `toHaveBeenCalledWith()` are essential."
+          ],
+          "tags": [
+            "React",
+            "Testing",
+            "RTL",
+            "Forms",
+            "Unit Testing",
+            "Integration Testing"
+          ],
+          "timeEstimate": 60,
+          "prerequisites": [
+            "theory_react_testing_library",
+            "Jest_Basics"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 9,
+          "learningPath": "intermediate",
+          "relatedConcepts": [
+            "jest.fn",
+            "fireEvent",
+            "screen",
+            "Queries",
+            "Assertions"
+          ]
+        },
+        {
+          "id": "task_enzyme_testing_1",
+          "title": "Test a Simple Toggle Component with Enzyme (Shallow & Mount)",
+          "description": "\nCreate a `ToggleSwitch` component that has an internal `isOn` state and a `label` prop. The component should display the label and visually indicate its `isOn` status (e.g., 'ON' or 'OFF' text). Your task is to write tests for this component using both Enzyme's `shallow` and `mount` rendering methods, highlighting their differences.\n\n**Component Requirements:**\n1.  A functional React component named `ToggleSwitch`.\n2.  Manages an internal boolean `isOn` state, defaulting to `false`.\n3.  Accepts a `label` prop (string).\n4.  Displays the `label` and the current status ('ON' if `true`, 'OFF' if `false`).\n5.  Clicking the switch should toggle the `isOn` state.\n6.  (Optional for `mount`): If you add a `ChildComponent` inside `ToggleSwitch`, ensure `mount` renders it fully.\n\n**Test Requirements (using Enzyme):**\n1.  **Shallow Render Test:**\n    *   Test initial render: verify the label and default 'OFF' status are displayed.\n    *   Simulate a click: verify the status toggles to 'ON'.\n    *   Simulate another click: verify the status toggles back to 'OFF'.\n    *   *Do NOT* try to access internal state directly with `wrapper.state()` for functional components; rely on rendered text.\n2.  **Mount Render Test (if applicable, demonstrate children):**\n    *   If `ToggleSwitch` contains a nested component (`ChildComponent`), demonstrate that `mount` renders `ChildComponent` fully, while `shallow` does not.\n    *   Re-run the click tests from shallow, ensuring they work similarly with `mount`. (Focus on DOM presence/text, not internal state).\n",
+          "difficulty": "medium",
+          "startingCode": "import React, { useState } from 'react';\n\ninterface ToggleSwitchProps {\n  label: string;\n}\n\n// Optional: a simple child component to demonstrate mount vs shallow\n// function NestedIndicator() {\n//   return <span className=\"nested-indicator\">[Nested Indicator]</span>;\n// }\n\nfunction ToggleSwitch({ label }: ToggleSwitchProps) {\n  const [isOn, setIsOn] = useState(false);\n\n  return (\n    <button onClick={() => setIsOn(!isOn)} data-testid=\"toggle-button\">\n      {label}: {isOn ? 'ON' : 'OFF'}\n      {/* Optional: <NestedIndicator /> */}\n    </button>\n  );\n}\n\nexport default ToggleSwitch;\n\n// --- Test File Structure (for your solution) ---\n// import React from 'react';\n// import { shallow, mount } from 'enzyme';\n// import ToggleSwitch from './ToggleSwitch';\n\n// describe('ToggleSwitch - Shallow Rendering', () => {\n//   // Your shallow tests here\n// });\n\n// describe('ToggleSwitch - Mount Rendering', () => {\n//   // Your mount tests here\n// });\n",
+          "solutionCode": "import React, { useState } from 'react';\nimport { shallow, mount } from 'enzyme';\n\ninterface ToggleSwitchProps {\n  label: string;\n}\n\n// A simple child component to demonstrate mount vs shallow\nfunction NestedIndicator() {\n  return <span className=\"nested-indicator\">[Nested Indicator]</span>;\n}\n\nfunction ToggleSwitch({ label }: ToggleSwitchProps) {\n  const [isOn, setIsOn] = useState(false);\n\n  return (\n    <button onClick={() => setIsOn(!isOn)} data-testid=\"toggle-button\">\n      {label}: {isOn ? 'ON' : 'OFF'}\n      <NestedIndicator /> {/* Include the child component */}\n    </button>\n  );\n}\n\nexport default ToggleSwitch;\n\n// --- Test File (e.g., ToggleSwitch.test.tsx) ---\n\ndescribe('ToggleSwitch - Shallow Rendering', () => {\n  it('renders correctly with initial OFF state and label', () => {\n    const wrapper = shallow(<ToggleSwitch label=\"Enable Feature\" />);\n    expect(wrapper.text()).toContain('Enable Feature: OFF');\n    // Verify NestedIndicator is present as a component type, not rendered DOM\n    expect(wrapper.find('NestedIndicator').exists()).toBe(true);\n    expect(wrapper.find('.nested-indicator').exists()).toBe(false); // No actual DOM from child\n  });\n\n  it('toggles state to ON on first click', () => {\n    const wrapper = shallow(<ToggleSwitch label=\"Enable Feature\" />);\n    const button = wrapper.find('[data-testid=\"toggle-button\"]');\n    \n    button.simulate('click');\n    expect(button.text()).toContain('Enable Feature: ON');\n  });\n\n  it('toggles state back to OFF on second click', () => {\n    const wrapper = shallow(<ToggleSwitch label=\"Enable Feature\" />);\n    const button = wrapper.find('[data-testid=\"toggle-button\"]');\n    \n    button.simulate('click'); // ON\n    button.simulate('click'); // OFF\n    expect(button.text()).toContain('Enable Feature: OFF');\n  });\n});\n\ndescribe('ToggleSwitch - Mount Rendering', () => {\n  it('renders correctly with initial OFF state and label', () => {\n    const wrapper = mount(<ToggleSwitch label=\"Enable Feature\" />);\n    expect(wrapper.text()).toContain('Enable Feature: OFF');\n    // Verify NestedIndicator's actual DOM is present\n    expect(wrapper.find('NestedIndicator').exists()).toBe(true);\n    expect(wrapper.find('.nested-indicator').exists()).toBe(true); // Actual DOM from child\n  });\n\n  it('toggles state to ON on first click', () => {\n    const wrapper = mount(<ToggleSwitch label=\"Enable Feature\" />);\n    const button = wrapper.find('[data-testid=\"toggle-button\"]');\n    \n    button.simulate('click');\n    // Need to `update()` for `mount` to re-render and reflect state changes immediately in the wrapper's DOM\n    wrapper.update(); \n    expect(button.text()).toContain('Enable Feature: ON');\n  });\n\n  it('toggles state back to OFF on second click', () => {\n    const wrapper = mount(<ToggleSwitch label=\"Enable Feature\" />);\n    const button = wrapper.find('[data-testid=\"toggle-button\"]');\n    \n    button.simulate('click'); // ON\n    wrapper.update(); \n    button.simulate('click'); // OFF\n    wrapper.update();\n    expect(button.text()).toContain('Enable Feature: OFF');\n  });\n});\n",
+          "testCases": [
+            "Shallow: Initial text contains 'OFF' and correct label.",
+            "Shallow: After 1 click, text contains 'ON'.",
+            "Shallow: After 2 clicks, text contains 'OFF'.",
+            "Shallow: `find('NestedIndicator').exists()` should be `true` (component type).",
+            "Shallow: `find('.nested-indicator').exists()` should be `false` (no child DOM).",
+            "Mount: Initial text contains 'OFF' and correct label.",
+            "Mount: After 1 click, text contains 'ON'.",
+            "Mount: After 2 clicks, text contains 'OFF'.",
+            "Mount: `find('NestedIndicator').exists()` should be `true`.",
+            "Mount: `find('.nested-indicator').exists()` should be `true` (child DOM is rendered)."
+          ],
+          "hints": [
+            "For `shallow` tests, remember that child components are not rendered into full DOM. You can find them by their component name (`wrapper.find('MyChildComponent')`).",
+            "For `mount` tests, after simulating an event that causes state changes, you might need to call `wrapper.update()` to re-render the component tree and reflect the changes in the wrapper before making assertions.",
+            "Use `data-testid` or CSS class/id selectors for `find()` when targeting specific DOM elements within the component.",
+            "`wrapper.text()` is useful for asserting displayed content."
+          ],
+          "tags": [
+            "React",
+            "Testing",
+            "Enzyme",
+            "Shallow",
+            "Mount",
+            "Unit Testing",
+            "Integration Testing"
+          ],
+          "timeEstimate": 75,
+          "prerequisites": [
+            "theory_enzyme_testing",
+            "React_State_Hooks"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 7,
+          "learningPath": "intermediate",
+          "relatedConcepts": [
+            "Component Isolation",
+            "DOM Manipulation",
+            "Virtual DOM",
+            "State Management"
+          ]
+        }
+      ]
+    }
+  }
+]

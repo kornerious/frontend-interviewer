@@ -1,0 +1,2699 @@
+[
+  {
+    "id": "99d9606f-4142-4fc9-9a87-6944c74a8151",
+    "startLine": 12900,
+    "endLine": 12999,
+    "processedDate": "2025-06-17T13:09:33.580Z",
+    "content": {
+      "logicalBlockInfo": {
+        "suggestedEndLine": -1
+      },
+      "theory": [
+        {
+          "id": "theory_transpilers_babel",
+          "title": "Transpilers and Babel",
+          "content": "## What is a Transpiler?\nIn modern web development, a transpiler (or source-to-source compiler) is a program that converts source code written in one programming language into source code in another programming language. This is distinct from a traditional compiler that converts source code into machine code or bytecode.\n\n## Babel\nBabel is a popular JavaScript transpiler that plays a crucial role in the modern frontend development workflow. Its primary function is to transform next-generation JavaScript (ECMAScript 2015+ or ES6+) into a backwards-compatible version of JavaScript that can run in current and older browsers or environments that do not fully support newer language features.\n\n### Why is Babel necessary?\nWeb browsers and Node.js environments often have varying levels of support for the latest ECMAScript features. By using Babel, developers can write code using cutting-edge JavaScript syntax (like arrow functions, `const`/`let`, classes, async/await, JSX, and TypeScript) and still ensure their applications are compatible with a wider range of target environments, improving accessibility and avoiding fragmented user experiences.\n\n### Key Concepts in Babel Configuration\n*   **Presets**: A preset is a shareable set of Babel plugins and/or options. They allow you to easily configure Babel for specific environments or language features without individually listing every single plugin. For instance, `@babel/preset-env` is a powerful preset that intelligently determines which Babel plugins are needed based on your target environments (e.g., specific browser versions or Node.js versions).\n*   **Plugins**: Plugins are specific transformations that Babel performs on your code. Each plugin typically handles one particular language feature. For example, `@babel/plugin-proposal-class-properties` allows you to use class field declarations (public and private class fields) which are a stage 3 ECMAScript proposal.\n\n### Configuration Example (`babel.config.js`)\nBabel's configuration is typically managed in a file like `babel.config.js` (for project-wide configuration) or `.babelrc` (for directory-specific configuration). The `module.exports` object defines the presets and plugins to be used.\n\n**Common options within `@babel/preset-env`:**\n*   `targets`: Specifies the environments you want to support. This can be a browserslist query string (e.g., `'> 1%', 'last 2 versions'`) or an object specifying specific browser versions or Node.js versions. Babel uses this to only apply transformations for features not supported by your target environments, optimizing bundle size and build time.\n*   `useBuiltIns`: When set to `'usage'` or `'entry'`, this option integrates with `core-js` to automatically polyfill ECMAScript features that are missing in your target environments, further enhancing compatibility.\n",
+          "examples": [
+            {
+              "id": "example_babel_config",
+              "title": "Babel Configuration for Modern JS",
+              "code": "module.exports = {\n  presets: [\n    ['@babel/preset-env', {\n      targets: {\n        browsers: ['> 1%', 'last 2 versions', 'not dead']\n      },\n      useBuiltIns: 'usage',\n      corejs: 3 // Specify the core-js version for polyfills\n    }]\n  ],\n  plugins: [\n    '@babel/plugin-proposal-class-properties',\n    '@babel/plugin-transform-runtime' // Helps to avoid duplication of helper code\n  ]\n};",
+              "explanation": "This configuration demonstrates a typical setup for Babel. It uses `@babel/preset-env` to transpile modern JavaScript features down to a version compatible with 99% of current browsers and the last two stable versions, excluding completely dead browsers. It also uses `useBuiltIns: 'usage'` and `corejs: 3` to automatically include polyfills only for the features actually used in the code and not supported by the target environments. The `@babel/plugin-proposal-class-properties` enables support for class field syntax, and `@babel/plugin-transform-runtime` helps reduce bundle size by preventing helper functions from being duplicated across multiple files.",
+              "language": "javascript"
+            },
+            {
+              "id": "example_es6_to_es5",
+              "title": "ES6+ to ES5 Transpilation Example",
+              "code": "// Input (ES6+)\nclass Greeter {\n  message = 'Hello';\n  constructor(name) {\n    this.name = name;\n  }\n  greet() {\n    return `${this.message}, ${this.name}!`\n  }\n}\nconst person = new Greeter('World');\nconsole.log(person.greet());\n\n// Output (transpiled ES5 by Babel, simplified)\n\"use strict\";\n\nfunction _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError(\"Cannot call a class as a function\"); } }\n\nfunction _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if (\"value\" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }\n\nfunction _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); Object.defineProperty(Constructor, \"prototype\", { writable: false }); return Constructor; }\n\nvar Greeter = /*#__PURE__*/function () {\n  function Greeter(name) {\n    _classCallCheck(this, Greeter);\n\n    this.message = 'Hello';\n    this.name = name;\n  }\n\n  _createClass(Greeter, [{\n    key: \"greet\",\n    value: function greet() {\n      return \"\".concat(this.message, \", \").concat(this.name, \"!\");\n    }\n  }]);\n\n  return Greeter;\n}();\n\nvar person = new Greeter('World');\nconsole.log(person.greet());",
+              "explanation": "This example illustrates how Babel transforms modern ES6+ JavaScript code (like classes, string literals with template syntax, and class properties) into older ES5 syntax. The original, cleaner ES6 code is on the left, and a simplified version of the Babel-transpiled ES5 output is on the right. Notice the use of helper functions (`_classCallCheck`, `_defineProperties`, `_createClass`) to mimic class behavior in ES5, and string concatenation replacing template literals.",
+              "language": "javascript"
+            }
+          ],
+          "relatedQuestions": [
+            "question_transpilers_babel_1",
+            "question_transpilers_babel_2",
+            "question_transpilers_babel_3",
+            "question_transpilers_babel_4",
+            "question_transpilers_babel_5"
+          ],
+          "relatedTasks": [
+            "task_babel_config"
+          ],
+          "tags": [
+            "JavaScript",
+            "Transpilers",
+            "Babel",
+            "ES6+",
+            "Build Tools"
+          ],
+          "technology": "JavaScript",
+          "prerequisites": [
+            "javascript_basics",
+            "frontend_development_overview"
+          ],
+          "complexity": 6,
+          "interviewRelevance": 7,
+          "learningPath": "intermediate",
+          "requiredFor": [
+            "modern_frontend_development",
+            "webpack_configuration",
+            "react_development"
+          ]
+        },
+        {
+          "id": "theory_modern_dev_workflow",
+          "title": "Modern Frontend Development Workflow",
+          "content": "## Overview of a Modern JavaScript Development Workflow\nA modern JavaScript development workflow is a systematic process that incorporates various tools and practices to streamline the development, testing, and deployment of web applications. This structured approach helps manage complexity, improve code quality, and increase developer productivity. Here are the common stages:\n\n1.  **Project Initialization**: This is the first step where a new project structure is set up. It typically involves creating a `package.json` file to manage project metadata and dependencies. Tools like npm or Yarn are commonly used for this purpose, often generating basic project templates.\n\n2.  **Dependency Management**: As projects grow, they rely on numerous external libraries and packages (dependencies). npm (Node Package Manager) and Yarn are essential package managers that allow developers to install, update, remove, and manage these dependencies efficiently. They resolve dependency trees, ensuring all required packages are available and compatible.\n\n3.  **Build Process**: Modern web applications often consist of many JavaScript modules, CSS files, images, and other assets. A build process consolidates these assets into optimized, deployable bundles. Tools like Webpack or Rollup are module bundlers that perform tasks such as:\n    *   **Module Bundling**: Combining multiple JavaScript modules into a single (or a few) files to reduce HTTP requests.\n    *   **Transpilation**: Converting modern JavaScript (ES6+) into backward-compatible JavaScript (ES5) using tools like Babel.\n    *   **Minification**: Removing unnecessary characters (whitespace, comments) from code to reduce file size.\n    *   **Code Splitting**: Breaking code into smaller chunks that can be loaded on demand, improving initial load times.\n    *   **Asset Optimization**: Processing and optimizing images, fonts, and other assets.\n\n4.  **Task Automation**: Repetitive tasks, such as compiling Sass to CSS, linting code, running tests, or generating documentation, can be automated to save time and reduce errors. Tools like Gulp or Grunt are task runners that allow developers to define and run custom build tasks.\n\n5.  **Development Server**: During development, a local web server is crucial for previewing the application. Development servers often come with features like:\n    *   **Hot Module Replacement (HMR)**: Automatically updates the browser with changes to code without a full page reload, preserving application state.\n    *   **Live Reload**: Automatically reloads the browser when file changes are detected.\n    *   **Proxying API requests**: Redirecting API calls from the frontend to a backend server.\n\n6.  **Testing**: Ensuring code quality and preventing regressions is vital. Automated testing frameworks help verify the functionality and correctness of the application. Common testing tools include:\n    *   **Unit Testing**: Jest, Mocha (for individual functions or components).\n    *   **Integration Testing**: React Testing Library, Enzyme (for interactions between components).\n    *   **End-to-End Testing**: Cypress, Playwright (for simulating user interactions across the entire application).\n\n7.  **Linting**: Linting is the process of analyzing source code to flag programming errors, bugs, stylistic errors, and suspicious constructs. Linters enforce coding standards and best practices, leading to more consistent and maintainable code. ESLint is the most popular linter for JavaScript/TypeScript, often used in conjunction with Prettier for code formatting.\n\n8.  **CI/CD (Continuous Integration/Continuous Deployment)**: CI/CD pipelines automate the processes of building, testing, and deploying applications. This ensures that new code changes are integrated, tested, and deployed frequently and reliably. Popular CI/CD platforms include Jenkins, GitLab CI/CD, GitHub Actions, and CircleCI.\n    *   **Continuous Integration (CI)**: Developers frequently merge their code changes into a central repository. Automated builds and tests are run to detect integration issues early.\n    *   **Continuous Deployment (CD)**: After successful integration and testing, changes are automatically deployed to production environments.",
+          "examples": [
+            {
+              "id": "example_package_json",
+              "title": "Basic package.json for Project Initialization",
+              "code": "{\n  \"name\": \"my-frontend-app\",\n  \"version\": \"1.0.0\",\n  \"description\": \"A simple frontend application.\",\n  \"main\": \"index.js\",\n  \"scripts\": {\n    \"start\": \"webpack serve --open\",\n    \"build\": \"webpack\",\n    \"test\": \"jest\",\n    \"lint\": \"eslint .\"\n  },\n  \"keywords\": [],\n  \"author\": \"Your Name\",\n  \"license\": \"ISC\",\n  \"devDependencies\": {\n    \"webpack\": \"^5.0.0\",\n    \"webpack-cli\": \"^4.0.0\",\n    \"webpack-dev-server\": \"^4.0.0\",\n    \"babel-loader\": \"^8.0.0\",\n    \"@babel/core\": \"^7.0.0\",\n    \"@babel/preset-env\": \"^7.0.0\",\n    \"eslint\": \"^8.0.0\",\n    \"jest\": \"^29.0.0\"\n  }\n}",
+              "explanation": "This `package.json` file is central to a modern workflow. It defines the project's metadata, scripts for common tasks (start, build, test, lint), and lists development dependencies. `npm install` or `yarn install` would use this file to set up the project environment. The scripts defined here (`start`, `build`, etc.) are direct entry points for executing various tools like Webpack and ESLint.",
+              "language": "json"
+            },
+            {
+              "id": "example_webpack_config",
+              "title": "Minimal Webpack Configuration",
+              "code": "const path = require('path');\n\nmodule.exports = {\n  mode: 'development',\n  entry: './src/index.js',\n  output: {\n    filename: 'bundle.js',\n    path: path.resolve(__dirname, 'dist'),\n  },\n  module: {\n    rules: [\n      {\n        test: /\\.js$/,\n        exclude: /node_modules/,\n        use: {\n          loader: 'babel-loader',\n          options: {\n            presets: ['@babel/preset-env'],\n          },\n        },\n      },\n      {\n        test: /\\.css$/i,\n        use: ['style-loader', 'css-loader'],\n      },\n    ],\n  },\n  devServer: {\n    static: path.join(__dirname, 'dist'),\n    compress: true,\n    port: 9000,\n    hot: true, // Enable Hot Module Replacement\n  },\n};",
+              "explanation": "This is a basic `webpack.config.js` file. It configures Webpack to take `src/index.js` as its entry point, bundle it into `bundle.js` in the `dist` folder. It includes a rule to transpile `.js` files using `babel-loader` (with `@babel/preset-env`), and rules to handle CSS files. The `devServer` configuration sets up a local development server with hot reloading, serving files from the `dist` directory on port 9000.",
+              "language": "javascript"
+            }
+          ],
+          "relatedQuestions": [
+            "question_modern_dev_workflow_1",
+            "question_modern_dev_workflow_2",
+            "question_modern_dev_workflow_3",
+            "question_modern_dev_workflow_4",
+            "question_modern_dev_workflow_5"
+          ],
+          "relatedTasks": [
+            "task_setup_dev_workflow"
+          ],
+          "tags": [
+            "Frontend Development",
+            "Workflow",
+            "Build Tools",
+            "Package Management",
+            "Testing",
+            "CI/CD"
+          ],
+          "technology": "JavaScript",
+          "prerequisites": [
+            "javascript_basics",
+            "npm_yarn_basics"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 9,
+          "learningPath": "intermediate",
+          "requiredFor": [
+            "professional_frontend_development",
+            "project_setup",
+            "performance_optimization"
+          ]
+        },
+        {
+          "id": "theory_js_framework_comparison",
+          "title": "JavaScript Framework Comparison: React, Angular, Vue",
+          "content": "## Choosing a JavaScript Framework\nIn the landscape of modern frontend development, React, Angular, and Vue are the three dominant choices for building single-page applications (SPAs) and complex user interfaces. Each has its philosophy, strengths, and ideal use cases. Understanding their core differences is crucial for making informed technology decisions.\n\n### Feature Comparison:\n\n*   **Type**:\n    *   **React**: Primarily a JavaScript **library** for building user interfaces. It focuses solely on the view layer, allowing developers to pick other libraries for routing, state management, etc., offering high flexibility.\n    *   **Angular**: A comprehensive **full framework** that provides a structured opinionated approach to building applications. It comes with a complete set of features out-of-the-box, including a router, HTTP client, and state management solutions.\n    *   **Vue**: A **progressive framework** that is designed to be incrementally adoptable. It can be used as a simple library for declarative rendering or scaled up to a full-fledged framework with its ecosystem tools (Vue Router, Vuex).\n\n*   **Learning Curve**:\n    *   **React**: Generally considered **moderate**. While JSX and component-based thinking might be new, its core API is small and functional. The learning curve often comes from its rich ecosystem and the freedom to choose additional libraries.\n    *   **Angular**: Often described as **steep**. Its comprehensive nature, reliance on TypeScript, concepts like modules, decorators, services, and dependency injection require a significant upfront investment to learn.\n    *   **Vue**: Known for its **gentle** learning curve. Its API is intuitive, well-documented, and it offers familiar templating syntax (HTML-based), making it easy for beginners, especially those with HTML/CSS backgrounds.\n\n*   **Data Binding**:\n    *   **React**: Employs **one-way data binding (unidirectional data flow)**. State flows down from parent components to children. Changes in child components often trigger actions that update the parent's state, which then re-renders children. This makes state management predictable and debugging easier.\n    *   **Angular**: Supports **two-way data binding**. Changes in the model (data) automatically update the view (UI), and changes in the view automatically update the model. This is often implemented using `ngModel` directive, simplifying form handling but potentially making data flow less explicit in complex applications.\n    *   **Vue**: Offers **two-way data binding (optional)**. While Vue's core rendering is reactive (one-way), it provides `v-model` for convenient two-way data binding on form inputs, similar to Angular, but it's an opt-in feature.\n\n*   **DOM (Document Object Model)**:\n    *   **React**: Utilizes a **Virtual DOM**. This is a lightweight, in-memory representation of the actual DOM. When state changes, React first updates the Virtual DOM, then efficiently calculates the minimal set of changes needed to update the real DOM, minimizing expensive direct manipulations.\n    *   **Angular**: Directly interacts with the **Real DOM** but uses its own **change detection mechanism**. When data changes, Angular's change detection algorithm (often triggered by zones) identifies which parts of the DOM need updating and performs direct manipulations. This can be efficient but might require optimization for very complex applications.\n    *   **Vue**: Also uses a **Virtual DOM**, similar to React, for efficient rendering updates. It tracks dependencies of components during render, which allows for very precise re-rendering of only the components that are affected by state changes.\n\n*   **Size**:\n    *   **React**: Relatively **lightweight (~40KB)** for the core library, but the total bundle size increases as more third-party libraries (router, state management, etc.) are added.\n    *   **Angular**: Generally **larger (~500KB)** due to being a full framework with many built-in features.\n    *   **Vue**: Very **lightweight (~33KB)** for its core, comparable to React, and scalable based on features used.\n\n*   **Mobile Development**:\n    *   **React**: Strong presence with **React Native** for building native mobile apps using JavaScript/React concepts.\n    *   **Angular**: Can be used with **Ionic** (for hybrid apps using web technologies) or **NativeScript** (for native apps).\n    *   **Vue**: Has **Vue Native** (similar to React Native) and also works with **NativeScript**.\n\n*   **Flexibility**:\n    *   **React**: **High flexibility** as it's a library, allowing developers to choose their preferred tools and libraries for different concerns (routing, state, etc.). This freedom can also lead to decision fatigue or inconsistent approaches within large teams.\n    *   **Angular**: **Medium flexibility**. As a full framework, it offers less choice but more convention, leading to consistency across projects, which can be beneficial for large enterprise applications.\n    *   **Vue**: **High flexibility** due to its progressive nature. It can be used for small, simple integrations or large-scale SPAs, providing choices while also offering opinionated official tools.\n\n*   **Development Approach**:\n    *   **React**: Primarily **component-based**, where UI is broken down into reusable, self-contained components. Focuses on functional programming paradigms with hooks for state and lifecycle management.\n    *   **Angular**: **Module-based** with a strong emphasis on object-oriented programming (OOP) principles. Applications are structured into NgModules, services, directives, and components, heavily relying on TypeScript and decorators.\n    *   **Vue**: Also strongly **component-based**, similar to React. Components are the building blocks, and Vue offers a more approachable syntax for defining them using Single File Components (`.vue` files).\n\n*   **Community & Ecosystem**:\n    *   **React**: Has a **large** and vibrant community, extensive third-party libraries, and readily available learning resources due to its popularity.\n    *   **Angular**: Also boasts a **large** enterprise-focused community, with strong corporate backing and a mature ecosystem.\n    *   **Vue**: Has a rapidly **growing** and highly engaged community, especially popular in Asia, with excellent documentation.\n\n*   **Corporate Support**:\n    *   **React**: Backed and maintained by **Facebook (Meta)**.\n    *   **Angular**: Backed and maintained by **Google**.\n    *   **Vue**: Maintained by an **independent** core team led by Evan You, relying on community contributions and sponsorships.\n",
+          "examples": [],
+          "relatedQuestions": [
+            "question_framework_comparison_1",
+            "question_framework_comparison_2",
+            "question_framework_comparison_3",
+            "question_framework_comparison_4",
+            "question_framework_comparison_5",
+            "question_framework_comparison_6"
+          ],
+          "relatedTasks": [],
+          "tags": [
+            "React",
+            "Angular",
+            "Vue",
+            "Frontend Frameworks",
+            "Library",
+            "Web Development",
+            "Comparison"
+          ],
+          "technology": "JavaScript",
+          "prerequisites": [
+            "javascript_basics",
+            "dom_manipulation"
+          ],
+          "complexity": 8,
+          "interviewRelevance": 9,
+          "learningPath": "intermediate",
+          "requiredFor": [
+            "framework_selection",
+            "frontend_architecture",
+            "career_path_frontend"
+          ]
+        },
+        {
+          "id": "theory_why_choose_react",
+          "title": "Key Advantages of Choosing React",
+          "content": "React, often described as a JavaScript library for building user interfaces, has gained immense popularity due to its powerful features and pragmatic approach to frontend development. Here's a deeper dive into why developers and companies choose React:\n\n1.  **Reusable Components**: React promotes a component-based architecture, where the UI is broken down into small, independent, and self-contained pieces called components. Each component manages its own state and logic. This modularity allows developers to reuse components across different parts of an application or even in entirely different projects, leading to faster development, easier maintenance, and consistent UI.\n\n2.  **Virtual DOM**: One of React's most significant performance optimizations is its use of a **Virtual DOM**. Instead of making direct manipulations to the browser's expensive Real DOM every time the application state changes, React first updates an in-memory representation of the DOM (the Virtual DOM). It then efficiently compares this updated Virtual DOM with the previous one, identifies the minimal differences, and only applies those necessary changes to the Real DOM. This diffing algorithm minimizes costly DOM operations, resulting in faster and smoother user interfaces, especially for complex and dynamic applications.\n\n3.  **One-way Data Flow (Unidirectional)**: React enforces a unidirectional data flow, meaning data flows in a single direction—typically from parent components down to child components via props. When state changes, the application re-renders to reflect those changes. This predictable data flow makes it much easier to understand how data is being updated throughout the application, simplifies debugging, and reduces the likelihood of complex, hard-to-trace bugs often associated with two-way data binding.\n\n4.  **SEO Friendly (Server-Side Rendering)**: Traditional Single Page Applications (SPAs) often face challenges with Search Engine Optimization (SEO) because their content is rendered dynamically by JavaScript on the client-side, making it difficult for search engine crawlers to index. React can be rendered on the server-side (SSR) using frameworks like Next.js or Gatsby. This pre-renders the initial HTML on the server, sending fully-formed pages to the browser, which is beneficial for SEO, faster initial page loads, and improved user experience.\n\n5.  **Hierarchical Component Structure**: React applications naturally form a hierarchical tree of components. Components that appear visually nested in the UI design are represented as parent-child relationships in the code. This intuitive structure mirrors the UI, making it easier to reason about the application's layout, data flow, and interactions. A parent component can pass data (props) to its child components, and children can communicate back to parents via callbacks.\n\n6.  **Rich Tool Ecosystem**: React benefits from a vast and constantly evolving ecosystem of development tools, libraries, and extensions. This includes official tools like Create React App (for quick project setup), React DevTools (for debugging), and popular third-party libraries for state management (Redux, Zustand, Recoil), routing (React Router), styling (Styled Components, Emotion), form handling (Formik, React Hook Form), and more. This rich ecosystem provides solutions for almost every development challenge.\n\n7.  **High Cohesion, Loose Coupling**: React components are designed to have **high cohesion** internally, meaning all related logic, markup (JSX), and styling for a specific part of the UI are encapsulated within that component. They are also **loosely coupled** with other components, meaning they interact with each other through well-defined interfaces (props and state) with minimal direct dependencies. This promotes modularity, testability, and easier maintenance, as changes in one component are less likely to break others.\n\n8.  **JSX (JavaScript XML)**: JSX is a syntax extension for JavaScript recommended by React. It allows developers to write HTML-like markup directly within their JavaScript code. This combines the markup (structure) and logic (behavior) of a component into the same file, making components self-contained, highly readable, and easier to understand by showing exactly how the UI will look with given data. While not mandatory, JSX is widely adopted due to its expressive power and development efficiency.",
+          "examples": [
+            {
+              "id": "example_react_component",
+              "title": "Reusable React Component (JSX & Props)",
+              "code": "import React from 'react';\n\nfunction Button({ onClick, label, type = 'button' }) {\n  return (\n    <button type={type} onClick={onClick} className=\"my-button\">\n      {label}\n    </button>\n  );\n}\n\nfunction App() {\n  const handleClick = () => {\n    alert('Button clicked!');\n  };\n\n  return (\n    <div>\n      <h1>React Component Example</h1>\n      <Button onClick={handleClick} label=\"Click Me!\" />\n      <Button type=\"submit\" label=\"Submit Form\" />\n      <Button label=\"Disabled Button\" disabled={true} />\n    </div>\n  );\n}\n\nexport default App;",
+              "explanation": "This example demonstrates several key React principles: reusable components, one-way data flow via props, and JSX. The `Button` component is designed to be highly reusable, accepting `onClick`, `label`, and `type` as props. It encapsulates its own rendering logic. The `App` component then composes multiple instances of the `Button` component, passing different props to each, showcasing how data flows unidirectionally from parent to child.",
+              "language": "jsx"
+            },
+            {
+              "id": "example_virtual_dom_concept",
+              "title": "Virtual DOM Concept (Simplified)",
+              "code": "// --- Initial Render (Simplified) ---\nconst initialVirtualDOM = { type: 'div', props: null, children: ['Hello'] };\n// React renders this to actual DOM\ndocument.getElementById('root').innerHTML = '<div>Hello</div>';\n\n// --- State Update (Simplified) ---\nconst updatedVirtualDOM = { type: 'div', props: null, children: ['Hello World'] };\n\n// React's diffing algorithm compares initialVirtualDOM and updatedVirtualDOM\n// It finds that 'Hello' changed to 'Hello World'\n\n// --- Actual DOM Update (Simplified) ---\n// Only the text content is updated, not the entire div element\ndocument.getElementById('root').firstChild.textContent = 'Hello World';\n\n// In a real React app, this would be handled internally:\n// ReactDOM.render(<App />, document.getElementById('root'));\n// setState triggers re-render, Virtual DOM diffs, then real DOM update.",
+              "explanation": "This simplified conceptual example illustrates the Virtual DOM process. Initially, React creates a Virtual DOM representation of the UI and renders it to the Real DOM. When the application's state changes, React creates a *new* Virtual DOM tree. Instead of directly manipulating the Real DOM, it performs a 'diffing' process between the old and new Virtual DOMs. It then calculates the most efficient way to update the Real DOM, applying only the minimal necessary changes. This batching of updates and intelligent diffing is what makes React highly performant, avoiding costly full re-renders of the DOM.",
+              "language": "javascript"
+            }
+          ],
+          "relatedQuestions": [
+            "question_why_react_1",
+            "question_why_react_2",
+            "question_why_react_3",
+            "question_why_react_4",
+            "question_why_react_5"
+          ],
+          "relatedTasks": [
+            "task_react_component_hierarchy"
+          ],
+          "tags": [
+            "React",
+            "Virtual DOM",
+            "Component-based",
+            "JSX",
+            "One-way Data Flow",
+            "SEO",
+            "Frontend Architecture"
+          ],
+          "technology": "React",
+          "prerequisites": [
+            "javascript_basics",
+            "dom_manipulation",
+            "html_css_basics"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 10,
+          "learningPath": "intermediate",
+          "requiredFor": [
+            "react_development",
+            "frontend_architecture_design",
+            "performance_optimization"
+          ]
+        },
+        {
+          "id": "theory_typescript_basic_types",
+          "title": "TypeScript: Basic Types",
+          "content": "## Introduction to TypeScript Basic Types\nTypeScript extends JavaScript by adding static type definitions. This means you can specify the type of variables, function parameters, and return values, allowing for early error detection during development (before runtime) and improved code readability and maintainability. Understanding basic types is fundamental to writing effective TypeScript code.\n\n### 1. Primitives\nThese are the fundamental building blocks of data types in JavaScript, and TypeScript provides specific types for them:\n*   **`boolean`**: Represents a true/false value.\n    ```typescript\n    let isDone: boolean = false;\n    isDone = true;\n    // isDone = 1; // Error: Type '1' is not assignable to type 'boolean'.\n    ```\n*   **`number`**: Represents both integer and floating-point numbers. Unlike some other languages, TypeScript does not have separate types for integers and floats.\n    ```typescript\n    let decimal: number = 6;\n    let hex: number = 0xf00d;\n    let binary: number = 0b1010;\n    let octal: number = 0o744;\n    // decimal = \"hello\"; // Error: Type 'string' is not assignable to type 'number'.\n    ```\n*   **`string`**: Represents textual data. You can use single quotes, double quotes, or backticks (for template strings).\n    ```typescript\n    let color: string = \"blue\";\n    color = 'red';\n    let greeting: string = `Hello, ${color}!`;\n    // color = true; // Error: Type 'boolean' is not assignable to type 'string'.\n    ```\n\n### 2. Arrays\nTypeScript allows you to specify the type of elements an array can hold. There are two common ways to declare array types:\n*   **Type followed by `[]`**: This is the most common and readable way.\n    ```typescript\n    let list: number[] = [1, 2, 3];\n    // list.push(\"4\"); // Error: Argument of type 'string' is not assignable to parameter of type 'number'.\n    ```\n*   **Generic Array Type (`Array<elemType>`)**: Using the generic `Array` type.\n    ```typescript\n    let list2: Array<string> = [\"a\", \"b\", \"c\"];\n    // list2.push(1); // Error: Argument of type 'number' is not assignable to parameter of type 'string'.\n    ```\n\n### 3. Tuple\nA tuple type allows you to express an array with a fixed number of elements whose types are known, but don't have to be the same. The order of types in the tuple declaration matters.\n*   **Usage**: Useful for representing a record with a fixed structure where each position has a specific meaning.\n    ```typescript\n    // Declare a tuple type\n    let x: [string, number];\n    // Initialize it\n    x = [\"hello\", 10]; // OK\n    // x = [10, \"hello\"]; // Error: Type 'number' is not assignable to type 'string'. Type 'string' is not assignable to type 'number'.\n    // x[0] = 5; // Error: Type 'number' is not assignable to type 'string'.\n    \n    // Accessing elements\n    console.log(x[0].substring(1)); // 'ello'\n    // console.log(x[1].substring(1)); // Error: Property 'substring' does not exist on type 'number'.\n    \n    // Tuples can also have optional elements and rest elements in more advanced scenarios.\n    ```\n\n### 4. Enum\nEnums (enumerations) are a feature in TypeScript that allows you to define a set of named constants. They make it easier to work with a set of distinct values.\n*   **Numeric Enums (default)**: By default, enums are numeric, starting with `0`.\n    ```typescript\n    enum Color { Red, Green, Blue }\n    let c: Color = Color.Green; // c is 1\n    console.log(c); // Output: 1\n\n    enum Status { Success = 200, NotFound = 404, ServerError = 500 }\n    let s: Status = Status.NotFound; // s is 404\n    console.log(Status.Success); // Output: 200\n    ```\n*   **String Enums**: You can also define enums with string values.\n    ```typescript\n    enum Direction { Up = \"UP\", Down = \"DOWN\", Left = \"LEFT\", Right = \"RIGHT\" }\n    let move: Direction = Direction.Up;\n    console.log(move); // Output: \"UP\"\n    ```\n\n### 5. Any\nThe `any` type is a powerful way to work with existing JavaScript code, as well as code from 3rd party libraries, without spending too much time providing type definitions. It allows you to opt-out of type checking for a specific variable. However, it should be used sparingly as it defeats the purpose of TypeScript's type safety.\n*   **Usage**: When the type is unknown, or when you need to store values of different types.\n    ```typescript\n    let notSure: any = 4;\n    notSure = \"maybe a string instead\";\n    notSure = false; // OK, can be a boolean\n\n    let looselyTyped: any = {};\n    looselyTyped.a = 1;\n    looselyTyped.b(); // No error at compile time, but will crash at runtime if 'b' is not a function\n    ```\n*   **When to use `any`**: When migrating a JavaScript project to TypeScript, for variables whose type truly changes during runtime, or for accepting user input that can be of various types before validation.\n\n### 6. Void, Null, Undefined, Never\nWhile not explicitly in the provided markdown, these are also basic types.\n*   **`void`**: The absence of any type. Commonly used as the return type of functions that do not return a value.\n    ```typescript\n    function warnUser(): void {\n      console.log(\"This is my warning message\");\n    }\n    ```\n*   **`null` and `undefined`**: Represent `null` and `undefined` values. By default, `null` and `undefined` are subtypes of all other types (e.g., `number`, `string`). However, with the `--strictNullChecks` flag, they can only be assigned to their own types or to `void`.\n    ```typescript\n    let u: undefined = undefined;\n    let n: null = null;\n    ```\n*   **`never`**: Represents the type of values that never occur. Used for functions that throw exceptions or functions that never return (e.g., infinite loops).\n    ```typescript\n    function error(message: string): never {\n      throw new Error(message);\n    }\n    ```\n",
+          "examples": [
+            {
+              "id": "example_typescript_enums",
+              "title": "Using TypeScript Enums and Tuples",
+              "code": "enum UserRole {\n  ADMIN = \"ADMIN\",\n  EDITOR = \"EDITOR\",\n  VIEWER = \"VIEWER\",\n}\n\n// A tuple to store user information: [id, name, role]\ntype UserInfoTuple = [number, string, UserRole];\n\nfunction processUser(user: UserInfoTuple): string {\n  const [id, name, role] = user;\n  if (role === UserRole.ADMIN) {\n    return `Admin User: ${name} (ID: ${id})`;\n  } else if (role === UserRole.EDITOR) {\n    return `Editor User: ${name} (ID: ${id})`;\n  } else {\n    return `Viewer User: ${name} (ID: ${id})`;\n  }\n}\n\nconst adminUser: UserInfoTuple = [101, \"Alice\", UserRole.ADMIN];\nconst editorUser: UserInfoTuple = [202, \"Bob\", UserRole.EDITOR];\nconst viewerUser: UserInfoTuple = [303, \"Charlie\", UserRole.VIEWER];\n\nconsole.log(processUser(adminUser));\nconsole.log(processUser(editorUser));\nconsole.log(processUser(viewerUser));\n\n// Example of array of a specific type\nconst userIds: number[] = [1, 5, 9, 13];\nuserIds.forEach(id => console.log(`User ID: ${id}`));",
+              "explanation": "This example demonstrates the practical use of TypeScript enums and tuples. `UserRole` is a string enum, providing readable named constants for user roles. `UserInfoTuple` defines a tuple type with a fixed structure for `[id (number), name (string), role (UserRole)]`. The `processUser` function correctly types its input as `UserInfoTuple` and uses the enum values for comparison, enhancing type safety and code clarity. It also shows a simple number array.",
+              "language": "typescript"
+            },
+            {
+              "id": "example_typescript_any",
+              "title": "Practical Use and Pitfalls of 'any' type",
+              "code": "function parseInput(input: any): any {\n  if (typeof input === 'string') {\n    try {\n      return JSON.parse(input);\n    } catch (e) {\n      console.error(\"Could not parse JSON string\");\n      return null; // Return null if parsing fails\n    }\n  } else if (typeof input === 'number') {\n    return input * 2;\n  } else if (typeof input === 'boolean') {\n    return !input;\n  }\n  return undefined; // Default return for unhandled types\n}\n\nlet unknownData: any = \"{\\\"name\\\": \\\"Alice\\\", \\\"age\\\": 30}\";\nlet processedData = parseInput(unknownData);\nconsole.log(processedData); // Output: { name: 'Alice', age: 30 }\n\nunknownData = 10;\nprocessedData = parseInput(unknownData);\nconsole.log(processedData); // Output: 20\n\nunknownData = true;\nprocessedData = parseInput(unknownData);\nconsole.log(processedData); // Output: false\n\n// Pitfall: 'any' allows invalid calls at compile time\nlet riskyVariable: any = \"hello\";\n// riskyVariable.map(); // No compile-time error, but will crash at runtime\n",
+              "explanation": "This example showcases `any` in a scenario where input type is truly dynamic, like a `parseInput` function that might handle various data formats. The function accepts and returns `any` because it processes different types of input into different types of output. This allows flexibility but also demonstrates the pitfall: `riskyVariable.map()` would cause a runtime error because `map` is not a method on a string, but TypeScript with `any` won't catch this at compile time. This highlights why `any` should be used cautiously and with clear justification.",
+              "language": "typescript"
+            }
+          ],
+          "relatedQuestions": [
+            "question_typescript_basics_1",
+            "question_typescript_basics_2",
+            "question_typescript_basics_3",
+            "question_typescript_basics_4",
+            "question_typescript_basics_5",
+            "question_typescript_basics_6"
+          ],
+          "relatedTasks": [
+            "task_typescript_basic_types"
+          ],
+          "tags": [
+            "TypeScript",
+            "Basic Types",
+            "Type Safety",
+            "Enums",
+            "Tuples",
+            "Any",
+            "Primitives"
+          ],
+          "technology": "TypeScript",
+          "prerequisites": [
+            "javascript_basics"
+          ],
+          "complexity": 5,
+          "interviewRelevance": 8,
+          "learningPath": "beginner",
+          "requiredFor": [
+            "typescript_development",
+            "type_script_advanced_types",
+            "react_with_typescript"
+          ]
+        }
+      ],
+      "questions": [
+        {
+          "id": "question_transpilers_babel_1",
+          "topic": "Transpilers and Babel",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "What is the primary purpose of a transpiler like Babel in modern JavaScript development?",
+          "answer": "To convert next-generation JavaScript (ES6+) into backward-compatible JavaScript that can run in older environments.",
+          "options": [],
+          "analysisPoints": [
+            "Identifies the core function of Babel.",
+            "Distinguishes between transpilation and compilation.",
+            "Highlights the compatibility issue it solves."
+          ],
+          "keyConcepts": [
+            "Transpiler",
+            "Babel",
+            "ES6+",
+            "Backward Compatibility"
+          ],
+          "evaluationCriteria": [
+            "Ability to define 'transpiler'.",
+            "Understanding of Babel's role.",
+            "Knowledge of target environments."
+          ],
+          "example": null,
+          "tags": [
+            "Babel",
+            "Transpilation",
+            "ES6"
+          ],
+          "prerequisites": [
+            "javascript_basics"
+          ],
+          "complexity": 2,
+          "interviewFrequency": 7,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_transpilers_babel_2",
+          "topic": "Transpilers and Babel Configuration",
+          "level": "medium",
+          "type": "mcq",
+          "question": "Given the following `babel.config.js` snippet, what is the main purpose of `@babel/preset-env` and its `targets` option?",
+          "answer": "It transpiles JavaScript code based on specified target environments, ensuring compatibility with those browsers or Node.js versions.",
+          "options": [
+            "It bundles all JavaScript files into a single output file.",
+            "It transpiles JavaScript code based on specified target environments, ensuring compatibility with those browsers or Node.js versions.",
+            "It automatically adds polyfills for all new JavaScript features regardless of browser support.",
+            "It minifies the JavaScript code to reduce file size."
+          ],
+          "analysisPoints": [
+            "Tests understanding of Babel presets vs. plugins.",
+            "Focuses on the `preset-env`'s role in environment-specific transpilation.",
+            "Distinguishes transpilation from bundling, polyfilling (without targets), and minification."
+          ],
+          "keyConcepts": [
+            "Babel Presets",
+            "babel/preset-env",
+            "Targets",
+            "Compatibility"
+          ],
+          "evaluationCriteria": [
+            "Correctly identifies the function of `preset-env`.",
+            "Understands the significance of `targets` option.",
+            "Differentiates between core Babel functions and other build steps."
+          ],
+          "example": "```javascript\n// babel.config.js\nmodule.exports = {\n  presets: [\n    ['@babel/preset-env', {\n      targets: {\n        browsers: ['> 1%', 'last 2 versions']\n      }\n    }]\n  ],\n  plugins: []\n};\n```",
+          "tags": [
+            "Babel",
+            "Configuration",
+            "Preset-Env",
+            "Transpilation"
+          ],
+          "prerequisites": [
+            "babel_basics",
+            "es6_features"
+          ],
+          "complexity": 5,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_transpilers_babel_3",
+          "topic": "Babel Configuration",
+          "level": "hard",
+          "type": "code",
+          "question": "You are working on a project that needs to support both modern browsers (last 2 versions) and IE11 for a specific set of users. You also want to use ES2022 features like class properties. Write the `babel.config.js` file that achieves this, ensuring you only transpile what's necessary and include polyfills efficiently. Assume you have `core-js` installed.",
+          "answer": "```javascript\nmodule.exports = {\n  presets: [\n    ['@babel/preset-env', {\n      targets: {\n        browsers: ['last 2 versions', 'ie >= 11', 'not dead']\n      },\n      useBuiltIns: 'usage',\n      corejs: 3\n    }]\n  ],\n  plugins: [\n    '@babel/plugin-proposal-class-properties',\n    '@babel/plugin-transform-runtime' // Recommended to avoid helper duplication\n  ]\n};\n```",
+          "options": [],
+          "analysisPoints": [
+            "Correctly uses `@babel/preset-env` to specify browser targets.",
+            "Includes IE11 in the `targets` configuration.",
+            "Applies `useBuiltIns: 'usage'` and `corejs: 3` for efficient polyfilling.",
+            "Adds `@babel/plugin-proposal-class-properties` for class properties.",
+            "Considered adding `@babel/plugin-transform-runtime` for optimization."
+          ],
+          "keyConcepts": [
+            "Babel Configuration",
+            "Preset-Env Targets",
+            "Polyfills",
+            "Class Properties",
+            "Optimization"
+          ],
+          "evaluationCriteria": [
+            "Accuracy of Babel configuration syntax.",
+            "Effective use of `targets` for diverse browser support.",
+            "Proper polyfill setup with `useBuiltIns` and `corejs`.",
+            "Inclusion of relevant plugins for advanced features.",
+            "Demonstrates understanding of efficient transpilation practices."
+          ],
+          "example": null,
+          "tags": [
+            "Babel",
+            "Configuration",
+            "Advanced",
+            "Polyfill",
+            "ES2022"
+          ],
+          "prerequisites": [
+            "babel_basics",
+            "es6_features",
+            "javascript_modules"
+          ],
+          "complexity": 8,
+          "interviewFrequency": 6,
+          "learningPath": "advanced"
+        },
+        {
+          "id": "question_transpilers_babel_4",
+          "topic": "Transpilers vs. Compilers",
+          "level": "easy",
+          "type": "open",
+          "question": "What is the fundamental difference between a transpiler and a traditional compiler, in the context of JavaScript?",
+          "answer": "A transpiler (like Babel) converts source code from one high-level language version (e.g., ES6+) to another high-level language version (e.g., ES5). A traditional compiler converts source code from a high-level language (e.g., C++, Java) into a lower-level language or machine code (e.g., assembly, bytecode) that can be directly executed by a machine or runtime environment.",
+          "options": [],
+          "analysisPoints": [
+            "Defines transpiler as source-to-source translation.",
+            "Defines compiler as high-level to low-level/machine code translation.",
+            "Provides context specific to JavaScript for transpilers."
+          ],
+          "keyConcepts": [
+            "Transpiler",
+            "Compiler",
+            "Source Code",
+            "Machine Code"
+          ],
+          "evaluationCriteria": [
+            "Clear definition of both terms.",
+            "Accurate distinction between their outputs.",
+            "Relevance to JavaScript context."
+          ],
+          "example": null,
+          "tags": [
+            "Transpilation",
+            "Compilation",
+            "Fundamentals"
+          ],
+          "prerequisites": [
+            "programming_fundamentals"
+          ],
+          "complexity": 3,
+          "interviewFrequency": 6,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_transpilers_babel_5",
+          "topic": "Babel Plugins",
+          "level": "medium",
+          "type": "flashcard",
+          "question": "In Babel, what is the role of a 'plugin' compared to a 'preset'?",
+          "answer": "A plugin handles a specific language feature transformation (e.g., arrow functions). A preset is a collection of pre-configured plugins and options designed for a specific environment or set of features (e.g., `@babel/preset-env` for ES6+).",
+          "options": [],
+          "analysisPoints": [
+            "Defines plugin as atomic transformation.",
+            "Defines preset as a group of plugins/options.",
+            "Illustrates with an example for each."
+          ],
+          "keyConcepts": [
+            "Babel Plugins",
+            "Babel Presets",
+            "Configuration"
+          ],
+          "evaluationCriteria": [
+            "Ability to differentiate plugin and preset.",
+            "Understanding of their respective granularities.",
+            "Knowledge of configuration structure."
+          ],
+          "example": null,
+          "tags": [
+            "Babel",
+            "Configuration",
+            "Plugins",
+            "Presets"
+          ],
+          "prerequisites": [
+            "babel_basics"
+          ],
+          "complexity": 4,
+          "interviewFrequency": 7,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_modern_dev_workflow_1",
+          "topic": "Modern Development Workflow",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "What are npm and Yarn primarily used for in a modern frontend workflow?",
+          "answer": "Dependency management and project initialization.",
+          "options": [],
+          "analysisPoints": [
+            "Identifies the core functions of package managers.",
+            "Highlights their role in setting up and maintaining projects."
+          ],
+          "keyConcepts": [
+            "npm",
+            "Yarn",
+            "Dependency Management",
+            "Project Initialization"
+          ],
+          "evaluationCriteria": [
+            "Basic understanding of package managers.",
+            "Recognition of their primary uses."
+          ],
+          "example": null,
+          "tags": [
+            "Workflow",
+            "Package Manager",
+            "npm",
+            "Yarn"
+          ],
+          "prerequisites": [
+            "javascript_basics"
+          ],
+          "complexity": 2,
+          "interviewFrequency": 8,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_modern_dev_workflow_2",
+          "topic": "Build Process",
+          "level": "medium",
+          "type": "mcq",
+          "question": "Which of the following tasks is NOT typically performed by a module bundler like Webpack in a modern frontend build process?",
+          "answer": "Automated deployment to a production server.",
+          "options": [
+            "Module bundling (combining multiple JS files).",
+            "Transpilation of ES6+ to ES5.",
+            "Minification of JavaScript and CSS files.",
+            "Automated deployment to a production server."
+          ],
+          "analysisPoints": [
+            "Tests understanding of core module bundler functionalities.",
+            "Distinguishes between bundling/transpilation/minification and deployment.",
+            "Identifies CI/CD as a separate stage."
+          ],
+          "keyConcepts": [
+            "Webpack",
+            "Module Bundling",
+            "Transpilation",
+            "Minification",
+            "CI/CD"
+          ],
+          "evaluationCriteria": [
+            "Correctly identifies the scope of module bundlers.",
+            "Differentiates between build process and deployment phases.",
+            "Knowledge of various build optimization techniques."
+          ],
+          "example": null,
+          "tags": [
+            "Webpack",
+            "Build Tools",
+            "Optimization",
+            "Deployment"
+          ],
+          "prerequisites": [
+            "webpack_basics"
+          ],
+          "complexity": 5,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_modern_dev_workflow_3",
+          "topic": "Code Quality and Testing",
+          "level": "medium",
+          "type": "open",
+          "question": "Explain the roles of linting and automated testing in a modern frontend development workflow. How do they contribute to code quality?",
+          "answer": "Linting (e.g., ESLint) involves static analysis of source code to identify programmatic errors, stylistic inconsistencies, and suspicious constructs. It helps enforce coding standards, improve readability, and prevent common mistakes before runtime. Automated testing (e.g., Jest, Mocha, Cypress) involves writing code to verify the functionality of the application automatically. Unit tests check individual functions/components, integration tests verify interactions between parts, and end-to-end tests simulate user flows. Together, they contribute to code quality by catching bugs early, ensuring new features don't break existing ones (regression prevention), making refactoring safer, and providing confidence in the codebase's correctness and maintainability.",
+          "options": [],
+          "analysisPoints": [
+            "Defines linting and its benefits (style, errors, consistency).",
+            "Defines automated testing (unit, integration, E2E) and its benefits (bug prevention, regression, refactoring safety).",
+            "Connects both practices to overall code quality and maintainability."
+          ],
+          "keyConcepts": [
+            "Linting",
+            "ESLint",
+            "Automated Testing",
+            "Unit Testing",
+            "Integration Testing",
+            "E2E Testing",
+            "Code Quality"
+          ],
+          "evaluationCriteria": [
+            "Clear definitions of linting and testing.",
+            "Accurate description of their purposes.",
+            "Ability to articulate their combined impact on quality.",
+            "Mention of specific tools is a plus."
+          ],
+          "example": null,
+          "tags": [
+            "Code Quality",
+            "Linting",
+            "Testing",
+            "ESLint",
+            "Jest"
+          ],
+          "prerequisites": [
+            "javascript_basics",
+            "software_testing_principles"
+          ],
+          "complexity": 6,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_modern_dev_workflow_4",
+          "topic": "Development Server Features",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "What is Hot Module Replacement (HMR) and why is it beneficial during frontend development?",
+          "answer": "Hot Module Replacement (HMR) is a feature of development servers that allows modules (like components or styles) to be updated in a running application without a full page reload. It's beneficial because it preserves the application's state, leading to faster development cycles and a smoother developer experience.",
+          "options": [],
+          "analysisPoints": [
+            "Defines HMR as updating modules without full reload.",
+            "Highlights state preservation and faster cycles as benefits."
+          ],
+          "keyConcepts": [
+            "HMR",
+            "Development Server",
+            "Developer Experience"
+          ],
+          "evaluationCriteria": [
+            "Correct definition of HMR.",
+            "Understanding of its practical advantages."
+          ],
+          "example": null,
+          "tags": [
+            "DevTools",
+            "HMR",
+            "Webpack Dev Server"
+          ],
+          "prerequisites": [
+            "web_development_basics"
+          ],
+          "complexity": 3,
+          "interviewFrequency": 7,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_modern_dev_workflow_5",
+          "topic": "CI/CD",
+          "level": "medium",
+          "type": "open",
+          "question": "Briefly explain what CI/CD stands for and its importance in a modern software development pipeline.",
+          "answer": "CI/CD stands for Continuous Integration / Continuous Deployment (or Delivery). It's a set of practices that enable rapid and reliable software releases. **Continuous Integration (CI)** means developers frequently merge their code changes into a central repository, where automated builds and tests are run to detect integration issues early. **Continuous Deployment (CD)** (or Delivery) means that after successful integration and testing, changes are automatically deployed to production environments (or made ready for manual deployment in Continuous Delivery). Its importance lies in: \n1.  **Faster Release Cycles**: Automates the delivery process, enabling more frequent releases. \n2.  **Early Bug Detection**: Issues are caught and resolved quickly due to frequent integration and testing. \n3.  **Improved Code Quality**: Automated tests and builds ensure consistency and reduce manual errors. \n4.  **Reduced Risk**: Smaller, more frequent deployments are less risky than large, infrequent ones. \n5.  **Better Collaboration**: Encourages frequent code merging and immediate feedback.",
+          "options": [],
+          "analysisPoints": [
+            "Correctly spells out CI/CD.",
+            "Explains Continuous Integration (frequent merges, automated build/test).",
+            "Explains Continuous Deployment (automatic deployment post-CI).",
+            "Articulates key benefits (speed, quality, risk reduction, collaboration)."
+          ],
+          "keyConcepts": [
+            "CI/CD",
+            "Continuous Integration",
+            "Continuous Deployment",
+            "Automation",
+            "Software Delivery"
+          ],
+          "evaluationCriteria": [
+            "Accurate definitions of CI and CD.",
+            "Comprehensive explanation of their importance.",
+            "Understanding of the benefits they bring to development."
+          ],
+          "example": null,
+          "tags": [
+            "CI/CD",
+            "DevOps",
+            "Automation",
+            "Deployment"
+          ],
+          "prerequisites": [
+            "software_development_lifecycle"
+          ],
+          "complexity": 6,
+          "interviewFrequency": 7,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_framework_comparison_1",
+          "topic": "JavaScript Framework Comparison",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "Which of React, Angular, and Vue is generally considered a 'full framework' offering a complete solution out-of-the-box?",
+          "answer": "Angular",
+          "options": [],
+          "analysisPoints": [
+            "Tests basic classification of frameworks vs. libraries.",
+            "Confirms knowledge of Angular's comprehensive nature."
+          ],
+          "keyConcepts": [
+            "Angular",
+            "Full Framework",
+            "Framework Types"
+          ],
+          "evaluationCriteria": [
+            "Correct identification of Angular's type.",
+            "Basic understanding of framework classifications."
+          ],
+          "example": null,
+          "tags": [
+            "Angular",
+            "Framework",
+            "Comparison"
+          ],
+          "prerequisites": [
+            "frontend_frameworks_overview"
+          ],
+          "complexity": 2,
+          "interviewFrequency": 8,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_framework_comparison_2",
+          "topic": "Data Binding",
+          "level": "medium",
+          "type": "mcq",
+          "question": "Consider the following statements about data binding in React, Angular, and Vue:\n\nI. React primarily uses one-way data flow.\nII. Angular typically uses two-way data binding.\nIII. Vue only supports one-way data flow, similar to React.\n\nWhich of the statements are TRUE?",
+          "answer": "I and II only",
+          "options": [
+            "I only",
+            "II only",
+            "I and II only",
+            "I, II, and III"
+          ],
+          "analysisPoints": [
+            "Confirms understanding of data flow mechanisms in each framework.",
+            "Distinguishes Vue's optional two-way binding from React's strict one-way."
+          ],
+          "keyConcepts": [
+            "Data Binding",
+            "One-way Data Flow",
+            "Two-way Data Binding",
+            "React",
+            "Angular",
+            "Vue"
+          ],
+          "evaluationCriteria": [
+            "Accurate knowledge of data binding in React.",
+            "Accurate knowledge of data binding in Angular.",
+            "Correctly identifies Vue's flexible data binding as optional two-way."
+          ],
+          "example": null,
+          "tags": [
+            "Data Flow",
+            "React",
+            "Angular",
+            "Vue",
+            "Comparison"
+          ],
+          "prerequisites": [
+            "frontend_frameworks_overview"
+          ],
+          "complexity": 6,
+          "interviewFrequency": 9,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_framework_comparison_3",
+          "topic": "DOM Interaction",
+          "level": "medium",
+          "type": "open",
+          "question": "Compare and contrast how React and Angular handle updates to the DOM. Discuss the concept of Virtual DOM.",
+          "answer": "**React (Virtual DOM):**\nReact uses a Virtual DOM, which is a lightweight JavaScript representation of the actual DOM. When state changes, React first updates this Virtual DOM. It then efficiently compares the new Virtual DOM with the previous one (a process called 'diffing') to identify the minimal set of changes needed. Finally, it batches these changes and applies only the necessary updates to the real DOM. This minimizes direct, expensive DOM manipulations, leading to faster and more efficient UI updates.\n\n**Angular (Real DOM with Change Detection):**\nAngular directly interacts with the Real DOM. It uses its own change detection mechanism (often powered by Zone.js in older versions, Ivy's tree-shakable approach in newer versions) to detect when data models change. When a change is detected, Angular traverses the component tree to identify which components' views need to be re-rendered and then updates the corresponding parts of the Real DOM directly. While it doesn't use a Virtual DOM, its change detection is highly optimized and can be configured (e.g., OnPush strategy) to be very performant, but it can be more complex to optimize manually compared to React's automatic Virtual DOM diffing for complex scenarios.",
+          "options": [],
+          "analysisPoints": [
+            "Explains Virtual DOM in React (in-memory representation, diffing, batching).",
+            "Explains Angular's approach (direct DOM, change detection mechanism).",
+            "Highlights the performance implications and differences in approach."
+          ],
+          "keyConcepts": [
+            "Virtual DOM",
+            "Real DOM",
+            "Change Detection",
+            "React",
+            "Angular",
+            "DOM Manipulation"
+          ],
+          "evaluationCriteria": [
+            "Clear and accurate explanation of Virtual DOM.",
+            "Accurate description of Angular's change detection.",
+            "Ability to compare their approaches effectively.",
+            "Understanding of performance implications."
+          ],
+          "example": null,
+          "tags": [
+            "Virtual DOM",
+            "DOM",
+            "Performance",
+            "React",
+            "Angular"
+          ],
+          "prerequisites": [
+            "dom_manipulation",
+            "javascript_performance"
+          ],
+          "complexity": 7,
+          "interviewFrequency": 9,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_framework_comparison_4",
+          "topic": "Framework Characteristics",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "Which framework is known for its 'progressive' nature, allowing it to be incrementally adopted into existing projects?",
+          "answer": "Vue",
+          "options": [],
+          "analysisPoints": [
+            "Tests recall of a key Vue characteristic.",
+            "Highlights its flexibility for various project sizes."
+          ],
+          "keyConcepts": [
+            "Vue",
+            "Progressive Framework",
+            "Incremental Adoption"
+          ],
+          "evaluationCriteria": [
+            "Correct identification of Vue's characteristic.",
+            "Understanding of 'progressive framework' concept."
+          ],
+          "example": null,
+          "tags": [
+            "Vue",
+            "Framework",
+            "Flexibility"
+          ],
+          "prerequisites": [
+            "frontend_frameworks_overview"
+          ],
+          "complexity": 3,
+          "interviewFrequency": 7,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_framework_comparison_5",
+          "topic": "Framework Choice",
+          "level": "hard",
+          "type": "open",
+          "question": "You are leading a new frontend project for an enterprise application. The team consists of experienced JavaScript developers, some of whom are familiar with React, others with Angular, and a few with Vue. The project requires high consistency, scalability, and long-term maintainability. Which framework would you lean towards and why, considering the team's background and project requirements?",
+          "answer": "For an enterprise application requiring high consistency, scalability, and long-term maintainability, with a mixed team background, I would lean towards **Angular**.\n\n**Justification:**\n\n1.  **Opinionated Full Framework**: Angular provides a comprehensive, opinionated structure and a full suite of tools (routing, state management, HTTP client, CLI). This enforces consistency across a large codebase and helps onboard new developers more easily, even if they're not familiar with Angular, because there's a clear 'Angular Way' to do things. This is critical for long-term maintainability and scalability in enterprise environments.\n2.  **TypeScript Integration**: Angular is built with TypeScript, which provides strong typing, leading to fewer runtime errors, better code completion, and easier refactoring—all crucial for large, complex applications and collaborative teams.\n3.  **Scalability & Maintainability**: Its module-based architecture, dependency injection, and clear separation of concerns (components, services, directives) promote highly scalable and maintainable applications. It's designed for large teams and complex projects.\n4.  **Corporate Support (Google)**: Google's strong backing ensures continuous development, stability, and a reliable ecosystem, which is important for enterprise applications with long lifecycles.\n5.  **Steep Learning Curve Mitigation**: While Angular has a steeper learning curve, the benefit of consistency and maintainability often outweighs this for enterprise projects. The team's mixed background means some will adapt quickly, and the structured nature will help others get up to speed with guidance.\n\n**Counter-arguments (and why they might be less suitable here):**\n\n*   **React**: Offers high flexibility, but this freedom can lead to inconsistencies in larger teams without strong architectural guidelines. While a robust ecosystem exists, choosing and integrating third-party libraries for every concern can be a project in itself.\n*   **Vue**: Excellent for gradual adoption and smaller projects due to its gentle learning curve. While it scales well, its 'progressive' nature means that for a large enterprise app from scratch, a more opinionated framework like Angular might provide better consistency and out-of-the-box features required for large-scale development.\n\nUltimately, Angular's strengths in enterprise-grade consistency, structured scalability, and corporate backing align well with the stated project requirements, despite its learning curve.",
+          "options": [],
+          "analysisPoints": [
+            "Justifies framework choice based on project requirements and team's skills.",
+            "Demonstrates deep understanding of framework characteristics (full framework, opinionated, TypeScript, scalability, corporate support).",
+            "Provides clear reasoning for choosing one framework over others.",
+            "Acknowledges trade-offs (e.g., learning curve) and addresses them."
+          ],
+          "keyConcepts": [
+            "Framework Selection",
+            "Enterprise Applications",
+            "Consistency",
+            "Scalability",
+            "Maintainability",
+            "React",
+            "Angular",
+            "Vue"
+          ],
+          "evaluationCriteria": [
+            "Ability to analyze a scenario and make a reasoned decision.",
+            "Comprehensive understanding of framework pros and cons.",
+            "Application of theoretical knowledge to practical scenarios.",
+            "Logical and well-structured argument."
+          ],
+          "example": null,
+          "tags": [
+            "Architecture",
+            "Framework Selection",
+            "Enterprise",
+            "Strategy"
+          ],
+          "prerequisites": [
+            "frontend_frameworks_overview",
+            "software_architecture"
+          ],
+          "complexity": 9,
+          "interviewFrequency": 7,
+          "learningPath": "advanced"
+        },
+        {
+          "id": "question_framework_comparison_6",
+          "topic": "Mobile Development with Frameworks",
+          "level": "easy",
+          "type": "mcq",
+          "question": "Which of the following frameworks/libraries is most commonly associated with building *native* mobile applications using JavaScript, directly from its core ecosystem?",
+          "answer": "React Native",
+          "options": [
+            "Ionic",
+            "NativeScript",
+            "React Native",
+            "Vue Native"
+          ],
+          "analysisPoints": [
+            "Tests specific knowledge of mobile development solutions.",
+            "Distinguishes between native, hybrid, and solutions from different ecosystems.",
+            "Focuses on direct ecosystem association."
+          ],
+          "keyConcepts": [
+            "Mobile Development",
+            "React Native",
+            "NativeScript",
+            "Ionic",
+            "Vue Native"
+          ],
+          "evaluationCriteria": [
+            "Correctly identifies React Native's primary role.",
+            "Differentiates between native and hybrid approaches."
+          ],
+          "example": null,
+          "tags": [
+            "Mobile Development",
+            "React Native",
+            "Native Apps"
+          ],
+          "prerequisites": [
+            "mobile_development_overview"
+          ],
+          "complexity": 4,
+          "interviewFrequency": 6,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_why_react_1",
+          "topic": "Why Choose React - Virtual DOM",
+          "level": "medium",
+          "type": "mcq",
+          "question": "Which statement best describes the primary benefit of React's Virtual DOM?",
+          "answer": "It minimizes direct manipulation of the actual DOM by calculating the most efficient updates.",
+          "options": [
+            "It provides a faster way to write HTML-like syntax directly in JavaScript.",
+            "It minimizes direct manipulation of the actual DOM by calculating the most efficient updates.",
+            "It automatically handles two-way data binding for form inputs.",
+            "It allows React components to be rendered on the server-side for SEO benefits."
+          ],
+          "analysisPoints": [
+            "Accurately defines the core advantage of Virtual DOM (performance optimization through diffing).",
+            "Distinguishes Virtual DOM's role from JSX, data binding, or SSR."
+          ],
+          "keyConcepts": [
+            "Virtual DOM",
+            "Performance",
+            "DOM Manipulation",
+            "React"
+          ],
+          "evaluationCriteria": [
+            "Correctly identifies the main benefit of Virtual DOM.",
+            "Avoids confusion with other React features.",
+            "Understanding of performance implications."
+          ],
+          "example": null,
+          "tags": [
+            "React",
+            "Virtual DOM",
+            "Performance"
+          ],
+          "prerequisites": [
+            "dom_manipulation",
+            "javascript_performance"
+          ],
+          "complexity": 5,
+          "interviewFrequency": 10,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_why_react_2",
+          "topic": "Why Choose React - Data Flow & Components",
+          "level": "medium",
+          "type": "open",
+          "question": "Explain the concepts of 'one-way data flow' and 'reusable components' in React. How do these concepts contribute to writing maintainable and scalable applications?",
+          "answer": "**One-way Data Flow (Unidirectional):**\nIn React, data primarily flows in one direction: from parent components down to child components via `props`. When a child needs to communicate back to its parent, it does so by calling a function (callback) passed down as a prop by the parent. This unidirectional flow makes the application's state changes predictable, easier to trace, and significantly simplifies debugging because you always know where data originates and how it propagates through the component tree. This predictability is crucial for maintaining large and complex applications.\n\n**Reusable Components:**\nReact encourages breaking down the UI into small, isolated, and self-contained units called components. Each component is responsible for rendering a specific part of the UI and managing its own state. The 'reusable' aspect means that once a component is built (e.g., a `Button`, `Modal`, or `UserProfileCard`), it can be used multiple times throughout the application or even in different projects with different data, without needing to rewrite the code. This promotes modularity, reduces code duplication, accelerates development, and ensures consistency in the UI, all of which are vital for scalable and maintainable applications.",
+          "options": [],
+          "analysisPoints": [
+            "Clearly defines one-way data flow and its benefits (predictability, debugging).",
+            "Clearly defines reusable components and their benefits (modularity, consistency, speed).",
+            "Connects both concepts to maintainability and scalability."
+          ],
+          "keyConcepts": [
+            "One-way Data Flow",
+            "Reusable Components",
+            "Props",
+            "State",
+            "Maintainability",
+            "Scalability",
+            "React"
+          ],
+          "evaluationCriteria": [
+            "Accurate definition of both concepts.",
+            "Comprehensive explanation of their advantages.",
+            "Ability to link theoretical concepts to practical benefits in development."
+          ],
+          "example": null,
+          "tags": [
+            "React",
+            "Architecture",
+            "Data Flow",
+            "Components",
+            "Best Practices"
+          ],
+          "prerequisites": [
+            "react_basics"
+          ],
+          "complexity": 7,
+          "interviewFrequency": 10,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_why_react_3",
+          "topic": "Why Choose React - JSX",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "What is JSX in React and why is it beneficial?",
+          "answer": "JSX (JavaScript XML) is a syntax extension for JavaScript that allows you to write HTML-like markup directly within your JavaScript code. It's beneficial because it combines markup and logic in the same file, making components self-contained, highly readable, and easier to understand.",
+          "options": [],
+          "analysisPoints": [
+            "Defines JSX as HTML-like syntax in JS.",
+            "Highlights benefits like readability and self-contained components."
+          ],
+          "keyConcepts": [
+            "JSX",
+            "React",
+            "Syntax Extension"
+          ],
+          "evaluationCriteria": [
+            "Correct definition of JSX.",
+            "Understanding of its advantages for component development."
+          ],
+          "example": null,
+          "tags": [
+            "React",
+            "JSX",
+            "Syntax"
+          ],
+          "prerequisites": [
+            "react_basics"
+          ],
+          "complexity": 3,
+          "interviewFrequency": 8,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_why_react_4",
+          "topic": "Why Choose React - SEO",
+          "level": "medium",
+          "type": "mcq",
+          "question": "How does React address the challenges of Search Engine Optimization (SEO) commonly faced by traditional Single Page Applications (SPAs)?",
+          "answer": "React supports Server-Side Rendering (SSR), which pre-renders the initial HTML on the server before sending it to the browser.",
+          "options": [
+            "React uses a highly optimized Virtual DOM that is directly indexable by search engines.",
+            "React automatically generates sitemap files that are submitted to search engines.",
+            "React supports Server-Side Rendering (SSR), which pre-renders the initial HTML on the server before sending it to the browser.",
+            "React requires all application data to be fetched synchronously, making it easier for crawlers."
+          ],
+          "analysisPoints": [
+            "Identifies SSR as the primary solution for React SEO.",
+            "Correctly explains how SSR works for SEO.",
+            "Dismisses incorrect or unrelated options."
+          ],
+          "keyConcepts": [
+            "React",
+            "SEO",
+            "SPA",
+            "Server-Side Rendering (SSR)",
+            "Crawlers"
+          ],
+          "evaluationCriteria": [
+            "Correctly identifies SSR as the solution.",
+            "Understands the mechanism of SSR for SEO.",
+            "Distinguishes from misconceptions about Virtual DOM or synchronous data."
+          ],
+          "example": null,
+          "tags": [
+            "React",
+            "SEO",
+            "SSR",
+            "Performance"
+          ],
+          "prerequisites": [
+            "react_basics",
+            "spa_architecture"
+          ],
+          "complexity": 6,
+          "interviewFrequency": 7,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_why_react_5",
+          "topic": "Why Choose React - Ecosystem & Cohesion",
+          "level": "medium",
+          "type": "open",
+          "question": "Discuss the 'rich tool ecosystem' and 'high cohesion, loose coupling' principles as they apply to React development. How do these aspects benefit large-scale projects?",
+          "answer": "**Rich Tool Ecosystem:**\nReact's popularity has fostered a vast and vibrant ecosystem of official and third-party tools, libraries, and extensions. This includes state management solutions (Redux, Zustand), routing libraries (React Router), UI component libraries (Material-UI, Ant Design), testing utilities (React Testing Library), and build tools (Create React App, Next.js). For large-scale projects, this means:\n*   **Accelerated Development**: Ready-made solutions reduce the need to build everything from scratch.\n*   **Problem Solving**: Solutions exist for almost any common challenge.\n*   **Community Support**: Large community provides ample documentation, tutorials, and help.\n\n**High Cohesion, Loose Coupling:**\n*   **High Cohesion**: A React component is typically designed to encapsulate all related logic, markup, and (often) styling for a specific UI piece. This means everything a component needs to function is contained within it, making it self-sufficient and easier to understand and manage in isolation.\n*   **Loose Coupling**: Components interact with each other primarily through props (data down) and callbacks (events up), minimizing direct dependencies between them. This means changing one component is less likely to break another. \n\nFor large-scale projects, these principles lead to:\n*   **Easier Maintenance**: Changes are localized, reducing the risk of unintended side effects.\n*   **Improved Testability**: Isolated components are easier to unit test.\n*   **Enhanced Collaboration**: Multiple teams/developers can work on different components concurrently with minimal conflicts.\n*   **Greater Scalability**: The application can grow by adding or modifying components independently, without impacting the entire system.",
+          "options": [],
+          "analysisPoints": [
+            "Defines 'rich tool ecosystem' and lists examples.",
+            "Explains 'high cohesion' (internal self-sufficiency).",
+            "Explains 'loose coupling' (minimal dependencies, clear interfaces).",
+            "Connects these concepts to benefits in large-scale project development (speed, maintainability, collaboration, scalability)."
+          ],
+          "keyConcepts": [
+            "React Ecosystem",
+            "Cohesion",
+            "Coupling",
+            "Scalability",
+            "Maintainability",
+            "Modularity"
+          ],
+          "evaluationCriteria": [
+            "Accurate definitions of technical terms.",
+            "Comprehensive explanation of their advantages for large projects.",
+            "Demonstrates understanding of software design principles."
+          ],
+          "example": null,
+          "tags": [
+            "React",
+            "Architecture",
+            "Ecosystem",
+            "Design Principles",
+            "Scalability"
+          ],
+          "prerequisites": [
+            "react_basics",
+            "software_design"
+          ],
+          "complexity": 8,
+          "interviewFrequency": 8,
+          "learningPath": "advanced"
+        },
+        {
+          "id": "question_typescript_basics_1",
+          "topic": "TypeScript Basic Types",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "In TypeScript, what is the difference between `number[]` and `Array<number>` when declaring an array type?",
+          "answer": "There is no functional difference; both `number[]` (shorthand syntax) and `Array<number>` (generic array type) are valid ways to declare an array whose elements are all numbers.",
+          "options": [],
+          "analysisPoints": [
+            "Identifies that both notations are equivalent.",
+            "Confirms understanding of array type declaration."
+          ],
+          "keyConcepts": [
+            "TypeScript Arrays",
+            "Type Syntax",
+            "Generics"
+          ],
+          "evaluationCriteria": [
+            "Correctly states their equivalence.",
+            "Demonstrates familiarity with TypeScript array syntax."
+          ],
+          "example": null,
+          "tags": [
+            "TypeScript",
+            "Arrays",
+            "Types"
+          ],
+          "prerequisites": [
+            "typescript_basics"
+          ],
+          "complexity": 3,
+          "interviewFrequency": 7,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_typescript_basics_2",
+          "topic": "TypeScript Basic Types - `any`",
+          "level": "medium",
+          "type": "mcq",
+          "question": "Consider the following TypeScript code:\n\n```typescript\nlet data: any = \"hello\";\ndata = 123;\nlet result = data.toFixed(2);\n```\n\nWhat is the expected behavior when this code is compiled and then run?",
+          "answer": "It will compile successfully, but throw a runtime error `TypeError: data.toFixed is not a function` when `data.toFixed(2)` is executed.",
+          "options": [
+            "It will result in a compile-time error because `toFixed` is not a method on a string.",
+            "It will compile successfully and `result` will be `\"123.00\"`.",
+            "It will compile successfully, but throw a runtime error `TypeError: data.toFixed is not a function` when `data.toFixed(2)` is executed.",
+            "It will compile successfully, and `result` will be `undefined`."
+          ],
+          "analysisPoints": [
+            "Tests understanding of `any` type's behavior (bypassing compile-time checks).",
+            "Recognizes that runtime type errors can still occur with `any`.",
+            "Identifies the correct method (`toFixed`) is for numbers, not strings."
+          ],
+          "keyConcepts": [
+            "TypeScript `any` type",
+            "Type Safety",
+            "Runtime Errors",
+            "Compile-time Errors"
+          ],
+          "evaluationCriteria": [
+            "Correctly predicts compile-time behavior with `any`.",
+            "Accurately identifies the runtime error and its cause.",
+            "Understanding of the trade-offs of using `any`."
+          ],
+          "example": null,
+          "tags": [
+            "TypeScript",
+            "Any Type",
+            "Error Handling",
+            "Runtime"
+          ],
+          "prerequisites": [
+            "typescript_basics"
+          ],
+          "complexity": 6,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_typescript_basics_3",
+          "topic": "TypeScript Basic Types - Tuple",
+          "level": "medium",
+          "type": "code",
+          "question": "Define a TypeScript tuple type named `Coordinates` that represents a point in 3D space with x, y, and z coordinates, all of which are numbers. Then, declare a variable `myPoint` of this type and initialize it with values (10, 20, 30). Finally, try to assign a string to the second element of `myPoint` and explain the outcome.",
+          "answer": "```typescript\ntype Coordinates = [number, number, number];\n\nlet myPoint: Coordinates = [10, 20, 30];\n\n// Attempt to assign a string to the second element\n// myPoint[1] = \"forty\"; // This line would cause a compile-time error\n\n/*\nOutcome Explanation:\nWhen attempting to assign `\"forty\"` (a string) to `myPoint[1]` (which is defined as a `number` in the `Coordinates` tuple type), TypeScript will throw a compile-time error. The error message would typically be similar to: \n\"Type 'string' is not assignable to type 'number'.\" \nThis demonstrates TypeScript's type safety: tuples enforce fixed types at specific positions, preventing incorrect data assignments during development.\n*/\n```",
+          "options": [],
+          "analysisPoints": [
+            "Correctly defines a tuple type with specific number elements.",
+            "Accurately initializes the tuple variable.",
+            "Demonstrates understanding of tuple's fixed type constraint by identifying the compile-time error.",
+            "Clearly explains the reason for the error."
+          ],
+          "keyConcepts": [
+            "TypeScript Tuple",
+            "Type Definition",
+            "Type Safety",
+            "Compile-time Error"
+          ],
+          "evaluationCriteria": [
+            "Correct tuple type declaration.",
+            "Accurate initialization.",
+            "Proper identification and explanation of the type error.",
+            "Demonstrates grasp of tuple immutability regarding types."
+          ],
+          "example": null,
+          "tags": [
+            "TypeScript",
+            "Tuple",
+            "Type Safety"
+          ],
+          "prerequisites": [
+            "typescript_basics"
+          ],
+          "complexity": 6,
+          "interviewFrequency": 7,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_typescript_basics_4",
+          "topic": "TypeScript Basic Types - Enum",
+          "level": "medium",
+          "type": "open",
+          "question": "When would you prefer using a TypeScript `enum` over a simple string literal union type (e.g., `type Status = 'active' | 'inactive';`) for defining a set of named constants? Provide a scenario.",
+          "answer": "You might prefer using a TypeScript `enum` when:\n\n1.  **You need integer-backed constants (Numeric Enums):** If the constants need to have numerical values that might correspond to backend codes, database values, or bit flags, numeric enums are a natural fit. String literal unions are purely for string values.\n2.  **You want reverse mappings:** Numeric enums generate reverse mappings, allowing you to get the string name from the numeric value (`Color[0]` yields `'Red'`). String enums do not have this property by default, but you get type-safety.\n3.  **You prefer a more distinct 'constant' type:** Enums create a distinct type that is not just a union of literal types. This can sometimes lead to clearer intent and more explicit type checks.\n4.  **You are migrating from other languages with Enum concepts:** Developers coming from C#, Java, etc., might find enums more familiar.\n\n**Scenario:**\nConsider an application that interacts with a backend API where HTTP status codes are used extensively, and you want to refer to them by meaningful names within the frontend. Using a numeric enum for `HttpStatus` allows you to define these constants with their actual numerical values, making the code readable while directly mapping to the API's expectations:\n\n```typescript\nenum HttpStatus {\n  OK = 200,\n  CREATED = 201,\n  BAD_REQUEST = 400,\n  UNAUTHORIZED = 401,\n  NOT_FOUND = 404,\n  INTERNAL_SERVER_ERROR = 500,\n}\n\nfunction handleResponse(statusCode: HttpStatus, data: any) {\n  if (statusCode === HttpStatus.OK) {\n    console.log(\"Request successful:\", data);\n  } else if (statusCode === HttpStatus.NOT_FOUND) {\n    console.warn(\"Resource not found.\");\n  } else {\n    console.error(\"An error occurred with status:\", statusCode);\n  }\n}\n\nhandleResponse(HttpStatus.OK, { message: \"Data fetched\" });\nhandleResponse(HttpStatus.NOT_FOUND, null);\n// handleResponse(200, { message: \"Legacy\" }); // Still works due to enum's numeric nature\n```\n\nIn contrast, a string literal union like `type Status = 'OK' | 'NOT_FOUND'` would force you to use strings (`'OK'`) and might not directly map to the numeric values expected by external systems without manual conversion.",
+          "options": [],
+          "analysisPoints": [
+            "Compares enums to string literal unions based on use cases (numeric values, reverse mapping, distinct type).",
+            "Provides a clear, relevant scenario where enum is advantageous (HTTP status codes, API integration).",
+            "Demonstrates code example supporting the explanation."
+          ],
+          "keyConcepts": [
+            "TypeScript Enum",
+            "String Literal Union",
+            "Named Constants",
+            "Type Safety",
+            "Numeric Enums"
+          ],
+          "evaluationCriteria": [
+            "Understanding of the differences and trade-offs.",
+            "Ability to articulate specific advantages of enums.",
+            "Provision of a practical and relevant use case with code.",
+            "Clear explanation of why one is preferred in the scenario."
+          ],
+          "example": null,
+          "tags": [
+            "TypeScript",
+            "Enums",
+            "Types",
+            "Best Practices"
+          ],
+          "prerequisites": [
+            "typescript_basics"
+          ],
+          "complexity": 7,
+          "interviewFrequency": 6,
+          "learningPath": "advanced"
+        },
+        {
+          "id": "question_typescript_basics_5",
+          "topic": "TypeScript Basic Types - Primitives",
+          "level": "easy",
+          "type": "mcq",
+          "question": "Which of the following TypeScript declarations will **not** result in a compile-time error?",
+          "answer": "```typescript\nlet city: string = \"New York\";\ncity = 'London';\n```",
+          "options": [
+            "```typescript\nlet count: number = 5;\ncount = \"ten\";\n```",
+            "```typescript\nlet isActive: boolean = true;\nisActive = 0;\n```",
+            "```typescript\nlet data: [string, number] = [\"item\", 50];\ndata[0] = 100;\n```",
+            "```typescript\nlet city: string = \"New York\";\ncity = 'London';\n```"
+          ],
+          "analysisPoints": [
+            "Tests understanding of primitive type assignments (string, number, boolean).",
+            "Tests understanding of tuple type immutability at specific positions.",
+            "Identifies correct type re-assignment for a string variable."
+          ],
+          "keyConcepts": [
+            "TypeScript Primitives",
+            "Type Assignment",
+            "Type Safety",
+            "Tuple Types"
+          ],
+          "evaluationCriteria": [
+            "Accurate identification of correct type usage.",
+            "Recognition of type errors in incorrect options.",
+            "Understanding of strict type checking."
+          ],
+          "example": "The correct option demonstrates valid re-assignment of a string literal to a variable declared as `string`. All other options involve assigning a value of an incompatible type (e.g., `string` to `number`, `number` to `boolean`, `number` to `string` within a tuple), which TypeScript's static type checker correctly flags as errors at compile time.",
+          "tags": [
+            "TypeScript",
+            "Primitives",
+            "Type Safety",
+            "Errors"
+          ],
+          "prerequisites": [
+            "typescript_basics"
+          ],
+          "complexity": 4,
+          "interviewFrequency": 9,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_typescript_basics_6",
+          "topic": "TypeScript Basic Types - Void and Never",
+          "level": "medium",
+          "type": "flashcard",
+          "question": "What is the primary difference in meaning between a function returning `void` and a function returning `never` in TypeScript?",
+          "answer": "A function returning `void` means it does not return any value, or its return value is ignored (e.g., `console.log()`). A function returning `never` means it will never return, typically because it throws an error or enters an infinite loop, indicating an unreachable end point.",
+          "options": [],
+          "analysisPoints": [
+            "Defines `void` as absence of return value.",
+            "Defines `never` as function that never completes execution.",
+            "Provides clear distinction and examples implied by context."
+          ],
+          "keyConcepts": [
+            "TypeScript Void",
+            "TypeScript Never",
+            "Return Types",
+            "Type System"
+          ],
+          "evaluationCriteria": [
+            "Accurate definition of both `void` and `never`.",
+            "Clear differentiation of their practical implications.",
+            "Understanding of their use cases."
+          ],
+          "example": null,
+          "tags": [
+            "TypeScript",
+            "Types",
+            "Void",
+            "Never"
+          ],
+          "prerequisites": [
+            "typescript_basics"
+          ],
+          "complexity": 5,
+          "interviewFrequency": 6,
+          "learningPath": "intermediate"
+        }
+      ],
+      "tasks": [
+        {
+          "id": "task_babel_config",
+          "title": "Configure Babel for ES6+ Transpilation and Class Properties",
+          "description": "\nYour task is to set up a minimal Babel configuration (`babel.config.js`) for a new JavaScript project. The requirements are:\n\n1.  **Transpile modern JavaScript (ES6+ features)** to be compatible with a target environment that includes `last 2 major versions` of browsers and `not dead` browsers.\n2.  Enable support for **Class Properties** syntax (e.g., `class MyClass { myProperty = 'value'; }`).\n3.  Ensure that **polyfills for used features** are automatically included efficiently (using `core-js` v3).\n\nCreate the `babel.config.js` file with the necessary `presets` and `plugins` to meet these requirements. Assume `core-js` is installed.\n",
+          "difficulty": "medium",
+          "startingCode": "// babel.config.js\nmodule.exports = {\n  // Your configuration goes here\n};\n\n// Example ES6+ code you'd want to transpile:\n// class MyComponent {\n//   static defaultProps = { greeting: 'Hello' };\n//   message = 'World';\n//   constructor(name) {\n//     this.name = name;\n//   }\n//   greet = () => {\n//     return `${MyComponent.defaultProps.greeting}, ${this.message}, ${this.name}!`\n//   }\n// }\n// const comp = new MyComponent('Developer');\n// console.log(comp.greet());\n",
+          "solutionCode": "module.exports = {\n  presets: [\n    ['@babel/preset-env', {\n      targets: {\n        browsers: ['last 2 major versions', 'not dead']\n      },\n      useBuiltIns: 'usage',\n      corejs: 3\n    }]\n  ],\n  plugins: [\n    '@babel/plugin-proposal-class-properties'\n  ]\n};",
+          "testCases": [
+            "The `presets` array should contain `@babel/preset-env`.",
+            "The `targets` option within `@babel/preset-env` should include `['last 2 major versions', 'not dead']`.",
+            "The `useBuiltIns` option should be set to `'usage'`.",
+            "The `corejs` option should be set to `3`.",
+            "The `plugins` array should contain `@babel/plugin-proposal-class-properties`.",
+            "The configuration should be a valid JavaScript module export."
+          ],
+          "hints": [
+            "Remember that `preset-env` handles general modern JavaScript features based on your target environments.",
+            "For specific, often experimental, language features like class properties, you usually need a dedicated plugin.",
+            "`useBuiltIns` and `corejs` are crucial for intelligent polyfilling to avoid including unnecessary polyfills."
+          ],
+          "tags": [
+            "Babel",
+            "Configuration",
+            "Transpilation",
+            "ES6+",
+            "Plugins",
+            "Presets"
+          ],
+          "timeEstimate": 30,
+          "prerequisites": [
+            "javascript_basics",
+            "npm_yarn_basics"
+          ],
+          "complexity": 6,
+          "interviewRelevance": 7,
+          "learningPath": "intermediate",
+          "relatedConcepts": [
+            "theory_transpilers_babel",
+            "question_transpilers_babel_3"
+          ]
+        },
+        {
+          "id": "task_setup_dev_workflow",
+          "title": "Setup a Basic Frontend Project with Webpack and Dev Server",
+          "description": "\nYour task is to set up a bare-bones frontend project that demonstrates key steps of a modern development workflow. Specifically, you need to:\n\n1.  **Initialize a new Node.js project** using npm.\n2.  **Install Webpack 5** and its CLI as development dependencies.\n3.  **Install Webpack Dev Server** as a development dependency.\n4.  Create a minimal `src/index.js` file with a simple `console.log` statement.\n5.  Create a `webpack.config.js` file that:\n    *   Sets the `mode` to 'development'.\n    *   Defines `src/index.js` as the entry point.\n    *   Configures the output bundle to be `bundle.js` in a `dist` directory.\n    *   Configures a `devServer` to serve files from `dist` and enable hot reloading.\n6.  Add `start` and `build` scripts to `package.json` to run the dev server and build the project respectively.\n\nDemonstrate the setup by providing the `package.json` and `webpack.config.js` files, and explain the commands to run.\n",
+          "difficulty": "medium",
+          "startingCode": "/* No starting code needed for files, just project structure. */\n\n// 1. Initialize project: `npm init -y`\n// 2. Install dependencies: `npm install --save-dev webpack webpack-cli webpack-dev-server`\n\n// src/index.js (Create this file):\n// console.log('Hello from Webpack!');\n\n// package.json (Update the scripts section):\n// Your scripts here\n\n// webpack.config.js (Create this file):\n// Your Webpack configuration here\n",
+          "solutionCode": "/* package.json */\n{\n  \"name\": \"my-webpack-app\",\n  \"version\": \"1.0.0\",\n  \"description\": \"\",\n  \"main\": \"index.js\",\n  \"scripts\": {\n    \"start\": \"webpack serve --open\",\n    \"build\": \"webpack --mode production\"\n  },\n  \"keywords\": [],\n  \"author\": \"\",\n  \"license\": \"ISC\",\n  \"devDependencies\": {\n    \"webpack\": \"^5.0.0\",\n    \"webpack-cli\": \"^4.0.0\",\n    \"webpack-dev-server\": \"^4.0.0\"\n  }\n}\n\n/* webpack.config.js */\nconst path = require('path');\n\nmodule.exports = {\n  mode: 'development',\n  entry: './src/index.js',\n  output: {\n    filename: 'bundle.js',\n    path: path.resolve(__dirname, 'dist'),\n  },\n  devServer: {\n    static: path.join(__dirname, 'dist'),\n    compress: true,\n    port: 8080,\n    hot: true, // Enable Hot Module Replacement\n  },\n};\n\n/* src/index.js */\nconsole.log('Hello from Webpack!');\n\n/* Commands to run: */\n// To start development server: `npm start`\n// To build for production: `npm run build`\n",
+          "testCases": [
+            "The `package.json` file should contain `webpack`, `webpack-cli`, and `webpack-dev-server` as `devDependencies`.",
+            "The `package.json` should have a `start` script using `webpack serve` and a `build` script using `webpack --mode production`.",
+            "The `webpack.config.js` should specify `mode: 'development'`.",
+            "The `entry` in `webpack.config.js` should point to `./src/index.js`.",
+            "The `output` in `webpack.config.js` should define `filename: 'bundle.js'` and a `path` resolving to `dist`.",
+            "The `devServer` configuration should be present, serving static files from `dist` and having `hot: true`.",
+            "A `src/index.js` file with content should exist."
+          ],
+          "hints": [
+            "Remember to `require('path')` for resolving file paths correctly in Node.js.",
+            "The `static` property in `devServer` tells it where to serve content from.",
+            "The `--open` flag for `webpack serve` is optional but convenient for automatically opening the browser."
+          ],
+          "tags": [
+            "Webpack",
+            "Build Tools",
+            "Development Workflow",
+            "npm",
+            "Hot Reloading"
+          ],
+          "timeEstimate": 45,
+          "prerequisites": [
+            "npm_yarn_basics",
+            "javascript_modules"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 9,
+          "learningPath": "intermediate",
+          "relatedConcepts": [
+            "theory_modern_dev_workflow",
+            "example_webpack_config"
+          ]
+        },
+        {
+          "id": "task_react_component_hierarchy",
+          "title": "Build a Hierarchical Counter Component in React",
+          "description": "\nImplement a simple React application that demonstrates a hierarchical component structure, one-way data flow, and state management. You need to create:\n\n1.  A `CounterDisplay` component that receives a `count` prop and displays it.\n2.  A `CounterButton` component that receives an `onClick` prop and a `label` prop. When clicked, it should call the `onClick` function.\n3.  A `ParentCounter` component that:\n    *   Manages its own `count` state (initialized to 0).\n    *   Renders a `CounterDisplay` component, passing its `count` state as a prop.\n    *   Renders two `CounterButton` components: one for 'Increment' and one for 'Decrement'.\n    *   Implements `increment` and `decrement` functions that update the `count` state. These functions should be passed down to the `CounterButton` components via their `onClick` prop.\n\nThis task highlights reusable components, one-way data flow from parent to child, and how children communicate back to parents via callbacks.\n",
+          "difficulty": "medium",
+          "startingCode": "import React, { useState } from 'react';\n\n// 1. Create CounterDisplay component here\n\n// 2. Create CounterButton component here\n\n// 3. Create ParentCounter component here\n\n// Export ParentCounter as default\nexport default ParentCounter;",
+          "solutionCode": "import React, { useState } from 'react';\n\n// 1. CounterDisplay Component\nfunction CounterDisplay({ count }) {\n  return (\n    <p style={{ fontSize: '2em', fontWeight: 'bold' }}>Current Count: {count}</p>\n  );\n}\n\n// 2. CounterButton Component\nfunction CounterButton({ onClick, label }) {\n  return (\n    <button \n      onClick={onClick} \n      style={{\n        margin: '5px',\n        padding: '10px 20px',\n        fontSize: '1em',\n        cursor: 'pointer'\n      }}\n    >\n      {label}\n    </button>\n  );\n}\n\n// 3. ParentCounter Component\nfunction ParentCounter() {\n  const [count, setCount] = useState(0);\n\n  const increment = () => {\n    setCount(prevCount => prevCount + 1);\n  };\n\n  const decrement = () => {\n    setCount(prevCount => prevCount - 1);\n  };\n\n  return (\n    <div style={{ textAlign: 'center', fontFamily: 'Arial, sans-serif' }}>\n      <h2>React Counter App</h2>\n      <CounterDisplay count={count} />\n      <div>\n        <CounterButton onClick={increment} label=\"Increment\" />\n        <CounterButton onClick={decrement} label=\"Decrement\" />\n      </div>\n    </div>\n  );\n}\n\nexport default ParentCounter;",
+          "testCases": [
+            "The `ParentCounter` component should manage a `count` state initialized to `0`.",
+            "Clicking 'Increment' button should increase the displayed count by 1.",
+            "Clicking 'Decrement' button should decrease the displayed count by 1.",
+            "The `CounterDisplay` component should correctly receive and show the `count` prop.",
+            "The `CounterButton` components should correctly receive `onClick` and `label` props and trigger the parent's function when clicked.",
+            "The application should render without console errors or warnings."
+          ],
+          "hints": [
+            "Use the `useState` hook in the `ParentCounter` component to manage the `count`.",
+            "Remember to pass functions as props to child components for callbacks.",
+            "Children components should not directly modify parent state; they should call functions passed from the parent."
+          ],
+          "tags": [
+            "React",
+            "Components",
+            "State Management",
+            "Props",
+            "One-way Data Flow",
+            "Hooks"
+          ],
+          "timeEstimate": 60,
+          "prerequisites": [
+            "react_basics",
+            "javascript_es6"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 10,
+          "learningPath": "intermediate",
+          "relatedConcepts": [
+            "theory_why_choose_react",
+            "example_react_component"
+          ]
+        },
+        {
+          "id": "task_typescript_basic_types",
+          "title": "Type-Safe User Profile Function with Enums and Tuples",
+          "description": "\nCreate a TypeScript function that processes user profile data, ensuring type safety using various basic TypeScript types.\n\n1.  Define a string `enum` called `UserStatus` with values: `ACTIVE`, `INACTIVE`, `PENDING`.\n2.  Define a `type alias` called `UserProfile` that is a tuple with the following structure and types:\n    *   Element 1: `number` (User ID)\n    *   Element 2: `string` (User Name)\n    *   Element 3: `UserStatus` (User Status from the enum)\n    *   Element 4: `boolean` (Is Admin)\n3.  Implement a function `displayUserProfile(profile: UserProfile): string` that:\n    *   Takes a `UserProfile` tuple as input.\n    *   Deconstructs the tuple to access its elements.\n    *   Returns a formatted string describing the user's profile, including their ID, name, status, and whether they are an admin. For example: \"User ID: 1, Name: Alice (ACTIVE), Admin: Yes\".\n4.  Demonstrate the function with at least two example `UserProfile` tuples.\n5.  Add a line of code that would cause a compile-time error if type safety were violated (e.g., trying to assign an invalid status or wrong type to a tuple element), and comment on why it fails.\n",
+          "difficulty": "medium",
+          "startingCode": "enum UserStatus { /* ... */ }\n\ntype UserProfile = [/* ... */];\n\nfunction displayUserProfile(profile: UserProfile): string {\n  // Implement function logic here\n}\n\n// Example usage\n// const user1: UserProfile = [/* ... */];\n// console.log(displayUserProfile(user1));\n\n// Example of compile-time error (commented out)\n// let invalidProfile: UserProfile = [/* ... */];\n// invalidProfile[2] = \"INVALID\"; // This should cause an error\n",
+          "solutionCode": "enum UserStatus {\n  ACTIVE = \"ACTIVE\",\n  INACTIVE = \"INACTIVE\",\n  PENDING = \"PENDING\",\n}\n\ntype UserProfile = [number, string, UserStatus, boolean];\n\nfunction displayUserProfile(profile: UserProfile): string {\n  const [id, name, status, isAdmin] = profile;\n  const adminStatus = isAdmin ? \"Yes\" : \"No\";\n  return `User ID: ${id}, Name: ${name} (${status}), Admin: ${adminStatus}`;\n}\n\n// Example usage:\nconst user1: UserProfile = [101, \"Alice Smith\", UserStatus.ACTIVE, true];\nconst user2: UserProfile = [202, \"Bob Johnson\", UserStatus.INACTIVE, false];\nconst user3: UserProfile = [303, \"Charlie Brown\", UserStatus.PENDING, false];\n\nconsole.log(displayUserProfile(user1));\n// Expected: \"User ID: 101, Name: Alice Smith (ACTIVE), Admin: Yes\"\n\nconsole.log(displayUserProfile(user2));\n// Expected: \"User ID: 202, Name: Bob Johnson (INACTIVE), Admin: No\"\n\nconsole.log(displayUserProfile(user3));\n// Expected: \"User ID: 303, Name: Charlie Brown (PENDING), Admin: No\"\n\n// Example of compile-time error due to type violation:\n// let invalidUserProfile: UserProfile = [404, \"Diana Prince\", \"UNKNOWN\", true];\n// The above line would cause a compile-time error:\n// Type 'string' is not assignable to type 'UserStatus'.\n\n// Another example of compile-time error:\n// let wrongTypeTuple: UserProfile = [\"500\", \"Eve\", UserStatus.ACTIVE, false];\n// Type 'string' is not assignable to type 'number'.\n\n// Mutating a tuple element with wrong type\n// let testTuple: UserProfile = [1, \"Test\", UserStatus.ACTIVE, true];\n// testTuple[1] = 123; // Error: Type 'number' is not assignable to type 'string'.\n",
+          "testCases": [
+            "The `UserStatus` enum should be defined with `ACTIVE`, `INACTIVE`, `PENDING` string values.",
+            "The `UserProfile` type alias should be a tuple `[number, string, UserStatus, boolean]`.",
+            "The `displayUserProfile` function should correctly accept a `UserProfile` tuple.",
+            "The `displayUserProfile` function should return the formatted string as specified.",
+            "Calling `displayUserProfile` with valid `UserProfile` data should produce correct output.",
+            "An attempt to assign an invalid string to a `UserStatus` enum member in a `UserProfile` tuple should cause a compile-time error.",
+            "An attempt to assign an incorrect type to any tuple element should cause a compile-time error."
+          ],
+          "hints": [
+            "Remember that string enums require explicit string assignments.",
+            "Tuple types define the types and order of elements precisely.",
+            "Deconstruct arrays (or tuples) for easier access to elements within the function."
+          ],
+          "tags": [
+            "TypeScript",
+            "Types",
+            "Enums",
+            "Tuples",
+            "Type Safety",
+            "Functions"
+          ],
+          "timeEstimate": 45,
+          "prerequisites": [
+            "typescript_basics"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 8,
+          "learningPath": "intermediate",
+          "relatedConcepts": [
+            "theory_typescript_basic_types",
+            "question_typescript_basics_3",
+            "question_typescript_basics_4"
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "bb43606f-e5b4-4560-9ce0-bdbcc4418039",
+    "startLine": 13100,
+    "endLine": 13199,
+    "processedDate": "2025-06-17T13:19:56.609Z",
+    "content": {
+      "logicalBlockInfo": {
+        "suggestedEndLine": -1
+      },
+      "theory": [
+        {
+          "id": "theory_pwa_manifest",
+          "title": "Progressive Web App (PWA) Web App Manifest",
+          "content": "The Web App Manifest is a JSON file that provides information about a web application to the browser and the operating system. It allows PWAs to be installed on a user's device and provides a native-app-like experience by controlling how the app appears to the user and defining its launch characteristics. It defines properties like the app's name, icons, start URL, display mode, theme colors, and orientation.\n\n## Key Manifest Fields\n\n*   **`description`**: A general description of the web application. This is used in app stores or installation prompts.\n*   **`start_url`**: Defines the URL that loads when the user launches the application from their home screen, desktop, or other application launchers. It should be a URL relative to the manifest's URL.\n*   **`display`**: Specifies the preferred display mode for the web application. Common values include:\n    *   `standalone`: The application will look and feel like a standalone application. It will open in its own window, separate from the browser, hiding typical browser UI elements like the URL bar.\n    *   `fullscreen`: The application will open completely full screen, taking up the entire display without any browser UI.\n    *   `minimal-ui`: Similar to `standalone`, but provides a minimal set of browser UI (e.g., a back button, URL bar, or refresh button on some platforms).\n    *   `browser`: The application opens in a regular browser tab or window, just like a standard website.\n*   **`background_color`**: Defines the placeholder background color for the application. This color is used when the web app is first launched before its stylesheet is loaded, providing a smooth transition.\n*   **`theme_color`**: Defines the default theme color for the application. This color can influence the color of the browser's UI elements (like the address bar or task switcher) when the PWA is running, providing a more integrated look.\n*   **`icons`**: An array of objects specifying icons for the application. These icons are used on the home screen, app launcher, task switcher, and splash screen. Each icon object requires:\n    *   `src`: The path to the icon image file.\n    *   `sizes`: The pixel dimensions of the icon (e.g., \"192x192\"). Multiple sizes are needed for different device resolutions.\n    *   `type`: The MIME type of the icon image (e.g., \"image/png\").\n\n## Importance\nThe Web App Manifest is crucial for making a web application installable and providing a native-like experience. It's one of the core components that enables a website to become a Progressive Web App.",
+          "examples": [
+            {
+              "id": "example_pwa_manifest_1",
+              "title": "Basic Web App Manifest JSON",
+              "code": "{\n  \"name\": \"My Awesome PWA\",\n  \"short_name\": \"PWA\",\n  \"description\": \"A simple Progressive Web App for learning.\",\n  \"start_url\": \"/\",\n  \"display\": \"standalone\",\n  \"background_color\": \"#ffffff\",\n  \"theme_color\": \"#000000\",\n  \"icons\": [\n    {\n      \"src\": \"icon-192x192.png\",\n      \"sizes\": \"192x192\",\n      \"type\": \"image/png\"\n    },\n    {\n      \"src\": \"icon-512x512.png\",\n      \"sizes\": \"512x512\",\n      \"type\": \"image/png\"\n    }\n  ]\n}",
+              "explanation": "This JSON snippet illustrates a typical `manifest.json` file. It defines the application's basic metadata, how it should be displayed when launched from the home screen, and the icons used for various purposes across the operating system.",
+              "language": "json"
+            }
+          ],
+          "relatedQuestions": [
+            "question_pwa_manifest_1",
+            "question_pwa_manifest_2",
+            "question_pwa_manifest_3",
+            "question_pwa_manifest_4",
+            "question_pwa_manifest_5"
+          ],
+          "relatedTasks": [
+            "task_pwa_manifest_1"
+          ],
+          "tags": [
+            "PWA",
+            "Web App Manifest",
+            "Frontend Fundamentals",
+            "Web Development"
+          ],
+          "technology": "Web",
+          "prerequisites": [
+            "HTML",
+            "CSS",
+            "JSON"
+          ],
+          "complexity": 4,
+          "interviewRelevance": 7,
+          "learningPath": "intermediate",
+          "requiredFor": [
+            "PWA Development",
+            "Offline-first Apps"
+          ]
+        },
+        {
+          "id": "theory_pwa_service_workers",
+          "title": "Progressive Web App (PWA) Offline Capabilities with Service Workers",
+          "content": "Service Workers are a type of web worker that runs in the background, separate from the main browser thread. They act as a programmable proxy between the browser and the network, enabling powerful features like offline capabilities, push notifications, and background synchronization. For offline capabilities, service workers typically intercept network requests and serve cached content.\n\n## Service Worker Lifecycle Events\n\n1.  **`install` event**: This event is fired when the service worker is first installed. It's a common place to cache static assets that are essential for the application to function offline (e.g., HTML, CSS, JavaScript files, images). The `event.waitUntil()` method ensures that the service worker does not install until the promise passed to it resolves. This is crucial for pre-caching assets.\n    ```javascript\n    self.addEventListener('install', event => {\n      event.waitUntil(\n        caches.open(CACHE_NAME)\n          .then(cache => cache.addAll(urlsToCache)) // caches all specified URLs\n      );\n    });\n    ```\n    *   `CACHE_NAME`: A string identifier for your cache, useful for versioning.\n    *   `urlsToCache`: An array of URLs that the service worker should pre-cache during installation.\n    *   `caches.open(CACHE_NAME)`: Opens or creates a cache with the specified name.\n    *   `cache.addAll(urlsToCache)`: Adds all URLs from the array to the cache.\n\n2.  **`fetch` event**: This event is fired every time the browser makes a network request. The service worker can intercept these requests and decide how to respond. A common strategy for offline support is \"Cache First, then Network\", where the service worker first checks its cache for a matching request and, if not found, falls back to the network.\n    ```javascript\n    self.addEventListener('fetch', event => {\n      event.respondWith(\n        caches.match(event.request) // Tries to find the request in the cache\n          .then(response => response || fetch(event.request)) // If found, return cached response; otherwise, fetch from network\n      );\n    });\n    ```\n    *   `event.respondWith()`: This method tells the browser to wait for the promise to resolve and then use the resulting Response as the network response.\n    *   `caches.match(event.request)`: Checks if the incoming network request's URL exists in any of the service worker's caches. It returns a Promise that resolves to the matching `Response` object or `undefined` if no match is found.\n    *   `response || fetch(event.request)`: This is a common pattern for the \"Cache First, then Network\" strategy. If `response` (from `caches.match`) is available (truthy), it's returned. Otherwise, `fetch(event.request)` is called to get the resource from the network.",
+          "examples": [
+            {
+              "id": "example_pwa_service_worker_1",
+              "title": "Service Worker Cache Strategy (Cache First)",
+              "code": "// service-worker.js\nconst CACHE_NAME = 'my-pwa-cache-v1';\nconst urlsToCache = [\n  '/',\n  '/index.html',\n  '/styles.css',\n  '/app.js',\n  '/images/logo.png'\n];\n\nself.addEventListener('install', event => {\n  console.log('Service Worker: Installing and caching assets...');\n  event.waitUntil(\n    caches.open(CACHE_NAME)\n      .then(cache => {\n        console.log('Service Worker: Caching new assets...');\n        return cache.addAll(urlsToCache);\n      })\n      .then(() => self.skipWaiting()) // Activates the new service worker immediately\n  );\n});\n\nself.addEventListener('fetch', event => {\n  console.log('Service Worker: Fetching resource:', event.request.url);\n  event.respondWith(\n    caches.match(event.request)\n      .then(response => {\n        // Cache hit - return response\n        if (response) {\n          console.log('Service Worker: Resource from cache:', event.request.url);\n          return response;\n        }\n        // No cache hit - fetch from network\n        console.log('Service Worker: Resource from network:', event.request.url);\n        return fetch(event.request);\n      })\n  );\n});\n\nself.addEventListener('activate', event => {\n  console.log('Service Worker: Activating...');\n  // Optional: Clean up old caches here\n  event.waitUntil(\n    caches.keys().then(cacheNames => {\n      return Promise.all(\n        cacheNames.map(cacheName => {\n          if (cacheName !== CACHE_NAME) {\n            console.log('Service Worker: Deleting old cache:', cacheName);\n            return caches.delete(cacheName);\n          }\n        })\n      );\n    })\n  );\n  event.waitUntil(clients.claim()); // Allows the service worker to take control of existing clients immediately\n});",
+              "explanation": "This code demonstrates a common 'Cache First, then Network Fallback' strategy. During installation, specified URLs are pre-cached. During fetch, the service worker attempts to serve resources from the cache first. If the resource is not in the cache, it falls back to fetching it from the network. The `activate` event is also shown for cleaning up old caches, ensuring only the current version's cache is used.",
+              "language": "javascript"
+            }
+          ],
+          "relatedQuestions": [
+            "question_pwa_service_worker_1",
+            "question_pwa_service_worker_2",
+            "question_pwa_service_worker_3",
+            "question_pwa_service_worker_4",
+            "question_pwa_service_worker_5",
+            "question_pwa_service_worker_6"
+          ],
+          "relatedTasks": [
+            "task_pwa_service_worker_1"
+          ],
+          "tags": [
+            "PWA",
+            "Service Worker",
+            "Offline",
+            "Caching",
+            "Web Development",
+            "JavaScript"
+          ],
+          "technology": "JavaScript",
+          "prerequisites": [
+            "JavaScript Promises",
+            "Event Listeners"
+          ],
+          "complexity": 6,
+          "interviewRelevance": 8,
+          "learningPath": "intermediate",
+          "requiredFor": [
+            "PWA Development",
+            "Offline-first Applications"
+          ]
+        },
+        {
+          "id": "theory_graphql_schema",
+          "title": "GraphQL Schema Definition Language (SDL)",
+          "content": "GraphQL is a query language for your API, and a server-side runtime for executing queries by using a type system you define for your data. A GraphQL schema defines the structure of the data that clients can query and mutate.\n\nThe Schema Definition Language (SDL) is used to define this schema in a human-readable and platform-agnostic way.\n\n## Key Components of a GraphQL Schema\n\n1.  **Object Types (`type`)**: These are the most fundamental components of a GraphQL schema. They represent the types of objects you can fetch from your service, and what fields they have.\n    *   Each field on an object type has a name and a type.\n    *   **Scalar Types**: GraphQL comes with built-in scalar types like `ID`, `String`, `Int`, `Float`, `Boolean`. `ID` is a unique identifier, often serialized as a string. These are terminal types; they don't have sub-fields.\n    *   **Custom Object Types**: Fields can also be other object types, allowing you to define relationships between data.\n    *   **Non-Nullable (`!`)**: An exclamation mark `!` after a type indicates that the field is non-nullable. It means that the API will always return a value for this field and it cannot be `null`.\n    *   **Lists (`[]`)**: Square brackets `[]` indicate a list of items. For example, `[Post!]!` means it's a list of non-nullable `Post` objects, and the list itself cannot be `null`.\n\n    **Example: `User` and `Post` Types**\n    ```graphql\ntype User {\n  id: ID!\n  name: String!\n  email: String!\n  posts: [Post!]! # A user can have multiple posts, and each post in the list cannot be null\n}\n\ntype Post {\n  id: ID!\n  title: String!\n  content: String!\n  author: User! # A post must have an author, which is a User object\n}\n    ```\n\n2.  **Root Types (`Query`, `Mutation`, `Subscription`)**:\n    Every GraphQL schema must have a `Query` type, which defines the entry points for reading data. It can optionally have a `Mutation` type for writing/modifying data, and a `Subscription` type for real-time data.\n    *   **`Query` Type**: Defines fields that clients can use to fetch data. Each field represents a top-level query operation. Arguments can be passed to these fields to filter or specify the data to be retrieved.\n        **Example:**\n        ```graphql\ntype Query {\n  user(id: ID!): User # Get a single user by ID\n  allUsers: [User!]! # Get all users\n  post(id: ID!): Post # Get a single post by ID\n  allPosts: [Post!]! # Get all posts\n}\n        ```\n    *   **`Mutation` Type**: Defines fields that clients can use to modify data on the server. Mutations are typically used for create, update, and delete operations. Each field specifies input arguments and the type of data returned after the mutation.\n        **Example:**\n        ```graphql\ntype Mutation {\n  createUser(name: String!, email: String!): User! # Create a new user\n  createPost(title: String!, content: String!, authorId: ID!): Post! # Create a new post\n}\n        ```\n\n## Importance\nThe GraphQL schema is the contract between the client and the server. It clearly defines what data is available, how it's structured, and what operations (queries, mutations) can be performed. This strong typing provides self-documentation and enables powerful tooling on both the client and server sides, improving development experience and reducing errors.",
+          "examples": [
+            {
+              "id": "example_graphql_schema_1",
+              "title": "Comprehensive GraphQL Schema Definition",
+              "code": "type User {\n  id: ID!\n  name: String!\n  email: String!\n  posts: [Post!]!\n}\n\ntype Post {\n  id: ID!\n  title: String!\n  content: String!\n  author: User!\n}\n\ntype Query {\n  user(id: ID!): User\n  allUsers: [User!]!\n  post(id: ID!): Post\n  allPosts: [Post!]!\n}\n\ntype Mutation {\n  createUser(name: String!, email: String!): User!\n  createPost(title: String!, content: String!, authorId: ID!): Post!\n}",
+              "explanation": "This example demonstrates a complete GraphQL schema definition using SDL, including custom object types (`User`, `Post`), relationships between types (`User` has `posts`, `Post` has `author`), and root operation types (`Query` for reading data, `Mutation` for modifying data). It also shows the use of non-nullable fields (`!`) and lists (`[]`).",
+              "language": "graphql"
+            }
+          ],
+          "relatedQuestions": [
+            "question_graphql_schema_1",
+            "question_graphql_schema_2",
+            "question_graphql_schema_3",
+            "question_graphql_schema_4",
+            "question_graphql_schema_5",
+            "question_graphql_schema_6"
+          ],
+          "relatedTasks": [
+            "task_graphql_schema_1"
+          ],
+          "tags": [
+            "GraphQL",
+            "Schema Definition Language",
+            "Backend",
+            "API Design",
+            "Data Modeling"
+          ],
+          "technology": "GraphQL",
+          "prerequisites": [
+            "Basic API concepts",
+            "JSON",
+            "Data types"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 9,
+          "learningPath": "intermediate",
+          "requiredFor": [
+            "GraphQL API Development",
+            "Full-stack Development"
+          ]
+        },
+        {
+          "id": "theory_graphql_apollo_client",
+          "title": "GraphQL Client: Apollo Client",
+          "content": "Apollo Client is a comprehensive state management library for JavaScript that enables you to manage both local and remote data with GraphQL. It fetches, caches, and modifies application data, all while automatically updating your UI. It's often used with React, Vue, Angular, or plain JavaScript.\n\n## Core Concepts\n\n*   **`ApolloClient`**: The main class for interacting with a GraphQL server. You instantiate it with configuration options, most importantly the URI of your GraphQL endpoint and a cache strategy.\n    *   **`uri`**: The URL of your GraphQL server endpoint. All GraphQL operations (queries, mutations) will be sent to this endpoint.\n    *   **`cache`**: An instance of `InMemoryCache` (or another cache implementation). This client-side cache stores the results of GraphQL queries, reducing network requests for frequently accessed data and providing instant UI updates.\n\n*   **`InMemoryCache`**: A normalized, in-memory GraphQL cache. It stores query results as a flat data structure, allowing different queries that fetch the same data to share that data in the cache. This helps prevent data duplication and ensures consistency across your UI when data changes.\n\n*   **`gql` tag**: A template literal tag from `@apollo/client` used to parse GraphQL query, mutation, and subscription strings into a format that Apollo Client can understand. It helps with syntax highlighting and build-time validation of your GraphQL operations.\n\n## Performing Operations\n\nOnce the client is initialized, you can use methods like `query()`, `mutate()`, and `subscribe()` to interact with your GraphQL API.\n\n*   **`client.query({ query: YOUR_GRAPHQL_QUERY, variables: {} })`**: Used to send GraphQL queries to the server to fetch data. It returns a Promise that resolves with the query result.\n*   **`client.mutate({ mutation: YOUR_GRAPHQL_MUTATION, variables: {} })`**: Used to send GraphQL mutations to the server to modify data. It also returns a Promise with the mutation result.\n\n## Example Usage Flow\n1.  Define your GraphQL query/mutation using the `gql` tag.\n2.  Initialize `ApolloClient` with your GraphQL endpoint and `InMemoryCache`.\n3.  Call `client.query()` or `client.mutate()` with your defined operation.\n4.  Process the data returned by the promise.",
+          "examples": [
+            {
+              "id": "example_graphql_apollo_client_1",
+              "title": "Apollo Client Initialization and Basic Query",
+              "code": "import { ApolloClient, InMemoryCache, gql } from '@apollo/client';\n\n// 1. Initialize Apollo Client\nconst client = new ApolloClient({\n  uri: 'https://api.example.com/graphql',\n  cache: new InMemoryCache() // The default cache for Apollo Client\n});\n\n// 2. Define a GraphQL Query\nconst GET_ALL_USERS = gql`\n  query {\n    allUsers {\n      id\n      name\n      email\n    }\n  }\n`;\n\n// 3. Execute the Query\nclient.query({\n  query: GET_ALL_USERS\n})\n.then(result => {\n  console.log('Query result:', result.data.allUsers);\n})\n.catch(error => {\n  console.error('Error fetching users:', error);\n});\n\n// 4. Example of a Mutation (concept only, not fully executable without a server)\nconst CREATE_USER_MUTATION = gql`\n  mutation CreateUser($name: String!, $email: String!) {\n    createUser(name: $name, email: $email) {\n      id\n      name\n      email\n    }\n  }\n`;\n\n/*\n// Example of executing a mutation\nclient.mutate({\n  mutation: CREATE_USER_MUTATION,\n  variables: {\n    name: 'Jane Doe',\n    email: 'jane.doe@example.com'\n  }\n})\n.then(result => {\n  console.log('Mutation result:', result.data.createUser);\n})\n.catch(error => {\n  console.error('Error creating user:', error);\n});\n*/",
+              "explanation": "This example shows how to set up `ApolloClient` by providing the GraphQL API `uri` and configuring an `InMemoryCache`. It then demonstrates how to define a GraphQL query using the `gql` tag and execute it using `client.query()`. A conceptual example for a mutation is also included to show the general pattern for data modification.",
+              "language": "typescript"
+            }
+          ],
+          "relatedQuestions": [
+            "question_graphql_apollo_client_1",
+            "question_graphql_apollo_client_2",
+            "question_graphql_apollo_client_3",
+            "question_graphql_apollo_client_4",
+            "question_graphql_apollo_client_5"
+          ],
+          "relatedTasks": [
+            "task_graphql_apollo_client_1"
+          ],
+          "tags": [
+            "GraphQL",
+            "Apollo Client",
+            "Frontend",
+            "Data Fetching",
+            "State Management",
+            "JavaScript"
+          ],
+          "technology": "TypeScript",
+          "prerequisites": [
+            "JavaScript Promises",
+            "GraphQL Basics",
+            "ES Modules"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 8,
+          "learningPath": "advanced",
+          "requiredFor": [
+            "Modern Frontend Development",
+            "React/Vue/Angular with GraphQL"
+          ]
+        }
+      ],
+      "questions": [
+        {
+          "id": "question_pwa_manifest_1",
+          "topic": "PWA Web App Manifest",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "What is the primary purpose of the `Web App Manifest` in a Progressive Web App?",
+          "answer": "To provide information about the web application to the browser and operating system, enabling it to be installed and offering a native-app-like experience.",
+          "options": [],
+          "analysisPoints": [
+            "Understands the core function of `manifest.json`.",
+            "Differentiates it from service workers or other PWA components."
+          ],
+          "keyConcepts": [
+            "Web App Manifest",
+            "PWA",
+            "Installability"
+          ],
+          "evaluationCriteria": [
+            "Accuracy of purpose",
+            "Conciseness"
+          ],
+          "example": "",
+          "tags": [
+            "PWA",
+            "Manifest",
+            "Basics"
+          ],
+          "prerequisites": [],
+          "complexity": 2,
+          "interviewFrequency": 6,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_pwa_manifest_2",
+          "topic": "PWA Web App Manifest",
+          "level": "medium",
+          "type": "mcq",
+          "question": "Which `display` mode in the Web App Manifest allows a PWA to open in its own window, hiding typical browser UI elements like the URL bar?",
+          "answer": "standalone",
+          "options": [
+            "fullscreen",
+            "minimal-ui",
+            "browser",
+            "standalone"
+          ],
+          "analysisPoints": [
+            "Understands the different display modes for PWAs.",
+            "Can differentiate between the visual effects of each mode.",
+            "Knows the common use cases for `standalone` display."
+          ],
+          "keyConcepts": [
+            "Web App Manifest",
+            "display mode",
+            "PWA UI"
+          ],
+          "evaluationCriteria": [
+            "Correct identification of display mode.",
+            "Understanding of PWA user experience."
+          ],
+          "example": "The `standalone` display mode provides an experience closest to a native application, without the browser's address bar or navigation controls.",
+          "tags": [
+            "PWA",
+            "Manifest",
+            "Display"
+          ],
+          "prerequisites": [
+            "PWA basics"
+          ],
+          "complexity": 5,
+          "interviewFrequency": 7,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_pwa_manifest_3",
+          "topic": "PWA Web App Manifest",
+          "level": "medium",
+          "type": "open",
+          "question": "Explain the difference between `background_color` and `theme_color` in the Web App Manifest and their impact on the user experience.",
+          "answer": "The `background_color` property defines a placeholder background color for the application. This color is displayed on the splash screen when the PWA is launching, before the web content is fully loaded. Its purpose is to provide a smooth transition and avoid a jarring white screen. The `theme_color` property, on the other hand, defines the default theme color for the application's surrounding UI elements, such as the browser's address bar or the task switcher's title bar on mobile devices. It helps integrate the PWA visually with the operating system's UI. Both contribute to a more native and integrated user experience by reducing perceived load times and aligning the app's appearance with the system.",
+          "options": [],
+          "analysisPoints": [
+            "Clearly distinguishes between the two properties.",
+            "Explains the visual effect and purpose of each.",
+            "Connects their usage to improved user experience.",
+            "Demonstrates understanding of PWA aesthetics."
+          ],
+          "keyConcepts": [
+            "Web App Manifest",
+            "background_color",
+            "theme_color",
+            "UX",
+            "PWA Aesthetics"
+          ],
+          "evaluationCriteria": [
+            "Clarity and accuracy of definitions.",
+            "Ability to articulate user experience impact.",
+            "Comprehensive explanation."
+          ],
+          "example": "",
+          "tags": [
+            "PWA",
+            "Manifest",
+            "UX",
+            "Colors"
+          ],
+          "prerequisites": [
+            "PWA basics"
+          ],
+          "complexity": 6,
+          "interviewFrequency": 7,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_pwa_manifest_4",
+          "topic": "PWA Web App Manifest",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "What is the significance of the `start_url` property in `manifest.json`?",
+          "answer": "It specifies the URL that should be loaded when the user launches the application from their home screen, desktop, or app launcher.",
+          "options": [],
+          "analysisPoints": [
+            "Identifies the role of `start_url`.",
+            "Understands its impact on app launch."
+          ],
+          "keyConcepts": [
+            "Web App Manifest",
+            "start_url",
+            "PWA Launch"
+          ],
+          "evaluationCriteria": [
+            "Accuracy",
+            "Conciseness"
+          ],
+          "example": "",
+          "tags": [
+            "PWA",
+            "Manifest"
+          ],
+          "prerequisites": [],
+          "complexity": 3,
+          "interviewFrequency": 6,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_pwa_manifest_5",
+          "topic": "PWA Web App Manifest",
+          "level": "medium",
+          "type": "code",
+          "question": "The `icons` array in a Web App Manifest should include multiple icon sizes to support various device resolutions. Provide an `icons` array that includes icons for `192x192` and `512x512` pixel dimensions, both in PNG format.",
+          "answer": "```json\n[\n  {\n    \"src\": \"icon-192x192.png\",\n    \"sizes\": \"192x192\",\n    \"type\": \"image/png\"\n  },\n  {\n    \"src\": \"icon-512x512.png\",\n    \"sizes\": \"512x512\",\n    \"type\": \"image/png\"\n  }\n]\n```",
+          "options": [],
+          "analysisPoints": [
+            "Correctly structures JSON for the `icons` array.",
+            "Includes all required fields (`src`, `sizes`, `type`).",
+            "Uses correct values for `sizes` and `type`.",
+            "Demonstrates understanding of multi-resolution icon requirements."
+          ],
+          "keyConcepts": [
+            "Web App Manifest",
+            "icons",
+            "JSON structure"
+          ],
+          "evaluationCriteria": [
+            "Syntactic correctness of JSON.",
+            "Completeness of icon object properties.",
+            "Adherence to requirements."
+          ],
+          "example": "This solution correctly defines two icon entries, one for 192x192 and one for 512x512, both as PNGs. This is crucial for ensuring the PWA's icon looks crisp on various devices and screen densities.",
+          "tags": [
+            "PWA",
+            "Manifest",
+            "Icons",
+            "JSON"
+          ],
+          "prerequisites": [
+            "JSON syntax"
+          ],
+          "complexity": 5,
+          "interviewFrequency": 6,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_pwa_service_worker_1",
+          "topic": "PWA Service Workers",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "What is the primary role of a Service Worker in a Progressive Web App?",
+          "answer": "To act as a programmable network proxy between the browser and the network, enabling features like offline capabilities, push notifications, and background sync.",
+          "options": [],
+          "analysisPoints": [
+            "Understands the core functionality of a Service Worker.",
+            "Identifies its position in the network request flow."
+          ],
+          "keyConcepts": [
+            "Service Worker",
+            "PWA",
+            "Offline",
+            "Network Proxy"
+          ],
+          "evaluationCriteria": [
+            "Accuracy",
+            "Conciseness"
+          ],
+          "example": "",
+          "tags": [
+            "PWA",
+            "Service Worker",
+            "Basics"
+          ],
+          "prerequisites": [],
+          "complexity": 3,
+          "interviewFrequency": 7,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_pwa_service_worker_2",
+          "topic": "PWA Service Workers",
+          "level": "medium",
+          "type": "mcq",
+          "question": "Consider the following service worker `install` event handler:\n\n```javascript\nself.addEventListener('install', event => {\n  event.waitUntil(\n    caches.open(CACHE_NAME)\n      .then(cache => cache.addAll(urlsToCache))\n  );\n});\n```\nWhat is the purpose of `event.waitUntil()` in this context?",
+          "answer": "It ensures that the service worker will not install until the caching operation (the promise returned by `cache.addAll()`) is successfully completed.",
+          "options": [
+            "It delays the installation of the service worker for better performance.",
+            "It allows the service worker to skip caching if an error occurs.",
+            "It ensures that the service worker will not install until the caching operation (the promise returned by `cache.addAll()`) is successfully completed.",
+            "It prevents the service worker from being registered if caching fails."
+          ],
+          "analysisPoints": [
+            "Understands the asynchronous nature of service worker installation.",
+            "Knows the role of `event.waitUntil()` in managing service worker lifecycle phases.",
+            "Recognizes that installation should only complete after critical tasks like caching are done."
+          ],
+          "keyConcepts": [
+            "Service Worker",
+            "Lifecycle",
+            "install event",
+            "event.waitUntil",
+            "Promises"
+          ],
+          "evaluationCriteria": [
+            "Correct explanation of `waitUntil`.",
+            "Understanding of service worker activation."
+          ],
+          "example": "Without `event.waitUntil()`, the browser might activate the service worker before all critical assets are cached, leading to a broken offline experience. `waitUntil` ensures atomic caching.",
+          "tags": [
+            "PWA",
+            "Service Worker",
+            "Caching",
+            "Lifecycle"
+          ],
+          "prerequisites": [
+            "JavaScript Promises"
+          ],
+          "complexity": 6,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_pwa_service_worker_3",
+          "topic": "PWA Service Workers",
+          "level": "hard",
+          "type": "open",
+          "question": "Describe the \"Cache First, then Network Fallback\" caching strategy using a Service Worker. Explain how the `fetch` event handler implements this strategy and discuss potential edge cases or considerations.",
+          "answer": "The \"Cache First, then Network Fallback\" strategy is a common caching pattern for Service Workers where the service worker first attempts to serve a resource from its cache. If the resource is found in the cache, it's returned immediately. If not, the service worker falls back to making a network request to fetch the resource.\n\nThis strategy is implemented within the `fetch` event handler, typically as follows:\n\n```javascript\nself.addEventListener('fetch', event => {\n  event.respondWith(\n    caches.match(event.request) // 1. Try to find the request in the cache\n      .then(cachedResponse => {\n        if (cachedResponse) {\n          return cachedResponse; // 2. If found, return cached response\n        }\n        // 3. If not found in cache, fetch from network\n        return fetch(event.request);\n      })\n  );\n});\n```\n\n**Explanation:**\n1.  `caches.match(event.request)`: The service worker checks if the incoming network `event.request` has a corresponding entry in any of its open caches. This is an asynchronous operation that returns a Promise.\n2.  `.then(cachedResponse => {...})`: Once the `caches.match` Promise resolves, the `cachedResponse` variable will contain the `Response` object if a match was found, or `undefined` otherwise.\n3.  `if (cachedResponse) { return cachedResponse; }`: If a cached response exists (i.e., `cachedResponse` is not `undefined`), it is immediately returned, fulfilling the `event.respondWith` Promise.\n4.  `return fetch(event.request);`: If no cached response is found, the service worker initiates a standard network request using `fetch(event.request)` and returns its result.\n\n**Potential Edge Cases/Considerations:**\n*   **Stale Content:** This strategy prioritizes speed (serving from cache) over freshness. Cached content might become stale if the network version updates but the cache is never updated. This can be mitigated by using a 'Stale-While-Revalidate' strategy or regularly updating caches during the `activate` phase (e.g., changing `CACHE_NAME`).\n*   **New Resources:** If a new resource (e.g., a new image or a new page) is requested that was not pre-cached during `install` and has never been accessed before, it will always fall back to the network. If the network is unavailable, the resource will not load.\n*   **Cache Invalidation:** Simply updating the `CACHE_NAME` in the `install` event won't automatically clean up old caches. An `activate` event handler is needed to delete old caches to prevent them from accumulating and consuming storage space.\n*   **Post Requests:** `caches.match()` only works with GET requests. POST requests (and other non-GET methods) will always fall through to the network, which is generally desired for data mutations.",
+          "options": [],
+          "analysisPoints": [
+            "Clearly defines the caching strategy.",
+            "Explains the JavaScript implementation details.",
+            "Identifies and discusses common edge cases/drawbacks (stale content, new resources).",
+            "Suggests solutions or mitigation strategies for edge cases.",
+            "Demonstrates a deep understanding of service worker behavior."
+          ],
+          "keyConcepts": [
+            "Service Worker",
+            "Cache First",
+            "Fetch Event",
+            "Offline Strategy",
+            "Caching Patterns",
+            "Stale Content",
+            "Edge Cases"
+          ],
+          "evaluationCriteria": [
+            "Completeness of explanation.",
+            "Accuracy of code description.",
+            "Insight into practical considerations.",
+            "Ability to analyze system behavior."
+          ],
+          "example": "",
+          "tags": [
+            "PWA",
+            "Service Worker",
+            "Caching",
+            "Advanced",
+            "Strategy"
+          ],
+          "prerequisites": [
+            "JavaScript Promises",
+            "Service Worker Lifecycle"
+          ],
+          "complexity": 8,
+          "interviewFrequency": 9,
+          "learningPath": "advanced"
+        },
+        {
+          "id": "question_pwa_service_worker_4",
+          "topic": "PWA Service Workers",
+          "level": "medium",
+          "type": "flashcard",
+          "question": "Which Service Worker event is typically used to pre-cache static assets that are essential for offline functionality?",
+          "answer": "The `install` event.",
+          "options": [],
+          "analysisPoints": [
+            "Recalls the correct service worker event for initial caching.",
+            "Understands the timing of asset pre-caching."
+          ],
+          "keyConcepts": [
+            "Service Worker",
+            "install event",
+            "Pre-caching",
+            "Offline Assets"
+          ],
+          "evaluationCriteria": [
+            "Correct event identification",
+            "Conciseness"
+          ],
+          "example": "",
+          "tags": [
+            "PWA",
+            "Service Worker",
+            "Caching"
+          ],
+          "prerequisites": [],
+          "complexity": 4,
+          "interviewFrequency": 7,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_pwa_service_worker_5",
+          "topic": "PWA Service Workers",
+          "level": "medium",
+          "type": "code",
+          "question": "Given the following incomplete Service Worker `fetch` event handler, complete the `event.respondWith()` block to implement a 'Cache First, then Network' strategy. Ensure that if a resource is found in the cache, it's returned, otherwise, it's fetched from the network.",
+          "answer": "```javascript\nself.addEventListener('fetch', event => {\n  event.respondWith(\n    caches.match(event.request) // Try to find the resource in the cache\n      .then(response => {\n        if (response) {\n          return response; // If found, return the cached response\n        }\n        return fetch(event.request); // Otherwise, fetch from the network\n      })\n  );\n});\n```",
+          "options": [],
+          "analysisPoints": [
+            "Correctly uses `caches.match` to check the cache.",
+            "Implements the conditional logic for cache hit/miss.",
+            "Correctly falls back to `fetch(event.request)` for network requests.",
+            "Understands the structure of `event.respondWith`."
+          ],
+          "keyConcepts": [
+            "Service Worker",
+            "Fetch Event",
+            "Caching Strategy",
+            "Promises",
+            "caches API"
+          ],
+          "evaluationCriteria": [
+            "Functional correctness of the caching strategy.",
+            "Syntactic correctness of JavaScript code.",
+            "Adherence to the 'Cache First, then Network' pattern."
+          ],
+          "example": "This solution correctly implements the 'Cache First, then Network Fallback' strategy, which is fundamental for providing offline capabilities in PWAs. It ensures that previously visited content loads instantly when offline, while new content is fetched when online.",
+          "tags": [
+            "PWA",
+            "Service Worker",
+            "Coding",
+            "Caching"
+          ],
+          "prerequisites": [
+            "JavaScript Promises",
+            "Service Worker basics"
+          ],
+          "complexity": 6,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_pwa_service_worker_6",
+          "topic": "PWA Service Workers",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "In a Service Worker, what is the role of `CACHE_NAME`?",
+          "answer": "It is a string identifier used to version and manage different caches. When the `CACHE_NAME` changes, it signals that new assets should be cached and old ones potentially removed.",
+          "options": [],
+          "analysisPoints": [
+            "Understands that `CACHE_NAME` is for versioning.",
+            "Recognizes its role in cache management."
+          ],
+          "keyConcepts": [
+            "Service Worker",
+            "Cache Naming",
+            "Versioning"
+          ],
+          "evaluationCriteria": [
+            "Accuracy",
+            "Conciseness"
+          ],
+          "example": "",
+          "tags": [
+            "PWA",
+            "Service Worker",
+            "Caching"
+          ],
+          "prerequisites": [],
+          "complexity": 3,
+          "interviewFrequency": 6,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_graphql_schema_1",
+          "topic": "GraphQL Schema Definition Language (SDL)",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "In GraphQL SDL, what does the exclamation mark `!` after a type (e.g., `String!`) signify?",
+          "answer": "It signifies that the field is non-nullable, meaning it will always return a value and cannot be `null`.",
+          "options": [],
+          "analysisPoints": [
+            "Understands the non-nullable syntax in GraphQL SDL.",
+            "Knows its implication for data integrity."
+          ],
+          "keyConcepts": [
+            "GraphQL SDL",
+            "Non-nullable",
+            "Type System"
+          ],
+          "evaluationCriteria": [
+            "Accuracy",
+            "Conciseness"
+          ],
+          "example": "",
+          "tags": [
+            "GraphQL",
+            "SDL",
+            "Basics"
+          ],
+          "prerequisites": [],
+          "complexity": 3,
+          "interviewFrequency": 7,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_graphql_schema_2",
+          "topic": "GraphQL Schema Definition Language (SDL)",
+          "level": "medium",
+          "type": "mcq",
+          "question": "Given the following GraphQL schema snippet:\n\n```graphql\ntype User {\n  id: ID!\n  name: String!\n  friends: [User!]!\n}\n\ntype Query {\n  user(id: ID!): User\n}\n```\n\nWhat does `friends: [User!]!` indicate about the `friends` field on the `User` type?",
+          "answer": "It is a non-nullable list of non-nullable `User` objects.",
+          "options": [
+            "It is a nullable list of nullable `User` objects.",
+            "It is a nullable list of non-nullable `User` objects.",
+            "It is a non-nullable list of nullable `User` objects.",
+            "It is a non-nullable list of non-nullable `User` objects."
+          ],
+          "analysisPoints": [
+            "Correctly interprets the `[]` syntax for lists.",
+            "Correctly interprets the `!` inside the brackets for non-nullable list items.",
+            "Correctly interprets the `!` outside the brackets for non-nullable list itself.",
+            "Demonstrates understanding of GraphQL type modifiers."
+          ],
+          "keyConcepts": [
+            "GraphQL SDL",
+            "Lists",
+            "Non-nullable",
+            "Type System"
+          ],
+          "evaluationCriteria": [
+            "Accurate interpretation of type modifiers.",
+            "Understanding of nested nullability."
+          ],
+          "example": "The outer `!` (`[User!]!`) means the `friends` list itself cannot be null. The inner `!` (`[User!]`) means that each individual `User` object within the `friends` list cannot be null.",
+          "tags": [
+            "GraphQL",
+            "SDL",
+            "Types"
+          ],
+          "prerequisites": [
+            "GraphQL SDL basics"
+          ],
+          "complexity": 6,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_graphql_schema_3",
+          "topic": "GraphQL Schema Definition Language (SDL)",
+          "level": "medium",
+          "type": "open",
+          "question": "In a GraphQL schema, what are the primary responsibilities of the `Query` and `Mutation` root types? Provide an example for each.",
+          "answer": "The `Query` and `Mutation` types are special root operation types in a GraphQL schema that define the entry points for interacting with the API.\n\n*   **`Query` Type**: The `Query` type defines all the operations that clients can use to **read or fetch data** from the server. It's analogous to GET requests in REST APIs. Each field defined on the `Query` type represents a top-level query that a client can perform. Query fields can accept arguments to filter or specify the data to be retrieved.\n    *   **Example:**\n        ```graphql\ntype Query {\n  user(id: ID!): User # Fetches a single user by ID\n  allPosts: [Post!]! # Fetches a list of all posts\n}\n        ```\n\n*   **`Mutation` Type**: The `Mutation` type defines all the operations that clients can use to **write, modify, or delete data** on the server. It's analogous to POST, PUT, DELETE requests in REST APIs. Each field on the `Mutation` type represents a distinct data modification operation. Mutation fields typically take input arguments for the data to be created/updated and return the modified object (or a relevant status).\n    *   **Example:**\n        ```graphql\ntype Mutation {\n  createUser(name: String!, email: String!): User! # Creates a new user\n  deletePost(id: ID!): Boolean! # Deletes a post and returns a boolean status\n}\n        ```\n\nIn essence, `Query` is for retrieving data without side effects, while `Mutation` is for operations that change server-side data.",
+          "options": [],
+          "analysisPoints": [
+            "Clearly defines the purpose of `Query` (read) and `Mutation` (write/modify).",
+            "Provides clear and syntactically correct GraphQL SDL examples for both.",
+            "Draws a comparison to REST API equivalents (GET vs. POST/PUT/DELETE).",
+            "Explains the role of arguments and return types."
+          ],
+          "keyConcepts": [
+            "GraphQL Schema",
+            "Query Type",
+            "Mutation Type",
+            "Data Operations",
+            "SDL"
+          ],
+          "evaluationCriteria": [
+            "Accuracy and completeness of definitions.",
+            "Quality and relevance of examples.",
+            "Understanding of API design principles."
+          ],
+          "example": "",
+          "tags": [
+            "GraphQL",
+            "SDL",
+            "Query",
+            "Mutation",
+            "API Design"
+          ],
+          "prerequisites": [
+            "Basic API concepts"
+          ],
+          "complexity": 7,
+          "interviewFrequency": 9,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_graphql_schema_4",
+          "topic": "GraphQL Schema Definition Language (SDL)",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "What are the five built-in scalar types in GraphQL?",
+          "answer": "ID, String, Int, Float, Boolean.",
+          "options": [],
+          "analysisPoints": [
+            "Recalls the fundamental GraphQL scalar types.",
+            "Differentiates them from custom object types."
+          ],
+          "keyConcepts": [
+            "GraphQL",
+            "Scalar Types",
+            "SDL"
+          ],
+          "evaluationCriteria": [
+            "Accuracy",
+            "Completeness"
+          ],
+          "example": "",
+          "tags": [
+            "GraphQL",
+            "SDL",
+            "Types"
+          ],
+          "prerequisites": [],
+          "complexity": 3,
+          "interviewFrequency": 6,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_graphql_schema_5",
+          "topic": "GraphQL Schema Definition Language (SDL)",
+          "level": "medium",
+          "type": "code",
+          "question": "Define a new GraphQL `type` called `Product` with the following fields:\n*   `id`: a non-nullable ID.\n*   `name`: a non-nullable String.\n*   `price`: a non-nullable Float.\n*   `description`: a nullable String.\n*   `category`: a non-nullable String.\n\nThen, add a `Query` field to fetch a single `Product` by its `id` and another `Query` field to fetch all `Product` objects.",
+          "answer": "```graphql\ntype Product {\n  id: ID!\n  name: String!\n  price: Float!\n  description: String\n  category: String!\n}\n\ntype Query {\n  product(id: ID!): Product\n  allProducts: [Product!]!\n}\n```",
+          "options": [],
+          "analysisPoints": [
+            "Correctly defines a new GraphQL object type (`Product`).",
+            "Applies non-nullable (`!`) and nullable types correctly.",
+            "Uses appropriate scalar types (`ID`, `String`, `Float`).",
+            "Correctly defines `Query` fields for single and list retrieval.",
+            "Applies non-nullable and list modifiers to `Query` return types."
+          ],
+          "keyConcepts": [
+            "GraphQL SDL",
+            "Object Types",
+            "Scalar Types",
+            "Non-nullable",
+            "Lists",
+            "Query Type"
+          ],
+          "evaluationCriteria": [
+            "Syntactic correctness of GraphQL SDL.",
+            "Adherence to field requirements and nullability.",
+            "Correct implementation of `Query` operations."
+          ],
+          "example": "This solution correctly defines the `Product` type with specified fields and their nullability. It also adds standard `Query` operations for retrieving a single product by `ID` and a list of all products, demonstrating foundational schema design.",
+          "tags": [
+            "GraphQL",
+            "SDL",
+            "Coding",
+            "Schema Design"
+          ],
+          "prerequisites": [
+            "GraphQL SDL basics"
+          ],
+          "complexity": 7,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_graphql_schema_6",
+          "topic": "GraphQL Schema Definition Language (SDL)",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "What is the primary benefit of using a strong type system like GraphQL SDL for an API?",
+          "answer": "It provides a clear contract between the client and server, enabling self-documentation, validation, and powerful tooling (like auto-completion and error checking) for both frontend and backend development.",
+          "options": [],
+          "analysisPoints": [
+            "Identifies the contract aspect.",
+            "Lists key benefits like documentation and tooling."
+          ],
+          "keyConcepts": [
+            "GraphQL",
+            "Type System",
+            "API Contract",
+            "Tooling",
+            "Documentation"
+          ],
+          "evaluationCriteria": [
+            "Accuracy",
+            "Completeness of benefits"
+          ],
+          "example": "",
+          "tags": [
+            "GraphQL",
+            "SDL",
+            "Benefits"
+          ],
+          "prerequisites": [],
+          "complexity": 4,
+          "interviewFrequency": 7,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_graphql_apollo_client_1",
+          "topic": "GraphQL Client: Apollo Client",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "What is the main purpose of `ApolloClient` in a frontend application?",
+          "answer": "It is a comprehensive state management library for JavaScript that enables fetching, caching, and modifying application data with GraphQL, and automatically updating the UI.",
+          "options": [],
+          "analysisPoints": [
+            "Understands `ApolloClient`'s role as a GraphQL client.",
+            "Identifies its core functionalities (fetching, caching, UI updates)."
+          ],
+          "keyConcepts": [
+            "Apollo Client",
+            "GraphQL Client",
+            "Data Fetching",
+            "State Management"
+          ],
+          "evaluationCriteria": [
+            "Accuracy",
+            "Completeness"
+          ],
+          "example": "",
+          "tags": [
+            "GraphQL",
+            "Apollo Client",
+            "Basics"
+          ],
+          "prerequisites": [],
+          "complexity": 3,
+          "interviewFrequency": 7,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_graphql_apollo_client_2",
+          "topic": "GraphQL Client: Apollo Client",
+          "level": "medium",
+          "type": "mcq",
+          "question": "Which component of `ApolloClient` is primarily responsible for storing the results of GraphQL queries, reducing network requests, and providing instant UI updates for frequently accessed data?",
+          "answer": "`InMemoryCache`",
+          "options": [
+            "`gql` tag",
+            "`uri` property",
+            "`InMemoryCache`",
+            "`ApolloLink`"
+          ],
+          "analysisPoints": [
+            "Identifies the caching mechanism within Apollo Client.",
+            "Understands the benefits of client-side caching.",
+            "Differentiates `InMemoryCache` from other Apollo Client components."
+          ],
+          "keyConcepts": [
+            "Apollo Client",
+            "InMemoryCache",
+            "Caching",
+            "Performance",
+            "UI Updates"
+          ],
+          "evaluationCriteria": [
+            "Correct identification of the caching component.",
+            "Understanding of its function and benefits."
+          ],
+          "example": "The `InMemoryCache` stores GraphQL query results in a normalized, in-memory format. This allows Apollo Client to serve data from the cache directly if available, avoiding unnecessary network requests and making the application feel faster and more responsive.",
+          "tags": [
+            "GraphQL",
+            "Apollo Client",
+            "Caching"
+          ],
+          "prerequisites": [
+            "Apollo Client basics"
+          ],
+          "complexity": 6,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_graphql_apollo_client_3",
+          "topic": "GraphQL Client: Apollo Client",
+          "level": "medium",
+          "type": "open",
+          "question": "You need to perform a GraphQL `Mutation` using `ApolloClient` to create a new post. Describe the steps involved, including how to define the mutation and how to execute it with variables.",
+          "answer": "To perform a GraphQL `Mutation` using `ApolloClient` to create a new post, you would follow these steps:\n\n1.  **Define the GraphQL Mutation:** First, you need to define the GraphQL mutation string using the `gql` template literal tag. This string specifies the `mutation` operation, its name (e.g., `CreatePost`), the input variables it expects, and the fields you want to receive back from the server after the mutation is successful.\n    ```typescript\n    import { gql } from '@apollo/client';\n\n    const CREATE_POST_MUTATION = gql`\n      mutation CreatePost($title: String!, $content: String!, $authorId: ID!) {\n        createPost(title: $title, content: $content, authorId: $authorId) {\n          id\n          title\n          author {\n            name\n          }\n        }\n      }\n    `;\n    ```\n\n2.  **Execute the Mutation with `client.mutate()`:** Once the mutation is defined, you use the `client.mutate()` method provided by your `ApolloClient` instance. This method takes an object with the `mutation` property (set to your defined GraphQL mutation) and a `variables` property (an object containing the actual values for the mutation's input arguments).\n    ```typescript\n    import { ApolloClient, InMemoryCache } from '@apollo/client';\n\n    const client = new ApolloClient({\n      uri: 'https://api.example.com/graphql',\n      cache: new InMemoryCache()\n    });\n\n    // ... (CREATE_POST_MUTATION defined above)\n\n    client.mutate({\n      mutation: CREATE_POST_MUTATION,\n      variables: {\n        title: 'My First Post',\n        content: 'This is the content of my first post.',\n        authorId: '123'\n      }\n    })\n    .then(result => {\n      console.log('Post created:', result.data.createPost);\n      // Handle successful creation, e.g., update UI\n    })\n    .catch(error => {\n      console.error('Error creating post:', error);\n      // Handle error, e.g., display error message\n    });\n    ```\n\nThis process ensures that the mutation is correctly structured with its inputs and the expected outputs, and that it's sent to the GraphQL server via the Apollo Client instance.",
+          "options": [],
+          "analysisPoints": [
+            "Explains how to define a GraphQL mutation using `gql`.",
+            "Demonstrates passing variables to the mutation.",
+            "Shows how to execute the mutation using `client.mutate()`.",
+            "Includes error handling and success logging.",
+            "Provides a coherent, step-by-step process."
+          ],
+          "keyConcepts": [
+            "Apollo Client",
+            "GraphQL Mutation",
+            "gql tag",
+            "Variables",
+            "Client.mutate()",
+            "Promises"
+          ],
+          "evaluationCriteria": [
+            "Accuracy of the explanation.",
+            "Correctness of code snippets.",
+            "Completeness of the workflow.",
+            "Understanding of mutation structure and execution."
+          ],
+          "example": "",
+          "tags": [
+            "GraphQL",
+            "Apollo Client",
+            "Mutation",
+            "Coding"
+          ],
+          "prerequisites": [
+            "GraphQL basics",
+            "Apollo Client setup"
+          ],
+          "complexity": 7,
+          "interviewFrequency": 8,
+          "learningPath": "advanced"
+        },
+        {
+          "id": "question_graphql_apollo_client_4",
+          "topic": "GraphQL Client: Apollo Client",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "What is the primary function of the `gql` template literal tag in Apollo Client?",
+          "answer": "It is used to parse GraphQL query, mutation, and subscription strings into a format that Apollo Client can understand, providing benefits like syntax highlighting and build-time validation.",
+          "options": [],
+          "analysisPoints": [
+            "Identifies the role of `gql` for parsing.",
+            "Lists associated benefits (syntax, validation)."
+          ],
+          "keyConcepts": [
+            "Apollo Client",
+            "gql tag",
+            "GraphQL Syntax"
+          ],
+          "evaluationCriteria": [
+            "Accuracy",
+            "Conciseness"
+          ],
+          "example": "",
+          "tags": [
+            "GraphQL",
+            "Apollo Client"
+          ],
+          "prerequisites": [],
+          "complexity": 3,
+          "interviewFrequency": 6,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_graphql_apollo_client_5",
+          "topic": "GraphQL Client: Apollo Client",
+          "level": "medium",
+          "type": "code",
+          "question": "Write the JavaScript code to initialize an `ApolloClient` instance and then execute a GraphQL query to fetch the `id` and `name` of a `User` with a specific `id` (e.g., 'user123'). Use `InMemoryCache` and a mock URI `https://graphql.example.com/api`.",
+          "answer": "```typescript\nimport { ApolloClient, InMemoryCache, gql } from '@apollo/client';\n\n// 1. Initialize Apollo Client\nconst client = new ApolloClient({\n  uri: 'https://graphql.example.com/api',\n  cache: new InMemoryCache()\n});\n\n// 2. Define the GraphQL Query\nconst GET_USER_BY_ID = gql`\n  query GetUser($userId: ID!) {\n    user(id: $userId) {\n      id\n      name\n    }\n  }\n`;\n\n// 3. Execute the Query with variables\nclient.query({\n  query: GET_USER_BY_ID,\n  variables: {\n    userId: 'user123'\n  }\n})\n.then(result => {\n  if (result.data && result.data.user) {\n    console.log('Fetched User:', result.data.user);\n  } else {\n    console.log('User not found or data is null.');\n  }\n})\n.catch(error => {\n  console.error('Error fetching user:', error);\n});\n```",
+          "options": [],
+          "analysisPoints": [
+            "Correctly imports necessary components.",
+            "Initializes `ApolloClient` with `uri` and `InMemoryCache`.",
+            "Defines a parameterized GraphQL query using `gql`.",
+            "Executes the query with `client.query()` and passes `variables` correctly.",
+            "Includes basic promise handling (`.then`, `.catch`).",
+            "Demonstrates understanding of data access from `result.data`."
+          ],
+          "keyConcepts": [
+            "Apollo Client",
+            "GraphQL Query",
+            "gql tag",
+            "Variables",
+            "InMemoryCache",
+            "Promises"
+          ],
+          "evaluationCriteria": [
+            "Functional correctness of Apollo Client setup.",
+            "Syntactic correctness of GraphQL query and JavaScript.",
+            "Proper handling of query execution and results."
+          ],
+          "example": "This solution correctly demonstrates the full flow from Apollo Client initialization to executing a specific query with variables and handling its asynchronous result. This is a fundamental operation for any frontend application consuming a GraphQL API.",
+          "tags": [
+            "GraphQL",
+            "Apollo Client",
+            "Coding",
+            "Query"
+          ],
+          "prerequisites": [
+            "JavaScript Promises",
+            "ES Modules",
+            "GraphQL Query basics"
+          ],
+          "complexity": 7,
+          "interviewFrequency": 8,
+          "learningPath": "advanced"
+        }
+      ],
+      "tasks": [
+        {
+          "id": "task_pwa_manifest_1",
+          "title": "Create a PWA Web App Manifest for a Recipe App",
+          "description": "\nYour task is to create a `manifest.json` file for a simple 'Recipe Finder' Progressive Web App. The manifest should:\n\n1.  Set the `name` to \"Recipe Finder\" and `short_name` to \"Recipes\".\n2.  Provide a `description` like \"Discover and save your favorite recipes.\"\n3.  Set the `start_url` to the root path (`/`).\n4.  Specify the `display` mode as `standalone`.\n5.  Set `background_color` to `#f0f0f0` and `theme_color` to `#4CAF50` (a shade of green).\n6.  Include at least two `icons`: one `192x192` and one `512x512`, both PNGs. Assume their paths are `images/icon-192.png` and `images/icon-512.png` respectively.\n\nYour solution should be a complete and valid JSON object.",
+          "difficulty": "medium",
+          "startingCode": "{\n  // TODO: Fill in the manifest properties\n  // \"name\": \"\",\n  // \"short_name\": \"\",\n  // ...\n}",
+          "solutionCode": "{\n  \"name\": \"Recipe Finder\",\n  \"short_name\": \"Recipes\",\n  \"description\": \"Discover and save your favorite recipes.\",\n  \"start_url\": \"/\",\n  \"display\": \"standalone\",\n  \"background_color\": \"#f0f0f0\",\n  \"theme_color\": \"#4CAF50\",\n  \"icons\": [\n    {\n      \"src\": \"images/icon-192.png\",\n      \"sizes\": \"192x192\",\n      \"type\": \"image/png\"\n    },\n    {\n      \"src\": \"images/icon-512.png\",\n      \"sizes\": \"512x512\",\n      \"type\": \"image/png\"\n    }\n  ]\n}",
+          "testCases": [
+            "The JSON must be valid.",
+            "All required fields (`name`, `short_name`, `description`, `start_url`, `display`, `background_color`, `theme_color`, `icons`) must be present.",
+            "The `display` mode must be `standalone`.",
+            "The `icons` array must contain at least two entries with correct `src`, `sizes`, and `type`."
+          ],
+          "hints": [
+            "Remember that the `icons` property is an array of objects.",
+            "Ensure all string values are enclosed in double quotes as per JSON standard.",
+            "Pay attention to the specific `sizes` and `type` requirements for icons."
+          ],
+          "tags": [
+            "PWA",
+            "Web App Manifest",
+            "JSON",
+            "Frontend"
+          ],
+          "timeEstimate": 20,
+          "prerequisites": [
+            "JSON basics"
+          ],
+          "complexity": 5,
+          "interviewRelevance": 7,
+          "learningPath": "intermediate",
+          "relatedConcepts": [
+            "Web Development",
+            "Offline Capabilities"
+          ]
+        },
+        {
+          "id": "task_pwa_service_worker_1",
+          "title": "Implement a Basic Service Worker for Offline Asset Caching",
+          "description": "\nYour task is to implement a `service-worker.js` file that provides basic offline capabilities for a web application. The service worker should:\n\n1.  Define a `CACHE_NAME` (e.g., `'my-app-cache-v1'`).\n2.  Define an array `urlsToCache` including the root path (`/`), `index.html`, `main.css`, and `app.js`.\n3.  In the `install` event handler:\n    *   Use `event.waitUntil` to ensure the service worker isn't activated until caching is complete.\n    *   Open the defined cache.\n    *   Add all `urlsToCache` to the cache.\n4.  In the `fetch` event handler:\n    *   Implement the \"Cache First, then Network Fallback\" strategy.\n    *   Check if the requested resource exists in the cache.\n    *   If found, respond with the cached version.\n    *   If not found, fetch the resource from the network.\n\nProvide the complete JavaScript code for the `service-worker.js` file.",
+          "difficulty": "medium",
+          "startingCode": "const CACHE_NAME = 'my-app-cache-v1';\nconst urlsToCache = [\n  '/',\n  '/index.html',\n  '/main.css',\n  '/app.js'\n];\n\nself.addEventListener('install', event => {\n  // TODO: Implement caching logic here\n});\n\nself.addEventListener('fetch', event => {\n  // TODO: Implement cache-first, network-fallback strategy here\n});",
+          "solutionCode": "const CACHE_NAME = 'my-app-cache-v1';\nconst urlsToCache = [\n  '/',\n  '/index.html',\n  '/main.css',\n  '/app.js'\n];\n\nself.addEventListener('install', event => {\n  console.log('[Service Worker] Installing...');\n  event.waitUntil(\n    caches.open(CACHE_NAME)\n      .then(cache => {\n        console.log('[Service Worker] Caching essential assets...');\n        return cache.addAll(urlsToCache);\n      })\n      .then(() => self.skipWaiting()) // Activates the new service worker immediately\n      .catch(error => console.error('[Service Worker] Caching failed:', error))\n  );\n});\n\nself.addEventListener('fetch', event => {\n  event.respondWith(\n    caches.match(event.request)\n      .then(response => {\n        if (response) {\n          console.log('[Service Worker] Serving from cache:', event.request.url);\n          return response;\n        }\n        console.log('[Service Worker] Fetching from network:', event.request.url);\n        return fetch(event.request);\n      })\n      .catch(error => {\n        console.error('[Service Worker] Fetch failed:', error);\n        // Optional: Return a fallback page for critical failures\n        // return caches.match('/offline.html');\n      })\n  );\n});\n\nself.addEventListener('activate', event => {\n  console.log('[Service Worker] Activating...');\n  event.waitUntil(\n    caches.keys().then(cacheNames => {\n      return Promise.all(\n        cacheNames.map(cacheName => {\n          if (cacheName !== CACHE_NAME) {\n            console.log('[Service Worker] Deleting old cache:', cacheName);\n            return caches.delete(cacheName);\n          }\n        })\n      );\n    })\n  );\n  event.waitUntil(clients.claim()); // Take control of clients immediately\n});",
+          "testCases": [
+            "The `install` event successfully adds all `urlsToCache` to the cache.",
+            "The `fetch` event correctly serves cached resources when available.",
+            "The `fetch` event falls back to network when resources are not in cache.",
+            "The service worker file is syntactically correct JavaScript.",
+            "Includes proper use of `event.waitUntil` and `event.respondWith`."
+          ],
+          "hints": [
+            "Remember that `caches.open()` and `cache.addAll()` return Promises, so they should be chained with `.then()`.",
+            "The `fetch` event handler needs to use `event.respondWith()` which expects a Promise that resolves to a `Response`.",
+            "For the 'Cache First' strategy, `caches.match()` is key. Don't forget the fallback to `fetch(event.request)`."
+          ],
+          "tags": [
+            "PWA",
+            "Service Worker",
+            "Caching",
+            "Offline",
+            "JavaScript"
+          ],
+          "timeEstimate": 45,
+          "prerequisites": [
+            "JavaScript Promises",
+            "Web APIs"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 8,
+          "learningPath": "intermediate",
+          "relatedConcepts": [
+            "Web App Manifest",
+            "Network Requests",
+            "Browser Storage"
+          ]
+        },
+        {
+          "id": "task_graphql_schema_1",
+          "title": "Extend a GraphQL Schema for an E-commerce Platform",
+          "description": "\nBuilding upon the provided `User` and `Post` types, extend the GraphQL schema for an e-commerce platform. You need to:\n\n1.  Define a new `type` called `Order` with the following fields:\n    *   `id`: non-nullable `ID`\n    *   `date`: non-nullable `String` (representing a date string, e.g., \"2023-10-27\")\n    *   `totalAmount`: non-nullable `Float`\n    *   `status`: non-nullable `String` (e.g., \"Pending\", \"Completed\", \"Shipped\")\n    *   `customer`: a non-nullable `User` type (linking an order to a user)\n2.  Add a `Query` field to `Query` type that allows fetching a single `Order` by its `id`.\n3.  Add another `Query` field to `Query` type that fetches a list of all `Order` objects.\n4.  Add a `Mutation` field to `Mutation` type for creating a new `Order`. It should take `date`, `totalAmount`, `status`, and `customerId` (`ID!`) as input, and return the newly created `Order`.\n\nYour solution should provide the complete GraphQL SDL for `Order` type, and the extended `Query` and `Mutation` types.",
+          "difficulty": "hard",
+          "startingCode": "type User {\n  id: ID!\n  name: String!\n  email: String!\n  posts: [Post!]!\n}\n\ntype Post {\n  id: ID!\n  title: String!\n  content: String!\n  author: User!\n}\n\ntype Query {\n  user(id: ID!): User\n  allUsers: [User!]!\n  post(id: ID!): Post\n  allPosts: [Post!]!\n  # TODO: Add Order Query fields here\n}\n\ntype Mutation {\n  createUser(name: String!, email: String!): User!\n  createPost(title: String!, content: String!, authorId: ID!): Post!\n  # TODO: Add Order Mutation fields here\n}\n\n# TODO: Define Order type here",
+          "solutionCode": "type User {\n  id: ID!\n  name: String!\n  email: String!\n  posts: [Post!]!\n}\n\ntype Post {\n  id: ID!\n  title: String!\n  content: String!\n  author: User!\n}\n\n# New Order Type\ntype Order {\n  id: ID!\n  date: String!\n  totalAmount: Float!\n  status: String!\n  customer: User! # Link to the User type\n}\n\ntype Query {\n  user(id: ID!): User\n  allUsers: [User!]!\n  post(id: ID!): Post\n  allPosts: [Post!]!\n  order(id: ID!): Order # Query for single Order\n  allOrders: [Order!]! # Query for all Orders\n}\n\ntype Mutation {\n  createUser(name: String!, email: String!): User!\n  createPost(title: String!, content: String!, authorId: ID!): Post!\n  createOrder(date: String!, totalAmount: Float!, status: String!, customerId: ID!): Order! # Mutation to create a new Order\n}",
+          "testCases": [
+            "The `Order` type is correctly defined with all specified fields and correct nullability.",
+            "The `customer` field in `Order` correctly references the `User` type.",
+            "The `Query` type includes `order(id: ID!): Order`.",
+            "The `Query` type includes `allOrders: [Order!]!`.",
+            "The `Mutation` type includes `createOrder` with correct arguments and return type.",
+            "The entire SDL is syntactically valid."
+          ],
+          "hints": [
+            "Remember to correctly use `!` for non-nullable fields and `[]` for lists.",
+            "When referencing another type (like `User` in `Order`), just use the type name.",
+            "For `createOrder` mutation, consider what information is needed as input and what should be returned."
+          ],
+          "tags": [
+            "GraphQL",
+            "SDL",
+            "Schema Design",
+            "API",
+            "Data Modeling"
+          ],
+          "timeEstimate": 60,
+          "prerequisites": [
+            "GraphQL SDL basics",
+            "Understanding of Query and Mutation"
+          ],
+          "complexity": 8,
+          "interviewRelevance": 9,
+          "learningPath": "advanced",
+          "relatedConcepts": [
+            "Backend Development",
+            "API Design",
+            "Database Schemas"
+          ]
+        },
+        {
+          "id": "task_graphql_apollo_client_1",
+          "title": "Set up Apollo Client and Execute a Mock Query and Mutation",
+          "description": "\nYour task is to create a JavaScript environment (Node.js script or browser script) that sets up Apollo Client and demonstrates basic data fetching and modification capabilities against a mock GraphQL endpoint.\n\n1.  **Initialize Apollo Client**: Create an `ApolloClient` instance using `InMemoryCache` and a mock `uri` (e.g., `'https://mock-graphql-api.com/graphql'`).\n2.  **Define a Query**: Create a GraphQL query using the `gql` tag to fetch `id` and `name` for all users.\n    ```graphql\n    query {\n      allUsers {\n        id\n        name\n      }\n    }\n    ```\n3.  **Execute the Query**: Call `client.query()` with your defined query. Log the successful `data` or any `error`.\n4.  **Define a Mutation**: Create a GraphQL mutation using the `gql` tag to `createUser` with `name` and `email` variables. Request `id`, `name`, and `email` back.\n    ```graphql\n    mutation CreateUser($name: String!, $email: String!) {\n      createUser(name: $name, email: $email) {\n        id\n        name\n        email\n      }\n    }\n    ```\n5.  **Execute the Mutation**: Call `client.mutate()` with your defined mutation and example variables. Log the successful `data` or any `error`.\n\nSince this is a mock setup, the `uri` will not actually resolve to a live server. Focus on the correct structure and calls for `ApolloClient`.",
+          "difficulty": "medium",
+          "startingCode": "import { ApolloClient, InMemoryCache, gql } from '@apollo/client';\n\n// TODO: Initialize ApolloClient\n\n// TODO: Define GET_ALL_USERS query\n\n// TODO: Execute GET_ALL_USERS query\n\n// TODO: Define CREATE_USER_MUTATION\n\n// TODO: Execute CREATE_USER_MUTATION",
+          "solutionCode": "import { ApolloClient, InMemoryCache, gql } from '@apollo/client';\n\n// 1. Initialize Apollo Client\nconst client = new ApolloClient({\n  uri: 'https://mock-graphql-api.com/graphql',\n  cache: new InMemoryCache() // The default cache for Apollo Client\n});\n\n// 2. Define a GraphQL Query\nconst GET_ALL_USERS = gql`\n  query {\n    allUsers {\n      id\n      name\n    }\n  }\n`;\n\n// 3. Execute the Query\nconsole.log('\\n--- Executing GET_ALL_USERS Query ---');\nclient.query({\n  query: GET_ALL_USERS\n})\n.then(result => {\n  console.log('Query result:', result.data);\n  // In a real app, result.data.allUsers would contain the user data\n})\n.catch(error => {\n  console.error('Error fetching users:', error.message);\n  // Expected error due to mock URI not resolving\n});\n\n// 4. Define a GraphQL Mutation\nconst CREATE_USER_MUTATION = gql`\n  mutation CreateUser($name: String!, $email: String!) {\n    createUser(name: $name, email: $email) {\n      id\n      name\n      email\n    }\n  }\n`;\n\n// 5. Execute the Mutation\nconsole.log('\\n--- Executing CREATE_USER_MUTATION ---');\nclient.mutate({\n  mutation: CREATE_USER_MUTATION,\n  variables: {\n    name: 'Alice Smith',\n    email: 'alice.smith@example.com'\n  }\n})\n.then(result => {\n  console.log('Mutation result:', result.data);\n  // In a real app, result.data.createUser would contain the new user data\n})\n.catch(error => {\n  console.error('Error creating user:', error.message);\n  // Expected error due to mock URI not resolving\n});",
+          "testCases": [
+            "ApolloClient is initialized with `uri` and `InMemoryCache`.",
+            "The `GET_ALL_USERS` query is correctly defined using `gql`.",
+            "The `client.query()` method is called for `GET_ALL_USERS`.",
+            "The `CREATE_USER_MUTATION` is correctly defined using `gql` with variables.",
+            "The `client.mutate()` method is called for `CREATE_USER_MUTATION` with example `variables`.",
+            "Both `query` and `mutate` calls include `.then()` and `.catch()` for promise handling."
+          ],
+          "hints": [
+            "Ensure you have `@apollo/client` installed (`npm install @apollo/client graphql`).",
+            "The `gql` tag is essential for parsing your GraphQL strings.",
+            "Remember that `client.query()` and `client.mutate()` return Promises.",
+            "For mutations, don't forget to pass the `variables` object."
+          ],
+          "tags": [
+            "GraphQL",
+            "Apollo Client",
+            "Frontend",
+            "Data Fetching",
+            "Mutation",
+            "Query",
+            "JavaScript"
+          ],
+          "timeEstimate": 50,
+          "prerequisites": [
+            "JavaScript Promises",
+            "ES Modules"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 8,
+          "learningPath": "advanced",
+          "relatedConcepts": [
+            "API Integration",
+            "State Management",
+            "Async JavaScript"
+          ]
+        }
+      ]
+    }
+  }
+]

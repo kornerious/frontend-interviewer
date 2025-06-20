@@ -1,0 +1,2057 @@
+[
+  {
+    "id": "4e67808c-4909-4910-9cd5-348c12fc637a",
+    "startLine": 14900,
+    "endLine": 14999,
+    "processedDate": "2025-06-17T14:22:43.614Z",
+    "content": {
+      "logicalBlockInfo": {
+        "suggestedEndLine": -1
+      },
+      "theory": [
+        {
+          "id": "theory_js_fundamentals_datatypes_and_scope",
+          "title": "JavaScript Fundamentals: Data Types, Variables, and Scope",
+          "content": "JavaScript features several built-in data types, broadly categorized into **primitive types** and **object types**.\n\n## Primitive Data Types\nThese are immutable values and include:\n*   `String`: Textual data.\n*   `Number`: Numeric data (integers and floating-point numbers).\n*   `BigInt`: Arbitrary-precision integers.\n*   `Boolean`: Logical entity (true/false).\n*   `Undefined`: A variable that has been declared but not yet assigned a value.\n*   `Symbol`: Unique and immutable values, often used as object property keys.\n*   `Null`: Represents the intentional absence of any object value. It's often referred to as a primitive type, although `typeof null` returns 'object' (a long-standing bug).\n\n## Object Data Type\nThis is the complex type, serving as the base for more structured data. Everything that is not a primitive type is an object. This includes plain objects (`{}`), arrays (`[]`), functions, Dates, RegExps, etc. Objects are mutable and are passed by reference.\n\n## Variable Declaration and Temporal Dead Zone (TDZ)\nJavaScript has different ways to declare variables: `var`, `let`, and `const`.\n*   `var`: Function-scoped or global-scoped. Hoisted to the top of their scope and initialized with `undefined`. Accessing them before declaration doesn't throw an error, but results in `undefined`.\n*   `let` and `const`: Block-scoped. Also hoisted, but they are not initialized. Instead, they enter a 'temporal dead zone' (TDZ) from the start of their block until their declaration is processed. Attempting to access a `let` or `const` variable within its TDZ will result in a `ReferenceError`.\n\n### Temporal Dead Zone Explained\nThe TDZ ensures that variables are only accessible after their declaration and initialization, preventing potential bugs caused by premature access. This makes `let` and `const` more predictable and safer to use than `var`.\n\n## Value vs. Reference Assignment\n*   **Primitive values** are assigned by value. When a primitive variable is assigned to another, a copy of the value is made.\n*   **Object values** are assigned by reference. When an object variable is assigned to another, both variables point to the *same* underlying object in memory. Changes made through one variable will be reflected in the other.\n\n",
+          "examples": [
+            {
+              "id": "example_js_fundamentals_1",
+              "title": "Primitive vs. Object Assignment",
+              "code": "let num1 = 10;\nlet num2 = num1;\nnum1 = 20;\nconsole.log(num2); // Output: 10 (num2 holds a copy of the original value)\n\nlet obj1 = { name: 'Hello' };\nlet obj2 = obj1;\nobj1 = { name: 'Bye' }; // obj1 now points to a NEW object\nconsole.log(obj2.name); // Output: Hello (obj2 still points to the ORIGINAL object)\n\nlet arr1 = [1, 2, 3];\nlet arr2 = arr1;\narr1.push(4); // Modifies the object arr1 points to\nconsole.log(arr2); // Output: [1, 2, 3, 4] (arr2 sees the change because it's the same object)\n\nlet obj3 = { value: 100 };\nlet obj4 = obj3;\nobj3.value = 200; // Modifies the object obj3 points to\nconsole.log(obj4.value); // Output: 200 (obj4 sees the change)\n",
+              "explanation": "This example clearly demonstrates the difference between value assignment for primitives and reference assignment for objects. When `obj1` is reassigned to a *new* object, `obj2` continues to point to the *original* object. However, if `obj1`'s *properties* were modified (e.g., `obj1.name = 'Bye';`) instead of reassigning `obj1` entirely, `obj2` would reflect that change because both would still refer to the same object.",
+              "language": "javascript"
+            },
+            {
+              "id": "example_js_fundamentals_tdz",
+              "title": "Temporal Dead Zone Demonstration",
+              "code": "// console.log(aVar); // No error, 'undefined' (var is hoisted and initialized)\nvar aVar = 10;\n\n// console.log(bLet); // ReferenceError: Cannot access 'bLet' before initialization (TDZ)\nlet bLet = 20;\n\n// console.log(cConst); // ReferenceError: Cannot access 'cConst' before initialization (TDZ)\nconst cConst = 30;\n\nfunction scopeExample() {\n  // console.log(scopedVar); // ReferenceError (TDZ applies to function scope as well for let/const)\n  let scopedVar = 'I am scoped';\n  console.log(scopedVar);\n}\n\n// TDZ with function parameters\nfunction greet(name = defaultName) {\n  // console.log(defaultName); // ReferenceError if defaultName is declared AFTER this line in the scope\n  const defaultName = 'Guest'; \n  console.log(`Hello, ${name}`);\n}\n\n// console.log(myFunc()); // ReferenceError: Cannot access 'myFunc' before initialization\nconst myFunc = () => { return 'Hello'; };\n",
+              "explanation": "This example illustrates the Temporal Dead Zone for `let` and `const`. Any attempt to access these variables before their declaration within their scope leads to a `ReferenceError`. In contrast, `var` variables, though hoisted, are initialized with `undefined`, so accessing them before assignment doesn't throw an error. The TDZ concept also applies to default parameters in functions and function expressions declared with `let`/`const`.",
+              "language": "javascript"
+            }
+          ],
+          "relatedQuestions": [
+            "question_js_datatypes_1",
+            "question_js_datatypes_mcq_1",
+            "question_js_datatypes_open_1",
+            "question_js_tdz_1",
+            "question_js_tdz_mcq_1",
+            "question_js_tdz_flashcard_1"
+          ],
+          "relatedTasks": [
+            "task_reference_vs_value",
+            "task_variable_scoping_challenge"
+          ],
+          "tags": [
+            "JavaScript",
+            "Fundamentals",
+            "Data Types",
+            "Variables",
+            "Scope",
+            "Temporal Dead Zone",
+            "Primitives",
+            "Objects"
+          ],
+          "technology": "JavaScript",
+          "prerequisites": [],
+          "complexity": 5,
+          "interviewRelevance": 9,
+          "learningPath": "beginner",
+          "requiredFor": [
+            "closure",
+            "hoisting",
+            "execution_context",
+            "object_oriented_js"
+          ]
+        },
+        {
+          "id": "theory_js_object_properties_and_coercion",
+          "title": "JavaScript: Object Property Access, Boxing, and Type Coercion",
+          "content": "Understanding how JavaScript handles properties on objects and performs type conversions is crucial for writing robust code.\n\n## Property Checking: `in` Operator vs. `hasOwnProperty()`\n\n*   **`in` operator**: Checks if a specified property exists in an object or anywhere in its prototype chain. It returns `true` for both own and inherited enumerable properties.\n*   **`Object.prototype.hasOwnProperty()` method**: Checks if an object has a specified property as its *own direct property*, meaning it was not inherited from its prototype chain. It returns `true` only for direct properties.\n\nUsing `hasOwnProperty()` is generally preferred when you want to avoid issues with inherited properties (e.g., when iterating over an object's properties).\n\n## Boxing and Unboxing of Primitive Values\n\nJavaScript automatically converts primitive values (`string`, `number`, `boolean`, `symbol`, `bigint`) into their corresponding object wrappers (`String`, `Number`, `Boolean`, `Symbol`, `BigInt`) when you try to access properties or methods on them. This process is called **boxing**.\n\nAfter the property/method access, the wrapper object is typically discarded. The reverse process, retrieving the primitive value from a wrapper object, is **unboxing**.\n\n### Why avoid `new String()`, `new Number()`, `new Boolean()`?\n\nUsing these constructors explicitly creates wrapper *objects* around primitive values. This can lead to unexpected behaviors:\n*   `typeof new String('foo')` is `'object'`, not `'string'`. Similarly for `Number` and `Boolean`.\n*   Wrapper objects are always truthy in a boolean context, even `new Boolean(false)`. This is a common source of bugs.\n*   Strict equality (`===`) will treat primitive values and their wrapper objects as different types.\n\nIt is almost always better to use primitive literals directly (e.g., `'foo'`, `123`, `true`).\n\n## Type Coercion (Conversion)\n\nType coercion is the automatic or explicit conversion of a value from one data type to another. JavaScript, being a dynamically typed language, performs coercion frequently.\n\n### Explicit Coercion\nThis is when you *deliberately* convert a type using functions like `String()`, `Number()`, `Boolean()`, `parseInt()`, `parseFloat()`, or unary operators like `+` for number conversion.\n\n### Implicit Coercion\nThis occurs automatically by JavaScript in certain contexts, such as:\n*   **Arithmetic operations**: `+` operator (string concatenation if one operand is a string, otherwise numeric addition), `-`, `*`, `/`, `%` (always numeric).\n*   **Comparison operations**: `==` (loose equality, performs coercion before comparison), `>`, `<`, etc.\n*   **Logical operations**: `&&`, `||`, `!` (values are coerced to booleans).\n*   **String interpolation/templating literals**: Values are coerced to strings.\n*   **Concatenation with empty string**: `'' + value` coerces `value` to a string.\n*   **Unary `+`**: Converts operand to a number (e.g., `+'5'` results in `5`).\n\nImplicit coercion can sometimes lead to surprising results and is a common source of confusion in JavaScript. It's often recommended to use strict equality (`===`) and explicit conversions to make code more predictable.",
+          "examples": [
+            {
+              "id": "example_js_properties_1",
+              "title": "hasOwnProperty vs. in operator",
+              "code": "const myObject = { ownProp: 1 };\nObject.prototype.inheritedProp = 2;\n\nconsole.log('ownProp' in myObject);         // true (exists on object itself)\nconsole.log(myObject.hasOwnProperty('ownProp')); // true (is an own property)\n\nconsole.log('inheritedProp' in myObject);    // true (exists in prototype chain)\nconsole.log(myObject.hasOwnProperty('inheritedProp')); // false (not an own property)\n\nconst objWithNullProto = Object.create(null);\nobjWithNullProto.customProp = 'value';\nconsole.log('customProp' in objWithNullProto); // true\nconsole.log(objWithNullProto.hasOwnProperty('customProp')); // true\nconsole.log('toString' in objWithNullProto); // false (no prototype chain)\n",
+              "explanation": "This example highlights the key difference: `in` checks the entire prototype chain, while `hasOwnProperty` only checks the object's direct properties. This is crucial for avoiding unexpected behavior when iterating or checking for specific properties.",
+              "language": "javascript"
+            },
+            {
+              "id": "example_js_boxing_1",
+              "title": "Boxing/Unboxing and Constructor Pitfalls",
+              "code": "const strPrimitive = \"hello\";\nconsole.log(strPrimitive.toUpperCase()); // \"HELLO\" (strPrimitive is boxed to a String object temporarily)\nconsole.log(typeof strPrimitive); // \"string\" (original primitive type remains)\n\nconst numPrimitive = 123;\nconsole.log(numPrimitive.toFixed(2)); // \"123.00\" (numPrimitive is boxed to a Number object temporarily)\n\nconst boolPrimitive = false;\nconsole.log(boolPrimitive.valueOf()); // false (boolPrimitive is boxed to a Boolean object temporarily)\n\nconst stringObject = new String(\"world\");\nconsole.log(typeof stringObject); // \"object\" - Pitfall!\nconsole.log(stringObject == \"world\"); // true (== performs coercion)\nconsole.log(stringObject === \"world\"); // false (=== checks type and value)\n\nconst booleanObject = new Boolean(false);\nconsole.log(booleanObject); // [Boolean: false]\nif (booleanObject) { // Pitfall! Object is always truthy\n  console.log(\"This will always execute, even if it wraps 'false'!\");\n}\n\nconst numberObject = new Number(0);\nconsole.log(numberObject); // [Number: 0]\nif (numberObject) { // Pitfall! Object is always truthy\n  console.log(\"This will also always execute, even if it wraps '0'!\");\n}\n",
+              "explanation": "This example shows automatic boxing when accessing methods on primitives and the problematic nature of using `new String()`, `new Number()`, `new Boolean()`. These constructors create objects which behave differently than their primitive counterparts in `typeof` checks and boolean contexts, leading to potential bugs.",
+              "language": "javascript"
+            },
+            {
+              "id": "example_js_coercion_1",
+              "title": "Implicit and Explicit Type Coercion Examples",
+              "code": "// Explicit Coercion\nconsole.log(String(123));        // \"123\"\nconsole.log(Number(\"456\"));      // 456\nconsole.log(Boolean(0));         // false\nconsole.log(Boolean(\"hello\"));   // true\nconsole.log(Boolean(null));      // false\nconsole.log(parseInt(\"10.5px\")); // 10\n\n// Implicit Coercion\nconsole.log(\"5\" + 1);         // \"51\" (number 1 coerced to string \"1\")\nconsole.log(\"5\" - 1);         // 4 (string \"5\" coerced to number 5)\nconsole.log(5 * \"2\");         // 10 (string \"2\" coerced to number 2)\nconsole.log(10 / \"2\");        // 5 (string \"2\" coerced to number 2)\nconsole.log(true + true);     // 2 (true coerced to 1)\nconsole.log(false - true);    // -1 (false coerced to 0, true to 1)\nconsole.log('10' == 10);      // true (string '10' coerced to number 10)\nconsole.log('10' === 10);     // false (no coercion, types are different)\nconsole.log(!\"hello\");       // false (\"hello\" coerced to true, then negated)\nconsole.log(!!\"world\");      // true (double negation to convert to boolean explicitly)\nconsole.log([] + {});        // \"[object Object]\" (empty array coerced to \"\", object to \"[object Object]\")\nconsole.log({} + []);        // 0 or \"[object Object]\" depending on context (complex, often seen as { } treated as a block, then + [] which is 0)\n                              // In browser console, {}+[] is 0, in Node.js, it's [object Object]\n                              // This is because { } at the start of a line can be parsed as a block scope, not an object literal.\n                              // When parsed as expression: ({} + []) is [object Object]\nconsole.log({}+[]+{}+[1]);   // This is a tricky one, will be detailed in a question.\n",
+              "explanation": "This example demonstrates various scenarios of both explicit and implicit type coercion. Pay close attention to how JavaScript handles the `+` operator (which can be concatenation or addition) and how loose equality (`==`) differs from strict equality (`===`). The behavior of `{}+[]` is particularly nuanced due to parsing rules.",
+              "language": "javascript"
+            }
+          ],
+          "relatedQuestions": [
+            "question_js_prop_check_1",
+            "question_js_prop_check_mcq_1",
+            "question_js_prop_check_flashcard_1",
+            "question_js_boxing_1",
+            "question_js_boxing_mcq_1",
+            "question_js_boxing_flashcard_1",
+            "question_js_coercion_1",
+            "question_js_coercion_open_1",
+            "question_js_coercion_mcq_1",
+            "question_js_coercion_flashcard_1",
+            "question_js_coercion_complex_example"
+          ],
+          "relatedTasks": [
+            "task_object_property_analyzer",
+            "task_safe_type_converter",
+            "task_predict_coercion_output"
+          ],
+          "tags": [
+            "JavaScript",
+            "Objects",
+            "Properties",
+            "Inheritance",
+            "Boxing",
+            "Unboxing",
+            "Type Coercion",
+            "Implicit Conversion",
+            "Explicit Conversion",
+            "`in` operator",
+            "`hasOwnProperty`"
+          ],
+          "technology": "JavaScript",
+          "prerequisites": [
+            "theory_js_fundamentals_datatypes_and_scope"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 9,
+          "learningPath": "intermediate",
+          "requiredFor": [
+            "prototypal_inheritance",
+            "js_performance_optimization",
+            "debugging_js"
+          ]
+        }
+      ],
+      "questions": [
+        {
+          "id": "question_js_datatypes_1",
+          "topic": "JavaScript Data Types and Reference Assignment",
+          "level": "medium",
+          "type": "open",
+          "question": "What data types are there in JavaScript? What will be the result of executing the following code? Explain your reasoning.\n```javascript\nlet firstObj = { name: 'Hello' };\nlet secondObj = firstObj;\nfirstObj = { name: 'Bye' };\nconsole.log(secondObj.name);\n```",
+          "answer": "JavaScript has primitive data types (String, Number, BigInt, Boolean, Undefined, Symbol, Null) and one complex type: Object (which includes arrays, functions, etc.).\n\nIn the provided code:\n1.  `let firstObj = { name: 'Hello' };` creates an object `{ name: 'Hello' }` in memory and `firstObj` points to its reference.\n2.  `let secondObj = firstObj;` assigns the *reference* that `firstObj` holds to `secondObj`. Now, both `firstObj` and `secondObj` point to the *same* object `{ name: 'Hello' }`.\n3.  `firstObj = { name: 'Bye' };` reassigns `firstObj` to point to a *new*, different object `{ name: 'Bye' }`.\n4.  `secondObj` *still points to the original object* `{ name: 'Hello' }` because its reference was not changed when `firstObj` was reassigned.\n\nTherefore, `console.log(secondObj.name)` will output `'Hello'`.",
+          "options": [],
+          "analysisPoints": [
+            "Identification of all JavaScript data types.",
+            "Understanding of primitive vs. object types.",
+            "Correctly explaining value vs. reference assignment.",
+            "Ability to trace object references through reassignment."
+          ],
+          "keyConcepts": [
+            "JavaScript Data Types",
+            "Primitive vs Object",
+            "Pass by Reference",
+            "Variable Reassignment"
+          ],
+          "evaluationCriteria": [
+            "Accuracy of data type list.",
+            "Clarity of explanation for reference assignment.",
+            "Correct prediction of code output."
+          ],
+          "example": "```javascript\nlet firstObj = { name: 'Hello' };\nlet secondObj = firstObj;\nfirstObj = { name: 'Bye' };\nconsole.log(secondObj.name); // Outputs: Hello\n```",
+          "tags": [
+            "JavaScript",
+            "Fundamentals",
+            "Data Types",
+            "Reference",
+            "Object",
+            "Variable Scope"
+          ],
+          "prerequisites": [],
+          "complexity": 6,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_js_datatypes_mcq_1",
+          "topic": "JavaScript Data Types and Reference Assignment",
+          "level": "easy",
+          "type": "mcq",
+          "question": "Which of the following JavaScript data types are considered primitive?",
+          "answer": "String, Number, Boolean, Undefined, Symbol, BigInt, Null",
+          "options": [
+            "String, Number, Object, Boolean",
+            "String, Number, Boolean, Array, Null",
+            "String, Number, Boolean, Undefined, Symbol, BigInt, Null",
+            "Object, Array, Function, String"
+          ],
+          "analysisPoints": [
+            "Distinguish between primitive and complex data types.",
+            "Recall all primitive data types."
+          ],
+          "keyConcepts": [
+            "JavaScript Data Types",
+            "Primitive Data Types",
+            "Object Data Type"
+          ],
+          "evaluationCriteria": [
+            "Accurate classification of data types."
+          ],
+          "example": "Primitive data types hold simple, immutable values directly. Objects hold more complex, mutable collections of data and are referenced.",
+          "tags": [
+            "JavaScript",
+            "Fundamentals",
+            "Data Types",
+            "Primitive"
+          ],
+          "prerequisites": [],
+          "complexity": 3,
+          "interviewFrequency": 7,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_js_datatypes_open_1",
+          "topic": "JavaScript Data Types and Mutability",
+          "level": "medium",
+          "type": "open",
+          "question": "Explain the concept of mutability and immutability in JavaScript data types. Provide an example for both a mutable and an immutable operation.",
+          "answer": "In JavaScript, **immutability** means that once a value is created, it cannot be changed. Primitive data types (String, Number, Boolean, Null, Undefined, Symbol, BigInt) are immutable. Operations on primitive values always return new values rather than modifying the original.\n\n**Mutability** means that a value can be changed after it's created. Objects (including arrays and functions) are mutable. When you modify an object, you are changing the underlying data structure in memory.\n\n**Example of Immutable Operation (String):**\n```javascript\nlet originalString = \"hello\";\nlet newString = originalString.toUpperCase(); // .toUpperCase() returns a NEW string\nconsole.log(originalString); // \"hello\" (original remains unchanged)\nconsole.log(newString);      // \"HELLO\"\n```\n\n**Example of Mutable Operation (Array/Object):**\n```javascript\nlet originalArray = [1, 2, 3];\noriginalArray.push(4); // .push() modifies the original array\nconsole.log(originalArray); // [1, 2, 3, 4] (original array is changed)\n\nlet originalObject = { a: 1 };\noriginalObject.b = 2; // Adding a new property modifies the original object\nconsole.log(originalObject); // { a: 1, b: 2 }\n```",
+          "options": [],
+          "analysisPoints": [
+            "Clear definition of mutability and immutability.",
+            "Correct identification of which data types are mutable/immutable.",
+            "Relevant and accurate code examples for both concepts.",
+            "Explanation of why the examples demonstrate mutability/immutability."
+          ],
+          "keyConcepts": [
+            "Mutability",
+            "Immutability",
+            "Primitive Data Types",
+            "Object Data Type",
+            "Side Effects"
+          ],
+          "evaluationCriteria": [
+            "Conceptual understanding and clarity.",
+            "Correctness of examples.",
+            "Ability to differentiate operations that modify vs. create new values."
+          ],
+          "example": "```javascript\n// Immutable example: String\nlet str1 = \"abc\";\nstr1.concat(\"def\"); // Returns new string, str1 is unchanged\nconsole.log(str1); // \"abc\"\n\n// Mutable example: Array\nlet arr1 = [1, 2];\narr1.push(3); // Modifies arr1 in place\nconsole.log(arr1); // [1, 2, 3]\n```",
+          "tags": [
+            "JavaScript",
+            "Fundamentals",
+            "Mutability",
+            "Immutability",
+            "Data Types"
+          ],
+          "prerequisites": [
+            "theory_js_fundamentals_datatypes_and_scope"
+          ],
+          "complexity": 7,
+          "interviewFrequency": 6,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_js_tdz_1",
+          "topic": "Temporal Dead Zone",
+          "level": "medium",
+          "type": "open",
+          "question": "What is the Temporal Dead Zone (TDZ) in JavaScript? Provide an example demonstrating the TDZ and explain why it occurs.",
+          "answer": "The Temporal Dead Zone (TDZ) is a behavior in JavaScript for variables declared with `let` and `const`. It refers to the period from the start of the block (or scope) until the variable's declaration is processed and initialized. During this period, accessing the variable will result in a `ReferenceError`.\n\n**Example:**\n```javascript\nfunction exampleTDZ() {\n  // console.log(myLetVar); // ReferenceError: Cannot access 'myLetVar' before initialization\n  // This line is within the TDZ of myLetVar\n\n  let myLetVar = 10;\n  console.log(myLetVar); // Output: 10 (outside TDZ)\n\n  // console.log(myConstVar); // ReferenceError: Cannot access 'myConstVar' before initialization\n  // This line is within the TDZ of myConstVar\n\n  const myConstVar = 20;\n  console.log(myConstVar); // Output: 20 (outside TDZ)\n}\nexampleTDZ();\n\n// Compare with var (no TDZ effect, but hoisting to undefined)\nfunction exampleVarHoisting() {\n  console.log(myVar); // Output: undefined\n  var myVar = 30;\n  console.log(myVar); // Output: 30\n}\nexampleVarHoisting();\n```\n\n**Why it occurs:**\n`let` and `const` variables are hoisted to the top of their block scope, but unlike `var`, they are *not* initialized. Instead, they remain in an uninitialized state within the TDZ. This design choice was made to prevent common bugs associated with `var`'s hoisting behavior (where a variable might be accessed before it's assigned a meaningful value, leading to `undefined`). The TDZ enforces stricter variable access rules, making code more predictable and easier to debug by requiring declarations before use.",
+          "options": [],
+          "analysisPoints": [
+            "Accurate definition of TDZ.",
+            "Correctly identifies `let` and `const` as affected variables.",
+            "Provides a clear and runnable example demonstrating a `ReferenceError` due to TDZ.",
+            "Explains the underlying reason for TDZ (hoisting without initialization, prevention of `var` related bugs)."
+          ],
+          "keyConcepts": [
+            "Temporal Dead Zone",
+            "Hoisting",
+            "let",
+            "const",
+            "ReferenceError",
+            "Block Scope"
+          ],
+          "evaluationCriteria": [
+            "Clarity and completeness of TDZ explanation.",
+            "Correctness of example.",
+            "Insight into the purpose and benefits of TDZ."
+          ],
+          "example": "```javascript\n// TDZ in action\nfunction testTDZ() {\n  // console.log(x); // ReferenceError\n  let x = 10;\n  console.log(x); // 10\n}\ntestTDZ();\n```",
+          "tags": [
+            "JavaScript",
+            "Scope",
+            "Temporal Dead Zone",
+            "Hoisting",
+            "ES6"
+          ],
+          "prerequisites": [],
+          "complexity": 7,
+          "interviewFrequency": 9,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_js_tdz_mcq_1",
+          "topic": "Temporal Dead Zone",
+          "level": "medium",
+          "type": "mcq",
+          "question": "Consider the following JavaScript code snippet:\n```javascript\nfunction checkTDZ() {\n  console.log(a);\n  let a = 5;\n}\ncheckTDZ();\n```\nWhat will be the output when `checkTDZ()` is called?",
+          "answer": "A ReferenceError",
+          "options": [
+            "5",
+            "undefined",
+            "A ReferenceError",
+            "A TypeError"
+          ],
+          "analysisPoints": [
+            "Understanding of `let` variable hoisting.",
+            "Knowledge of the Temporal Dead Zone concept.",
+            "Ability to distinguish between `undefined` from `var` hoisting and `ReferenceError` from `let`/`const` TDZ."
+          ],
+          "keyConcepts": [
+            "Temporal Dead Zone",
+            "let",
+            "ReferenceError",
+            "Hoisting"
+          ],
+          "evaluationCriteria": [
+            "Correct identification of the error type.",
+            "Demonstrates understanding of TDZ vs. `var` hoisting."
+          ],
+          "example": "The variable `a` declared with `let` is in its Temporal Dead Zone from the beginning of the `checkTDZ` function's scope until its declaration `let a = 5;`. Any access to `a` before this declaration results in a `ReferenceError`, indicating that the variable cannot be accessed before initialization.",
+          "tags": [
+            "JavaScript",
+            "Scope",
+            "Temporal Dead Zone",
+            "let"
+          ],
+          "prerequisites": [
+            "theory_js_fundamentals_datatypes_and_scope"
+          ],
+          "complexity": 6,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_js_tdz_flashcard_1",
+          "topic": "Temporal Dead Zone",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "What kind of error occurs when accessing a `let` or `const` variable within its Temporal Dead Zone?",
+          "answer": "`ReferenceError`",
+          "options": [],
+          "analysisPoints": [],
+          "keyConcepts": [
+            "Temporal Dead Zone",
+            "let",
+            "const",
+            "ReferenceError"
+          ],
+          "evaluationCriteria": [],
+          "example": "Trying to use a variable declared with `let` or `const` before its declaration in the code will trigger a `ReferenceError` because it's in the TDZ.",
+          "tags": [
+            "JavaScript",
+            "TDZ",
+            "Error Handling"
+          ],
+          "prerequisites": [
+            "theory_js_fundamentals_datatypes_and_scope"
+          ],
+          "complexity": 4,
+          "interviewFrequency": 7,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_js_boxing_1",
+          "topic": "Boxing/Unboxing in JavaScript",
+          "level": "medium",
+          "type": "open",
+          "question": "How does boxing/unboxing work in JavaScript? Provide an example of boxing and explain why `new String('foo')` behaves differently from `'foo'`.",
+          "answer": "Boxing is the process where JavaScript automatically wraps a primitive value (like a string, number, or boolean) into its corresponding object wrapper (`String`, `Number`, `Boolean`) when a property or method is accessed on it. This temporary object allows the primitive to behave like an object (e.g., calling `toUpperCase()` on a string). After the operation, the wrapper object is typically discarded. Unboxing is the reverse process, implicitly converting an object wrapper back to its primitive value, often done when the primitive value is needed (e.g., in arithmetic operations).\n\n**Example of Boxing:**\n```javascript\nconst strPrimitive = \"hello\";\nconsole.log(strPrimitive.toUpperCase()); // \"HELLO\"\n// Behind the scenes, JavaScript performs: new String(strPrimitive).toUpperCase();\n// The String object is then discarded.\n\nconst numPrimitive = 123;\nconsole.log(numPrimitive.toFixed(2)); // \"123.00\"\n// Behind the scenes: new Number(numPrimitive).toFixed(2);\n```\n\n**Difference between `'foo'` and `new String('foo')`:**\n*   `'foo'` is a **primitive string literal**. Its `typeof` is `'string'`. It's immutable and directly holds the string value.\n*   `new String('foo')` creates a **String object wrapper**. Its `typeof` is `'object'`. It's a mutable object that *contains* the primitive string `'foo'` as its internal value.\n\nThis difference leads to key behavioral discrepancies:\n*   **Type check**: `typeof 'foo'` is `'string'`, `typeof new String('foo')` is `'object'`.\n*   **Equality**: `'foo' === new String('foo')` is `false` because they are of different types (primitive vs. object). `'foo' == new String('foo')` is `true` because `==` performs type coercion, unboxing the `String` object to its primitive value before comparison.\n*   **Boolean context**: `if (new Boolean(false))` will evaluate to `true` because any object (even a wrapper around `false` or `0` or `''`) is considered truthy. `if (false)` evaluates to `false`.",
+          "options": [],
+          "analysisPoints": [
+            "Clear definition of boxing and unboxing.",
+            "Provides a concrete example of automatic boxing.",
+            "Explains the `typeof` difference between primitives and wrapper objects.",
+            "Discusses equality (`==` vs `===`) and truthiness for wrapper objects.",
+            "Justifies why `new String()` etc. should be avoided."
+          ],
+          "keyConcepts": [
+            "Boxing",
+            "Unboxing",
+            "Primitive Data Types",
+            "Object Wrappers",
+            "`typeof` operator",
+            "Type Coercion",
+            "Truthiness"
+          ],
+          "evaluationCriteria": [
+            "Accuracy of definitions.",
+            "Relevance and clarity of examples.",
+            "Demonstrates understanding of common pitfalls with wrapper objects."
+          ],
+          "example": "```javascript\nconst s1 = \"hello\";\nconst s2 = new String(\"hello\");\n\nconsole.log(typeof s1); // \"string\"\nconsole.log(typeof s2); // \"object\"\n\nconsole.log(s1 === s2); // false\nconsole.log(s1 == s2);  // true\n```",
+          "tags": [
+            "JavaScript",
+            "Fundamentals",
+            "Boxing",
+            "Unboxing",
+            "Type Coercion",
+            "Primitives",
+            "Objects"
+          ],
+          "prerequisites": [
+            "theory_js_object_properties_and_coercion",
+            "theory_js_fundamentals_datatypes_and_scope"
+          ],
+          "complexity": 7,
+          "interviewFrequency": 7,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_js_boxing_mcq_1",
+          "topic": "Boxing in JavaScript",
+          "level": "medium",
+          "type": "mcq",
+          "question": "Which of the following statements about JavaScript's boxing mechanism is TRUE?\n\n```javascript\nlet value = 'JavaScript';\nlet result = value.slice(0, 4);\n```",
+          "answer": "The primitive string 'JavaScript' is temporarily wrapped in a `String` object to allow access to the `slice` method.",
+          "options": [
+            "The `slice` method can be called directly on primitive strings without any wrapping.",
+            "The primitive string 'JavaScript' is permanently converted into a `String` object by calling `slice`.",
+            "The primitive string 'JavaScript' is temporarily wrapped in a `String` object to allow access to the `slice` method.",
+            "Calling `slice` on a primitive string will result in a `TypeError` because primitives do not have methods."
+          ],
+          "analysisPoints": [
+            "Understanding of how primitive methods are accessed.",
+            "Knowledge of the temporary nature of boxing.",
+            "Distinguishing between primitive types and object wrappers."
+          ],
+          "keyConcepts": [
+            "Boxing",
+            "Primitive Data Types",
+            "Object Wrappers",
+            "String methods"
+          ],
+          "evaluationCriteria": [
+            "Correct explanation of boxing.",
+            "Avoiding misconceptions about permanent conversion or type errors."
+          ],
+          "example": "When a method like `slice()` is called on a primitive string, JavaScript internally performs an operation similar to `new String('JavaScript').slice(0, 4)`. This creates a temporary `String` object, calls the method, and then discards the object, leaving the original primitive string unchanged.",
+          "tags": [
+            "JavaScript",
+            "Boxing",
+            "Primitives",
+            "Methods"
+          ],
+          "prerequisites": [
+            "theory_js_object_properties_and_coercion"
+          ],
+          "complexity": 6,
+          "interviewFrequency": 7,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_js_boxing_flashcard_1",
+          "topic": "Boxing",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "What is the process called when JavaScript automatically converts a primitive value to its corresponding object wrapper to allow method access?",
+          "answer": "Boxing",
+          "options": [],
+          "analysisPoints": [],
+          "keyConcepts": [
+            "Boxing",
+            "Primitive Data Types",
+            "Object Wrappers"
+          ],
+          "evaluationCriteria": [],
+          "example": "When you call `\"hello\".toUpperCase()`, the string primitive is 'boxed' into a `String` object to allow the method call.",
+          "tags": [
+            "JavaScript",
+            "Boxing",
+            "Primitives"
+          ],
+          "prerequisites": [
+            "theory_js_object_properties_and_coercion"
+          ],
+          "complexity": 3,
+          "interviewFrequency": 6,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_js_prop_check_1",
+          "topic": "Property Checking: `in` vs `hasOwnProperty`",
+          "level": "medium",
+          "type": "open",
+          "question": "What is the difference between the `in` operator and the `hasOwnProperty` method in JavaScript? Provide code examples to illustrate their distinct behaviors.",
+          "answer": "The `in` operator and the `hasOwnProperty()` method are both used to check for the existence of a property on an object, but they differ in how they consider the object's prototype chain.\n\n*   **`in` operator**: This operator returns `true` if the specified property is found directly on the object *or* anywhere in its prototype chain (i.e., it's an own property or an inherited property).\n*   **`Object.prototype.hasOwnProperty()` method**: This method returns `true` only if the specified property is a direct, *own property* of the object itself, and not an inherited property from its prototype chain.\n\n**Code Examples:**\n```javascript\nconst myObject = { \n  a: 1,\n  myMethod: function() {}\n};\n\n// Add a property to the prototype chain of Object\nObject.prototype.inheritedProp = 100;\n\n// --- Checking 'a' (own property) ---\nconsole.log('a' in myObject);         // true (exists on object itself)\nconsole.log(myObject.hasOwnProperty('a')); // true (is an own property)\n\n// --- Checking 'myMethod' (own property) ---\nconsole.log('myMethod' in myObject);         // true\nconsole.log(myObject.hasOwnProperty('myMethod')); // true\n\n// --- Checking 'inheritedProp' (inherited property) ---\nconsole.log('inheritedProp' in myObject);    // true (exists in prototype chain)\nconsole.log(myObject.hasOwnProperty('inheritedProp')); // false (NOT an own property)\n\n// --- Checking 'toString' (inherited property from Object.prototype) ---\nconsole.log('toString' in myObject);         // true\nconsole.log(myObject.hasOwnProperty('toString')); // false\n\n// --- Edge case: property with value undefined (still an own property) ---\nconst obj2 = { b: undefined };\nconsole.log('b' in obj2);         // true\nconsole.log(obj2.hasOwnProperty('b')); // true\n\n// --- Using Object.create(null) for objects without prototype chain ---\nconst objWithoutProto = Object.create(null);\nobjWithoutProto.customProp = 'value';\nconsole.log('customProp' in objWithoutProto); // true\nconsole.log(objWithoutProto.hasOwnProperty('customProp')); // true\nconsole.log('toString' in objWithoutProto); // false (no prototype chain)\n```",
+          "options": [],
+          "analysisPoints": [
+            "Clear definition of `in` operator's behavior.",
+            "Clear definition of `hasOwnProperty` method's behavior.",
+            "Examples that demonstrate both own and inherited properties.",
+            "Explanation of the output for each example.",
+            "Mention of `Object.create(null)` as an edge case."
+          ],
+          "keyConcepts": [
+            "`in` operator",
+            "`hasOwnProperty`",
+            "Prototype Chain",
+            "Inherited Properties",
+            "Own Properties",
+            "Object.prototype"
+          ],
+          "evaluationCriteria": [
+            "Accuracy of conceptual differentiation.",
+            "Correctness and clarity of code examples.",
+            "Ability to explain the practical implications (e.g., for iteration)."
+          ],
+          "example": "```javascript\nconst car = { brand: 'Toyota' };\nconst toyotaPrius = Object.create(car);\ntoyotaPrius.model = 'Prius';\n\nconsole.log('model' in toyotaPrius);          // true\nconsole.log(toyotaPrius.hasOwnProperty('model')); // true\n\nconsole.log('brand' in toyotaPrius);          // true (inherited)\nconsole.log(toyotaPrius.hasOwnProperty('brand')); // false\n```",
+          "tags": [
+            "JavaScript",
+            "Objects",
+            "Properties",
+            "Inheritance",
+            "Prototype Chain"
+          ],
+          "prerequisites": [
+            "theory_js_object_properties_and_coercion"
+          ],
+          "complexity": 7,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_js_prop_check_mcq_1",
+          "topic": "Property Checking: `in` vs `hasOwnProperty`",
+          "level": "easy",
+          "type": "mcq",
+          "question": "Given the following JavaScript code:\n```javascript\nconst person = { name: 'Alice' };\nObject.prototype.age = 30;\n\nconsole.log('name' in person);\nconsole.log(person.hasOwnProperty('name'));\nconsole.log('age' in person);\nconsole.log(person.hasOwnProperty('age'));\n```\nWhat will be the output of these `console.log` statements, in order?",
+          "answer": "true, true, true, false",
+          "options": [
+            "true, true, true, true",
+            "true, false, true, false",
+            "true, true, true, false",
+            "false, true, false, true"
+          ],
+          "analysisPoints": [
+            "Understanding of own vs. inherited properties.",
+            "Correct application of `in` operator.",
+            "Correct application of `hasOwnProperty` method."
+          ],
+          "keyConcepts": [
+            "`in` operator",
+            "`hasOwnProperty`",
+            "Prototype Chain"
+          ],
+          "evaluationCriteria": [
+            "Correct prediction of all outputs based on the rules."
+          ],
+          "example": "The 'name' property is directly on the `person` object, so both `in` and `hasOwnProperty` return `true`. The 'age' property is inherited from `Object.prototype`. The `in` operator finds it in the prototype chain and returns `true`, but `hasOwnProperty` only checks direct properties, so it returns `false`.",
+          "tags": [
+            "JavaScript",
+            "Objects",
+            "Properties",
+            "Inheritance"
+          ],
+          "prerequisites": [
+            "theory_js_object_properties_and_coercion"
+          ],
+          "complexity": 5,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_js_prop_check_flashcard_1",
+          "topic": "Property Checking",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "Which method should you use to check if an object has a property *directly* (not inherited from its prototype chain)?",
+          "answer": "`Object.prototype.hasOwnProperty()`",
+          "options": [],
+          "analysisPoints": [],
+          "keyConcepts": [
+            "`hasOwnProperty`",
+            "Own Properties",
+            "Prototype Chain"
+          ],
+          "evaluationCriteria": [],
+          "example": "```javascript\nconst obj = { a: 1 };\nconsole.log(obj.hasOwnProperty('a')); // true\nconsole.log(obj.hasOwnProperty('toString')); // false\n```",
+          "tags": [
+            "JavaScript",
+            "Objects",
+            "Properties"
+          ],
+          "prerequisites": [
+            "theory_js_object_properties_and_coercion"
+          ],
+          "complexity": 4,
+          "interviewFrequency": 7,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_js_coercion_1",
+          "topic": "Type Coercion",
+          "level": "medium",
+          "type": "open",
+          "question": "What is type coercion (conversion) in JavaScript? Differentiate between explicit and implicit type coercion, providing a code example for each.",
+          "answer": "Type coercion, or type conversion, is the process of converting a value from one data type to another. JavaScript is a dynamically typed language, and it performs type coercion both automatically (implicitly) and when explicitly requested.\n\n**Explicit Type Coercion:**\nThis occurs when a developer intentionally converts a value from one type to another using specific functions, methods, or operators.\n\n*   **Example:**\n    ```javascript\n    // Convert to String\n    let num = 123;\n    let strNum = String(num); // or num.toString()\n    console.log(strNum, typeof strNum); // \"123\" \"string\"\n\n    // Convert to Number\n    let str = \"456\";\n    let numStr = Number(str); // or +str, or parseInt(str)\n    console.log(numStr, typeof numStr); // 456 \"number\"\n\n    // Convert to Boolean\n    let val = 0;\n    let boolVal = Boolean(val); // or !!val\n    console.log(boolVal, typeof boolVal); // false \"boolean\"\n    ```\n\n**Implicit Type Coercion:**\nThis happens automatically behind the scenes by the JavaScript engine when an operation involves values of different types. JavaScript attempts to make sense of the operation by converting one or both operands to a compatible type.\n\n*   **Example:**\n    ```javascript\n    // Numeric context (string to number)\n    console.log(\"10\" - 5);    // Output: 5 (string \"10\" implicitly converted to number 10)\n    console.log(\"5\" * \"2\");   // Output: 10 (both strings implicitly converted to numbers)\n\n    // String concatenation context (number to string)\n    console.log(\"Hello \" + 123); // Output: \"Hello 123\" (number 123 implicitly converted to string \"123\")\n\n    // Boolean context (various values to boolean)\n    if (\" \") { // Non-empty string is truthy\n      console.log(\"Space is truthy\"); // Output: \"Space is truthy\"\n    }\n    console.log(1 == '1');    // Output: true (string '1' implicitly converted to number 1)\n    ```",
+          "options": [],
+          "analysisPoints": [
+            "Clear definition of type coercion.",
+            "Accurate distinction between explicit and implicit coercion.",
+            "Relevant code examples for both types of coercion.",
+            "Explanation of how coercion happens in each example."
+          ],
+          "keyConcepts": [
+            "Type Coercion",
+            "Explicit Coercion",
+            "Implicit Coercion",
+            "Data Types",
+            "Operators"
+          ],
+          "evaluationCriteria": [
+            "Conceptual understanding.",
+            "Correctness and variety of examples.",
+            "Ability to explain the 'why' behind coercion behavior."
+          ],
+          "example": "```javascript\n// Explicit\nconst num = 10;\nconst strNum = String(num);\nconsole.log(strNum); // \"10\"\n\n// Implicit\nconst a = \"20\";\nconst b = 5;\nconsole.log(a / b); // 4 (a is implicitly converted to a number)\n```",
+          "tags": [
+            "JavaScript",
+            "Fundamentals",
+            "Type Coercion",
+            "Type Conversion",
+            "Explicit",
+            "Implicit"
+          ],
+          "prerequisites": [
+            "theory_js_object_properties_and_coercion"
+          ],
+          "complexity": 6,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_js_coercion_mcq_1",
+          "topic": "Implicit Type Coercion",
+          "level": "medium",
+          "type": "mcq",
+          "question": "What is the output of the following JavaScript code snippet?\n```javascript\nconsole.log(5 + '5' - 3);\n```",
+          "answer": "52",
+          "options": [
+            "7",
+            "NaN",
+            "52",
+            "Error"
+          ],
+          "analysisPoints": [
+            "Understanding of operator precedence.",
+            "Knowledge of how `+` operator behaves with mixed types (string concatenation vs. numeric addition).",
+            "Knowledge of how `-` operator behaves with strings (always numeric subtraction after coercion)."
+          ],
+          "keyConcepts": [
+            "Implicit Type Coercion",
+            "Operator Precedence",
+            "String Concatenation",
+            "Numeric Operations"
+          ],
+          "evaluationCriteria": [
+            "Correct prediction of chain of operations.",
+            "Accurate application of coercion rules."
+          ],
+          "example": "The expression `5 + '5' - 3` is evaluated from left to right:\n1.  `5 + '5'`: The `+` operator, when one operand is a string, performs string concatenation. `5` is coerced to `'5'`, resulting in `'55'`.\n2.  `'55' - 3`: The `-` operator always attempts to perform numeric subtraction. `'55'` is coerced to the number `55`. `55 - 3` results in `52`.",
+          "tags": [
+            "JavaScript",
+            "Type Coercion",
+            "Operators",
+            "Implicit"
+          ],
+          "prerequisites": [
+            "theory_js_object_properties_and_coercion"
+          ],
+          "complexity": 6,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_js_coercion_flashcard_1",
+          "topic": "Type Coercion",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "What is the result of `\"10\" - 5` in JavaScript?",
+          "answer": "`5` (Number)",
+          "options": [],
+          "analysisPoints": [],
+          "keyConcepts": [
+            "Implicit Type Coercion",
+            "Numeric Operators"
+          ],
+          "evaluationCriteria": [],
+          "example": "The `-` operator forces its operands to be numbers. So, the string `\"10\"` is implicitly converted to the number `10`, and `10 - 5` equals `5`.",
+          "tags": [
+            "JavaScript",
+            "Type Coercion",
+            "Implicit"
+          ],
+          "prerequisites": [
+            "theory_js_object_properties_and_coercion"
+          ],
+          "complexity": 3,
+          "interviewFrequency": 6,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_js_coercion_complex_example",
+          "topic": "Advanced Type Coercion",
+          "level": "hard",
+          "type": "open",
+          "question": "How does type conversion occur in the following JavaScript example? Explain the step-by-step evaluation of the expression and the final result:\n```javascript\nconsole.log({} + [] + {} + [1]);\n```",
+          "answer": "This expression is tricky due to how JavaScript parses `{}`, especially at the beginning of a statement, and the behavior of the `+` operator. The outcome can also vary slightly between environments (e.g., Node.js vs. browser console).\n\nLet's analyze assuming it's part of an expression (e.g., inside `console.log()`):\n\n1.  **`{}`**: When `({})` is used as an expression, it is an empty object literal.\n2.  **`{}` + `[]`**: The `+` operator tries to convert both operands to primitive values first. The `valueOf()` method is called for objects. If that doesn't return a primitive, `toString()` is called.\n    *   `{}.toString()` returns `\"[object Object]\"`.\n    *   `[].toString()` returns `\"\"` (an empty string).\n    *   So, `\"[object Object]\" + \"\"` results in `\"[object Object]\"` (string concatenation).\n\n3.  **`\"[object Object]\" + {}`**: Again, string concatenation because the left operand is a string.\n    *   `{}.toString()` returns `\"[object Object]\"`.\n    *   So, `\"[object Object]\" + \"[object Object]\"` results in `\"[object Object][object Object]\"`.\n\n4.  **`\"[object Object][object Object]\" + [1]`**: String concatenation.\n    *   `[1].toString()` returns `\"1\"`.\n    *   So, `\"[object Object][object Object]\" + \"1\"` results in `\"[object Object][object Object]1\"`.\n\n**Final Result:** `\"[object Object][object Object]1\"`\n\n**Important Note on `{}` at the start of a statement:**\nIf `{}` appears at the very beginning of a statement (not inside parentheses or as part of an expression), it might be interpreted as an empty *block statement* rather than an empty object literal. In such a scenario:\n```javascript\n{} + []\n// This is parsed as: an empty block { } followed by a unary + on an empty array []\n// Unary + on [] results in Number([]) which is 0.\n// So, if parsed this way, the first part would be 0. (e.g., console.log({} + [])) might be 0 in some contexts)\n```\nHowever, within `console.log({} + [] + {} + [1]);`, the entire expression is parsed as a single unit, and `{} `is unambiguously treated as an object literal. The consistent result across environments for the full expression is `\"[object Object][object Object]1\"`.",
+          "options": [],
+          "analysisPoints": [
+            "Detailed step-by-step breakdown of coercion.",
+            "Understanding of how `+` operator behaves with mixed types.",
+            "Knowledge of `toString()` and `valueOf()` methods for objects/arrays.",
+            "Awareness of parsing nuances for `{}` (block vs. object literal).",
+            "Correct final output."
+          ],
+          "keyConcepts": [
+            "Type Coercion",
+            "Implicit Coercion",
+            "Object to Primitive Conversion",
+            "`toString()`",
+            "`valueOf()`",
+            "Operator Precedence",
+            "JavaScript Parsing"
+          ],
+          "evaluationCriteria": [
+            "Thoroughness of explanation.",
+            "Accuracy of each coercion step.",
+            "Ability to explain environment-specific nuances (if any).",
+            "Correct final result."
+          ],
+          "example": "```javascript\n// Step 1: {} + []\n// {}.toString() -> \"[object Object]\"\n// [].toString() -> \"\"\n// \"[object Object]\" + \"\" -> \"[object Object]\"\n\n// Step 2: \"[object Object]\" + {}\n// {}.toString() -> \"[object Object]\"\n// \"[object Object]\" + \"[object Object]\" -> \"[object Object][object Object]\"\n\n// Step 3: \"[object Object][object Object]\" + [1]\n// [1].toString() -> \"1\"\n// \"[object Object][object Object]\" + \"1\" -> \"[object Object][object Object]1\"\n\nconsole.log({} + [] + {} + [1]); // \"[object Object][object Object]1\"\n```",
+          "tags": [
+            "JavaScript",
+            "Type Coercion",
+            "Advanced",
+            "Implicit",
+            "Edge Cases"
+          ],
+          "prerequisites": [
+            "theory_js_object_properties_and_coercion"
+          ],
+          "complexity": 9,
+          "interviewFrequency": 5,
+          "learningPath": "advanced"
+        }
+      ],
+      "tasks": [
+        {
+          "id": "task_reference_vs_value",
+          "title": "Tracing Variable References and Values",
+          "description": "\nImplement a function `analyzeVariables` that takes no arguments. Inside this function, declare variables of different JavaScript data types (primitive and object) and perform assignments that demonstrate both pass-by-value and pass-by-reference behaviors.\n\nYour task is to:\n1.  Declare a `number` primitive, assign it to a new variable, and then modify the original number.\n2.  Declare an `object` literal, assign it to a new variable, and then modify a property of the *original* object.\n3.  Declare another `object` literal, assign it to a new variable, and then *reassign* the *original* object variable to a completely new object.\n4.  After each step, log the values of all relevant variables to the console and provide comments explaining what is expected and why.\n\nThis task aims to solidify your understanding of how JavaScript handles primitive vs. object assignments.\n",
+          "difficulty": "medium",
+          "startingCode": "function analyzeVariables() {\n  // 1. Number primitive (pass-by-value)\n  let numA = 10;\n  let numB = numA;\n  console.log(`Initial: numA = ${numA}, numB = ${numB}`);\n  numA = 20;\n  console.log(`After numA = 20: numA = ${numA}, numB = ${numB}`); // What will numB be?\n\n  // 2. Object literal (pass-by-reference - modifying content)\n  let objX = { value: 100 };\n  let objY = objX;\n  console.log(`Initial: objX.value = ${objX.value}, objY.value = ${objY.value}`);\n  objX.value = 200;\n  console.log(`After objX.value = 200: objX.value = ${objX.value}, objY.value = ${objY.value}`); // What will objY.value be?\n\n  // 3. Object literal (pass-by-reference - reassigning reference)\n  let objP = { data: 'Alpha' };\n  let objQ = objP;\n  console.log(`Initial: objP.data = ${objP.data}, objQ.data = ${objQ.data}`);\n  objP = { data: 'Beta' }; // Reassign objP to a NEW object\n  console.log(`After objP = { data: 'Beta' }: objP.data = ${objP.data}, objQ.data = ${objQ.data}`); // What will objQ.data be?\n}\n\nanalyzeVariables();\n",
+          "solutionCode": "function analyzeVariables() {\n  // 1. Number primitive (pass-by-value)\n  let numA = 10;\n  let numB = numA;\n  console.log(`Initial: numA = ${numA}, numB = ${numB}`);\n  numA = 20;\n  // Expected: numB will remain 10 because numA holds a copy of the value; changing numA doesn't affect numB.\n  console.log(`After numA = 20: numA = ${numA}, numB = ${numB}`); // Output: numA = 20, numB = 10\n\n  // 2. Object literal (pass-by-reference - modifying content)\n  let objX = { value: 100 };\n  let objY = objX;\n  console.log(`Initial: objX.value = ${objX.value}, objY.value = ${objY.value}`);\n  objX.value = 200;\n  // Expected: objY.value will also be 200 because objX and objY both point to the SAME object in memory.\n  console.log(`After objX.value = 200: objX.value = ${objX.value}, objY.value = ${objY.value}`); // Output: objX.value = 200, objY.value = 200\n\n  // 3. Object literal (pass-by-reference - reassigning reference)\n  let objP = { data: 'Alpha' };\n  let objQ = objP;\n  console.log(`Initial: objP.data = ${objP.data}, objQ.data = ${objQ.data}`);\n  objP = { data: 'Beta' }; // Reassign objP to a NEW object\n  // Expected: objQ.data will remain 'Alpha' because objP was reassigned to a new object, but objQ still points to the ORIGINAL object.\n  console.log(`After objP = { data: 'Beta' }: objP.data = ${objP.data}, objQ.data = ${objQ.data}`); // Output: objP.data = Beta, objQ.data = Alpha\n\n  // Additional check with an array\n  let arr1 = [1, 2];\n  let arr2 = arr1;\n  console.log(`Initial: arr1 = ${arr1}, arr2 = ${arr2}`);\n  arr1.push(3);\n  console.log(`After arr1.push(3): arr1 = ${arr1}, arr2 = ${arr2}`); // Expected: arr2 also has 3\n\n  arr1 = [4, 5]; // Reassign arr1 to a new array\n  console.log(`After arr1 = [4, 5]: arr1 = ${arr1}, arr2 = ${arr2}`); // Expected: arr2 remains [1,2,3]\n}\n\nanalyzeVariables();\n",
+          "testCases": [
+            "Verify `numB` remains `10` after `numA` reassignment.",
+            "Verify `objY.value` changes to `200` after `objX.value` modification.",
+            "Verify `objQ.data` remains `'Alpha'` after `objP` reassignment.",
+            "Verify changes to array elements through one variable are reflected in another referencing the same array.",
+            "Verify array reassignment to a new array behaves like object reassignment, not affecting other variables referencing the original array."
+          ],
+          "hints": [
+            "Remember that primitive values are copied, while objects are referenced.",
+            "Reassigning a variable holding an object reference makes that variable point to a *new* object, but doesn't change what other variables might be pointing to.",
+            "Modifying a property of an object through one reference will be visible through all other references to that same object."
+          ],
+          "tags": [
+            "JavaScript",
+            "Fundamentals",
+            "Data Types",
+            "Reference vs Value",
+            "Object",
+            "Primitive"
+          ],
+          "timeEstimate": 30,
+          "prerequisites": [
+            "theory_js_fundamentals_datatypes_and_scope"
+          ],
+          "complexity": 6,
+          "interviewRelevance": 8,
+          "learningPath": "intermediate",
+          "relatedConcepts": [
+            "pass_by_value",
+            "pass_by_reference",
+            "mutability",
+            "immutability"
+          ]
+        },
+        {
+          "id": "task_variable_scoping_challenge",
+          "title": "Debug Temporal Dead Zone Errors",
+          "description": "\nGiven a series of JavaScript code snippets, identify which lines will throw a `ReferenceError` due to the Temporal Dead Zone (TDZ). Your task is to:\n\n1.  For each `console.log` statement, determine if it will execute successfully or throw a `ReferenceError`.\n2.  If it throws an error, explain why it's in the TDZ.\n3.  If it executes, state its output.\n4.  Modify the code to fix any TDZ errors while preserving the intended variable usage (i.e., keep `let`/`const` where appropriate).\n\nThis task will test your understanding of `let`, `const`, `var`, and the Temporal Dead Zone.\n",
+          "difficulty": "medium",
+          "startingCode": "function analyzeTDZ() {\n  // Snippet 1\n  // console.log(a);\n  let a = 10;\n  console.log(a);\n\n  // Snippet 2\n  {\n    // console.log(b);\n    const b = 20;\n    console.log(b);\n  }\n\n  // Snippet 3\n  // console.log(c);\n  var c = 30;\n  console.log(c);\n\n  // Snippet 4: Function expression with TDZ\n  // sayHello();\n  const sayHello = () => {\n    console.log('Hello!');\n  };\n  sayHello();\n\n  // Snippet 5: Nested scope with TDZ\n  let outerVar = 'I am outer';\n  if (true) {\n    // console.log(outerVar); // Potential TDZ? No, it's declared above.\n    // console.log(innerVar); // Is this in TDZ?\n    let innerVar = 'I am inner';\n    console.log(innerVar);\n  }\n  // console.log(innerVar); // Is this accessible?\n}\n\nanalyzeTDZ();\n",
+          "solutionCode": "function analyzeTDZ() {\n  // Snippet 1\n  // console.log(a); // Line 1: ReferenceError - 'a' is in TDZ. 'let a' has been hoisted but not initialized.\n  let a = 10;\n  console.log(a); // Output: 10 (outside TDZ)\n\n  // Snippet 2\n  {\n    // console.log(b); // Line 2: ReferenceError - 'b' is in block-scoped TDZ.\n    const b = 20;\n    console.log(b); // Output: 20 (outside TDZ)\n  }\n\n  // Snippet 3\n  console.log(c); // Output: undefined. 'var c' is hoisted and initialized to undefined. No TDZ.\n  var c = 30;\n  console.log(c); // Output: 30\n\n  // Snippet 4: Function expression with TDZ\n  // sayHello(); // Line 3: ReferenceError - 'sayHello' is in TDZ because it's a const-declared function expression.\n  const sayHello = () => {\n    console.log('Hello!');\n  };\n  sayHello(); // Output: 'Hello!' (outside TDZ)\n\n  // Snippet 5: Nested scope with TDZ\n  let outerVar = 'I am outer';\n  if (true) {\n    console.log(outerVar); // Output: 'I am outer'. outerVar is accessible from parent scope.\n    // console.log(innerVar); // Line 4: ReferenceError - 'innerVar' is in its block-scoped TDZ.\n    let innerVar = 'I am inner';\n    console.log(innerVar); // Output: 'I am inner'\n  }\n  // console.log(innerVar); // Line 5: ReferenceError - innerVar is block-scoped, not accessible outside its 'if' block.\n}\n\nanalyzeTDZ();\n",
+          "testCases": [
+            "Verify `let` variable access before declaration throws `ReferenceError`.",
+            "Verify `const` variable access before declaration throws `ReferenceError`.",
+            "Verify `var` variable access before declaration results in `undefined`.",
+            "Verify function expressions declared with `const` are subject to TDZ.",
+            "Verify variables are accessible from parent scope if not in TDZ.",
+            "Verify block-scoped variables are not accessible outside their block."
+          ],
+          "hints": [
+            "Focus on the declaration keyword (`var`, `let`, `const`) and the variable's position relative to its usage.",
+            "Remember that `var` variables are initialized to `undefined` during hoisting, unlike `let` and `const`.",
+            "Pay attention to block scopes (`{}`) for `let` and `const`."
+          ],
+          "tags": [
+            "JavaScript",
+            "Scope",
+            "Temporal Dead Zone",
+            "Hoisting",
+            "let",
+            "const",
+            "var",
+            "Debugging"
+          ],
+          "timeEstimate": 45,
+          "prerequisites": [
+            "theory_js_fundamentals_datatypes_and_scope"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 9,
+          "learningPath": "intermediate",
+          "relatedConcepts": [
+            "hoisting",
+            "block_scope",
+            "function_scope"
+          ]
+        },
+        {
+          "id": "task_object_property_analyzer",
+          "title": "Object Property Checker Utility",
+          "description": "\nCreate a function `analyzeObjectProperties(obj, propertyName)` that determines the presence and origin of a property on a given object. The function should return an object with the following boolean properties:\n\n*   `existsInObject`: `true` if the property exists directly on `obj` or in its prototype chain (using the `in` operator).\n*   `isOwnProperty`: `true` if the property exists directly on `obj` (using `hasOwnProperty`).\n*   `isEnumerable`: `true` if the property is enumerable (using `propertyIsEnumerable`).\n*   `isInherited`: `true` if the property exists but is not an own property (i.e., it's from the prototype chain).\n\nHandle edge cases such as `null` or `undefined` for `obj` gracefully (return an object indicating no properties found, e.g., all `false`).\n\n",
+          "difficulty": "medium",
+          "startingCode": "function analyzeObjectProperties(obj, propertyName) {\n  if (obj === null || typeof obj !== 'object' && typeof obj !== 'function') {\n    // Handle non-object types or null/undefined obj gracefully\n    return {\n      existsInObject: false,\n      isOwnProperty: false,\n      isEnumerable: false,\n      isInherited: false\n    };\n  }\n\n  const exists = propertyName in obj;\n  const isOwn = obj.hasOwnProperty(propertyName);\n  const isEnum = obj.propertyIsEnumerable(propertyName);\n  \n  // Determine if inherited\n  const isInherited = exists && !isOwn;\n\n  return {\n    existsInObject: exists,\n    isOwnProperty: isOwn,\n    isEnumerable: isEnum,\n    isInherited: isInherited\n  };\n}\n\n// Test Cases:\n// console.log(analyzeObjectProperties({ a: 1, b: 2 }, 'a'));\n// console.log(analyzeObjectProperties({ c: 3 }, 'd'));\n// console.log(analyzeObjectProperties(Object.create({ p: 10 }), 'p'));\n// console.log(analyzeObjectProperties(Object.prototype, 'toString'));\n// console.log(analyzeObjectProperties(null, 'test'));\n",
+          "solutionCode": "function analyzeObjectProperties(obj, propertyName) {\n  if (obj === null || (typeof obj !== 'object' && typeof obj !== 'function')) {\n    return {\n      existsInObject: false,\n      isOwnProperty: false,\n      isEnumerable: false,\n      isInherited: false\n    };\n  }\n\n  const existsInObject = propertyName in obj;\n  const isOwnProperty = Object.prototype.hasOwnProperty.call(obj, propertyName);\n  // Note: Using Object.prototype.hasOwnProperty.call for robustness against objects \n  // that might shadow hasOwnProperty (though rare).\n\n  let isEnumerable = false;\n  try {\n    isEnumerable = obj.propertyIsEnumerable(propertyName);\n  } catch (e) {\n    // Some objects (like primitives temporarily boxed) might not have this method directly\n    // Or it might throw if obj is a primitive that cannot be coerced to object context\n    // For this task, we assume obj is a valid object-like structure.\n  }\n  \n  const isInherited = existsInObject && !isOwnProperty;\n\n  return {\n    existsInObject,\n    isOwnProperty,\n    isEnumerable,\n    isInherited\n  };\n}\n\n// Test Cases:\nconst obj1 = { a: 1, b: 2 };\nconsole.log('--- Test Case 1: Own, enumerable property ---');\nconsole.log(analyzeObjectProperties(obj1, 'a')); \n// Expected: { existsInObject: true, isOwnProperty: true, isEnumerable: true, isInherited: false }\n\nconst obj2 = { c: 3 };\nconsole.log('\\n--- Test Case 2: Non-existent property ---');\nconsole.log(analyzeObjectProperties(obj2, 'd')); \n// Expected: { existsInObject: false, isOwnProperty: false, isEnumerable: false, isInherited: false }\n\nconst protoObj = { p: 10, q: 20 };\nconst obj3 = Object.create(protoObj);\nobj3.myProp = 'test';\nconsole.log('\\n--- Test Case 3: Inherited property ---');\nconsole.log(analyzeObjectProperties(obj3, 'p')); \n// Expected: { existsInObject: true, isOwnProperty: false, isEnumerable: true, isInherited: true }\n\nconsole.log('\\n--- Test Case 4: Property from Object.prototype ---');\nconsole.log(analyzeObjectProperties({}, 'toString')); \n// Expected: { existsInObject: true, isOwnProperty: false, isEnumerable: false, isInherited: true }\n\nconsole.log('\\n--- Test Case 5: Null object ---');\nconsole.log(analyzeObjectProperties(null, 'test'));\n// Expected: { existsInObject: false, isOwnProperty: false, isEnumerable: false, isInherited: false }\n\nconsole.log('\\n--- Test Case 6: Undefined property (own) ---');\nconst obj4 = { x: undefined };\nconsole.log(analyzeObjectProperties(obj4, 'x'));\n// Expected: { existsInObject: true, isOwnProperty: true, isEnumerable: true, isInherited: false }\n\nconsole.log('\\n--- Test Case 7: Non-enumerable own property ---');\nconst obj5 = {};\nObject.defineProperty(obj5, 'hidden', { value: 1, enumerable: false });\nconsole.log(analyzeObjectProperties(obj5, 'hidden'));\n// Expected: { existsInObject: true, isOwnProperty: true, isEnumerable: false, isInherited: false }\n",
+          "testCases": [
+            "Test with an object having an own, enumerable property.",
+            "Test with an object and a non-existent property.",
+            "Test with an object inheriting a property from its prototype.",
+            "Test with a property from `Object.prototype` (e.g., `toString`).",
+            "Test with `null` as the object argument.",
+            "Test with `undefined` as the object argument.",
+            "Test with a property that exists but its value is `undefined`.",
+            "Test with a non-enumerable own property (e.g., defined with `Object.defineProperty`)."
+          ],
+          "hints": [
+            "Remember that `hasOwnProperty` and `propertyIsEnumerable` are methods of `Object.prototype`. Consider using `call` for robustness.",
+            "The `in` operator checks both own and inherited properties.",
+            "`isInherited` can be derived from `existsInObject` and `isOwnProperty`."
+          ],
+          "tags": [
+            "JavaScript",
+            "Objects",
+            "Properties",
+            "Prototype Chain",
+            "`hasOwnProperty`",
+            "`in` operator",
+            "Utility Function"
+          ],
+          "timeEstimate": 45,
+          "prerequisites": [
+            "theory_js_object_properties_and_coercion"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 8,
+          "learningPath": "intermediate",
+          "relatedConcepts": [
+            "Object.defineProperty",
+            "Object.create",
+            "enumerable_properties"
+          ]
+        },
+        {
+          "id": "task_predict_coercion_output",
+          "title": "Predict JavaScript Coercion Outputs",
+          "description": "\nImplement a function `predictCoercionResults()` that demonstrates various scenarios of JavaScript's implicit type coercion. For each given expression, you need to:\n\n1.  Add a `console.log()` statement with the expression.\n2.  Add a comment next to each `console.log()` predicting its output.\n3.  For challenging cases, add a brief explanation of the coercion steps.\n\nYour task is to correctly predict the outputs of the following expressions and explain the logic:\n\n*   `'10' + 5`\n*   `'10' - 5`\n*   `true + false`\n*   `'hello' && 0`\n*   `!\"\"`\n*   `[] + {}`\n*   `{} + []` (Pay close attention to parsing context)\n*   `null == undefined`\n*   `null === undefined`\n*   `NaN == NaN`\n*   `5 / 'foo'`\n\nThis task aims to thoroughly test your understanding of implicit type coercion rules in JavaScript.\n",
+          "difficulty": "hard",
+          "startingCode": "function predictCoercionResults() {\n  console.log('10' + 5);      // Prediction: \n  console.log('10' - 5);      // Prediction: \n  console.log(true + false);  // Prediction: \n  console.log('hello' && 0);  // Prediction: \n  console.log(!\"\");           // Prediction: \n  console.log([] + {});       // Prediction: \n  console.log({} + []);       // Prediction: \n  console.log(null == undefined); // Prediction: \n  console.log(null === undefined); // Prediction: \n  console.log(NaN == NaN);    // Prediction: \n  console.log(5 / 'foo');     // Prediction: \n}\n\npredictCoercionResults();\n",
+          "solutionCode": "function predictCoercionResults() {\n  // 1. String Concatenation\n  console.log('10' + 5);      // Prediction: \"105\" (5 is coerced to '5', then concatenation)\n\n  // 2. Numeric Subtraction\n  console.log('10' - 5);      // Prediction: 5 ('10' is coerced to 10, then subtraction)\n\n  // 3. Boolean to Number Coercion (true=1, false=0)\n  console.log(true + false);  // Prediction: 1 (true is 1, false is 0, 1 + 0 = 1)\n\n  // 4. Logical AND (evaluates to last truthy operand, or first falsy)\n  console.log('hello' && 0);  // Prediction: 0 ('hello' is truthy, so it proceeds to 0. 0 is falsy, so 0 is returned)\n\n  // 5. Logical NOT (negates boolean coercion)\n  console.log(!\"\");           // Prediction: true (empty string \"\" is falsy, !falsy is true)\n\n  // 6. Object to Primitive Coercion for '+' operator\n  console.log([] + {});       // Prediction: \"[object Object]\" ([] converts to \"\", {} converts to \"[object Object]\", then concatenation)\n\n  // 7. Context-dependent parsing for {} and '+'\n  // This is tricky: if {} is at the start of a line, it can be parsed as a block.\n  // If it's part of an expression (like in console.log()), it's an object literal.\n  // ({} + []) is parsed as an expression.\n  console.log({} + []);       // Prediction: \"[object Object]\" when parsed as expression. If parsed as statement, {}+[] -> 0. \n                                // In this specific console.log() context, it's typically \"[object Object]\" in modern JS engines/browsers, \n                                // but some environments (like browser console for just `{}+[]`) might show 0.\n                                // The correct explanation focuses on the expression parsing: {}.toString() -> \"[object Object]\", [].toString() -> \"\". \"[object Object]\" + \"\" = \"[object Object]\".\n\n  // 8. Loose Equality (null and undefined are loosely equal to each other only)\n  console.log(null == undefined); // Prediction: true\n\n  // 9. Strict Equality (checks type and value)\n  console.log(null === undefined); // Prediction: false\n\n  // 10. NaN behavior (NaN is never equal to itself)\n  console.log(NaN == NaN);    // Prediction: false\n\n  // 11. Division resulting in NaN (string cannot be coerced to a valid number for division)\n  console.log(5 / 'foo');     // Prediction: NaN ('foo' is coerced to NaN when attempting number conversion for division)\n}\n\npredictCoercionResults();\n",
+          "testCases": [
+            "Verify `String + Number` concatenation.",
+            "Verify `String - Number` arithmetic.",
+            "Verify `Boolean + Boolean` arithmetic.",
+            "Verify logical operator short-circuiting and truthiness.",
+            "Verify logical NOT behavior.",
+            "Verify `Array + Object` coercion with `toString()`.",
+            "Verify `Object + Array` coercion, explaining parsing nuances.",
+            "Verify `null == undefined`.",
+            "Verify `null === undefined`.",
+            "Verify `NaN == NaN`.",
+            "Verify division by non-numeric string results in `NaN`."
+          ],
+          "hints": [
+            "The `+` operator is overloaded: it performs string concatenation if *either* operand is a string, otherwise it performs numeric addition.",
+            "Other arithmetic operators (`-`, `*`, `/`, `%`) always attempt numeric conversion.",
+            "For loose equality (`==`), recall the specific rules for `null`, `undefined`, `NaN`, and objects.",
+            "Remember that `NaN` is unique and does not equal itself (`NaN === NaN` is `false`).",
+            "Consider how `toString()` and `valueOf()` methods are used in object-to-primitive conversions."
+          ],
+          "tags": [
+            "JavaScript",
+            "Type Coercion",
+            "Implicit Conversion",
+            "Operators",
+            "Edge Cases",
+            "Debugging"
+          ],
+          "timeEstimate": 60,
+          "prerequisites": [
+            "theory_js_object_properties_and_coercion"
+          ],
+          "complexity": 9,
+          "interviewRelevance": 9,
+          "learningPath": "advanced",
+          "relatedConcepts": [
+            "truthiness",
+            "falsiness",
+            "operator_precedence",
+            "NaN",
+            "Object.prototype.toString"
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "06754615-bba5-4907-9d23-b466fdbe02bd",
+    "startLine": 15100,
+    "endLine": 15199,
+    "processedDate": "2025-06-17T14:41:32.504Z",
+    "content": {
+      "logicalBlockInfo": {
+        "suggestedEndLine": -1
+      },
+      "theory": [
+        {
+          "id": "theory_array_prototype_extension_flatten",
+          "title": "Array Prototype Extension and Deep Flattening",
+          "content": "## Extending Array Prototype\nJavaScript allows extending built-in object prototypes, such as `Array.prototype`. This enables adding new methods directly to array instances, making them available on all arrays. A common pattern is to check `if (!Array.prototype.methodName)` before defining a polyfill, ensuring that the method is only added if it doesn't already exist natively.\n\n## Array Flattening\nArray flattening is the process of converting a multi-dimensional array into a one-dimensional array. This can be shallow (only flattening one level deep) or deep (flattening all nested arrays recursively).\n\n### Recursive Flattening Implementation\nA common approach for deep flattening is recursion. The function iterates through the array; if an element is an array, it recursively calls itself on that element and concatenates the results. Otherwise, it adds the element directly to the result.\n\nNative JavaScript provides `Array.prototype.flat()` and `Array.prototype.flatMap()` for flattening arrays, which are more performant and robust than custom polyfills for production use. `flat()` takes an optional `depth` argument (defaulting to 1) to control how many levels to flatten. `Infinity` can be passed to flatten all levels.\n\n## Example Code (Polyfill for `flatten`)\n```javascript\n/**\n * Recursively flattens a nested array into a single-dimensional array.\n * @param {Array} array The array to flatten.\n * @returns {Array} The flattened array.\n */\nfunction flatten(array) {\n  let result = [];\n  for (let i = 0; i < array.length; i++) {\n    if (Array.isArray(array[i])) {\n      result = result.concat(flatten(array[i])); // Recursively flatten nested arrays\n    } else {\n      result.push(array[i]); // Add non-array elements directly\n    }\n  }\n  return result;\n}\n\n// Polyfill check to add `flatten` method to Array.prototype if it doesn't exist\nif (!Array.prototype.flatten) {\n  Array.prototype.flatten = function() {\n    // 'this' refers to the array instance on which 'flatten' is called\n    return flatten(this);\n  };\n}\n```\n\n",
+          "examples": [
+            {
+              "id": "example_array_flatten_1",
+              "title": "Using the Custom Flatten Polyfill",
+              "code": "let arr = [1, 2, [3, 4, [5, 6, [7, [8, 9, 10]]]]];\nconsole.log(arr.flatten()); // Expected: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]",
+              "explanation": "This example demonstrates how the `flatten` method, added to `Array.prototype`, can be called directly on an array instance to deeply flatten its contents, producing a single-dimensional array from a deeply nested structure.",
+              "language": "javascript"
+            },
+            {
+              "id": "example_array_flatten_2",
+              "title": "Native `Array.prototype.flat()` vs. Custom",
+              "code": "const nestedArray = [1, [2, 3], [4, [5]]];\n\n// Using custom flatten (if polyfill is present)\n// console.log(nestedArray.flatten()); // [1, 2, 3, 4, 5]\n\n// Using native flat() for shallow flatten\nconsole.log(nestedArray.flat()); // [1, 2, 3, 4, [5]]\n\n// Using native flat() for deep flatten\nconsole.log(nestedArray.flat(Infinity)); // [1, 2, 3, 4, 5]",
+              "explanation": "This example contrasts the behavior of a custom deep flatten function with the native `Array.prototype.flat()` method. It shows that `flat()` by default performs a shallow flatten (depth 1), and requires `Infinity` to achieve full deep flattening, similar to the custom implementation.",
+              "language": "javascript"
+            }
+          ],
+          "relatedQuestions": [
+            "question_array_flatten_1",
+            "question_array_flatten_2",
+            "question_array_flatten_3",
+            "question_array_flatten_4",
+            "question_array_flatten_5"
+          ],
+          "relatedTasks": [
+            "task_implement_deep_flatten"
+          ],
+          "tags": [
+            "Array",
+            "Prototype",
+            "Polyfill",
+            "Recursion",
+            "Data Structures",
+            "Functional Programming"
+          ],
+          "technology": "JavaScript",
+          "prerequisites": [
+            "javascript_basics",
+            "functions",
+            "array_methods"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 8,
+          "learningPath": "intermediate",
+          "requiredFor": [
+            "advanced_array_manipulation",
+            "custom_utilities"
+          ]
+        },
+        {
+          "id": "theory_higher_order_functions_filtering",
+          "title": "Higher-Order Functions and Array Filtering",
+          "content": "## Higher-Order Functions (HOFs)\nHigher-Order Functions are functions that either take one or more functions as arguments or return a function as their result. They are a fundamental concept in functional programming and enable powerful abstractions and code reusability in JavaScript.\n\n### `Array.prototype.filter()`\n`Array.prototype.filter()` is a built-in array method that creates a new array with all elements that pass the test implemented by the provided callback function. The callback function is executed for each element in the array and should return a boolean value (true to keep the element, false to discard it).\n\n### Closures and HOFs for Filtering\nWhen a higher-order function returns another function, the returned function often forms a closure. A closure is the combination of a function and the lexical environment within which that function was declared. This environment consists of any local variables that were in-scope at the time the closure was created.\n\nIn the context of filtering, a HOF can take parameters (e.g., `start`, `end` for a range) and return a filter callback. This callback 'remembers' the `start` and `end` values from its lexical environment, allowing it to perform the specific filtering logic based on those parameters for each element in the array.\n\n## Example Code (between function)\n```javascript\n/**\n * Creates a filter callback function that checks if a value is within a specified range.\n * This is a higher-order function because it returns another function.\n * @param {number} start The lower bound of the range (exclusive).\n * @param {number} end The upper bound of the range (exclusive).\n * @returns {function(number, number): boolean} A callback function for Array.prototype.filter.\n */\nfunction between(start, end) {\n  // This inner function forms a closure over 'start' and 'end'\n  return function(value, index) {\n    return value > start && value < end;\n  };\n}\n```",
+          "examples": [
+            {
+              "id": "example_hof_filter_1",
+              "title": "Using `between` for Numeric Filtering",
+              "code": "const list = [1, 2, 3, 4, 5, 6, 7, 8];\nconst filteredArray = list.filter(between(3, 6)); // [4, 5]\nconsole.log(filteredArray);",
+              "explanation": "This example demonstrates how the `between` higher-order function is used with `Array.prototype.filter`. `between(3, 6)` returns a new function that acts as the predicate for `filter`. This predicate function checks if each number is greater than 3 and less than 6, effectively filtering out numbers outside this range.",
+              "language": "javascript"
+            },
+            {
+              "id": "example_hof_filter_2",
+              "title": "Generic Higher-Order Filter",
+              "code": "function createLengthFilter(minLength) {\n  return function(str) {\n    return str.length >= minLength;\n  };\n}\n\nconst words = ['apple', 'banana', 'cat', 'dog', 'elephant'];\nconst longWords = words.filter(createLengthFilter(5));\nconsole.log(longWords); // ['apple', 'banana', 'elephant']",
+              "explanation": "This example illustrates a more generic higher-order function `createLengthFilter` that takes a `minLength` and returns a function to filter strings by their length. This highlights the reusability and abstraction power of HOFs.",
+              "language": "javascript"
+            }
+          ],
+          "relatedQuestions": [
+            "question_hof_filter_1",
+            "question_hof_filter_2",
+            "question_hof_filter_3",
+            "question_hof_filter_4"
+          ],
+          "relatedTasks": [
+            "task_implement_flexible_filter_hof"
+          ],
+          "tags": [
+            "Higher-Order Functions",
+            "Closures",
+            "Array Methods",
+            "Filter",
+            "Functional Programming",
+            "JavaScript"
+          ],
+          "technology": "JavaScript",
+          "prerequisites": [
+            "javascript_functions",
+            "array_basics",
+            "scope_and_closure"
+          ],
+          "complexity": 6,
+          "interviewRelevance": 9,
+          "learningPath": "intermediate",
+          "requiredFor": [
+            "react_hooks",
+            "state_management",
+            "utility_libraries"
+          ]
+        },
+        {
+          "id": "theory_custom_promise_implementation",
+          "title": "Asynchronous JavaScript and Custom Promise Implementation",
+          "content": "## Asynchronous Operations in JavaScript\nJavaScript is single-threaded, meaning it executes one operation at a time. However, to handle long-running operations (like network requests, file I/O, timers) without blocking the main thread, it uses asynchronous mechanisms. Traditionally, this was managed with callbacks, which could lead to 'callback hell' (deeply nested, hard-to-read code).\n\n## Introduction to Promises\nPromises were introduced to provide a more manageable way to handle asynchronous operations. A `Promise` is an object representing the eventual completion (or failure) of an asynchronous operation and its resulting value. A Promise can be in one of three states:\n\n*   **Pending**: Initial state, neither fulfilled nor rejected.\n*   **Fulfilled (Resolved)**: Meaning that the operation completed successfully.\n*   **Rejected**: Meaning that the operation failed.\n\nOnce a promise is fulfilled or rejected, it is `settled` and its state cannot change. `then()` and `catch()` methods are used to attach handlers to a promise that will be called when the promise settles.\n\n### Core Mechanics of a Basic Custom Promise\nThe provided `CustomPromise` implementation demonstrates the fundamental concepts:\n\n1.  **Constructor**: Takes an `executor` function as an argument. The `executor` is immediately executed and receives `resolver` (for success) and `reject` (for failure) functions as arguments.\n2.  **State Management**: It maintains an internal `state` (PENDING, RESOLVED, REJECTED) and `value` (the result or error).\n3.  **Callback Queues**: `thenCallbacks` and `errorCallbacks` arrays store functions registered via `.then()` and `.catch()`.\n4.  **`resolver(value)`**: When called, it changes the promise's state to `RESOLVED`, sets its `value`, and iterates through `thenCallbacks` to execute them with the `value`.\n5.  **`reject(value)`**: When called, it changes the promise's state to `REJECTED`, sets its `value`, and iterates through `errorCallbacks` to execute them with the `value`.\n6.  **`then(callback)`**: Adds `callback` to `thenCallbacks`. Crucially, in a real Promise, `.then()` *always* returns a new Promise, allowing for chaining.\n7.  **`catch(callback)`**: A syntactic sugar for `then(null, callback)`, adding `callback` to `errorCallbacks`.\n\n**Limitations of this Basic Implementation**: This custom implementation is simplified. A full Promise implementation handles microtask queues, ensures `then` handlers are always called asynchronously even if the promise is already settled, allows `then` calls to be chained (where each `then` returns a *new* promise), propagates return values/errors in chains, and includes static methods like `Promise.resolve()`, `Promise.reject()`, `Promise.all()`, `Promise.race()`, etc.\n\n## Example Code (CustomPromise)\n```javascript\nclass CustomPromise {\n  constructor(action) {\n    this.state = \"PENDING\"; // Initial state\n    this.value = undefined; // Stores resolved value or rejected error\n    this.thenCallbacks = []; // Callbacks for successful resolution\n    this.errorCallbacks = []; // Callbacks for rejection\n    \n    // The executor function is called immediately\n    // Bind resolver and reject to 'this' to ensure correct context\n    try {\n      action(this.resolver.bind(this), this.reject.bind(this));\n    } catch (e) {\n      this.reject(e); // Catch synchronous errors in the executor\n    }\n  }\n\n  resolver(value) {\n    // Only transition if currently PENDING\n    if (this.state === \"PENDING\") {\n      this.state = \"RESOLVED\";\n      this.value = value;\n      // Asynchronously call callbacks (simulating microtask queue)\n      setTimeout(() => {\n        this.thenCallbacks.forEach((callback) => {\n          callback(this.value);\n        });\n      }, 0);\n    }\n  }\n\n  reject(value) {\n    // Only transition if currently PENDING\n    if (this.state === \"PENDING\") {\n      this.state = \"REJECTED\";\n      this.value = value;\n      // Asynchronously call callbacks\n      setTimeout(() => {\n        this.errorCallbacks.forEach((callback) => {\n          callback(this.value);\n        });\n      }, 0);\n    }\n  }\n\n  then(callback) {\n    // If already resolved, call callback asynchronously\n    if (this.state === \"RESOLVED\") {\n      setTimeout(() => callback(this.value), 0);\n    } else {\n      this.thenCallbacks.push(callback);\n    }\n    return this; // Basic chaining, though not returning a new promise like native\n  }\n\n  catch(callback) {\n    // If already rejected, call callback asynchronously\n    if (this.state === \"REJECTED\") {\n      setTimeout(() => callback(this.value), 0);\n    } else {\n      this.errorCallbacks.push(callback);\n    }\n    return this; // Basic chaining\n  }\n}\n```",
+          "examples": [
+            {
+              "id": "example_custom_promise_1",
+              "title": "Basic Usage of CustomPromise",
+              "code": "let promise = new CustomPromise((resolver, reject) => {\n  setTimeout(() => {\n    const success = Math.random() > 0.5;\n    if (success) {\n      resolver(\"Operation successful!\");\n    } else {\n      reject(\"Operation failed!\");\n    }\n  }, 1000);\n});\n\npromise\n  .then(function(response) {\n    console.log(\"Success:\", response);\n  })\n  .catch(function(error) {\n    console.error(\"Error:\", error);\n  });\n\nconsole.log(\"Promise initiated, waiting...\");",
+              "explanation": "This example demonstrates the basic asynchronous behavior of the `CustomPromise`. The executor function simulates an async operation (using `setTimeout`). Based on a random condition, it either calls `resolver` or `reject`. The `.then()` and `.catch()` handlers are registered to receive the outcome.",
+              "language": "javascript"
+            },
+            {
+              "id": "example_custom_promise_2",
+              "title": "Synchronous Executor Error Handling (Improved CustomPromise)",
+              "code": "let syncErrorPromise = new CustomPromise((resolve, reject) => {\n  throw new Error(\"Synchronous error in executor!\");\n});\n\nsyncErrorPromise.catch(error => {\n  console.error(\"Caught synchronous error:\", error.message);\n});\n\n// A promise that resolves immediately\nlet instantPromise = new CustomPromise((resolve) => {\n  resolve(\"Immediately resolved!\");\n});\n\ninstantPromise.then(response => {\n  console.log(\"Resolved immediately:\", response);\n});",
+              "explanation": "This example shows two cases: first, how the `try-catch` block in the `CustomPromise` constructor handles synchronous errors thrown within the executor function, leading to an immediate rejection. Second, it shows how `then` is called asynchronously even if the promise is resolved immediately, mimicking native Promise behavior for consistent async execution.",
+              "language": "javascript"
+            }
+          ],
+          "relatedQuestions": [
+            "question_promise_1",
+            "question_promise_2",
+            "question_promise_3",
+            "question_promise_4",
+            "question_promise_5"
+          ],
+          "relatedTasks": [
+            "task_extend_custom_promise_chaining"
+          ],
+          "tags": [
+            "Promises",
+            "Asynchronous JavaScript",
+            "OOP",
+            "Concurrency",
+            "Event Loop",
+            "JavaScript"
+          ],
+          "technology": "JavaScript",
+          "prerequisites": [
+            "javascript_basics",
+            "callbacks",
+            "event_loop_basics",
+            "classes"
+          ],
+          "complexity": 8,
+          "interviewRelevance": 10,
+          "learningPath": "advanced",
+          "requiredFor": [
+            "api_integration",
+            "react_hooks_async",
+            "node_js_backend"
+          ]
+        },
+        {
+          "id": "theory_array_manipulation_filtering_sorting",
+          "title": "Advanced Array Manipulation: Filtering, Sorting, and Mapping",
+          "content": "## Core Array Transformation Methods\nModern JavaScript provides powerful array methods that facilitate functional programming paradigms for transforming and manipulating data collections.\n\n### `Array.prototype.filter()`\nAs discussed, `filter()` creates a new array containing only elements for which the provided callback function returns `true`. It's ideal for selecting a subset of data based on specific criteria.\n\n### `Array.prototype.map()`\n`map()` creates a new array by calling a provided callback function on every element in the calling array. It's used to transform each element of an array into a new value, resulting in an array of the same length but with potentially different elements.\n\n### `Array.prototype.sort()`\n`sort()` sorts the elements of an array *in place* and returns the reference to the same array, now sorted. By default, `sort()` converts elements to strings and compares them based on their UTF-16 code units, which often leads to incorrect results for numbers or complex objects. To sort numerically or by custom criteria, a `compareFunction` must be provided.\n\n**`compareFunction(a, b)` rules:**\n*   If `compareFunction(a, b)` returns `a value < 0`, `a` comes before `b`.\n*   If `compareFunction(a, b)` returns `a value > 0`, `b` comes before `a`.\n*   If `compareFunction(a, b)` returns `0`, `a` and `b` maintain their relative order (though some engines might reorder them).\n\n### Chaining Array Methods\nThese methods are often chained together to perform complex data transformations in a clean, readable, and declarative way. Since `filter()` and `map()` return new arrays (and `sort()` returns the modified original array, which can then be used in a chain), you can call these methods one after another.\n\n**Example Scenario: Filtering, Mapping, and Sorting a Movie List**\nConsider a list of movie objects, each with properties like `title`, `averageRating`, `genres`, etc. A common task might be to find movies with a certain rating, then sort them by title. This involves:\n1.  **Filtering**: Selecting movies that meet rating criteria.\n2.  **Sorting**: Ordering the filtered movies by title (alphabetically).\n\nOptionally, **Mapping**: You might also want to transform the filtered and sorted list into a simpler format (e.g., just an array of titles) using `map()`.\n\n## Example Code (Movie List Manipulation)\n```javascript\nconst movies = [\n  { id: 1, title: 'The Great Adventure', averageRating: 4.5, genre: 'Action' },\n  { id: 2, title: 'Epic Drama', averageRating: 3.8, genre: 'Drama' },\n  { id: 3, title: 'Comedy Night', averageRating: 4.1, genre: 'Comedy' },\n  { id: 4, title: 'Sci-Fi Odyssey', averageRating: 4.7, genre: 'Sci-Fi' },\n  { id: 5, title: 'Romantic Getaway', averageRating: 3.5, genre: 'Romance' },\n  { id: 6, title: 'Action Thriller', averageRating: 4.5, genre: 'Action' },\n];\n\n/**\n * Filters a movie list by minimum rating and sorts by title.\n * @param {Array<Object>} movieList The list of movie objects.\n * @param {number} minRating The minimum average rating.\n * @returns {Array<Object>} The filtered and sorted list of movies.\n */\nfunction filterAndSortMovies(movieList, minRating) {\n  return movieList\n    .filter(movie => movie.averageRating >= minRating) // Filter by rating\n    .sort((a, b) => a.title.localeCompare(b.title)); // Sort alphabetically by title\n}\n\nconst highRatedMovies = filterAndSortMovies(movies, 4.0);\nconsole.log(highRatedMovies);\n/*\nOutput:\n[\n  { id: 6, title: 'Action Thriller', averageRating: 4.5, genre: 'Action' },\n  { id: 3, title: 'Comedy Night', averageRating: 4.1, genre: 'Comedy' },\n  { id: 4, title: 'Sci-Fi Odyssey', averageRating: 4.7, genre: 'Sci-Fi' },\n  { id: 1, title: 'The Great Adventure', averageRating: 4.5, genre: 'Action' }\n]\n*/\n\n// Example with map as well\nconst highRatedMovieTitles = movies\n  .filter(movie => movie.averageRating >= 4.0)\n  .sort((a, b) => a.title.localeCompare(b.title))\n  .map(movie => movie.title);\n\nconsole.log(highRatedMovieTitles);\n// Output: ['Action Thriller', 'Comedy Night', 'Sci-Fi Odyssey', 'The Great Adventure']\n\n```",
+          "examples": [
+            {
+              "id": "example_array_manipulation_1",
+              "title": "Filtering and Sorting Numbers",
+              "code": "const numbers = [20, 5, 15, 10, 25];\n\nconst filteredAndSorted = numbers\n  .filter(num => num > 10) // [20, 15, 25]\n  .sort((a, b) => a - b); // [15, 20, 25]\n\nconsole.log(filteredAndSorted);",
+              "explanation": "This example shows a simple chain of `filter` and `sort` on an array of numbers. It first filters out numbers less than or equal to 10, then sorts the remaining numbers in ascending order using a numeric comparator.",
+              "language": "javascript"
+            },
+            {
+              "id": "example_array_manipulation_2",
+              "title": "Sorting Objects by Multiple Criteria",
+              "code": "const users = [\n  { name: 'Alice', age: 30 },\n  { name: 'Bob', age: 25 },\n  { name: 'Charlie', age: 30 }\n];\n\n// Sort primarily by age (ascending), secondarily by name (alphabetical)\nusers.sort((a, b) => {\n  if (a.age !== b.age) {\n    return a.age - b.age;\n  } else {\n    return a.name.localeCompare(b.name);\n  }\n});\n\nconsole.log(users);\n/*\nOutput:\n[\n  { name: 'Bob', age: 25 },\n  { name: 'Alice', age: 30 },\n  { name: 'Charlie', age: 30 }\n]\n*/",
+              "explanation": "This example demonstrates how to sort an array of objects based on multiple criteria. It first compares `age` and if they are equal, it then uses `localeCompare` to sort by `name`, ensuring a consistent and expected order.",
+              "language": "javascript"
+            }
+          ],
+          "relatedQuestions": [
+            "question_array_manipulation_1",
+            "question_array_manipulation_2",
+            "question_array_manipulation_3",
+            "question_array_manipulation_4"
+          ],
+          "relatedTasks": [
+            "task_movie_list_management"
+          ],
+          "tags": [
+            "Array Methods",
+            "Filter",
+            "Sort",
+            "Map",
+            "Data Transformation",
+            "Functional Programming",
+            "Chaining"
+          ],
+          "technology": "JavaScript",
+          "prerequisites": [
+            "javascript_basics",
+            "array_methods",
+            "object_manipulation"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 9,
+          "learningPath": "intermediate",
+          "requiredFor": [
+            "data_processing",
+            "frontend_development",
+            "component_data_handling"
+          ]
+        }
+      ],
+      "questions": [
+        {
+          "id": "question_array_flatten_1",
+          "topic": "Array Prototype and Flattening",
+          "level": "medium",
+          "type": "mcq",
+          "question": "Given the following JavaScript code snippet, what will be the output of `console.log(arr.flatten())` if the `flatten` function is implemented recursively to handle arbitrary nesting?\n\n```javascript\nif (!Array.prototype.flatten) {\n  Array.prototype.flatten = function() {\n    // Assume a correct recursive flatten function is defined globally\n    // function flatten(arr) { ... implementation ... }\n    return flatten(this);\n  }\n}\n\nlet arr = [1, 2, [3, 4, [5, 6, [7, [8, 9, 10]]]]];\n```",
+          "answer": "[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]",
+          "options": [
+            "[1, 2, [3, 4, [5, 6, [7, [8, 9, 10]]]]]",
+            "[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]",
+            "[1, 2, 3, 4, 5, 6, 7, [8, 9, 10]]",
+            "Error: flatten is not defined"
+          ],
+          "analysisPoints": [
+            "Tests understanding of deep array flattening.",
+            "Checks knowledge of how `Array.prototype` methods are invoked (using `this`).",
+            "Assumes the `flatten` helper function is correctly implemented and accessible."
+          ],
+          "keyConcepts": [
+            "Array.prototype",
+            "Deep Flattening",
+            "Recursion",
+            "Polyfill"
+          ],
+          "evaluationCriteria": [
+            "Ability to trace recursive operations on nested data structures.",
+            "Understanding of array methods and prototype extensions."
+          ],
+          "example": "The provided `flatten` polyfill for `Array.prototype` is designed to recursively process all nested arrays. When called on `arr`, it will traverse all levels, extracting individual numbers and combining them into a single-dimensional array, regardless of how deep the nesting goes. The `flatten` function (as described in the theory block) concatenates results of recursive calls, ensuring all elements are brought to the top level.",
+          "tags": [
+            "Array",
+            "Recursion",
+            "Prototype",
+            "Polyfill",
+            "Easy"
+          ],
+          "prerequisites": [
+            "javascript_basics",
+            "array_methods"
+          ],
+          "complexity": 4,
+          "interviewFrequency": 7,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_array_flatten_2",
+          "topic": "Array Flattening",
+          "level": "medium",
+          "type": "open",
+          "question": "Describe the difference between shallow and deep array flattening. Provide a brief conceptual example for each.",
+          "answer": "Shallow flattening only flattens the first level of nested arrays. If there are arrays nested within arrays that are themselves nested at the first level, those inner arrays will remain intact. For example, `[1, [2, 3], [4, [5]]]` shallow flattened would become `[1, 2, 3, 4, [5]]`.\n\nDeep flattening, on the other hand, recursively flattens all levels of nested arrays until there are no more arrays within arrays, resulting in a single-dimensional array containing only non-array elements. For example, `[1, [2, 3], [4, [5]]]` deep flattened would become `[1, 2, 3, 4, 5]`.",
+          "analysisPoints": [
+            "Defines shallow vs. deep flattening.",
+            "Provides clear conceptual examples for each type.",
+            "Demonstrates understanding of multi-dimensional array structures."
+          ],
+          "keyConcepts": [
+            "Array Flattening",
+            "Shallow Flatten",
+            "Deep Flatten",
+            "Recursion"
+          ],
+          "evaluationCriteria": [
+            "Clarity and accuracy of definitions.",
+            "Effectiveness of examples in illustrating concepts."
+          ],
+          "example": "N/A",
+          "tags": [
+            "Array",
+            "Data Structures",
+            "Conceptual",
+            "Medium"
+          ],
+          "prerequisites": [
+            "array_basics"
+          ],
+          "complexity": 5,
+          "interviewFrequency": 6,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_array_flatten_3",
+          "topic": "Array.prototype.flat()",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "What is the native JavaScript method for flattening arrays, and how do you use it for deep flattening?",
+          "answer": "`Array.prototype.flat()` is the native method. To deep flatten, you pass `Infinity` as the depth argument: `arr.flat(Infinity)`.",
+          "analysisPoints": [
+            "Recalls the native method name.",
+            "Remembers the correct argument for deep flattening."
+          ],
+          "keyConcepts": [
+            "Array.prototype.flat",
+            "Native Array Methods",
+            "Deep Flattening"
+          ],
+          "evaluationCriteria": [
+            "Quick recall of syntax and purpose."
+          ],
+          "example": "N/A",
+          "tags": [
+            "Array",
+            "Native Methods",
+            "Flashcard",
+            "Easy"
+          ],
+          "prerequisites": [
+            "array_methods"
+          ],
+          "complexity": 3,
+          "interviewFrequency": 8,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_array_flatten_4",
+          "topic": "Array Polyfilling",
+          "level": "medium",
+          "type": "mcq",
+          "question": "Why is the `if (!Array.prototype.flatten)` check important when polyfilling `Array.prototype.flatten`?\n\n```javascript\nif (!Array.prototype.flatten) {\n  Array.prototype.flatten = function() { /* ... */ };\n}\n```",
+          "answer": "To prevent overwriting the native `Array.prototype.flat()` method (or other existing `flatten` implementations) if it already exists in the environment.",
+          "options": [
+            "To make the `flatten` method available as a global function.",
+            "To prevent infinite recursion when `flatten` is called.",
+            "To improve performance by avoiding redundant function declarations.",
+            "To prevent overwriting the native `Array.prototype.flat()` method (or other existing `flatten` implementations) if it already exists in the environment."
+          ],
+          "analysisPoints": [
+            "Tests understanding of polyfilling best practices.",
+            "Highlights the importance of defensive programming when extending built-in prototypes.",
+            "Relates to browser compatibility and future-proofing."
+          ],
+          "keyConcepts": [
+            "Polyfill",
+            "Array.prototype",
+            "Browser Compatibility",
+            "Defensive Programming"
+          ],
+          "evaluationCriteria": [
+            "Understanding of polyfill purpose.",
+            "Knowledge of potential conflicts with native implementations."
+          ],
+          "example": "The `if (!Array.prototype.flatten)` check ensures that your custom `flatten` implementation is only added to the `Array.prototype` if a method with that name doesn't already exist. This is crucial because modern browsers have a native `Array.prototype.flat()` method. If you were to add your `flatten` method unconditionally, it would override the native `flat()` (if you named it `flat`) or your custom `flatten` might conflict with a future native `flatten` method or another library's polyfill. This check helps maintain compatibility and avoids unexpected behavior.",
+          "tags": [
+            "Array",
+            "Polyfill",
+            "Best Practices",
+            "Compatibility",
+            "Medium"
+          ],
+          "prerequisites": [
+            "javascript_prototypes",
+            "browser_environments"
+          ],
+          "complexity": 6,
+          "interviewFrequency": 7,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_array_flatten_5",
+          "topic": "Array Flattening Complexity",
+          "level": "hard",
+          "type": "code",
+          "question": "Write an iterative (non-recursive) function to deeply flatten a nested array. The function should handle arrays of numbers and other arrays.\n\nExample:\n`flattenIterative([1, [2, [3, 4]], 5])` should return `[1, 2, 3, 4, 5]`.",
+          "answer": "```javascript\nfunction flattenIterative(arr) {\n  const stack = [...arr]; // Use a stack, initialize with array elements\n  const result = [];\n\n  while (stack.length > 0) {\n    const element = stack.shift(); // Take elements from the front of the stack (mimicking queue for order)\n\n    if (Array.isArray(element)) {\n      // If it's an array, unshift its elements back to the stack (at the beginning to maintain order)\n      // Using unshift + reverse or push + reverse at the end for stack behavior\n      // For maintaining original order like recursion, we process from right to left if pushing to end\n      // Or process from left to right if pushing to beginning of stack (unshift)\n      // Let's use unshift to simulate recursive call order for depth-first traversal with a queue-like processing:\n      // stack = [..., element_n-1, element_n, ...] -> process element_n, if array, unshift its children in reverse\n      // to get correct order when shifted.\n      // A simpler approach for iterative flatten to maintain order is to use a while loop with splice/concat for results\n      // or use a stack with push/pop and reverse when pushing children.\n      \n      // Correct iterative flatten using a stack for DFS, maintaining order:\n      // stack operations: push/pop. Push children in reverse order to process them correctly.\n      const innerElements = element.reverse(); // Reverse so that when popped, they are in original order\n      for (let i = 0; i < innerElements.length; i++) {\n        stack.unshift(innerElements[i]); // Add to the beginning to process next\n      }\n    } else {\n      result.push(element);\n    }\n  }\n\n  return result;\n}\n\n// A more common and often simpler iterative flatten that maintains order:\nfunction flattenIterativeQueue(arr) {\n    const result = [];\n    const queue = [...arr]; // Initialize a queue with the array elements\n\n    while (queue.length > 0) {\n        const current = queue.shift(); // Get the first element\n\n        if (Array.isArray(current)) {\n            // If it's an array, add its elements to the end of the queue\n            // This correctly maintains order from left to right\n            queue.push(...current);\n        } else {\n            result.push(current);\n        }\n    }\n    return result;\n}\n\n// Test cases:\nconsole.log(flattenIterativeQueue([1, 2, [3, 4, [5, 6, [7, [8, 9, 10]]]]])); // [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]\nconsole.log(flattenIterativeQueue([1, [2, [3, 4]], 5])); // [1, 2, 3, 4, 5]\nconsole.log(flattenIterativeQueue([])); // []\nconsole.log(flattenIterativeQueue([1, [null, [undefined]], 3])); // [1, null, undefined, 3]\n```",
+          "analysisPoints": [
+            "Tests ability to convert recursive logic to iterative.",
+            "Requires understanding of stack/queue data structures.",
+            "Assesses ability to manage array elements and order during flattening.",
+            "Highlights the use of `Array.isArray` for type checking."
+          ],
+          "keyConcepts": [
+            "Iterative Algorithm",
+            "Stack/Queue",
+            "Array Flattening",
+            "DFS/BFS (conceptual)"
+          ],
+          "evaluationCriteria": [
+            "Correctness of the iterative implementation.",
+            "Efficiency and handling of edge cases (empty array, non-number elements).",
+            "Understanding of array manipulation methods like `push`, `shift`, `unshift`, `splice`, `concat`."
+          ],
+          "example": "The iterative approach for deep flattening typically uses a stack (or queue) to keep track of elements to process. When an array element is encountered, its contents are added to the stack/queue. Non-array elements are pushed to the result array. The `flattenIterativeQueue` implementation uses a queue-like approach (FIFO for processing elements, pushing new array elements to the end) which naturally preserves the order of elements from left to right.",
+          "tags": [
+            "Array",
+            "Algorithm",
+            "Iterative",
+            "Data Structures",
+            "Hard",
+            "Coding Challenge"
+          ],
+          "prerequisites": [
+            "recursion",
+            "array_methods",
+            "data_structures_basics"
+          ],
+          "complexity": 8,
+          "interviewFrequency": 7,
+          "learningPath": "advanced"
+        },
+        {
+          "id": "question_hof_filter_1",
+          "topic": "Higher-Order Functions and Closures",
+          "level": "medium",
+          "type": "mcq",
+          "question": "Consider the `between` function provided:\n\n```javascript\nfunction between(start, end) {\n  return function(value, index) {\n    return value > start && value < end;\n  };\n}\n```\n\nWhat JavaScript concept allows the inner function to access `start` and `end` even after the `between` function has finished executing?",
+          "answer": "Closure",
+          "options": [
+            "Scope Chaining",
+            "Hoisting",
+            "Closure",
+            "This binding"
+          ],
+          "analysisPoints": [
+            "Tests fundamental understanding of closures.",
+            "Distinguishes closure from related scope concepts."
+          ],
+          "keyConcepts": [
+            "Closure",
+            "Lexical Environment",
+            "Higher-Order Functions",
+            "Scope"
+          ],
+          "evaluationCriteria": [
+            "Correct identification of the concept.",
+            "Understanding of how inner functions retain access to outer scope variables."
+          ],
+          "example": "A closure is formed when an inner function 'remembers' the environment (including local variables) in which it was created, even after the outer function has finished executing. In the `between` example, the anonymous inner function returned by `between` closes over the `start` and `end` parameters from its parent scope. This allows the filter callback to use these `start` and `end` values when it's later invoked by `Array.prototype.filter`.",
+          "tags": [
+            "Higher-Order Functions",
+            "Closures",
+            "Scope",
+            "JavaScript",
+            "Medium"
+          ],
+          "prerequisites": [
+            "javascript_functions",
+            "scope_basics"
+          ],
+          "complexity": 6,
+          "interviewFrequency": 9,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_hof_filter_2",
+          "topic": "Array.prototype.filter()",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "What is the primary purpose of `Array.prototype.filter()`?",
+          "answer": "`Array.prototype.filter()` creates a new array containing only elements that pass a provided test function (i.e., for which the callback returns `true`).",
+          "analysisPoints": [
+            "Recalls the main function of `filter`.",
+            "Highlights that it returns a new array."
+          ],
+          "keyConcepts": [
+            "Array.prototype.filter",
+            "Immutability",
+            "Filtering"
+          ],
+          "evaluationCriteria": [
+            "Quick recall of method purpose."
+          ],
+          "example": "N/A",
+          "tags": [
+            "Array Methods",
+            "Filter",
+            "Flashcard",
+            "Easy"
+          ],
+          "prerequisites": [
+            "array_basics"
+          ],
+          "complexity": 3,
+          "interviewFrequency": 8,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_hof_filter_3",
+          "topic": "Higher-Order Functions",
+          "level": "medium",
+          "type": "open",
+          "question": "Explain why using a higher-order function like `between` is more flexible and reusable than writing a direct filter callback for each range, e.g., `list.filter(value => value > 3 && value < 6)`.",
+          "answer": "Using a higher-order function like `between` enhances flexibility and reusability because it allows you to dynamically create filter predicates with different parameters without rewriting the core filtering logic. Instead of hardcoding `start` and `end` values directly into the `filter` callback for each use case (`value => value > 3 && value < 6`), `between(start, end)` abstracts this logic. You can easily generate `between(1, 5)`, `between(10, 20)`, etc., making your code more modular, cleaner, and easier to maintain. It adheres to the DRY (Don't Repeat Yourself) principle.",
+          "analysisPoints": [
+            "Emphasizes reusability and flexibility.",
+            "Contrasts HOF approach with direct callback.",
+            "Connects to principles like DRY and modularity."
+          ],
+          "keyConcepts": [
+            "Higher-Order Functions",
+            "Reusability",
+            "Flexibility",
+            "DRY Principle",
+            "Functional Programming"
+          ],
+          "evaluationCriteria": [
+            "Articulates benefits of HOFs.",
+            "Compares different coding styles effectively."
+          ],
+          "example": "N/A",
+          "tags": [
+            "Higher-Order Functions",
+            "Functional Programming",
+            "Best Practices",
+            "Medium"
+          ],
+          "prerequisites": [
+            "javascript_functions",
+            "functional_programming_basics"
+          ],
+          "complexity": 6,
+          "interviewFrequency": 7,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_hof_filter_4",
+          "topic": "Custom Filter Predicate",
+          "level": "medium",
+          "type": "code",
+          "question": "Implement a higher-order function `getPropertyChecker(propertyName, expectedValue)` that returns a callback function. This callback should be suitable for `Array.prototype.filter()` and will return `true` if an object in the array has a property named `propertyName` with a value equal to `expectedValue`. Otherwise, it should return `false`.",
+          "answer": "```javascript\nfunction getPropertyChecker(propertyName, expectedValue) {\n  return function(obj) {\n    // Ensure obj is an object and has the property before checking value\n    return typeof obj === 'object' && obj !== null && obj.hasOwnProperty(propertyName) && obj[propertyName] === expectedValue;\n  };\n}\n\n// Example usage:\nconst products = [\n  { name: 'Laptop', category: 'Electronics', price: 1200 },\n  { name: 'Desk Chair', category: 'Furniture', price: 300 },\n  { name: 'Smartphone', category: 'Electronics', price: 800 },\n  { name: 'Lamp', category: 'Furniture', price: 50 }\n];\n\nconst electronicProducts = products.filter(getPropertyChecker('category', 'Electronics'));\nconsole.log(electronicProducts); \n/*\n[\n  { name: 'Laptop', category: 'Electronics', price: 1200 },\n  { name: 'Smartphone', category: 'Electronics', price: 800 }\n]\n*/\n\nconst affordableChairs = products.filter(getPropertyChecker('price', 300));\nconsole.log(affordableChairs);\n/*\n[\n  { name: 'Desk Chair', category: 'Furniture', price: 300 }\n]\n*/\n\nconst nonExistentProducts = products.filter(getPropertyChecker('color', 'red'));\nconsole.log(nonExistentProducts); // []\n```",
+          "analysisPoints": [
+            "Tests ability to write a higher-order function.",
+            "Checks understanding of filtering arrays of objects.",
+            "Evaluates proper handling of object property access and existence (`hasOwnProperty`).",
+            "Demonstrates practical application of HOFs for reusable filtering logic."
+          ],
+          "keyConcepts": [
+            "Higher-Order Functions",
+            "Array.prototype.filter",
+            "Object Properties",
+            "Closures",
+            "Type Checking"
+          ],
+          "evaluationCriteria": [
+            "Correct implementation of the HOF and its returned callback.",
+            "Robustness in handling different object structures and property existence.",
+            "Clarity and conciseness of code."
+          ],
+          "example": "The `getPropertyChecker` function creates a reusable filter predicate. When called with a `propertyName` and `expectedValue`, it returns a new function. This inner function then operates on each `obj` passed by `filter()`, checking if `obj` has the specified property and if its value matches the `expectedValue`. This pattern is very useful for creating dynamic filters.",
+          "tags": [
+            "Higher-Order Functions",
+            "Array Methods",
+            "Filtering",
+            "Coding Challenge",
+            "Medium"
+          ],
+          "prerequisites": [
+            "javascript_objects",
+            "array_methods",
+            "closures"
+          ],
+          "complexity": 7,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_promise_1",
+          "topic": "Promise Lifecycle",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "What are the three states of a JavaScript Promise, and which states are considered 'settled'?",
+          "answer": "The three states are: `Pending`, `Fulfilled` (or `Resolved`), and `Rejected`. The `Fulfilled` and `Rejected` states are considered 'settled'.",
+          "analysisPoints": [
+            "Recalls the basic states of a Promise.",
+            "Identifies which states are terminal."
+          ],
+          "keyConcepts": [
+            "Promises",
+            "Asynchronous JavaScript",
+            "Promise States"
+          ],
+          "evaluationCriteria": [
+            "Quick and accurate recall of Promise lifecycle."
+          ],
+          "example": "N/A",
+          "tags": [
+            "Promises",
+            "Asynchronous",
+            "Flashcard",
+            "Easy"
+          ],
+          "prerequisites": [
+            "javascript_basics"
+          ],
+          "complexity": 3,
+          "interviewFrequency": 9,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_promise_2",
+          "topic": "Custom Promise Executor",
+          "level": "medium",
+          "type": "mcq",
+          "question": "In the `CustomPromise` implementation, what is the purpose of the `action` (executor) function passed to the constructor?\n\n```javascript\nclass CustomPromise {\n  constructor(action) {\n    // ...\n    action(this.resolver.bind(this), this.reject.bind(this));\n  }\n  // ...\n}\n```",
+          "answer": "It contains the asynchronous operation logic and invokes `resolver` or `reject` to change the promise's state.",
+          "options": [
+            "It defines the initial state of the promise.",
+            "It is a callback that runs when the promise is settled.",
+            "It registers `then` and `catch` handlers for the promise.",
+            "It contains the asynchronous operation logic and invokes `resolver` or `reject` to change the promise's state."
+          ],
+          "analysisPoints": [
+            "Tests understanding of the Promise constructor's executor function.",
+            "Clarifies the role of `resolver` and `reject` within the executor.",
+            "Distinguishes executor from `then`/`catch` handlers."
+          ],
+          "keyConcepts": [
+            "Promises",
+            "Executor Function",
+            "Asynchronous Operations",
+            "Promise Lifecycle"
+          ],
+          "evaluationCriteria": [
+            "Correctly identifies the executor's responsibility.",
+            "Understands how it initiates the async process."
+          ],
+          "example": "The `action` (or `executor`) function is the core logic that defines what the promise actually *does* asynchronously. It's given two functions, `resolve` and `reject`, which it calls when the asynchronous work completes successfully or fails, respectively. This is where you would place your `setTimeout`, `fetch` call, or any other async operation.",
+          "tags": [
+            "Promises",
+            "Asynchronous",
+            "Constructor",
+            "Medium"
+          ],
+          "prerequisites": [
+            "callbacks",
+            "javascript_classes"
+          ],
+          "complexity": 6,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_promise_3",
+          "topic": "Promise Chaining",
+          "level": "hard",
+          "type": "open",
+          "question": "The provided `CustomPromise` implementation's `then` method simply returns `this`. Explain why this behavior differs significantly from native JavaScript Promises regarding chaining, and what fundamental change is needed to support true chaining (i.e., `promise.then(...).then(...)` where each `.then()` operates on the result of the previous one).",
+          "answer": "Native JavaScript Promises achieve true chaining because each call to `then()` (or `catch()`) *returns a new Promise*. This new Promise is then resolved or rejected based on the return value or thrown error of the handler function from the *previous* `then()` or `catch()`.\n\nThe provided `CustomPromise`'s `then` method, by simply returning `this`, allows for sequential registration of callbacks on the *same* promise instance. This means all `.then()` calls will receive the result of the *original* promise, and there's no mechanism to pass the transformed result from one handler to the next handler in a chain, nor to handle asynchronous operations *within* a `then` handler and wait for them.\n\nTo support true chaining, the `then` method would need to:\n1.  Create and return a *new* `CustomPromise` instance.\n2.  Inside this new promise's executor, call the original `then` callback (the one passed to `then`).\n3.  If the original callback returns a value, resolve the new promise with that value.\n4.  If the original callback returns *another promise*, wait for that promise to settle and then resolve/reject the new promise with its outcome (this is called 'promise resolution procedure').\n5.  If the original callback throws an error, reject the new promise with that error.",
+          "analysisPoints": [
+            "Identifies the key difference in `then` return behavior.",
+            "Explains the impact on chaining functionality.",
+            "Outlines the necessary steps to implement true promise chaining.",
+            "Demonstrates deep understanding of Promise resolution procedure."
+          ],
+          "keyConcepts": [
+            "Promise Chaining",
+            "Promise Resolution Procedure",
+            "Asynchronous Flow Control",
+            "Return Values in Promises"
+          ],
+          "evaluationCriteria": [
+            "Thorough explanation of `then` behavior differences.",
+            "Accurate description of how chaining works natively.",
+            "Clear articulation of the implementation requirements for chaining."
+          ],
+          "example": "N/A",
+          "tags": [
+            "Promises",
+            "Asynchronous",
+            "Chaining",
+            "Architecture",
+            "Hard"
+          ],
+          "prerequisites": [
+            "custom_promise_implementation",
+            "promise_lifecycle",
+            "call_stack_event_loop"
+          ],
+          "complexity": 9,
+          "interviewFrequency": 9,
+          "learningPath": "advanced"
+        },
+        {
+          "id": "question_promise_4",
+          "topic": "Promise Error Handling",
+          "level": "medium",
+          "type": "code",
+          "question": "Modify the `CustomPromise`'s `constructor`, `resolver`, and `reject` methods to ensure that callbacks (both `thenCallbacks` and `errorCallbacks`) are always executed asynchronously, even if the promise is resolved or rejected synchronously inside the executor. Provide a brief explanation of why this is important for consistent behavior.",
+          "answer": "```javascript\nclass CustomPromise {\n  constructor(action) {\n    this.state = \"PENDING\";\n    this.value = undefined;\n    this.thenCallbacks = [];\n    this.errorCallbacks = [];\n    \n    const resolve = (value) => {\n      // Ensure resolver is called asynchronously to match native promise behavior\n      setTimeout(() => this._resolve(value), 0);\n    };\n    const reject = (value) => {\n      // Ensure reject is called asynchronously\n      setTimeout(() => this._reject(value), 0);\n    };\n\n    try {\n      action(resolve, reject);\n    } catch (e) {\n      reject(e); // Catch sync errors in executor, and reject asynchronously\n    }\n  }\n\n  _resolve(value) { // Renamed to private to signify internal use\n    if (this.state === \"PENDING\") {\n      this.state = \"RESOLVED\";\n      this.value = value;\n      this.thenCallbacks.forEach((callback) => {\n        callback(this.value);\n      });\n      this.thenCallbacks = []; // Clear callbacks once executed\n      this.errorCallbacks = []; // No longer needed for resolved promise\n    }\n  }\n\n  _reject(value) { // Renamed to private\n    if (this.state === \"PENDING\") {\n      this.state = \"REJECTED\";\n      this.value = value;\n      this.errorCallbacks.forEach((callback) => {\n        callback(this.value);\n      });\n      this.thenCallbacks = []; // No longer needed for rejected promise\n      this.errorCallbacks = []; // Clear callbacks once executed\n    }\n  }\n\n  then(callback) {\n    if (this.state === \"RESOLVED\") {\n      setTimeout(() => callback(this.value), 0);\n    } else if (this.state === \"PENDING\") {\n      this.thenCallbacks.push(callback);\n    }\n    return this; \n  }\n\n  catch(callback) {\n    if (this.state === \"REJECTED\") {\n      setTimeout(() => callback(this.value), 0);\n    } else if (this.state === \"PENDING\") {\n      this.errorCallbacks.push(callback);\n    }\n    return this;\n  }\n}\n\n// Usage demonstration:\nconsole.log(\"Start\");\nlet syncPromise = new CustomPromise((resolve) => {\n  resolve(\"Sync resolved\");\n});\nsyncPromise.then(val => console.log(val));\nconsole.log(\"End\");\n// Expected Output: Start, End, Sync resolved (showing 'Sync resolved' is async)\n\nlet syncErrorPromise = new CustomPromise((_, reject) => {\n  reject(\"Sync rejected\");\n});\nsyncErrorPromise.catch(err => console.error(err));\n```\n\n**Explanation:**\nIt's crucial for `resolver` and `reject` (and the `then`/`catch` handlers themselves) to always execute asynchronously (e.g., by wrapping their calls in `setTimeout(..., 0)` or `queueMicrotask`) for consistency. If a promise resolves synchronously, and its `then` handlers also execute synchronously, it can lead to unexpected execution order (e.g., `console.log` statements after the promise creation might execute *after* the `then` handler, even if they logically appear to execute before). Native Promises always put their handlers into the microtask queue, ensuring they run after the current script execution stack has cleared, providing a predictable asynchronous execution model.",
+          "analysisPoints": [
+            "Tests understanding of synchronous vs. asynchronous execution in Promises.",
+            "Highlights the role of `setTimeout(0)` (or microtasks) in Promise behavior.",
+            "Assesses ability to modify existing code for specific asynchronous guarantees.",
+            "Explains the importance of consistent async execution for predictability."
+          ],
+          "keyConcepts": [
+            "Promises",
+            "Asynchronous Execution",
+            "Event Loop",
+            "Microtask Queue",
+            "setTimeout(0)"
+          ],
+          "evaluationCriteria": [
+            "Correct implementation of asynchronous execution for handlers.",
+            "Clear explanation of why this behavior is necessary.",
+            "Understanding of the JavaScript event loop and task queues."
+          ],
+          "example": "This modification ensures that even if `resolve` or `reject` is called immediately within the executor, the corresponding `then` or `catch` callbacks are deferred to the next tick of the event loop. This guarantees that synchronous code following the promise creation always executes before any promise handlers, mimicking the behavior of native Promises and preventing race conditions or unpredictable side effects.",
+          "tags": [
+            "Promises",
+            "Asynchronous",
+            "Event Loop",
+            "Coding Challenge",
+            "Medium"
+          ],
+          "prerequisites": [
+            "custom_promise_implementation",
+            "event_loop_basics"
+          ],
+          "complexity": 7,
+          "interviewFrequency": 8,
+          "learningPath": "advanced"
+        },
+        {
+          "id": "question_promise_5",
+          "topic": "Async/Await vs. Promises",
+          "level": "hard",
+          "type": "open",
+          "question": "How do `async/await` syntax sugar build on top of Promises, and what are their primary advantages for handling complex asynchronous flows compared to raw `.then()` chaining?",
+          "answer": "`async/await` is syntactic sugar built on top of Promises, meaning that `async` functions always return a Promise, and `await` expressions are essentially a more readable way to wait for a Promise to settle. Behind the scenes, the JavaScript engine desugars `async/await` into Promise-based code with `.then()` and `.catch()` calls.\n\n**Primary advantages for handling complex asynchronous flows:**\n1.  **Readability and Simplicity**: `async/await` makes asynchronous code look and behave like synchronous code. This significantly improves readability, especially in complex sequences where multiple asynchronous operations depend on each other, reducing the 'pyramid of doom' or callback hell associated with deeply nested `.then()` calls.\n2.  **Error Handling**: Error handling becomes much simpler with `try...catch` blocks, similar to synchronous error handling. This is often more intuitive than chaining `.catch()` blocks, especially for multiple `await` calls within a single `async` function.\n3.  **Debugging**: Stepping through `async/await` code in a debugger is typically easier, as the execution flow appears more linear compared to jumping between different `.then()` callbacks.\n4.  **Conditional Logic and Loops**: Writing conditional asynchronous logic or loops (`if/else`, `for`, `while`) that involve waiting for promises is much more straightforward and natural with `await`, as you can use standard synchronous control flow constructs.\n5.  **Less Indentation**: It avoids the increasing indentation levels that can occur with `.then()` chains, leading to flatter and more maintainable code.\n\nWhile `async/await` offers these significant benefits, it's important to remember that it doesn't replace the underlying Promise API. For concurrent operations (like `Promise.all` or `Promise.race`), or when you need to attach multiple callbacks to a single promise, raw Promise methods are still directly relevant.",
+          "analysisPoints": [
+            "Defines `async/await` as syntactic sugar over Promises.",
+            "Lists and explains multiple advantages of `async/await`.",
+            "Compares `async/await` with traditional `.then()` chaining.",
+            "Acknowledges scenarios where raw Promise methods are still useful."
+          ],
+          "keyConcepts": [
+            "Async/Await",
+            "Promises",
+            "Asynchronous Programming",
+            "Error Handling",
+            "Code Readability",
+            "Syntactic Sugar"
+          ],
+          "evaluationCriteria": [
+            "Comprehensive explanation of the relationship between `async/await` and Promises.",
+            "Clear articulation of the benefits with supporting reasons.",
+            "Demonstrates advanced understanding of asynchronous patterns."
+          ],
+          "example": "N/A",
+          "tags": [
+            "Promises",
+            "Async/Await",
+            "Asynchronous",
+            "Best Practices",
+            "Hard"
+          ],
+          "prerequisites": [
+            "promises_introduction",
+            "event_loop_advanced"
+          ],
+          "complexity": 9,
+          "interviewFrequency": 10,
+          "learningPath": "advanced"
+        },
+        {
+          "id": "question_array_manipulation_1",
+          "topic": "Array.prototype.sort()",
+          "level": "medium",
+          "type": "mcq",
+          "question": "Given the following array:\n\n```javascript\nconst items = [ { name: 'Banana', price: 1.5 }, { name: 'Apple', price: 1.0 }, { name: 'Cherry', price: 2.0 } ];\n```\n\nWhich `sort` comparator function would correctly sort the `items` array by `price` in **descending** order?",
+          "answer": "`items.sort((a, b) => b.price - a.price);`",
+          "options": [
+            "`items.sort((a, b) => a.price - b.price);`",
+            "`items.sort((a, b) => a.name.localeCompare(b.name));`",
+            "`items.sort((a, b) => b.price - a.price);`",
+            "`items.sort((a, b) => a.price > b.price);`"
+          ],
+          "analysisPoints": [
+            "Tests knowledge of `Array.prototype.sort()` with objects.",
+            "Verifies understanding of numeric comparison logic (`a - b` vs `b - a`) for ascending/descending order.",
+            "Distinguishes numeric sorting from string sorting (`localeCompare`)."
+          ],
+          "keyConcepts": [
+            "Array.prototype.sort",
+            "Comparator Function",
+            "Descending Order",
+            "Object Sorting"
+          ],
+          "evaluationCriteria": [
+            "Correct application of sort comparator logic.",
+            "Understanding of numeric comparison for sorting."
+          ],
+          "example": "The `sort` method's `compareFunction(a, b)` expects a negative number if `a` should come before `b`, a positive number if `b` should come before `a`, and zero if their order doesn't matter. For descending order of `price`, if `b.price` is greater than `a.price`, `b` should come before `a`, so `b.price - a.price` would be positive, correctly placing `b` before `a`.",
+          "tags": [
+            "Array Methods",
+            "Sort",
+            "Objects",
+            "Medium"
+          ],
+          "prerequisites": [
+            "array_basics",
+            "object_properties"
+          ],
+          "complexity": 5,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_array_manipulation_2",
+          "topic": "Array Method Chaining",
+          "level": "medium",
+          "type": "open",
+          "question": "When chaining `filter()`, `map()`, and `sort()` on a large array of objects, what are the potential performance considerations and in what order should these methods generally be chained to optimize performance, and why?",
+          "answer": "When chaining `filter()`, `map()`, and `sort()` on a large array:\n\n**Potential Performance Considerations:**\n*   **Intermediate Arrays**: Both `filter()` and `map()` create new arrays. If operations are not ordered optimally, this can lead to creating large intermediate arrays that consume more memory and CPU cycles for garbage collection.\n*   **Number of Iterations**: Each chained method iterates over its input array. The size of these intermediate arrays directly impacts the total number of operations performed.\n*   **Sorting Cost**: `sort()` generally has a time complexity of O(N log N) (or worse, O(N^2) for some implementations/cases), making it the most expensive operation among the three, especially for large N.\n\n**Optimal Chaining Order:**\nGenerally, the optimal order is:\n1.  **`filter()`**: Apply `filter()` first. This is crucial because it immediately reduces the number of elements in the array that subsequent operations (`map`, `sort`) need to process. By reducing the size of the array as early as possible, you minimize the work (and memory footprint) for later, more expensive operations.\n2.  **`sort()`**: Apply `sort()` next. While `sort()` is expensive, it operates on a (now potentially smaller) filtered array. If you map before sorting, and the mapping changes the sort key, you might be sorting unnecessary data or using values that are no longer relevant for the sort.\n3.  **`map()`**: Apply `map()` last. `map()` transforms each element. By performing it last, you ensure that you are only transforming the data that is actually needed (i.e., the filtered and sorted elements), avoiding unnecessary transformations on elements that would have been filtered out anyway.\n\n**Why this order?**\nThis order (`filter` -> `sort` -> `map`) prioritizes reducing the data set size as early as possible (`filter`), then performing the most computationally expensive operation (`sort`) on the minimized set, and finally transforming only the necessary data (`map`). This minimizes memory overhead and the total number of operations, leading to better performance, especially with large datasets.",
+          "analysisPoints": [
+            "Identifies resource consumption (memory, CPU) as key performance factors.",
+            "Correctly identifies the optimal chaining order.",
+            "Provides clear reasoning for the chosen order based on method behavior and complexity.",
+            "Demonstrates an understanding of practical optimization for data processing."
+          ],
+          "keyConcepts": [
+            "Array Method Chaining",
+            "Performance Optimization",
+            "Filter",
+            "Sort",
+            "Map",
+            "Intermediate Arrays",
+            "Time Complexity"
+          ],
+          "evaluationCriteria": [
+            "Comprehensive understanding of performance implications.",
+            "Logical and accurate explanation of optimal chaining order.",
+            "Ability to apply theoretical knowledge to practical scenarios."
+          ],
+          "example": "N/A",
+          "tags": [
+            "Array Methods",
+            "Performance",
+            "Optimization",
+            "Functional Programming",
+            "Hard"
+          ],
+          "prerequisites": [
+            "array_methods",
+            "algorithm_complexity_basics"
+          ],
+          "complexity": 8,
+          "interviewFrequency": 7,
+          "learningPath": "advanced"
+        },
+        {
+          "id": "question_array_manipulation_3",
+          "topic": "Array.prototype.map()",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "What is the primary difference between `Array.prototype.forEach()` and `Array.prototype.map()`?",
+          "answer": "`forEach()` iterates over array elements and executes a callback for each, but it does not return a new array. `map()` also iterates, but it *returns a new array* containing the results of calling a provided callback function on every element.",
+          "analysisPoints": [
+            "Highlights the key difference: `map` returns a new array, `forEach` does not.",
+            "Clarifies their respective purposes."
+          ],
+          "keyConcepts": [
+            "Array.prototype.map",
+            "Array.prototype.forEach",
+            "Immutability",
+            "Transformation"
+          ],
+          "evaluationCriteria": [
+            "Quick recall of method differences."
+          ],
+          "example": "N/A",
+          "tags": [
+            "Array Methods",
+            "Map",
+            "ForEach",
+            "Flashcard",
+            "Easy"
+          ],
+          "prerequisites": [
+            "array_basics"
+          ],
+          "complexity": 3,
+          "interviewFrequency": 8,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_array_manipulation_4",
+          "topic": "Data Filtering and Mapping",
+          "level": "medium",
+          "type": "code",
+          "question": "You are given an array of user objects. Each user has `id`, `name`, and `isActive` properties. Write a JavaScript function `getActiveUserNames(users)` that takes this array, filters for users where `isActive` is `true`, and then maps them to an array containing only their `name` property. The function should return this new array of active user names.",
+          "answer": "```javascript\nconst users = [\n  { id: 1, name: 'Alice', isActive: true },\n  { id: 2, name: 'Bob', isActive: false },\n  { id: 3, name: 'Charlie', isActive: true },\n  { id: 4, name: 'David', isActive: false }\n];\n\n/**\n * Filters active users and returns an array of their names.\n * @param {Array<Object>} users The array of user objects.\n * @returns {Array<string>} An array of active user names.\n */\nfunction getActiveUserNames(users) {\n  if (!Array.isArray(users)) {\n    return []; // Handle non-array input gracefully\n  }\n  return users\n    .filter(user => user.isActive === true) // Filter for active users\n    .map(user => user.name); // Map to an array of names\n}\n\n// Test cases\nconsole.log(getActiveUserNames(users)); // Expected: ['Alice', 'Charlie']\n\nconst emptyUsers = [];\nconsole.log(getActiveUserNames(emptyUsers)); // Expected: []\n\nconst mixedUsers = [\n  { id: 5, name: 'Eve', isActive: true },\n  { id: 6, name: 'Frank', isActive: false },\n  null, // Test with null/undefined elements\n  { id: 7, name: 'Grace', isActive: true },\n  undefined\n];\nconsole.log(getActiveUserNames(mixedUsers)); // Expected: ['Eve', 'Grace'] (handles null/undefined gracefully due to property access failing or returning falsy, which is okay for this filter)\n\nconsole.log(getActiveUserNames(null)); // Expected: []\nconsole.log(getActiveUserNames(\"not an array\")); // Expected: []\n```",
+          "analysisPoints": [
+            "Tests chaining of `filter` and `map` methods.",
+            "Requires correct use of arrow functions for succinct callbacks.",
+            "Assesses ability to extract specific properties from objects.",
+            "Checks for basic input validation (optional but good practice)."
+          ],
+          "keyConcepts": [
+            "Array.prototype.filter",
+            "Array.prototype.map",
+            "Method Chaining",
+            "Object Properties",
+            "Data Transformation"
+          ],
+          "evaluationCriteria": [
+            "Correct implementation of filtering and mapping logic.",
+            "Efficiency and conciseness of the solution.",
+            "Handling of edge cases like empty arrays or invalid input."
+          ],
+          "example": "This function first uses `filter` to create a new array containing only the user objects where `isActive` is true. Then, it chains `map` to this filtered array, transforming each user object into just its `name` string. The result is a clean array of strings representing the names of active users.",
+          "tags": [
+            "Array Methods",
+            "Filter",
+            "Map",
+            "Chaining",
+            "Coding Challenge",
+            "Medium"
+          ],
+          "prerequisites": [
+            "array_methods",
+            "javascript_objects"
+          ],
+          "complexity": 6,
+          "interviewFrequency": 9,
+          "learningPath": "intermediate"
+        }
+      ],
+      "tasks": [
+        {
+          "id": "task_implement_deep_flatten",
+          "title": "Implement a Generic Deep Flatten Function",
+          "description": "\nImplement a JavaScript function named `deepFlatten(arr)` that takes an array, potentially containing nested arrays of any depth, and returns a new one-dimensional array with all elements flattened. You should not use the native `Array.prototype.flat()` method.\n\n**Requirements:**\n1.  The function should be named `deepFlatten`.\n2.  It must take a single argument, `arr`, which is an array.\n3.  It should handle arbitrarily deep nesting of arrays.\n4.  The function should return a *new* array, not modify the original.\n5.  Consider edge cases like empty arrays, arrays with `null` or `undefined` elements, and arrays with non-array, non-primitive elements (e.g., objects).\n\nYour solution can be recursive or iterative, but aim for clarity and correctness.\n",
+          "difficulty": "medium",
+          "startingCode": "/**\n * Recursively flattens a nested array into a single-dimensional array.\n * @param {Array} arr The array to flatten.\n * @returns {Array} The flattened array.\n */\nfunction deepFlatten(arr) {\n  // TODO: Implement the deep flattening logic here\n  // Hint: You'll need to check if an element is an array.\n  // Consider using Array.isArray() or instanceof Array.\n  // Use Array.prototype.concat() or spread operator (...) for combining arrays.\n  \n  return []; // Replace with your implementation\n}\n",
+          "solutionCode": "/**\n * Recursively flattens a nested array into a single-dimensional array.\n * @param {Array} arr The array to flatten.\n * @returns {Array} The flattened array.\n */\nfunction deepFlatten(arr) {\n  let result = [];\n  for (let i = 0; i < arr.length; i++) {\n    if (Array.isArray(arr[i])) {\n      // If the current element is an array, recursively flatten it\n      // and concatenate the results.\n      result = result.concat(deepFlatten(arr[i]));\n    } else {\n      // If it's not an array, add it directly to the result.\n      result.push(arr[i]);\n    }\n  }\n  return result;\n}\n\n// Iterative solution using a stack (alternative)\n/*\nfunction deepFlattenIterative(arr) {\n  const result = [];\n  const stack = [...arr]; // Initialize stack with elements from the input array\n\n  while (stack.length > 0) {\n    const element = stack.shift(); // Get the first element (BFS-like processing order)\n\n    if (Array.isArray(element)) {\n      // If it's an array, add its elements to the end of the stack\n      // This ensures elements are processed in their original order.\n      stack.push(...element);\n    } else {\n      result.push(element);\n    }\n  }\n  return result;\n}\n*/\n",
+          "testCases": [
+            "deepFlatten([1, 2, [3, 4]]) should return [1, 2, 3, 4]",
+            "deepFlatten([1, [2, [3, 4, [5]]], 6]) should return [1, 2, 3, 4, 5, 6]",
+            "deepFlatten([]) should return []",
+            "deepFlatten([1, [null, undefined], [{}, [true]]]) should return [1, null, undefined, {}, true]",
+            "deepFlatten([1, 2, 3]) should return [1, 2, 3]"
+          ],
+          "hints": [
+            "The base case for recursion is when an element is not an array.",
+            "Remember that `Array.isArray()` is the most reliable way to check if something is an array.",
+            "Consider using a `for...of` loop or `forEach` for iterating, or a traditional `for` loop.",
+            "For an iterative approach, think about using a stack or a queue to manage nested arrays."
+          ],
+          "tags": [
+            "Array",
+            "Recursion",
+            "Algorithm",
+            "Data Structures",
+            "Flatten"
+          ],
+          "timeEstimate": 45,
+          "prerequisites": [
+            "javascript_functions",
+            "array_methods",
+            "recursion"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 8,
+          "learningPath": "intermediate",
+          "relatedConcepts": [
+            "theory_array_prototype_extension_flatten",
+            "question_array_flatten_2",
+            "question_array_flatten_5"
+          ]
+        },
+        {
+          "id": "task_implement_flexible_filter_hof",
+          "title": "Create a Flexible Object Filter Higher-Order Function",
+          "description": "\nDesign and implement a higher-order function `createFilter(criteria)` that takes an object `criteria` as an argument. The `criteria` object will have key-value pairs (e.g., `{ category: 'Electronics', inStock: true }`).\n\nThe `createFilter` function should return a new function (a predicate) suitable for `Array.prototype.filter()`. This returned predicate function should take an object `item` and return `true` if `item` matches *all* the key-value pairs specified in `criteria`, and `false` otherwise.\n\n**Requirements:**\n1.  The function should be named `createFilter` and accept one argument `criteria` (an object).\n2.  It should return a function `(item) => boolean`.\n3.  The returned function should iterate through all `criteria` properties.\n4.  For each property in `criteria`, check if `item` has that property and if its value strictly matches (`===`) the value in `criteria`.\n5.  If `item` fails to match any single criterion, the returned function should immediately return `false`.\n6.  If `item` matches all criteria, it should return `true`.\n7.  Handle cases where `criteria` is empty (should match all items).\n8.  Handle cases where `item` might be `null` or `undefined` gracefully (should return `false`).\n",
+          "difficulty": "medium",
+          "startingCode": "/**\n * Creates a higher-order filter function based on specified criteria.\n * @param {Object} criteria An object with key-value pairs to match.\n * @returns {function(Object): boolean} A predicate function for Array.prototype.filter.\n */\nfunction createFilter(criteria) {\n  // TODO: Implement the logic to return the predicate function.\n  // Hint: You'll need to iterate over the keys of the criteria object.\n  // Use Object.keys() or a for...in loop.\n  // Remember to check for own properties if using for...in.\n\n  return function(item) {\n    // Replace this with actual filtering logic\n    return false; \n  };\n}\n\n// Example Data\nconst products = [\n  { id: 1, name: 'Laptop', category: 'Electronics', price: 1200, inStock: true },\n  { id: 2, name: 'Desk Chair', category: 'Furniture', price: 300, inStock: false },\n  { id: 3, name: 'Smartphone', category: 'Electronics', price: 800, inStock: true },\n  { id: 4, name: 'Coffee Table', category: 'Furniture', price: 150, inStock: true }\n];\n",
+          "solutionCode": "/**\n * Creates a higher-order filter function based on specified criteria.\n * @param {Object} criteria An object with key-value pairs to match.\n * @returns {function(Object): boolean} A predicate function for Array.prototype.filter.\n */\nfunction createFilter(criteria) {\n  const criteriaKeys = Object.keys(criteria);\n  \n  return function(item) {\n    // Handle null/undefined items gracefully\n    if (item === null || typeof item !== 'object') {\n      return false;\n    }\n\n    // If no criteria are provided, all items match\n    if (criteriaKeys.length === 0) {\n      return true;\n    }\n\n    // Check if the item matches all criteria\n    for (const key of criteriaKeys) {\n      // If item doesn't have the property, or its value doesn't match, return false\n      if (!item.hasOwnProperty(key) || item[key] !== criteria[key]) {\n        return false;\n      }\n    }\n    // If all criteria are matched, return true\n    return true;\n  };\n}\n\n// Example Data\nconst products = [\n  { id: 1, name: 'Laptop', category: 'Electronics', price: 1200, inStock: true },\n  { id: 2, name: 'Desk Chair', category: 'Furniture', price: 300, inStock: false },\n  { id: 3, name: 'Smartphone', category: 'Electronics', price: 800, inStock: true },\n  { id: 4, name: 'Coffee Table', category: 'Furniture', price: 150, inStock: true }\n];\n\n// Test Cases:\nconst electronicsFilter = createFilter({ category: 'Electronics' });\nconsole.log('Electronics:', products.filter(electronicsFilter));\n/*\nOutput:\n[\n  { id: 1, name: 'Laptop', category: 'Electronics', price: 1200, inStock: true },\n  { id: 3, name: 'Smartphone', category: 'Electronics', price: 800, inStock: true }\n]\n*/\n\nconst inStockFurnitureFilter = createFilter({ category: 'Furniture', inStock: true });\nconsole.log('In-Stock Furniture:', products.filter(inStockFurnitureFilter));\n/*\nOutput:\n[\n  { id: 4, name: 'Coffee Table', category: 'Furniture', price: 150, inStock: true }\n]\n*/\n\nconst allProductsFilter = createFilter({});\nconsole.log('All Products (empty criteria):', products.filter(allProductsFilter));\n// Should return all products\n\nconst noMatchFilter = createFilter({ price: 10000 });\nconsole.log('No Match:', products.filter(noMatchFilter));\n// Should return an empty array\n\nconst invalidItems = [\n  { id: 5, name: 'Valid', category: 'Test' },\n  null,\n  undefined,\n  'string_item'\n];\nconst testFilter = createFilter({ category: 'Test' });\nconsole.log('Invalid items test:', invalidItems.filter(testFilter));\n// Expected: [{ id: 5, name: 'Valid', category: 'Test' }] (null/undefined/string filtered out)\n",
+          "testCases": [
+            "products.filter(createFilter({ category: 'Electronics' })) should return only electronic products.",
+            "products.filter(createFilter({ category: 'Furniture', inStock: true })) should return only in-stock furniture.",
+            "products.filter(createFilter({})) should return all products.",
+            "products.filter(createFilter({ price: 9999 })) should return an empty array.",
+            "createFilter({ key: 'value' })(null) should return false.",
+            "createFilter({ key: 'value' })(undefined) should return false.",
+            "createFilter({ key: 'value' })({ otherKey: 'otherValue' }) should return false."
+          ],
+          "hints": [
+            "Inside the returned function, iterate over the keys of the `criteria` object.",
+            "Use `item.hasOwnProperty(key)` to check if the item actually has the property, and then compare its value.",
+            "Remember to return `false` immediately if any criterion is not met (`early exit`).",
+            "Consider how `Object.keys()` can help you get the criteria properties efficiently."
+          ],
+          "tags": [
+            "Higher-Order Functions",
+            "Closures",
+            "Array Methods",
+            "Filtering",
+            "Objects",
+            "Utility"
+          ],
+          "timeEstimate": 60,
+          "prerequisites": [
+            "javascript_objects",
+            "array_methods",
+            "closures"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 9,
+          "learningPath": "intermediate",
+          "relatedConcepts": [
+            "theory_higher_order_functions_filtering",
+            "question_hof_filter_3",
+            "question_hof_filter_4"
+          ]
+        },
+        {
+          "id": "task_extend_custom_promise_chaining",
+          "title": "Extend CustomPromise for Basic Chaining",
+          "description": "\nExtend the provided `CustomPromise` class to support a more fundamental aspect of native Promise chaining: `then()` should return a *new* `CustomPromise` instance. This new promise should then resolve or reject based on the return value or thrown error of the callback executed by the *previous* promise.\n\n**Requirements:**\n1.  Modify the `then` method of `CustomPromise`.\n2.  `then` must now return a `new CustomPromise`.\n3.  The `executor` of this new promise should connect to the outcome of the original promise's callback:\n    *   If the original promise resolves and its `then` callback is executed, the return value of that callback should resolve the *new* promise.\n    *   If the original promise resolves and its `then` callback throws an error, the *new* promise should be rejected with that error.\n    *   If the original promise rejects and no `catch` is explicitly chained to it, the *new* promise should also reject with the original error (error propagation).\n4.  All promise resolutions/rejections and callback executions should remain asynchronous (using `setTimeout(0)` or similar).\n\n**Note**: This is a simplified chaining; a full implementation would also handle a handler returning another promise.\n",
+          "difficulty": "hard",
+          "startingCode": "class CustomPromise {\n  constructor(action) {\n    this.state = \"PENDING\";\n    this.value = undefined;\n    this.thenCallbacks = [];\n    this.errorCallbacks = [];\n\n    const resolve = (value) => {\n      setTimeout(() => this._resolve(value), 0);\n    };\n    const reject = (value) => {\n      setTimeout(() => this._reject(value), 0);\n    };\n\n    try {\n      action(resolve, reject);\n    } catch (e) {\n      reject(e);\n    }\n  }\n\n  _resolve(value) {\n    if (this.state === \"PENDING\") {\n      this.state = \"RESOLVED\";\n      this.value = value;\n      this.thenCallbacks.forEach(callback => callback(this.value));\n      this.thenCallbacks = [];\n      this.errorCallbacks = [];\n    }\n  }\n\n  _reject(value) {\n    if (this.state === \"PENDING\") {\n      this.state = \"REJECTED\";\n      this.value = value;\n      this.errorCallbacks.forEach(callback => callback(this.value));\n      this.thenCallbacks = [];\n      this.errorCallbacks = [];\n    }\n  }\n\n  then(onFulfilled) {\n    // TODO: Modify this method to return a new CustomPromise\n    // This is the core part to implement for chaining.\n    if (this.state === \"RESOLVED\") {\n      setTimeout(() => onFulfilled(this.value), 0);\n    } else if (this.state === \"PENDING\") {\n      this.thenCallbacks.push(onFulfilled);\n    }\n    return this; // This needs to change!\n  }\n\n  catch(onRejected) {\n    if (this.state === \"REJECTED\") {\n      setTimeout(() => onRejected(this.value), 0);\n    } else if (this.state === \"PENDING\") {\n      this.errorCallbacks.push(onRejected);\n    }\n    return this; \n  }\n}\n",
+          "solutionCode": "class CustomPromise {\n  constructor(action) {\n    this.state = \"PENDING\";\n    this.value = undefined;\n    this.thenCallbacks = [];\n    this.errorCallbacks = [];\n\n    const resolve = (value) => {\n      setTimeout(() => this._resolve(value), 0);\n    };\n    const reject = (value) => {\n      setTimeout(() => this._reject(value), 0);\n    };\n\n    try {\n      action(resolve, reject);\n    } catch (e) {\n      reject(e);\n    }\n  }\n\n  _resolve(value) {\n    if (this.state === \"PENDING\") {\n      this.state = \"RESOLVED\";\n      this.value = value;\n      // Execute all registered thenCallbacks asynchronously\n      this.thenCallbacks.forEach(callback => callback(this.value));\n      this.thenCallbacks = [];\n      this.errorCallbacks = [];\n    }\n  }\n\n  _reject(value) {\n    if (this.state === \"PENDING\") {\n      this.state = \"REJECTED\";\n      this.value = value;\n      // Execute all registered errorCallbacks asynchronously\n      this.errorCallbacks.forEach(callback => callback(this.value));\n      this.thenCallbacks = [];\n      this.errorCallbacks = [];\n    }\n  }\n\n  then(onFulfilled, onRejected) {\n    // Return a new promise for chaining\n    return new CustomPromise((newResolve, newReject) => {\n      const handleFulfilled = (value) => {\n        try {\n          const result = onFulfilled ? onFulfilled(value) : value;\n          newResolve(result);\n        } catch (error) {\n          newReject(error);\n        }\n      };\n\n      const handleRejected = (reason) => {\n        try {\n          if (onRejected) {\n            const result = onRejected(reason);\n            newResolve(result); // If onRejected handles error, new promise resolves\n          } else {\n            newReject(reason); // Error propagation\n          }\n        } catch (error) {\n          newReject(error);\n        }\n      };\n\n      if (this.state === \"RESOLVED\") {\n        setTimeout(() => handleFulfilled(this.value), 0);\n      } else if (this.state === \"REJECTED\") {\n        setTimeout(() => handleRejected(this.value), 0);\n      } else { // PENDING\n        this.thenCallbacks.push(handleFulfilled);\n        this.errorCallbacks.push(handleRejected);\n      }\n    });\n  }\n\n  catch(onRejected) {\n    return this.then(null, onRejected);\n  }\n}\n\n// Usage for testing chaining:\nconsole.log(\"Start of script\");\n\nlet promise1 = new CustomPromise(resolve => {\n  setTimeout(() => resolve(10), 100);\n});\n\npromise1\n  .then(value => {\n    console.log(`First then: ${value}`); // 10\n    return value * 2;\n  })\n  .then(newValue => {\n    console.log(`Second then: ${newValue}`); // 20\n    return new CustomPromise(resolve => setTimeout(() => resolve(newValue + 5), 50)); // Simplified: doesn't truly wait like native\n  })\n  .then(finalValue => {\n    console.log(`Third then: ${finalValue}`); // 25\n    if (finalValue > 20) throw new Error(\"Value too high!\");\n    return finalValue;\n  })\n  .catch(error => {\n    console.error(\"Caught error in chain:\", error.message);\n  })\n  .then(() => console.log(\"This runs after catch or successful chain\"));\n\nlet errorPromise = new CustomPromise((_, reject) => {\n  setTimeout(() => reject(\"Error occurred!\"), 200);\n});\n\nerrorPromise\n  .then(val => console.log(\"Should not run:\", val))\n  .catch(err => {\n    console.error(\"Caught error in error chain:\", err);\n    return \"Error handled\"; // Returning a value from catch resolves next then\n  })\n  .then(msg => console.log(\"Next after handling error:\", msg)); // \"Error handled\"\n\nconsole.log(\"End of script\");\n",
+          "testCases": [
+            "A chain like `promise.then(v => v + 1).then(v => v * 2)` should correctly pass the transformed value.",
+            "A `then` callback throwing an error should be caught by a subsequent `catch`.",
+            "A rejected promise with no `onRejected` in `then` should propagate the error to the next `catch`.",
+            "A `catch` handler that returns a value should resolve the subsequent `then` with that value.",
+            "Ensure all handlers are called asynchronously even for already resolved/rejected promises."
+          ],
+          "hints": [
+            "The `then` method must create and return `new CustomPromise(...)`.",
+            "The executor of this new promise needs to be resolved/rejected based on the outcome of the `onFulfilled` or `onRejected` callback from the *previous* promise.",
+            "Remember to wrap the execution of `onFulfilled` and `onRejected` in a `try...catch` block to handle synchronous errors thrown by the user's callback.",
+            "If `onFulfilled` or `onRejected` is not provided, the value or reason should simply be passed through to the next promise in the chain."
+          ],
+          "tags": [
+            "Promises",
+            "Asynchronous",
+            "Chaining",
+            "OOP",
+            "Design Patterns",
+            "Advanced"
+          ],
+          "timeEstimate": 120,
+          "prerequisites": [
+            "theory_custom_promise_implementation",
+            "question_promise_3",
+            "question_promise_4"
+          ],
+          "complexity": 9,
+          "interviewRelevance": 10,
+          "learningPath": "advanced",
+          "relatedConcepts": [
+            "Promise.prototype.then",
+            "Promise Resolution Procedure",
+            "Error Propagation"
+          ]
+        },
+        {
+          "id": "task_movie_list_management",
+          "title": "Movie List Filtering, Sorting, and Mapping",
+          "description": "\nYou are tasked with creating a robust function to manage a list of movie objects. Each movie object has at least `title` (string), `genre` (string), and `averageRating` (number) properties.\n\nImplement a JavaScript function `processMovies(movieList, options)` that filters, sorts, and optionally maps the movies based on a given `options` object.\n\n**Requirements:**\n1.  The function `processMovies` should accept two arguments: `movieList` (an array of movie objects) and `options` (an object).\n2.  The `options` object can have the following properties (all optional):\n    *   `minRating` (number): Filters movies with `averageRating` greater than or equal to this value. Default to 0.\n    *   `genre` (string): Filters movies that exactly match this `genre`. Default to `null` (no genre filtering).\n    *   `sortBy` (string): Sorts the results. Can be `'titleAsc'`, `'titleDesc'`, `'ratingAsc'`, `'ratingDesc'`. Default to no specific sort (maintain original order or engine-dependent order).\n    *   `outputFormat` (string): If `'titlesOnly'`, return an array of just movie titles. Otherwise (default), return the full movie objects.\n3.  The processing order should be: **Filter** -> **Sort** -> **Map**.\n4.  The function must return a *new* array and not modify the original `movieList`.\n5.  Handle invalid inputs (e.g., non-array `movieList`, non-object `options`).\n\nExample Movie Object Structure:\n```javascript\n{\n  title: 'Movie Title',\n  genre: 'Action',\n  averageRating: 4.2\n}\n```\n",
+          "difficulty": "medium",
+          "startingCode": "const moviesData = [\n  { title: 'The Great Adventure', genre: 'Action', averageRating: 4.5 },\n  { title: 'Epic Drama', genre: 'Drama', averageRating: 3.8 },\n  { title: 'Comedy Night', genre: 'Comedy', averageRating: 4.1 },\n  { title: 'Sci-Fi Odyssey', genre: 'Sci-Fi', averageRating: 4.7 },\n  { title: 'Romantic Getaway', genre: 'Romance', averageRating: 3.5 },\n  { title: 'Action Thriller', genre: 'Action', averageRating: 4.5 },\n  { title: 'Another Drama', genre: 'Drama', averageRating: 3.9 }\n];\n\n/**\n * Processes a list of movie objects based on filtering, sorting, and mapping options.\n * @param {Array<Object>} movieList The list of movie objects.\n * @param {Object} options The processing options (minRating, genre, sortBy, outputFormat).\n * @returns {Array<Object>|Array<string>} The processed list of movies or movie titles.\n */\nfunction processMovies(movieList, options = {}) {\n  // TODO: Implement filtering, sorting, and mapping logic.\n  // Remember to return a new array.\n  // Use Array.prototype.filter, sort, map.\n  \n  if (!Array.isArray(movieList)) {\n    return [];\n  }\n\n  let result = [...movieList]; // Start with a shallow copy to avoid modifying original\n\n  // 1. Filtering\n\n\n  // 2. Sorting\n\n\n  // 3. Mapping\n\n\n  return result;\n}\n",
+          "solutionCode": "const moviesData = [\n  { title: 'The Great Adventure', genre: 'Action', averageRating: 4.5 },\n  { title: 'Epic Drama', genre: 'Drama', averageRating: 3.8 },\n  { title: 'Comedy Night', genre: 'Comedy', averageRating: 4.1 },\n  { title: 'Sci-Fi Odyssey', genre: 'Sci-Fi', averageRating: 4.7 },\n  { title: 'Romantic Getaway', genre: 'Romance', averageRating: 3.5 },\n  { title: 'Action Thriller', genre: 'Action', averageRating: 4.5 },\n  { title: 'Another Drama', genre: 'Drama', averageRating: 3.9 }\n];\n\n/**\n * Processes a list of movie objects based on filtering, sorting, and mapping options.\n * @param {Array<Object>} movieList The list of movie objects.\n * @param {Object} options The processing options (minRating, genre, sortBy, outputFormat).\n * @returns {Array<Object>|Array<string>} The processed list of movies or movie titles.\n */\nfunction processMovies(movieList, options = {}) {\n  if (!Array.isArray(movieList)) {\n    return [];\n  }\n\n  let result = [...movieList]; // Start with a shallow copy\n\n  const { minRating = 0, genre = null, sortBy = null, outputFormat = null } = options;\n\n  // 1. Filtering\n  result = result.filter(movie => {\n    let passesFilter = true;\n\n    if (movie.averageRating < minRating) {\n      passesFilter = false;\n    }\n\n    if (genre !== null && movie.genre !== genre) {\n      passesFilter = false;\n    }\n    \n    // Handle potentially malformed movie objects\n    if (typeof movie.averageRating !== 'number' || typeof movie.title !== 'string' || typeof movie.genre !== 'string') {\n        passesFilter = false;\n    }\n\n    return passesFilter;\n  });\n\n  // 2. Sorting\n  if (sortBy) {\n    result.sort((a, b) => {\n      switch (sortBy) {\n        case 'titleAsc':\n          return a.title.localeCompare(b.title);\n        case 'titleDesc':\n          return b.title.localeCompare(a.title);\n        case 'ratingAsc':\n          return a.averageRating - b.averageRating;\n        case 'ratingDesc':\n          return b.averageRating - a.averageRating;\n        default:\n          return 0; // No specific sort\n      }\n    });\n  }\n\n  // 3. Mapping\n  if (outputFormat === 'titlesOnly') {\n    result = result.map(movie => movie.title);\n  }\n\n  return result;\n}\n\n// Test Cases:\nconsole.log(\"--- Test Case 1: High Rated Action Movies ---\");\nconst highRatedActionMovies = processMovies(moviesData, { minRating: 4.0, genre: 'Action', sortBy: 'titleAsc' });\nconsole.log(highRatedActionMovies);\n/* Expected:\n[\n  { title: 'Action Thriller', genre: 'Action', averageRating: 4.5 },\n  { title: 'The Great Adventure', genre: 'Action', averageRating: 4.5 }\n]\n*/\n\nconsole.log(\"--- Test Case 2: All Drama Movies (Titles Only) ---\");\nconst dramaTitles = processMovies(moviesData, { genre: 'Drama', outputFormat: 'titlesOnly', sortBy: 'ratingDesc' });\nconsole.log(dramaTitles);\n/* Expected (order matters for sort, then map):\n[\n  'Epic Drama',\n  'Another Drama'\n]\n*/\n\nconsole.log(\"--- Test Case 3: All Movies Sorted by Rating Desc ---\");\nconst allSortedByRating = processMovies(moviesData, { sortBy: 'ratingDesc' });\nconsole.log(allSortedByRating.map(m => m.title + ' (' + m.averageRating + ')'));\n/* Expected:\n[\n  'Sci-Fi Odyssey (4.7)',\n  'The Great Adventure (4.5)',\n  'Action Thriller (4.5)',\n  'Comedy Night (4.1)',\n  'Another Drama (3.9)',\n  'Epic Drama (3.8)',\n  'Romantic Getaway (3.5)'\n]\n*/\n\nconsole.log(\"--- Test Case 4: No Filter, No Sort, No Map ---\");\nconst noOps = processMovies(moviesData, {});\nconsole.log(noOps.length === moviesData.length); // Should be true\n\nconsole.log(\"--- Test Case 5: Empty Input Array ---\");\nconsole.log(processMovies([], {})); // Expected: []\n\nconsole.log(\"--- Test Case 6: Invalid Input Data ---\");\nconst malformedMovies = [\n  { title: 'Good Movie', genre: 'Action', averageRating: 4.0 },\n  { title: 'Bad Movie', averageRating: 'not a number' }, // Bad rating\n  { genre: 'Missing Title', averageRating: 3.0 } // Missing title\n];\nconst goodMovies = processMovies(malformedMovies, {});\nconsole.log(\"Malformed movies (filtered out bad data):\");\nconsole.log(goodMovies);\n/* Expected:\n[\n  { title: 'Good Movie', genre: 'Action', averageRating: 4 }\n]\n*/\n",
+          "testCases": [
+            "processMovies(moviesData, { minRating: 4.5, genre: 'Action', sortBy: 'titleAsc' }) should return specific high-rated action movies sorted by title.",
+            "processMovies(moviesData, { genre: 'Drama', outputFormat: 'titlesOnly', sortBy: 'ratingDesc' }) should return only drama titles, sorted descending by rating.",
+            "processMovies(moviesData, { sortBy: 'ratingDesc' }) should return all movies sorted by rating in descending order.",
+            "processMovies(moviesData, {}) should return a shallow copy of the original array, in original order.",
+            "processMovies([], {}) should return an empty array.",
+            "processMovies(null, {}) should return an empty array.",
+            "processMovies(moviesData, { sortBy: 'nonexistentSort' }) should return filtered movies without specific sorting.",
+            "processMovies(moviesData, { minRating: 5.0 }) should return an empty array if no movies meet the rating."
+          ],
+          "hints": [
+            "Start by creating a shallow copy of `movieList` (`[...movieList]`) to ensure immutability.",
+            "Use conditional logic inside your `filter` callback to apply `minRating` and `genre` filters only if they are provided in `options`.",
+            "For `sort`, use a `switch` statement or a series of `if/else if` to handle different `sortBy` values. Remember to use `localeCompare` for string sorting and simple subtraction for numeric sorting (`a.value - b.value` for ascending, `b.value - a.value` for descending).",
+            "Apply `map` only if `outputFormat` is `'titlesOnly'`."
+          ],
+          "tags": [
+            "Array Methods",
+            "Filter",
+            "Sort",
+            "Map",
+            "Data Transformation",
+            "Objects",
+            "Frontend",
+            "Practice"
+          ],
+          "timeEstimate": 90,
+          "prerequisites": [
+            "theory_array_manipulation_filtering_sorting",
+            "array_methods",
+            "javascript_objects"
+          ],
+          "complexity": 8,
+          "interviewRelevance": 9,
+          "learningPath": "intermediate",
+          "relatedConcepts": [
+            "question_array_manipulation_2",
+            "question_array_manipulation_4"
+          ]
+        }
+      ]
+    }
+  }
+]

@@ -1,0 +1,906 @@
+[
+  {
+    "id": "a06b08ae-b726-4420-b06e-425d85b96e3b",
+    "startLine": 4700,
+    "endLine": 4799,
+    "processedDate": "2025-06-17T09:16:53.443Z",
+    "content": {
+      "logicalBlockInfo": {
+        "suggestedEndLine": -1
+      },
+      "theory": [
+        {
+          "id": "theory_react_error_boundaries_overview",
+          "title": "React Error Boundaries: Concept and Implementation",
+          "content": "## Introduction to React Error Boundaries\nReact Error Boundaries are React components that **catch JavaScript errors** anywhere in their child component tree, **log those errors**, and **display a fallback UI** instead of the crashed component tree. They are a robust way to prevent an entire application from crashing due due to an error in a single component. Error Boundaries catch errors during:\n\n*   Rendering\n*   In lifecycle methods\n*   In constructors of the whole tree below them\n\nThey are class components that implement at least one of the two lifecycle methods: `static getDerivedStateFromError()` or `componentDidCatch()`.\n\n### Why Use Error Boundaries?\nBefore React 16, errors in components could lead to the unmounting of the entire React component tree, resulting in a blank page for the user. Error Boundaries provide a way to gracefully handle these errors, displaying a user-friendly message or fallback UI, thus improving the user experience and application resilience.\n\n### Basic Structure of an Error Boundary\nAn Error Boundary is typically a class component that maintains its own state to track whether an error has occurred in its children.\n\n```typescript\nimport React from 'react';\n\ninterface ErrorBoundaryState {\n  hasError: boolean;\n  errorInfo: React.ErrorInfo | null;\n}\n\ninterface ErrorBoundaryProps {\n  children: React.ReactNode;\n}\n\nclass ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundaryState> {\n  state: ErrorBoundaryState = { hasError: false, errorInfo: null };\n  \n  static getDerivedStateFromError(error: Error): ErrorBoundaryState {\n    // Update state so the next render will show the fallback UI.\n    // This method is for handling errors during the render phase.\n    console.log('getDerivedStateFromError called with:', error);\n    return { hasError: true, errorInfo: null }; // errorInfo is typically null here as we only update hasError for immediate fallback\n  }\n  \n  componentDidCatch(error: Error, errorInfo: React.ErrorInfo): void {\n    // You can also log the error to an error reporting service\n    console.log('componentDidCatch called with:', error, errorInfo);\n    console.error('Error caught by Error Boundary:', error);\n    console.error('Error info:', errorInfo);\n    \n    // Update state to display error details (if desired) after the commit phase\n    this.setState({ errorInfo: errorInfo });\n    // logErrorToService(error, errorInfo); // Example of reporting to an external service\n  }\n  \n  render() {\n    if (this.state.hasError) {\n      // Render fallback UI when an error occurs\n      return (\n        <div className=\"error-boundary\">\n          <h2>Something went wrong.</h2>\n          {this.state.errorInfo && (\n            <details style={{ whiteSpace: 'pre-wrap' }}>\n              <summary>Error Details</summary>\n              {/* errorInfo.componentStack provides the component stack trace */}\n              <pre>{this.state.errorInfo.componentStack}</pre>\n            </details>\n          )}\n        </div>\n      );\n    }\n    \n    // Otherwise, render children normally\n    return this.props.children;\n  }\n}\n```\n\n### Usage Example\n\n```typescript jsx\n// Using an error boundary around a component or a section of the UI\n<ErrorBoundary>\n  <MyProblematicComponent />\n</ErrorBoundary>\n\n// You can also wrap multiple components or even the entire application\nfunction App() {\n  return (\n    <ErrorBoundary>\n      <h1>My Application</h1>\n      <MyHeader />\n      <MyContent />\n      <MyFooter />\n    </ErrorBoundary>\n  );\n}\n```\n\nBy placing an `ErrorBoundary` component around parts of your UI, you isolate potential errors. If `MyProblematicComponent` (or any of its descendants) throws an error during rendering, lifecycle methods, or constructors, the `ErrorBoundary` will catch it and display its fallback UI instead of crashing the whole application.",
+          "examples": [
+            {
+              "id": "example_error_boundary_basic_usage",
+              "title": "Basic Error Boundary and Usage",
+              "code": "import React, { useState } from 'react';\n\ninterface ErrorBoundaryState {\n  hasError: boolean;\n  errorInfo: React.ErrorInfo | null;\n}\n\ninterface ErrorBoundaryProps {\n  children: React.ReactNode;\n}\n\nclass ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundaryState> {\n  state: ErrorBoundaryState = { hasError: false, errorInfo: null };\n\n  static getDerivedStateFromError(error: Error): ErrorBoundaryState {\n    console.log('Error caught by getDerivedStateFromError:', error.message);\n    return { hasError: true, errorInfo: null };\n  }\n\n  componentDidCatch(error: Error, errorInfo: React.ErrorInfo): void {\n    console.error('Error caught by componentDidCatch:', error, errorInfo);\n    this.setState({ errorInfo: errorInfo });\n  }\n\n  render() {\n    if (this.state.hasError) {\n      return (\n        <div style={{ padding: '20px', border: '1px solid red', color: 'red' }}>\n          <h3>Oops! Something went wrong in a child component.</h3>\n          {this.state.errorInfo && (\n            <details style={{ whiteSpace: 'pre-wrap' }}>\n              <summary>Error Details (Click to expand)</summary>\n              <pre>{this.state.errorInfo.componentStack}</pre>\n            </details>\n          )}\n        </div>\n      );\n    }\n    return this.props.children;\n  }\n}\n\nconst BuggyComponent: React.FC<{shouldThrow: boolean}> = ({ shouldThrow }) => {\n  if (shouldThrow) {\n    throw new Error('I am a simulated error from BuggyComponent!');\n  }\n  return <p>This component is working fine.</p>;\n};\n\nconst App: React.FC = () => {\n  const [showError, setShowError] = useState(false);\n\n  const triggerError = () => {\n    setShowError(true);\n  };\n\n  return (\n    <div>\n      <h1>Error Boundary Demo</h1>\n      <button onClick={triggerError}>Trigger Error</button>\n      \n      <ErrorBoundary>\n        <BuggyComponent shouldThrow={showError} />\n      </ErrorBoundary>\n\n      <p>Content outside the error boundary continues to work.</p>\n    </div>\n  );\n};\n\nexport default App;\n",
+              "explanation": "This example demonstrates a complete `ErrorBoundary` component and how to use it. The `BuggyComponent` is designed to throw an error when `shouldThrow` is `true`. By wrapping `BuggyComponent` with `ErrorBoundary`, any error thrown inside `BuggyComponent` (or its descendants) is caught, and the `ErrorBoundary`'s fallback UI is rendered instead of crashing the entire `App`. The console logs show when `getDerivedStateFromError` and `componentDidCatch` are triggered.",
+              "language": "typescript"
+            }
+          ],
+          "relatedQuestions": [
+            "question_error_boundaries_purpose",
+            "question_error_boundaries_why_class_component",
+            "question_error_boundaries_catch_scope",
+            "question_error_boundaries_mcq_basic_functionality"
+          ],
+          "relatedTasks": [
+            "task_implement_error_boundary_component",
+            "task_integrate_error_boundary_into_app"
+          ],
+          "tags": [
+            "React",
+            "Error Handling",
+            "Class Components",
+            "Component Lifecycle"
+          ],
+          "technology": "React",
+          "prerequisites": [
+            "React_Class_Components",
+            "React_State_and_Props",
+            "React_Component_Lifecycle"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 9,
+          "learningPath": "intermediate",
+          "requiredFor": [
+            "Robust_React_Applications",
+            "Production_Ready_Frontends",
+            "Advanced_React_Patterns"
+          ]
+        },
+        {
+          "id": "theory_get_derived_state_from_error",
+          "title": "static getDerivedStateFromError(error)",
+          "content": "## `static getDerivedStateFromError(error)` Lifecycle Method\n\nThis static method is a lifecycle hook in React class components specifically designed for error handling. It is called when a descendant component throws an error during the **render phase**.\n\n### Key Characteristics:\n\n*   **Static Method**: It's a static method, meaning it's called on the class itself, not on an instance. It does not have access to `this`.\n*   **Purpose**: Its primary purpose is to update the state of the Error Boundary component, allowing it to render a fallback UI. It receives the `error` that was thrown as its only argument.\n*   **Return Value**: It must return an object to update the state of the component, or `null` to indicate that the error has been handled and no state update is needed (though typically you'd return a state update like `{ hasError: true }`).\n*   **Render Phase**: This method is called during React's \"render phase.\" In this phase, React is calculating what changes need to be made to the DOM. Because it's purely about calculation, **side effects are not permitted** within `getDerivedStateFromError`. This means you should not perform actions like network requests, logging (beyond simple console logs for debugging), or setting timers here.\n*   **Immediate Fallback**: It's the ideal place to update state to immediately display a fallback UI, as it's called right before the render method.\n\n```typescript\nclass ErrorBoundary extends React.Component {\n  state = { hasError: false };\n  \n  static getDerivedStateFromError(error: Error) {\n    console.log('getDerivedStateFromError called with:', error.message);\n    // DO: Return new state based on error to show fallback UI\n    // DON'T: Cause side effects (e.g., API calls, subscriptions)\n    return { hasError: true };\n  }\n  \n  // ... rest of the component\n}\n```\n\n### The \"Render Phase\" Context\nIn React, the render phase is where React determines what changes need to be applied to the DOM. This phase can be interrupted or restarted by React (e.g., due to higher-priority updates). If side effects were allowed here, they could be executed multiple times or incompletely, leading to inconsistent or buggy behavior. `getDerivedStateFromError` is therefore restricted to pure state updates.",
+          "examples": [
+            {
+              "id": "example_get_derived_state_from_error",
+              "title": "Using getDerivedStateFromError for Fallback UI",
+              "code": "import React from 'react';\n\ninterface ErrorBoundaryState {\n  hasError: boolean;\n}\n\nclass SimpleErrorBoundary extends React.Component<{}, ErrorBoundaryState> {\n  state: ErrorBoundaryState = { hasError: false };\n\n  // This method is called when an error is thrown in a child component\n  // during rendering. It's a static method and doesn't have 'this'.\n  static getDerivedStateFromError(error: Error): ErrorBoundaryState {\n    // Log the error (for development, don't do complex logging here)\n    console.log('Error caught by getDerivedStateFromError:', error.message);\n    // Update state to trigger fallback UI\n    return { hasError: true };\n  }\n\n  render() {\n    if (this.state.hasError) {\n      return <h1>An error occurred in this section.</h1>; // Fallback UI\n    }\n    return this.props.children;\n  }\n}\n\nconst ComponentThatMightFail: React.FC<{ fail: boolean }> = ({ fail }) => {\n  if (fail) {\n    throw new Error('Oops, I failed!');\n  }\n  return <p>I am a component that can potentially fail.</p>;\n};\n\nconst App: React.FC = () => {\n  const [shouldFail, setShouldFail] = React.useState(false);\n\n  return (\n    <div>\n      <h2>getDerivedStateFromError Demo</h2>\n      <button onClick={() => setShouldFail(true)}>Make Component Fail</button>\n      <SimpleErrorBoundary>\n        <ComponentThatMightFail fail={shouldFail} />\n      </SimpleErrorBoundary>\n      <p>Application continues to run.</p>\n    </div>\n  );\n};\n\nexport default App;\n",
+              "explanation": "This example showcases `getDerivedStateFromError`. When the 'Make Component Fail' button is clicked, `ComponentThatMightFail` throws an error during its render. `SimpleErrorBoundary`'s `getDerivedStateFromError` then catches it, updates `hasError` to `true`, and triggers a re-render to display the `<h1>An error occurred...</h1>` fallback, preventing the entire application from crashing.",
+              "language": "typescript"
+            }
+          ],
+          "relatedQuestions": [
+            "question_get_derived_state_from_error_purpose",
+            "question_get_derived_state_from_error_side_effects",
+            "question_error_boundary_phases",
+            "question_get_derived_state_from_error_mcq_return_value"
+          ],
+          "relatedTasks": [
+            "task_implement_error_boundary_component"
+          ],
+          "tags": [
+            "React",
+            "Error Handling",
+            "Lifecycle Methods",
+            "Static Methods",
+            "Render Phase"
+          ],
+          "technology": "React",
+          "prerequisites": [
+            "React_Class_Components",
+            "React_Lifecycle_Methods"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 8,
+          "learningPath": "intermediate",
+          "requiredFor": [
+            "Robust_React_Applications"
+          ]
+        },
+        {
+          "id": "theory_component_did_catch",
+          "title": "componentDidCatch(error, errorInfo)",
+          "content": "## `componentDidCatch(error, errorInfo)` Lifecycle Method\n\nThis lifecycle method is called after an error has been thrown by a descendant component. Unlike `getDerivedStateFromError`, `componentDidCatch` is called during React's **commit phase**.\n\n### Key Characteristics:\n\n*   **Instance Method**: It's an instance method, so it has access to `this` (the component instance).\n*   **Arguments**: It receives two arguments:\n    *   `error`: The error that was thrown.\n    *   `errorInfo`: An object with a `componentStack` property, providing information about which component caused the error, including the component stack trace.\n*   **Purpose**: This method is ideal for performing **side effects**, such as:\n    *   Logging the error to an error tracking service (e.g., Sentry, Bugsnag).\n    *   Logging to the console for debugging purposes.\n    *   Updating the component's state (e.g., to display more detailed error information to the user after the initial fallback UI is shown by `getDerivedStateFromError`).\n*   **Commit Phase**: This method is called during React's \"commit phase.\" In this phase, React has already applied all the changes to the DOM. Since the DOM updates are complete, it's safe to perform side effects here, as there's no risk of interrupting a critical rendering process.\n\n```typescript\nclass ErrorBoundary extends React.Component {\n  state = { hasError: false, errorInfo: null };\n  \n  // ... getDerivedStateFromError method\n\n  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {\n    console.log('componentDidCatch called with:', error, errorInfo);\n    // DO: Log error information, report to error tracking service\n    // Can also update state here to show more details\n    console.error('Error caught:', error);\n    console.error('Error info:', errorInfo); // errorInfo.componentStack contains the React component stack\n    \n    // Optional: update state with error details to display to the user\n    this.setState({ errorInfo: errorInfo });\n    // logErrorToService(error, errorInfo); // Example of reporting to an external service\n  }\n  \n  // ... render method\n}\n```\n\n### The `errorInfo` object\nThe `errorInfo` object provides context about where the error occurred in the React component tree. Its `componentStack` property is particularly useful as it shows the component hierarchy leading up to the error, similar to a JavaScript stack trace but specific to React components.\n\n```\n// Example of errorInfo.componentStack\n\"The above error occurred in the <BuggyComponent> component:\n    in BuggyComponent (at App.tsx:X)\n    in ErrorBoundary (at App.tsx:Y)\n    in App (at index.tsx:Z)\"\n```\n\n### Relationship with `getDerivedStateFromError`\nTypically, `getDerivedStateFromError` is used for the immediate state update (`{ hasError: true }`) to render a basic fallback UI, while `componentDidCatch` is used for side effects like logging and potentially setting more detailed error information in the state that can be displayed to the user later.",
+          "examples": [
+            {
+              "id": "example_component_did_catch_logging",
+              "title": "Using componentDidCatch for Error Logging and Details",
+              "code": "import React from 'react';\n\ninterface ErrorBoundaryState {\n  hasError: boolean;\n  error: Error | null;\n  errorInfo: React.ErrorInfo | null;\n}\n\nclass LoggingErrorBoundary extends React.Component<{}, ErrorBoundaryState> {\n  state: ErrorBoundaryState = { hasError: false, error: null, errorInfo: null };\n\n  static getDerivedStateFromError(error: Error): ErrorBoundaryState {\n    console.log('getDerivedStateFromError triggered.');\n    return { hasError: true, error: error, errorInfo: null }; // Set hasError for immediate fallback\n  }\n\n  // This method is called after the error has been thrown and after the render phase.\n  // It's safe to perform side effects here.\n  componentDidCatch(error: Error, errorInfo: React.ErrorInfo): void {\n    console.log('componentDidCatch triggered.');\n    // Log the error to an external service (simulated)\n    console.error('External Logging Service: Error Caught!', error, errorInfo.componentStack);\n    \n    // Update state to show detailed error info in the UI (optional)\n    this.setState({ errorInfo: errorInfo });\n  }\n\n  render() {\n    if (this.state.hasError) {\n      return (\n        <div style={{ padding: '20px', border: '1px solid blue', color: 'blue' }}>\n          <h3>A critical error occurred.</h3>\n          {this.state.error && <p>Error message: {this.state.error.message}</p>}\n          {this.state.errorInfo && (\n            <details style={{ whiteSpace: 'pre-wrap' }}>\n              <summary>Technical Details</summary>\n              <pre>{this.state.errorInfo.componentStack}</pre>\n            </details>\n          )}\n        </div>\n      );\n    }\n    return this.props.children;\n  }\n}\n\nconst RiskyComponent: React.FC<{ trigger: boolean }> = ({ trigger }) => {\n  if (trigger) {\n    throw new Error('This component failed intentionally during render!');\n  }\n  return <p>This risky component is running smoothly.</p>;\n};\n\nconst App: React.FC = () => {\n  const [shouldTrigger, setShouldTrigger] = React.useState(false);\n\n  return (\n    <div>\n      <h2>componentDidCatch Demo</h2>\n      <button onClick={() => setShouldTrigger(true)}>Trigger Risky Component Error</button>\n      <LoggingErrorBoundary>\n        <RiskyComponent trigger={shouldTrigger} />\n      </LoggingErrorBoundary>\n    </div>\n  );\n};\n\nexport default App;\n",
+              "explanation": "This example demonstrates `componentDidCatch`'s role in logging errors and optionally updating state with more detailed `errorInfo`. When `RiskyComponent` throws, `getDerivedStateFromError` sets `hasError`, and then `componentDidCatch` is called. Inside `componentDidCatch`, the error and `errorInfo.componentStack` are logged to the console (simulating an external logging service). The `ErrorBoundary` then renders its fallback, including the detailed `componentStack` for the user to view if they choose to expand the details.",
+              "language": "typescript"
+            }
+          ],
+          "relatedQuestions": [
+            "question_component_did_catch_purpose",
+            "question_component_did_catch_side_effects",
+            "question_error_info_object",
+            "question_error_boundary_phases",
+            "question_mcq_get_derived_state_from_error_vs_component_did_catch"
+          ],
+          "relatedTasks": [
+            "task_implement_error_boundary_component",
+            "task_integrate_error_boundary_with_logging"
+          ],
+          "tags": [
+            "React",
+            "Error Handling",
+            "Lifecycle Methods",
+            "Side Effects",
+            "Commit Phase",
+            "Error Logging"
+          ],
+          "technology": "React",
+          "prerequisites": [
+            "React_Class_Components",
+            "React_Lifecycle_Methods",
+            "React_State_and_Props"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 9,
+          "learningPath": "intermediate",
+          "requiredFor": [
+            "Production_Ready_React_Applications",
+            "Debugging_React"
+          ]
+        },
+        {
+          "id": "theory_error_boundary_limitations",
+          "title": "Important Limitations of React Error Boundaries",
+          "content": "## When Error Boundaries DO NOT Catch Errors\n\nWhile powerful, React Error Boundaries are not omnipotent and have specific limitations. It's crucial to understand these scenarios where they will *not* catch errors:\n\n1.  **Event Handlers**: Errors thrown inside event handlers (e.g., `onClick`, `onChange`, `onSubmit`) are *not* caught by Error Boundaries. This is because event handlers are asynchronous and are not part of React's render or commit phases where Error Boundaries operate. For errors in event handlers, you should use standard JavaScript `try/catch` blocks.\n\n    ```typescript jsx\n    function MyComponent() {\n      const handleClick = () => {\n        try {\n          // Error here will NOT be caught by Error Boundary\n          throw new Error('Error in event handler!');\n        } catch (error) {\n          console.error('Caught by try/catch:', error);\n          // You can then update local state or re-throw if needed\n        }\n      };\n\n      return <button onClick={handleClick}>Click Me</button>;\n    }\n\n    // ... wrapped by ErrorBoundary\n    // <ErrorBoundary><MyComponent /></ErrorBoundary>\n    ```\n\n2.  **Asynchronous Code**: Errors in `setTimeout`, `requestAnimationFrame` callbacks, or any other asynchronous code (like `Promise.then()` or `async/await` blocks) are not caught by Error Boundaries. These operations execute outside of React's render/commit cycle.\n\n    ```typescript jsx\n    function AsyncComponent() {\n      React.useEffect(() => {\n        setTimeout(() => {\n          // Error here will NOT be caught by Error Boundary\n          throw new Error('Error in setTimeout!');\n        }, 1000);\n      }, []);\n      return <p>I'm an async component.</p>;\n    }\n\n    // ... wrapped by ErrorBoundary\n    // <ErrorBoundary><AsyncComponent /></ErrorBoundary>\n    ```\n\n3.  **Errors in the Error Boundary Itself**: An Error Boundary cannot catch errors that occur within itself. If the `render` method, `getDerivedStateFromError`, or `componentDidCatch` method of the Error Boundary component itself throws an error, React will propagate that error up the tree. To catch errors in an Error Boundary, you would need a parent Error Boundary, but this is usually not recommended and suggests an issue with the Error Boundary's implementation.\n\n4.  **Server-Side Rendering (SSR)**: Error Boundaries currently only work for client-side rendering. Errors during SSR are handled differently, typically by the server-side framework.\n\n### Consequences of Uncaught Errors\nAs of React 16, if an error is thrown in a component and is *not* caught by any Error Boundary, React will **unmount the entire React component tree**. This results in a blank page for the user, which is a very poor user experience. This behavior highlights the importance of strategically placing Error Boundaries to contain errors and preserve the rest of the application's functionality.",
+          "examples": [
+            {
+              "id": "example_error_boundary_limitations_event_handler",
+              "title": "Error in Event Handler (Not Caught by Error Boundary)",
+              "code": "import React, { useState } from 'react';\n\nclass MyErrorBoundary extends React.Component<{}, { hasError: boolean }> {\n  state = { hasError: false };\n\n  static getDerivedStateFromError(error: Error) {\n    console.log('ErrorBoundary: getDerivedStateFromError caught an error:', error.message);\n    return { hasError: true };\n  }\n\n  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {\n    console.error('Error Boundary: componentDidCatch caught an error:', error, errorInfo);\n  }\n\n  render() {\n    if (this.state.hasError) {\n      return <h1 style={{color: 'red'}}>Something went wrong in rendering children!</h1>;\n    }\n    return this.props.children;\n  }\n}\n\nconst ComponentWithEventHandlerError: React.FC = () => {\n  const [clicked, setClicked] = useState(false);\n\n  const handleClick = () => {\n    setClicked(true);\n    // This error is NOT caught by the ErrorBoundary\n    throw new Error('Error inside button onClick handler!');\n  };\n\n  if (clicked) {\n    return <p>Component was clicked. Check console for uncaught error!</p>;\n  }\n  return <button onClick={handleClick}>Click to trigger event handler error</button>;\n};\n\nconst App: React.FC = () => {\n  return (\n    <div>\n      <h2>Error Boundary Limitations Demo: Event Handlers</h2>\n      <MyErrorBoundary>\n        <ComponentWithEventHandlerError />\n      </MyErrorBoundary>\n      <p>Content below Error Boundary.</p>\n    </div>\n  );\n};\n\nexport default App;\n",
+              "explanation": "This example demonstrates that errors in event handlers are not caught by Error Boundaries. When the button is clicked, `handleClick` throws an error. You'll observe that the `MyErrorBoundary`'s `getDerivedStateFromError` and `componentDidCatch` methods are *not* called. Instead, the error will propagate up and typically be caught by the browser's global error handler, or it will unmount the whole React tree if not handled by a global error listener, leading to a blank screen or a visible uncaught error in the console, depending on the environment.",
+              "language": "typescript"
+            },
+            {
+              "id": "example_error_boundary_limitations_async_code",
+              "title": "Error in Asynchronous Code (Not Caught by Error Boundary)",
+              "code": "import React, { useEffect, useState } from 'react';\n\nclass MyErrorBoundary extends React.Component<{}, { hasError: boolean }> {\n  state = { hasError: false };\n\n  static getDerivedStateFromError(error: Error) {\n    console.log('ErrorBoundary: getDerivedStateFromError caught an error:', error.message);\n    return { hasError: true };\n  }\n\n  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {\n    console.error('Error Boundary: componentDidCatch caught an error:', error, errorInfo);\n  }\n\n  render() {\n    if (this.state.hasError) {\n      return <h1 style={{color: 'orange'}}>Something went wrong in rendering children!</h1>;\n    }\n    return this.props.children;\n  }\n}\n\nconst ComponentWithAsyncError: React.FC = () => {\n  const [triggered, setTriggered] = useState(false);\n\n  useEffect(() => {\n    if (triggered) {\n      console.log('Attempting to trigger async error in 1 second...');\n      setTimeout(() => {\n        // This error is NOT caught by the ErrorBoundary\n        throw new Error('Error from async setTimeout!');\n      }, 1000);\n    }\n  }, [triggered]);\n\n  return (\n    <div>\n      <p>Component with async operation.</p>\n      <button onClick={() => setTriggered(true)}>Trigger Async Error (after 1s)</button>\n    </div>\n  );\n};\n\nconst App: React.FC = () => {\n  return (\n    <div>\n      <h2>Error Boundary Limitations Demo: Asynchronous Code</h2>\n      <MyErrorBoundary>\n        <ComponentWithAsyncError />\n      </MyErrorBoundary>\n      <p>Content below Error Boundary.</p>\n    </div>\n  );\n};\n\nexport default App;\n",
+              "explanation": "This example shows that errors thrown within asynchronous code (like `setTimeout`) are also not caught by Error Boundaries. After clicking the button, a `setTimeout` is initiated. One second later, an error is thrown inside its callback. Similar to event handlers, `MyErrorBoundary` does not intercept this error, and it propagates globally, likely resulting in a browser-level uncaught error.",
+              "language": "typescript"
+            }
+          ],
+          "relatedQuestions": [
+            "question_error_boundary_limitations_mcq",
+            "question_error_boundary_uncaught_behavior",
+            "question_error_handling_event_handlers",
+            "question_error_handling_async_code",
+            "question_error_boundary_self_error"
+          ],
+          "relatedTasks": [
+            "task_handle_errors_outside_boundaries"
+          ],
+          "tags": [
+            "React",
+            "Error Handling",
+            "Limitations",
+            "Event Handlers",
+            "Asynchronous JavaScript",
+            "try-catch"
+          ],
+          "technology": "React",
+          "prerequisites": [
+            "React_Component_Lifecycle",
+            "JavaScript_Event_Loop",
+            "JavaScript_Promises"
+          ],
+          "complexity": 8,
+          "interviewRelevance": 9,
+          "learningPath": "advanced",
+          "requiredFor": [
+            "Production_Ready_React_Applications",
+            "Debugging_Complex_Applications"
+          ]
+        }
+      ],
+      "questions": [
+        {
+          "id": "question_error_boundaries_purpose",
+          "topic": "React Error Boundaries",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "What is the primary purpose of a React Error Boundary?",
+          "answer": "To catch JavaScript errors in child components, log them, and display a fallback UI instead of crashing the entire application.",
+          "analysisPoints": [
+            "Identifies core function: catching errors.",
+            "Highlights key outcomes: logging and fallback UI.",
+            "Emphasizes benefit: preventing application crash."
+          ],
+          "keyConcepts": [
+            "Error Handling",
+            "Fallback UI",
+            "Application Resilience"
+          ],
+          "evaluationCriteria": [
+            "Basic understanding of Error Boundaries' role."
+          ],
+          "example": null,
+          "tags": [
+            "React",
+            "Error Handling",
+            "Basic"
+          ],
+          "prerequisites": [
+            "React_Basics"
+          ],
+          "complexity": 3,
+          "interviewFrequency": 7,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_error_boundaries_why_class_component",
+          "topic": "React Error Boundaries",
+          "level": "medium",
+          "type": "open",
+          "question": "Why must a React Error Boundary be a class component, and what specific lifecycle methods are crucial for its functionality?",
+          "answer": "Error Boundaries must be class components because the specific lifecycle methods required to catch errors, `static getDerivedStateFromError(error)` and `componentDidCatch(error, errorInfo)`, are currently only available in class components. Functional components and Hooks (like `useEffect` or `useState`) cannot directly implement this error-catching mechanism.",
+          "analysisPoints": [
+            "Correctly identifies the necessity of class components.",
+            "Names the two key lifecycle methods for error handling.",
+            "Explains that these methods are exclusive to class components (as of current React versions, though hooks for error boundaries are a frequent discussion point)."
+          ],
+          "keyConcepts": [
+            "Class Components",
+            "Lifecycle Methods",
+            "Error Handling"
+          ],
+          "evaluationCriteria": [
+            "Understanding of React component types and their capabilities.",
+            "Knowledge of specific Error Boundary lifecycle methods."
+          ],
+          "example": null,
+          "tags": [
+            "React",
+            "Class Components",
+            "Error Handling",
+            "Lifecycle Methods"
+          ],
+          "prerequisites": [
+            "React_Class_Components",
+            "React_Functional_Components"
+          ],
+          "complexity": 6,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_get_derived_state_from_error_purpose",
+          "topic": "getDerivedStateFromError",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "What is the primary role of `static getDerivedStateFromError(error)` in an Error Boundary?",
+          "answer": "Its primary role is to update the component's state to indicate that an error has occurred (`hasError: true`), allowing the next render cycle to display a fallback UI. It's called during the render phase and should not cause side effects.",
+          "analysisPoints": [
+            "Focuses on state update for fallback UI.",
+            "Mentions 'render phase'.",
+            "Highlights the 'no side effects' rule."
+          ],
+          "keyConcepts": [
+            "Lifecycle Methods",
+            "Render Phase",
+            "State Update",
+            "No Side Effects"
+          ],
+          "evaluationCriteria": [
+            "Understanding of `getDerivedStateFromError`'s specific use case."
+          ],
+          "example": null,
+          "tags": [
+            "React",
+            "Error Handling",
+            "Lifecycle Methods",
+            "Flashcard"
+          ],
+          "prerequisites": [
+            "React_Lifecycle_Methods"
+          ],
+          "complexity": 4,
+          "interviewFrequency": 7,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_get_derived_state_from_error_side_effects",
+          "topic": "getDerivedStateFromError",
+          "level": "medium",
+          "type": "mcq",
+          "question": "Consider the `static getDerivedStateFromError(error)` method in a React Error Boundary. Which of the following operations is **NOT** permissible within this method?",
+          "answer": "Making an API call to log the error to a remote service.",
+          "options": [
+            "Returning an object to update the component's state.",
+            "Logging the error to the console using `console.log()`.",
+            "Setting a boolean flag in the component's state to `true`.",
+            "Making an API call to log the error to a remote service."
+          ],
+          "analysisPoints": [
+            "Tests knowledge of side effect restrictions in the render phase.",
+            "Distinguishes between permissible (pure state updates, simple logging) and impermissible (API calls, subscriptions) actions.",
+            "Reinforces understanding of React's lifecycle phases."
+          ],
+          "keyConcepts": [
+            "Render Phase",
+            "Side Effects",
+            "Lifecycle Methods"
+          ],
+          "evaluationCriteria": [
+            "Ability to identify correct and incorrect actions within a specific lifecycle method."
+          ],
+          "example": "The `static getDerivedStateFromError` method is called during React's 'render phase', which is a pure phase where React calculates what changes to make. Performing side effects like network requests (API calls) within this phase can lead to inconsistencies, bugs, or multiple executions if React re-renders. State updates and simple console logs are acceptable as they don't cause external changes or break the purity of the render phase.",
+          "tags": [
+            "React",
+            "Error Handling",
+            "Lifecycle Methods",
+            "MCQ"
+          ],
+          "prerequisites": [
+            "React_Lifecycle_Methods",
+            "React_Render_Phase"
+          ],
+          "complexity": 6,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_component_did_catch_purpose",
+          "topic": "componentDidCatch",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "What is the main responsibility of `componentDidCatch(error, errorInfo)` in an Error Boundary?",
+          "answer": "Its main responsibility is to perform side effects after an error has been caught, such as logging the error to an external service or updating the component's state with detailed error information.",
+          "analysisPoints": [
+            "Highlights 'side effects' as its core purpose.",
+            "Provides examples of common side effects (logging, state update for details).",
+            "Distinguishes it from `getDerivedStateFromError`'s primary role."
+          ],
+          "keyConcepts": [
+            "Lifecycle Methods",
+            "Commit Phase",
+            "Side Effects",
+            "Error Logging"
+          ],
+          "evaluationCriteria": [
+            "Understanding of `componentDidCatch`'s specific use case."
+          ],
+          "example": null,
+          "tags": [
+            "React",
+            "Error Handling",
+            "Lifecycle Methods",
+            "Flashcard"
+          ],
+          "prerequisites": [
+            "React_Lifecycle_Methods"
+          ],
+          "complexity": 4,
+          "interviewFrequency": 7,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_component_did_catch_side_effects",
+          "topic": "componentDidCatch",
+          "level": "medium",
+          "type": "open",
+          "question": "Explain why `componentDidCatch` is the appropriate place for side effects like logging errors to an analytics service, while `getDerivedStateFromError` is not.",
+          "answer": "`getDerivedStateFromError` is called during the 'render phase', a pure phase where React computes what changes to make to the DOM. Performing side effects here is dangerous because React might pause, abandon, or restart this phase, leading to inconsistent or repeated side effects. \n\n`componentDidCatch`, on the other hand, is called during the 'commit phase', after React has already updated the DOM. At this point, the changes are committed, and it's safe to perform side effects like network requests (e.g., logging errors to a service) or updating the component's state, without interfering with the rendering process.",
+          "analysisPoints": [
+            "Clearly defines render vs. commit phases.",
+            "Explains the implications of side effects in each phase.",
+            "Connects the phase behavior directly to the suitability of each method for side effects."
+          ],
+          "keyConcepts": [
+            "Render Phase",
+            "Commit Phase",
+            "Side Effects",
+            "Lifecycle Methods",
+            "Error Logging"
+          ],
+          "evaluationCriteria": [
+            "Deep understanding of React's rendering pipeline and lifecycle phases.",
+            "Ability to articulate reasons for design choices."
+          ],
+          "example": null,
+          "tags": [
+            "React",
+            "Error Handling",
+            "Lifecycle Methods",
+            "Advanced"
+          ],
+          "prerequisites": [
+            "React_Lifecycle_Methods",
+            "React_Phases_and_Render_Process"
+          ],
+          "complexity": 7,
+          "interviewFrequency": 9,
+          "learningPath": "advanced"
+        },
+        {
+          "id": "question_error_info_object",
+          "topic": "componentDidCatch",
+          "level": "medium",
+          "type": "flashcard",
+          "question": "What is the significance of the `errorInfo` object passed to `componentDidCatch`, and what key property does it contain?",
+          "answer": "The `errorInfo` object provides additional information about where the error occurred in the component tree. Its key property is `componentStack`, which offers a React-specific stack trace, detailing the component hierarchy that led to the error.",
+          "analysisPoints": [
+            "Defines `errorInfo`'s purpose.",
+            "Identifies `componentStack` as the crucial property.",
+            "Explains `componentStack`'s utility (React-specific trace)."
+          ],
+          "keyConcepts": [
+            "Error Information",
+            "Stack Trace",
+            "Debugging"
+          ],
+          "evaluationCriteria": [
+            "Knowledge of `componentDidCatch` arguments and their utility."
+          ],
+          "example": null,
+          "tags": [
+            "React",
+            "Error Handling",
+            "Debugging",
+            "Flashcard"
+          ],
+          "prerequisites": [
+            "React_Error_Boundaries"
+          ],
+          "complexity": 5,
+          "interviewFrequency": 7,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_error_boundary_limitations_mcq",
+          "topic": "Error Boundary Limitations",
+          "level": "medium",
+          "type": "mcq",
+          "question": "Which of the following scenarios will a React Error Boundary **NOT** catch an error?",
+          "answer": "An error thrown inside a `setTimeout` callback function within a component.",
+          "options": [
+            "An error occurring during the `render` method of a child component.",
+            "An error thrown inside a `setTimeout` callback function within a component.",
+            "An error occurring in the constructor of a deeply nested child component.",
+            "An error in a child component's `componentDidMount` lifecycle method."
+          ],
+          "analysisPoints": [
+            "Tests understanding of the boundaries of error boundary's error catching.",
+            "Distinguishes between synchronous React lifecycle errors (caught) and asynchronous JS errors (not caught).",
+            "Reinforces knowledge of what 'out of React's rendering cycle' means."
+          ],
+          "keyConcepts": [
+            "Error Handling Limitations",
+            "Asynchronous Code",
+            "Event Handlers"
+          ],
+          "evaluationCriteria": [
+            "Ability to identify common scenarios where Error Boundaries are ineffective.",
+            "Distinguishing between React lifecycle and general JavaScript execution."
+          ],
+          "example": "Error Boundaries are designed to catch errors that occur during React's rendering process, including render methods, constructors, and synchronous lifecycle methods (like `componentDidMount` and `componentDidUpdate`). However, they do not catch errors in asynchronous code (like `setTimeout`, `Promises`) or in event handlers, because these execute outside of the React component tree's rendering and commit phases. For such cases, standard JavaScript `try/catch` blocks are required.",
+          "tags": [
+            "React",
+            "Error Handling",
+            "Limitations",
+            "MCQ"
+          ],
+          "prerequisites": [
+            "React_Error_Boundaries",
+            "JavaScript_Event_Loop"
+          ],
+          "complexity": 7,
+          "interviewFrequency": 9,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_error_boundary_uncaught_behavior",
+          "topic": "Error Boundary Limitations",
+          "level": "medium",
+          "type": "open",
+          "question": "What happens if a React component throws an error and there is no Error Boundary to catch it in its parent tree (as of React 16 and later)? How does this impact user experience?",
+          "answer": "As of React 16 and later, if an error is thrown in a component and is not caught by any Error Boundary in its parent tree, React will **unmount the entire React component tree**. This leads to a blank page for the user, providing a very poor and uninformative user experience, as the application appears completely broken with no feedback.",
+          "analysisPoints": [
+            "Accurately describes the unmounting behavior.",
+            "Highlights the negative user experience (blank page).",
+            "Emphasizes the severity of unhandled errors."
+          ],
+          "keyConcepts": [
+            "Uncaught Errors",
+            "Application Crash",
+            "User Experience"
+          ],
+          "evaluationCriteria": [
+            "Understanding the consequence of not using Error Boundaries.",
+            "Awareness of modern React's error handling philosophy."
+          ],
+          "example": null,
+          "tags": [
+            "React",
+            "Error Handling",
+            "Consequences",
+            "User Experience"
+          ],
+          "prerequisites": [
+            "React_Error_Boundaries"
+          ],
+          "complexity": 6,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_error_handling_event_handlers",
+          "topic": "Error Boundary Limitations",
+          "level": "medium",
+          "type": "code",
+          "question": "An Error Boundary does not catch errors in event handlers. Write a simple React functional component that has a button. When the button is clicked, an error should be thrown in its `onClick` handler. Demonstrate how to gracefully handle this error using a standard JavaScript mechanism, ensuring the component doesn't crash the entire app if clicked.",
+          "answer": "```typescript jsx\nimport React from 'react';\n\nconst ComponentWithSafeEventHandler: React.FC = () => {\n  const handleClick = () => {\n    try {\n      // This error will be caught by the try/catch block, not an Error Boundary\n      throw new Error('Simulated error in event handler!');\n    } catch (error: any) {\n      console.error('Error caught locally in event handler:', error.message);\n      alert(`An error occurred: ${error.message}. Check console.`);\n      // You could also update component state here to display an error message in the UI\n    }\n  };\n\n  return (\n    <div>\n      <h3>Event Handler Error Demo</h3>\n      <button onClick={handleClick}>\n        Click to trigger an error in handler (handled locally)\n      </button>\n      <p>This component remains functional because the error is caught within the handler itself.</p>\n    </div>\n  );\n};\n\nexport default ComponentWithSafeEventHandler;\n```",
+          "analysisPoints": [
+            "Correctly identifies `try/catch` as the solution for event handler errors.",
+            "Implements a functional component with an event handler.",
+            "Demonstrates a `throw new Error()` inside the handler.",
+            "Uses `try/catch` to prevent the error from propagating.",
+            "Provides feedback (console.error, alert) to show the error was handled."
+          ],
+          "keyConcepts": [
+            "Error Handling",
+            "Event Handlers",
+            "try-catch",
+            "JavaScript Basics"
+          ],
+          "evaluationCriteria": [
+            "Ability to apply `try/catch` for specific error scenarios.",
+            "Understanding of event handler execution context."
+          ],
+          "example": null,
+          "tags": [
+            "React",
+            "Error Handling",
+            "JavaScript",
+            "Code Challenge"
+          ],
+          "prerequisites": [
+            "React_Event_Handling",
+            "JavaScript_Error_Handling"
+          ],
+          "complexity": 6,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_error_boundary_self_error",
+          "topic": "Error Boundary Limitations",
+          "level": "hard",
+          "type": "open",
+          "question": "Can an Error Boundary catch an error that occurs within its own `render` method or one of its lifecycle methods? If not, what is the recommended way to handle such a scenario, and why is this design choice made?",
+          "answer": "No, an Error Boundary cannot catch errors that occur within itself (i.e., its own `render` method, `static getDerivedStateFromError`, or `componentDidCatch`). If an error is thrown within the Error Boundary component itself, it will propagate up the component tree to the next nearest Error Boundary (if one exists) or cause the entire React tree to unmount.\n\nThe recommended way to handle such a scenario is to ensure that your Error Boundary itself is **robust and doesn't contain logic that can easily fail**. If an Error Boundary is failing, it suggests a fundamental flaw in its implementation. It should be a simple, highly reliable component whose sole purpose is to catch errors from its children and render a fallback.\n\nThis design choice is made to prevent infinite loops or unrecoverable states. If an Error Boundary could catch its own errors, it might enter a loop where it keeps trying to render a fallback, failing, catching its own error, and trying again. By preventing self-catching, React forces developers to ensure their error handling mechanism itself is sound, promoting stability.",
+          "analysisPoints": [
+            "Clearly states that Error Boundaries cannot self-catch.",
+            "Explains the propagation behavior for self-errors.",
+            "Provides the recommended approach: make the Error Boundary robust and simple.",
+            "Justifies the design choice (preventing infinite loops/unrecoverable states).",
+            "Demonstrates a deeper understanding of React's error handling philosophy."
+          ],
+          "keyConcepts": [
+            "Error Boundary Design",
+            "Robustness",
+            "Self-Correction",
+            "React Philosophy"
+          ],
+          "evaluationCriteria": [
+            "Understanding of advanced error boundary behavior.",
+            "Ability to articulate design principles."
+          ],
+          "example": null,
+          "tags": [
+            "React",
+            "Error Handling",
+            "Design Patterns",
+            "Architecture"
+          ],
+          "prerequisites": [
+            "React_Error_Boundaries",
+            "Software_Design_Principles"
+          ],
+          "complexity": 8,
+          "interviewFrequency": 7,
+          "learningPath": "advanced"
+        },
+        {
+          "id": "question_mcq_get_derived_state_from_error_vs_component_did_catch",
+          "topic": "getDerivedStateFromError vs componentDidCatch",
+          "level": "medium",
+          "type": "mcq",
+          "question": "Which of the following statements accurately describes the primary difference between `static getDerivedStateFromError()` and `componentDidCatch()` in a React Error Boundary?",
+          "answer": "`getDerivedStateFromError` is for rendering a fallback UI during the render phase, while `componentDidCatch` is for performing side effects like logging during the commit phase.",
+          "options": [
+            "`getDerivedStateFromError` is for logging errors, while `componentDidCatch` is for updating state.",
+            "`getDerivedStateFromError` runs after the component renders, while `componentDidCatch` runs before.",
+            "`getDerivedStateFromError` is for rendering a fallback UI during the render phase, while `componentDidCatch` is for performing side effects like logging during the commit phase.",
+            "Both methods serve the exact same purpose and can be used interchangeably."
+          ],
+          "analysisPoints": [
+            "Clearly differentiates the purpose of each method.",
+            "Correctly identifies the lifecycle phase for each method.",
+            "Highlights the side-effect allowance in `componentDidCatch` and restriction in `getDerivedStateFromError`."
+          ],
+          "keyConcepts": [
+            "Lifecycle Methods",
+            "Render Phase",
+            "Commit Phase",
+            "Side Effects",
+            "State Management"
+          ],
+          "evaluationCriteria": [
+            "Ability to distinguish between similar but distinct lifecycle methods.",
+            "Understanding of their specific roles and constraints."
+          ],
+          "example": "`getDerivedStateFromError` is a static method that returns a state object to update the component's state, primarily used to set a flag like `hasError: true` so the `render` method can switch to a fallback UI. It operates in the render phase, meaning no side effects. `componentDidCatch` is an instance method called after the error has been thrown and React has committed changes. It's the place for side effects like sending error reports to a server or updating state with more detailed error information, as it operates in the commit phase, where side effects are safe.",
+          "tags": [
+            "React",
+            "Error Handling",
+            "Lifecycle Methods",
+            "MCQ",
+            "Comparison"
+          ],
+          "prerequisites": [
+            "React_Lifecycle_Methods"
+          ],
+          "complexity": 7,
+          "interviewFrequency": 9,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_error_boundary_flashcard_definition",
+          "topic": "React Error Boundaries",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "Define 'Error Boundary' in React.",
+          "answer": "An Error Boundary is a React class component that gracefully catches JavaScript errors within its child component tree, logs them, and displays a fallback UI instead of crashing the entire application.",
+          "analysisPoints": [
+            "Concise definition.",
+            "Mentions key characteristics: class component, error catching, logging, fallback UI."
+          ],
+          "keyConcepts": [
+            "Error Handling",
+            "Class Components",
+            "Fallback UI"
+          ],
+          "evaluationCriteria": [
+            "Basic recall of definition."
+          ],
+          "example": null,
+          "tags": [
+            "React",
+            "Error Handling",
+            "Definition",
+            "Flashcard"
+          ],
+          "prerequisites": [
+            "React_Basics"
+          ],
+          "complexity": 3,
+          "interviewFrequency": 7,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_error_boundary_flashcard_methods",
+          "topic": "React Error Boundaries",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "Name the two lifecycle methods required to implement a React Error Boundary.",
+          "answer": "`static getDerivedStateFromError(error)` and `componentDidCatch(error, errorInfo)`.",
+          "analysisPoints": [
+            "Correctly lists both required methods.",
+            "Demonstrates basic recall."
+          ],
+          "keyConcepts": [
+            "Lifecycle Methods",
+            "Error Handling"
+          ],
+          "evaluationCriteria": [
+            "Recall of key methods."
+          ],
+          "example": null,
+          "tags": [
+            "React",
+            "Error Handling",
+            "Lifecycle Methods",
+            "Flashcard"
+          ],
+          "prerequisites": [
+            "React_Lifecycle_Methods"
+          ],
+          "complexity": 3,
+          "interviewFrequency": 7,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_error_boundary_flashcard_event_handlers",
+          "topic": "Error Boundary Limitations",
+          "level": "medium",
+          "type": "flashcard",
+          "question": "Do React Error Boundaries catch errors in event handlers? If not, what should be used?",
+          "answer": "No, React Error Boundaries do not catch errors in event handlers. Standard JavaScript `try/catch` blocks should be used for error handling within event handlers.",
+          "analysisPoints": [
+            "Correctly states the limitation.",
+            "Provides the appropriate alternative solution."
+          ],
+          "keyConcepts": [
+            "Error Handling Limitations",
+            "Event Handlers",
+            "try-catch"
+          ],
+          "evaluationCriteria": [
+            "Recall of a key limitation and its workaround."
+          ],
+          "example": null,
+          "tags": [
+            "React",
+            "Error Handling",
+            "Limitations",
+            "Flashcard"
+          ],
+          "prerequisites": [
+            "React_Error_Boundaries"
+          ],
+          "complexity": 5,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_error_boundary_flashcard_async_code",
+          "topic": "Error Boundary Limitations",
+          "level": "medium",
+          "type": "flashcard",
+          "question": "Can React Error Boundaries catch errors in asynchronous code like `setTimeout` or Promises?",
+          "answer": "No, React Error Boundaries do not catch errors in asynchronous code because such code executes outside of React's rendering and commit phases.",
+          "analysisPoints": [
+            "Correctly states the limitation.",
+            "Provides the reason for the limitation (outside React's phases)."
+          ],
+          "keyConcepts": [
+            "Error Handling Limitations",
+            "Asynchronous Code"
+          ],
+          "evaluationCriteria": [
+            "Recall of a key limitation and its reasoning."
+          ],
+          "example": null,
+          "tags": [
+            "React",
+            "Error Handling",
+            "Limitations",
+            "Flashcard"
+          ],
+          "prerequisites": [
+            "React_Error_Boundaries",
+            "JavaScript_Async"
+          ],
+          "complexity": 5,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        }
+      ],
+      "tasks": [
+        {
+          "id": "task_implement_error_boundary_component",
+          "title": "Implement a Reusable React Error Boundary Component",
+          "description": "\nImplement a `ErrorBoundary` class component in React that fulfills the following requirements:\n\n1.  It should catch JavaScript errors in its child component tree during rendering, lifecycle methods, and constructors.\n2.  It must implement `static getDerivedStateFromError(error)` to update its state to indicate an error has occurred, enabling it to render a fallback UI.\n3.  It must implement `componentDidCatch(error, errorInfo)` to log the error and its `componentStack` to the console (simulating logging to an external service).\n4.  When an error is caught, it should display a generic \"Something went wrong.\" message as a fallback UI.\n5.  Optionally, the fallback UI should include a 'Details' section that, when expanded, shows the `componentStack` from `errorInfo`.\n6.  Provide a simple `BuggyComponent` that throws an error conditionally to test your `ErrorBoundary`.\n7.  Wrap the `BuggyComponent` with your `ErrorBoundary` in an `App` component to demonstrate its usage.\n",
+          "difficulty": "medium",
+          "startingCode": "import React, { useState } from 'react';\n\n// --- ErrorBoundary Component (Your task to complete) ---\ninterface ErrorBoundaryState {\n  hasError: boolean;\n  errorInfo: React.ErrorInfo | null;\n}\n\ninterface ErrorBoundaryProps {\n  children: React.ReactNode;\n}\n\nclass ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundaryState> {\n  state: ErrorBoundaryState = { hasError: false, errorInfo: null };\n\n  static getDerivedStateFromError(error: Error): ErrorBoundaryState {\n    // TODO: Implement this method to update state for fallback UI\n    return { hasError: true, errorInfo: null };\n  }\n\n  componentDidCatch(error: Error, errorInfo: React.ErrorInfo): void {\n    // TODO: Implement this method for logging and optional detailed state update\n    console.error('Caught by Error Boundary:', error, errorInfo);\n  }\n\n  render() {\n    if (this.state.hasError) {\n      // TODO: Render fallback UI\n      return (\n        <div style={{ padding: '20px', border: '1px solid red', color: 'red' }}>\n          <h3>Something went wrong.</h3>\n          {/* Optional: display errorInfo.componentStack here */}\n        </div>\n      );\n    }\n    return this.props.children;\n  }\n}\n// -----------------------------------------------------\n\n// --- BuggyComponent (Provided) ---\nconst BuggyComponent: React.FC<{ shouldThrow: boolean }> = ({ shouldThrow }) => {\n  if (shouldThrow) {\n    throw new Error('This is a simulated error from BuggyComponent.');\n  }\n  return <p>This component is working normally.</p>;\n};\n// -----------------------------------------------------\n\n// --- App Component (Your task to complete) ---\nconst App: React.FC = () => {\n  const [triggerError, setTriggerError] = useState(false);\n\n  return (\n    <div>\n      <h1>Error Boundary Implementation Task</h1>\n      <button onClick={() => setTriggerError(true)}>\n        Trigger Error in Buggy Component\n      </button>\n      \n      {/* TODO: Wrap BuggyComponent with your ErrorBoundary */}\n      <div>\n        <BuggyComponent shouldThrow={triggerError} />\n      </div>\n\n      <p>Content below the potentially failing component.</p>\n    </div>\n  );\n};\n\nexport default App;\n",
+          "solutionCode": "import React, { useState } from 'react';\n\ninterface ErrorBoundaryState {\n  hasError: boolean;\n  errorInfo: React.ErrorInfo | null;\n}\n\ninterface ErrorBoundaryProps {\n  children: React.ReactNode;\n}\n\nclass ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundaryState> {\n  state: ErrorBoundaryState = { hasError: false, errorInfo: null };\n\n  static getDerivedStateFromError(error: Error): ErrorBoundaryState {\n    // Update state so the next render will show the fallback UI.\n    // This method is for handling errors during the render phase.\n    console.log('getDerivedStateFromError called:', error.message);\n    return { hasError: true, errorInfo: null }; // Set hasError, errorInfo can be null initially\n  }\n\n  componentDidCatch(error: Error, errorInfo: React.ErrorInfo): void {\n    // You can also log the error to an error reporting service here\n    console.error('Error caught by Error Boundary:', error);\n    console.error('Error info (componentStack):', errorInfo.componentStack);\n    \n    // Update state to display error details (if desired) after the commit phase\n    this.setState({ errorInfo: errorInfo });\n    // logErrorToService(error, errorInfo); // Example of reporting to an external service\n  }\n\n  render() {\n    if (this.state.hasError) {\n      // Render fallback UI when an error occurs\n      return (\n        <div className=\"error-boundary\" style={{ padding: '20px', border: '1px solid red', color: 'red', backgroundColor: '#ffe6e6' }}>\n          <h2>Something went wrong.</h2>\n          {this.state.errorInfo && (\n            <details style={{ whiteSpace: 'pre-wrap', marginTop: '10px' }}>\n              <summary>Error Details (Click to expand)</summary>\n              <pre style={{ margin: '5px 0', fontSize: '0.8em', lineHeight: '1.4em' }}>\n                {this.state.errorInfo.componentStack}\n              </pre>\n            </details>\n          )}\n        </div>\n      );\n    }\n    \n    // Otherwise, render children normally\n    return this.props.children;\n  }\n}\n\nconst BuggyComponent: React.FC<{ shouldThrow: boolean }> = ({ shouldThrow }) => {\n  if (shouldThrow) {\n    // Simulate an error during render\n    throw new Error('This is a simulated error from BuggyComponent.');\n  }\n  return <p>This component is working normally.</p>;\n};\n\nconst App: React.FC = () => {\n  const [triggerError, setTriggerError] = useState(false);\n\n  return (\n    <div>\n      <h1>Error Boundary Implementation Task</h1>\n      <button onClick={() => setTriggerError(true)}>\n        Trigger Error in Buggy Component\n      </button>\n      \n      <ErrorBoundary>\n        <BuggyComponent shouldThrow={triggerError} />\n      </ErrorBoundary>\n\n      <p>Content below the potentially failing component (should remain visible).</p>\n    </div>\n  );\n};\n\nexport default App;\n",
+          "testCases": [
+            "Initial render: `BuggyComponent` should render normally, `ErrorBoundary` should show its children.",
+            "Trigger error: Clicking the button should cause `BuggyComponent` to throw an error.",
+            "Fallback UI: `ErrorBoundary` should catch the error and display its fallback UI with \"Something went wrong.\".",
+            "Console logs: `getDerivedStateFromError` and `componentDidCatch` should log messages to the console.",
+            "Error details: If implemented, expanding the 'Details' in the fallback UI should show the `componentStack`."
+          ],
+          "hints": [
+            "Remember that `static getDerivedStateFromError` is a static method and doesn't have `this` context. It should only return a state object.",
+            "`componentDidCatch` is an instance method, so `this` is available. It's the right place for side effects like logging.",
+            "Make sure your `BuggyComponent`'s error throwing mechanism is tied to a state change (e.g., via a button click) to clearly demonstrate the boundary's effect."
+          ],
+          "tags": [
+            "React",
+            "Error Handling",
+            "Class Components",
+            "Lifecycle Methods",
+            "Testing"
+          ],
+          "timeEstimate": 45,
+          "prerequisites": [
+            "React_Class_Components",
+            "React_Lifecycle_Methods",
+            "React_State_and_Props"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 9,
+          "learningPath": "intermediate",
+          "relatedConcepts": [
+            "React_Error_Boundaries_Overview",
+            "get_derived_state_from_error",
+            "component_did_catch"
+          ]
+        },
+        {
+          "id": "task_integrate_error_boundary_into_app",
+          "title": "Integrate Error Boundaries Strategically in a Simulated Application",
+          "description": "\nGiven a small React application with multiple components, integrate the `ErrorBoundary` component (from the previous task or provided) strategically to enhance error resilience. The application structure is as follows:\n\n`App`\n  `Header`\n  `MainContent`\n    `WidgetA` (might fail)\n    `WidgetB`\n  `Footer`\n\nYour tasks are:\n\n1.  Create a basic `ErrorBoundary` component (if not already done).\n2.  Implement `WidgetA` such that it can conditionally throw an error (e.g., when a button inside it is clicked, or based on a prop).\n3.  Wrap `WidgetA` individually with an `ErrorBoundary` so that its failure does not affect `WidgetB` or other parts of `MainContent`.\n4.  Also, wrap the entire `MainContent` component with *another* `ErrorBoundary`. This boundary should catch any errors from `WidgetB` or other direct children of `MainContent`.\n5.  Ensure that an error in `WidgetA` only shows the fallback for `WidgetA`, while an error in `WidgetB` shows the fallback for the entire `MainContent` area.\n6.  Add console logs within your Error Boundaries to demonstrate which boundary catches which error.\n",
+          "difficulty": "medium",
+          "startingCode": "import React, { useState } from 'react';\n\n// --- Provided ErrorBoundary (use your solution from previous task or this one) ---\nclass ErrorBoundary extends React.Component<any, any> {\n  state = { hasError: false, errorInfo: null };\n\n  static getDerivedStateFromError(error: Error) {\n    console.log('ErrorBoundary: getDerivedStateFromError called.');\n    return { hasError: true };\n  }\n\n  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {\n    console.error('ErrorBoundary: componentDidCatch caught error:', error.message, errorInfo.componentStack);\n    this.setState({ errorInfo });\n  }\n\n  render() {\n    if (this.state.hasError) {\n      return (\n        <div style={{ border: '2px dashed red', padding: '15px', margin: '10px 0' }}>\n          <h3>⚠️ Component Failed!</h3>\n          {this.state.errorInfo && (\n            <details>\n              <summary>Error Details</summary>\n              <pre style={{ whiteSpace: 'pre-wrap', fontSize: '0.75em' }}>\n                {this.state.errorInfo.componentStack}\n              </pre>\n            </details>\n          )}\n        </div>\n      );\n    }\n    return this.props.children;\n  }\n}\n// --------------------------------------------------------------------------\n\n// --- App Components (Your task to modify/complete) ---\nconst Header: React.FC = () => (\n  <header style={{ background: '#f0f0f0', padding: '20px', textAlign: 'center' }}>\n    <h2>Application Header</h2>\n  </header>\n);\n\nconst Footer: React.FC = () => (\n  <footer style={{ background: '#f0f0f0', padding: '15px', textAlign: 'center', marginTop: '20px' }}>\n    <p>© 2023 My App</p>\n  </footer>\n);\n\n// WidgetA: Can throw an error\nconst WidgetA: React.FC<{ triggerError: boolean }> = ({ triggerError }) => {\n  if (triggerError) {\n    throw new Error('Error in WidgetA!');\n  }\n  return (\n    <div style={{ border: '1px solid lightblue', padding: '10px', margin: '5px' }}>\n      <h4>Widget A</h4>\n      <p>This widget is fine.</p>\n    </div>\n  );\n};\n\n// WidgetB: Will throw error if trigger is true\nconst WidgetB: React.FC<{ triggerError: boolean }> = ({ triggerError }) => {\n  if (triggerError) {\n    throw new Error('Error in WidgetB!');\n  }\n  return (\n    <div style={{ border: '1px solid lightgreen', padding: '10px', margin: '5px' }}>\n      <h4>Widget B</h4>\n      <p>This widget is also fine.</p>\n    </div>\n  );\n};\n\nconst MainContent: React.FC = () => {\n  const [errorA, setErrorA] = useState(false);\n  const [errorB, setErrorB] = useState(false);\n\n  return (\n    <main style={{ padding: '20px', border: '1px solid gray', margin: '20px', minHeight: '300px' }}>\n      <h3>Main Application Content</h3>\n      <button onClick={() => setErrorA(true)} style={{ marginRight: '10px' }}>\n        Trigger Error in Widget A\n      </button>\n      <button onClick={() => setErrorB(true)}>\n        Trigger Error in Widget B\n      </button>\n\n      {/* TODO: Place Error Boundaries strategically */}\n      \n      <div>\n        {/* Widget A goes here */}\n        <WidgetA triggerError={errorA} />\n      </div>\n      <div>\n        {/* Widget B goes here */}\n        <WidgetB triggerError={errorB} />\n      </div>\n    </main>\n  );\n};\n\nconst App: React.FC = () => {\n  return (\n    <div>\n      <Header />\n      {/* TODO: MainContent needs an ErrorBoundary if WidgetB fails */}\n      <MainContent />\n      <Footer />\n    </div>\n  );\n};\n\nexport default App;\n",
+          "solutionCode": "import React, { useState } from 'react';\n\nclass ErrorBoundary extends React.Component<any, any> {\n  state = { hasError: false, errorInfo: null };\n  constructor(props: any) {\n    super(props);\n    // Adding a name prop to distinguish boundaries in logs\n    // This is not part of standard ErrorBoundary but useful for this task\n    this.state = { hasError: false, errorInfo: null };\n  }\n\n  static getDerivedStateFromError(error: Error) {\n    console.log(`ErrorBoundary (${this.name || 'Unnamed'}): getDerivedStateFromError called.`);\n    return { hasError: true };\n  }\n\n  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {\n    console.error(`ErrorBoundary (${(this.props as any).name || 'Unnamed'}): componentDidCatch caught error:`, error.message, errorInfo.componentStack);\n    this.setState({ errorInfo });\n  }\n\n  render() {\n    if (this.state.hasError) {\n      return (\n        <div style={{ border: '2px dashed red', padding: '15px', margin: '10px 0', backgroundColor: '#ffe6e6' }}>\n          <h3>⚠️ Component Failed! (Boundary: {(this.props as any).name || 'Unnamed'})</h3>\n          {this.state.errorInfo && (\n            <details>\n              <summary>Error Details</summary>\n              <pre style={{ whiteSpace: 'pre-wrap', fontSize: '0.75em', maxHeight: '150px', overflowY: 'auto' }}>\n                {this.state.errorInfo.componentStack}\n              </pre>\n            </details>\n          )}\n        </div>\n      );\n    }\n    return this.props.children;\n  }\n}\n\nconst Header: React.FC = () => (\n  <header style={{ background: '#f0f0f0', padding: '20px', textAlign: 'center' }}>\n    <h2>Application Header</h2>\n  </header>\n);\n\nconst Footer: React.FC = () => (\n  <footer style={{ background: '#f0f0f0', padding: '15px', textAlign: 'center', marginTop: '20px' }}>\n    <p>© 2023 My App</p>\n  </footer>\n);\n\nconst WidgetA: React.FC<{ triggerError: boolean }> = ({ triggerError }) => {\n  if (triggerError) {\n    throw new Error('Error in WidgetA!');\n  }\n  return (\n    <div style={{ border: '1px solid lightblue', padding: '10px', margin: '5px' }}>\n      <h4>Widget A</h4>\n      <p>This widget is fine.</p>\n    </div>\n  );\n};\n\nconst WidgetB: React.FC<{ triggerError: boolean }> = ({ triggerError }) => {\n  if (triggerError) {\n    throw new Error('Error in WidgetB!');\n  }\n  return (\n    <div style={{ border: '1px solid lightgreen', padding: '10px', margin: '5px' }}>\n      <h4>Widget B</h4>\n      <p>This widget is also fine.</p>\n    </div>\n  );\n};\n\nconst MainContent: React.FC = () => {\n  const [errorA, setErrorA] = useState(false);\n  const [errorB, setErrorB] = useState(false);\n\n  return (\n    <main style={{ padding: '20px', border: '1px solid gray', margin: '20px', minHeight: '300px' }}>\n      <h3>Main Application Content</h3>\n      <button onClick={() => setErrorA(true)} style={{ marginRight: '10px' }}>\n        Trigger Error in Widget A\n      </button>\n      <button onClick={() => setErrorB(true)}>\n        Trigger Error in Widget B\n      </button>\n      \n      {/* Individual Error Boundary for Widget A */}\n      <ErrorBoundary name=\"WidgetA-Boundary\">\n        <WidgetA triggerError={errorA} />\n      </ErrorBoundary>\n      \n      {/* Widget B is now directly under MainContent's boundary */}\n      <WidgetB triggerError={errorB} />\n\n    </main>\n  );\n};\n\nconst App: React.FC = () => {\n  return (\n    <div>\n      <Header />\n      {/* MainContent wrapped by its own ErrorBoundary */}\n      <ErrorBoundary name=\"MainContent-Boundary\">\n        <MainContent />\n      </ErrorBoundary>\n      <Footer />\n    </div>\n  );\n};\n\nexport default App;\n",
+          "testCases": [
+            "Initial render: All components (Header, MainContent, WidgetA, WidgetB, Footer) should render without errors.",
+            "Error in WidgetA: Clicking 'Trigger Error in Widget A' should cause WidgetA's dedicated ErrorBoundary to show its fallback. WidgetB, Header, and Footer should remain visible and functional. Console should show logs from 'WidgetA-Boundary'.",
+            "Error in WidgetB: Clicking 'Trigger Error in Widget B' should cause MainContent's ErrorBoundary to show its fallback. WidgetA, Header, and Footer should remain visible and functional. Console should show logs from 'MainContent-Boundary'.",
+            "Multiple Errors: Trigger an error in WidgetA, then try to trigger an error in WidgetB (or vice versa). Observe how the different boundaries behave and which part of the UI is affected.",
+            "No Errors: Confirm that without triggering errors, the application functions normally without any visible boundary fallbacks."
+          ],
+          "hints": [
+            "Remember that an Error Boundary only catches errors in its *children*. It does not catch errors in itself or its siblings.",
+            "You'll need two separate instances of `ErrorBoundary` for this task.",
+            "Consider adding a `name` prop to your `ErrorBoundary` and logging that name in `componentDidCatch` to easily identify which boundary is triggered in the console.",
+            "Think about the hierarchy: `App > MainContent-ErrorBoundary > MainContent > (WidgetA-ErrorBoundary > WidgetA), WidgetB`."
+          ],
+          "tags": [
+            "React",
+            "Error Handling",
+            "Component Hierarchy",
+            "Application Structure",
+            "Nested Components"
+          ],
+          "timeEstimate": 60,
+          "prerequisites": [
+            "React_Component_Composition",
+            "React_Error_Boundaries_Overview"
+          ],
+          "complexity": 8,
+          "interviewRelevance": 9,
+          "learningPath": "advanced",
+          "relatedConcepts": [
+            "React_Error_Boundaries_Overview",
+            "Error_Boundary_Limitations"
+          ]
+        },
+        {
+          "id": "task_handle_errors_outside_boundaries",
+          "title": "Handling Errors Outside React Error Boundaries",
+          "description": "\nReact Error Boundaries have limitations and do not catch errors in event handlers or asynchronous code. This task focuses on implementing robust error handling for such scenarios.\n\nYour tasks are:\n\n1.  Create a functional React component called `ActionButtons`.\n2.  Inside `ActionButtons`, include two buttons:\n    *   One button, when clicked, should throw an error directly within its `onClick` handler.\n    *   Another button, when clicked, should trigger an asynchronous operation (e.g., a `setTimeout` or a `Promise` that rejects after a delay) that throws/rejects an error.\n3.  Implement `try/catch` blocks within the respective handlers to gracefully handle these errors. Do **not** rely on an `ErrorBoundary` for these specific errors.\n4.  Display a user-friendly message or update component state to show that an error occurred and was handled, without crashing the component or the application.\n5.  Include console logs to confirm when errors are caught locally by `try/catch`.\n6.  (Optional but recommended) Wrap `ActionButtons` with a generic `ErrorBoundary` to show that *other* types of errors (e.g., render-time errors) would still be caught by the boundary, but the button errors are not.\n",
+          "difficulty": "hard",
+          "startingCode": "import React, { useState } from 'react';\n\n// Basic Error Boundary (for demonstrating its non-involvement)\nclass GenericErrorBoundary extends React.Component<any, any> {\n  state = { hasError: false };\n  static getDerivedStateFromError(error: Error) {\n    console.log('GenericErrorBoundary caught a render error:', error.message);\n    return { hasError: true };\n  }\n  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {\n    console.error('GenericErrorBoundary componentDidCatch:', error, errorInfo.componentStack);\n  }\n  render() {\n    if (this.state.hasError) {\n      return <div style={{ border: '2px solid purple', padding: '10px' }}>\n               <p>A rendering error occurred in a child. (Caught by GenericErrorBoundary)</p>\n             </div>;\n    }\n    return this.props.children;\n  }\n}\n\n// Your component to implement\nconst ActionButtons: React.FC = () => {\n  const [status, setStatus] = useState<string>('Ready');\n\n  const handleSyncError = () => {\n    // TODO: Implement try/catch for synchronous error\n    setStatus('Attempting sync error...');\n    // throw new Error('Sync error!'); // This will be caught by try/catch\n  };\n\n  const handleAsyncError = () => {\n    // TODO: Implement try/catch for asynchronous error\n    setStatus('Attempting async error...');\n    // setTimeout(() => { throw new Error('Async error!'); }, 500); // This needs Promise.catch or try/catch around the setTimeout callback\n  };\n\n  return (\n    <div style={{ border: '1px solid gray', padding: '20px', margin: '20px' }}>\n      <h3>Action Buttons with Local Error Handling</h3>\n      <button onClick={handleSyncError} style={{ marginRight: '10px' }}>\n        Trigger Sync Error (Event Handler)\n      </button>\n      <button onClick={handleAsyncError}>\n        Trigger Async Error (setTimeout)\n      </button>\n      <p>Status: {status}</p>\n    </div>\n  );\n};\n\nconst App: React.FC = () => {\n  return (\n    <div>\n      <h1>Error Handling Outside Boundaries Task</h1>\n      <GenericErrorBoundary>\n        <ActionButtons />\n      </GenericErrorBoundary>\n      <p>Application continues to run.</p>\n    </div>\n  );\n};\n\nexport default App;\n",
+          "solutionCode": "import React, { useState } from 'react';\n\n// Basic Error Boundary (for demonstrating its non-involvement)\nclass GenericErrorBoundary extends React.Component<any, any> {\n  state = { hasError: false };\n  static getDerivedStateFromError(error: Error) {\n    console.log('GenericErrorBoundary caught a render error:', error.message);\n    return { hasError: true };\n  }\n  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {\n    console.error('GenericErrorBoundary componentDidCatch (render error):', error, errorInfo.componentStack);\n  }\n  render() {\n    if (this.state.hasError) {\n      return <div style={{ border: '2px solid purple', padding: '10px', margin: '10px' }}>\n               <p>A rendering error occurred in a child. (Caught by GenericErrorBoundary)</p>\n             </div>;\n    }\n    return this.props.children;\n  }\n}\n\nconst ActionButtons: React.FC = () => {\n  const [status, setStatus] = useState<string>('Ready');\n\n  const handleSyncError = () => {\n    try {\n      // Error in event handler - caught by local try/catch\n      throw new Error('Simulated synchronous error in onClick!');\n    } catch (error: any) {\n      console.error('Locally caught sync error:', error.message);\n      setStatus(`Sync Error Handled: ${error.message}`);\n      // Optionally, show a temporary error message in the UI\n    }\n  };\n\n  const handleAsyncError = () => {\n    setStatus('Attempting async error...');\n    // Error in async code (setTimeout callback) - needs try/catch inside callback\n    setTimeout(() => {\n      try {\n        throw new Error('Simulated asynchronous error in setTimeout!');\n      } catch (error: any) {\n        console.error('Locally caught async error:', error.message);\n        setStatus(`Async Error Handled: ${error.message}`);\n      }\n    }, 1000);\n\n    // Example with Promise rejection\n    /*\n    new Promise((_, reject) => {\n      setTimeout(() => {\n        reject(new Error('Simulated async promise rejection!'));\n      }, 1500);\n    })\n    .catch((error: any) => {\n      console.error('Locally caught promise error:', error.message);\n      setStatus(`Promise Error Handled: ${error.message}`);\n    });\n    */\n  };\n\n  // Example of an error that WOULD be caught by GenericErrorBoundary\n  const triggerRenderError = () => {\n    // Simulate a rendering error for the ErrorBoundary to catch\n    throw new Error('Simulated rendering error!');\n  };\n\n  return (\n    <div style={{ border: '1px solid gray', padding: '20px', margin: '20px' }}>\n      <h3>Action Buttons with Local Error Handling</h3>\n      <button onClick={handleSyncError} style={{ marginRight: '10px' }}>\n        Trigger Sync Error (Event Handler)\n      </button>\n      <button onClick={handleAsyncError} style={{ marginRight: '10px' }}>\n        Trigger Async Error (setTimeout)\n      </button>\n      {/* Optional button to demonstrate a render error caught by GenericErrorBoundary */}\n      <button onClick={triggerRenderError}>Trigger Render Error (for ErrorBoundary)</button>\n      <p style={{ marginTop: '15px', fontWeight: 'bold' }}>Status: {status}</p>\n    </div>\n  );\n};\n\nconst App: React.FC = () => {\n  return (\n    <div>\n      <h1>Error Handling Outside Boundaries Task</h1>\n      <GenericErrorBoundary>\n        <ActionButtons />\n      </GenericErrorBoundary>\n      <p>Application continues to run.</p>\n    </div>\n  );\n};\n\nexport default App;\n",
+          "testCases": [
+            "Initial state: `ActionButtons` should render normally, status is 'Ready'.",
+            "Sync Error (Event Handler): Click 'Trigger Sync Error'. The component should NOT crash. The status message should update to 'Sync Error Handled...'. Console should show 'Locally caught sync error:', and `GenericErrorBoundary`'s logs should NOT appear.",
+            "Async Error (setTimeout): Click 'Trigger Async Error'. Wait 1 second. The component should NOT crash. The status message should update to 'Async Error Handled...'. Console should show 'Locally caught async error:', and `GenericErrorBoundary`'s logs should NOT appear.",
+            "Render Error (Optional): If implemented, clicking 'Trigger Render Error' should cause `GenericErrorBoundary` to display its fallback UI, and its logs should appear, demonstrating the different scopes of error handling."
+          ],
+          "hints": [
+            "For event handlers, place the `try/catch` directly around the code that might throw inside the `onClick` handler function.",
+            "For `setTimeout` callbacks, the `try/catch` must be *inside* the callback function passed to `setTimeout`, not around the `setTimeout` call itself.",
+            "For Promises, use the `.catch()` method or an `async/await` block with `try/catch` around the `await` call.",
+            "Ensure your `setStatus` calls provide clear feedback to the user about which error was handled and where."
+          ],
+          "tags": [
+            "React",
+            "Error Handling",
+            "JavaScript",
+            "try-catch",
+            "Asynchronous JavaScript",
+            "Event Handlers"
+          ],
+          "timeEstimate": 75,
+          "prerequisites": [
+            "React_Functional_Components",
+            "React_State_and_Props",
+            "JavaScript_Error_Handling",
+            "JavaScript_Asynchronous_Programming"
+          ],
+          "complexity": 8,
+          "interviewRelevance": 9,
+          "learningPath": "advanced",
+          "relatedConcepts": [
+            "Error_Boundary_Limitations"
+          ]
+        }
+      ]
+    }
+  }
+]

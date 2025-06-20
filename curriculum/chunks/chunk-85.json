@@ -1,0 +1,1453 @@
+[
+  {
+    "id": "76447370-0415-49aa-916f-aec1cb21075c",
+    "startLine": 17100,
+    "endLine": 17199,
+    "processedDate": "2025-06-17T15:48:23.494Z",
+    "content": {
+      "logicalBlockInfo": {
+        "suggestedEndLine": -1
+      },
+      "theory": [
+        {
+          "id": "theory_lazy_loading_images_intersection_observer",
+          "title": "Lazy Loading Images with Intersection Observer",
+          "content": "Lazy loading is a technique that defers the loading of non-critical resources at page load time. Instead, these resources are loaded at the moment of need. For images, this means loading them only when they are about to enter the viewport, saving bandwidth and improving initial page load performance.\n\nThe `IntersectionObserver` API provides a way to asynchronously observe changes in the intersection of a target element with an ancestor element or with the top-level document's viewport. It's a highly efficient way to implement lazy loading because it avoids constant polling or event listeners (like `scroll` or `resize`), which can be performance heavy.\n\n## Key Concepts\n*   **`IntersectionObserver`**: A browser API that reports when an element (target) enters or exits the viewport (or another element).\n*   **Callback function**: A function that `IntersectionObserver` executes whenever the target element crosses one of the specified thresholds.\n*   **`IntersectionObserverEntry`**: Objects passed to the callback, each describing the intersection change of one observed target.\n    *   `isIntersecting`: A boolean indicating if the target element is currently intersecting with the root.\n*   **`observer.observe(targetElement)`**: Starts observing a target element.\n*   **`observer.disconnect()`**: Stops observing all target elements for a given observer.\n*   **Placeholder Image**: A lightweight, often blurry or low-resolution image shown immediately to improve perceived performance while the actual image loads.",
+          "examples": [
+            {
+              "id": "example_lazy_loading_image_1",
+              "title": "React Component for Lazy Loading Images",
+              "code": "import React, { useRef, useEffect, useState } from 'react';\n\ninterface LazyImageProps {\n  src: string;\n  placeholder: string;\n  alt: string;\n}\n\nfunction LazyImage({ src, placeholder, alt }: LazyImageProps) {\n  const imgRef = useRef<HTMLImageElement>(null);\n  const [isLoaded, setIsLoaded] = useState(false);\n\n  useEffect(() => {\n    const observer = new IntersectionObserver(\n      (entries) => {\n        if (entries[0].isIntersecting) {\n          setIsLoaded(true);\n          observer.disconnect(); // Stop observing once loaded\n        }\n      },\n      { rootMargin: '0px 0px 50px 0px' } // Load when 50px from bottom of viewport\n    );\n\n    if (imgRef.current) {\n      observer.observe(imgRef.current);\n    }\n\n    // Clean up observer on component unmount\n    return () => {\n      if (imgRef.current) {\n        observer.unobserve(imgRef.current);\n      }\n      observer.disconnect();\n    };\n  }, []); // Empty dependency array means this effect runs once on mount\n\n  return (\n    <img\n      ref={imgRef}\n      src={isLoaded ? src : placeholder}\n      alt={alt}\n      style={{ opacity: isLoaded ? 1 : 0.5, transition: 'opacity 0.3s ease-in-out' }} // Visual transition\n    />\n  );\n}",
+              "explanation": "This React component demonstrates lazy loading using `IntersectionObserver`. It takes a `src` (the actual image), `placeholder` (a low-res initial image), and `alt` text. Initially, it displays the `placeholder`. Once the `imgRef` element enters the viewport (or is within 50px of it due to `rootMargin`), `isLoaded` is set to `true`, switching the `src` to the high-resolution image. The observer is then disconnected to prevent further observations and save resources. The `useEffect` cleanup function ensures the observer is properly disconnected when the component unmounts.",
+              "language": "typescript"
+            }
+          ],
+          "relatedQuestions": [
+            "question_lazy_loading_1",
+            "question_lazy_loading_2",
+            "question_lazy_loading_3",
+            "question_lazy_loading_4"
+          ],
+          "relatedTasks": [
+            "task_lazy_loading_1"
+          ],
+          "tags": [
+            "React",
+            "Performance",
+            "Lazy Loading",
+            "IntersectionObserver",
+            "Frontend",
+            "Web APIs"
+          ],
+          "technology": "React, TypeScript, Web APIs",
+          "prerequisites": [
+            "react_basics",
+            "dom_manipulation",
+            "javascript_async"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 8,
+          "learningPath": "intermediate",
+          "requiredFor": [
+            "performance_optimization",
+            "complex_ui_patterns"
+          ]
+        },
+        {
+          "id": "theory_web_application_optimization",
+          "title": "Web Application Performance Optimization Strategies",
+          "content": "Optimizing a web application's performance is crucial for user experience, SEO, and business success. It involves a multi-faceted approach targeting various layers of the application stack.\n\n## 1. Front-end Optimization\nFocuses on improving the client-side rendering and interaction speed.\n*   **Minimize HTTP requests**: Combine and concatenate CSS/JS files, use CSS sprites, and inline small assets (e.g., SVGs, base64 images).\n*   **Implement code splitting and lazy loading**: Load only the necessary JavaScript, CSS, and images for the initial view. Defer loading of modules, components, or routes until they are needed.\n*   **Use efficient CSS selectors and reduce unused CSS**: Avoid overly complex or deeply nested selectors. Utilize tools to identify and remove dead CSS code (e.g., PurgeCSS, UnCSS).\n*   **Optimize critical rendering path**: Prioritize the content and resources needed to render the above-the-fold content first. Defer non-critical CSS/JS.\n*   **Implement responsive images with `srcset`/`sizes`**: Serve different image resolutions and formats based on the user's device, viewport size, and pixel density. Use `<picture>` for art direction.\n\n## 2. Back-end Optimization\nEnsures the server responds quickly and efficiently.\n*   **Implement server-side caching**: Cache frequently accessed data, database queries, and rendered HTML fragments to reduce processing load.\n*   **Optimize database queries**: Use indexes, avoid N+1 queries, use efficient joins, and select only necessary columns.\n*   **Use connection pooling**: Reuse database connections instead of establishing new ones for each request, reducing overhead.\n*   **Implement pagination for large data sets**: Retrieve and display data in chunks rather than loading entire datasets, which can overwhelm both server and client.\n*   **Consider serverless architecture for scaling**: Utilize services like AWS Lambda, Azure Functions, or Google Cloud Functions for auto-scaling and cost efficiency, especially for sporadic workloads.\n\n## 3. Network Optimization\nAims to reduce the time it takes for data to travel between client and server.\n*   **Enable HTTP/2 or HTTP/3**: These protocols offer multiplexing, header compression, server push, and other features that improve concurrent request handling over a single connection.\n*   **Use CDNs (Content Delivery Networks) for static assets**: Distribute static files (images, CSS, JS) closer to users geographically, reducing latency.\n*   **Implement proper cache headers**: Utilize `Cache-Control`, `Expires`, and `ETag` headers to instruct browsers and proxies on how long to cache resources, reducing subsequent requests.\n*   **Minimize cookie size**: Large cookies are sent with every HTTP request, increasing overhead. Keep them lean.\n*   **Enable Brotli/Gzip compression**: Compress text-based assets (HTML, CSS, JS, SVG) before sending them over the network, significantly reducing transfer size.\n\n## 4. Asset Optimization\nFocuses on making individual files smaller and more efficient.\n*   **Minify and compress JavaScript, CSS, HTML**: Remove unnecessary characters (whitespace, comments) and shorten variable names to reduce file size.\n*   **Optimize images (WebP format, proper sizing)**: Convert images to modern formats like WebP (or AVIF) for better compression. Ensure images are sized correctly for their display dimensions to avoid downloading excessively large files.\n*   **Use `font-display` property for text rendering**: Control how fonts are loaded and displayed, preventing Flash of Invisible Text (FOIT) or Flash of Unstyled Text (FOUT). Common values include `swap`, `fallback`, `optional`, `block`.\n*   **Implement resource hints (preload, prefetch)**: `preload` fetches a resource that is needed in the current navigation but might not be discovered immediately. `prefetch` fetches a resource that might be needed for a future navigation.\n\n## 5. Measuring Performance\nTools and metrics to identify bottlenecks and track improvements.\n*   **Use Lighthouse for auditing**: A Google tool that audits web pages for performance, accessibility, best practices, and SEO, providing actionable recommendations.\n*   **Monitor Core Web Vitals**: A set of user-centric metrics (LCP, FID, CLS) that quantify key aspects of the user experience, reflecting real-world usage.\n    *   **LCP (Largest Contentful Paint)**: Measures perceived load speed, marking the point when the page's main content has likely loaded.\n    *   **FID (First Input Delay)**: Measures responsiveness, quantifying the time from when a user first interacts with a page to when the browser is actually able to begin processing event handlers.\n    *   **CLS (Cumulative Layout Shift)**: Measures visual stability, quantifying unexpected layout shifts during the loading phase.\n*   **Implement Real User Monitoring (RUM)**: Collects performance data from actual users visiting your website, providing insights into real-world performance under various network conditions and device types.\n*   **Set up performance budgets**: Define thresholds for key metrics (e.g., JavaScript bundle size, image size, initial load time) and use automated tools to ensure these budgets are not exceeded during development and deployment.",
+          "examples": [
+            {
+              "id": "example_performance_srcset",
+              "title": "Responsive Images with srcset",
+              "code": "<img\n  src=\"image-small.jpg\"\n  srcset=\"image-small.jpg 480w, image-medium.jpg 800w, image-large.jpg 1200w\"\n  sizes=\"(max-width: 600px) 480px, (max-width: 1000px) 800px, 1200px\"\n  alt=\"Descriptive Alt Text\"\n/>",
+              "explanation": "This HTML snippet demonstrates responsive images using `srcset` and `sizes`. `srcset` provides a list of image candidates with their intrinsic widths (`w`). `sizes` tells the browser what width the image will occupy at different viewport sizes. The browser then intelligently selects the most appropriate image from `srcset` based on the `sizes` attribute and its own internal heuristics (like pixel density, network speed), improving load times by serving smaller images to smaller screens.",
+              "language": "html"
+            },
+            {
+              "id": "example_performance_font_display",
+              "title": "Using font-display in CSS",
+              "code": "@font-face {\n  font-family: 'Open Sans';\n  src: url('/fonts/OpenSans-Regular.woff2') format('woff2');\n  font-weight: 400;\n  font-display: swap; /* Most common and recommended value */\n}",
+              "explanation": "The `font-display: swap;` property tells the browser how to render text while a web font is loading. With `swap`, the browser will immediately render text using a fallback font. Once the custom font loads, it will swap out the fallback font for the custom one. This prevents Flash of Invisible Text (FOIT) and improves perceived performance, although it might cause a Flash of Unstyled Text (FOUT).",
+              "language": "css"
+            },
+            {
+              "id": "example_performance_resource_hints",
+              "title": "Resource Hints: Preload and Prefetch",
+              "code": "<!-- Preload a critical CSS file that is discovered later in the HTML -->\n<link rel=\"preload\" href=\"/styles/critical.css\" as=\"style\">\n\n<!-- Prefetch a resource (e.g., JavaScript for a future route) -->\n<link rel=\"prefetch\" href=\"/js/next-route-bundle.js\" as=\"script\">",
+              "explanation": "`<link rel=\"preload\">` tells the browser to fetch a resource immediately that is critical for the current page, even if it's not discovered until later in the parsing process (e.g., fonts, background images in CSS). `as=\"style\"` or `as=\"script\"` specifies the type of resource. `<link rel=\"prefetch\">` suggests to the browser that a resource might be needed for a future navigation, so it can be fetched in the background with low priority when the browser is idle.",
+              "language": "html"
+            }
+          ],
+          "relatedQuestions": [
+            "question_performance_1",
+            "question_performance_2",
+            "question_performance_3",
+            "question_performance_4",
+            "question_performance_5",
+            "question_performance_6",
+            "question_performance_7",
+            "question_performance_8",
+            "question_performance_9"
+          ],
+          "relatedTasks": [
+            "task_performance_1",
+            "task_performance_2",
+            "task_performance_3"
+          ],
+          "tags": [
+            "Performance",
+            "Optimization",
+            "Frontend",
+            "Backend",
+            "Network",
+            "Assets",
+            "Core Web Vitals",
+            "Lighthouse",
+            "SEO"
+          ],
+          "technology": "Web Performance, HTTP, CSS, JavaScript, HTML, Databases",
+          "prerequisites": [
+            "html_basics",
+            "css_basics",
+            "javascript_basics",
+            "http_basics",
+            "browser_rendering"
+          ],
+          "complexity": 9,
+          "interviewRelevance": 10,
+          "learningPath": "advanced",
+          "requiredFor": [
+            "senior_frontend",
+            "fullstack_development",
+            "devops_frontend"
+          ]
+        },
+        {
+          "id": "theory_server_side_rendering",
+          "title": "Server-Side Rendering (SSR)",
+          "content": "Server-Side Rendering (SSR) is a technique where the initial rendering of web pages occurs on the server, generating a fully-formed HTML document that is then sent to the client's browser. This contrasts with Client-Side Rendering (CSR), where the browser receives a minimal HTML shell and relies on JavaScript to fetch data and construct the DOM.\n\n## Key Aspects of SSR\n\n### 1. Performance Benefits\n*   **Faster First Contentful Paint (FCP)**: Users see content much faster because the browser receives ready-to-render HTML immediately, reducing the blank screen time associated with CSR.\n*   **Better Time to Interactive (TTI)**: While FCP is faster, the page might not be interactive until client-side JavaScript loads and 'hydrates' the page. However, for many users, seeing content quickly is paramount.\n*   **Improved Core Web Vitals scores**: SSR generally contributes positively to metrics like LCP and CLS due to pre-rendered content.\n\n### 2. SEO Advantages\n*   **Search engines can easily index content**: Bots often struggle with JavaScript-heavy CSR applications. SSR provides a fully rendered HTML snapshot, making it much easier for search engine crawlers (like Googlebot) to parse and index the content, improving search rankings.\n*   **Better social media sharing previews**: When a link to an SSR page is shared on platforms like Facebook or Twitter, the social media crawlers can easily access and generate accurate link previews (opengraph tags, titles, descriptions) because they receive static HTML.\n\n### 3. Implementation Approaches\n*   **Traditional server templating**: Old-school approach using languages like PHP (Blade, Twig), Ruby on Rails (ERB), Python (Django templates), or Java (JSP) to render HTML on the server.\n*   **Modern JavaScript frameworks (Next.js, Nuxt.js)**: Frameworks built on React (Next.js), Vue (Nuxt.js), or Angular (Angular Universal) enable developers to write universal (isomorphic) JavaScript code that runs both on the server and the client, simplifying SSR setup for SPA frameworks.\n*   **Universal JavaScript applications**: Applications where the same JavaScript code can run both on the server and in the browser, allowing for shared logic and components.\n\n### 4. Tradeoffs\n*   **Higher server load**: The server has to do more work by rendering each page, which can increase server costs and potentially require more robust server infrastructure.\n*   **More complex development setup**: Debugging can be more challenging, and managing server-side specific logic (e.g., Node.js environment vs. browser environment) adds complexity.\n*   **Potentially slower Time to First Byte (TTFB)**: While FCP is faster, the TTFB can be slower than CSR because the server needs to fetch data, render the page, and then send the full HTML, which takes time. For CSR, the initial HTML is minimal and sent quickly.\n\n### 5. Hydration\n*   **Definition**: Hydration is the process by which client-side JavaScript takes over a server-rendered HTML page. It involves attaching event listeners, making the components interactive, and reconstructing the component tree in the browser. Without hydration, the server-rendered HTML would be static and unresponsive to user input.\n*   **How it works**: The server sends HTML and possibly initial state. The client then loads the JavaScript bundle. This JavaScript re-renders the component (often into a virtual DOM) and compares it with the existing server-rendered HTML. It then attaches event handlers to the corresponding DOM elements, making the page interactive without re-rendering the entire visible content.\n*   **Challenges**: Hydration can sometimes lead to a period where the page looks ready but isn't interactive (known as 'TBT' - Total Blocking Time, a Core Web Vital related to interactivity). Mismatch between server and client rendering can also cause issues.",
+          "examples": [
+            {
+              "id": "example_ssr_nextjs_getserversideprops",
+              "title": "Next.js SSR with getServerSideProps",
+              "code": "// pages/posts/[id].tsx\nimport { GetServerSideProps } from 'next';\n\ninterface PostProps {\n  post: { id: number; title: string; content: string };\n}\n\nfunction Post({ post }: PostProps) {\n  return (\n    <div>\n      <h1>{post.title}</h1>\n      <p>{post.content}</p>\n    </div>\n  );\n}\n\nexport const getServerSideProps: GetServerSideProps = async (context) => {\n  const { id } = context.params as { id: string };\n  // Fetch data on the server-side before rendering\n  const res = await fetch(`https://api.example.com/posts/${id}`);\n  const post = await res.json();\n\n  if (!post) {\n    return {\n      notFound: true,\n    };\n  }\n\n  return {\n    props: { post }, // Will be passed to the page component as props\n  };\n};\n\nexport default Post;",
+              "explanation": "This Next.js example demonstrates `getServerSideProps` for SSR. The `getServerSideProps` function runs exclusively on the server at request time. It fetches data (e.g., from an API) and then passes this data as `props` to the React component. The page is then rendered to HTML on the server with this data, and the full HTML is sent to the client. This ensures the content is present for SEO and fast FCP.",
+              "language": "typescript"
+            },
+            {
+              "id": "example_ssr_conceptual_hydration",
+              "title": "Conceptual Hydration Process",
+              "code": "<!-- Server-rendered HTML received by client -->\n<div id=\"app\">\n  <button>Click Me (Static)</button>\n</div>\n\n// Client-side JavaScript\nimport React from 'react';\nimport ReactDOM from 'react-dom';\n\nfunction App() {\n  const [count, setCount] = React.useState(0);\n  return (\n    <div>\n      <button onClick={() => setCount(count + 1)}>Click Me ({count})</button>\n    </div>\n  );\n}\n\n// Instead of ReactDOM.render, use ReactDOM.hydrate\n// This tells React to attach event listeners and make the server-rendered HTML interactive\nReactDOM.hydrate(<App />, document.getElementById('app'));",
+              "explanation": "This conceptual example shows how hydration works. The server sends the initial HTML containing a `<button>`. On the client, instead of re-rendering everything from scratch with `ReactDOM.render`, `ReactDOM.hydrate` is used. This function instructs React to 'take over' the existing HTML, re-use its structure, and attach event handlers (like the `onClick` for the button) to make it interactive, without re-drawing the entire DOM.",
+              "language": "typescript"
+            }
+          ],
+          "relatedQuestions": [
+            "question_ssr_1",
+            "question_ssr_2",
+            "question_ssr_3",
+            "question_ssr_4",
+            "question_ssr_5"
+          ],
+          "relatedTasks": [
+            "task_ssr_1"
+          ],
+          "tags": [
+            "SSR",
+            "CSR",
+            "Next.js",
+            "React",
+            "Performance",
+            "SEO",
+            "Hydration",
+            "Frontend Architecture"
+          ],
+          "technology": "React, Next.js, Node.js",
+          "prerequisites": [
+            "react_basics",
+            "web_performance",
+            "frontend_architecture"
+          ],
+          "complexity": 8,
+          "interviewRelevance": 9,
+          "learningPath": "advanced",
+          "requiredFor": [
+            "senior_frontend",
+            "solution_architect",
+            "performance_engineer"
+          ]
+        },
+        {
+          "id": "theory_react_application_deployment",
+          "title": "Deploying a React Application to Production",
+          "content": "Deploying a React application to production involves several critical steps to ensure it is secure, performant, and reliable. The process typically goes beyond simply building the application and includes environment setup, configuration, and continuous deployment practices.\n\n## Key Steps for React Application Deployment\n\n1.  **Build the application**: The first step is to generate optimized production-ready static assets. This usually involves running a build command, e.g., `npm run build` or `yarn build`, which uses tools like Webpack, Rollup, or Vite to transpile, minify, bundle, and optimize your JavaScript, CSS, and other assets.\n\n2.  **Configure environment variables**: Production environments often require different API endpoints, keys, or configurations than development. Use environment variables (e.g., `process.env.NODE_ENV`, `.env` files with `dotenv`, or platform-specific variables) to manage these differences without hardcoding sensitive information.\n\n3.  **Choose a hosting platform**: Select a suitable platform for serving your static assets. Popular choices include:\n    *   **Static Site Hosts**: Netlify, Vercel (ideal for Next.js/Gatsby), GitHub Pages, Surge.sh. These offer easy setup, CDNs, and often CI/CD.\n    *   **Cloud Object Storage**: AWS S3 with CloudFront, Google Cloud Storage, Azure Blob Storage. Highly scalable and cost-effective for static files.\n    *   **Traditional Web Servers**: Nginx, Apache. Requires manual configuration for serving static files and handling routing.\n    *   **Containerization**: Docker can package your React app (and a web server like Nginx) into a portable image, deployable to Kubernetes, ECS, or other container orchestration services.\n\n4.  **Configure routing for SPAs**: React applications are often Single Page Applications (SPAs). This means client-side routing. On a web server, if a user directly navigates to a sub-route (e.g., `/about`), the server needs to be configured to return the main `index.html` file for all routes not matching static assets, allowing the client-side router to take over. This is often done with a 'fallback' or 'rewrite' rule (e.g., Nginx `try_files` directive).\n\n5.  **Set up Continuous Integration/Continuous Deployment (CI/CD)**: Automate the build, test, and deployment process. Tools like GitHub Actions, GitLab CI/CD, Jenkins, Travis CI, or Netlify/Vercel's built-in CI/CD pipelines can automatically deploy your application whenever changes are pushed to your main branch. This ensures faster, more reliable, and consistent deployments.\n\n6.  **Implement Caching and CDN**: Leverage CDNs to distribute your static assets globally and reduce latency for users worldwide. Configure appropriate HTTP caching headers (`Cache-Control`, `ETag`) to ensure browsers cache assets effectively and re-download only when necessary.\n\n7.  **Monitor and Logging**: After deployment, set up monitoring tools (e.g., Sentry for error tracking, Google Analytics for usage, performance monitoring tools like Lighthouse, RUM) and logging (e.g., for server-side issues, API errors) to track application health and identify issues quickly.\n\n8.  **Security Best Practices**: Implement HTTPS, sanitize user inputs, secure API keys, and manage dependencies to avoid vulnerabilities. Ensure `package-lock.json` (or `yarn.lock`) is committed and up-to-date.\n\n9.  **Pre-rendering/SSR/SSG (Optional but Recommended)**: For better SEO and initial load performance, consider pre-rendering (e.g., React Snap), Server-Side Rendering (e.g., Next.js `getServerSideProps`), or Static Site Generation (e.g., Next.js `getStaticProps`, Gatsby).\n\nBy following these steps, you can ensure a robust and efficient deployment pipeline for your React application.",
+          "examples": [
+            {
+              "id": "example_react_deployment_build_script",
+              "title": "Package.json Build Script",
+              "code": "{\n  \"name\": \"my-react-app\",\n  \"version\": \"0.1.0\",\n  \"private\": true,\n  \"scripts\": {\n    \"start\": \"react-scripts start\",\n    \"build\": \"react-scripts build\",\n    \"test\": \"react-scripts test\",\n    \"eject\": \"react-scripts eject\"\n  },\n  \"dependencies\": {\n    \"react\": \"^18.2.0\",\n    \"react-dom\": \"^18.2.0\",\n    \"react-scripts\": \"5.0.1\"\n  },\n  \"browserslist\": {\n    \"production\": [\n      \">0.2%\",\n      \"not dead\",\n      \"not op_mini all\"\n    ],\n    \"development\": [\n      \"last 1 chrome version\",\n      \"last 1 firefox version\",\n      \"last 1 safari version\"\n    ]\n  }\n}",
+              "explanation": "This `package.json` snippet from a Create React App project shows the standard `build` script. Running `npm run build` (or `yarn build`) executes `react-scripts build`. This command bundles the React application into static files (HTML, CSS, JS, images) inside a `build` directory, optimized for production. These static files are then ready for deployment to a web server or static hosting service.",
+              "language": "json"
+            },
+            {
+              "id": "example_react_deployment_nginx_config",
+              "title": "Nginx Configuration for React SPA",
+              "code": "server {\n    listen 80;\n    server_name yourdomain.com;\n\n    root /usr/share/nginx/html; # Path to your built React app (e.g., /app/build)\n    index index.html;\n\n    location / {\n        try_files $uri $uri/ /index.html;\n    }\n\n    # Optional: Cache static assets\n    location ~* \\.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot)$ {\n        expires 1y;\n        add_header Cache-Control \"public, immutable\";\n    }\n\n    error_page 404 /index.html;\n}",
+              "explanation": "This Nginx configuration demonstrates how to serve a React SPA. The `root` directive points to where your compiled React application files (from the `build` folder) are located. The crucial part is `try_files $uri $uri/ /index.html;`. This tells Nginx to first try to serve the requested URI as a static file, then as a directory. If neither exists, it falls back to serving `index.html`. This ensures that client-side routes (e.g., `/about`) are handled by React Router after `index.html` is loaded. The optional `location` block for static assets sets long caching headers for performance.",
+              "language": "nginx"
+            }
+          ],
+          "relatedQuestions": [
+            "question_react_deployment_1",
+            "question_react_deployment_2",
+            "question_react_deployment_3",
+            "question_react_deployment_4",
+            "question_react_deployment_5"
+          ],
+          "relatedTasks": [
+            "task_react_deployment_1",
+            "task_react_deployment_2"
+          ],
+          "tags": [
+            "React",
+            "Deployment",
+            "CI/CD",
+            "Web Hosting",
+            "Nginx",
+            "Webpack",
+            "Performance",
+            "Security",
+            "Frontend"
+          ],
+          "technology": "React, Node.js, Webpack, Nginx, CI/CD, Cloud Platforms",
+          "prerequisites": [
+            "react_basics",
+            "webpack_basics",
+            "http_basics",
+            "command_line"
+          ],
+          "complexity": 8,
+          "interviewRelevance": 9,
+          "learningPath": "advanced",
+          "requiredFor": [
+            "senior_frontend",
+            "devops_frontend",
+            "fullstack_development"
+          ]
+        }
+      ],
+      "questions": [
+        {
+          "id": "question_lazy_loading_1",
+          "topic": "Lazy Loading Images with Intersection Observer",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "What is the primary benefit of lazy loading images?",
+          "answer": "Reduces initial page load time and bandwidth consumption by only loading images when they are needed (e.g., enter the viewport).",
+          "analysisPoints": [
+            "Focus on initial page load improvement.",
+            "Highlight bandwidth saving as a key benefit."
+          ],
+          "keyConcepts": [
+            "Lazy Loading",
+            "Performance Optimization"
+          ],
+          "evaluationCriteria": [
+            "Understanding of basic performance concepts."
+          ],
+          "example": "N/A",
+          "tags": [
+            "Lazy Loading",
+            "Performance",
+            "Flashcard"
+          ],
+          "prerequisites": [
+            "web_performance_basics"
+          ],
+          "complexity": 3,
+          "interviewFrequency": 7,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_lazy_loading_2",
+          "topic": "IntersectionObserver API",
+          "level": "medium",
+          "type": "mcq",
+          "question": "Which of the following is NOT a valid option for configuring an `IntersectionObserver`?",
+          "answer": "`offset`",
+          "options": [
+            "`root`",
+            "`rootMargin`",
+            "`threshold`",
+            "`offset`"
+          ],
+          "analysisPoints": [
+            "Identifies common `IntersectionObserver` options.",
+            "Tests knowledge of API configuration."
+          ],
+          "keyConcepts": [
+            "IntersectionObserver",
+            "Web APIs"
+          ],
+          "evaluationCriteria": [
+            "Knowledge of `IntersectionObserver` API.",
+            "Ability to distinguish valid from invalid configuration properties."
+          ],
+          "example": "The `IntersectionObserver` constructor accepts an `options` object with `root`, `rootMargin`, and `threshold`. `offset` is not a standard option for configuring it. `root` specifies the element that is used as the viewport for checking intersection. `rootMargin` allows shrinking or growing the root's bounding box. `threshold` is a single number or an array of numbers that indicate at what percentage of the target's visibility the observer's callback should be executed.",
+          "tags": [
+            "IntersectionObserver",
+            "Web APIs",
+            "MCQ"
+          ],
+          "prerequisites": [
+            "javascript_dom"
+          ],
+          "complexity": 6,
+          "interviewFrequency": 6,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_lazy_loading_3",
+          "topic": "React Hooks and IntersectionObserver Cleanup",
+          "level": "medium",
+          "type": "open",
+          "question": "In the provided `LazyImage` React component, why is `observer.disconnect()` called inside the `useEffect` cleanup function, and also immediately after `setIsLoaded(true)`?",
+          "answer": "The `observer.disconnect()` call inside the `useEffect` cleanup function (`return () => observer.disconnect();`) ensures that the `IntersectionObserver` instance is properly cleaned up when the `LazyImage` component unmounts from the DOM. This prevents memory leaks and ensures that the observer doesn't continue to observe an element that no longer exists.\n\nThe `observer.disconnect()` call immediately after `setIsLoaded(true)` (inside the observer's callback) is a specific optimization for lazy loading. Once the image is loaded, there's no need to continue observing it. Disconnecting immediately saves browser resources by stopping unnecessary observation checks, as the image's source has already been updated.",
+          "analysisPoints": [
+            "Distinguish between `useEffect` cleanup for unmounting and specific logical cleanup.",
+            "Explain memory leak prevention.",
+            "Explain resource optimization."
+          ],
+          "keyConcepts": [
+            "React Hooks",
+            "useEffect",
+            "Cleanup Functions",
+            "IntersectionObserver",
+            "Performance Optimization",
+            "Memory Management"
+          ],
+          "evaluationCriteria": [
+            "Understanding of `useEffect` lifecycle and cleanup.",
+            "Knowledge of `IntersectionObserver` behavior.",
+            "Ability to explain practical performance optimizations."
+          ],
+          "example": "N/A",
+          "tags": [
+            "React",
+            "Hooks",
+            "IntersectionObserver",
+            "Performance",
+            "Open-Ended"
+          ],
+          "prerequisites": [
+            "react_hooks",
+            "javascript_closures"
+          ],
+          "complexity": 7,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_lazy_loading_4",
+          "topic": "Lazy Loading Component Enhancement",
+          "level": "hard",
+          "type": "code",
+          "question": "Enhance the `LazyImage` component to include an error state if the `src` image fails to load. When an error occurs, display an `errorPlaceholder` image instead. Provide the modified component and relevant CSS.",
+          "answer": "```typescript\nimport React, { useRef, useEffect, useState } from 'react';\n\ninterface LazyImageProps {\n  src: string;\n  placeholder: string;\n  errorPlaceholder: string; // New prop for error state\n  alt: string;\n}\n\nfunction LazyImage({ src, placeholder, errorPlaceholder, alt }: LazyImageProps) {\n  const imgRef = useRef<HTMLImageElement>(null);\n  const [isLoaded, setIsLoaded] = useState(false);\n  const [hasError, setHasError] = useState(false); // New state for error\n\n  useEffect(() => {\n    const observer = new IntersectionObserver(\n      (entries) => {\n        if (entries[0].isIntersecting) {\n          setIsLoaded(true);\n          observer.disconnect();\n        }\n      },\n      { rootMargin: '0px 0px 50px 0px' }\n    );\n\n    if (imgRef.current) {\n      observer.observe(imgRef.current);\n    }\n\n    return () => {\n      if (imgRef.current) {\n        observer.unobserve(imgRef.current);\n      }\n      observer.disconnect();\n    };\n  }, []);\n\n  const handleImageError = () => {\n    setHasError(true); // Set error state on image load failure\n  };\n\n  const currentSrc = hasError ? errorPlaceholder : (isLoaded ? src : placeholder);\n\n  return (\n    <img\n      ref={imgRef}\n      src={currentSrc}\n      alt={alt}\n      onError={handleImageError} // Add onError handler\n      style={{\n        opacity: isLoaded || hasError ? 1 : 0.5, \n        transition: 'opacity 0.3s ease-in-out'\n      }}\n    />\n  );\n}\n```\n\n**Explanation:**\n1.  **`hasError` State**: A new state `hasError` is introduced, initialized to `false`.\n2.  **`errorPlaceholder` Prop**: A new prop `errorPlaceholder` is added to receive the URL for the image to display on error.\n3.  **`handleImageError` Function**: This function is called when the `onError` event of the `<img>` tag fires. It sets `hasError` to `true`.\n4.  **Dynamic `src`**: The `currentSrc` variable now dynamically selects the image source based on `hasError` (highest priority), then `isLoaded`, and finally `placeholder`.\n5.  **`onError` Attribute**: The `onError` attribute is added to the `<img>` tag, pointing to `handleImageError`. This intrinsic HTML attribute is triggered when an error occurs during image loading (e.g., broken URL, corrupted file).",
+          "analysisPoints": [
+            "Proper use of `useState` for managing component state.",
+            "Correct handling of `onError` event on `<img>` tag.",
+            "Conditional rendering of image sources.",
+            "Demonstrates robust component design."
+          ],
+          "keyConcepts": [
+            "React State",
+            "Event Handling",
+            "Conditional Rendering",
+            "Error Handling",
+            "Component Design"
+          ],
+          "evaluationCriteria": [
+            "Ability to extend existing React components.",
+            "Understanding of error handling in React.",
+            "Implementation of new features in a clean, functional way."
+          ],
+          "example": "N/A",
+          "tags": [
+            "React",
+            "Lazy Loading",
+            "Error Handling",
+            "Code Challenge"
+          ],
+          "prerequisites": [
+            "react_hooks",
+            "javascript_events"
+          ],
+          "complexity": 8,
+          "interviewFrequency": 7,
+          "learningPath": "advanced"
+        },
+        {
+          "id": "question_performance_1",
+          "topic": "Web Performance Optimization Basics",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "List two common techniques for minimizing HTTP requests in a web application.",
+          "answer": "Bundling/concatenating CSS/JS files and using CSS sprites.",
+          "analysisPoints": [
+            "Basic understanding of HTTP overhead.",
+            "Knowledge of common bundling techniques."
+          ],
+          "keyConcepts": [
+            "HTTP Requests",
+            "Bundling",
+            "Performance Optimization"
+          ],
+          "evaluationCriteria": [
+            "Recall of fundamental optimization strategies."
+          ],
+          "example": "N/A",
+          "tags": [
+            "Performance",
+            "HTTP",
+            "Flashcard"
+          ],
+          "prerequisites": [
+            "web_basics"
+          ],
+          "complexity": 3,
+          "interviewFrequency": 8,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_performance_2",
+          "topic": "Responsive Images",
+          "level": "medium",
+          "type": "mcq",
+          "question": "Which HTML attributes are primarily used together to implement responsive images that serve different image resolutions based on screen size and pixel density?",
+          "answer": "`srcset` and `sizes`",
+          "options": [
+            "`src` and `alt`",
+            "`srcset` and `sizes`",
+            "`width` and `height`",
+            "`media` and `src`"
+          ],
+          "analysisPoints": [
+            "Correctly identifies attributes for responsive images.",
+            "Distinguishes from basic image attributes."
+          ],
+          "keyConcepts": [
+            "Responsive Images",
+            "srcset",
+            "sizes",
+            "HTML"
+          ],
+          "evaluationCriteria": [
+            "Understanding of modern HTML image techniques."
+          ],
+          "example": "The `srcset` attribute provides a list of image sources along with their intrinsic widths or pixel densities. The `sizes` attribute informs the browser about the rendered size of the image at different viewport widths. Together, these attributes allow the browser to pick the most appropriate image for the current viewing context, optimizing bandwidth and image quality.",
+          "tags": [
+            "HTML",
+            "Images",
+            "Performance",
+            "MCQ"
+          ],
+          "prerequisites": [
+            "html_basics",
+            "css_media_queries"
+          ],
+          "complexity": 6,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_performance_3",
+          "topic": "Core Web Vitals",
+          "level": "medium",
+          "type": "open",
+          "question": "Explain the three Core Web Vitals metrics and their significance for user experience and SEO.",
+          "answer": "The three Core Web Vitals are:\n\n1.  **Largest Contentful Paint (LCP)**: Measures perceived loading performance. It reports the render time of the largest image or text block visible within the viewport. A good LCP score is less than 2.5 seconds. Significance: A faster LCP means users see the main content of the page quicker, leading to a better perceived loading experience and reducing bounce rates.\n2.  **First Input Delay (FID)**: Measures interactivity. It quantifies the time from when a user first interacts with a page (e.g., clicks a button, taps a link) to when the browser is actually able to begin processing event handlers in response to that interaction. A good FID score is less than 100 milliseconds. Significance: A low FID ensures the page responds quickly to user input, providing a smooth and engaging user experience.\n3.  **Cumulative Layout Shift (CLS)**: Measures visual stability. It quantifies the sum of all unexpected layout shifts that occur during the entire lifespan of a page. A good CLS score is less than 0.1. Significance: Low CLS means content doesn't unexpectedly move around while the user is trying to interact with it, preventing frustrating experiences like clicking the wrong button or losing their place while reading.",
+          "analysisPoints": [
+            "Accurate definition of each metric.",
+            "Correct thresholds for 'good' scores.",
+            "Clear explanation of user experience impact.",
+            "Mention of SEO relevance."
+          ],
+          "keyConcepts": [
+            "Core Web Vitals",
+            "LCP",
+            "FID",
+            "CLS",
+            "Performance Metrics",
+            "User Experience",
+            "SEO"
+          ],
+          "evaluationCriteria": [
+            "Comprehensive understanding of Core Web Vitals.",
+            "Ability to articulate their impact.",
+            "Knowledge of performance measurement."
+          ],
+          "example": "N/A",
+          "tags": [
+            "Performance",
+            "Core Web Vitals",
+            "SEO",
+            "Open-Ended"
+          ],
+          "prerequisites": [
+            "web_performance"
+          ],
+          "complexity": 8,
+          "interviewFrequency": 9,
+          "learningPath": "advanced"
+        },
+        {
+          "id": "question_performance_4",
+          "topic": "Asset Optimization: font-display",
+          "level": "medium",
+          "type": "mcq",
+          "question": "Consider the following CSS:\n\n```css\n@font-face {\n  font-family: 'CustomFont';\n  src: url('/fonts/CustomFont.woff2') format('woff2');\n  font-display: swap;\n}\n```\n\nWhat is the primary effect of using `font-display: swap;`?",
+          "answer": "The browser will render text using a fallback font immediately, then swap to 'CustomFont' once it loads.",
+          "options": [
+            "The browser will block rendering of text until 'CustomFont' loads.",
+            "The browser will render text transparently until 'CustomFont' loads, then show the text.",
+            "The browser will render text using a fallback font immediately, then swap to 'CustomFont' once it loads.",
+            "The browser will only use 'CustomFont' if it's already in the cache, otherwise it will use a fallback."
+          ],
+          "analysisPoints": [
+            "Tests understanding of `font-display: swap`.",
+            "Distinguishes `swap` from `block` (FOIT) and `fallback`.",
+            "Focuses on perceived performance benefits."
+          ],
+          "keyConcepts": [
+            "font-display",
+            "FOIT",
+            "FOUT",
+            "Web Fonts",
+            "Performance"
+          ],
+          "evaluationCriteria": [
+            "Knowledge of CSS font loading strategies.",
+            "Understanding of visual stability implications."
+          ],
+          "example": "The `font-display` property controls how a font face is displayed based on whether and when it is downloaded and ready to use. `swap` provides an immediate fallback font, preventing a 'Flash of Invisible Text' (FOIT). Once the custom font is ready, it swaps in, potentially causing a 'Flash of Unstyled Text' (FOUT). This generally improves perceived performance as users don't see blank text.",
+          "tags": [
+            "CSS",
+            "Performance",
+            "Web Fonts",
+            "MCQ"
+          ],
+          "prerequisites": [
+            "css_typography"
+          ],
+          "complexity": 7,
+          "interviewFrequency": 7,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_performance_5",
+          "topic": "Network Optimization: HTTP/2",
+          "level": "medium",
+          "type": "flashcard",
+          "question": "Name two key features of HTTP/2 that improve web performance.",
+          "answer": "Multiplexing (allowing multiple requests/responses over a single TCP connection) and Header Compression (HPACK). Server Push is another key feature.",
+          "analysisPoints": [
+            "Identifies core HTTP/2 advantages.",
+            "Focuses on how it reduces latency and overhead."
+          ],
+          "keyConcepts": [
+            "HTTP/2",
+            "Multiplexing",
+            "Header Compression",
+            "Server Push",
+            "Network Performance"
+          ],
+          "evaluationCriteria": [
+            "Knowledge of modern web protocols."
+          ],
+          "example": "N/A",
+          "tags": [
+            "HTTP",
+            "Network",
+            "Performance",
+            "Flashcard"
+          ],
+          "prerequisites": [
+            "http_basics"
+          ],
+          "complexity": 5,
+          "interviewFrequency": 6,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_performance_6",
+          "topic": "Performance Budgets",
+          "level": "hard",
+          "type": "open",
+          "question": "What are performance budgets, and how can they be implemented and maintained in a frontend development workflow?",
+          "answer": "Performance budgets are thresholds set for various performance metrics (e.g., JavaScript bundle size, image size, initial load time, Lighthouse scores, Core Web Vitals) that a web application should not exceed. They act as a guardrail to prevent performance regressions as new features are added.\n\n**Implementation and Maintenance:**\n1.  **Define Metrics**: Identify key performance metrics relevant to your application and users (e.g., LCP < 2.5s, JS bundle < 200KB, image count < 10).\n2.  **Set Baselines and Budgets**: Measure current performance to establish baselines. Set realistic, aspirational budgets based on these baselines and user expectations.\n3.  **Tooling Integration**: Integrate performance budget tools into your development and CI/CD workflow:\n    *   **Webpack/Rollup**: Plugins like `webpack-bundle-analyzer` or `performance-budgets` can fail builds if size limits are exceeded.\n    *   **Lighthouse CI**: Run Lighthouse audits in your CI/CD pipeline and fail builds if scores drop below a threshold or metrics like LCP/FID/CLS are too high.\n    *   **Bundle Size Tools**: Tools like `bundle-analyzer`, `Source Map Explorer` can visualize bundle contents.\n    *   **Image Optimization Tools**: Use image compression and optimization tools (e.g., ImageOptim, imagemin plugins) as part of the build process.\n4.  **Automated Checks**: Automate budget checks in pre-commit hooks (e.g., with Husky and lint-staged) or, more effectively, in CI/CD pipelines.\n5.  **Monitoring**: Continuously monitor real user performance (RUM) in production to see if budgets align with actual user experience and adjust as needed.\n6.  **Education and Buy-in**: Ensure all team members understand the importance of performance budgets and how their work impacts them. Make performance a shared responsibility.\n7.  **Regular Review**: Performance budgets are not static. Review and adjust them periodically as the application evolves, user expectations change, and new technologies emerge.",
+          "analysisPoints": [
+            "Clear definition of performance budgets.",
+            "Practical steps for setting and measuring budgets.",
+            "Specific tools and integration points (CI/CD, build tools).",
+            "Emphasis on continuous monitoring and team involvement."
+          ],
+          "keyConcepts": [
+            "Performance Budgets",
+            "CI/CD",
+            "Lighthouse",
+            "Bundle Size",
+            "Web Performance Metrics",
+            "Development Workflow"
+          ],
+          "evaluationCriteria": [
+            "Depth of knowledge on performance governance.",
+            "Ability to describe practical implementation steps.",
+            "Understanding of integration with development tools."
+          ],
+          "example": "N/A",
+          "tags": [
+            "Performance",
+            "DevOps",
+            "CI/CD",
+            "Optimization",
+            "Open-Ended"
+          ],
+          "prerequisites": [
+            "web_performance",
+            "build_tools",
+            "ci_cd_basics"
+          ],
+          "complexity": 9,
+          "interviewFrequency": 8,
+          "learningPath": "advanced"
+        },
+        {
+          "id": "question_performance_7",
+          "topic": "Resource Hints",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "What is the difference between `preload` and `prefetch` resource hints?",
+          "answer": "`preload` fetches a resource needed for the current page load with high priority, while `prefetch` fetches a resource needed for a future navigation with low priority.",
+          "analysisPoints": [
+            "Clear distinction between immediate vs. future need.",
+            "Difference in priority (high vs. low)."
+          ],
+          "keyConcepts": [
+            "Preload",
+            "Prefetch",
+            "Resource Hints",
+            "Performance"
+          ],
+          "evaluationCriteria": [
+            "Recall of specific HTML performance features."
+          ],
+          "example": "N/A",
+          "tags": [
+            "HTML",
+            "Performance",
+            "Flashcard"
+          ],
+          "prerequisites": [
+            "html_basics"
+          ],
+          "complexity": 4,
+          "interviewFrequency": 6,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_performance_8",
+          "topic": "Compression Techniques",
+          "level": "medium",
+          "type": "mcq",
+          "question": "Which of the following compression algorithms is generally considered superior to Gzip for text-based content and is supported by modern browsers?",
+          "answer": "Brotli",
+          "options": [
+            "Deflate",
+            "LZMA",
+            "Brotli",
+            "LZO"
+          ],
+          "analysisPoints": [
+            "Identifies modern compression standards.",
+            "Tests knowledge of current best practices."
+          ],
+          "keyConcepts": [
+            "Compression",
+            "Brotli",
+            "Gzip",
+            "HTTP Optimization"
+          ],
+          "evaluationCriteria": [
+            "Knowledge of network optimization techniques."
+          ],
+          "example": "Brotli is a newer open-source compression algorithm developed by Google, generally offering better compression ratios than Gzip, especially for web assets like HTML, CSS, and JavaScript. It's supported by all major modern browsers.",
+          "tags": [
+            "Network",
+            "Performance",
+            "Compression",
+            "MCQ"
+          ],
+          "prerequisites": [
+            "http_basics"
+          ],
+          "complexity": 6,
+          "interviewFrequency": 7,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_performance_9",
+          "topic": "Optimizing CSS",
+          "level": "medium",
+          "type": "flashcard",
+          "question": "How can you reduce the size of CSS delivered to the client and improve its parsing speed?",
+          "answer": "Minify CSS (remove whitespace, comments), use tools to remove unused CSS (e.g., PurgeCSS, UnCSS), and optimize CSS selectors for efficiency.",
+          "analysisPoints": [
+            "Focus on both file size and parse time.",
+            "Mention specific tools/techniques."
+          ],
+          "keyConcepts": [
+            "CSS Optimization",
+            "Minification",
+            "Unused CSS",
+            "Performance"
+          ],
+          "evaluationCriteria": [
+            "Knowledge of CSS best practices for performance."
+          ],
+          "example": "N/A",
+          "tags": [
+            "CSS",
+            "Performance",
+            "Flashcard"
+          ],
+          "prerequisites": [
+            "css_basics"
+          ],
+          "complexity": 5,
+          "interviewFrequency": 7,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_ssr_1",
+          "topic": "Server-Side Rendering (SSR) vs. Client-Side Rendering (CSR)",
+          "level": "medium",
+          "type": "mcq",
+          "question": "Which of the following is a primary benefit of Server-Side Rendering (SSR) over Client-Side Rendering (CSR) for a public-facing website?",
+          "answer": "Improved SEO and faster First Contentful Paint (FCP)",
+          "options": [
+            "Reduced server load and simpler development setup",
+            "Improved SEO and faster First Contentful Paint (FCP)",
+            "Always faster Time to Interactive (TTI) compared to CSR",
+            "Better support for dynamic data fetching on the client side"
+          ],
+          "analysisPoints": [
+            "Highlights the key advantages of SSR (SEO, FCP).",
+            "Identifies common misconceptions about SSR (server load, TTI guarantee).",
+            "Contrasts with CSR strengths."
+          ],
+          "keyConcepts": [
+            "SSR",
+            "CSR",
+            "SEO",
+            "FCP",
+            "Performance"
+          ],
+          "evaluationCriteria": [
+            "Understanding of the core trade-offs between rendering approaches.",
+            "Knowledge of performance metrics."
+          ],
+          "example": "SSR sends fully rendered HTML, making it easy for search engine crawlers to index content, thus boosting SEO. By rendering content on the server, the browser receives the full HTML markup sooner, leading to a much faster First Contentful Paint (FCP) where users see meaningful content quickly, even if the page isn't fully interactive yet.",
+          "tags": [
+            "SSR",
+            "CSR",
+            "Performance",
+            "SEO",
+            "MCQ"
+          ],
+          "prerequisites": [
+            "web_rendering_basics"
+          ],
+          "complexity": 7,
+          "interviewFrequency": 9,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_ssr_2",
+          "topic": "SSR Hydration",
+          "level": "medium",
+          "type": "open",
+          "question": "What is 'hydration' in the context of Server-Side Rendering (SSR) with a JavaScript framework like React, and why is it important?",
+          "answer": "In SSR, hydration is the process where client-side JavaScript 'takes over' the server-rendered HTML. It involves parsing the JavaScript bundle, rebuilding the virtual DOM, and attaching event listeners to the existing DOM elements that were pre-rendered by the server. This makes the static server-rendered page interactive and allows it to behave like a regular Single Page Application (SPA).\n\nHydration is crucial because without it, the server-rendered page would remain static and unresponsive to user interactions. It bridges the gap between the fast initial content display (from SSR) and the rich interactivity expected from a modern web application (provided by the client-side framework). It ensures that the user experience is seamless, moving from a static view to a fully functional application without a full page reload or a 'blank screen' moment.",
+          "analysisPoints": [
+            "Accurate definition of hydration (taking over static HTML, attaching event listeners).",
+            "Explains the 'why' (making interactive, bridging SSR and SPA benefits).",
+            "Mentions the seamless user experience.",
+            "Connects to virtual DOM concepts."
+          ],
+          "keyConcepts": [
+            "Hydration",
+            "SSR",
+            "React",
+            "Virtual DOM",
+            "Interactivity",
+            "User Experience"
+          ],
+          "evaluationCriteria": [
+            "Comprehensive understanding of post-SSR client-side process.",
+            "Ability to explain its purpose and significance.",
+            "Knowledge of framework-specific rendering lifecycles."
+          ],
+          "example": "N/A",
+          "tags": [
+            "SSR",
+            "React",
+            "Hydration",
+            "Open-Ended"
+          ],
+          "prerequisites": [
+            "react_lifecycle",
+            "ssr_basics"
+          ],
+          "complexity": 8,
+          "interviewFrequency": 9,
+          "learningPath": "advanced"
+        },
+        {
+          "id": "question_ssr_3",
+          "topic": "SSR Trade-offs",
+          "level": "hard",
+          "type": "open",
+          "question": "A team is debating whether to implement SSR for a new e-commerce platform built with React. Discuss the main tradeoffs they should consider when opting for SSR versus a purely client-side rendered (CSR) approach.",
+          "answer": "When deciding between SSR and CSR for an e-commerce platform, the team should consider the following tradeoffs:\n\n**Advantages of SSR (over CSR):**\n1.  **SEO**: E-commerce heavily relies on search engine visibility. SSR ensures all product pages, categories, and static content are fully crawlable by search engines immediately, leading to better indexing and higher rankings.\n2.  **Performance (Initial Load)**: Users get a faster First Contentful Paint (FCP) and Largest Contentful Paint (LCP) because the server sends pre-rendered HTML. This is critical for e-commerce, as slow loading times can lead to high bounce rates and lost sales.\n3.  **Social Media Previews**: Shared product links will have accurate and rich previews on social media platforms.\n4.  **Accessibility**: Content is available sooner for users with slower connections or older devices.\n\n**Disadvantages/Tradeoffs of SSR (compared to CSR):**\n1.  **Increased Server Load/Costs**: The server must render each page on every request, consuming more CPU and memory. For a high-traffic e-commerce site, this can significantly increase hosting costs and require more robust server infrastructure.\n2.  **Slower Time to First Byte (TTFB)**: While FCP is faster, the server needs to fetch data, render the page, and then send it. This can mean a slightly longer TTFB compared to CSR, which sends a minimal HTML shell very quickly.\n3.  **More Complex Development/Debugging**: Developing with universal JavaScript adds complexity. Developers need to be mindful of server-side (Node.js) vs. client-side (browser) environments, ensuring code is compatible with both. Debugging can be trickier.\n4.  **Hydration Issues**: The hydration process can sometimes lead to a period where the page appears interactive but isn't (blocking time). Mismatches between server-rendered and client-rendered content can also cause re-rendering issues.\n5.  **Caching Complexity**: Caching strategies on the server-side for dynamic content can be more complex to implement and invalidate effectively.\n\n**Recommendation for E-commerce**: Given the critical importance of SEO and initial load performance for e-commerce (directly impacting sales and user acquisition), SSR (or Static Site Generation for less dynamic pages) is generally the preferred approach, with solutions like Next.js being excellent choices to mitigate some of the complexity tradeoffs.",
+          "analysisPoints": [
+            "Comprehensive analysis of both pros and cons.",
+            "Relates tradeoffs specifically to e-commerce context (SEO, sales).",
+            "Discusses server burden, TTFB vs FCP nuances.",
+            "Acknowledges development complexity and hydration challenges.",
+            "Provides an informed recommendation.",
+            "Highlights frameworks like Next.js as solutions."
+          ],
+          "keyConcepts": [
+            "SSR",
+            "CSR",
+            "Trade-offs",
+            "E-commerce",
+            "SEO",
+            "Performance Metrics",
+            "Server Load",
+            "Hydration",
+            "Development Complexity"
+          ],
+          "evaluationCriteria": [
+            "Ability to perform a detailed architectural comparison.",
+            "Critical thinking about real-world application scenarios.",
+            "Understanding of impact on various stakeholders (users, developers, business).",
+            "Capability to articulate nuanced differences."
+          ],
+          "example": "N/A",
+          "tags": [
+            "SSR",
+            "CSR",
+            "Architecture",
+            "Performance",
+            "SEO",
+            "Open-Ended"
+          ],
+          "prerequisites": [
+            "ssr_basics",
+            "frontend_architecture"
+          ],
+          "complexity": 9,
+          "interviewFrequency": 9,
+          "learningPath": "expert"
+        },
+        {
+          "id": "question_ssr_4",
+          "topic": "Next.js SSR",
+          "level": "medium",
+          "type": "flashcard",
+          "question": "Which function in Next.js is used to fetch data for Server-Side Rendering (SSR) on a page component?",
+          "answer": "`getServerSideProps`",
+          "analysisPoints": [
+            "Specific Next.js data fetching method.",
+            "Connects function to SSR purpose."
+          ],
+          "keyConcepts": [
+            "Next.js",
+            "SSR",
+            "getServerSideProps",
+            "Data Fetching"
+          ],
+          "evaluationCriteria": [
+            "Recall of framework-specific SSR mechanisms."
+          ],
+          "example": "N/A",
+          "tags": [
+            "Next.js",
+            "SSR",
+            "Flashcard"
+          ],
+          "prerequisites": [
+            "nextjs_basics"
+          ],
+          "complexity": 5,
+          "interviewFrequency": 7,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_ssr_5",
+          "topic": "Universal JavaScript",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "What is meant by 'Universal JavaScript applications' in the context of SSR?",
+          "answer": "Applications where the same JavaScript code can run both on the server (e.g., Node.js) and in the browser (client-side).",
+          "analysisPoints": [
+            "Focus on code reusability across environments.",
+            "Link to server-side Node.js and client-side browser execution."
+          ],
+          "keyConcepts": [
+            "Universal JavaScript",
+            "Isomorphic JavaScript",
+            "SSR",
+            "Node.js"
+          ],
+          "evaluationCriteria": [
+            "Understanding of core SSR architectural concepts."
+          ],
+          "example": "N/A",
+          "tags": [
+            "SSR",
+            "JavaScript",
+            "Architecture",
+            "Flashcard"
+          ],
+          "prerequisites": [
+            "javascript_environments"
+          ],
+          "complexity": 4,
+          "interviewFrequency": 6,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_react_deployment_1",
+          "topic": "React Deployment Steps",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "What is the very first step to prepare a React application for production deployment?",
+          "answer": "Running the build command (e.g., `npm run build` or `yarn build`) to generate optimized static assets.",
+          "analysisPoints": [
+            "Highlights the importance of the build process.",
+            "Emphasizes optimization for production."
+          ],
+          "keyConcepts": [
+            "React Build",
+            "Deployment",
+            "Static Assets"
+          ],
+          "evaluationCriteria": [
+            "Understanding of basic deployment workflow."
+          ],
+          "example": "N/A",
+          "tags": [
+            "React",
+            "Deployment",
+            "Flashcard"
+          ],
+          "prerequisites": [
+            "react_basics"
+          ],
+          "complexity": 3,
+          "interviewFrequency": 8,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_react_deployment_2",
+          "topic": "SPA Routing on Servers",
+          "level": "medium",
+          "type": "mcq",
+          "question": "When deploying a React Single Page Application (SPA) to a traditional web server like Nginx or Apache, what special configuration is typically required to handle client-side routing (e.g., direct access to `/about` page)?",
+          "answer": "Configuring the server to return `index.html` for all non-existent paths (fallback routing)",
+          "options": [
+            "Rewriting all URLs to `index.html` using a 301 redirect",
+            "Configuring the server to return `index.html` for all non-existent paths (fallback routing)",
+            "Installing a server-side React router on Nginx/Apache",
+            "Ensuring every client-side route has a corresponding static HTML file on the server"
+          ],
+          "analysisPoints": [
+            "Identifies the correct server-side handling for SPAs.",
+            "Distinguishes from incorrect or inefficient methods.",
+            "Tests understanding of client-side routing in a static context."
+          ],
+          "keyConcepts": [
+            "SPA Routing",
+            "Nginx",
+            "Apache",
+            "Fallback Routing",
+            "Deployment"
+          ],
+          "evaluationCriteria": [
+            "Knowledge of server configurations for SPAs.",
+            "Understanding of how client-side routing interacts with web servers."
+          ],
+          "example": "For SPAs, if a user directly accesses a route like `yourdomain.com/products/123`, the web server needs to be configured to return the `index.html` file of your React application, rather than a 404 error. The client-side React router then takes over, parses the URL, and renders the correct component. This is commonly achieved using `try_files` in Nginx or `mod_rewrite` in Apache.",
+          "tags": [
+            "React",
+            "Deployment",
+            "SPA",
+            "Nginx",
+            "MCQ"
+          ],
+          "prerequisites": [
+            "react_router_dom",
+            "http_basics"
+          ],
+          "complexity": 7,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_react_deployment_3",
+          "topic": "CI/CD for React Applications",
+          "level": "hard",
+          "type": "open",
+          "question": "Describe a typical Continuous Integration/Continuous Deployment (CI/CD) pipeline for a React application, outlining the key stages and benefits.",
+          "answer": "A typical CI/CD pipeline for a React application automates the process of building, testing, and deploying the application, ensuring faster, more reliable, and consistent releases.\n\n**Key Stages:**\n1.  **Source Code Commit**: Developers push code changes to a version control system (e.g., Git on GitHub, GitLab, Bitbucket).\n2.  **Continuous Integration (CI) - Build Stage**: The CI server (e.g., GitHub Actions, GitLab CI, Jenkins, Travis CI) detects the new commit and triggers the pipeline:\n    *   **Install Dependencies**: `npm install` or `yarn install` to fetch project dependencies.\n    *   **Linting/Static Analysis**: Run linters (ESLint, Stylelint) to enforce code style and identify potential issues early.\n    *   **Testing**: Run unit tests (Jest, React Testing Library), integration tests, and possibly end-to-end (E2E) tests (Cypress, Playwright). If tests fail, the pipeline stops, providing immediate feedback.\n    *   **Build Application**: Execute the production build command (`npm run build`) to compile, minify, and bundle the React application into static assets.\n    *   **Artifact Generation**: The built assets (e.g., `build/` folder) are stored as artifacts for the next stage.\n    *   **Performance Audits (Optional but Recommended)**: Run tools like Lighthouse CI to ensure performance budgets are met.\n3.  **Continuous Deployment (CD) - Deploy Stage**: If all CI stages pass, the CD process is triggered:\n    *   **Environment Configuration**: Fetch environment variables specific to the deployment environment (staging, production).\n    *   **Deployment**: The built static assets are uploaded to the chosen hosting platform (e.g., AWS S3, Netlify, Vercel, Nginx server).\n    *   **Cache Invalidation**: Invalidate CDN caches (e.g., CloudFront) to ensure users receive the latest version of the application.\n    *   **Smoke Tests (Optional)**: Run a quick set of tests on the deployed application to ensure basic functionality.\n4.  **Monitoring and Rollback (Post-Deployment)**: After deployment, monitoring tools track application health. If critical issues arise, the pipeline should support quick rollbacks to a previous stable version.\n\n**Benefits:**\n*   **Faster Release Cycles**: Automates manual steps, allowing for more frequent deployments.\n*   **Improved Code Quality**: Automated testing and linting catch bugs and style issues early.\n*   **Reduced Risk**: Consistent, repeatable deployments minimize human error.\n*   **Faster Feedback**: Developers get immediate feedback on code changes.\n*   **Better Collaboration**: Establishes a clear, automated process for integrating and deploying code.",
+          "analysisPoints": [
+            "Comprehensive description of CI and CD stages.",
+            "Lists specific tools/commands for each stage.",
+            "Explains the rationale and benefits of automation.",
+            "Covers testing, building, deployment, and post-deployment monitoring.",
+            "Emphasizes speed, quality, and reliability."
+          ],
+          "keyConcepts": [
+            "CI/CD",
+            "Continuous Integration",
+            "Continuous Deployment",
+            "React Deployment",
+            "Automated Testing",
+            "Build Process",
+            "Version Control",
+            "DevOps"
+          ],
+          "evaluationCriteria": [
+            "In-depth knowledge of modern development workflows.",
+            "Ability to articulate the value proposition of CI/CD.",
+            "Familiarity with common CI/CD tools and practices.",
+            "Demonstrates architectural thinking."
+          ],
+          "example": "N/A",
+          "tags": [
+            "React",
+            "Deployment",
+            "CI/CD",
+            "DevOps",
+            "Open-Ended"
+          ],
+          "prerequisites": [
+            "git_basics",
+            "build_tools",
+            "web_hosting"
+          ],
+          "complexity": 9,
+          "interviewFrequency": 9,
+          "learningPath": "expert"
+        },
+        {
+          "id": "question_react_deployment_4",
+          "topic": "Environment Variables",
+          "level": "medium",
+          "type": "flashcard",
+          "question": "Why is it important to manage environment variables for a React application during deployment, and how is it typically done?",
+          "answer": "It's important to manage environment variables because configurations (like API endpoints, secret keys) often differ between development, staging, and production environments. Hardcoding them is insecure and inflexible. It's typically done using `.env` files (e.g., with `dotenv` or Create React App's built-in support) during development, and by setting environment variables directly on the hosting platform (e.g., Netlify UI, Docker ENV, server config) during deployment.",
+          "analysisPoints": [
+            "Security and flexibility as key reasons.",
+            "Mention of `.env` files for dev.",
+            "Mention of platform-specific methods for production.",
+            "Link to build time vs. runtime variables."
+          ],
+          "keyConcepts": [
+            "Environment Variables",
+            "Deployment",
+            "Security",
+            ".env",
+            "Build Process"
+          ],
+          "evaluationCriteria": [
+            "Understanding of configuration management in production."
+          ],
+          "example": "N/A",
+          "tags": [
+            "React",
+            "Deployment",
+            "Security",
+            "Configuration",
+            "Flashcard"
+          ],
+          "prerequisites": [
+            "javascript_basics"
+          ],
+          "complexity": 6,
+          "interviewFrequency": 7,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_react_deployment_5",
+          "topic": "React Deployment Platforms",
+          "level": "easy",
+          "type": "mcq",
+          "question": "Which of the following is typically NOT a primary hosting option for deploying a static React application's `build` output?",
+          "answer": "MongoDB Atlas",
+          "options": [
+            "Netlify",
+            "AWS S3 (with CloudFront)",
+            "Vercel",
+            "MongoDB Atlas"
+          ],
+          "analysisPoints": [
+            "Identifies common static hosting platforms.",
+            "Distinguishes hosting platforms from database services.",
+            "Tests knowledge of deployment ecosystem."
+          ],
+          "keyConcepts": [
+            "React Deployment",
+            "Hosting",
+            "Static Sites",
+            "CDN"
+          ],
+          "evaluationCriteria": [
+            "Basic knowledge of deployment environments."
+          ],
+          "example": "Netlify, Vercel, and AWS S3 (especially with CloudFront CDN) are all excellent and common choices for deploying the static output of a React application. MongoDB Atlas is a database-as-a-service and is not used for hosting frontend static files.",
+          "tags": [
+            "React",
+            "Deployment",
+            "Hosting",
+            "MCQ"
+          ],
+          "prerequisites": [
+            "web_hosting_basics"
+          ],
+          "complexity": 4,
+          "interviewFrequency": 7,
+          "learningPath": "beginner"
+        }
+      ],
+      "tasks": [
+        {
+          "id": "task_lazy_loading_1",
+          "title": "Implement a Lazy-Loaded Image Gallery",
+          "description": "\nCreate a React component `ImageGallery` that displays a list of images. Each image should be lazy-loaded using the `IntersectionObserver` API.\n\n**Requirements:**\n1.  Create a `LazyImage` sub-component similar to the theory's example that accepts `src`, `placeholder`, and `alt` props.\n2.  The `LazyImage` should use `IntersectionObserver` to load the `src` image only when it enters the viewport.\n3.  Ensure the observer is disconnected once the image is loaded.\n4.  Implement proper cleanup for the `IntersectionObserver` when the component unmounts.\n5.  The `ImageGallery` component should render a list of `LazyImage` components, each with unique `src`, `placeholder`, and `alt` values.\n6.  Add a visual transition (e.g., opacity fade-in) when the image loads.\n7.  (Bonus) Implement an `errorPlaceholder` prop for `LazyImage` to show an image if `src` fails to load.\n",
+          "difficulty": "medium",
+          "startingCode": "import React, { useRef, useEffect, useState } from 'react';\n\ninterface LazyImageProps {\n  src: string;\n  placeholder: string;\n  alt: string;\n  // Bonus: errorPlaceholder?: string;\n}\n\n// TODO: Implement LazyImage component\nfunction LazyImage({ src, placeholder, alt }: LazyImageProps) {\n  const imgRef = useRef<HTMLImageElement>(null);\n  const [isLoaded, setIsLoaded] = useState(false);\n  // Bonus: const [hasError, setHasError] = useState(false);\n\n  useEffect(() => {\n    // TODO: Implement IntersectionObserver logic\n    // Remember to observe, disconnect, and cleanup\n  }, []);\n\n  const currentSrc = isLoaded ? src : placeholder; // TODO: Adjust for errorPlaceholder\n\n  return (\n    <img\n      ref={imgRef}\n      src={currentSrc}\n      alt={alt}\n      // TODO: Add onError handler for bonus\n      style={{ transition: 'opacity 0.3s ease-in-out' }}\n    />\n  );\n}\n\n// Main Gallery Component\ninterface ImageGalleryProps {\n  images: { id: number; src: string; placeholder: string; alt: string; error?: boolean }[];\n}\n\nfunction ImageGallery({ images }: ImageGalleryProps) {\n  return (\n    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '20px' }}>\n      <h2>Image Gallery</h2>\n      {images.map(image => (\n        <div key={image.id} style={{ height: '250px', backgroundColor: '#f0f0f0', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>\n          <LazyImage\n            src={image.src}\n            placeholder={image.placeholder}\n            alt={image.alt}\n            // Bonus: errorPlaceholder={image.error ? 'https://via.placeholder.com/200/FF0000/FFFFFF?text=Error' : undefined}\n          />\n        </div>\n      ))}\n    </div>\n  );\n}\n\n// Example Usage (in App.tsx or similar)\nconst dummyImages = Array.from({ length: 20 }, (_, i) => ({\n  id: i,\n  src: `https://picsum.photos/id/${10 + i}/400/300`,\n  placeholder: `https://picsum.photos/id/${10 + i}/20/15`,\n  alt: `Random image ${i + 1}`,\n  error: i === 5 || i === 12 // Simulate some errors\n}));\n\n// Render this component:\n// <ImageGallery images={dummyImages} />\n",
+          "solutionCode": "import React, { useRef, useEffect, useState } from 'react';\n\ninterface LazyImageProps {\n  src: string;\n  placeholder: string;\n  alt: string;\n  errorPlaceholder?: string;\n}\n\nfunction LazyImage({ src, placeholder, alt, errorPlaceholder }: LazyImageProps) {\n  const imgRef = useRef<HTMLImageElement>(null);\n  const [isLoaded, setIsLoaded] = useState(false);\n  const [hasError, setHasError] = useState(false);\n\n  useEffect(() => {\n    const observer = new IntersectionObserver(\n      (entries) => {\n        if (entries[0].isIntersecting) {\n          setIsLoaded(true);\n          observer.disconnect();\n        }\n      },\n      { rootMargin: '0px 0px 50px 0px' }\n    );\n\n    if (imgRef.current) {\n      observer.observe(imgRef.current);\n    }\n\n    return () => {\n      if (imgRef.current) {\n        observer.unobserve(imgRef.current);\n      }\n      observer.disconnect();\n    };\n  }, []);\n\n  const handleImageError = () => {\n    setHasError(true);\n  };\n\n  const currentSrc = hasError ? errorPlaceholder || placeholder : (isLoaded ? src : placeholder);\n\n  return (\n    <img\n      ref={imgRef}\n      src={currentSrc}\n      alt={alt}\n      onError={handleImageError}\n      style={{\n        display: 'block',\n        width: '100%',\n        height: '100%',\n        objectFit: 'cover',\n        opacity: (isLoaded && !hasError) ? 1 : 0.5,\n        transition: 'opacity 0.3s ease-in-out'\n      }}\n    />\n  );\n}\n\ninterface ImageGalleryProps {\n  images: { id: number; src: string; placeholder: string; alt: string; error?: boolean }[];\n}\n\nfunction ImageGallery({ images }: ImageGalleryProps) {\n  return (\n    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '20px' }}>\n      <h2>Image Gallery</h2>\n      {images.map(image => (\n        <div key={image.id} style={{ height: '250px', backgroundColor: '#f0f0f0', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>\n          <LazyImage\n            src={image.src}\n            placeholder={image.placeholder}\n            alt={image.alt}\n            errorPlaceholder={image.error ? 'https://via.placeholder.com/200/FF0000/FFFFFF?text=Error' : undefined}\n          />\n        </div>\n      ))}\n    </div>\n  );\n}\n\nconst dummyImages = Array.from({ length: 20 }, (_, i) => ({\n  id: i,\n  src: `https://picsum.photos/id/${10 + i}/400/300`,\n  placeholder: `https://picsum.photos/id/${10 + i}/20/15`,\n  alt: `Random image ${i + 1}`,\n  error: i === 5 || i === 12\n}));\n\n// Example of how to use it:\n// function App() {\n//   return <ImageGallery images={dummyImages} />;\n// }\n// export default App;\n",
+          "testCases": [
+            "Images far from viewport should initially show placeholders.",
+            "Images entering viewport should transition to high-resolution `src`.",
+            "Scrolling quickly through images should still trigger loading correctly.",
+            "Component unmount should disconnect observer gracefully (check console for warnings).",
+            "Images with invalid `src` should display `errorPlaceholder` (if bonus implemented).",
+            "Performance: Observer callback should not fire excessively, indicating efficient use."
+          ],
+          "hints": [
+            "Remember to use `useRef` to get a direct reference to the `<img>` DOM element.",
+            "The `IntersectionObserver` callback provides an array of `IntersectionObserverEntry` objects. Check `entry.isIntersecting`.",
+            "The cleanup function of `useEffect` is crucial for preventing memory leaks, especially with event listeners or observers.",
+            "For the bonus, the `<img>` element has an `onError` event handler.",
+            "Consider using `object-fit: cover;` and `width: 100%; height: 100%;` on the image style for better visual consistency within the gallery items."
+          ],
+          "tags": [
+            "React",
+            "Lazy Loading",
+            "IntersectionObserver",
+            "Performance",
+            "Frontend",
+            "Hooks"
+          ],
+          "timeEstimate": 60,
+          "prerequisites": [
+            "react_hooks",
+            "javascript_dom",
+            "intersection_observer_api"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 8,
+          "learningPath": "intermediate",
+          "relatedConcepts": [
+            "web_performance_optimization",
+            "component_lifecycle",
+            "state_management"
+          ]
+        },
+        {
+          "id": "task_performance_1",
+          "title": "Optimize an Image Asset Delivery",
+          "description": "\nGiven a scenario where an application serves high-resolution images to all users, implement a solution to optimize image delivery using responsive image techniques.\n\n**Requirements:**\n1.  Create an HTML structure for an `<img>` tag.\n2.  Utilize the `srcset` and `sizes` attributes to provide multiple image candidates for different screen widths.\n3.  Ensure a fallback `src` is provided for browsers that don't support `srcset`.\n4.  (Bonus) Use the `<picture>` element for 'art direction' to serve a completely different image when the viewport is very narrow (e.g., mobile screens).\n\n**Image URLs to use (simulated):**\n*   Small (480px wide): `https://via.placeholder.com/480x300.png?text=Small`\n*   Medium (800px wide): `https://via.placeholder.com/800x500.png?text=Medium`\n*   Large (1200px wide): `https://via.placeholder.com/1200x750.png?text=Large`\n*   (Bonus for Picture) Mobile specific (e.g., taller aspect ratio): `https://via.placeholder.com/300x600.png?text=Mobile`\n",
+          "difficulty": "medium",
+          "startingCode": "<!-- Starting HTML structure -->\n<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n    <meta charset=\"UTF-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <title>Responsive Image Task</title>\n    <style>\n        body { font-family: sans-serif; margin: 20px; }\n        img { max-width: 100%; height: auto; border: 1px solid #ccc; display: block; margin-top: 20px; }\n    </style>\n</head>\n<body>\n    <h1>Image Optimization with srcset/sizes</h1>\n\n    <!-- TODO: Implement the responsive image here -->\n    <img src=\"https://via.placeholder.com/1200x750.png?text=DefaultFallback\" alt=\"A placeholder image\">\n\n    <h2>Bonus: Art Direction with &lt;picture&gt;</h2>\n    <!-- TODO: Implement the <picture> element here -->\n\n</body>\n</html>\n",
+          "solutionCode": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n    <meta charset=\"UTF-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <title>Responsive Image Task Solution</title>\n    <style>\n        body { font-family: sans-serif; margin: 20px; }\n        img { max-width: 100%; height: auto; border: 1px solid #ccc; display: block; margin-top: 20px; }\n    </style>\n</head>\n<body>\n    <h1>Image Optimization with srcset/sizes</h1>\n\n    <img \n      src=\"https://via.placeholder.com/480x300.png?text=SmallFallback\" \n      srcset=\"\n        https://via.placeholder.com/480x300.png?text=Small 480w,\n        https://via.placeholder.com/800x500.png?text=Medium 800w,\n        https://via.placeholder.com/1200x750.png?text=Large 1200w\n      \" \n      sizes=\"\n        (max-width: 600px) 480px,\n        (max-width: 1000px) 800px,\n        1200px\n      \" \n      alt=\"A descriptive image demonstrating srcset and sizes\">\n\n    <h2>Bonus: Art Direction with &lt;picture&gt;</h2>\n    <picture>\n        <source media=\"(max-width: 500px)\" srcset=\"https://via.placeholder.com/300x600.png?text=MobileSpecific\">\n        <source media=\"(min-width: 501px) and (max-width: 900px)\" srcset=\"https://via.placeholder.com/800x500.png?text=TabletSpecific\">\n        <img \n          src=\"https://via.placeholder.com/1200x750.png?text=DesktopFallback\" \n          alt=\"A descriptive image demonstrating picture element for art direction\">\n    </picture>\n\n</body>\n</html>\n",
+          "testCases": [
+            "Resize browser window: Verify the image source changes based on viewport width (using dev tools network tab or inspecting element's `currentSrc`).",
+            "Test on a very small viewport (e.g., 320px wide): Ensure `Small` image is loaded.",
+            "Test on a medium viewport (e.g., 850px wide): Ensure `Medium` image is loaded.",
+            "Test on a large viewport (e.g., 1400px wide): Ensure `Large` image is loaded.",
+            "For bonus, test with a viewport <= 500px: Ensure the `MobileSpecific` image is loaded. Test with viewport > 500px and <= 900px for `TabletSpecific`.",
+            "Verify fallback `src` works (e.g., by intentionally breaking `srcset`)."
+          ],
+          "hints": [
+            "The `srcset` attribute accepts a comma-separated list of image URLs followed by a 'width descriptor' (e.g., `480w`).",
+            "The `sizes` attribute specifies the image's display width at different viewport sizes using media queries (e.g., `(max-width: 600px) 480px`).",
+            "The browser evaluates `sizes` first, then picks the best image from `srcset`.",
+            "For `<picture>`, use `<source>` elements with `media` attributes, and always include a fallback `<img>` at the end.",
+            "Use browser developer tools (Network tab) to verify which image resource is actually loaded."
+          ],
+          "tags": [
+            "HTML",
+            "Images",
+            "Performance",
+            "Responsive Design",
+            "Optimization"
+          ],
+          "timeEstimate": 45,
+          "prerequisites": [
+            "html_basics",
+            "css_media_queries"
+          ],
+          "complexity": 6,
+          "interviewRelevance": 7,
+          "learningPath": "intermediate",
+          "relatedConcepts": [
+            "asset_optimization",
+            "front_end_optimization"
+          ]
+        },
+        {
+          "id": "task_performance_2",
+          "title": "Implement a Basic Font Loading Strategy with `font-display`",
+          "description": "\nDemonstrate how to load a custom web font efficiently using the `font-display` CSS property to prevent Flash of Invisible Text (FOIT).\n\n**Requirements:**\n1.  Define a `@font-face` rule for a custom font. You can use a dummy font file or a public one like Google Fonts' 'Open Sans' via `url()`.\n2.  Apply `font-display: swap;` to the `@font-face` rule.\n3.  Create an HTML page that uses this custom font in a heading and paragraph.\n4.  (Simulate) a slow font load: You can artificially delay the font file in a local server or pretend it's slow to verify fallback behavior.\n\n**Font URL (simulated):**\n*   `https://fonts.googleapis.com/css2?family=Open+Sans&display=swap` (or download a `woff2` and serve locally)\n",
+          "difficulty": "easy",
+          "startingCode": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n    <meta charset=\"UTF-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <title>Font Loading Task</title>\n    <style>\n        /* TODO: Define @font-face rule here */\n        /* Example structure */\n        /*\n        @font-face {\n            font-family: 'MyCustomFont';\n            src: url('path/to/mycustomfont.woff2') format('woff2');\n            font-weight: normal;\n            font-style: normal;\n            \n            /* TODO: Add font-display property */\n        }\n        */\n\n        body {\n            font-family: sans-serif; /* Fallback */\n            margin: 20px;\n        }\n        h1 {\n            font-size: 2.5em;\n            /* TODO: Apply your custom font */\n        }\n        p {\n            font-size: 1.2em;\n            line-height: 1.6;\n            /* TODO: Apply your custom font */\n        }\n    </style>\n</head>\n<body>\n    <h1>This is a heading with a custom font.</h1>\n    <p>This paragraph also uses the custom font. Observe how the text renders initially before the font is fully loaded, especially if you simulate a slow network connection.</p>\n</body>\n</html>\n",
+          "solutionCode": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n    <meta charset=\"UTF-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <title>Font Loading Task Solution</title>\n    <style>\n        @font-face {\n            font-family: 'Open Sans';\n            src: url('https://fonts.gstatic.com/s/opensans/v34/memvYaGs126MiZpBA-DpfimhnxOyPUo.woff2') format('woff2');\n            font-weight: 400;\n            font-style: normal;\n            font-display: swap; /* Crucial for preventing FOIT */\n        }\n\n        body {\n            font-family: sans-serif; /* Fallback font */\n            margin: 20px;\n        }\n        h1 {\n            font-family: 'Open Sans', sans-serif; /* Use custom font, with fallback */\n            font-size: 2.5em;\n        }\n        p {\n            font-family: 'Open Sans', sans-serif;\n            font-size: 1.2em;\n            line-height: 1.6;\n        }\n    </style>\n</head>\n<body>\n    <h1>This is a heading with a custom font.</h1>\n    <p>This paragraph also uses the custom font. Observe how the text renders initially before the font is fully loaded, especially if you simulate a slow network connection.</p>\n</body>\n</html>\n",
+          "testCases": [
+            "Load the page with a fast network: Verify the font loads and applies quickly.",
+            "Simulate slow network (e.g., 'Fast 3G' in Chrome DevTools): Observe that the text appears using the fallback `sans-serif` font *before* 'Open Sans' loads, then 'swaps' to 'Open Sans' once loaded. This confirms FOIT prevention.",
+            "Verify the `font-family` property in dev tools computed styles after font has loaded."
+          ],
+          "hints": [
+            "The `font-display` property should be placed inside the `@font-face` rule.",
+            "`swap` is generally the most recommended value for `font-display` as it prioritizes content display.",
+            "Remember to provide a generic fallback font in your `font-family` stack (e.g., `sans-serif`).",
+            "Use your browser's developer tools (Network tab, then filter by 'Fonts') to observe font loading behavior and experiment with network throttling."
+          ],
+          "tags": [
+            "CSS",
+            "Performance",
+            "Web Fonts",
+            "Optimization",
+            "Frontend"
+          ],
+          "timeEstimate": 30,
+          "prerequisites": [
+            "css_basics",
+            "web_fonts"
+          ],
+          "complexity": 5,
+          "interviewRelevance": 6,
+          "learningPath": "intermediate",
+          "relatedConcepts": [
+            "asset_optimization",
+            "critical_rendering_path"
+          ]
+        },
+        {
+          "id": "task_performance_3",
+          "title": "Analyze and Suggest Performance Improvements with Lighthouse",
+          "description": "\nGiven a (simulated) web page, use Google Lighthouse to audit its performance. Then, based on the report, identify at least three specific areas for improvement and propose concrete solutions that align with web performance best practices.\n\n**Requirements:**\n1.  **Select a webpage:** Use any public-facing website (e.g., a news site, an e-commerce site, or even your personal portfolio). If you don't have one, `https://www.google.com` or `https://www.wikipedia.org` are fine for analysis, though your proposed solutions might be more generic.\n2.  **Run Lighthouse Audit:** Execute a Lighthouse audit (e.g., in Chrome DevTools or via web.dev/measure).\n3.  **Analyze Report:** Examine the 'Performance' section of the Lighthouse report.\n4.  **Identify Bottlenecks:** Pick at least three distinct performance issues reported by Lighthouse.\n5.  **Propose Solutions:** For each identified issue, suggest a specific and actionable solution from the web application optimization strategies discussed (Front-end, Back-end, Network, Asset).\n\n**Example Output Format:**\n\n**Website Analyzed:** `[URL of the website]`\n\n**Lighthouse Performance Score:** `[Score]`\n\n**Identified Issues & Proposed Solutions:**\n\n1.  **Issue (Lighthouse Says):** `[e.g., Reduce unused JavaScript]`\n    **Explanation:** `[Briefly explain what this means]`\n    **Proposed Solution:** `[e.g., Implement code splitting using dynamic imports for routes or components. Use a tool like Webpack Bundle Analyzer to identify large chunks, and then apply lazy loading (React.lazy + Suspense) or route-based splitting.]`\n\n2.  **Issue (Lighthouse Says):** `[e.g., Serve images in next-gen formats]`\n    **Explanation:** `[Briefly explain what this means]`\n    **Proposed Solution:** `[e.g., Convert images to WebP or AVIF formats. Use a CDN that supports image optimization, or implement a build step to convert existing images during deployment. Use the <picture> element for broader browser compatibility.]`\n\n3.  **Issue (Lighthouse Says):** `[e.g., Ensure text remains visible during webfont load]`\n    **Explanation:** `[Briefly explain what this means]`\n    **Proposed Solution:** `[e.g., Apply 'font-display: swap;' in the @font-face rule of the CSS to allow the browser to render text with a fallback font immediately, preventing Flash of Invisible Text (FOIT) while the custom font loads.]`\n",
+          "difficulty": "hard",
+          "startingCode": "/* No starting code, this is a conceptual/analysis task */\n\n// Use Chrome DevTools (Lighthouse tab) or web.dev/measure to run the audit.\n// Then, structure your answer as described in the problem description.\n",
+          "solutionCode": "/* Example Solution Structure (content will vary based on website analyzed) */\n\n**Website Analyzed:** `https://www.example.com` (Replace with your chosen URL)\n\n**Lighthouse Performance Score:** `72` (Example score)\n\n**Identified Issues & Proposed Solutions:**\n\n1.  **Issue (Lighthouse Says):** `Eliminate render-blocking resources`\n    **Explanation:** This refers to stylesheets and scripts that the browser must download, parse, and execute before it can render any content on the screen. This delays the First Contentful Paint (FCP).\n    **Proposed Solution:**\n    *   **CSS:** Identify critical CSS needed for above-the-fold content and inline it directly into the HTML. Defer non-critical CSS by loading it asynchronously (e.g., using `<link rel=\"preload\" as=\"style\" onload=\"this.rel='stylesheet'\">`).\n    *   **JavaScript:** Defer non-critical JavaScript by adding `defer` or `async` attributes to script tags. For very small, critical scripts, consider inlining them.\n\n2.  **Issue (Lighthouse Says):** `Serve static assets with an efficient cache policy`\n    **Explanation:** The server is not instructing browsers to cache static assets (like images, CSS, JS) for a sufficiently long period, leading to browsers re-downloading these assets on subsequent visits, increasing load times.\n    **Proposed Solution:** Configure the web server (e.g., Nginx, Apache, or CDN) to send appropriate `Cache-Control` headers (e.g., `Cache-Control: public, max-age=31536000, immutable`) for static assets. This allows browsers and CDNs to cache these files for a year, drastically reducing network requests on repeat visits.\n\n3.  **Issue (Lighthouse Says):** `Minimize main-thread work`\n    **Explanation:** The browser's main thread is busy parsing, compiling, and executing JavaScript, style, and layout work for a prolonged period, which can delay interactivity and make the page feel sluggish (impacts FID and TTI).\n    **Proposed Solution:**\n    *   **Reduce JavaScript Bundle Size:** Implement code splitting and lazy loading for non-critical JavaScript. Remove unused JavaScript (tree-shaking).\n    *   **Optimize Long Tasks:** Break up long-running JavaScript tasks into smaller, asynchronous chunks using `setTimeout`, `requestIdleCallback`, or Web Workers.\n    *   **Debounce/Throttle Event Handlers:** Reduce the frequency of expensive computations tied to user interactions (e.g., scroll, resize, input).\n\n4.  **Issue (Lighthouse Says):** `Avoid chaining critical requests`\n    **Explanation:** This means there are multiple nested dependencies (e.g., HTML loads CSS, which loads a font, which loads an image) that form a long chain, delaying the rendering of critical content.\n    **Proposed Solution:** Use `rel=\"preload\"` resource hints for critical resources discovered late in the HTML parsing process (e.g., fonts, critical background images referenced in CSS). This tells the browser to fetch them earlier with high priority.\n",
+          "testCases": [
+            "The analysis should clearly state the chosen website's URL.",
+            "The Lighthouse performance score should be provided.",
+            "At least three distinct Lighthouse issues from the 'Performance' section should be identified.",
+            "For each issue, a clear and concise explanation should be given.",
+            "For each issue, a specific, actionable, and relevant solution must be proposed, demonstrating knowledge of optimization techniques."
+          ],
+          "hints": [
+            "Focus on the 'Opportunities' and 'Diagnostics' sections of the Lighthouse report. They provide actionable insights.",
+            "Categorize issues into Front-end, Back-end, Network, or Asset optimization where possible.",
+            "For each suggestion, think about *how* you would implement it in a real project (e.g., specific code attributes, build tool configurations, server settings).",
+            "Common issues include large images, render-blocking CSS/JS, inefficient caching, slow server response times, and excessive main-thread work.",
+            "Remember the Core Web Vitals and how different optimizations might impact them."
+          ],
+          "tags": [
+            "Performance",
+            "Lighthouse",
+            "Optimization",
+            "Analysis",
+            "Frontend",
+            "Consulting"
+          ],
+          "timeEstimate": 90,
+          "prerequisites": [
+            "web_performance_optimization",
+            "core_web_vitals",
+            "http_basics"
+          ],
+          "complexity": 9,
+          "interviewRelevance": 10,
+          "learningPath": "expert",
+          "relatedConcepts": [
+            "measuring_performance",
+            "performance_budgets",
+            "critical_rendering_path"
+          ]
+        },
+        {
+          "id": "task_ssr_1",
+          "title": "Implement a Basic Server-Side Rendering (SSR) Setup with Node.js and Express",
+          "description": "\nCreate a very simple server-side rendered (SSR) React application using Node.js and Express. The goal is to demonstrate the fundamental concept of rendering a React component to a string on the server and sending it as HTML.\n\n**Requirements:**\n1.  Set up a basic Node.js Express server.\n2.  Create a simple React functional component (e.g., `App`) that displays a dynamic message (e.g., 'Hello from SSR!').\n3.  On the server, use `ReactDOMServer.renderToString()` to render the React component to an HTML string.\n4.  Embed this rendered HTML string into a full HTML document template.\n5.  Serve this full HTML document from an Express route.\n6.  (Bonus) Include a client-side bundle that `hydrates` the server-rendered HTML, making the React component interactive (e.g., add a button that increments a counter).\n\n**Assumptions:**\n*   You have Node.js and npm/yarn installed.\n*   You can create a basic `package.json` and install dependencies (`express`, `react`, `react-dom`).\n",
+          "difficulty": "hard",
+          "startingCode": "// server/index.js\nconst express = require('express');\nconst React = require('react');\nconst ReactDOMServer = require('react-dom/server');\n\n// TODO: Import your React App component (if in a separate file)\n// const App = require('../src/App').default; \n\nconst app = express();\nconst PORT = 3000;\n\napp.get('/', (req, res) => {\n  // TODO: Create a simple React App component (or use the one from src/App.js)\n  // Example: \n  const App = () => <h1>Hello from SSR!</h1>;\n\n  // TODO: Render the React component to a string\n  const appHtml = ReactDOMServer.renderToString(<App />);\n\n  // TODO: Create a full HTML document with the rendered appHtml embedded\n  const html = `\n    <!DOCTYPE html>\n    <html>\n      <head>\n        <title>Basic SSR React App</title>\n      </head>\n      <body>\n        <div id=\"root\">${appHtml}</div>\n        <!-- TODO: Add client-side bundle for hydration (Bonus) -->\n        <script src=\"/static/bundle.js\"></script>\n      </body>\n    </html>\n  `;\n\n  res.send(html);\n});\n\n// TODO: Serve static files (e.g., the client-side bundle) (Bonus)\n// app.use('/static', express.static('public'));\n\napp.listen(PORT, () => {\n  console.log(`Server listening on port ${PORT}`);\n});\n\n// --- Client-side (src/App.js) for Bonus --- (Create this file if doing bonus)\n/*\nimport React, { useState } from 'react';\n\nfunction App() {\n  const [count, setCount] = useState(0);\n  return (\n    <div>\n      <h1>Hello from SSR! Count: {count}</h1>\n      <button onClick={() => setCount(count + 1)}>Increment</button>\n    </div>\n  );\n}\n\nexport default App;\n*/\n\n// --- Client-side entry (src/index.js) for Bonus --- (Create this file if doing bonus)\n/*\nimport React from 'react';\nimport ReactDOM from 'react-dom';\nimport App from './App';\n\n// Use hydrate instead of render for SSRed content\nReactDOM.hydrate(<App />, document.getElementById('root'));\n*/\n\n// --- webpack.config.js for Bonus --- (Create this file if doing bonus, requires webpack, webpack-cli, babel-loader, @babel/preset-env, @babel/preset-react)\n/*\nconst path = require('path');\n\nmodule.exports = {\n  mode: 'development',\n  entry: './src/index.js',\n  output: {\n    path: path.resolve(__dirname, 'public'),\n    filename: 'bundle.js',\n  },\n  module: {\n    rules: [\n      {\n        test: /\\.(js|jsx)$/,\n        exclude: /node_modules/,\n        use: {\n          loader: 'babel-loader',\n          options: {\n            presets: ['@babel/preset-env', '@babel/preset-react'],\n          },\n        },\n      },\n    ],\n  },\n  resolve: {\n    extensions: ['.js', '.jsx'],\n  },\n};\n*/\n",
+          "solutionCode": "// server/index.js\nconst express = require('express');\nconst React = require('react');\nconst ReactDOMServer = require('react-dom/server');\n\n// Assuming src/App.js exists and exports default\nconst App = require('../src/App').default;\n\nconst app = express();\nconst PORT = 3000;\n\n// Serve static files from the 'public' directory (for the client-side bundle)\napp.use('/static', express.static('public'));\n\napp.get('/', (req, res) => {\n  // Render the React component to a string\n  const appHtml = ReactDOMServer.renderToString(<App />);\n\n  // Create a full HTML document with the rendered appHtml embedded\n  const html = `\n    <!DOCTYPE html>\n    <html>\n      <head>\n        <title>Basic SSR React App</title>\n      </head>\n      <body>\n        <div id=\"root\">${appHtml}</div>\n        <!-- The client-side bundle for hydration -->\n        <script src=\"/static/bundle.js\"></script>\n      </body>\n    </html>\n  `;\n\n  res.send(html);\n});\n\napp.listen(PORT, () => {\n  console.log(`Server listening on port ${PORT}`);\n  console.log(`Visit http://localhost:${PORT}`);\n});\n\n\n// --- src/App.js ---\n/*\nimport React, { useState } from 'react';\n\nfunction App() {\n  const [count, setCount] = useState(0);\n  console.log('App component rendered or hydrated. Current count:', count);\n  return (\n    <div>\n      <h1>Hello from SSR! Count: {count}</h1>\n      <button onClick={() => setCount(count + 1)}>Increment</button>\n    </div>\n  );\n}\n\nexport default App;\n*/\n\n// --- src/index.js ---\n/*\nimport React from 'react';\nimport ReactDOM from 'react-dom';\nimport App from './App';\n\n// Use hydrate instead of render for SSRed content\n// Only run on client-side\nif (typeof window !== 'undefined') {\n  ReactDOM.hydrate(<App />, document.getElementById('root'));\n}\n*/\n\n// --- webpack.config.js ---\n/*\nconst path = require('path');\n\nmodule.exports = {\n  mode: 'development',\n  entry: './src/index.js',\n  output: {\n    path: path.resolve(__dirname, 'public'), // Output client bundle to 'public' folder\n    filename: 'bundle.js',\n  },\n  module: {\n    rules: [\n      {\n        test: /\\.(js|jsx)$/,\n        exclude: /node_modules/,\n        use: {\n          loader: 'babel-loader',\n          options: {\n            presets: ['@babel/preset-env', ['@babel/preset-react', { runtime: 'automatic' }]],\n          },\n        },\n      },\n    ],\n  },\n  resolve: {\n    extensions: ['.js', '.jsx'],\n  },\n  devtool: 'eval-source-map', // For easier debugging\n};\n*/\n\n/*\n** Steps to Run the Solution (assuming solution files are in correct folders):**\n1.  **Install dependencies**: `npm init -y` (if not done) then `npm install express react react-dom @babel/core @babel/preset-env @babel/preset-react babel-loader webpack webpack-cli`\n2.  **Add build script to package.json**: `\"scripts\": { \"build:client\": \"webpack --config webpack.config.js\", \"start:server\": \"node server/index.js\" }`\n3.  **Run client build**: `npm run build:client`\n4.  **Start server**: `npm run start:server`\n5.  **Open in browser**: Go to `http://localhost:3000`\n*/\n",
+          "testCases": [
+            "Navigate to `http://localhost:3000` in a browser.",
+            "View page source: Verify that the `<h1>Hello from SSR!</h1>` text is present directly in the HTML received from the server (not just in a script tag).",
+            "Disable JavaScript in browser: Verify the initial text is still visible.",
+            "Enable JavaScript and click the 'Increment' button (Bonus): Verify that the counter increments and the button becomes interactive, demonstrating hydration.",
+            "Check console logs (Bonus): Verify 'App component rendered or hydrated' log appears only once on the client side after the page loads, indicating hydration, not a full re-render."
+          ],
+          "hints": [
+            "Remember to `require` React and `ReactDOMServer` at the top of your server file.",
+            "`ReactDOMServer.renderToString()` is used on the server, while `ReactDOM.hydrate()` (or `ReactDOM.render()` for client-only) is used on the client.",
+            "For the bonus, you'll need to set up a simple Webpack configuration to bundle your client-side React code.",
+            "Express's `express.static()` middleware is essential for serving your client-side JavaScript bundle.",
+            "Ensure your React component is pure (doesn't rely on browser-specific APIs) when rendered on the server."
+          ],
+          "tags": [
+            "SSR",
+            "React",
+            "Node.js",
+            "Express",
+            "Hydration",
+            "Frontend Architecture",
+            "Build Tools"
+          ],
+          "timeEstimate": 120,
+          "prerequisites": [
+            "react_basics",
+            "node_js_basics",
+            "express_basics",
+            "webpack_basics"
+          ],
+          "complexity": 9,
+          "interviewRelevance": 9,
+          "learningPath": "advanced",
+          "relatedConcepts": [
+            "server_side_rendering",
+            "universal_javascript",
+            "frontend_build_process",
+            "deployment"
+          ]
+        },
+        {
+          "id": "task_react_deployment_1",
+          "title": "Configure Nginx for a React SPA and Serve Static Assets",
+          "description": "\nConfigure an Nginx server block to correctly serve a production-built React Single Page Application (SPA) and handle its client-side routing. This task simulates a common production deployment scenario.\n\n**Requirements:**\n1.  Create an Nginx server block configuration.\n2.  Set the `root` directive to point to a hypothetical directory where the React build output (`index.html`, `static/js`, `static/css`, etc.) would reside (e.g., `/usr/share/nginx/html`).\n3.  Implement a `location /` block that ensures client-side routes are handled correctly by serving `index.html` as a fallback for any non-existent paths.\n4.  Add a separate `location` block for static assets (e.g., JavaScript, CSS, images) to apply long-term caching headers.\n\n**Note:** You don't need to actually set up an Nginx server or build a React app for this task. Provide the Nginx configuration file content as the solution.\n",
+          "difficulty": "medium",
+          "startingCode": "```nginx\n# Nginx Configuration for React SPA\nserver {\n    listen 80;\n    server_name yourdomain.com;\n\n    # TODO: Set the root directory for your built React application\n    root /path/to/your/react/build;\n\n    # Index file\n    index index.html index.htm;\n\n    # TODO: Implement the main location block for SPA routing fallback\n    location / {\n        # Try to serve file, then directory, then fallback to index.html\n    }\n\n    # TODO: Implement location block for static assets with caching\n    # Example: .js, .css, .png, .jpg, .jpeg, .gif, .ico, .svg, .woff, .woff2, .ttf, .eot\n    location ~* \\.(some|asset|extensions)$ {\n        # Set long cache headers\n    }\n\n    # Optional: Error page for 404 (often redirects to index.html for SPAs)\n    # error_page 404 /index.html;\n}\n```",
+          "solutionCode": "```nginx\n# Nginx Configuration for React SPA\nserver {\n    listen 80;\n    server_name yourdomain.com; # Replace with your actual domain\n\n    # Root directory where your React app's build output resides\n    root /usr/share/nginx/html; # Common path, or /app/build\n\n    # Index file to serve when accessing root or directories\n    index index.html index.htm;\n\n    # Main location block for handling client-side routing in SPAs\n    # This tries to serve the requested file, then a directory, \n    # and if neither is found, it serves index.html (allowing React Router to take over)\n    location / {\n        try_files $uri $uri/ /index.html;\n    }\n\n    # Location block for static assets (JavaScript, CSS, images, fonts etc.)\n    # Sets aggressive caching headers for these files.\n    location ~* \\.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot)$ {\n        expires 1y; # Cache for 1 year\n        add_header Cache-Control \"public, immutable\"; # Indicate public cache, immutable content\n        access_log off; # Turn off access logging for static assets for performance\n        log_not_found off;\n    }\n\n    # Optional: Custom 404 error page fallback to index.html for SPA consistency\n    error_page 404 /index.html;\n}\n```",
+          "testCases": [
+            "Configuration should be syntactically correct Nginx.",
+            "The `root` directive should be present and point to a valid (hypothetical) build directory.",
+            "The main `location /` block must include `try_files $uri $uri/ /index.html;` to ensure SPA routing fallback.",
+            "A separate `location` block for static assets should correctly use `expires` and `add_header Cache-Control` for long-term caching.",
+            "The static asset `location` block regex should cover common file types (js, css, image, font files)."
+          ],
+          "hints": [
+            "The `try_files` directive is crucial for SPAs. It tells Nginx to look for files in a specific order.",
+            "Using `location ~* \\.(...)` allows you to match specific file extensions for different caching policies.",
+            "`expires 1y;` is a strong caching directive. `add_header Cache-Control \"public, immutable\";` further enhances this for CDN and browser caching.",
+            "Remember that Nginx processes `location` blocks in a specific order (exact matches first, then regex matches, then prefix matches)."
+          ],
+          "tags": [
+            "Nginx",
+            "Deployment",
+            "React",
+            "SPA",
+            "Caching",
+            "Web Server",
+            "Frontend Infrastructure"
+          ],
+          "timeEstimate": 45,
+          "prerequisites": [
+            "http_basics",
+            "web_hosting_basics",
+            "react_router_dom"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 8,
+          "learningPath": "intermediate",
+          "relatedConcepts": [
+            "react_application_deployment",
+            "network_optimization"
+          ]
+        },
+        {
+          "id": "task_react_deployment_2",
+          "title": "Automate React Build and Deployment with a CI/CD Script",
+          "description": "\nWrite a conceptual CI/CD pipeline script (e.g., using YAML syntax common in GitHub Actions, GitLab CI, etc.) that automates the build, test, and deployment process for a simple React application.\n\n**Requirements:**\n1.  **Trigger:** The pipeline should be triggered on push to the `main` branch.\n2.  **Stages:** Define distinct stages for 'Build', 'Test', and 'Deploy'.\n3.  **Build Stage:**\n    *   Install Node.js.\n    *   Install project dependencies.\n    *   Run the React build command (`npm run build`).\n    *   Save the build output as an artifact.\n4.  **Test Stage:**\n    *   Install Node.js.\n    *   Install project dependencies.\n    *   Run unit tests (`npm test`).\n5.  **Deploy Stage:**\n    *   This stage should only run if the 'Build' and 'Test' stages succeed.\n    *   Simulate a deployment step (e.g., a `deploy.sh` script or a command to upload artifacts).\n    *   (Bonus) Include steps for linting before testing, and a performance audit (e.g., Lighthouse CI) after building.\n\n**Note:** This is a conceptual task; actual execution requires a CI/CD platform. Focus on the logical flow and commands.\n",
+          "difficulty": "hard",
+          "startingCode": "```yaml\n# .github/workflows/deploy.yml or .gitlab-ci.yml\n\nname: React CI/CD Pipeline\n\non: \n  push:\n    branches: [ main ]\n  pull_request:\n    branches: [ main ]\n\njobs:\n  # TODO: Define the Build stage\n  build:\n    runs-on: ubuntu-latest\n    steps:\n      # Checkout code\n      - uses: actions/checkout@v3\n      \n      # Setup Node.js\n      # - uses: actions/setup-node@v3\n      #   with:\n      #     node-version: '18'\n\n      # TODO: Install dependencies\n      # TODO: Run React build command\n      # TODO: Upload build artifacts\n\n  # TODO: Define the Test stage (depends on build)\n  test:\n    needs: build\n    runs-on: ubuntu-latest\n    steps:\n      # Checkout code (or download artifacts from build stage)\n      - uses: actions/checkout@v3\n      # - uses: actions/download-artifact@v3\n      #   with:\n      #     name: react-build\n\n      # Setup Node.js\n      # - uses: actions/setup-node@v3\n      #   with:\n      #     node-version: '18'\n\n      # TODO: Install dependencies\n      # TODO: Run tests\n\n  # TODO: Define the Deploy stage (depends on test)\n  deploy:\n    needs: test\n    if: github.ref == 'refs/heads/main' # Only deploy main branch pushes\n    runs-on: ubuntu-latest\n    steps:\n      # Download artifacts from build stage\n      # - uses: actions/download-artifact@v3\n      #   with:\n      #     name: react-build\n      \n      # TODO: Simulate deployment (e.g., a simple echo command or placeholder for actual deploy)\n```",
+          "solutionCode": "```yaml\n# .github/workflows/deploy.yml\n\nname: React CI/CD Pipeline\n\non: \n  push:\n    branches: [ main ]\n  pull_request:\n    branches: [ main ]\n\njobs:\n  # Stage 1: Build\n  build:\n    runs-on: ubuntu-latest\n    steps:\n      - name: Checkout code\n        uses: actions/checkout@v3\n      \n      - name: Setup Node.js\n        uses: actions/setup-node@v3\n        with:\n          node-version: '18'\n\n      - name: Install dependencies\n        run: npm ci # Use npm ci for clean installs in CI environments\n\n      - name: Run ESLint (Bonus)\n        run: npm run lint # Assuming you have a 'lint' script\n\n      - name: Build React application\n        run: npm run build\n\n      - name: Upload build artifacts\n        uses: actions/upload-artifact@v3\n        with:\n          name: react-build\n          path: build/ # Path to your React build output directory\n\n      - name: Run Lighthouse CI (Bonus)\n        # Requires Lighthouse CI server and config. This is a placeholder.\n        run: | \n          echo \"Running Lighthouse audit...\"\n          # npx @lhci/cli audit --upload-url=http://localhost:9000\n\n  # Stage 2: Test\n  test:\n    needs: build # This job depends on the 'build' job completing successfully\n    runs-on: ubuntu-latest\n    steps:\n      - name: Checkout code\n        uses: actions/checkout@v3\n\n      - name: Setup Node.js\n        uses: actions/setup-node@v3\n        with:\n          node-version: '18'\n\n      - name: Install dependencies\n        run: npm ci\n\n      - name: Run unit and integration tests\n        run: npm test -- --coverage --passWithNoTests # Example for Jest\n\n  # Stage 3: Deploy\n  deploy:\n    needs: test # This job depends on the 'test' job completing successfully\n    if: github.ref == 'refs/heads/main' # Only deploy if the push is to the main branch\n    runs-on: ubuntu-latest\n    environment: production # Designate this as a production deployment environment\n    steps:\n      - name: Download build artifacts\n        uses: actions/download-artifact@v3\n        with:\n          name: react-build\n          path: ./build # Download artifacts to a specific path\n\n      - name: Simulate deployment to hosting (e.g., Netlify, Vercel, S3)\n        run: | \n          echo \"Deploying React app to production...\"\n          # Replace with actual deployment commands, e.g.:\n          # npx netlify deploy --dir=./build --prod\n          # aws s3 sync ./build s3://your-bucket-name --delete\n          echo \"Deployment complete!\"\n```",
+          "testCases": [
+            "The YAML syntax should be valid.",
+            "The `on` trigger should correctly specify push to `main`.",
+            "Distinct jobs for `build`, `test`, and `deploy` should be present.",
+            "`test` job should explicitly `need` `build`.",
+            "`deploy` job should explicitly `need` `test` and have a conditional trigger for `main` branch.",
+            "Build stage should include Node.js setup, dependency installation (`npm ci`), and `npm run build`.",
+            "Build stage should use `actions/upload-artifact` to save the `build` directory.",
+            "Test stage should include Node.js setup, dependency installation, and `npm test`.",
+            "Deploy stage should include `actions/download-artifact` and a placeholder for deployment commands.",
+            "(Bonus) Linting step (`npm run lint`) before build/test.",
+            "(Bonus) Placeholder for Lighthouse CI execution after build."
+          ],
+          "hints": [
+            "Use `uses: actions/checkout@v3` to get your repository code.",
+            "Use `uses: actions/setup-node@v3` to configure Node.js environment.",
+            "`npm ci` is preferred over `npm install` in CI environments for reproducibility.",
+            "`needs: [job_id]` specifies dependencies between jobs.",
+            "`if: github.ref == 'refs/heads/main'` is a common way to gate deployments to the main branch.",
+            "`actions/upload-artifact` and `actions/download-artifact` are used to pass files between jobs.",
+            "For actual deployment, you would replace the `echo` command in the deploy step with commands specific to your hosting provider (e.g., Netlify CLI, AWS CLI, rsync to a server)."
+          ],
+          "tags": [
+            "React",
+            "CI/CD",
+            "Deployment",
+            "DevOps",
+            "Automation",
+            "YAML",
+            "GitHub Actions"
+          ],
+          "timeEstimate": 90,
+          "prerequisites": [
+            "git_basics",
+            "command_line",
+            "npm_basics"
+          ],
+          "complexity": 8,
+          "interviewRelevance": 9,
+          "learningPath": "advanced",
+          "relatedConcepts": [
+            "react_application_deployment",
+            "web_performance_optimization"
+          ]
+        }
+      ]
+    }
+  }
+]

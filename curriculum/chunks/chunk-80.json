@@ -1,0 +1,590 @@
+[
+  {
+    "id": "d1c2e95e-c011-4e02-acc9-df947baa837d",
+    "startLine": 16600,
+    "endLine": 16699,
+    "processedDate": "2025-06-17T15:29:00.700Z",
+    "content": {
+      "logicalBlockInfo": {
+        "suggestedEndLine": -1
+      },
+      "theory": [
+        {
+          "id": "theory_vanilla_js_spreadsheet",
+          "title": "Interactive Spreadsheet with Vanilla JavaScript and DOM Manipulation",
+          "content": "This section details the implementation of a basic interactive spreadsheet using vanilla JavaScript and direct DOM manipulation. It serves as a practical example for understanding how to create dynamic HTML structures, handle user input through events, and manage an application's state within a class-based architecture without external frameworks.\n\n## Core Concepts\n-   **DOM Manipulation**: The fundamental technique involves creating, appending, and removing HTML elements (tables, rows, cells, input fields, and buttons) dynamically using JavaScript APIs like `document.createElement()`, `appendChild()`, `removeChild()`, and manipulating `innerHTML`. This provides granular control over the webpage structure.\n-   **Event Handling**: User interactions, such as typing in a cell or clicking buttons, are captured using event listeners (`addEventListener`). The `input` event is particularly important for real-time updates of cell data as the user types, while `click` events trigger actions like adding or removing rows/columns.\n-   **Class-Based Structure**: The entire spreadsheet logic is encapsulated within a `Spreadsheet` class. This object-oriented approach promotes modularity, organizes related data (like `rows`, `cols`, `data` array) and behaviors (like `render`, `addRow`, `update`), and facilitates reusability.\n-   **Data Model (`this.data`)**: The spreadsheet's content is maintained in a 2D array, where `this.data[rowIndex][colIndex]` stores the value of a specific cell. This array acts as the single source of truth for the spreadsheet's state.\n-   **Dynamic Sizing**: Methods such as `addRow()`, `addColumn()`, `removeRow()`, and `removeColumn()` demonstrate how to dynamically modify the `this.data` array and update the spreadsheet's dimensions (`this.rows`, `this.cols`). These methods leverage array manipulation techniques like `push()` and `splice()`.\n-   **Re-rendering Strategy (`update()`)**: The `update()` method re-renders the entire HTML table whenever the underlying data model changes. It achieves this by clearing the contents of the `spreadsheet-container` element (`innerHTML = ''`) and then re-appending a newly generated table via `this.render()`. While simple to implement, this full re-render strategy can be inefficient for very large datasets due to the overhead of recreating the entire DOM structure.\n\n## Implementation Details\n\n### `Spreadsheet` Class Initialization\nThe constructor sets up the initial dimensions and populates the `data` array with empty strings.\n\n```javascript\nclass Spreadsheet {\n  constructor(rows, cols) {\n    this.rows = rows;\n    this.cols = cols;\n    // Initialize data as a 2D array filled with empty strings\n    this.data = Array(rows).fill(null).map(() => Array(cols).fill(''));\n  }\n  // ... other methods\n}\n```\n\n### `render()` Method for UI Generation\nThis method dynamically creates all the necessary HTML elements for the table, including headers, data cells (with input fields), and control buttons. It attaches event listeners to these elements to enable interactivity.\n\n```javascript\nrender() {\n  const table = document.createElement('table');\n  const thead = document.createElement('thead');\n  const tbody = document.createElement('tbody');\n\n  // Header row for column labels and 'add column' button\n  const headerTr = document.createElement('tr');\n  headerTr.innerHTML = '<th></th>'; // Empty corner cell for alignment\n\n  for (let c = 0; c < this.cols; c++) {\n    const th = document.createElement('th');\n    th.textContent = String.fromCharCode(65 + c); // Column A, B, C...\n    const removeColBtn = document.createElement('button');\n    removeColBtn.textContent = 'x';\n    removeColBtn.className = 'remove-btn'; // For styling\n    // Using an IIFE to capture the correct 'c' value for each listener\n    ((colIndex) => {\n        removeColBtn.addEventListener('click', () => this.removeColumn(colIndex));\n    })(c);\n    th.appendChild(removeColBtn);\n    headerTr.appendChild(th);\n  }\n\n  const addColTh = document.createElement('th');\n  const addColButton = document.createElement('button');\n  addColButton.textContent = '+';\n  addColButton.addEventListener('click', () => this.addColumn());\n  addColTh.appendChild(addColButton);\n  headerTr.appendChild(addColTh);\n  thead.appendChild(headerTr);\n  table.appendChild(thead);\n\n  // Data rows and row headers\n  for (let r = 0; r < this.rows; r++) {\n    const tr = document.createElement('tr');\n    const th = document.createElement('th');\n    th.textContent = (r + 1).toString(); // Row 1, 2, 3...\n    const removeRowBtn = document.createElement('button');\n    removeRowBtn.textContent = 'x';\n    removeRowBtn.className = 'remove-btn';\n    ((rowIndex) => {\n        removeRowBtn.addEventListener('click', () => this.removeRow(rowIndex));\n    })(r);\n    th.appendChild(removeRowBtn);\n    tr.appendChild(th);\n\n    for (let c = 0; c < this.cols; c++) {\n      const td = document.createElement('td');\n      const input = document.createElement('input');\n      input.type = 'text';\n      input.value = this.data[r][c];\n      input.dataset.row = r.toString(); // Store row index as data attribute\n      input.dataset.col = c.toString(); // Store column index as data attribute\n      input.addEventListener('input', (e) => {\n        // Update the internal data model when an input changes\n        this.data[parseInt(e.target.dataset.row)][parseInt(e.target.dataset.col)] = e.target.value;\n      });\n      td.appendChild(input);\n      tr.appendChild(td);\n    }\n    tbody.appendChild(tr);\n  }\n\n  // 'Add Row' button at the bottom of the table\n  const addRowTr = document.createElement('tr');\n  const addRowTh = document.createElement('th');\n  const addRowButton = document.createElement('button');\n  addRowButton.textContent = '+';\n  addRowButton.addEventListener('click', () => this.addRow());\n  addRowTh.appendChild(addRowButton);\n  addRowTr.appendChild(addRowTh); // This 'th' acts as the button container for the new row\n  // Append empty 'td' elements to fill the rest of the row, matching column count\n  for (let i = 0; i < this.cols; i++) {\n      addRowTr.appendChild(document.createElement('td'));\n  }\n  tbody.appendChild(addRowTr);\n  \n  table.appendChild(tbody);\n  return table;\n}\n```\n\n### Data Modification Methods\nThese methods directly manipulate the `this.data` array and update the `rows` or `cols` count, then trigger a UI refresh via `update()`.\n\n```javascript\naddRow() {\n  this.data.push(Array(this.cols).fill(''));\n  this.rows++;\n  this.update();\n}\n\naddColumn() {\n  for (let i = 0; i < this.rows; i++) {\n    this.data[i].push('');\n  }\n  this.cols++;\n  this.update();\n}\n\nremoveRow(rowIndex) {\n  if (rowIndex >= 0 && rowIndex < this.rows) {\n    this.data.splice(rowIndex, 1); // Remove 1 element at rowIndex\n    this.rows--;\n    this.update();\n  }\n}\n\nremoveColumn(colIndex) {\n  if (colIndex >= 0 && colIndex < this.cols) {\n    for (let i = 0; i < this.rows; i++) {\n      this.data[i].splice(colIndex, 1); // Remove 1 element at colIndex from each row\n    }\n    this.cols--;\n    this.update();\n  }\n}\n```\n\n### `update()` Method for View Synchronization\nThis method is critical for keeping the DOM in sync with the internal `this.data` model. It ensures that any changes to the spreadsheet's dimensions or data are reflected in the user interface.\n\n```javascript\nupdate() {\n  const spreadsheetContainer = document.getElementById('spreadsheet-container');\n  spreadsheetContainer.innerHTML = ''; // Clears all children\n  spreadsheetContainer.appendChild(this.render()); // Re-creates and appends the new table\n}\n```\n\n## Usage\nThe spreadsheet instance is created and appended to a designated container (`spreadsheet-container`) once the entire DOM content has been loaded, ensuring that the target element exists.\n\n```javascript\ndocument.addEventListener('DOMContentLoaded', () => {\n  const spreadsheet = new Spreadsheet(10, 8); // Example: 10 rows, 8 columns\n  const container = document.getElementById('spreadsheet-container');\n  container.appendChild(spreadsheet.render());\n});\n```",
+          "examples": [
+            {
+              "id": "example_spreadsheet_constructor",
+              "title": "Spreadsheet Class Initialization",
+              "code": "class Spreadsheet {\n  constructor(rows, cols) {\n    this.rows = rows;\n    this.cols = cols;\n    // Initialize a 2D array with empty strings\n    this.data = Array(rows).fill(null).map(() => Array(cols).fill(''));\n    // Example: Populate some initial data for demonstration\n    this.data[0][0] = 'Product';\n    this.data[0][1] = 'Price';\n    this.data[1][0] = 'Laptop';\n    this.data[1][1] = '1200';\n  }\n  \n  // ... other methods\n}\n\nconst mySpreadsheet = new Spreadsheet(2, 2);\nconsole.log(mySpreadsheet.data);\n/* Output:\n[\n  ['Product', 'Price'],\n  ['Laptop', '1200']\n]\n*/",
+              "explanation": "This example illustrates the `Spreadsheet` constructor, showing how `rows`, `cols`, and the `data` 2D array are initialized. It also includes a basic setup to pre-fill a couple of cells, demonstrating how the internal data model holds the spreadsheet's content.",
+              "language": "javascript"
+            },
+            {
+              "id": "example_spreadsheet_add_remove_row_col",
+              "title": "Adding and Removing Rows/Columns Logic",
+              "code": "class Spreadsheet {\n  constructor(rows, cols) {\n    this.rows = rows;\n    this.cols = cols;\n    this.data = Array(rows).fill(null).map(() => Array(cols).fill(''));\n  }\n\n  addRow() {\n    this.data.push(Array(this.cols).fill(''));\n    this.rows++;\n    this.update(); // Assumes update method exists for UI refresh\n  }\n\n  removeRow(rowIndex) {\n    if (rowIndex >= 0 && rowIndex < this.rows) {\n      this.data.splice(rowIndex, 1);\n      this.rows--;\n      this.update();\n    }\n  }\n\n  addColumn() {\n    for (let i = 0; i < this.rows; i++) {\n      this.data[i].push('');\n    }\n    this.cols++;\n    this.update();\n  }\n\n  removeColumn(colIndex) {\n    if (colIndex >= 0 && colIndex < this.cols) {\n      for (let i = 0; i < this.rows; i++) {\n        this.data[i].splice(colIndex, 1);\n      }\n      this.cols--;\n      this.update();\n    }\n  }\n\n  update() {\n    // In a real application, this would trigger a DOM re-render.\n    // For this example, we just log the changes.\n    console.log('Spreadsheet state updated. Current data:', this.data);\n    console.log(`Current dimensions: Rows=${this.rows}, Cols=${this.cols}`);\n  }\n}\n\nconst spreadsheet = new Spreadsheet(2, 2);\nconsole.log('Initial data:', JSON.stringify(spreadsheet.data));\n\nspreadsheet.addRow();\nconsole.log('After addRow:', JSON.stringify(spreadsheet.data));\n\nspreadsheet.removeRow(0);\nconsole.log('After removeRow(0):', JSON.stringify(spreadsheet.data));\n\nspreadsheet.addColumn();\nconsole.log('After addColumn:', JSON.stringify(spreadsheet.data));\n\nspreadsheet.removeColumn(0);\nconsole.log('After removeColumn(0):', JSON.stringify(spreadsheet.data));",
+              "explanation": "This example specifically demonstrates the internal logic of the `addRow`, `removeRow`, `addColumn`, and `removeColumn` methods. It shows how they modify the `data` array and the `rows`/`cols` properties. The `update()` call within these methods ensures that the UI (in a full implementation) would be synchronized with these data changes. The `JSON.stringify` is used for clearer console output of the array state.",
+              "language": "javascript"
+            }
+          ],
+          "relatedQuestions": [],
+          "relatedTasks": [],
+          "tags": [
+            "Vanilla JS",
+            "DOM Manipulation",
+            "Classes",
+            "Data Structures",
+            "Frontend Architecture",
+            "Event Handling"
+          ],
+          "technology": "JavaScript",
+          "prerequisites": [
+            "HTML",
+            "CSS",
+            "Basic JavaScript Syntax",
+            "Arrays",
+            "Functions"
+          ],
+          "complexity": 6,
+          "interviewRelevance": 7,
+          "learningPath": "intermediate",
+          "requiredFor": [
+            "Interactive UI Development",
+            "Building Custom Components",
+            "Understanding UI Frameworks"
+          ]
+        },
+        {
+          "id": "theory_react_user_search_interface",
+          "title": "Building a User Search Interface with React Hooks and Accessibility",
+          "content": "This section outlines the construction of a dynamic user search interface using React functional components and various React Hooks. The focus is on efficient state management, implementing a flexible search mechanism, and ensuring robust keyboard accessibility for an enhanced user experience.\n\n## Core Concepts\n-   **React State Management (`useState`)**: The `useState` hook is crucial for managing the dynamic data within the component. This includes: `searchTerm` (the user's input), `searchResults` (the filtered list of users), `selectedIndex` (the currently highlighted item for keyboard navigation), and `isDropdownOpen` (controls the visibility of the results dropdown).\n-   **React Refs (`useRef`)**: The `useRef` hook provides a way to access and interact with underlying DOM elements directly. In this context, `searchInputRef` allows managing focus on the search input, and `resultsContainerRef` helps in programmatic scrolling to ensure the selected search result is always visible.\n-   **Side Effects (`useEffect`)**: The `useEffect` hook is used for handling operations that cause side effects, such as:\n    -   Triggering the search function whenever the `searchTerm` changes.\n    -   Attaching and detaching global event listeners (e.g., `keydown` for keyboard navigation, `mousedown` for click-outside functionality).\n    -   Managing the scroll position of the selected item within the results list.\n-   **Search Logic (`searchUsers` Function)**: This function is responsible for filtering the raw user data (`users`) based on the current `searchTerm`. Key considerations for this logic include case-insensitivity and searching across multiple relevant user properties (e.g., `name`, `purchased` items, `address`, `zipCode`).\n-   **Keyboard Navigation (Accessibility)**: A critical aspect of a user-friendly interface. This involves detecting `ArrowUp`, `ArrowDown`, `Enter`, and `Escape` key presses. The `selectedIndex` state is updated to highlight the corresponding search result, and `e.preventDefault()` is used to stop default browser behaviors (like page scrolling). `Enter` key typically selects an item, while `Escape` closes the dropdown.\n-   **Dropdown Visibility Management**: The `isDropdownOpen` state controls when the search results dropdown is displayed. It's typically shown when a non-empty `searchTerm` yields results and hidden when the input is empty, no results are found, or the user clicks outside/presses Escape.\n-   **Debouncing for Performance**: To prevent the `searchUsers` function (which might be computationally expensive or trigger API calls) from running on every keystroke, a debouncing mechanism is employed. This delays the execution of the search logic until a short period of user inactivity, reducing unnecessary computations.\n\n## Implementation Details\n\n### State Variables and Refs\n```javascript\nimport React, { useState, useEffect, useRef } from 'react';\n\n// Sample user data\nconst users = [\n  { id: 1, name: 'John Smith', purchased: ['Laptop', 'Mouse'], \n    address: '123 Main St', zipCode: '10001' },\n  { id: 2, name: 'Sarah Johnson', purchased: ['Phone', 'Headphones'], \n    address: '456 Oak Ave', zipCode: '20002' },\n  // ... more users\n];\n\nfunction UserSearch() {\n  const [searchTerm, setSearchTerm] = useState('');\n  const [searchResults, setSearchResults] = useState([]);\n  const [selectedIndex, setSelectedIndex] = useState(0); // Index of highlighted item\n  const [isDropdownOpen, setIsDropdownOpen] = useState(false); // Dropdown visibility\n  \n  const searchInputRef = useRef(null); // Ref for the search input DOM element\n  const resultsContainerRef = useRef(null); // Ref for the results list container\n  // ... rest of the component\n}\n```\n\n### Search Logic (`searchUsers`)\nThis function filters the `users` array based on the `query`, ensuring case-insensitive matching across multiple fields.\n\n```javascript\nconst searchUsers = (query) => {\n  if (!query.trim()) return [];\n  const lowerCaseQuery = query.toLowerCase();\n  \n  return users.filter(user => {\n    // Check user's name\n    if (user.name.toLowerCase().includes(lowerCaseQuery)) return true;\n    // Check purchased items array\n    if (user.purchased.some(item => item.toLowerCase().includes(lowerCaseQuery))) return true;\n    // Check address\n    if (user.address.toLowerCase().includes(lowerCaseQuery)) return true;\n    // Check zipCode (direct includes as it's typically numeric or alphanumeric)\n    if (user.zipCode.includes(lowerCaseQuery)) return true; \n    \n    return false;\n  });\n};\n```\n\n### `useEffect` for Search Term Changes and Debouncing\nThis hook integrates a debouncing mechanism (e.g., using a custom `useDebounce` hook or `setTimeout`) to delay the `searchUsers` call, preventing excessive re-filtering on rapid keystrokes.\n\n```javascript\n// Assuming a useDebounce hook is available\nconst debouncedSearchTerm = useDebounce(searchTerm, 300); // 300ms delay\n\nuseEffect(() => {\n  if (debouncedSearchTerm.trim()) {\n    const filtered = searchUsers(debouncedSearchTerm);\n    setSearchResults(filtered);\n    setSelectedIndex(filtered.length > 0 ? 0 : -1); // Auto-select first result, or none\n    setIsDropdownOpen(filtered.length > 0); // Open dropdown if results exist\n  } else {\n    setSearchResults([]);\n    setSelectedIndex(-1);\n    setIsDropdownOpen(false);\n  }\n}, [debouncedSearchTerm]); // Re-run effect only when debouncedSearchTerm changes\n```\n\n### `useEffect` for Keyboard Navigation\nThis hook sets up a global `keydown` event listener to manage `selectedIndex` based on arrow keys, `Enter` for selection, and `Escape` for closing the dropdown. It cleans up the listener on unmount.\n\n```javascript\nuseEffect(() => {\n  const handleKeyDown = (e) => {\n    if (!isDropdownOpen || searchResults.length === 0) return;\n\n    switch (e.key) {\n      case 'ArrowDown':\n        e.preventDefault(); // Prevents page scroll\n        setSelectedIndex(prevIndex => (prevIndex + 1) % searchResults.length);\n        break;\n      case 'ArrowUp':\n        e.preventDefault(); // Prevents page scroll\n        setSelectedIndex(prevIndex => (prevIndex - 1 + searchResults.length) % searchResults.length); // Handles wrap-around for negative index\n        break;\n      case 'Enter':\n        e.preventDefault();\n        if (selectedIndex >= 0 && selectedIndex < searchResults.length) {\n          const selectedUser = searchResults[selectedIndex];\n          console.log('Selected user:', selectedUser);\n          setSearchTerm(selectedUser.name); // Update input with selected name\n          setIsDropdownOpen(false); // Close dropdown\n          searchInputRef.current?.focus(); // Return focus to input\n        }\n        break;\n      case 'Escape':\n        setIsDropdownOpen(false);\n        searchInputRef.current?.focus(); // Return focus to input\n        break;\n      default:\n        break;\n    }\n  };\n\n  window.addEventListener('keydown', handleKeyDown);\n  return () => {\n    window.removeEventListener('keydown', handleKeyDown);\n  };\n}, [searchResults, selectedIndex, isDropdownOpen]); // Dependencies: only re-run if these change\n```\n\n### `useEffect` for Scroll Into View\nEnsures that the currently selected (highlighted) item within the `searchResults` list is always visible in the scrollable container.\n\n```javascript\nuseEffect(() => {\n  if (resultsContainerRef.current && selectedIndex !== -1) {\n    const selectedElement = resultsContainerRef.current.children[selectedIndex];\n    if (selectedElement) {\n      selectedElement.scrollIntoView({\n        behavior: 'smooth', // Smooth scroll effect\n        block: 'nearest'    // Scrolls the minimum amount to make element visible\n      });\n    }\n  }\n}, [selectedIndex, searchResults]); // Runs when selection or results change\n```\n\n### `useEffect` for Click Outside\nHandles closing the dropdown when a user clicks anywhere on the document outside of the search input and results container, improving user experience.\n\n```javascript\nuseEffect(() => {\n  const handleClickOutside = (event) => {\n    if (searchInputRef.current && !searchInputRef.current.contains(event.target) &&\n        resultsContainerRef.current && !resultsContainerRef.current.contains(event.target)) {\n      setIsDropdownOpen(false);\n    }\n  };\n\n  document.addEventListener('mousedown', handleClickOutside);\n  return () => {\n    document.removeEventListener('mousedown', handleClickOutside);\n  };\n}, [searchInputRef, resultsContainerRef]); // Dependencies: refs themselves don't change often\n```\n\n## Sample User Data\nThis `users` array serves as the local data source for the search functionality. In a real-world application, this data might come from an API.\n\n```javascript\nconst users = [\n  { id: 1, name: 'John Smith', purchased: ['Laptop', 'Mouse'], \n    address: '123 Main St', zipCode: '10001' },\n  { id: 2, name: 'Sarah Johnson', purchased: ['Phone', 'Headphones'], \n    address: '456 Oak Ave', zipCode: '20002' },\n  { id: 3, name: 'David Lee', purchased: ['Keyboard', 'Monitor'], \n    address: '789 Pine Ln', zipCode: '30003' },\n  { id: 4, name: 'Emily White', purchased: ['Tablet', 'Smartwatch'], \n    address: '101 Cedar Rd', zipCode: '40004' },\n  { id: 5, name: 'Michael Brown', purchased: ['Camera', 'Tripod'], \n    address: '202 Birch Dr', zipCode: '50005' }\n];\n```",
+          "examples": [
+            {
+              "id": "example_user_search_component_structure",
+              "title": "UserSearch Component Basic Structure with JSX",
+              "code": "import React, { useState, useEffect, useRef } from 'react';\n\n// Sample user data\nconst users = [\n  { id: 1, name: 'John Smith', purchased: ['Laptop', 'Mouse'], \n    address: '123 Main St', zipCode: '10001' },\n  { id: 2, name: 'Sarah Johnson', purchased: ['Phone', 'Headphones'], \n    address: '456 Oak Ave', zipCode: '20002' }\n];\n\n// Minimal custom useDebounce for this example\nfunction useDebounce(value, delay) {\n  const [debouncedValue, setDebouncedValue] = useState(value);\n  useEffect(() => {\n    const handler = setTimeout(() => { setDebouncedValue(value); }, delay);\n    return () => { clearTimeout(handler); };\n  }, [value, delay]);\n  return debouncedValue;\n}\n\nfunction UserSearch() {\n  const [searchTerm, setSearchTerm] = useState('');\n  const [searchResults, setSearchResults] = useState([]);\n  const [selectedIndex, setSelectedIndex] = useState(-1);\n  const [isDropdownOpen, setIsDropdownOpen] = useState(false);\n  const searchInputRef = useRef(null);\n  const resultsContainerRef = useRef(null);\n  const dropdownId = 'user-search-results';\n\n  const debouncedSearchTerm = useDebounce(searchTerm, 300);\n\n  const searchUsers = (query) => {\n    if (!query.trim()) return [];\n    const lowerCaseQuery = query.toLowerCase();\n    return users.filter(user => \n      user.name.toLowerCase().includes(lowerCaseQuery) ||\n      user.purchased.some(item => item.toLowerCase().includes(lowerCaseQuery)) ||\n      user.address.toLowerCase().includes(lowerCaseQuery) ||\n      user.zipCode.includes(lowerCaseQuery)\n    );\n  };\n\n  useEffect(() => {\n    const filteredResults = searchUsers(debouncedSearchTerm);\n    setSearchResults(filteredResults);\n    setSelectedIndex(filteredResults.length > 0 ? 0 : -1);\n    setIsDropdownOpen(debouncedSearchTerm.trim().length > 0 && filteredResults.length > 0);\n  }, [debouncedSearchTerm]); // Only re-run when debounced term changes\n\n  // Omitted keyboard and click-outside effects for brevity in this specific example\n  // (see theory for full implementations)\n\n  return (\n    <div style={{ position: 'relative', width: '300px', margin: 'auto' }}>\n      <input\n        type=\"text\"\n        placeholder=\"Search users...\"\n        value={searchTerm}\n        onChange={(e) => setSearchTerm(e.target.value)}\n        onFocus={() => setIsDropdownOpen(searchTerm.trim().length > 0 && searchResults.length > 0)}\n        ref={searchInputRef}\n        id=\"user-search-input\"\n        role=\"combobox\"\n        aria-autocomplete=\"list\"\n        aria-controls={dropdownId}\n        aria-expanded={isDropdownOpen}\n        aria-activedescendant={selectedIndex !== -1 && searchResults[selectedIndex] ? `result-item-${searchResults[selectedIndex].id}` : undefined}\n        style={{ width: '100%', padding: '8px' }}\n      />\n      {isDropdownOpen && searchResults.length > 0 && (\n        <ul\n          id={dropdownId}\n          ref={resultsContainerRef}\n          role=\"listbox\"\n          style={{\n            listStyle: 'none', padding: '0', margin: '5px 0 0 0',\n            border: '1px solid #ddd', maxHeight: '150px', overflowY: 'auto',\n            position: 'absolute', width: '100%', zIndex: 1000, backgroundColor: 'white'\n          }}\n        >\n          {searchResults.map((user, index) => (\n            <li \n              key={user.id}\n              id={`result-item-${user.id}`}\n              role=\"option\"\n              aria-selected={index === selectedIndex}\n              className={index === selectedIndex ? 'selected' : ''}\n              onClick={() => {\n                console.log('Clicked user:', user);\n                setSearchTerm(user.name);\n                setIsDropdownOpen(false);\n              }}\n              style={{ padding: '8px', background: index === selectedIndex ? '#f0f0f0' : 'white', cursor: 'pointer' }}\n            >\n              {user.name} ({user.address})\n            </li>\n          ))}\n        </ul>\n      )}\n      {isDropdownOpen && searchResults.length === 0 && searchTerm.trim().length > 0 && (\n        <div style={{ padding: '8px', border: '1px solid #ddd', marginTop: '5px', backgroundColor: 'white' }}>No results found.</div>\n      )}\n    </div>\n  );\n}\n\nexport default UserSearch;",
+              "explanation": "This example provides the foundational React component structure for `UserSearch`. It demonstrates how `useState` manages the input and results, `useRef` provides access to DOM elements, and a `useEffect` with debouncing triggers the search. The JSX structure illustrates the search input and the conditional rendering of the results dropdown. ARIA attributes are included for accessibility.",
+              "language": "javascript"
+            },
+            {
+              "id": "example_keyboard_navigation_logic",
+              "title": "Dedicated Keyboard Navigation Hook Example",
+              "code": "import React, { useState, useEffect, useCallback } from 'react';\n\nfunction useKeyboardNavigation(items, onSelect) {\n  const [selectedIndex, setSelectedIndex] = useState(-1);\n\n  useEffect(() => {\n    if (items.length > 0 && selectedIndex === -1) {\n      setSelectedIndex(0); // Auto-select first item if results appear\n    }\n  }, [items]);\n\n  const handleKeyDown = useCallback((e) => {\n    if (items.length === 0) return;\n\n    switch (e.key) {\n      case 'ArrowDown':\n        e.preventDefault();\n        setSelectedIndex(prevIndex => (prevIndex + 1) % items.length);\n        break;\n      case 'ArrowUp':\n        e.preventDefault();\n        setSelectedIndex(prevIndex => (prevIndex - 1 + items.length) % items.length);\n        break;\n      case 'Enter':\n        e.preventDefault();\n        if (selectedIndex !== -1) {\n          onSelect(items[selectedIndex]);\n        }\n        break;\n      case 'Escape':\n        setSelectedIndex(-1); // Deselect\n        // Additional logic to close dropdown would go here in main component\n        break;\n      default:\n        break;\n    }\n  }, [items, selectedIndex, onSelect]);\n\n  useEffect(() => {\n    window.addEventListener('keydown', handleKeyDown);\n    return () => {\n      window.removeEventListener('keydown', handleKeyDown);\n    };\n  }, [handleKeyDown]);\n\n  return [selectedIndex, setSelectedIndex];\n}\n\n// Example usage in a component:\n/*\nfunction MySearchComponent() {\n  const [searchQuery, setSearchQuery] = useState('');\n  const [results, setResults] = useState(['Result A', 'Result B', 'Result C']);\n  \n  const handleSelection = useCallback((selectedItem) => {\n    console.log('Selected:', selectedItem);\n    // Close dropdown, update input, etc.\n  }, []);\n\n  const [keyboardSelectedIndex] = useKeyboardNavigation(results, handleSelection);\n\n  return (\n    <div>\n      <input type=\"text\" value={searchQuery} onChange={e => setSearchQuery(e.target.value)} />\n      <ul>\n        {results.map((res, idx) => (\n          <li key={idx} style={{ background: idx === keyboardSelectedIndex ? 'yellow' : 'none' }}>\n            {res}\n          </li>\n        ))}\n      </ul>\n    </div>\n  );\n}\n*/",
+              "explanation": "This example extracts the core keyboard navigation logic into a reusable custom hook, `useKeyboardNavigation`. It manages the `selectedIndex` state and handles `keydown` events for `ArrowUp`, `ArrowDown`, `Enter`, and `Escape`. This pattern promotes code reuse and separation of concerns, making the main `UserSearch` component cleaner. `useCallback` is used to memoize `handleKeyDown` to prevent unnecessary re-creation of the event listener.",
+              "language": "javascript"
+            }
+          ],
+          "relatedQuestions": [],
+          "relatedTasks": [],
+          "tags": [
+            "React",
+            "Hooks",
+            "State Management",
+            "Accessibility",
+            "Search",
+            "Performance",
+            "Frontend Development"
+          ],
+          "technology": "React",
+          "prerequisites": [
+            "HTML",
+            "CSS",
+            "JavaScript ES6+",
+            "React Basics (Components, Props)"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 9,
+          "learningPath": "intermediate",
+          "requiredFor": [
+            "Interactive Forms",
+            "Autocomplete Components",
+            "Accessible UI Patterns",
+            "SPAs"
+          ]
+        }
+      ],
+      "questions": [
+        {
+          "id": "question_spreadsheet_dom_update_strategy",
+          "topic": "Vanilla JS DOM Update Strategy",
+          "level": "medium",
+          "type": "open",
+          "question": "The provided `Spreadsheet` class uses `innerHTML = ''` followed by `appendChild(this.render())` for updates. Discuss the advantages and disadvantages of this DOM update strategy. What are alternative approaches, and when would you consider using them?",
+          "answer": "This is an open-ended question that requires a detailed explanation.",
+          "options": [],
+          "analysisPoints": [
+            "**Advantages**: Simplicity and ease of implementation. It's straightforward to understand: just wipe and redraw. It works well for small, simple UIs or when the entire UI state truly changes dramatically.",
+            "**Disadvantages**: \n    1.  **Performance**: For larger DOM trees or frequent updates, `innerHTML = ''` is highly inefficient. It forces the browser to parse HTML, create new DOM nodes, and re-paint/re-layout the entire subtree from scratch, which is computationally expensive.\n    2.  **Loss of State**: All existing DOM elements are destroyed and recreated. This means any transient UI state (e.g., input focus, cursor position, scroll position, media playback state, attached event listeners from external libraries) is lost.\n    3.  **Flickering**: Rapid re-rendering can cause visual flickering, especially on slower devices or for complex layouts.",
+            "**Alternative Approaches**: \n    1.  **Granular DOM Updates**: Instead of re-rendering the whole table, identify exactly which cells/rows/columns have changed and update only those specific DOM elements. This requires more complex logic to track changes but is significantly more performant.\n        *   **When to use**: When fine-grained control is needed, performance is critical, and you want to avoid framework overhead. Often seen in highly optimized custom widgets or when dealing with specific, isolated DOM updates.\n    2.  **Virtual DOM (e.g., React, Vue)**: Frameworks create a lightweight JavaScript representation of the DOM (Virtual DOM). When the state changes, they compute a 'diff' between the old and new Virtual DOM, then apply only the necessary minimal changes to the actual DOM. This abstracts away manual DOM manipulation complexities.\n        *   **When to use**: For complex, interactive applications where managing UI state and efficient updates manually becomes too cumbersome. Offers good performance automatically for most cases, simplifies development, and provides a component-based architecture.\n    3.  **Document Fragments**: For batching multiple DOM manipulations. Instead of appending elements one by one to the live DOM (which causes reflows for each append), you can append them to a `DocumentFragment` first, and then append the fragment to the live DOM in a single operation. This reduces reflows and improves performance for a series of additions.\n        *   **When to use**: When performing multiple sequential additions/modifications to the DOM, especially within a loop, to reduce layout thrashing.",
+            "**Conclusion**: The `innerHTML = ''` approach is acceptable for very simple scenarios. However, for anything more than trivial, adopting granular updates or leveraging a Virtual DOM-based framework is superior for performance, state preservation, and developer experience."
+          ],
+          "keyConcepts": [
+            "DOM Manipulation",
+            "Performance Optimization",
+            "Re-rendering Strategies",
+            "Virtual DOM",
+            "Granular Updates",
+            "DocumentFragment"
+          ],
+          "evaluationCriteria": [
+            "Depth of understanding of DOM performance implications.",
+            "Ability to analyze trade-offs of different rendering approaches.",
+            "Knowledge of common frontend optimization techniques and relevant tools/frameworks."
+          ],
+          "example": "```javascript\n// Current update method in Spreadsheet class:\nupdate() {\n  const spreadsheetContainer = document.getElementById('spreadsheet-container');\n  spreadsheetContainer.innerHTML = ''; // Full destruction and recreation\n  spreadsheetContainer.appendChild(this.render());\n}\n\n// Conceptual Granular update (e.g., for a single cell edit):\n// Instead of full re-render, if only cell [0][0] changes:\n// const cellInput = document.querySelector('[data-row=\"0\"][data-col=\"0\"]');\n// if (cellInput) {\n//   cellInput.value = this.data[0][0];\n// }\n\n// Conceptual DocumentFragment usage for adding multiple rows:\n// const fragment = document.createDocumentFragment();\n// for (let i = 0; i < newRows.length; i++) {\n//   const tr = document.createElement('tr');\n//   // ... add cells to tr\n//   fragment.appendChild(tr);\n// }\n// tbody.appendChild(fragment); // Single append to live DOM\n```",
+          "tags": [
+            "Vanilla JS",
+            "DOM",
+            "Performance",
+            "Optimization",
+            "Architecture",
+            "Rendering"
+          ],
+          "prerequisites": [
+            "theory_vanilla_js_spreadsheet",
+            "JavaScript Fundamentals"
+          ],
+          "complexity": 7,
+          "interviewFrequency": 7,
+          "learningPath": "advanced"
+        },
+        {
+          "id": "question_spreadsheet_remove_column_logic",
+          "topic": "Spreadsheet Data Manipulation",
+          "level": "easy",
+          "type": "mcq",
+          "question": "Consider the `removeColumn` method from the `Spreadsheet` class:\n\n```javascript\nremoveColumn(colIndex) {\n  if (colIndex >= 0 && colIndex < this.cols) {\n    for (let i = 0; i < this.rows; i++) {\n      this.data[i].splice(colIndex, 1);\n    }\n    this.cols--;\n    this.update();\n  }\n}\n```\n\nWhat is the primary array method used inside the loop to remove the column's data from each row, and what does `1` in `splice(colIndex, 1)` signify?",
+          "answer": "splice; It signifies the number of elements to remove starting from `colIndex`.",
+          "options": [
+            "pop; It signifies the new length of the array.",
+            "shift; It signifies the element to add.",
+            "slice; It signifies the ending index of the new array.",
+            "splice; It signifies the number of elements to remove starting from `colIndex`."
+          ],
+          "analysisPoints": [
+            "Tests knowledge of common JavaScript array manipulation methods, specifically `splice`.",
+            "Ensures understanding of `splice` parameters (start index, delete count).",
+            "Distinguishes `splice` (modifies in place) from `slice` (creates new array)."
+          ],
+          "keyConcepts": [
+            "Array Methods",
+            "JavaScript Fundamentals",
+            "Data Structures (2D Array)"
+          ],
+          "evaluationCriteria": [
+            "Correct identification of `splice` method.",
+            "Accurate understanding of `splice`'s second argument.",
+            "Understanding of array mutation."
+          ],
+          "example": "The `splice()` method is used to change the contents of an array by removing, replacing, or adding elements. `array.splice(startIndex, deleteCount, ...itemsToAdd)`. In `this.data[i].splice(colIndex, 1)`, `colIndex` is the starting index from which to remove elements, and `1` means 'remove one element' at that position.",
+          "tags": [
+            "JavaScript",
+            "Arrays",
+            "Methods",
+            "Data Manipulation"
+          ],
+          "prerequisites": [
+            "theory_vanilla_js_spreadsheet",
+            "JavaScript Arrays"
+          ],
+          "complexity": 3,
+          "interviewFrequency": 5,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_spreadsheet_event_delegation_flashcard",
+          "topic": "Event Handling & Optimization in Vanilla JS",
+          "level": "medium",
+          "type": "flashcard",
+          "question": "What is 'event delegation' and how could it be applied to optimize event handling for cell input events in the `Spreadsheet` class's `render()` method?",
+          "answer": "Event delegation is a technique where you attach a single event listener to a common ancestor (parent) element, instead of attaching individual listeners to multiple child elements. When an event (like `input` or `click`) is triggered on a child element, it 'bubbles up' the DOM tree. The single listener on the parent then catches the event, and by inspecting `event.target` (the actual element that triggered the event), it can determine which child element was interacted with and perform the appropriate action.\n\nFor the `Spreadsheet`'s cell input events, instead of adding an `input` event listener to every single `<input>` element within the cells (which can be hundreds or thousands), one `input` listener could be attached to the `<tbody>` or even the `<table>` element. When an `input` event occurs, the listener would check if `event.target` is an `<input>` element within a data cell. To identify which specific cell's data changed, you would typically use `dataset` attributes (e.g., `data-row` and `data-col`) on the input elements themselves. This significantly reduces memory footprint and improves performance, especially for large tables with many interactive elements, as fewer event listeners are managed.",
+          "options": [],
+          "analysisPoints": [],
+          "keyConcepts": [
+            "Event Delegation",
+            "DOM Events",
+            "Performance Optimization",
+            "Memory Management",
+            "Event Bubbling"
+          ],
+          "evaluationCriteria": [],
+          "example": "```javascript\n// Original approach (simplified):\n// const input = document.createElement('input');\n// input.dataset.row = r;\n// input.dataset.col = c;\n// input.addEventListener('input', (e) => {\n//   this.data[parseInt(e.target.dataset.row)][parseInt(e.target.dataset.col)] = e.target.value;\n// });\n\n// Event delegation approach (conceptual within render() or in update/constructor):\n// Add this once to the table/tbody:\n// table.addEventListener('input', (e) => {\n//   const target = e.target;\n//   if (target.tagName === 'INPUT' && target.dataset.row && target.dataset.col) {\n//     const rowIndex = parseInt(target.dataset.row);\n//     const colIndex = parseInt(target.dataset.col);\n//     this.data[rowIndex][colIndex] = target.value;\n//   }\n// });\n```",
+          "tags": [
+            "JavaScript",
+            "DOM",
+            "Events",
+            "Performance",
+            "Frontend Architecture"
+          ],
+          "prerequisites": [
+            "theory_vanilla_js_spreadsheet",
+            "DOM Events"
+          ],
+          "complexity": 6,
+          "interviewFrequency": 8,
+          "learningPath": "advanced"
+        },
+        {
+          "id": "question_react_hooks_purpose_mcq",
+          "topic": "React Hooks Fundamentals",
+          "level": "easy",
+          "type": "mcq",
+          "question": "Which React hook is primarily used for performing side effects in functional components, such as data fetching, subscriptions, or manually changing the DOM, and typically runs after every render?",
+          "answer": "useEffect",
+          "options": [
+            "useState",
+            "useContext",
+            "useReducer",
+            "useEffect"
+          ],
+          "analysisPoints": [
+            "Tests fundamental knowledge of React hooks and their specific purposes.",
+            "Highlights the core role of `useEffect` in managing operations that interact with the outside world or require cleanup (side effects).",
+            "Distinguishes `useEffect` from state management hooks (`useState`, `useReducer`) and context hooks (`useContext`)."
+          ],
+          "keyConcepts": [
+            "React Hooks",
+            "useEffect",
+            "Side Effects",
+            "Functional Components",
+            "Component Lifecycle"
+          ],
+          "evaluationCriteria": [
+            "Correct identification of `useEffect`'s purpose.",
+            "Basic understanding of React component lifecycle concepts in functional components."
+          ],
+          "example": "The `useEffect` hook allows you to perform side effects in functional components. It is a powerful tool that combines the functionalities of `componentDidMount`, `componentDidUpdate`, and `componentWillUnmount` lifecycle methods from class components. It typically runs after every render of the component, but its execution can be controlled by specifying dependencies.",
+          "tags": [
+            "React",
+            "Hooks",
+            "useEffect",
+            "Fundamentals"
+          ],
+          "prerequisites": [
+            "React Basics"
+          ],
+          "complexity": 3,
+          "interviewFrequency": 9,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_react_search_keyboard_navigation_implementation_code",
+          "topic": "React User Search Implementation - Keyboard Navigation",
+          "level": "hard",
+          "type": "code",
+          "question": "Given a React functional component `UserSearch` with `searchTerm`, `searchResults`, `selectedIndex`, and `isDropdownOpen` states, and `searchInputRef`, `resultsContainerRef` refs, implement the `useEffect` hook that handles keyboard navigation. Your implementation should cover:\n1.  **ArrowDown**: Move `selectedIndex` down, wrapping from the last item to the first. `preventDefault()` browser's default scroll.\n2.  **ArrowUp**: Move `selectedIndex` up, wrapping from the first item to the last. `preventDefault()` browser's default scroll.\n3.  **Enter**: If an item is selected, log the selected user object, update `searchTerm` with the user's name, and close the dropdown (`isDropdownOpen` to `false`). `preventDefault()` form submission.\n4.  **Escape**: Close the dropdown (`isDropdownOpen` to `false`).\n\nAssume the `searchResults` array is available and `isDropdownOpen` indicates if the results list is visible. The `selectedIndex` should be `-1` if no item is selected or results are empty. Ensure proper cleanup of event listeners.",
+          "answer": "The expected solution would be the `useEffect` hook provided in the theory section for keyboard navigation, demonstrating correct handling of `selectedIndex` updates, `e.preventDefault()`, and state updates for dropdown visibility and selection, along with proper listener cleanup.",
+          "options": [],
+          "analysisPoints": [
+            "Correct usage of `useEffect` for adding and removing global event listeners.",
+            "Accurate implementation of `selectedIndex` state updates with wrap-around logic for both `ArrowDown` and `ArrowUp`.",
+            "Proper use of `e.preventDefault()` for relevant key presses to control browser behavior.",
+            "Correct state transitions for `isDropdownOpen` (closing on `Enter` or `Escape`).",
+            "Ability to access and utilize `searchResults` and `selectedIndex` correctly within the effect.",
+            "Handling edge cases like empty `searchResults` or `isDropdownOpen` being false.",
+            "Ensuring `searchInputRef.current?.focus()` is called to return focus when dropdown closes via Enter/Escape."
+          ],
+          "keyConcepts": [
+            "React Hooks (useEffect)",
+            "Event Handling (Keyboard Events)",
+            "Accessibility (Keyboard Navigation)",
+            "State Management",
+            "Array Modulo Arithmetic (for wrap-around)"
+          ],
+          "evaluationCriteria": [
+            "Syntactical correctness of React code.",
+            "Logical accuracy and completeness of keyboard navigation implementation.",
+            "Adherence to accessibility best practices (e.g., `preventDefault`).",
+            "Correct handling of `useEffect` dependencies and cleanup."
+          ],
+          "example": "```javascript\nimport React, { useState, useEffect, useRef } from 'react';\n\nconst users = [\n  { id: 1, name: 'Alice', purchased: ['Book'], address: '101 Pine', zipCode: '11111' },\n  { id: 2, name: 'Bob', purchased: ['Chair'], address: '202 Oak', zipCode: '22222' },\n  { id: 3, name: 'Charlie', purchased: ['Desk'], address: '303 Elm', zipCode: '33333' }\n];\n\nfunction UserSearchKeyboardNavChallenge() {\n  const [searchTerm, setSearchTerm] = useState('');\n  const [searchResults, setSearchResults] = useState([]);\n  const [selectedIndex, setSelectedIndex] = useState(-1);\n  const [isDropdownOpen, setIsDropdownOpen] = useState(false);\n  const searchInputRef = useRef(null);\n  const resultsContainerRef = useRef(null);\n\n  // Simplified search logic for example\n  useEffect(() => {\n    if (searchTerm.trim()) {\n      const filtered = users.filter(user => user.name.toLowerCase().includes(searchTerm.toLowerCase()));\n      setSearchResults(filtered);\n      setSelectedIndex(filtered.length > 0 ? 0 : -1);\n      setIsDropdownOpen(filtered.length > 0);\n    } else {\n      setSearchResults([]);\n      setSelectedIndex(-1);\n      setIsDropdownOpen(false);\n    }\n  }, [searchTerm]);\n\n  // --- YOUR KEYBOARD NAVIGATION useEffect IMPLEMENTATION STARTS HERE ---\n  useEffect(() => {\n    const handleKeyDown = (e) => {\n      if (!isDropdownOpen || searchResults.length === 0) return;\n\n      switch (e.key) {\n        case 'ArrowDown':\n          e.preventDefault();\n          setSelectedIndex(prevIndex => (prevIndex + 1) % searchResults.length);\n          break;\n        case 'ArrowUp':\n          e.preventDefault();\n          setSelectedIndex(prevIndex => (prevIndex - 1 + searchResults.length) % searchResults.length);\n          break;\n        case 'Enter':\n          e.preventDefault();\n          if (selectedIndex !== -1 && selectedIndex < searchResults.length) {\n            const selectedUser = searchResults[selectedIndex];\n            console.log('Selected user:', selectedUser);\n            setSearchTerm(selectedUser.name); // Update input field\n            setIsDropdownOpen(false); // Close dropdown\n            searchInputRef.current?.focus(); // Return focus to input\n          }\n          break;\n        case 'Escape':\n          setIsDropdownOpen(false);\n          searchInputRef.current?.focus(); // Return focus to input\n          break;\n        default:\n          break;\n      }\n    };\n\n    window.addEventListener('keydown', handleKeyDown);\n    return () => {\n      window.removeEventListener('keydown', handleKeyDown);\n    };\n  }, [searchResults, selectedIndex, isDropdownOpen]);\n\n  // Effect for scroll into view (as per theory)\n  useEffect(() => {\n    if (resultsContainerRef.current && selectedIndex !== -1) {\n      const selectedElement = resultsContainerRef.current.children[selectedIndex];\n      if (selectedElement) {\n        selectedElement.scrollIntoView({ behavior: 'smooth', block: 'nearest' });\n      }\n    }\n  }, [selectedIndex, searchResults]);\n  // --- KEYBOARD NAVIGATION useEffect IMPLEMENTATION ENDS HERE ---\n\n  return (\n    <div style={{ padding: '20px' }}>\n      <h3>User Search with Keyboard Navigation Challenge</h3>\n      <input\n        type=\"text\"\n        placeholder=\"Search users...\"\n        value={searchTerm}\n        onChange={(e) => setSearchTerm(e.target.value)}\n        onFocus={() => setIsDropdownOpen(searchTerm.trim().length > 0 && searchResults.length > 0)}\n        ref={searchInputRef}\n        style={{ width: '300px', padding: '8px', fontSize: '16px' }}\n      />\n      {isDropdownOpen && searchResults.length > 0 && (\n        <ul ref={resultsContainerRef}\n            style={{\n              listStyle: 'none', padding: '0', margin: '5px 0 0 0',\n              border: '1px solid #ddd', maxHeight: '150px', overflowY: 'auto',\n              width: '300px', boxShadow: '0 2px 5px rgba(0,0,0,0.1)'\n            }}>\n          {searchResults.map((user, index) => (\n            <li\n              key={user.id}\n              style={{\n                padding: '10px',\n                background: index === selectedIndex ? '#f0f0f0' : 'white',\n                cursor: 'pointer',\n                borderBottom: '1px solid #eee'\n              }}\n              onClick={() => {\n                console.log('Clicked user:', user);\n                setSearchTerm(user.name);\n                setIsDropdownOpen(false);\n              }}\n            >\n              {user.name}\n            </li>\n          ))}\n        </ul>\n      )}\n      {isDropdownOpen && searchResults.length === 0 && searchTerm.trim().length > 0 && (\n          <div style={{ padding: '10px', border: '1px solid #ddd', width: '300px', marginTop: '5px' }}>No results found.</div>\n      )}\n    </div>\n  );\n}\n\nexport default UserSearchKeyboardNavChallenge;\n```",
+          "tags": [
+            "React",
+            "Hooks",
+            "Accessibility",
+            "Keyboard Events",
+            "Frontend",
+            "Code Challenge"
+          ],
+          "prerequisites": [
+            "theory_react_user_search_interface",
+            "React Basics",
+            "JavaScript Arrays"
+          ],
+          "complexity": 8,
+          "interviewFrequency": 9,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_react_controlled_uncontrolled_flashcard",
+          "topic": "React Forms and Inputs",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "What is the key difference between a controlled component and an uncontrolled component in React, particularly in the context of input fields like a search bar or text input?",
+          "answer": "A **controlled component** is a form input element whose value is controlled by React state. The input's value is always driven by its `value` prop, and any changes are handled by an `onChange` event handler that updates the state. This makes the input's value predictable and allows React to manage its entire lifecycle. The search input in `UserSearch` (`value={searchTerm}` and `onChange={(e) => setSearchTerm(e.target.value)}`) is a classic example of a controlled component.\n\nAn **uncontrolled component** is a form input element whose value is managed by the DOM itself, similar to how traditional HTML forms work. You typically use a `ref` to gain direct access to the DOM element and retrieve its current value when needed (e.g., when a form is submitted). Uncontrolled components can be simpler for very basic, isolated form inputs, but they offer less programmatic control from React's side compared to controlled components.",
+          "options": [],
+          "analysisPoints": [],
+          "keyConcepts": [
+            "Controlled Components",
+            "Uncontrolled Components",
+            "React Forms",
+            "State Management",
+            "Refs",
+            "Input Fields"
+          ],
+          "evaluationCriteria": [],
+          "example": "```jsx\n// Controlled Component (as seen in UserSearch's input)\nfunction ControlledInput() {\n  const [value, setValue] = useState('');\n  return <input type=\"text\" value={value} onChange={(e) => setValue(e.target.value)} />;\n}\n\n// Uncontrolled Component example\nfunction UncontrolledInput() {\n  const inputRef = useRef(null);\n\n  function handleSubmit(event) {\n    event.preventDefault();\n    alert('Input value: ' + inputRef.current.value);\n  }\n\n  return (\n    <form onSubmit={handleSubmit}>\n      <input type=\"text\" ref={inputRef} defaultValue=\"Initial value\" />\n      <button type=\"submit\">Submit</button>\n    </form>\n  );\n}\n```",
+          "tags": [
+            "React",
+            "Forms",
+            "State",
+            "Hooks",
+            "Fundamentals"
+          ],
+          "prerequisites": [
+            "React Basics"
+          ],
+          "complexity": 4,
+          "interviewFrequency": 7,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_search_debouncing_mcq",
+          "topic": "Search Optimization",
+          "level": "medium",
+          "type": "mcq",
+          "question": "When implementing a real-time search interface, such as the `UserSearch` component, which performance optimization technique is most suitable for preventing the `searchUsers` function (or an API call) from being executed on every single keystroke, especially if the operation is computationally expensive or network-bound?",
+          "answer": "Debouncing",
+          "options": [
+            "Throttling",
+            "Debouncing",
+            "Memoization",
+            "Caching"
+          ],
+          "analysisPoints": [
+            "Tests knowledge of common performance optimization techniques for frequently triggered events.",
+            "Distinguishes debouncing from throttling based on their behavior (executing after inactivity vs. limiting rate).",
+            "Relates the concept directly to the use case of search inputs."
+          ],
+          "keyConcepts": [
+            "Debouncing",
+            "Throttling",
+            "Performance Optimization",
+            "Event Handling",
+            "Front-end Architecture"
+          ],
+          "evaluationCriteria": [
+            "Correct identification of debouncing as the appropriate technique.",
+            "Understanding its application in search scenarios.",
+            "Ability to differentiate it from related concepts."
+          ],
+          "example": "```javascript\n// Conceptual `useDebounce` hook often used in React\nfunction useDebounce(value, delay) {\n  const [debouncedValue, setDebouncedValue] = useState(value);\n\n  useEffect(() => {\n    const handler = setTimeout(() => {\n      setDebouncedValue(value);\n    }, delay);\n    return () => {\n      clearTimeout(handler);\n    };\n  }, [value, delay]);\n\n  return debouncedValue;\n}\n\n// In UserSearch component:\n// const debouncedSearchTerm = useDebounce(searchTerm, 300); // 300ms delay\n// useEffect(() => {\n//   // This effect only runs when debouncedSearchTerm changes\n//   // meaning after 300ms of inactivity.\n//   setSearchResults(searchUsers(debouncedSearchTerm));\n// }, [debouncedSearchTerm]);\n```\n**Debouncing** ensures that a function (like `searchUsers` or an API call) is only executed after a specified period of inactivity (e.g., 300 milliseconds) has passed since the last time it was invoked. This is ideal for search inputs because it prevents overwhelming the system with requests for every single character typed, only performing the search when the user pauses typing.",
+          "tags": [
+            "JavaScript",
+            "Performance",
+            "Optimization",
+            "React",
+            "Hooks"
+          ],
+          "prerequisites": [
+            "JavaScript Advanced (Closures, Timers)",
+            "theory_react_user_search_interface"
+          ],
+          "complexity": 6,
+          "interviewFrequency": 8,
+          "learningPath": "advanced"
+        },
+        {
+          "id": "question_react_refs_purpose_flashcard",
+          "topic": "React Refs",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "When and why would you typically use `useRef` in a React functional component? Provide two common use cases.",
+          "answer": "`useRef` is a React Hook that allows you to persist a mutable value across renders of a functional component without causing the component to re-render when that value changes. It's like a 'box' that can hold a mutable value in its `.current` property.\n\nTwo common use cases are:\n1.  **Accessing DOM elements directly**: This is the most frequent use. For instance, you can use `useRef` to get a direct reference to an input element to programmatically focus it (`inputRef.current.focus()`), manage media playback, measure element dimensions, or integrate with third-party DOM libraries that don't operate on React's declarative rendering.\n2.  **Storing mutable values that don't trigger re-renders**: `useRef` can hold any mutable value (not just DOM nodes) that needs to persist across renders but whose changes should not cause the component to re-render. Examples include storing a timer ID (`setTimeout` or `setInterval` IDs), a WebSocket instance, or any value that behaves like an instance variable in a class component.",
+          "options": [],
+          "analysisPoints": [],
+          "keyConcepts": [
+            "useRef",
+            "React Hooks",
+            "DOM Manipulation",
+            "Mutable Values",
+            "Side Effects",
+            "Component Lifecycle"
+          ],
+          "evaluationCriteria": [],
+          "example": "```jsx\nimport React, { useRef, useEffect } from 'react';\n\nfunction MyComponent() {\n  const inputRef = useRef(null); // Use case 1: Accessing DOM element\n  const intervalIdRef = useRef(null); // Use case 2: Storing mutable value\n\n  useEffect(() => {\n    // 1. Focus on the input when the component mounts\n    if (inputRef.current) {\n      inputRef.current.focus();\n    }\n\n    // 2. Store an interval ID that won't trigger re-renders\n    intervalIdRef.current = setInterval(() => {\n      console.log('Interval running...');\n    }, 1000);\n\n    return () => {\n      // Cleanup the interval on component unmount\n      clearInterval(intervalIdRef.current);\n    };\n  }, []); // Empty dependency array means this effect runs once on mount and cleans up on unmount\n\n  return (\n    <div>\n      <input ref={inputRef} type=\"text\" placeholder=\"I will be focused!\" />\n      <p>Check console for interval messages.</p>\n    </div>\n  );\n}\n```",
+          "tags": [
+            "React",
+            "Hooks",
+            "useRef",
+            "DOM",
+            "State Management",
+            "Fundamentals"
+          ],
+          "prerequisites": [
+            "React Basics"
+          ],
+          "complexity": 4,
+          "interviewFrequency": 7,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_user_search_interface_open",
+          "topic": "User Search Interface Design & Architecture",
+          "level": "medium",
+          "type": "open",
+          "question": "You've been asked to create a real-time user search interface with an autocomplete-like dropdown. Beyond the basic functionality, what are the critical considerations for ensuring high performance, excellent user experience, and robust accessibility? Discuss at least three points for each category (performance, UX, accessibility), providing specific techniques or React-related features.",
+          "answer": "This is an open-ended question that prompts a comprehensive answer covering various aspects of UI development.",
+          "options": [],
+          "analysisPoints": [
+            "**Performance Considerations**: \n    1.  **Debouncing/Throttling**: To prevent the search logic (especially if it involves expensive computations or API calls) from running on every keystroke, apply debouncing (e.g., 300-500ms delay) to the input change handler. This ensures the search only triggers after a brief period of user inactivity.\n    2.  **Memoization**: Use `React.memo` for the search results list component (if it's a separate component) and `useMemo` for the `searchResults` array itself or the `searchUsers` filtering function. This prevents unnecessary re-renders of the list or re-computation of filtered data if the relevant props/dependencies haven't changed.\n    3.  **Virtualization/Windowing**: For very large datasets (hundreds or thousands of results), render only the items currently visible in the viewport, plus a few buffer items. Libraries like `react-window` or `react-virtualized` can significantly improve performance by reducing the number of DOM nodes.\n    4.  **Efficient Search Algorithm**: Ensure the filtering logic (`searchUsers`) is optimized (e.g., converting search term and relevant user data fields to lowercase only once for comparison, using `some` or `every` effectively for array checks).\n    5.  **Backend Integration**: For massive datasets, delegate the actual search operation to a backend API, making the frontend primarily responsible for display and interaction rather than heavy data processing.\n        ",
+            "**User Experience (UX) Considerations**: \n    1.  **Clear Visual Feedback**: Provide immediate feedback to the user, such as a loading spinner while search is in progress, or a 'No results found' message if applicable. Highlight the active/selected item in the dropdown clearly.\n    2.  **Intuitive Interaction**: The dropdown should appear reliably on focus/input and disappear on blur/escape/selection. Clicking an item should populate the input and close the dropdown. The debouncing should be tuned to feel responsive without being overwhelming.\n    3.  **Scroll Management**: Ensure the keyboard-selected item automatically scrolls into view within the dropdown, preventing hidden selections.\n    4.  **Click Outside Behavior**: Implement logic to close the dropdown when the user clicks anywhere outside the search input and results list.\n    5.  **Empty State Handling**: Clearly communicate when no results are found for a given query, or when the search input is empty.\n        ",
+            "**Accessibility Considerations (ARIA)**: \n    1.  **Keyboard Navigation**: Full keyboard support using `ArrowUp`, `ArrowDown`, `Enter`, and `Escape` keys is paramount. Ensure `e.preventDefault()` is used to prevent default browser behaviors.\n    2.  **ARIA Roles and Attributes**: Implement appropriate ARIA roles and attributes for autocomplete patterns:\n        *   `role='combobox'` on the input.\n        *   `aria-autocomplete='list'` on the input.\n        *   `aria-controls` on the input, pointing to the ID of the results `<ul>` (`role='listbox'`).\n        *   `aria-expanded` on the input, indicating if the dropdown is visible.\n        *   `aria-activedescendant` on the input, dynamically pointing to the `id` of the currently highlighted `<li>` (`role='option'`).\n        *   Each `<li>` in the dropdown should have `role='option'` and `aria-selected`.\n    3.  **Focus Management**: Ensure focus returns to the search input after a selection or after the dropdown closes, maintaining a logical tab order.\n    4.  **Semantic HTML**: Use semantic HTML elements (`<input>`, `<ul>`, `<li>`) where appropriate to convey meaning to assistive technologies.\n    5.  **Contrast and Readability**: Ensure sufficient color contrast for text and interactive elements, and use clear, readable fonts.",
+            "**React-specific features for implementation**: `useState`, `useEffect`, `useRef`, `useCallback`, `useMemo`, and potentially custom hooks for reusability (e.g., `useDebounce`, `useClickOutside`)."
+          ],
+          "keyConcepts": [
+            "React",
+            "Hooks",
+            "State Management",
+            "Accessibility",
+            "Performance Optimization",
+            "User Experience",
+            "Search",
+            "Frontend Architecture",
+            "ARIA"
+          ],
+          "evaluationCriteria": [
+            "Completeness and depth of the solution outline.",
+            "Understanding of React's core principles and advanced features (hooks, memoization).",
+            "Ability to integrate performance and accessibility best practices.",
+            "Demonstrates architectural thinking and problem-solving for real-world scenarios."
+          ],
+          "example": "See the `theory_react_user_search_interface` for foundational code that implements many of these concepts, including debouncing, keyboard navigation, and ARIA attributes.",
+          "tags": [
+            "React",
+            "Frontend Interview",
+            "System Design",
+            "Accessibility",
+            "Performance",
+            "UX"
+          ],
+          "prerequisites": [
+            "theory_react_user_search_interface",
+            "React Advanced"
+          ],
+          "complexity": 9,
+          "interviewFrequency": 10,
+          "learningPath": "advanced"
+        }
+      ],
+      "tasks": [
+        {
+          "id": "task_implement_vanilla_js_spreadsheet",
+          "title": "Build a Dynamic Vanilla JavaScript Spreadsheet",
+          "description": "Implement the `Spreadsheet` class in vanilla JavaScript to create a fully functional, interactive spreadsheet. Your implementation should adhere to the following requirements:\n\n1.  **Constructor**: Initialize `this.rows`, `this.cols` with provided dimensions and create a 2D `this.data` array of `rows` by `cols` filled with empty strings.\n2.  **`render()` method**: This method should generate the complete HTML `<table>` structure. \n    *   Each data cell (`<td>`) must contain an `<input type=\"text\">` field.\n    *   Include headers (`<th>`) for both rows (numbered 1, 2, 3...) and columns (lettered A, B, C...). \n    *   Next to each row number and column letter, add a small 'x' button to `remove` that specific row or column. Ensure these buttons function correctly.\n    *   Add a '+' button at the bottom (in the first column's header area) to `addRow()` and another '+' button at the end of the top header row to `addColumn()`.\n3.  **Data Persistence (Cell Editing)**: Attach an `input` event listener to each cell's input field. When the user types, the corresponding value in the `this.data` array must be updated in real-time.\n4.  **`addRow()` / `addColumn()`**: Implement these methods to add a new empty row or column to the `this.data` array. After modifying the data, these methods *must* call `this.update()` to refresh the UI.\n5.  **`removeRow(rowIndex)` / `removeColumn(colIndex)`**: Implement these methods to remove a row or column from the `this.data` array. Include boundary checks (`rowIndex`/`colIndex` should be valid). After modification, these methods *must* call `this.update()`.\n6.  **`update()` method**: This method is responsible for synchronizing the DOM with the `this.data` model. It should clear the content of the `spreadsheet-container` element and then append a fresh table generated by `this.render()`.\n\nYour solution should be self-contained within the `Spreadsheet` class and demonstrate its usage by creating an instance and appending it to a container (`<div id=\"spreadsheet-container\"></div>`) when the `DOMContentLoaded` event fires. Minimal CSS for basic layout is provided.",
+          "difficulty": "medium",
+          "startingCode": "<!-- index.html -->\n<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n    <meta charset=\"UTF-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <title>Vanilla JS Spreadsheet</title>\n    <style>\n        body { font-family: sans-serif; display: flex; justify-content: center; padding: 20px; background-color: #f4f4f4; }\n        #spreadsheet-container { border: 1px solid #ccc; padding: 10px; background-color: #fff; box-shadow: 0 0 10px rgba(0,0,0,0.1); overflow-x: auto; }\n        table { border-collapse: collapse; margin-top: 10px; }\n        th, td { border: 1px solid #ccc; padding: 0; min-width: 80px; text-align: center; vertical-align: middle; height: 30px; }\n        td input { width: calc(100% - 2px); height: calc(100% - 2px); border: none; outline: none; padding: 5px; box-sizing: border-box; text-align: center; }\n        th button { background-color: #f0f0f0; border: 1px solid #ccc; padding: 5px 10px; cursor: pointer; font-weight: bold; width: 100%; height: 100%; box-sizing: border-box; }\n        th button:hover { background-color: #e0e0e0; }\n        .remove-btn { background-color: #ffcccc; color: #cc0000; font-size: 0.8em; padding: 2px 5px; border: 1px solid #cc0000; border-radius: 3px; cursor: pointer; margin-left: 5px; }\n        .remove-btn:hover { background-color: #ffaaaa; }\n        .header-content { display: flex; align-items: center; justify-content: center; height: 100%; width: 100%; box-sizing: border-box; padding: 0 5px; }\n        .header-content span { flex-grow: 1; text-align: center; }\n    </style>\n</head>\n<body>\n    <div id=\"spreadsheet-container\"></div>\n\n    <script>\n      class Spreadsheet {\n        constructor(rows, cols) {\n          this.rows = rows;\n          this.cols = cols;\n          this.data = Array(rows).fill(null).map(() => Array(cols).fill(''));\n        }\n\n        render() {\n          const table = document.createElement('table');\n          const thead = document.createElement('thead');\n          const tbody = document.createElement('tbody');\n\n          // Top header row for column controls\n          const headerTr = document.createElement('tr');\n          headerTr.innerHTML = '<th></th>'; // Empty corner cell\n\n          for (let c = 0; c < this.cols; c++) {\n            const th = document.createElement('th');\n            const div = document.createElement('div');\n            div.className = 'header-content';\n            const span = document.createElement('span');\n            span.textContent = String.fromCharCode(65 + c); // A, B, C...\n            const removeColBtn = document.createElement('button');\n            removeColBtn.textContent = 'x';\n            removeColBtn.className = 'remove-btn';\n            // Important: Use a closure or let to capture current 'c'\n            ((columnIndex) => {\n              removeColBtn.addEventListener('click', () => this.removeColumn(columnIndex));\n            })(c);\n            \n            div.appendChild(span);\n            div.appendChild(removeColBtn);\n            th.appendChild(div);\n            headerTr.appendChild(th);\n          }\n\n          const addColTh = document.createElement('th');\n          const addColButton = document.createElement('button');\n          addColButton.textContent = '+';\n          addColButton.addEventListener('click', () => this.addColumn());\n          addColTh.appendChild(addColButton);\n          headerTr.appendChild(addColTh);\n          thead.appendChild(headerTr);\n          table.appendChild(thead);\n\n          // Data rows and left header column (row controls)\n          for (let r = 0; r < this.rows; r++) {\n            const tr = document.createElement('tr');\n            const th = document.createElement('th');\n            const div = document.createElement('div');\n            div.className = 'header-content';\n            const span = document.createElement('span');\n            span.textContent = (r + 1).toString();\n            const removeRowBtn = document.createElement('button');\n            removeRowBtn.textContent = 'x';\n            removeRowBtn.className = 'remove-btn';\n            // Important: Use a closure or let to capture current 'r'\n            ((rowIndex) => {\n              removeRowBtn.addEventListener('click', () => this.removeRow(rowIndex));\n            })(r);\n            \n            div.appendChild(span);\n            div.appendChild(removeRowBtn);\n            th.appendChild(div);\n            tr.appendChild(th);\n\n            for (let c = 0; c < this.cols; c++) {\n              const td = document.createElement('td');\n              const input = document.createElement('input');\n              input.type = 'text';\n              input.value = this.data[r][c];\n              input.dataset.row = r.toString();\n              input.dataset.col = c.toString();\n              input.addEventListener('input', (e) => {\n                this.data[parseInt(e.target.dataset.row)][parseInt(e.target.dataset.col)] = e.target.value;\n              });\n              td.appendChild(input);\n              tr.appendChild(td);\n            }\n            tbody.appendChild(tr);\n          }\n\n          // Add row button at the bottom\n          const addRowTr = document.createElement('tr');\n          const addRowTh = document.createElement('th');\n          const addRowButton = document.createElement('button');\n          addRowButton.textContent = '+';\n          addRowButton.addEventListener('click', () => this.addRow());\n          addRowTh.appendChild(addRowButton);\n          addRowTr.appendChild(addRowTh); \n\n          // Append empty TDs to span across remaining columns to align the '+' button\n          for(let i = 0; i < this.cols; i++) {\n            addRowTr.appendChild(document.createElement('td'));\n          }\n          \n          tbody.appendChild(addRowTr);\n          table.appendChild(tbody);\n          \n          return table;\n        }\n        \n        addRow() {\n          this.data.push(Array(this.cols).fill(''));\n          this.rows++;\n          this.update();\n        }\n        \n        addColumn() {\n          for (let i = 0; i < this.rows; i++) {\n            this.data[i].push('');\n          }\n          this.cols++;\n          this.update();\n        }\n        \n        removeRow(rowIndex) {\n          if (rowIndex >= 0 && rowIndex < this.rows) {\n            this.data.splice(rowIndex, 1);\n            this.rows--;\n            this.update();\n          }\n        }\n        \n        removeColumn(colIndex) {\n          if (colIndex >= 0 && colIndex < this.cols) {\n            for (let i = 0; i < this.rows; i++) {\n              this.data[i].splice(colIndex, 1);\n            }\n            this.cols--;\n            this.update();\n          }\n        }\n        \n        update() {\n          const spreadsheetContainer = document.getElementById('spreadsheet-container');\n          spreadsheetContainer.innerHTML = '';\n          spreadsheetContainer.appendChild(this.render());\n        }\n      }\n\n      document.addEventListener('DOMContentLoaded', () => {\n        const spreadsheet = new Spreadsheet(5, 5); // Example initial size\n        const container = document.getElementById('spreadsheet-container');\n        container.appendChild(spreadsheet.render());\n      });\n    </script>\n</body>\n</html>\n",
+          "solutionCode": "<!-- index.html -->\n<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n    <meta charset=\"UTF-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <title>Vanilla JS Spreadsheet Solution</title>\n    <style>\n        body { font-family: sans-serif; display: flex; justify-content: center; padding: 20px; background-color: #f4f4f4; }\n        #spreadsheet-container { border: 1px solid #ccc; padding: 10px; background-color: #fff; box-shadow: 0 0 10px rgba(0,0,0,0.1); overflow-x: auto; }\n        table { border-collapse: collapse; margin-top: 10px; }\n        th, td { border: 1px solid #ccc; padding: 0; min-width: 80px; text-align: center; vertical-align: middle; height: 30px; }\n        td input { width: calc(100% - 2px); height: calc(100% - 2px); border: none; outline: none; padding: 5px; box-sizing: border-box; text-align: center; }\n        th button { background-color: #f0f0f0; border: 1px solid #ccc; padding: 5px 10px; cursor: pointer; font-weight: bold; width: 100%; height: 100%; box-sizing: border-box; }\n        th button:hover { background-color: #e0e0e0; }\n        .remove-btn { background-color: #ffcccc; color: #cc0000; font-size: 0.8em; padding: 2px 5px; border: 1px solid #cc0000; border-radius: 3px; cursor: pointer; margin-left: 5px; }\n        .remove-btn:hover { background-color: #ffaaaa; }\n        .header-content { display: flex; align-items: center; justify-content: center; height: 100%; width: 100%; box-sizing: border-box; padding: 0 5px; }\n        .header-content span { flex-grow: 1; text-align: center; }\n    </style>\n</head>\n<body>\n    <div id=\"spreadsheet-container\"></div>\n\n    <script>\n      class Spreadsheet {\n        constructor(rows, cols) {\n          this.rows = rows;\n          this.cols = cols;\n          this.data = Array(rows).fill(null).map(() => Array(cols).fill(''));\n        }\n\n        render() {\n          const table = document.createElement('table');\n          const thead = document.createElement('thead');\n          const tbody = document.createElement('tbody');\n\n          // Top header row for column controls\n          const headerTr = document.createElement('tr');\n          headerTr.innerHTML = '<th></th>'; // Empty corner cell\n\n          for (let c = 0; c < this.cols; c++) {\n            const th = document.createElement('th');\n            const div = document.createElement('div');\n            div.className = 'header-content';\n            const span = document.createElement('span');\n            span.textContent = String.fromCharCode(65 + c); // A, B, C...\n            const removeColBtn = document.createElement('button');\n            removeColBtn.textContent = 'x';\n            removeColBtn.className = 'remove-btn';\n            // Use a closure to capture the correct 'c' value for each listener\n            ((columnIndex) => {\n              removeColBtn.addEventListener('click', () => this.removeColumn(columnIndex));\n            })(c);\n            \n            div.appendChild(span);\n            div.appendChild(removeColBtn);\n            th.appendChild(div);\n            headerTr.appendChild(th);\n          }\n\n          const addColTh = document.createElement('th');\n          const addColButton = document.createElement('button');\n          addColButton.textContent = '+';\n          addColButton.addEventListener('click', () => this.addColumn());\n          addColTh.appendChild(addColButton);\n          headerTr.appendChild(addColTh);\n          thead.appendChild(headerTr);\n          table.appendChild(thead);\n\n          // Data rows and left header column (row controls)\n          for (let r = 0; r < this.rows; r++) {\n            const tr = document.createElement('tr');\n            const th = document.createElement('th');\n            const div = document.createElement('div');\n            div.className = 'header-content';\n            const span = document.createElement('span');\n            span.textContent = (r + 1).toString();\n            const removeRowBtn = document.createElement('button');\n            removeRowBtn.textContent = 'x';\n            removeRowBtn.className = 'remove-btn';\n            // Use a closure to capture the correct 'r' value for each listener\n            ((rowIndex) => {\n              removeRowBtn.addEventListener('click', () => this.removeRow(rowIndex));\n            })(r);\n            \n            div.appendChild(span);\n            div.appendChild(removeRowBtn);\n            th.appendChild(div);\n            tr.appendChild(th);\n\n            for (let c = 0; c < this.cols; c++) {\n              const td = document.createElement('td');\n              const input = document.createElement('input');\n              input.type = 'text';\n              input.value = this.data[r][c];\n              input.dataset.row = r.toString(); // Store row index as data attribute\n              input.dataset.col = c.toString(); // Store column index as data attribute\n              input.addEventListener('input', (e) => {\n                this.data[parseInt(e.target.dataset.row)][parseInt(e.target.dataset.col)] = e.target.value;\n              });\n              td.appendChild(input);\n              tr.appendChild(td);\n            }\n            tbody.appendChild(tr);\n          }\n\n          // Add row button at the bottom\n          const addRowTr = document.createElement('tr');\n          const addRowTh = document.createElement('th');\n          const addRowButton = document.createElement('button');\n          addRowButton.textContent = '+';\n          addRowButton.addEventListener('click', () => this.addRow());\n          addRowTh.appendChild(addRowButton);\n          addRowTr.appendChild(addRowTh); \n\n          // Append empty TDs to span across remaining columns to align the '+' button\n          for(let i = 0; i < this.cols; i++) {\n            addRowTr.appendChild(document.createElement('td'));\n          }\n          \n          tbody.appendChild(addRowTr);\n          table.appendChild(tbody);\n          \n          return table;\n        }\n        \n        addRow() {\n          this.data.push(Array(this.cols).fill(''));\n          this.rows++;\n          this.update();\n        }\n        \n        addColumn() {\n          for (let i = 0; i < this.rows; i++) {\n            this.data[i].push('');\n          }\n          this.cols++;\n          this.update();\n        }\n        \n        removeRow(rowIndex) {\n          if (rowIndex >= 0 && rowIndex < this.rows) {\n            this.data.splice(rowIndex, 1);\n            this.rows--;\n            this.update();\n          }\n        }\n        \n        removeColumn(colIndex) {\n          if (colIndex >= 0 && colIndex < this.cols) {\n            for (let i = 0; i < this.rows; i++) {\n              this.data[i].splice(colIndex, 1);\n            }\n            this.cols--;\n            this.update();\n          }\n        }\n        \n        update() {\n          const spreadsheetContainer = document.getElementById('spreadsheet-container');\n          spreadsheetContainer.innerHTML = '';\n          spreadsheetContainer.appendChild(this.render());\n        }\n      }\n\n      document.addEventListener('DOMContentLoaded', () => {\n        const spreadsheet = new Spreadsheet(5, 5); // Example initial size\n        const container = document.getElementById('spreadsheet-container');\n        container.appendChild(spreadsheet.render());\n      });\n    </script>\n</body>\n</html>\n",
+          "testCases": [
+            "**Initialization**: Load `index.html`. Verify a 5x5 grid (or initial size) appears correctly, with column letters (A-E) and row numbers (1-5) as headers. Check that input fields are present in all cells.",
+            "**Cell Editing**: Type 'Test' into cell A1. Open browser developer console and type `spreadsheet.data[0][0]` (assuming `spreadsheet` is globally accessible via the `DOMContentLoaded` block). It should return 'Test'. Type in other cells and verify the `data` array is correctly updated.",
+            "**Add Row Functionality**: Click the '+' button at the bottom. Verify a new, empty row is appended to the table, and the total number of rows displayed on the UI and in the `spreadsheet.rows` property increases by one.",
+            "**Add Column Functionality**: Click the '+' button in the top right. Verify a new, empty column is appended to the table, and the total number of columns (`spreadsheet.cols`) increases by one. Existing data should shift correctly.",
+            "**Remove Row Functionality**: Click the 'x' button next to row 2. Verify row 2 disappears, and row 3 shifts up to become the new row 2. Check `spreadsheet.rows` decreases. Repeat for first, last, and middle rows.",
+            "**Remove Column Functionality**: Click the 'x' button next to column B. Verify column B disappears, and column C shifts left to become the new column B. Check `spreadsheet.cols` decreases. Repeat for first, last, and middle columns.",
+            "**Data Persistence Across Updates**: Type some data into a few cells (e.g., A1, B2). Then, add a new row and a new column. Verify that the previously entered data in A1 and B2 is still present and correctly displayed after the `update()` calls.",
+            "**Edge Cases (Removing when 1 row/col)**: Try to remove a row or column when only one is left. The current code allows this, shrinking to 0xN or Nx0. Consider if explicit handling is needed (e.g., prevent removal if only one left, or if 0 dimensions are okay).",
+            "**Event Listener Cleanup (Implicit)**: While `innerHTML = ''` handles removal of old listeners, reflect on why explicit `removeEventListener` might be needed in other granular update scenarios."
+          ],
+          "hints": [
+            "Pay close attention to how you pass `rowIndex` and `colIndex` to `removeRow` and `removeColumn` from within the loops in `render()`. If not handled carefully (e.g., using `let` for loop variables or an Immediately Invoked Function Expression - IIFE for closures), the `rowIndex` and `colIndex` inside the event listener might refer to the final value of the loop variable, not the value at the time the listener was attached.",
+            "The `update()` method is crucial. Every time `this.data` dimensions change (via `addRow`, `addColumn`, `removeRow`, `removeColumn`), `update()` must be called to redraw the table.",
+            "Use `dataset` attributes (e.g., `input.dataset.row = r; input.dataset.col = c;`) to store the row and column index directly on the input elements. This makes it easy to retrieve them in the `input` event listener (`e.target.dataset.row`). Remember to parse them to integers when using them as array indices (`parseInt(e.target.dataset.row)`).",
+            "The `String.fromCharCode(65 + c)` trick is handy for generating alphabetical column headers (A, B, C...).",
+            "Ensure your 'Add Row' button is placed correctly to span across the existing columns for good visual alignment."
+          ],
+          "tags": [
+            "Vanilla JS",
+            "DOM Manipulation",
+            "Classes",
+            "Event Handling",
+            "Frontend",
+            "UI Components"
+          ],
+          "timeEstimate": 90,
+          "prerequisites": [
+            "HTML",
+            "CSS",
+            "JavaScript Fundamentals",
+            "DOM API",
+            "Object-Oriented JavaScript"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 7,
+          "learningPath": "intermediate",
+          "relatedConcepts": [
+            "Event Delegation",
+            "Performance Optimization",
+            "Single Responsibility Principle"
+          ]
+        },
+        {
+          "id": "task_implement_react_search_autocomplete",
+          "title": "Build a React User Search with Autocomplete & Accessibility",
+          "description": "Implement a `UserSearch` React functional component that provides a robust real-time search experience, an autocomplete-like dropdown, full keyboard navigation, and proper accessibility attributes.\n\n**Detailed Requirements:**\n1.  **Search Input**: A controlled text input field (`<input type=\"text\">`) to capture the user's search query.\n2.  **Sample Data**: Use the provided `users` array as the data source for the search.\n3.  **Real-time Filtering**: As the user types, filter the `users` array. The search should be case-insensitive and search across multiple user fields: `name`, items in `purchased` array, `address`, and `zipCode`.\n4.  **Autocomplete Dropdown**: Display the matching `searchResults` in a dropdown list (`<ul><li>`) immediately below the input. The dropdown should:\n    *   Only appear when the `searchTerm` is not empty and there are `searchResults`.\n    *   Show a 'No results found.' message if the `searchTerm` is not empty but `searchResults` is empty.\n5.  **Keyboard Navigation**: Implement comprehensive keyboard support within the dropdown:\n    *   `ArrowDown`: Move the `selectedIndex` down. The selection should wrap from the last item to the first item.\n    *   `ArrowUp`: Move the `selectedIndex` up. The selection should wrap from the first item to the last item.\n    *   `Enter`: If an item is selected, log the full selected `user` object to the console. Update the input field's value to the selected user's `name`. Close the dropdown.\n    *   `Escape`: Close the dropdown.\n    *   Crucially, `preventDefault()` for `ArrowDown`, `ArrowUp`, and `Enter` keys to stop default browser behavior (e.g., page scrolling or form submission).\n6.  **Visual Highlighting & Scroll**: Visually highlight the currently `selectedIndex` item in the dropdown. Ensure the highlighted item automatically scrolls into view if it's outside the visible area of the dropdown (use `scrollIntoView`).\n7.  **Click Outside Close**: The dropdown must close if the user clicks anywhere on the document outside the search input field and the results dropdown itself.\n8.  **Accessibility (ARIA)**: Apply relevant ARIA attributes to the input and dropdown elements to ensure screen reader compatibility and adherence to accessibility standards. These include, but are not limited to, `role`, `aria-autocomplete`, `aria-controls`, `aria-expanded`, and `aria-activedescendant`.\n9.  **Performance Enhancement**: Implement **debouncing** for the search input. The search filtering logic (or API call in a real app) should only execute after the user has stopped typing for a brief delay (e.g., 300ms) to avoid excessive re-renders/computations.\n\nYour solution should be presented as a single React functional component.",
+          "difficulty": "hard",
+          "startingCode": "import React, { useState, useEffect, useRef, useCallback } from 'react';\n\nconst users = [\n  { id: 1, name: 'John Smith', purchased: ['Laptop', 'Mouse'], \n    address: '123 Main St', zipCode: '10001' },\n  { id: 2, name: 'Sarah Johnson', purchased: ['Phone', 'Headphones'], \n    address: '456 Oak Ave', zipCode: '20002' },\n  { id: 3, name: 'David Lee', purchased: ['Keyboard', 'Monitor'], \n    address: '789 Pine Ln', zipCode: '30003' },\n  { id: 4, name: 'Emily White', purchased: ['Tablet', 'Smartwatch'], \n    address: '101 Cedar Rd', zipCode: '40004' },\n  { id: 5, name: 'Michael Brown', purchased: ['Camera', 'Tripod'], \n    address: '202 Birch Dr', zipCode: '50005' },\n  { id: 6, name: 'Olivia Taylor', purchased: ['Webcam', 'Microphone'], \n    address: '303 Elm Ct', zipCode: '60006' },\n  { id: 7, name: 'Daniel Miller', purchased: ['Monitor Arm', 'Desk Mat'], \n    address: '404 Willow Way', zipCode: '70007' }\n];\n\n// Custom hook for debouncing a value\nfunction useDebounce(value, delay) {\n  const [debouncedValue, setDebouncedValue] = useState(value);\n\n  useEffect(() => {\n    const handler = setTimeout(() => {\n      setDebouncedValue(value);\n    }, delay);\n    return () => {\n      clearTimeout(handler);\n    };\n  }, [value, delay]);\n\n  return debouncedValue;\n}\n\nfunction UserSearch() {\n  const [searchTerm, setSearchTerm] = useState('');\n  const [searchResults, setSearchResults] = useState([]);\n  const [selectedIndex, setSelectedIndex] = useState(-1); // -1 for no selection initially\n  const [isDropdownOpen, setIsDropdownOpen] = useState(false);\n  \n  const searchInputRef = useRef(null);\n  const resultsContainerRef = useRef(null);\n  const dropdownId = 'user-search-results'; // For ARIA attributes\n\n  const debouncedSearchTerm = useDebounce(searchTerm, 300);\n\n  // Search logic based on debounced term\n  useEffect(() => {\n    if (debouncedSearchTerm.trim()) {\n      const lowerCaseQuery = debouncedSearchTerm.toLowerCase();\n      const filtered = users.filter(user => {\n        const nameMatch = user.name.toLowerCase().includes(lowerCaseQuery);\n        const purchasedMatch = user.purchased.some(item => item.toLowerCase().includes(lowerCaseQuery));\n        const addressMatch = user.address.toLowerCase().includes(lowerCaseQuery);\n        const zipCodeMatch = user.zipCode.includes(lowerCaseQuery);\n        return nameMatch || purchasedMatch || addressMatch || zipCodeMatch;\n      });\n      setSearchResults(filtered);\n      setSelectedIndex(filtered.length > 0 ? 0 : -1); // Auto-select first if results exist\n      setIsDropdownOpen(filtered.length > 0);\n    } else {\n      setSearchResults([]);\n      setSelectedIndex(-1);\n      setIsDropdownOpen(false);\n    }\n  }, [debouncedSearchTerm]);\n\n  // Keyboard navigation logic\n  useEffect(() => {\n    const handleKeyDown = (e) => {\n      if (!isDropdownOpen || searchResults.length === 0) return;\n\n      switch (e.key) {\n        case 'ArrowDown':\n          e.preventDefault();\n          setSelectedIndex(prevIndex => (prevIndex + 1) % searchResults.length);\n          break;\n        case 'ArrowUp':\n          e.preventDefault();\n          setSelectedIndex(prevIndex => (prevIndex - 1 + searchResults.length) % searchResults.length);\n          break;\n        case 'Enter':\n          e.preventDefault();\n          if (selectedIndex !== -1 && selectedIndex < searchResults.length) {\n            const selectedUser = searchResults[selectedIndex];\n            console.log('Selected user:', selectedUser);\n            setSearchTerm(selectedUser.name);\n            setIsDropdownOpen(false);\n            searchInputRef.current?.focus();\n          }\n          break;\n        case 'Escape':\n          setIsDropdownOpen(false);\n          searchInputRef.current?.focus();\n          break;\n        default:\n          break;\n      }\n    };\n\n    window.addEventListener('keydown', handleKeyDown);\n    return () => window.removeEventListener('keydown', handleKeyDown);\n  }, [searchResults, selectedIndex, isDropdownOpen]);\n\n  // Scroll selected item into view\n  useEffect(() => {\n    if (resultsContainerRef.current && selectedIndex !== -1) {\n      const selectedElement = resultsContainerRef.current.children[selectedIndex];\n      if (selectedElement) {\n        selectedElement.scrollIntoView({\n          behavior: 'smooth',\n          block: 'nearest'\n        });\n      }\n    }\n  }, [selectedIndex, searchResults]);\n\n  // Close dropdown on click outside\n  useEffect(() => {\n    const handleClickOutside = (event) => {\n      if (searchInputRef.current && !searchInputRef.current.contains(event.target) &&\n          resultsContainerRef.current && !resultsContainerRef.current.contains(event.target)) {\n        setIsDropdownOpen(false);\n      }\n    };\n    document.addEventListener('mousedown', handleClickOutside);\n    return () => document.removeEventListener('mousedown', handleClickOutside);\n  }, []);\n\n  return (\n    <div style={{ position: 'relative', width: '400px', margin: '50px auto', fontFamily: 'Arial, sans-serif' }}>\n      <input\n        type=\"text\"\n        placeholder=\"Search for users...\"\n        value={searchTerm}\n        onChange={(e) => setSearchTerm(e.target.value)}\n        onFocus={() => setIsDropdownOpen(searchTerm.trim().length > 0 && searchResults.length > 0)}\n        ref={searchInputRef}\n        id=\"user-search-input\"\n        role=\"combobox\"\n        aria-autocomplete=\"list\"\n        aria-controls={dropdownId}\n        aria-expanded={isDropdownOpen}\n        aria-activedescendant={selectedIndex !== -1 ? `result-item-${searchResults[selectedIndex]?.id}` : undefined}\n        style={{ width: '100%', padding: '10px', fontSize: '16px', border: '1px solid #ccc', borderRadius: '4px', boxSizing: 'border-box' }}\n      />\n      {isDropdownOpen && searchResults.length > 0 && (\n        <ul\n          id={dropdownId}\n          ref={resultsContainerRef}\n          role=\"listbox\"\n          style={{\n            listStyle: 'none',\n            padding: '0',\n            margin: '5px 0 0 0',\n            border: '1px solid #ddd',\n            maxHeight: '250px',\n            overflowY: 'auto',\n            position: 'absolute',\n            width: '100%',\n            zIndex: 1000,\n            backgroundColor: 'white',\n            boxShadow: '0 2px 8px rgba(0,0,0,0.15)',\n            borderRadius: '4px'\n          }}\n        >\n          {searchResults.map((user, index) => (\n            <li\n              key={user.id}\n              id={`result-item-${user.id}`}\n              role=\"option\"\n              aria-selected={index === selectedIndex}\n              className={index === selectedIndex ? 'selected' : ''}\n              onClick={() => {\n                console.log('Clicked user:', user);\n                setSearchTerm(user.name);\n                setIsDropdownOpen(false);\n              }}\n              style={{\n                padding: '12px',\n                cursor: 'pointer',\n                borderBottom: '1px solid #eee',\n                backgroundColor: index === selectedIndex ? '#f0f0f0' : 'white',\n                transition: 'background-color 0.1s ease'\n              }}\n            >\n              <strong>{user.name}</strong> ({user.zipCode})<br/>\n              <small>{user.address}</small><br/>\n              <small>Purchased: {user.purchased.join(', ')}</small>\n            </li>\n          ))}\n        </ul>\n      )}\n      {isDropdownOpen && searchResults.length === 0 && searchTerm.trim().length > 0 && (\n        <div style={{\n          padding: '12px',\n          border: '1px solid #ddd',\n          marginTop: '5px',\n          backgroundColor: 'white',\n          boxShadow: '0 2px 8px rgba(0,0,0,0.15)',\n          borderRadius: '4px'\n        }}>No results found.</div>\n      )}\n    </div>\n  );\n}\n\nexport default UserSearch;",
+          "solutionCode": "import React, { useState, useEffect, useRef, useCallback } from 'react';\n\nconst users = [\n  { id: 1, name: 'John Smith', purchased: ['Laptop', 'Mouse'], \n    address: '123 Main St', zipCode: '10001' },\n  { id: 2, name: 'Sarah Johnson', purchased: ['Phone', 'Headphones'], \n    address: '456 Oak Ave', zipCode: '20002' },\n  { id: 3, name: 'David Lee', purchased: ['Keyboard', 'Monitor'], \n    address: '789 Pine Ln', zipCode: '30003' },\n  { id: 4, name: 'Emily White', purchased: ['Tablet', 'Smartwatch'], \n    address: '101 Cedar Rd', zipCode: '40004' },\n  { id: 5, name: 'Michael Brown', purchased: ['Camera', 'Tripod'], \n    address: '202 Birch Dr', zipCode: '50005' },\n  { id: 6, name: 'Olivia Taylor', purchased: ['Webcam', 'Microphone'], \n    address: '303 Elm Ct', zipCode: '60006' },\n  { id: 7, name: 'Daniel Miller', purchased: ['Monitor Arm', 'Desk Mat'], \n    address: '404 Willow Way', zipCode: '70007' },\n  { id: 8, name: 'Jessica Davis', purchased: ['Printer', 'Ink'], \n    address: '505 Poplar Blvd', zipCode: '80008' },\n  { id: 9, name: 'Chris Wilson', purchased: ['External Drive', 'USB Hub'], \n    address: '606 Maple Dr', zipCode: '90009' },\n  { id: 10, name: 'Amanda Green', purchased: ['Router', 'Ethernet Cable'], \n    address: '707 Spruce Ln', zipCode: '10010' }\n];\n\n// Custom hook for debouncing a value\nfunction useDebounce(value, delay) {\n  const [debouncedValue, setDebouncedValue] = useState(value);\n\n  useEffect(() => {\n    const handler = setTimeout(() => {\n      setDebouncedValue(value);\n    }, delay);\n\n    return () => {\n      clearTimeout(handler);\n    };\n  }, [value, delay]);\n\n  return debouncedValue;\n}\n\nfunction UserSearch() {\n  const [searchTerm, setSearchTerm] = useState('');\n  const [searchResults, setSearchResults] = useState([]);\n  const [selectedIndex, setSelectedIndex] = useState(-1); // -1 for no selection initially\n  const [isDropdownOpen, setIsDropdownOpen] = useState(false);\n  \n  const searchInputRef = useRef(null);\n  const resultsContainerRef = useRef(null);\n  const dropdownId = 'user-search-results'; // For ARIA attributes\n\n  const debouncedSearchTerm = useDebounce(searchTerm, 300);\n\n  // Search logic memoized with useCallback (users array is stable here)\n  const performSearch = useCallback((query) => {\n    if (!query.trim()) return [];\n    const lowerCaseQuery = query.toLowerCase();\n    \n    return users.filter(user => {\n      const nameMatch = user.name.toLowerCase().includes(lowerCaseQuery);\n      const purchasedMatch = user.purchased.some(item => item.toLowerCase().includes(lowerCaseQuery));\n      const addressMatch = user.address.toLowerCase().includes(lowerCaseQuery);\n      const zipCodeMatch = user.zipCode.includes(lowerCaseQuery);\n      return nameMatch || purchasedMatch || addressMatch || zipCodeMatch;\n    });\n  }, [users]); // 'users' is stable, but include if it could change\n\n  // Effect to perform search when debounced term changes\n  useEffect(() => {\n    const filtered = performSearch(debouncedSearchTerm);\n    setSearchResults(filtered);\n    setSelectedIndex(filtered.length > 0 ? 0 : -1); // Auto-select first if results exist\n    setIsDropdownOpen(debouncedSearchTerm.trim().length > 0 && filtered.length > 0); // Open if term and results\n  }, [debouncedSearchTerm, performSearch]);\n\n  // Keyboard navigation logic\n  useEffect(() => {\n    const handleKeyDown = (e) => {\n      if (!isDropdownOpen || searchResults.length === 0) return;\n\n      switch (e.key) {\n        case 'ArrowDown':\n          e.preventDefault();\n          setSelectedIndex(prevIndex => (prevIndex + 1) % searchResults.length);\n          break;\n        case 'ArrowUp':\n          e.preventDefault();\n          setSelectedIndex(prevIndex => (prevIndex - 1 + searchResults.length) % searchResults.length);\n          break;\n        case 'Enter':\n          e.preventDefault();\n          if (selectedIndex !== -1 && selectedIndex < searchResults.length) {\n            const selectedUser = searchResults[selectedIndex];\n            console.log('Selected user:', selectedUser);\n            setSearchTerm(selectedUser.name); // Update input field with selected name\n            setIsDropdownOpen(false); // Close dropdown\n            searchInputRef.current?.focus(); // Return focus to input for continued typing\n          }\n          break;\n        case 'Escape':\n          setIsDropdownOpen(false);\n          searchInputRef.current?.focus(); // Return focus to input\n          break;\n        default:\n          break;\n      }\n    };\n\n    window.addEventListener('keydown', handleKeyDown);\n    return () => window.removeEventListener('keydown', handleKeyDown);\n  }, [searchResults, selectedIndex, isDropdownOpen]);\n\n  // Scroll selected item into view\n  useEffect(() => {\n    if (resultsContainerRef.current && selectedIndex !== -1) {\n      const selectedElement = resultsContainerRef.current.children[selectedIndex];\n      if (selectedElement) {\n        selectedElement.scrollIntoView({\n          behavior: 'smooth',\n          block: 'nearest'\n        });\n      }\n    }\n  }, [selectedIndex, searchResults]); // Dependency on searchResults ensures it runs if results change while an item is selected\n\n  // Close dropdown on click outside\n  useEffect(() => {\n    const handleClickOutside = (event) => {\n      if (searchInputRef.current && !searchInputRef.current.contains(event.target) &&\n          resultsContainerRef.current && !resultsContainerRef.current.contains(event.target)) {\n        setIsDropdownOpen(false);\n      }\n    };\n    document.addEventListener('mousedown', handleClickOutside);\n    return () => document.removeEventListener('mousedown', handleClickOutside);\n  }, []);\n\n  return (\n    <div style={{ position: 'relative', width: '400px', margin: '50px auto', fontFamily: 'Arial, sans-serif' }}>\n      <input\n        type=\"text\"\n        placeholder=\"Search for users...\"\n        value={searchTerm}\n        onChange={(e) => setSearchTerm(e.target.value)}\n        onFocus={() => setIsDropdownOpen(searchTerm.trim().length > 0 && searchResults.length > 0)}\n        ref={searchInputRef}\n        id=\"user-search-input\"\n        role=\"combobox\"\n        aria-autocomplete=\"list\"\n        aria-controls={dropdownId}\n        aria-expanded={isDropdownOpen}\n        // aria-activedescendant points to the ID of the currently selected option\n        aria-activedescendant={selectedIndex !== -1 && isDropdownOpen && searchResults[selectedIndex] ? `result-item-${searchResults[selectedIndex].id}` : undefined}\n        style={{ width: '100%', padding: '10px', fontSize: '16px', border: '1px solid #ccc', borderRadius: '4px', boxSizing: 'border-box' }}\n      />\n      {isDropdownOpen && searchResults.length > 0 && (\n        <ul\n          id={dropdownId}\n          ref={resultsContainerRef}\n          role=\"listbox\"\n          style={{\n            listStyle: 'none',\n            padding: '0',\n            margin: '5px 0 0 0',\n            border: '1px solid #ddd',\n            maxHeight: '250px',\n            overflowY: 'auto',\n            position: 'absolute',\n            width: '100%',\n            zIndex: 1000,\n            backgroundColor: 'white',\n            boxShadow: '0 2px 8px rgba(0,0,0,0.15)',\n            borderRadius: '4px'\n          }}\n        >\n          {searchResults.map((user, index) => (\n            <li\n              key={user.id}\n              id={`result-item-${user.id}`}\n              role=\"option\"\n              aria-selected={index === selectedIndex}\n              className={index === selectedIndex ? 'selected' : ''}\n              onClick={() => {\n                console.log('Clicked user:', user);\n                setSearchTerm(user.name);\n                setIsDropdownOpen(false);\n                searchInputRef.current?.focus(); // Return focus to input on click\n              }}\n              style={{\n                padding: '12px',\n                cursor: 'pointer',\n                borderBottom: '1px solid #eee',\n                backgroundColor: index === selectedIndex ? '#f0f0f0' : 'white',\n                transition: 'background-color 0.1s ease'\n              }}\n            >\n              <strong>{user.name}</strong> ({user.zipCode})<br/>\n              <small>{user.address}</small><br/>\n              <small>Purchased: {user.purchased.join(', ')}</small>\n            </li>\n          ))}\n        </ul>\n      )}\n      {isDropdownOpen && searchResults.length === 0 && searchTerm.trim().length > 0 && (\n        <div style={{\n          padding: '12px',\n          border: '1px solid #ddd',\n          marginTop: '5px',\n          backgroundColor: 'white',\n          boxShadow: '0 2px 8px rgba(0,0,0,0.15)',\n          borderRadius: '4px'\n        }}>No results found.</div>\n      )}\n    </div>\n  );\n}\n\nexport default UserSearch;",
+          "testCases": [
+            "**Basic Search**: Type 'john' in the input. Verify 'John Smith' appears in the dropdown. Type 'ph'. Verify 'Sarah Johnson' appears. Type 'laptop'. Verify 'John Smith' appears. Type '10001'. Verify 'John Smith' appears.",
+            "**Debouncing**: Type a sequence of characters quickly (e.g., 'micr'). Observe that the search results update only after a short pause, not on every single character. You can add a `console.count('Search performed')` inside your `performSearch` function to verify this.",
+            "**Keyboard Navigation - ArrowDown**: With results displayed, press `ArrowDown` repeatedly. Verify the highlighted item moves down the list, wrapping from the last item back to the first. Ensure the browser doesn't scroll the page.",
+            "**Keyboard Navigation - ArrowUp**: With results displayed, press `ArrowUp` repeatedly. Verify the highlighted item moves up the list, wrapping from the first item back to the last. Ensure the browser doesn't scroll the page.",
+            "**Keyboard Navigation - Scroll into View**: If the results list is long and scrollable, navigate using arrow keys. Verify that the highlighted item automatically scrolls into the visible area of the dropdown when it goes out of view.",
+            "**Keyboard Navigation - Enter Selection**: Navigate to an item (e.g., 'David Lee'). Press `Enter`. Verify 'David Lee' is logged to the console, the input field updates to 'David Lee', and the dropdown closes.",
+            "**Keyboard Navigation - Escape**: With the dropdown open, press `Escape`. Verify the dropdown closes.",
+            "**Dropdown Visibility**: \n    *   Start with an empty input: Dropdown should be hidden.\n    *   Type 'abc' (no match): Dropdown should be open showing 'No results found.'.\n    *   Delete all text from input: Dropdown should close.\n    *   Click input to focus, then click outside: Dropdown should close.",
+            "**Accessibility (ARIA)**: Use browser developer tools (e.g., Chrome's Accessibility tab) to inspect the search input and dropdown elements. Verify that `role=\"combobox\"`, `aria-autocomplete=\"list\"`, `aria-controls=\"user-search-results\"`, `aria-expanded=\"true\"`/`\"false\"`, `aria-activedescendant=\"result-item-X\"` (where X is the ID of the selected item) are dynamically present and correct on the input. Verify `role=\"listbox\"` on the `<ul>` and `role=\"option\"` and `aria-selected=\"true\"`/`\"false\"` on the `<li>` items.",
+            "**Click Outside**: Click inside the input, then click a blank area of the page. The dropdown should hide."
+          ],
+          "hints": [
+            "Start by implementing the `useDebounce` hook, as it's fundamental to the performance requirement.",
+            "Your main search `useEffect` should depend on the `debouncedSearchTerm`. Use `useCallback` for your `performSearch` function if `users` array is mutable, or if it has other changing dependencies, to avoid unnecessary re-creations.",
+            "For keyboard navigation, attach the `keydown` event listener to `window` or `document`. Remember to return a cleanup function from `useEffect` to remove the event listener when the component unmounts to prevent memory leaks.",
+            "The modulo operator (`%`) is useful for handling wrap-around logic for `selectedIndex` (`(prevIndex + 1) % length` and `(prevIndex - 1 + length) % length` for negative results).",
+            "`scrollIntoView({ behavior: 'smooth', block: 'nearest' })` is a powerful method available on DOM elements for programmatic scrolling.",
+            "Ensure unique `id` attributes for each list item (`<li id={`result-item-${user.id}`}>`) to correctly link them via `aria-activedescendant` on the input.",
+            "Think about `selectedIndex` initialization. If `searchResults` are available, `selectedIndex` should ideally start at `0` to pre-select the first item. If no results, it should be `-1`."
+          ],
+          "tags": [
+            "React",
+            "Hooks",
+            "Accessibility",
+            "Performance",
+            "Frontend Development",
+            "UI/UX",
+            "Complex Forms"
+          ],
+          "timeEstimate": 180,
+          "prerequisites": [
+            "theory_react_user_search_interface",
+            "React Hooks",
+            "JavaScript ES6+",
+            "DOM Events"
+          ],
+          "complexity": 9,
+          "interviewRelevance": 10,
+          "learningPath": "advanced",
+          "relatedConcepts": [
+            "Controlled Components",
+            "Custom Hooks",
+            "Functional Programming",
+            "Web Accessibility Guidelines"
+          ]
+        }
+      ]
+    }
+  }
+]

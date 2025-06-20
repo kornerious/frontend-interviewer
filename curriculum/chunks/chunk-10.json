@@ -1,0 +1,1164 @@
+[
+  {
+    "id": "5b3f79a8-86e0-4b5d-a48c-65f527cac722",
+    "startLine": 2000,
+    "endLine": 2099,
+    "processedDate": "2025-06-17T08:06:54.131Z",
+    "content": {
+      "logicalBlockInfo": {
+        "suggestedEndLine": -1
+      },
+      "theory": [
+        {
+          "id": "theory_async_fetch_retry",
+          "title": "Asynchronous Operations: Fetch with Retry and Exponential Backoff",
+          "content": "## Concept\nWhen making network requests (e.g., using `fetch`), transient errors like network glitches or server overload can occur. A retry mechanism allows an application to automatically re-attempt a failed request, improving robustness and user experience. Exponential backoff is a strategy often combined with retries, where the delay between retries increases exponentially. This prevents overwhelming a potentially recovering server and gives it time to stabilize.\n\n## Implementation Details\n*   **`fetch(url, options)`**: The standard Web API for making network requests, returning a `Promise` that resolves to a `Response` object.\n*   **`async`/`await`**: Simplifies asynchronous code, making it look more synchronous. `await` pauses execution until the `Promise` settles (resolves or rejects).\n*   **`try...catch`**: Catches errors that occur during the `fetch` operation. If an error is caught, the retry logic is initiated.\n*   **Recursion**: The `fetchWithRetry` function calls itself (`return fetchWithRetry(...)`) with a decremented `retries` count. This allows for a clean, recursive retry loop.\n*   **`retries` parameter**: A counter that tracks the number of remaining attempts. The recursion stops when `retries` reaches 0, at which point the error is re-thrown.\n*   **`backoff` parameter**: The initial delay (in milliseconds) before the first retry. This value is used to calculate subsequent delays.\n*   **Exponential Delay Calculation**: `delay = backoff * Math.pow(2, 3 - retries)`. This formula calculates an exponentially increasing delay. For example, if `retries` starts at 3:\n    *   1st retry (`retries=2`): `backoff * Math.pow(2, 1)`\n    *   2nd retry (`retries=1`): `backoff * Math.pow(2, 2)`\n    *   3rd retry (`retries=0`): `backoff * Math.pow(2, 3)`\n*   **`new Promise(resolve => setTimeout(resolve, delay))`**: Creates a promise that resolves after a specified `delay`. Awaiting this promise pauses the function's execution, creating the necessary delay before the next retry attempt.\n\n## Advantages\n*   **Improved Reliability**: Makes network operations more resilient to temporary failures.\n*   **Reduced Server Load**: Exponential backoff prevents stampeding retries from hammering a struggling server.\n*   **Better User Experience**: Transparently handles failures without immediate error messages.\n\n## Disadvantages\n*   **Increased Latency**: Retries introduce delays, potentially making operations take longer.\n*   **Complexity**: Adds logic to network requests that might not always be necessary.\n*   **Not for all errors**: Only suitable for transient errors; permanent errors (e.g., 404 Not Found, 401 Unauthorized) should not be retried indefinitely.",
+          "examples": [
+            {
+              "id": "example_async_fetch_retry_1",
+              "title": "Basic Fetch with Retry Implementation",
+              "code": "async function fetchWithRetry(url, options = {}, retries = 3, backoff = 300) {\n  try {\n    console.log(`Attempting fetch for ${url} (retries left: ${retries})`);\n    const response = await fetch(url, options);\n    if (!response.ok) {\n      // Consider non-2xx responses as errors for retry purposes, e.g., 5xx errors\n      throw new Error(`HTTP error! status: ${response.status}`);\n    }\n    return response;\n  } catch (error) {\n    console.error(`Fetch failed: ${error.message}`);\n    if (retries > 0) {\n      const delay = backoff * Math.pow(2, 3 - retries);\n      console.log(`Retrying in ${delay}ms...`);\n      await new Promise(resolve => setTimeout(resolve, delay));\n      return fetchWithRetry(url, options, retries - 1, backoff);\n    }\n    throw error; // Re-throw if no retries left\n  }\n}\n\n// Example usage:\n// (async () => {\n//   try {\n//     const data = await fetchWithRetry('https://jsonplaceholder.typicode.com/todos/1', {}, 3, 200);\n//     console.log('Data fetched successfully:', await data.json());\n//   } catch (err) {\n//     console.error('Failed after multiple retries:', err.message);\n//   }\n// })();\n\n// Example for a failing URL (uncomment to test retry logic)\n// (async () => {\n//   try {\n//     const data = await fetchWithRetry('https://httpstat.us/500', {}, 3, 200);\n//     console.log('Data fetched successfully:', await data.json());\n//   } catch (err) {\n//     console.error('Failed after multiple retries:', err.message);\n//   }\n// })();",
+              "explanation": "This example demonstrates the `fetchWithRetry` function with added logging to show the retry attempts and delays. It includes a check for `response.ok` to treat non-2xx HTTP responses as errors that trigger retries. The commented-out sections show how to call the function with a successful URL and a simulated failing URL (HTTP 500) to observe the retry mechanism in action.",
+              "language": "typescript"
+            }
+          ],
+          "relatedQuestions": [
+            "question_fetch_retry_mcq_1",
+            "question_fetch_retry_open_1",
+            "question_fetch_retry_flashcard_1",
+            "question_fetch_retry_code_1"
+          ],
+          "relatedTasks": [
+            "task_implement_fetch_with_jitter"
+          ],
+          "tags": [
+            "async",
+            "promises",
+            "error-handling",
+            "network",
+            "api-calls",
+            "resilience"
+          ],
+          "technology": "JavaScript",
+          "prerequisites": [
+            "async_await",
+            "promises",
+            "error_handling",
+            "fetch_api"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 8,
+          "learningPath": "intermediate",
+          "requiredFor": [
+            "robust_api_design",
+            "client_server_communication"
+          ]
+        },
+        {
+          "id": "theory_async_concurrent_limit",
+          "title": "Asynchronous Operations: Concurrent Task Limiter",
+          "content": "## Concept\nWhen dealing with a large number of asynchronous tasks (e.g., many API calls, file processing, or image loading), executing them all concurrently can overwhelm system resources, lead to rate limiting from servers, or degrade performance. A concurrent task limiter (or concurrency pool/throttle) allows you to control the maximum number of tasks that can run simultaneously. Once the limit is reached, subsequent tasks wait until one of the currently executing tasks completes, freeing up a slot.\n\n## Implementation Details\n*   **`tasks` array**: An array of functions, where each function returns a Promise. This design makes the limiter generic, as it doesn't care what the promise does, only that it produces one.\n*   **`limit`**: The maximum number of concurrent tasks allowed.\n*   **`results` array**: Stores promises for the final results of all tasks. `Promise.all(results)` is used at the end to wait for all tasks (even those that were queued) to complete and collect their results in order.\n*   **`executing` array**: This is the core of the concurrency control. It holds promises that represent the *currently running* tasks. When a task starts, its completion promise is added to `executing`.\n*   **`Promise.resolve().then(() => task())`**: Ensures that each `task()` function is called and its result (a promise) is immediately wrapped and pushed to `results`. This also ensures that `task()` is only called when its turn comes in the loop, not necessarily when it's allowed to *execute* concurrently.\n*   **`p.then(() => executing.splice(executing.indexOf(e), 1))`**: Once a promise `p` (representing a task's execution) resolves, its corresponding entry `e` is removed from the `executing` array. This frees up a slot for a new task.\n*   **`if (executing.length >= limit)`**: This condition checks if the concurrency limit has been reached. If it has, the system needs to wait for an existing task to finish before starting a new one.\n*   **`await Promise.race(executing)`**: This is the key to pausing execution. `Promise.race()` returns a promise that settles as soon as *any* of the promises in the `executing` array settles. By `await`ing this, the loop effectively pauses until a slot becomes available (i.e., one of the currently running tasks finishes and its promise resolves/rejects). After `Promise.race` resolves, the `then` callback associated with the finished promise (which removes it from `executing`) will run, making space.\n\n## How it Works (Simplified Flow)\n1.  Iterate through `tasks`.\n2.  For each `task`, create a promise `p` that represents its execution.\n3.  Add `p` to the `results` array (to eventually collect all results).\n4.  Create a separate promise `e` that resolves when `p` resolves, and critically, when `e` resolves, it removes itself from the `executing` array.\n5.  Add `e` to the `executing` array.\n6.  If `executing.length` reaches `limit`, `await Promise.race(executing)`. This pauses the `for` loop until *any* of the `executing` tasks finishes, which then removes itself from `executing`, reducing its length below the limit and allowing the loop to continue with the next task.\n7.  After the loop finishes, `Promise.all(results)` waits for all tasks to truly complete and collects their outcomes.\n\n## Advantages\n*   **Resource Management**: Prevents overwhelming the client or server.\n*   **Stability**: Avoids hitting rate limits or crashing due to too many open connections.\n*   **Predictable Performance**: Ensures a more stable execution flow.\n\n## Disadvantages\n*   **Increased Complexity**: Requires careful management of promises and execution state.\n*   **Potential Deadlocks (if not careful)**: Incorrect logic could lead to tasks waiting indefinitely.\n*   **Overhead**: Some performance overhead due to managing the queue and promises.",
+          "examples": [
+            {
+              "id": "example_async_concurrent_limit_1",
+              "title": "Basic Concurrent Task Limiter Usage",
+              "code": "async function concurrentLimit(tasks, limit) {\n  const results = [];\n  const executing = [];\n\n  for (const task of tasks) {\n    // Wrap task in a Promise to ensure it's a promise, and to track its resolution.\n    // We immediately push this promise to results, as we want to collect ALL results.\n    const p = Promise.resolve().then(() => task());\n    results.push(p);\n\n    if (limit <= tasks.length) {\n      // 'e' represents the promise that resolves when 'p' finishes AND removes itself\n      // from the 'executing' queue. This is crucial for freeing up a slot.\n      const e = p.then(() => executing.splice(executing.indexOf(e), 1));\n      executing.push(e);\n\n      // If we've hit the limit, wait for at least one task to complete.\n      // Promise.race allows us to wait for *any* of the currently executing\n      // tasks to finish, freeing up a slot for the next task in the loop.\n      if (executing.length >= limit) {\n        await Promise.race(executing);\n      }\n    }\n  }\n  \n  // Wait for all tasks (both currently executing and those that were queued) to complete.\n  return Promise.all(results);\n}\n\n// Helper function to simulate an async task\nconst createTask = (id, duration) => () => {\n  console.log(`Task ${id} started (duration: ${duration}ms)`);\n  return new Promise(resolve => setTimeout(() => {\n    console.log(`Task ${id} finished`);\n    resolve(`Result of Task ${id}`);\n  }, duration));\n};\n\n// Example usage:\n// const tasksToRun = [\n//   createTask(1, 1000),\n//   createTask(2, 500),\n//   createTask(3, 1200),\n//   createTask(4, 700),\n//   createTask(5, 300),\n//   createTask(6, 1500),\n// ];\n\n// (async () => {\n//   console.log('Starting concurrent tasks with limit 2...');\n//   const results = await concurrentLimit(tasksToRun, 2);\n//   console.log('All tasks completed:', results);\n// })();\n\n// Expected output with limit 2:\n// Task 1 started (duration: 1000ms)\n// Task 2 started (duration: 500ms)\n// Task 2 finished\n// Task 3 started (duration: 1200ms)\n// Task 1 finished\n// Task 4 started (duration: 700ms)\n// Task 5 started (duration: 300ms)\n// Task 5 finished\n// Task 6 started (duration: 1500ms)\n// Task 4 finished\n// Task 3 finished\n// Task 6 finished\n// All tasks completed: [ 'Result of Task 1', 'Result of Task 2', 'Result of Task 3', 'Result of Task 4', 'Result of Task 5', 'Result of Task 6' ]",
+              "explanation": "This example provides a concrete demonstration of the `concurrentLimit` function. It includes a `createTask` helper to easily generate simulated asynchronous operations with varying durations. By uncommenting the example usage, you can observe how tasks are initiated and completed, adhering to the specified concurrency limit. The log messages illustrate the staggered start and finish times, confirming that only a maximum of `limit` tasks run at any given moment.",
+              "language": "typescript"
+            }
+          ],
+          "relatedQuestions": [
+            "question_concurrent_limit_mcq_1",
+            "question_concurrent_limit_open_1",
+            "question_concurrent_limit_flashcard_1",
+            "question_concurrent_limit_code_1"
+          ],
+          "relatedTasks": [
+            "task_implement_concurrency_pool"
+          ],
+          "tags": [
+            "async",
+            "promises",
+            "concurrency",
+            "task-management",
+            "performance",
+            "resource-control"
+          ],
+          "technology": "JavaScript",
+          "prerequisites": [
+            "async_await",
+            "promises",
+            "promise_all",
+            "promise_race"
+          ],
+          "complexity": 8,
+          "interviewRelevance": 9,
+          "learningPath": "advanced",
+          "requiredFor": [
+            "complex_async_flows",
+            "data_fetching_optimization"
+          ]
+        },
+        {
+          "id": "theory_async_cancellable_promises",
+          "title": "Asynchronous Operations: Cancellable Promises",
+          "content": "## Concept\nStandard JavaScript Promises are not inherently cancellable. Once initiated, there's no built-in mechanism to stop their execution or prevent their `.then()` or `.catch()` callbacks from firing. This can lead to issues like:\n*   **Memory Leaks/Performance Issues**: Holding references to components that have been unmounted (e.g., waiting for an API call, then trying to update state on a non-existent component).\n*   **Race Conditions**: When multiple async operations are triggered, and an earlier, slower operation finishes after a later, faster one, potentially overwriting correct state.\n\nA cancellable promise pattern introduces a way to signal that the result of an asynchronous operation should be ignored or that the operation itself should ideally cease execution (though truly stopping a low-level operation like `fetch` mid-flight is not possible in JavaScript without browser intervention). Instead, it prevents the resolution/rejection callbacks from propagating their values if cancellation has been requested.\n\n## Implementation Details\n*   **`isCancelled` flag**: A boolean variable, typically closed over by a closure, which indicates whether the cancellation signal has been received.\n*   **`wrappedPromise`**: A new `Promise` is created to wrap the original `promise`. This wrapper promise is what consumers will interact with.\n*   **Conditional Resolution/Rejection**: Inside the `wrappedPromise`'s executor, the original `promise`'s `then` method is called. The crucial part is that within the `then` callbacks (both for success and failure), the `isCancelled` flag is checked:\n    *   If `isCancelled` is `true`, the `wrappedPromise` is rejected with a specific object (e.g., `{ isCancelled: true }`). This allows the consumer to differentiate between a true error and a cancellation.\n    *   If `isCancelled` is `false`, the original value or error is propagated to `resolve` or `reject` respectively.\n*   **`cancel` function**: A simple function that sets the `isCancelled` flag to `true`.\n*   **Return Object**: The `createCancellablePromise` function returns an object containing both the `promise` (the `wrappedPromise`) and the `cancel` function, allowing the consumer to manage the promise's lifecycle.\n\n## How it Works\nWhen you call `cancel()`, the `isCancelled` flag is set. If the original promise subsequently resolves or rejects, the `wrappedPromise`'s internal `then` callbacks will check `isCancelled`. If `true`, instead of resolving with the original value or rejecting with the original error, it will immediately reject with a cancellation signal. Consumers of the `wrappedPromise` can then catch this specific cancellation rejection and handle it appropriately (e.g., by doing nothing or cleaning up).\n\n## Limitations\n*   **Does not truly abort an ongoing operation**: For network requests (like `fetch`), the underlying request will still complete and consume network resources. This pattern only prevents the *JavaScript callbacks* from executing their payload.\n*   **Requires cooperation**: The calling code must check for the cancellation rejection to properly ignore the result.\n*   **More advanced cancellation**: For truly aborting `fetch` requests, the `AbortController` API is the modern and recommended approach.",
+          "examples": [
+            {
+              "id": "example_async_cancellable_promises_1",
+              "title": "Basic Cancellable Promise Usage",
+              "code": "function createCancellablePromise(promise) {\n  let isCancelled = false;\n  \n  const wrappedPromise = new Promise((resolve, reject) => {\n    promise.then(\n      value => isCancelled ? reject({ isCancelled: true, message: 'Promise cancelled' }) : resolve(value),\n      error => isCancelled ? reject({ isCancelled: true, message: 'Promise cancelled due to error' }) : reject(error)\n    );\n  });\n  \n  return {\n    promise: wrappedPromise,\n    cancel: () => { isCancelled = true; }\n  };\n}\n\n// Simulate an async operation\nconst longRunningOperation = (value, delay) => new Promise(resolve => {\n  console.log(`Operation '${value}' started, will resolve in ${delay}ms`);\n  setTimeout(() => {\n    console.log(`Operation '${value}' actually completed`);\n    resolve(value);\n  }, delay);\n});\n\n// Example 1: Successful completion\n// (async () => {\n//   console.log('\\n--- Example 1: Successful completion ---');\n//   const { promise } = createCancellablePromise(longRunningOperation('Data A', 100));\n//   try {\n//     const result = await promise;\n//     console.log('Result:', result);\n//   } catch (error) {\n//     console.error('Error (should not happen):', error);\n//   }\n// })();\n\n// Example 2: Cancellation before completion\n// (async () => {\n//   console.log('\\n--- Example 2: Cancellation before completion ---');\n//   const { promise, cancel } = createCancellablePromise(longRunningOperation('Data B', 500));\n//   setTimeout(() => {\n//     console.log('Calling cancel() for Data B');\n//     cancel();\n//   }, 100);\n\n//   try {\n//     const result = await promise;\n//     console.log('Result:', result); // This line won't be reached\n//   } catch (error) {\n//     if (error && error.isCancelled) {\n//       console.warn('Promise was cancelled:', error.message);\n//     } else {\n//       console.error('Regular error:', error);\n//     }\n//   }\n// })();\n\n// Example 3: Original promise rejects, but cancelled\n// (async () => {\n//   console.log('\\n--- Example 3: Original promise rejects, but cancelled ---');\n//   const failingOperation = () => new Promise((_, reject) => {\n//     setTimeout(() => reject(new Error('Original operation failed')), 300);\n//   });\n//   const { promise, cancel } = createCancellablePromise(failingOperation());\n//   setTimeout(() => {\n//     console.log('Calling cancel() for failing operation');\n//     cancel();\n//   }, 100);\n\n//   try {\n//     await promise;\n//   } catch (error) {\n//     if (error && error.isCancelled) {\n//       console.warn('Promise was cancelled during original rejection:', error.message);\n//     } else {\n//       console.error('Regular error:', error.message);\n//     }\n//   }\n// })();",
+              "explanation": "This example demonstrates how to use the `createCancellablePromise` function. It includes a `longRunningOperation` helper to simulate an asynchronous task. Three scenarios are shown:\n1.  **Successful Completion**: The promise resolves normally as no cancellation occurs.\n2.  **Cancellation before Completion**: The `cancel()` function is called before `longRunningOperation` finishes. The `wrappedPromise` then rejects with `{ isCancelled: true }`, which is caught and handled.\n3.  **Original Promise Rejects but Cancelled**: Even if the original promise would have rejected, if `cancel()` is called first, the `wrappedPromise` still rejects with the cancellation signal, overriding the original error. This highlights that cancellation takes precedence.",
+              "language": "typescript"
+            }
+          ],
+          "relatedQuestions": [
+            "question_cancellable_promises_mcq_1",
+            "question_cancellable_promises_open_1",
+            "question_cancellable_promises_flashcard_1",
+            "question_cancellable_promises_code_1"
+          ],
+          "relatedTasks": [
+            "task_implement_cancel_previous_fetch"
+          ],
+          "tags": [
+            "async",
+            "promises",
+            "cancellation",
+            "error-handling",
+            "frontend-patterns",
+            "lifecycle"
+          ],
+          "technology": "JavaScript",
+          "prerequisites": [
+            "promises",
+            "async_await",
+            "closures"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 7,
+          "learningPath": "advanced",
+          "requiredFor": [
+            "react_component_lifecycle",
+            "efficient_ui_updates"
+          ]
+        },
+        {
+          "id": "theory_object_creation_patterns",
+          "title": "Objects and Prototypes: Object Creation Patterns",
+          "content": "## Concept\nIn JavaScript, objects are fundamental. There are several common patterns for creating objects, each with its own advantages, disadvantages, and implications for inheritance, `this` binding, and memory usage. Understanding these patterns is crucial for writing efficient, maintainable, and idiomatic JavaScript code.\n\n## Object Literal Pattern\n*   **Description**: The simplest way to create a single object. It's a direct declaration of an object with its properties and methods.\n*   **Syntax**: `const obj = { key: value, method() {} };`\n*   **Pros**: Easy to read and write, ideal for single instances or quick data structures.\n*   **Cons**: Not suitable for creating multiple instances with shared methods (methods would be duplicated for each object, consuming more memory).\n*   **`this` context**: `this` inside methods refers to the object itself.\n\n```javascript\nconst personLiteral = {\n  firstName: 'John',\n  lastName: 'Doe',\n  getFullName() {\n    return this.firstName + ' ' + this.lastName;\n  }\n};\n```\n\n## Constructor Function Pattern\n*   **Description**: Uses a regular function called with the `new` keyword to create new instances of objects. This pattern mimics class-based inheritance in other languages, though JavaScript's underlying mechanism is prototype-based.\n*   **Syntax**: `function MyObject(prop1) { this.prop1 = prop1; } const instance = new MyObject('value');`\n*   **Pros**: Allows for creating multiple instances with a clear blueprint. Methods can be shared via the prototype chain (`MyObject.prototype.method = ...`), saving memory.\n*   **Cons**: Requires the `new` keyword, which can be easily forgotten, leading to incorrect `this` binding (global object in non-strict mode, `undefined` in strict mode). Methods defined directly on `this` inside the constructor are duplicated for every instance.\n*   **`this` context**: When called with `new`, `this` inside the constructor refers to the newly created object. Methods defined on `this` refer to that specific instance. Methods defined on `MyObject.prototype` also correctly refer to the instance when called on an instance.\n\n```javascript\nfunction PersonConstructor(firstName, lastName) {\n  this.firstName = firstName;\n  this.lastName = lastName;\n  // Method defined directly on instance (memory inefficient for many instances)\n  this.getFullName = function() {\n    return this.firstName + ' ' + this.lastName;\n  };\n}\n// Better: method on prototype (shared across instances)\n// PersonConstructor.prototype.getFullName = function() {\n//   return this.firstName + ' ' + this.lastName;\n// };\n\nconst john = new PersonConstructor('John', 'Doe');\n```\n\n## Factory Function Pattern\n*   **Description**: A function that returns a new object. It doesn't use `new` and typically avoids `this` entirely, instead relying on closures to manage private data or parameters.\n*   **Syntax**: `function createMyObject(prop1) { return { prop1, method: () => prop1 }; } const instance = createMyObject('value');`\n*   **Pros**: Very flexible, no `new` keyword required, simplifies `this` binding issues as it often avoids `this`. Can create objects with private variables using closures. Can return different types of objects.\n*   **Cons**: Each method is recreated for every object instance (unless manually managed, e.g., by importing methods). No direct link to a shared prototype, which means `instanceof` won't work for type checking (though `typeof` will).\n*   **`this` context**: Often avoids `this` entirely. If `this` is used, its context depends on how the returned object's method is called.\n\n```javascript\nfunction createPersonFactory(firstName, lastName) {\n  return {\n    firstName,\n    lastName,\n    getFullName() {\n      // Can directly access lexical scope variables here if preferred\n      return firstName + ' ' + lastName; // Example using closure, or this.firstName\n    }\n  };\n}\nconst jane = createPersonFactory('Jane', 'Doe');\n```\n\n## `Object.create()` Pattern\n*   **Description**: `Object.create()` creates a new object, using an existing object as the prototype of the newly created object. This provides a direct and explicit way to manage the prototype chain.\n*   **Syntax**: `const proto = { method() {} }; const obj = Object.create(proto);`\n*   **Pros**: Directly sets up prototype inheritance, enabling efficient method sharing. Good for implementing classical inheritance patterns or when you need a specific prototype chain.\n*   **Cons**: Less intuitive for beginners than object literals or constructor functions. Properties must be added manually or via `Object.defineProperties()`, which can be verbose.\n*   **`this` context**: Methods inherited from the prototype correctly reference `this` as the instance itself.\n\n```javascript\nconst personProto = {\n  getFullName() {\n    return this.firstName + ' ' + this.lastName;\n  }\n};\nconst bob = Object.create(personProto);\nbob.firstName = 'Bob';\nbob.lastName = 'Smith';\n```\n\n## ES6 Class Syntax (Syntactic Sugar)\nWhile not explicitly in the provided markdown, it's essential to understand that ES6 `class` syntax is syntactic sugar over the constructor function and prototype pattern. It simplifies the definition of constructor functions and their prototype methods.\n\n```javascript\nclass PersonClass {\n  constructor(firstName, lastName) {\n    this.firstName = firstName;\n    this.lastName = lastName;\n  }\n  getFullName() {\n    return this.firstName + ' ' + this.lastName;\n  }\n}\nconst alice = new PersonClass('Alice', 'Wonderland');\n```\n\n## Choosing a Pattern\n*   **Object Literal**: For single, unique objects (e.g., configuration objects, utility namespaces).\n*   **Constructor Function / ES6 Class**: For creating multiple instances of the same 'type' of object where inheritance and `instanceof` checks are desired, and methods should be shared via the prototype.\n*   **Factory Function**: For creating objects where `new` keyword is undesirable, or where privacy (via closures) is needed, or when you need to return different types of objects based on input.\n*   **`Object.create()`**: When you need precise control over the prototype chain, e.g., for mixins or explicit inheritance models.",
+          "examples": [
+            {
+              "id": "example_object_creation_patterns_1",
+              "title": "Demonstration of Object Literal",
+              "code": "const config = {\n  apiUrl: 'https://api.example.com',\n  timeout: 5000,\n  version: '1.0',\n  getConfig() {\n    return `API URL: ${this.apiUrl}, Timeout: ${this.timeout}ms`;\n  }\n};\n\nconsole.log(config.getConfig()); // Output: API URL: https://api.example.com, Timeout: 5000ms",
+              "explanation": "This example shows a simple object literal used for a configuration object. It's concise and perfectly suited for a single instance of an object that holds related properties and methods.",
+              "language": "typescript"
+            },
+            {
+              "id": "example_object_creation_patterns_2",
+              "title": "Demonstration of Constructor Function with Prototype Method",
+              "code": "function Book(title, author) {\n  this.title = title;\n  this.author = author;\n}\n\n// Method added to the prototype, shared by all instances\nBook.prototype.getSummary = function() {\n  return `${this.title} by ${this.author}`;\n};\n\nconst book1 = new Book('The Hobbit', 'J.R.R. Tolkien');\nconst book2 = new Book('1984', 'George Orwell');\n\nconsole.log(book1.getSummary()); // Output: The Hobbit by J.R.R. Tolkien\nconsole.log(book2.getSummary()); // Output: 1984 by George Orwell\nconsole.log(book1.getSummary === book2.getSummary); // Output: true (methods are shared)",
+              "explanation": "This example uses a constructor function `Book`. Crucially, the `getSummary` method is added to `Book.prototype`. This ensures that all instances of `Book` share the same `getSummary` method, leading to better memory efficiency compared to defining the method directly on `this` inside the constructor. The `console.log` confirms that the method reference is identical for both instances.",
+              "language": "typescript"
+            },
+            {
+              "id": "example_object_creation_patterns_3",
+              "title": "Demonstration of Factory Function with Closure",
+              "code": "function createCounter(initialValue = 0) {\n  let count = initialValue; // Private variable via closure\n  return {\n    increment: () => { count++; return count; },\n    decrement: () => { count--; return count; },\n    getCount: () => count\n  };\n}\n\nconst counter1 = createCounter(5);\nconsole.log(counter1.increment()); // Output: 6\nconsole.log(counter1.getCount());    // Output: 6\n\nconst counter2 = createCounter(10);\nconsole.log(counter2.decrement()); // Output: 9\nconsole.log(counter1.getCount());    // Output: 6 (counter1's count is independent)",
+              "explanation": "This example demonstrates a factory function `createCounter`. It utilizes a closure to create a private `count` variable that cannot be accessed directly from outside the returned object. Each call to `createCounter` creates a new, independent counter instance with its own `count` state. This pattern is excellent for encapsulating state and methods without relying on `this`.",
+              "language": "typescript"
+            }
+          ],
+          "relatedQuestions": [
+            "question_object_creation_mcq_1",
+            "question_object_creation_open_1",
+            "question_object_creation_flashcard_1",
+            "question_object_creation_code_1",
+            "question_object_creation_mcq_2",
+            "question_object_creation_open_2"
+          ],
+          "relatedTasks": [
+            "task_implement_shape_factory",
+            "task_create_user_manager"
+          ],
+          "tags": [
+            "objects",
+            "prototypes",
+            "inheritance",
+            "javascript-fundamentals",
+            "design-patterns",
+            "this-keyword"
+          ],
+          "technology": "JavaScript",
+          "prerequisites": [
+            "javascript_basics",
+            "functions",
+            "closures",
+            "this_keyword"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 9,
+          "learningPath": "intermediate",
+          "requiredFor": [
+            "oop_in_js",
+            "design_patterns",
+            "react_component_state"
+          ]
+        }
+      ],
+      "questions": [
+        {
+          "id": "question_fetch_retry_mcq_1",
+          "topic": "Fetch with Retry and Exponential Backoff",
+          "level": "medium",
+          "type": "mcq",
+          "question": "Consider the `fetchWithRetry` function provided. What is the primary purpose of `await new Promise(resolve => setTimeout(resolve, delay))` within the `catch` block?",
+          "answer": "To introduce a delay before retrying the fetch request.",
+          "options": [
+            "To introduce a delay before retrying the fetch request.",
+            "To convert the `setTimeout` callback into a Promise.",
+            "To ensure the error is caught asynchronously.",
+            "To prevent the browser from freezing during the retry."
+          ],
+          "analysisPoints": [
+            "The core functionality of `setTimeout` is to schedule a function to run after a delay, but it doesn't return a Promise.",
+            "Wrapping `setTimeout` in `new Promise` allows `await` to be used with it, pausing the execution of the `async` function until the delay is over.",
+            "This pause is essential for implementing the backoff strategy, giving the server time to recover or reducing network congestion.",
+            "It's not primarily about converting a callback to a Promise, but rather about making a non-Promise-based delay mechanism `await`-able."
+          ],
+          "keyConcepts": [
+            "async/await",
+            "Promises",
+            "setTimeout",
+            "Exponential Backoff"
+          ],
+          "evaluationCriteria": [
+            "Understanding of `async/await` and Promises.",
+            "Knowledge of how to introduce delays in asynchronous functions.",
+            "Recognition of the purpose of exponential backoff."
+          ],
+          "example": "The code `await new Promise(resolve => setTimeout(resolve, delay))` uses `setTimeout` to wait for a specified `delay` and then resolves the internal promise. The `await` keyword then pauses the `fetchWithRetry` function's execution until that promise resolves, effectively creating a non-blocking delay before the next retry attempt.",
+          "tags": [
+            "async",
+            "promises",
+            "error-handling",
+            "network"
+          ],
+          "prerequisites": [
+            "async_await",
+            "promises",
+            "setTimeout"
+          ],
+          "complexity": 6,
+          "interviewFrequency": 7,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_fetch_retry_open_1",
+          "topic": "Fetch with Retry and Exponential Backoff",
+          "level": "hard",
+          "type": "open",
+          "question": "The provided `fetchWithRetry` function implements a basic exponential backoff. Describe a scenario where this specific backoff strategy (`backoff * Math.pow(2, 3 - retries)`) might not be optimal, and suggest how you would modify it to incorporate 'jitter'. Explain why jitter is beneficial.",
+          "answer": "This backoff strategy (pure exponential `backoff * Math.pow(2, 3 - retries)`) might not be optimal in scenarios where multiple clients simultaneously experience a failure and attempt to retry at the exact same exponential intervals. This can lead to a 'thundering herd' problem, where all clients retry at roughly the same time, hitting the server simultaneously and potentially causing another cascade of failures, rather than allowing the server to recover.\n\nTo incorporate 'jitter', you would add a random component to the calculated delay. There are two main types:\n1.  **Full Jitter**: `delay = Math.random() * (backoff * Math.pow(2, retries_attempted))`\n2.  **Decorrelated Jitter**: `delay = min(max_delay, random_multiplier * last_delay_duration)`\n\nFor the provided function, a simple way to add full jitter would be to modify the delay calculation to something like:\n```javascript\nconst delay = Math.random() * (backoff * Math.pow(2, 3 - retries));\n```\n(Adjusting `3 - retries` to be `initial_retries - retries` or `retries_attempted` for clarity, e.g., `retriesAttempted = initialRetries - retries; const delay = Math.random() * (backoff * Math.pow(2, retriesAttempted));`)\n\n**Why Jitter is Beneficial:**\nJitter helps to spread out the retry attempts over a slightly wider time window. Instead of all clients retrying at 1s, then 2s, then 4s, etc., they might retry at 0.7s, 1.3s, 1.9s, 3.5s, etc. This randomizes the timing of requests, reducing the likelihood of a large number of clients hitting the server at precisely the same moment. It effectively dampens the 'thundering herd' effect, allowing a recovering server to gradually handle incoming requests rather than being immediately overwhelmed again, thus improving overall system stability and recovery time.",
+          "analysisPoints": [
+            "Identifies the 'thundering herd' problem as a limitation of deterministic exponential backoff.",
+            "Explains the concept of 'jitter' in the context of retry strategies.",
+            "Proposes a concrete code modification to add jitter (e.g., using `Math.random()`).",
+            "Articulates the benefits of jitter, such as preventing server overload and improving recovery."
+          ],
+          "keyConcepts": [
+            "Exponential Backoff",
+            "Jitter",
+            "Thundering Herd Problem",
+            "Distributed Systems",
+            "Error Handling",
+            "Network Resilience"
+          ],
+          "evaluationCriteria": [
+            "Depth of understanding of retry strategies.",
+            "Ability to identify potential performance bottlenecks in distributed systems.",
+            "Creativity and correctness in proposing code modifications.",
+            "Clarity in explaining technical rationale."
+          ],
+          "example": "```javascript\nasync function fetchWithRetryWithJitter(url, options = {}, retries = 3, backoff = 300) {\n  try {\n    return await fetch(url, options);\n  } catch (error) {\n    if (retries > 0) {\n      const retriesAttempted = 3 - retries; // How many retries have occurred\n      // Full jitter: delay is a random value up to the calculated max exponential backoff\n      const maxDelay = backoff * Math.pow(2, retriesAttempted);\n      const delay = Math.random() * maxDelay;\n      \n      console.log(`Retrying in ${delay.toFixed(0)}ms (max ${maxDelay}ms)...`);\n      await new Promise(resolve => setTimeout(resolve, delay));\n      return fetchWithRetryWithJitter(url, options, retries - 1, backoff);\n    }\n    throw error;\n  }\n}\n\n// (async () => {\n//   try {\n//     await fetchWithRetryWithJitter('https://httpstat.us/500', {}, 3, 200); // Simulate failures\n//   } catch (err) {\n//     console.error('Failed after retries with jitter:', err.message);\n//   }\n// })();\n```",
+          "tags": [
+            "async",
+            "promises",
+            "error-handling",
+            "network",
+            "advanced-concepts",
+            "performance"
+          ],
+          "prerequisites": [
+            "fetch_retry",
+            "math_random"
+          ],
+          "complexity": 8,
+          "interviewFrequency": 6,
+          "learningPath": "advanced"
+        },
+        {
+          "id": "question_fetch_retry_flashcard_1",
+          "topic": "Fetch with Retry",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "What is the primary benefit of adding a retry mechanism to network requests?",
+          "answer": "Increases the robustness and reliability of API calls by automatically re-attempting failed requests, thereby improving resilience to transient network issues or server instability.",
+          "analysisPoints": [],
+          "keyConcepts": [
+            "Retry mechanism",
+            "Robustness",
+            "Reliability",
+            "Transient errors"
+          ],
+          "evaluationCriteria": [
+            "Basic understanding of retry purpose"
+          ],
+          "example": "",
+          "tags": [
+            "async",
+            "network"
+          ],
+          "prerequisites": [],
+          "complexity": 3,
+          "interviewFrequency": 7,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_fetch_retry_code_1",
+          "topic": "Fetch with Retry",
+          "level": "medium",
+          "type": "code",
+          "question": "Modify the `fetchWithRetry` function to include an `onError` callback that gets triggered on each failed retry attempt, receiving the `error` and the current `retryCount` (how many retries are left). The callback should not prevent the retry mechanism from continuing.",
+          "answer": "```javascript\nasync function fetchWithRetry(url, options = {}, retries = 3, backoff = 300, onError = () => {}) {\n  try {\n    return await fetch(url, options);\n  } catch (error) {\n    onError(error, retries); // Call the onError callback\n    if (retries > 0) {\n      const delay = backoff * Math.pow(2, 3 - retries);\n      await new Promise(resolve => setTimeout(resolve, delay));\n      return fetchWithRetry(url, options, retries - 1, backoff, onError); // Pass callback in recursive call\n    }\n    throw error;\n  }\n}\n\n// Example usage:\n// (async () => {\n//   console.log('Testing fetchWithRetry with onError callback...');\n//   try {\n//     const response = await fetchWithRetry(\n//       'https://httpstat.us/500', // URL that will fail\n//       {},\n//       3, // 3 retries\n//       100, // 100ms initial backoff\n//       (error, retriesLeft) => {\n//         console.warn(`Retry failed: ${error.message}. ${retriesLeft} retries left.`);\n//       }\n//     );\n//     console.log('Fetch succeeded after retries (should not happen for 500):', response.status);\n//   } catch (finalError) {\n//     console.error('Final failure after all retries:', finalError.message);\n//   }\n// })();\n```",
+          "options": [],
+          "analysisPoints": [
+            "Correctly identifies where to place the `onError` callback (inside the `catch` block before checking `retries > 0`).",
+            "Ensures the `onError` callback receives the correct arguments (`error` and `retries`).",
+            "Properly passes the `onError` callback in the recursive call to maintain its functionality across retries.",
+            "Demonstrates understanding that the callback should not interfere with the retry logic itself."
+          ],
+          "keyConcepts": [
+            "Callbacks",
+            "Function Parameters",
+            "Recursion",
+            "Error Handling",
+            "Asynchronous Logic"
+          ],
+          "evaluationCriteria": [
+            "Ability to integrate new functionality into existing async code.",
+            "Correct parameter passing in recursive functions.",
+            "Maintaining non-blocking behavior for callbacks."
+          ],
+          "example": "The provided solution adds an `onError` parameter to the `fetchWithRetry` function. Inside the `catch` block, immediately after an error occurs, `onError(error, retries)` is called. This allows external logic to react to each failed attempt. Crucially, the `onError` parameter is also passed into the recursive call `fetchWithRetry(url, options, retries - 1, backoff, onError)` to ensure the callback remains available for subsequent retries.",
+          "tags": [
+            "async",
+            "promises",
+            "error-handling",
+            "callbacks",
+            "refactoring"
+          ],
+          "prerequisites": [
+            "fetch_retry",
+            "functions",
+            "recursion"
+          ],
+          "complexity": 7,
+          "interviewFrequency": 6,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_concurrent_limit_mcq_1",
+          "topic": "Concurrent Task Limiter",
+          "level": "medium",
+          "type": "mcq",
+          "question": "In the `concurrentLimit` function, what is the primary role of `Promise.race(executing)`?",
+          "answer": "To pause the execution of the loop until at least one of the currently running tasks completes, freeing up a slot.",
+          "options": [
+            "To pause the execution of the loop until at least one of the currently running tasks completes, freeing up a slot.",
+            "To ensure all tasks in the `executing` array finish before the loop continues.",
+            "To return the result of the fastest task currently executing.",
+            "To cancel all pending tasks if one task fails."
+          ],
+          "analysisPoints": [
+            "`Promise.race` resolves or rejects as soon as *any* of the promises in its iterable settles.",
+            "In this context, it's used to detect when *any* of the `executing` tasks finishes.",
+            "Awaiting `Promise.race(executing)` allows the `for` loop to pause until a slot becomes available in the `executing` array.",
+            "It does not wait for *all* tasks (that's `Promise.all`), nor does it necessarily return the result to the caller (it's awaited internally), nor does it cancel tasks."
+          ],
+          "keyConcepts": [
+            "Promise.race",
+            "Concurrency Control",
+            "Async/Await",
+            "Task Queue"
+          ],
+          "evaluationCriteria": [
+            "Understanding of `Promise.race` functionality.",
+            "Ability to explain how `Promise.race` is applied for concurrency control.",
+            "Distinguishing between `Promise.race` and `Promise.all`."
+          ],
+          "example": "```javascript\n// Consider `executing` = [P1 (resolves in 100ms), P2 (resolves in 500ms)]\n// await Promise.race(executing) will resolve after P1 (100ms), \n// allowing the loop to proceed even if P2 is still running. \n// This is how it 'frees up a slot' for the next task without waiting for everything.\n```",
+          "tags": [
+            "async",
+            "promises",
+            "concurrency",
+            "performance"
+          ],
+          "prerequisites": [
+            "promise_race",
+            "async_await"
+          ],
+          "complexity": 7,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_concurrent_limit_open_1",
+          "topic": "Concurrent Task Limiter",
+          "level": "hard",
+          "type": "open",
+          "question": "The provided `concurrentLimit` function uses `executing.splice(executing.indexOf(e), 1)` to remove completed tasks from the `executing` array. Discuss potential edge cases or issues with this approach, especially if a task might fail or if promises could resolve unexpectedly quickly or slowly. How might you make this removal more robust?",
+          "answer": "The `executing.splice(executing.indexOf(e), 1)` approach has a potential edge case, though it's often negligible in practice:\n\n**Potential Issue: Multiple Identical Promises / Reference Integrity**: If, for some reason, the `executing` array could contain multiple *references to the exact same promise object `e`* (which is unlikely in the provided code, as `e` is newly created per task), `indexOf` would only find the *first* occurrence. `splice` would then only remove that first occurrence, leaving duplicates. However, in the given code, `e` is a unique `Promise` instance created for each `p` (`p.then(...)`), so this specific issue is less likely.\n\n**More significant consideration: Debugging and Clarity**: While functional, `indexOf` and `splice` can be less intuitive for managing a queue of promises. If a promise *fails*, it still settles and should be removed, which `p.then(() => ...)` correctly handles (as `then` runs for both resolution and rejection if the second argument is omitted, or the error propagates if not handled and removes the `e` from the `executing` array implicitly).\n\n**Robustness / Alternative Approaches:**\n1.  **Using a `Set` or `Map`**: Instead of an array, a `Set` (for unique promises) or a `Map` (if you need to associate data with each promise) can provide more robust and efficient removal, especially if the list of `executing` promises could become large.\n    *   **Set**: Add `e` to Set, then `executingSet.delete(e)` upon completion.\n    ```javascript\n    // ... inside loop\n    const executingSet = new Set();\n    // ...\n    const e = p.finally(() => executingSet.delete(e)); // `finally` ensures removal regardless of resolve/reject\n    executingSet.add(e);\n    if (executingSet.size >= limit) {\n        await Promise.race(executingSet);\n    }\n    // ...\n    return Promise.all(results);\n    ```\n    This is more robust as `Set.delete()` operates directly on the reference, not an index, avoiding `indexOf`'s potential pitfalls.\n\n2.  **Tracking `executing` promises via a counter and a queue**: A more traditional approach might involve a separate queue for pending tasks and a counter for currently running tasks. When a task finishes, the counter decrements, and the next task from the queue is started.\n    This allows for more explicit control over the flow and simplifies the `executing` array management.\n\n**Why `splice(indexOf(e))` works for this specific case:**\n*   Each `e` promise is a unique instance created via `p.then(...)`. So there won't be duplicate references to the same `e` in `executing` to confuse `indexOf`.\n*   `p.then(...)` will trigger its callback whether `p` resolves or rejects, ensuring `e` (and thus `p`) is removed from `executing` correctly upon settlement (completion).\n\nHowever, using `Set` with `finally` makes the completion handling slightly cleaner and semantically clearer that the promise is being removed from the set regardless of its outcome, and it can be more performant for very large `executing` arrays as `Set.delete` is average O(1) vs. `indexOf` which is O(N).",
+          "analysisPoints": [
+            "Identifies the specific technical point about `indexOf` and potential issues with non-unique references (though noting its less likely here).",
+            "Highlights the importance of handling both resolution and rejection for removal (`.then()` vs. `.finally()`).",
+            "Proposes a more robust alternative (using `Set.delete` or a task queue/counter) with code examples.",
+            "Explains the benefits of the proposed alternative (clarity, performance, direct reference handling)."
+          ],
+          "keyConcepts": [
+            "Promises",
+            "Array Methods (`indexOf`, `splice`)",
+            "Set Data Structure",
+            "Error Handling",
+            "Concurrency Patterns",
+            "Promise.finally"
+          ],
+          "evaluationCriteria": [
+            "Ability to critically analyze provided code for edge cases.",
+            "Knowledge of alternative data structures (Set) and their use cases.",
+            "Understanding of promise lifecycle (`.finally`).",
+            "Clarity and completeness of alternative solutions."
+          ],
+          "example": "```javascript\n// Alternative using Set and Promise.finally\nasync function concurrentLimitRobust(tasks, limit) {\n  const results = [];\n  const executingSet = new Set(); // Use a Set for robust removal\n  \n  for (const task of tasks) {\n    const p = Promise.resolve().then(() => task());\n    results.push(p);\n    \n    // Create a wrapper promise 'e' that removes itself from the set upon settlement\n    const e = p.finally(() => executingSet.delete(e));\n    executingSet.add(e); // Add to the set of executing promises\n    \n    if (executingSet.size >= limit) {\n      await Promise.race(executingSet); // Wait for any promise in the set to settle\n    }\n  }\n  \n  return Promise.all(results);\n}\n\n// (async () => {\n//   console.log('Testing robust concurrentLimit with Set...');\n//   const tasksToRun = [\n//     () => new Promise(res => setTimeout(() => { console.log('Task A done'); res('A'); }, 1000)),\n//     () => new Promise(res => setTimeout(() => { console.log('Task B done'); res('B'); }, 500)),\n//     () => new Promise((_, rej) => setTimeout(() => { console.log('Task C failed'); rej('C'); }, 1200))\n//   ];\n//   try {\n//     const results = await concurrentLimitRobust(tasksToRun, 2);\n//     console.log('All tasks completed:', results);\n//   } catch (error) {\n//     console.error('One or more tasks failed:', error);\n//   }\n// })();\n```",
+          "tags": [
+            "async",
+            "promises",
+            "concurrency",
+            "data-structures",
+            "refactoring",
+            "edge-cases"
+          ],
+          "prerequisites": [
+            "concurrent_limit",
+            "set_data_structure",
+            "promise_finally"
+          ],
+          "complexity": 8,
+          "interviewFrequency": 7,
+          "learningPath": "advanced"
+        },
+        {
+          "id": "question_concurrent_limit_flashcard_1",
+          "topic": "Concurrent Task Limiter",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "What is the primary benefit of using a concurrent task limiter?",
+          "answer": "It controls the maximum number of asynchronous operations running simultaneously, preventing resource exhaustion, rate limiting, and performance degradation.",
+          "analysisPoints": [],
+          "keyConcepts": [
+            "Concurrency",
+            "Resource management",
+            "Rate limiting",
+            "Performance"
+          ],
+          "evaluationCriteria": [
+            "Basic understanding of concurrency control"
+          ],
+          "example": "",
+          "tags": [
+            "async",
+            "concurrency"
+          ],
+          "prerequisites": [],
+          "complexity": 3,
+          "interviewFrequency": 6,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_concurrent_limit_code_1",
+          "topic": "Concurrent Task Limiter",
+          "level": "hard",
+          "type": "code",
+          "question": "Modify the `concurrentLimit` function to also return the results of tasks in the order they were provided, even if they completed out of order. Ensure that if any task fails, the final `Promise.all` still rejects, but all tasks are still attempted.",
+          "answer": "```javascript\nasync function concurrentLimit(tasks, limit) {\n  const results = []; // Stores promises for all task outcomes, in original order\n  const executing = []; // Stores promises for tasks currently running\n\n  for (let i = 0; i < tasks.length; i++) {\n    const task = tasks[i];\n    \n    // Create a promise for the current task. Use Promise.resolve() to ensure consistency\n    // and immediately call the task function.\n    const taskPromise = Promise.resolve().then(() => task());\n    results.push(taskPromise); // Store its promise in results to maintain order\n\n    // Create a promise 'completionPromise' that resolves when taskPromise completes.\n    // This is the one we add to 'executing' and remove when it's done.\n    // Using .finally() ensures it's removed whether it resolves or rejects.\n    const completionPromise = taskPromise.finally(() => {\n      // Remove the completionPromise from the executing array\n      executing.splice(executing.indexOf(completionPromise), 1);\n    });\n    executing.push(completionPromise);\n\n    // If the limit is reached, wait for any currently executing task to finish\n    if (executing.length >= limit) {\n      await Promise.race(executing);\n    }\n  }\n\n  // Wait for all tasks to complete, regardless of success or failure.\n  // Promise.all handles rejection correctly if any input promise rejects.\n  return Promise.all(results);\n}\n\n// Example usage:\n// const taskA = () => new Promise(res => setTimeout(() => { console.log('A done'); res('Result A'); }, 1000));\n// const taskB = () => new Promise((_, rej) => setTimeout(() => { console.log('B failed'); rej('Error B'); }, 300));\n// const taskC = () => new Promise(res => setTimeout(() => { console.log('C done'); res('Result C'); }, 700));\n\n// (async () => {\n//   console.log('Starting tasks with concurrency limit 1, expecting rejection...');\n//   try {\n//     const results = await concurrentLimit([taskA, taskB, taskC], 1);\n//     console.log('All results:', results);\n//   } catch (error) {\n//     console.error('Caught error:', error);\n//   }\n// })();\n\n// (async () => {\n//   console.log('\\nStarting tasks with concurrency limit 2, all success...');\n//   const tasks = [\n//     () => new Promise(res => setTimeout(() => res('First'), 800)),\n//     () => new Promise(res => setTimeout(() => res('Second'), 300)),\n//     () => new Promise(res => setTimeout(() => res('Third'), 1200))\n//   ];\n//   try {\n//     const results = await concurrentLimit(tasks, 2);\n//     console.log('All results:', results);\n//   } catch (error) {\n//     console.error('Caught error (should not happen):', error);\n//   }\n// })();\n\n```",
+          "options": [],
+          "analysisPoints": [
+            "Correctly uses `results.push(taskPromise)` to store the original task's promise, ensuring that `Promise.all(results)` maintains order.",
+            "The `executing` array correctly stores and manages the 'completion' promises, allowing the `Promise.race` logic to work for concurrency.",
+            "Using `.finally()` on the `taskPromise` to trigger the removal from `executing` ensures that the slot is freed up whether the task resolves or rejects.",
+            "Confirms that `Promise.all` inherently rejects if any promise in its array rejects, fulfilling the failure condition."
+          ],
+          "keyConcepts": [
+            "Promise.all",
+            "Promise.race",
+            "Concurrency Control",
+            "Promise.finally",
+            "Error Handling in Promises",
+            "Array Order Preservation"
+          ],
+          "evaluationCriteria": [
+            "Ability to manage promise states and order correctly.",
+            "Effective use of `Promise.finally` for cleanup.",
+            "Understanding of how `Promise.all` handles rejections.",
+            "Complex asynchronous control flow implementation."
+          ],
+          "example": "The solution ensures tasks are processed concurrently while preserving the original order of their results by pushing the `taskPromise` directly into the `results` array. The `executing` array's promises are responsible solely for concurrency management, using `.finally()` to guarantee removal when a task settles (either resolves or rejects). `Promise.all(results)` then correctly collects all outcomes in the initial order, rejecting if any task failed.",
+          "tags": [
+            "async",
+            "promises",
+            "concurrency",
+            "error-handling",
+            "advanced-patterns"
+          ],
+          "prerequisites": [
+            "concurrent_limit",
+            "promise_all",
+            "promise_finally"
+          ],
+          "complexity": 9,
+          "interviewFrequency": 8,
+          "learningPath": "advanced"
+        },
+        {
+          "id": "question_cancellable_promises_mcq_1",
+          "topic": "Cancellable Async Operations",
+          "level": "medium",
+          "type": "mcq",
+          "question": "Which of the following best describes the core mechanism used by `createCancellablePromise` to implement cancellation?",
+          "answer": "A flag that, when set, causes the wrapped promise to reject with a specific cancellation object instead of its original value or error.",
+          "options": [
+            "A flag that, when set, causes the wrapped promise to reject with a specific cancellation object instead of its original value or error.",
+            "It stops the underlying asynchronous operation (e.g., `fetch`) from completing.",
+            "It uses `Promise.race` to quickly resolve or reject the wrapped promise.",
+            "It removes the original promise from the JavaScript event loop queue."
+          ],
+          "analysisPoints": [
+            "The `isCancelled` flag is central to the mechanism.",
+            "When `isCancelled` is true, the `then` callbacks of the original promise check this flag.",
+            "Instead of `resolve(value)` or `reject(error)`, `reject({ isCancelled: true })` is called.",
+            "It's crucial to understand that this pattern *does not* abort the underlying operation itself, only prevents its callbacks from affecting subsequent logic.",
+            "It does not directly interact with the event loop or use `Promise.race` for cancellation."
+          ],
+          "keyConcepts": [
+            "Promise Cancellation",
+            "Closures",
+            "Flag Mechanism",
+            "Error Handling"
+          ],
+          "evaluationCriteria": [
+            "Understanding of the cancellation pattern's mechanics.",
+            "Distinguishing between soft cancellation (ignoring results) and hard cancellation (aborting operations).",
+            "Knowledge of how closures enable this pattern."
+          ],
+          "example": "```javascript\n// Inside createCancellablePromise:\n// promise.then(\n//   value => isCancelled ? reject({ isCancelled: true }) : resolve(value),\n//   error => isCancelled ? reject({ isCancelled: true }) : reject(error)\n// );\n// This snippet shows the conditional logic based on the `isCancelled` flag.\n```",
+          "tags": [
+            "async",
+            "promises",
+            "cancellation",
+            "frontend-patterns"
+          ],
+          "prerequisites": [
+            "promises",
+            "closures"
+          ],
+          "complexity": 6,
+          "interviewFrequency": 7,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_cancellable_promises_open_1",
+          "topic": "Cancellable Async Operations",
+          "level": "hard",
+          "type": "open",
+          "question": "The provided cancellable promise implementation offers a 'soft' cancellation. Explain the difference between 'soft' and 'hard' cancellation in the context of asynchronous operations like `fetch`. When would you prefer the `AbortController` API over this custom implementation?",
+          "answer": "**Soft Cancellation (as implemented):**\nThis mechanism prevents the *callbacks* of a promise from executing their payload if a cancellation signal has been issued. The underlying asynchronous operation (e.g., a network request started by `fetch`) still completes, consuming network bandwidth and server resources. The `isCancelled` flag merely tells the wrapper promise to ignore the original promise's resolution/rejection and instead reject with a cancellation error. It's about preventing side effects (like updating unmounted React components).\n\n**Hard Cancellation:**\nThis attempts to genuinely stop the underlying asynchronous operation mid-flight. For network requests, this means aborting the actual HTTP request so that it never reaches the server or stops consuming network resources if it's already in progress. This is often more resource-efficient and can prevent unnecessary work on both the client and server.\n\n**When to prefer `AbortController` over this custom implementation:**\nYou would prefer the `AbortController` API in modern browser environments primarily when dealing with `fetch` (or other APIs that support it, like `XMLHttpRequest`, `WebSockets`, `ReadableStream`): \n1.  **True Resource Abortions**: When you need to stop the actual network request or other long-running operations. This is crucial for optimizing network usage, preventing unnecessary server load, and improving perceived performance.\n2.  **Standardized API**: `AbortController` is a web standard, offering a consistent and widely supported way to implement cancellability for browser APIs.\n3.  **Cleaner Integration**: It provides a `signal` property that can be passed directly to `fetch` options, making the integration straightforward.\n4.  **Error Differentiation**: It throws a specific `AbortError` DOMException, which allows clearer error handling than a custom `{ isCancelled: true }` object.\n\nWhile the custom `createCancellablePromise` is useful for demonstrating the concept or wrapping promises from libraries that don't support `AbortController`, `AbortController` is generally the superior choice for `fetch` due to its ability to perform hard cancellations and its standardized nature.",
+          "analysisPoints": [
+            "Clearly defines soft cancellation (callback prevention) and hard cancellation (underlying operation termination).",
+            "Explains the resource implications of each type.",
+            "Lists specific advantages of `AbortController` (true abortion, standardization, cleaner integration, specific error type).",
+            "Contextualizes when each approach is appropriate."
+          ],
+          "keyConcepts": [
+            "Promise Cancellation",
+            "Soft vs. Hard Cancellation",
+            "AbortController API",
+            "Fetch API",
+            "Resource Management",
+            "Web APIs"
+          ],
+          "evaluationCriteria": [
+            "Comprehensive understanding of cancellation types.",
+            "Knowledge of `AbortController` and its benefits.",
+            "Ability to compare and contrast different async patterns.",
+            "Practical application scenarios for each approach."
+          ],
+          "example": "```javascript\n// Example using AbortController with fetch\nconst controller = new AbortController();\nconst signal = controller.signal;\n\nasync function fetchWithAbort(url) {\n  try {\n    console.log('Fetching with AbortController...');\n    const response = await fetch(url, { signal });\n    const data = await response.json();\n    console.log('Data fetched:', data);\n  } catch (error) {\n    if (error.name === 'AbortError') {\n      console.warn('Fetch request was aborted.');\n    } else {\n      console.error('Fetch error:', error);\n    }\n  }\n}\n\nconst promise = fetchWithAbort('https://jsonplaceholder.typicode.com/todos/1');\n\nsetTimeout(() => {\n  console.log('Aborting fetch...');\n  controller.abort();\n}, 50);\n\n// Expected: 'Fetching with AbortController...', 'Aborting fetch...', 'Fetch request was aborted.'\n// The actual network request would ideally be cancelled by the browser.",
+          "tags": [
+            "async",
+            "promises",
+            "cancellation",
+            "abortcontroller",
+            "fetch-api",
+            "web-apis"
+          ],
+          "prerequisites": [
+            "cancellable_promises",
+            "fetch_api"
+          ],
+          "complexity": 8,
+          "interviewFrequency": 8,
+          "learningPath": "advanced"
+        },
+        {
+          "id": "question_cancellable_promises_flashcard_1",
+          "topic": "Cancellable Async Operations",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "Why are native JavaScript Promises often described as 'not cancellable'?",
+          "answer": "Once a native Promise is created and an asynchronous operation starts, there's no built-in method to stop that operation or prevent its `.then()` or `.catch()` handlers from eventually being called, regardless of external state.",
+          "analysisPoints": [],
+          "keyConcepts": [
+            "Promises",
+            "Cancellability",
+            "Asynchronous operations"
+          ],
+          "evaluationCriteria": [
+            "Basic understanding of Promise immutability"
+          ],
+          "example": "",
+          "tags": [
+            "async",
+            "promises"
+          ],
+          "prerequisites": [],
+          "complexity": 3,
+          "interviewFrequency": 6,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_cancellable_promises_code_1",
+          "topic": "Cancellable Async Operations",
+          "level": "medium",
+          "type": "code",
+          "question": "Extend the `createCancellablePromise` function to accept an optional `cleanup` callback. This `cleanup` function should be executed if the promise is cancelled, providing an opportunity to release resources or perform other side effects associated with the aborted operation. The `cleanup` callback should receive the `isCancelled` flag as its argument.",
+          "answer": "```javascript\nfunction createCancellablePromise(promise, cleanup = (isCancelled) => {}) {\n  let isCancelled = false;\n  \n  const wrappedPromise = new Promise((resolve, reject) => {\n    promise.then(\n      value => {\n        if (isCancelled) {\n          cleanup(true); // Execute cleanup on cancellation\n          reject({ isCancelled: true, message: 'Promise cancelled' });\n        } else {\n          resolve(value);\n        }\n      },\n      error => {\n        if (isCancelled) {\n          cleanup(true); // Execute cleanup on cancellation, even if original rejected\n          reject({ isCancelled: true, message: 'Promise cancelled due to error' });\n        } else {\n          cleanup(false); // Execute cleanup on non-cancellation error\n          reject(error);\n        }\n      }\n    );\n  });\n  \n  return {\n    promise: wrappedPromise,\n    cancel: () => { \n      isCancelled = true; \n      // If the promise hasn't settled yet, the cleanup will be called \n      // when its original .then/.catch fires and sees isCancelled = true.\n      // If you needed immediate cleanup regardless of original promise state,\n      // you might add cleanup() here, but be careful with async cleanup.\n    }\n  };\n}\n\n// Example usage:\n// const resourceTracker = new Set();\n// const simulateFetch = (id, delay) => {\n//   console.log(`Starting fetch ${id}`);\n//   resourceTracker.add(id);\n//   return new Promise(res => setTimeout(() => {\n//     console.log(`Fetch ${id} completed`);\n//     res(`Data from ${id}`);\n//   }, delay));\n// };\n\n// (async () => {\n//   console.log('\\n--- Testing cleanup on cancel ---');\n//   const { promise, cancel } = createCancellablePromise(\n//     simulateFetch('img-1', 500),\n//     (wasCancelled) => {\n//       console.log(`Cleanup called for img-1. Was cancelled: ${wasCancelled}`);\n//       resourceTracker.delete('img-1');\n//     }\n//   );\n\n//   setTimeout(() => {\n//     console.log('Cancelling img-1 fetch...');\n//     cancel();\n//   }, 100);\n\n//   try {\n//     await promise;\n//   } catch (error) {\n//     if (error && error.isCancelled) {\n//       console.warn('img-1 fetch was cancelled.');\n//     } else {\n//       console.error('img-1 fetch error:', error.message);\n//     }\n//   }\n//   setTimeout(() => console.log('Current resources:', Array.from(resourceTracker)), 600);\n// })();\n\n// (async () => {\n//   console.log('\\n--- Testing cleanup on success ---');\n//   const { promise } = createCancellablePromise(\n//     simulateFetch('img-2', 100),\n//     (wasCancelled) => {\n//       console.log(`Cleanup called for img-2. Was cancelled: ${wasCancelled}`);\n//       resourceTracker.delete('img-2');\n//     }\n//   );\n//   try {\n//     await promise;\n//     console.log('img-2 fetch completed successfully.');\n//   } catch (error) {\n//     console.error('img-2 fetch error:', error.message);\n//   }\n//   setTimeout(() => console.log('Current resources:', Array.from(resourceTracker)), 200);\n// })();\n```",
+          "options": [],
+          "analysisPoints": [
+            "Correctly adds `cleanup` as an optional parameter to the main function.",
+            "Ensures `cleanup` is called inside both `resolve` and `reject` handlers of the original promise.",
+            "Passes the `isCancelled` status to the `cleanup` callback.",
+            "Maintains the existing cancellation logic while adding the new callback.",
+            "Considers scenarios where the original promise resolves, rejects, or is cancelled, and ensures `cleanup` is triggered appropriately."
+          ],
+          "keyConcepts": [
+            "Callbacks",
+            "Function Parameters",
+            "Error Handling",
+            "Resource Management",
+            "Promise Lifecycle"
+          ],
+          "evaluationCriteria": [
+            "Ability to extend existing asynchronous patterns.",
+            "Correct handling of different promise settlement states.",
+            "Understanding of cleanup logic in concurrent operations."
+          ],
+          "example": "The solution modifies `createCancellablePromise` to accept an optional `cleanup` callback. This callback is invoked within the `then` and `catch` blocks of the wrapped promise, specifically when the original promise settles. It receives a `boolean` argument indicating whether the cancellation flag was `true` at the time of settlement. This allows for conditional resource release or logging based on whether the operation was ignored due to cancellation or completed/failed naturally.",
+          "tags": [
+            "async",
+            "promises",
+            "cancellation",
+            "resource-management",
+            "callbacks"
+          ],
+          "prerequisites": [
+            "cancellable_promises"
+          ],
+          "complexity": 7,
+          "interviewFrequency": 7,
+          "learningPath": "advanced"
+        },
+        {
+          "id": "question_object_creation_mcq_1",
+          "topic": "Object Creation Patterns",
+          "level": "easy",
+          "type": "mcq",
+          "question": "Which object creation pattern is best suited for creating a single, unique object like a configuration settings object?",
+          "answer": "Object Literal",
+          "options": [
+            "Object Literal",
+            "Constructor Function",
+            "Factory Function",
+            "Using Object.create()"
+          ],
+          "analysisPoints": [
+            "Object literals are direct and simple, ideal for one-off objects.",
+            "Constructor functions, factory functions, and `Object.create()` are generally used when you need to create multiple instances or manage inheritance/prototypes.",
+            "For a single, unique instance, the overhead and complexity of other patterns are unnecessary."
+          ],
+          "keyConcepts": [
+            "Object Literal",
+            "Object Creation Patterns",
+            "Single Instance"
+          ],
+          "evaluationCriteria": [
+            "Basic knowledge of object literal usage.",
+            "Understanding the common use cases for different patterns."
+          ],
+          "example": "```javascript\nconst appConfig = {\n  debugMode: true,\n  logLevel: 'info',\n  getDebugStatus() {\n    return this.debugMode ? 'Debug ON' : 'Debug OFF';\n  }\n};\nconsole.log(appConfig.getDebugStatus()); // Output: Debug ON\n```\nThis example demonstrates an object literal for a single configuration object.",
+          "tags": [
+            "objects",
+            "javascript-fundamentals"
+          ],
+          "prerequisites": [],
+          "complexity": 3,
+          "interviewFrequency": 8,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_object_creation_open_1",
+          "topic": "Object Creation Patterns",
+          "level": "medium",
+          "type": "open",
+          "question": "Compare and contrast the Constructor Function pattern with the Factory Function pattern in JavaScript. Discuss their main differences, advantages, and disadvantages, especially concerning `this` binding and prototype inheritance.",
+          "answer": "**Constructor Function Pattern**\n*   **How it works**: A regular function invoked with the `new` keyword. Inside the constructor, `this` refers to the newly created object. Properties and methods are typically assigned to `this` (or to `Constructor.prototype` for shared methods).\n*   **Advantages**: \n    *   Clear blueprint for creating multiple instances.\n    *   Supports `instanceof` operator for type checking (`instance instanceof Constructor`).\n    *   Methods can be shared via the prototype chain (`Constructor.prototype`), leading to memory efficiency for many instances.\n*   **Disadvantages**: \n    *   Requires the `new` keyword, which is a common source of errors if omitted (results in `this` binding to global object/`undefined` in strict mode).\n    *   Methods defined directly on `this` inside the constructor are duplicated for every instance, leading to memory inefficiency.\n    *   Less flexible if you want to return different types of objects or objects with private state (without using closures).\n*   **`this` binding**: When called with `new`, `this` is implicitly bound to the new object. Methods on `prototype` also correctly bind `this` to the instance.\n*   **Prototype inheritance**: Naturally leverages JavaScript's prototype chain for method sharing and inheritance.\n\n**Factory Function Pattern**\n*   **How it works**: A simple function that returns a new object. It does not use the `new` keyword. Properties and methods are created and returned as part of the new object.\n*   **Advantages**: \n    *   No `new` keyword, making it less error-prone and more flexible in usage.\n    *   Simplifies `this` binding issues as it often avoids `this` or explicitly controls it.\n    *   Excellent for creating objects with private variables using closures.\n    *   Can return different types of objects based on input parameters.\n*   **Disadvantages**: \n    *   Methods are generally recreated for every object instance, potentially leading to memory inefficiency if many instances are created and methods are complex (unless methods are external and imported).\n    *   Does not naturally support `instanceof` for type checking, as there's no direct prototype linkage in the same way constructor functions provide.\n    *   No direct prototype chain for shared methods, requiring manual management if method sharing is desired.\n*   **`this` binding**: Often avoids `this` entirely, relying on lexical scope/closures. If `this` is used within the returned object's methods, its context depends on how the method is called (e.g., `object.method()`, `method.call(obj)`).\n*   **Prototype inheritance**: Does not inherently use prototype inheritance for methods or properties, although `Object.create()` could be combined within a factory function.\n\n**Key Differences Summarized:**\n| Feature            | Constructor Function          | Factory Function              |\n| :----------------- | :---------------------------- | :---------------------------- |\n| **`new` keyword**  | Required                      | Not used (and discouraged)    |\n| **`this` binding** | Implicitly bound to new object| Often avoids `this`, uses closures |\n| **Prototype**      | Direct prototype chain (`.prototype`)| No inherent prototype chain    |\n| **Memory**         | Efficient with prototype methods| Less efficient (methods recreated per instance)|\n| **`instanceof`**   | Supported                     | Not supported natively        |\n| **Privacy**        | Harder (requires conventions)| Easy with closures            |\n| **Flexibility**    | Less flexible for varied returns| Highly flexible for varied returns|\n\nChoosing between them depends on the specific requirements: constructor functions/classes are often preferred when classic inheritance and type checking are important, while factory functions are great for flexibility, encapsulation, and avoiding `this` complexities.",
+          "analysisPoints": [
+            "Provides clear descriptions of both patterns.",
+            "Lists distinct advantages and disadvantages for each.",
+            "Explicitly addresses `this` binding behavior in both contexts.",
+            "Compares how prototype inheritance works (or doesn't inherently) for each.",
+            "Includes a summary table for quick comparison, enhancing clarity."
+          ],
+          "keyConcepts": [
+            "Constructor Function",
+            "Factory Function",
+            "Object Creation Patterns",
+            "this Keyword",
+            "Prototype Inheritance",
+            "Closures",
+            "Instanceof Operator"
+          ],
+          "evaluationCriteria": [
+            "Comprehensive understanding of both patterns.",
+            "Ability to articulate nuanced differences.",
+            "Knowledge of `this` binding rules.",
+            "Understanding of memory implications and prototype chain."
+          ],
+          "example": "See theory block examples for `Constructor Function` and `Factory Function` for concrete code demonstrations.",
+          "tags": [
+            "objects",
+            "javascript-fundamentals",
+            "design-patterns",
+            "prototype",
+            "this-keyword"
+          ],
+          "prerequisites": [
+            "object_creation_patterns",
+            "this_keyword",
+            "prototypes",
+            "closures"
+          ],
+          "complexity": 7,
+          "interviewFrequency": 9,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_object_creation_flashcard_1",
+          "topic": "Object Creation Patterns",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "What is the main drawback of defining methods directly inside a Constructor Function (e.g., `this.method = function() {...}`) instead of on its prototype?",
+          "answer": "Each instance created by the constructor will have its own copy of the method, leading to increased memory consumption, especially with many instances.",
+          "analysisPoints": [],
+          "keyConcepts": [
+            "Constructor Function",
+            "Prototype",
+            "Memory efficiency",
+            "Method duplication"
+          ],
+          "evaluationCriteria": [
+            "Basic understanding of prototype benefits"
+          ],
+          "example": "",
+          "tags": [
+            "objects",
+            "prototype"
+          ],
+          "prerequisites": [],
+          "complexity": 4,
+          "interviewFrequency": 7,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_object_creation_code_1",
+          "topic": "Object Creation Patterns",
+          "level": "medium",
+          "type": "code",
+          "question": "Implement a `Dog` object using the Constructor Function pattern, ensuring that `speak` and `wagTail` methods are shared across all `Dog` instances for memory efficiency. Each `Dog` should have a `name` and `breed` property.",
+          "answer": "```javascript\nfunction Dog(name, breed) {\n  this.name = name;\n  this.breed = breed;\n}\n\nDog.prototype.speak = function() {\n  return `${this.name} barks: Woof! Woof!`;\n};\n\nDog.prototype.wagTail = function() {\n  return `${this.name} wags its tail happily.`;\n};\n\n// Example Usage:\n// const max = new Dog('Max', 'Golden Retriever');\n// const buddy = new Dog('Buddy', 'Labrador');\n\n// console.log(max.speak());        // Max barks: Woof! Woof!\n// console.log(buddy.wagTail());      // Buddy wags its tail happily.\n// console.log(max.speak === buddy.speak); // true (methods are shared)\n```",
+          "options": [],
+          "analysisPoints": [
+            "Correctly defines the `Dog` constructor function with `name` and `breed` properties.",
+            "Properly places the `speak` and `wagTail` methods on `Dog.prototype`.",
+            "Demonstrates understanding of how `this` refers to the instance within prototype methods.",
+            "Validates that methods are indeed shared by checking strict equality."
+          ],
+          "keyConcepts": [
+            "Constructor Function",
+            "Prototype",
+            "this Keyword",
+            "Memory Efficiency",
+            "Object Inheritance"
+          ],
+          "evaluationCriteria": [
+            "Ability to apply the Constructor Function pattern correctly.",
+            "Understanding of prototype-based inheritance for method sharing.",
+            "Correct use of `this` context."
+          ],
+          "example": "The solution defines `Dog` as a constructor function that initializes instance-specific properties (`name`, `breed`). The `speak` and `wagTail` methods are then attached to `Dog.prototype`. This makes these methods accessible to all `Dog` instances through the prototype chain, ensuring that only one copy of these methods exists in memory, regardless of how many `Dog` objects are created.",
+          "tags": [
+            "objects",
+            "prototype",
+            "constructor-function",
+            "javascript-fundamentals"
+          ],
+          "prerequisites": [
+            "object_creation_patterns"
+          ],
+          "complexity": 5,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_object_creation_mcq_2",
+          "topic": "Object Creation Patterns",
+          "level": "medium",
+          "type": "mcq",
+          "question": "Which of the following statements about Factory Functions is TRUE?",
+          "answer": "They can easily create objects with private variables using closures.",
+          "options": [
+            "They explicitly require the `new` keyword for proper instantiation.",
+            "Methods defined within them are automatically shared via a prototype chain.",
+            "They can easily create objects with private variables using closures.",
+            "The `instanceof` operator works reliably for objects created by factory functions."
+          ],
+          "analysisPoints": [
+            "Factory functions *do not* use the `new` keyword; this is a key differentiator from constructor functions.",
+            "They *do not* automatically share methods via a prototype chain. Methods are typically recreated per instance unless externalized.",
+            "The `instanceof` operator does *not* work reliably as there's no `constructor` property or shared prototype chain in the same way.",
+            "Factory functions are excellent for implementing privacy through closures, as variables declared within the factory function's scope are accessible by the returned object's methods but not from outside."
+          ],
+          "keyConcepts": [
+            "Factory Function",
+            "Closures",
+            "Private Variables",
+            "Prototype",
+            "Instanceof",
+            "New Keyword"
+          ],
+          "evaluationCriteria": [
+            "Detailed understanding of Factory Function characteristics.",
+            "Ability to distinguish features from other creation patterns.",
+            "Knowledge of closures for privacy."
+          ],
+          "example": "```javascript\nfunction createBankAccount(initialBalance) {\n  let balance = initialBalance; // Private variable\n\n  return {\n    deposit: (amount) => { balance += amount; },\n    withdraw: (amount) => { if (balance >= amount) balance -= amount; },\n    getBalance: () => balance // Accesses private 'balance'\n  };\n}\n\nconst account = createBankAccount(100);\naccount.deposit(50); \nconsole.log(account.getBalance()); // Output: 150\n// console.log(account.balance); // Undefined - 'balance' is private\n```\nThis example shows how `balance` remains private within the factory function's closure.",
+          "tags": [
+            "objects",
+            "factory-function",
+            "closures",
+            "privacy"
+          ],
+          "prerequisites": [
+            "object_creation_patterns",
+            "closures"
+          ],
+          "complexity": 6,
+          "interviewFrequency": 7,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_object_creation_open_2",
+          "topic": "Objects and Prototypes",
+          "level": "hard",
+          "type": "open",
+          "question": "Explain the concept of the prototype chain in JavaScript. How does `Object.create()` directly leverage this concept, and what are its advantages compared to other object creation patterns for managing inheritance?",
+          "answer": "**The Prototype Chain in JavaScript:**\nIn JavaScript, every object has an internal slot called `[[Prototype]]` (exposed as `__proto__` in some environments, or accessible via `Object.getPrototypeOf()`). When you try to access a property or method on an object, JavaScript first looks for it directly on that object. If it doesn't find it, it then looks at the object referenced by its `[[Prototype]]`. If still not found, it continues up the chain to that prototype's `[[Prototype]]`, and so on, until it reaches `null` (the end of the chain). This forms a 'prototype chain' that enables inheritance and method sharing.\n\n**How `Object.create()` Leverages the Prototype Chain:**\n`Object.create(proto)` directly creates a new, empty object whose `[[Prototype]]` points precisely to the `proto` object passed as its argument. This is its primary and explicit function. This means the newly created object immediately inherits all properties and methods from `proto` through the prototype chain.\n\nFor example:\n```javascript\nconst animalProto = { sound: '...', makeSound() { console.log(this.sound); } };\nconst dog = Object.create(animalProto);\ndog.sound = 'Woof';\ndog.makeSound(); // 'Woof' (this.sound is dog's own property, makeSound is inherited)\nconsole.log(Object.getPrototypeOf(dog) === animalProto); // true\n```\n\n**Advantages of `Object.create()` for Managing Inheritance:**\n1.  **Direct Prototype Linkage**: Unlike constructor functions (where inheritance involves `Constructor.prototype = Object.create(Parent.prototype)`), `Object.create()` provides a single, direct step to establish the prototype link for a new object. It's explicit and clear.\n2.  **No `new` Keyword/Constructor Involvement**: You don't need a constructor function, nor do you use the `new` keyword. This avoids `this` binding pitfalls associated with forgetting `new`.\n3.  **Flexible Inheritance**: It allows you to create objects with *any* existing object as their prototype, not just prototypes derived from constructor functions. This is powerful for patterns like mixins or when implementing classical inheritance without classes.\n4.  **Creating Empty Objects with Specific Prototypes**: It's the most straightforward way to create an object that specifically inherits from another object but initially has no own properties, allowing you to gradually add them.\n5.  **Simpler Property Descriptors**: The second optional argument allows defining properties with full descriptor control (`value`, `writable`, `enumerable`, `configurable`) at creation time.\n\n**Comparison to Other Patterns:**\n*   **vs. Object Literal**: Object literals implicitly inherit from `Object.prototype`. `Object.create()` gives you control over *which* object the new object inherits from.\n*   **vs. Constructor Function / ES6 Class**: While constructor functions/classes use prototypes for method sharing, `Object.create()` provides a lower-level, more direct way to manage the `[[Prototype]]` link. Constructor functions essentially automate `Object.create()` behind the scenes when setting up inheritance between parent and child constructors' prototypes. `Object.create()` gives you explicit control over this step.\n*   **vs. Factory Function**: Factory functions typically don't use prototype inheritance by default. If a factory function wanted to leverage prototype inheritance, it might internally use `Object.create()` to construct the object it returns.\n\nIn essence, `Object.create()` offers precise, explicit control over an object's `[[Prototype]]`, making it a powerful tool for advanced inheritance patterns and understanding the core of JavaScript's object model.",
+          "analysisPoints": [
+            "Defines the prototype chain clearly, explaining the lookup mechanism.",
+            "Explains how `Object.create()` directly manipulates the `[[Prototype]]` link.",
+            "Lists at least 3-4 distinct advantages of `Object.create()`.",
+            "Compares `Object.create()` against other patterns, highlighting its unique benefits in inheritance management.",
+            "Demonstrates solid understanding of JavaScript's fundamental object model."
+          ],
+          "keyConcepts": [
+            "Prototype Chain",
+            "Object.create()",
+            "Inheritance",
+            "[[Prototype]]",
+            "Constructor Function",
+            "Factory Function",
+            "Object Literal"
+          ],
+          "evaluationCriteria": [
+            "Depth of knowledge regarding JavaScript's prototype system.",
+            "Ability to explain the mechanics of `Object.create()`.",
+            "Comparative analysis skills for object creation patterns.",
+            "Clarity and structure of explanation."
+          ],
+          "example": "See theory block example for `Object.create()`.",
+          "tags": [
+            "objects",
+            "prototype",
+            "inheritance",
+            "object-create",
+            "javascript-fundamentals"
+          ],
+          "prerequisites": [
+            "object_creation_patterns",
+            "prototypes"
+          ],
+          "complexity": 8,
+          "interviewFrequency": 8,
+          "learningPath": "advanced"
+        }
+      ],
+      "tasks": [
+        {
+          "id": "task_implement_fetch_with_jitter",
+          "title": "Implement Fetch with Exponential Backoff and Jitter",
+          "description": "\nImplement a `fetchWithRetry` function that makes an HTTP request and retries on failure. The function should incorporate:\n\n1.  **Exponential Backoff**: The delay between retries should increase exponentially.\n2.  **Full Jitter**: Randomize the delay within the exponential range to prevent the 'thundering herd' problem. The delay should be a random value between 0 and the calculated exponential backoff value.\n3.  **Retry Limit**: A maximum number of retry attempts.\n4.  **Error Handling**: Throw the final error if all retries are exhausted.\n\nYour solution should be an `async` function and use `fetch`.\n",
+          "difficulty": "medium",
+          "startingCode": "async function fetchWithRetry(url, options = {}, retries = 3, initialBackoff = 300) {\n  // TODO: Implement the fetch with retry and jitter logic\n  // Use initialBackoff as the base for exponential calculation.\n  // Full jitter means delay = Math.random() * (base_backoff * Math.pow(2, attempted_retries))\n  \n  // Consider edge cases:\n  // 1. What if retries is 0 initially?\n  // 2. What if fetch always fails?\n  \n  try {\n    // Initial attempt\n    const response = await fetch(url, options);\n    if (!response.ok) {\n      throw new Error(`HTTP error! status: ${response.status}`);\n    }\n    return response;\n  } catch (error) {\n    // TODO: Implement retry logic here\n    if (retries > 0) {\n      // Calculate delay with jitter\n      // Await delay\n      // Recursive call\n    }\n    throw error; // Final throw if no retries left\n  }\n}\n\n// Helper to simulate a failing fetch for testing\n// const simulateFailingFetch = (url, options) => {\n//   let attempt = 0;\n//   return () => new Promise((resolve, reject) => {\n//     attempt++;\n//     console.log(`Simulated fetch to ${url}, attempt ${attempt}`);\n//     if (attempt < 3) { // Fail first 2 attempts\n//       setTimeout(() => reject(new Error(`Simulated Network Error (Attempt ${attempt})`)), 50);\n//     } else {\n//       setTimeout(() => resolve({ ok: true, status: 200, json: () => Promise.resolve({ data: 'success' }) }), 50);\n//     }\n//   });\n// };\n\n// const failingFetch = simulateFailingFetch('https://example.com/api/data');\n\n// // Example Usage:\n// (async () => {\n//   try {\n//     const response = await fetchWithRetry('https://example.com/api/data', { fetcher: failingFetch }, 4, 100);\n//     const data = await response.json();\n//     console.log('Final Data:', data);\n//   } catch (error) {\n//     console.error('Final Error:', error.message);\n//   }\n// })();",
+          "solutionCode": "async function fetchWithRetry(url, options = {}, retries = 3, initialBackoff = 300) {\n  let currentRetries = retries;\n  const originalRetries = retries;\n\n  while (currentRetries >= 0) {\n    try {\n      console.log(`Attempting fetch for ${url} (retries left: ${currentRetries}, total attempts: ${originalRetries - currentRetries + 1})`);\n      const response = await fetch(url, options);\n      if (!response.ok) {\n        // Treat non-2xx responses as errors that trigger retries\n        throw new Error(`HTTP error! status: ${response.status}`);\n      }\n      return response;\n    } catch (error) {\n      console.error(`Fetch failed: ${error.message}`);\n      if (currentRetries > 0) {\n        const retriesAttempted = originalRetries - currentRetries; // How many retries have already happened\n        const baseDelay = initialBackoff * Math.pow(2, retriesAttempted);\n        const delayWithJitter = Math.random() * baseDelay; // Full jitter\n        \n        console.log(`Retrying in ${delayWithJitter.toFixed(0)}ms (max ${baseDelay}ms) ...`);\n        await new Promise(resolve => setTimeout(resolve, delayWithJitter));\n        currentRetries--;\n      } else {\n        throw error; // Re-throw the error if no retries left\n      }\n    }\n  }\n}\n\n// Helper to simulate a failing fetch for testing (if fetch is not mocked)\n/*\nconst createSimulatedFailingFetch = (successOnAttempt = 3) => {\n  let currentAttempt = 0;\n  return (url, options) => {\n    currentAttempt++;\n    return new Promise((resolve, reject) => {\n      console.log(`[Simulated] Fetching ${url}, attempt ${currentAttempt}...`);\n      if (currentAttempt < successOnAttempt) {\n        setTimeout(() => reject(new Error(`Simulated transient error on attempt ${currentAttempt}`)), 50);\n      } else {\n        setTimeout(() => resolve({ ok: true, status: 200, json: () => Promise.resolve({ message: 'Success after retries!' + currentAttempt }) }), 50);\n      }\n    });\n  };\n};\n\n// To use the simulated fetch, you'd typically pass it in options or mock global fetch\n// Example: Mocking global fetch for testing\n// const originalFetch = global.fetch;\n// global.fetch = createSimulatedFailingFetch(3);\n\n// (async () => {\n//   try {\n//     console.log('\\n--- Test Case 1: Succeeds after retries ---');\n//     const response = await fetchWithRetry('https://api.example.com/data', {}, 3, 100);\n//     const data = await response.json();\n//     console.log('SUCCESS: ', data);\n//   } catch (err) {\n//     console.error('FAILED: ', err.message);\n//   }\n// })();\n\n// global.fetch = createSimulatedFailingFetch(5); // Now fails 4 times\n\n// (async () => {\n//   try {\n//     console.log('\\n--- Test Case 2: Fails after all retries ---');\n//     const response = await fetchWithRetry('https://api.example.com/data', {}, 3, 100); // Only 3 retries\n//     const data = await response.json();\n//     console.log('SUCCESS: ', data);\n//   } catch (err) {\n//     console.error('FAILED: ', err.message);\n//   }\n// })();\n\n// global.fetch = originalFetch; // Restore original fetch\n*/",
+          "testCases": [
+            "Test with a URL that always succeeds (0 retries should occur).",
+            "Test with a URL that fails transiently but succeeds within the retry limit (e.g., fails 2 times, succeeds on 3rd attempt, with `retries = 3`). Verify successful return.",
+            "Test with a URL that always fails (e.g., a non-existent URL or a mock that always throws). Verify that the function throws an error after exhausting all retries.",
+            "Test with `retries = 0`. Verify that it attempts once and throws immediately on failure.",
+            "Observe logs to ensure exponential backoff and jitter are applied (delays should vary and increase).",
+            "Test with a non-2xx HTTP status code (e.g., 500 Internal Server Error) to ensure it triggers retries."
+          ],
+          "hints": [
+            "Use a `while` loop or recursion for the retry logic.",
+            "Remember to `await new Promise(resolve => setTimeout(resolve, delay))` for the backoff.",
+            "The formula for full jitter is `Math.random() * (base_backoff * Math.pow(2, current_retry_number))`.",
+            "Ensure the `retries` count correctly decrements and the error is re-thrown when no retries are left."
+          ],
+          "tags": [
+            "async",
+            "promises",
+            "error-handling",
+            "network",
+            "algorithms",
+            "resilience"
+          ],
+          "timeEstimate": 45,
+          "prerequisites": [
+            "theory_async_fetch_retry"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 9,
+          "learningPath": "intermediate",
+          "relatedConcepts": [
+            "fetch_api",
+            "exponential_backoff",
+            "jitter",
+            "error_handling"
+          ]
+        },
+        {
+          "id": "task_implement_concurrency_pool",
+          "title": "Implement a Generic Concurrency Pool",
+          "description": "\nImplement a function `concurrencyPool(tasks, limit)` that executes a list of asynchronous tasks with a specified concurrency limit. The function should:\n\n1.  Accept an array of `tasks`, where each `task` is a function that returns a `Promise`.\n2.  Accept a `limit` number, representing the maximum concurrent tasks.\n3.  Ensure that no more than `limit` tasks are running at any given time.\n4.  Return a `Promise` that resolves with an array of all task results, in the order the tasks were provided, once all tasks have completed (regardless of individual success or failure).\n5.  If any task rejects, the final returned `Promise` should also reject.\n\nYour implementation should be robust and handle task completions (both resolution and rejection) correctly to free up concurrency slots.\n",
+          "difficulty": "hard",
+          "startingCode": "async function concurrencyPool(tasks, limit) {\n  const results = [];     // To store the results of all tasks in order\n  const executing = [];   // To track promises that are currently running\n\n  // TODO: Implement the concurrency logic\n  // Iterate through tasks, start new ones if limit allows, otherwise wait.\n  // Use Promise.race and Promise.all effectively.\n\n  return Promise.all(results); // Final collection of results\n}\n\n// Helper to create a simulated async task\n// const createTask = (id, duration, shouldFail = false) => () => {\n//   console.log(`Task ${id} started (duration: ${duration}ms)`);\n//   return new Promise((resolve, reject) => {\n//     setTimeout(() => {\n//       if (shouldFail) {\n//         console.log(`Task ${id} FAILED`);\n//         reject(new Error(`Error from Task ${id}`));\n//       } else {\n//         console.log(`Task ${id} finished`);\n//         resolve(`Result of Task ${id}`);\n//       }\n//     }, duration);\n//   });\n// };\n\n// // Example Usage:\n// (async () => {\n//   console.log('\\n--- Test Case 1: All tasks succeed, limit 2 ---');\n//   const tasks1 = [\n//     createTask(1, 1000),\n//     createTask(2, 500),\n//     createTask(3, 1200),\n//     createTask(4, 700),\n//   ];\n//   try {\n//     const results = await concurrencyPool(tasks1, 2);\n//     console.log('All results:', results);\n//   } catch (error) {\n//     console.error('Error:', error.message);\n//   }\n// })();\n\n// (async () => {\n//   console.log('\\n--- Test Case 2: One task fails, limit 2 ---');\n//   const tasks2 = [\n//     createTask(A, 1000),\n//     createTask(B, 300, true), // This one fails\n//     createTask(C, 700),\n//   ];\n//   try {\n//     const results = await concurrencyPool(tasks2, 2);\n//     console.log('All results:', results);\n//   } catch (error) {\n//     console.error('Error:', error.message);\n//   }\n// })();",
+          "solutionCode": "async function concurrencyPool(tasks, limit) {\n  const results = [];\n  const executing = new Set(); // Using a Set for efficient add/delete of executing promises\n  \n  for (const taskFn of tasks) {\n    // Wrap the task function call in a Promise.resolve() to ensure consistency\n    // and capture the promise returned by the task.\n    const taskPromise = Promise.resolve().then(() => taskFn());\n    results.push(taskPromise); // Store this promise to collect all results in order\n\n    // Create a 'completion promise' that removes itself from the executing set\n    // when it settles (either resolves or rejects). Using .finally() ensures this.\n    const completionPromise = taskPromise.finally(() => {\n      executing.delete(completionPromise);\n    });\n    executing.add(completionPromise); // Add to the set of currently executing promises\n\n    // If the number of executing tasks reaches the limit, wait for one to finish.\n    // Promise.race waits for the *first* promise in the set to settle.\n    if (executing.size >= limit) {\n      await Promise.race(executing); \n    }\n  }\n  \n  // Wait for all tasks to genuinely complete (including those that were queued).\n  // Promise.all will resolve with an array of results or reject if any promise rejected.\n  return Promise.all(results);\n}\n\n// Helper to create a simulated async task\n/*\nconst createTask = (id, duration, shouldFail = false) => () => {\n  console.log(`Task ${id} started (duration: ${duration}ms)`);\n  return new Promise((resolve, reject) => {\n    setTimeout(() => {\n      if (shouldFail) {\n        console.log(`Task ${id} FAILED`);\n        reject(new Error(`Error from Task ${id}`));\n      } else {\n        console.log(`Task ${id} finished`);\n        resolve(`Result of Task ${id}`);\n      }\n    }, duration);\n  });\n};\n\n// Example Usage:\n// (async () => {\n//   console.log('\\n--- Test Case 1: All tasks succeed, limit 2 ---');\n//   const tasks1 = [\n//     createTask('A', 1000),\n//     createTask('B', 500),\n//     createTask('C', 1200),\n//     createTask('D', 700),\n//   ];\n//   try {\n//     const results = await concurrencyPool(tasks1, 2);\n//     console.log('All results:', results);\n//   } catch (error) {\n//     console.error('Error:', error.message);\n//   }\n// })();\n\n// (async () => {\n//   console.log('\\n--- Test Case 2: One task fails, limit 2 ---');\n//   const tasks2 = [\n//     createTask('X', 1000),\n//     createTask('Y', 300, true), // This one fails\n//     createTask('Z', 700),\n//   ];\n//   try {\n//     const results = await concurrencyPool(tasks2, 2);\n//     console.log('All results:', results);\n//   } catch (error) {\n//     console.error('Error (expected):', error.message);\n//   }\n// })();\n\n// (async () => {\n//   console.log('\\n--- Test Case 3: Empty tasks array ---');\n//   try {\n//     const results = await concurrencyPool([], 2);\n//     console.log('Empty tasks results:', results); // Expected: []\n//   } catch (error) {\n//     console.error('Error (unexpected):', error.message);\n//   }\n// })();\n\n// (async () => {\n//   console.log('\\n--- Test Case 4: Limit > tasks.length ---');\n//   const tasks4 = [\n//     createTask('P', 500),\n//     createTask('Q', 200),\n//   ];\n//   try {\n//     const results = await concurrencyPool(tasks4, 5);\n//     console.log('Limit > tasks results:', results); // Should run all concurrently\n//   } catch (error) {\n//     console.error('Error (unexpected):', error.message);\n//   }\n// })();\n\n// (async () => {\n//   console.log('\\n--- Test Case 5: Limit = 1 (sequential) ---');\n//   const tasks5 = [\n//     createTask('S1', 300),\n//     createTask('S2', 200),\n//     createTask('S3', 400)\n//   ];\n//   try {\n//     const results = await concurrencyPool(tasks5, 1);\n//     console.log('Sequential results:', results);\n//   } catch (error) {\n//     console.error('Error (unexpected):', error.message);\n//   }\n// })();\n*/",
+          "testCases": [
+            "Test with `limit = 1` (sequential execution): Ensure tasks run one after another.",
+            "Test with `limit` equal to the number of tasks: Ensure all tasks start immediately.",
+            "Test with `limit` less than the number of tasks: Verify that no more than `limit` tasks run concurrently at any point.",
+            "Test with an empty `tasks` array: Should return an empty array.",
+            "Test where all tasks succeed: Verify all results are returned in the correct order.",
+            "Test where one or more tasks fail: Verify that the `concurrencyPool` promise rejects, but all tasks are still attempted and their completion frees up slots.",
+            "Measure the total execution time for different limits to confirm concurrent vs. sequential behavior (e.g., total time for 4 tasks of 1000ms each should be ~2000ms with limit 2, and ~4000ms with limit 1).",
+            "Test with `limit = 0` or negative `limit` (handle as sequential or throw error, or clamp to 1)."
+          ],
+          "hints": [
+            "The `results` array should store the original promises (`taskPromise`) to preserve order for `Promise.all`.",
+            "The `executing` collection should contain promises that represent the *completion* of active tasks, not necessarily their results.",
+            "Use `Promise.race(executing)` to wait for *any* currently running task to finish when the limit is reached.",
+            "Consider using a `Set` for `executing` to simplify adding and deleting promises.",
+            "The `.finally()` method on a promise is useful for cleanup (like removing from `executing`) regardless of whether the promise resolves or rejects."
+          ],
+          "tags": [
+            "async",
+            "promises",
+            "concurrency",
+            "algorithms",
+            "data-structures",
+            "performance"
+          ],
+          "timeEstimate": 60,
+          "prerequisites": [
+            "theory_async_concurrent_limit",
+            "promise_all",
+            "promise_race"
+          ],
+          "complexity": 9,
+          "interviewRelevance": 10,
+          "learningPath": "advanced",
+          "relatedConcepts": [
+            "event_loop",
+            "task_queuing",
+            "resource_management"
+          ]
+        },
+        {
+          "id": "task_implement_cancel_previous_fetch",
+          "title": "Implement a 'Cancel Previous' Fetch Mechanism",
+          "description": "\nImplement a function `debounceFetch(url, options)` that ensures only the *latest* `fetch` request is active at any given time. If a new `debounceFetch` call is made while a previous one is still pending, the previous one should be cancelled or ignored.\n\nThis is a common pattern for type-ahead search inputs or rapid button clicks where only the most recent action's result is relevant.\n\nYour solution should:\n1.  Return a Promise that resolves with the `Response` of the *latest* successful `fetch` call.\n2.  Use the `AbortController` API for effective cancellation of previous `fetch` requests.\n3.  Maintain a reference to the active `AbortController` and its associated Promise.\n4.  Handle `AbortError` specifically, ensuring it doesn't propagate as a regular error.\n",
+          "difficulty": "hard",
+          "startingCode": "let activeController = null; // Store the active AbortController globally or in a closure\nlet activePromise = null;    // Store the promise of the active fetch operation\n\nasync function debounceFetch(url, options = {}) {\n  // TODO: Implement cancellation logic for previous fetch\n  // 1. If an activeController exists, abort it.\n  // 2. Create a new AbortController.\n  // 3. Perform the fetch request with the new controller's signal.\n  // 4. Handle AbortError specifically.\n  // 5. Update activeController and activePromise for the new request.\n\n  return new Promise((resolve, reject) => {\n    // Placeholder: actual fetch logic will go here\n    // resolve(new Response('{}', { status: 200 })); \n  });\n}\n\n// Helper to simulate network delay for testing\n// const simulateNetworkDelay = (ms) => new Promise(res => setTimeout(res, ms));\n\n// // Example Usage:\n// (async () => {\n//   console.log('--- Rapid Firing Test ---');\n//   debounceFetch('api/search?q=a', { requestId: 1 }).then(res => console.log('Result 1:', res.url)).catch(err => console.log('Error 1:', err.name)); // Should be cancelled\n//   await simulateNetworkDelay(50);\n//   debounceFetch('api/search?q=ab', { requestId: 2 }).then(res => console.log('Result 2:', res.url)).catch(err => console.log('Error 2:', err.name)); // Should be cancelled\n//   await simulateNetworkDelay(50);\n//   debounceFetch('api/search?q=abc', { requestId: 3 }).then(res => console.log('Result 3:', res.url)).catch(err => console.log('Error 3:', err.name)); // Should succeed\n\n//   await simulateNetworkDelay(200); // Allow last fetch to complete\n//   console.log('--- Single Firing Test ---');\n//   debounceFetch('api/data', { requestId: 4 }).then(res => console.log('Result 4:', res.url)).catch(err => console.log('Error 4:', err.name)); // Should succeed\n\n//   await simulateNetworkDelay(200); // Allow last fetch to complete\n// })();",
+          "solutionCode": "let activeController = null; // Stores the AbortController for the currently active fetch\nlet activePromise = null;    // Stores the promise of the currently active fetch operation\n\nasync function debounceFetch(url, options = {}) {\n  // 1. If there's an active request, abort it.\n  if (activeController) {\n    activeController.abort();\n  }\n\n  // 2. Create a new AbortController for the current request.\n  const currentController = new AbortController();\n  const signal = currentController.signal;\n  activeController = currentController; // Set this as the new active controller\n\n  // 3. Create a promise for the current fetch operation.\n  // We need to wrap it so we can specifically handle AbortError.\n  const currentFetchPromise = new Promise(async (resolve, reject) => {\n    try {\n      const response = await fetch(url, { ...options, signal });\n      // Important: After fetch resolves, check if *this* specific fetch was cancelled by a later call.\n      // This handles the race condition where the fetch succeeds, but then a new debounceFetch call\n      // comes in and aborts *this* one before its then/catch handlers execute.\n      if (activeController !== currentController) {\n        // This means a newer request has taken over. Treat this one as effectively cancelled.\n        // We don't want to resolve/reject for an outdated request.\n        return reject({ name: 'StaleRequestError', message: 'This request was superseded.' });\n      }\n      resolve(response);\n    } catch (error) {\n      if (error.name === 'AbortError') {\n        // This is the intended cancellation. We should not propagate this as a regular error.\n        // Only reject if it's not the currently active request that got aborted.\n        if (activeController === currentController) {\n          // This indicates this request was aborted by an external mechanism, and it's currently active\n          // This specific pattern here aims to handle cases where *this* exact request was aborted.\n          // For debounce, we want to reject silently if *this* specific call was aborted by a new call.\n          reject(error); // This will then be caught by the outer catch to differentiate\n        } else {\n           // If activeController is already different, it means *this* promise was aborted by a newer call.\n           // In debounce, we usually want to silently ignore these.\n           // The caller of the `activePromise` (which is `currentFetchPromise`) will then reject if awaited.\n           reject(error);\n        }\n      } else if (activeController !== currentController) {\n          // If a new request has taken over, and this one errors out, silently ignore it as well.\n          reject({ name: 'StaleRequestError', message: 'This request failed but was superseded.' });\n      } else {\n        // Regular error not related to cancellation\n        reject(error);\n      }\n    }\n  });\n\n  activePromise = currentFetchPromise; // Store the promise for external waiting\n  \n  // Return a promise that only resolves if it's still the active one,\n  // and also handles the AbortError internally without propagating it to the outside `then` chain.\n  return new Promise((resolve, reject) => {\n    currentFetchPromise.then(response => {\n      if (activeController === currentController) {\n        resolve(response);\n      } else {\n        // This should theoretically be handled by the currentFetchPromise's internal logic\n        // but this adds an extra layer of safety for race conditions.\n        reject(new Error('Previous request superseded, results ignored.'));\n      }\n    }).catch(error => {\n      if (error.name === 'AbortError' || error.name === 'StaleRequestError') {\n        // Silently catch the abortion or stale request error for debounce pattern.\n        // This makes the returned promise neither resolve nor reject for cancelled requests.\n        // console.log(`Request for ${url} was cancelled/superseded.`);\n        // Do nothing, the promise effectively 'hangs' or is never fulfilled from this perspective.\n      } else {\n        reject(error); // Propagate actual errors\n      }\n    });\n  });\n}\n\n// --- Test Setup --- (To be run in a browser or Node.js environment with fetch API available)\n/*\nconst wait = (ms) => new Promise(resolve => setTimeout(resolve, ms));\nconst mockFetch = async (url, options) => {\n  const duration = Math.random() * 200 + 100; // Simulate network delay\n  await wait(duration);\n  if (options.signal && options.signal.aborted) {\n    throw new DOMException('Aborted', 'AbortError');\n  }\n  console.log(`[Mock] Fetch completed for ${url} after ${duration.toFixed(0)}ms`);\n  return new Response(JSON.stringify({ url, data: `content for ${url}` }), { status: 200 });\n};\n\n// Replace global fetch for testing (or pass mockFetch in options)\n// const originalFetch = global.fetch;\n// global.fetch = mockFetch;\n\n// Test Case 1: Rapid Firing (Debounce)\n// (async () => {\n//   console.log('\\n--- Test Case 1: Rapid Firing (Debounce) ---');\n//   const results = [];\n//   debounceFetch('/api/search?q=a').then(res => results.push(`A: ${res.url}`)).catch(err => err.name === 'AbortError' ? null : results.push(`A_Err: ${err.name}`));\n//   await wait(30);\n//   debounceFetch('/api/search?q=ab').then(res => results.push(`AB: ${res.url}`)).catch(err => err.name === 'AbortError' ? null : results.push(`AB_Err: ${err.name}`));\n//   await wait(30);\n//   debounceFetch('/api/search?q=abc').then(res => results.push(`ABC: ${res.url}`)).catch(err => err.name === 'AbortError' ? null : results.push(`ABC_Err: ${err.name}`));\n//   await wait(500); // Wait for last request to complete\n//   console.log('Final results for Test 1 (expect only ABC):', results);\n// })();\n\n// Test Case 2: Single Call (Should succeed)\n// (async () => {\n//   console.log('\\n--- Test Case 2: Single Call ---');\n//   const results = [];\n//   debounceFetch('/api/data').then(res => results.push(`Data: ${res.url}`)).catch(err => err.name === 'AbortError' ? null : results.push(`Data_Err: ${err.name}`));\n//   await wait(500);\n//   console.log('Final results for Test 2 (expect Data):', results);\n// })();\n\n// Test Case 3: Error Handling (Non-AbortError)\n// global.fetch = async (url, options) => { await wait(10); if (url === '/api/error') throw new Error('Simulated API Error'); return new Response('{}'); };\n// (async () => {\n//   console.log('\\n--- Test Case 3: Error Handling (Non-AbortError) ---');\n//   const results = [];\n//   debounceFetch('/api/error').then(res => results.push(`ErrorTest: ${res.url}`)).catch(err => results.push(`ErrorTest_Err: ${err.name || err.message}`));\n//   await wait(100);\n//   console.log('Final results for Test 3 (expect ErrorTest_Err):', results);\n// })();\n// global.fetch = originalFetch; // Restore original fetch\n*/",
+          "testCases": [
+            "**Rapid Sequential Calls**: Call `debounceFetch` rapidly multiple times (e.g., 3 calls with small delays between them). Only the *last* call should resolve successfully, and previous calls should be cancelled or their results ignored.",
+            "**Single Call**: Call `debounceFetch` once. It should resolve normally.",
+            "**Call, Wait, Call Again**: Call `debounceFetch`, wait for it to complete, then call it again. Both should resolve successfully.",
+            "**External Error Handling**: Simulate a network error (not an abort) from the `fetch` call (e.g., a 404 or 500 status, or network down). Verify that the `debounceFetch` promise rejects with the actual error, assuming it was the last active request.",
+            "**Edge Case: Immediate Abort**: Call `debounceFetch`, then immediately call `activeController.abort()` externally (if `activeController` is exposed). The initial call's promise should be handled as aborted.",
+            "Verify no unhandled promise rejections occur due to ignored cancellations."
+          ],
+          "hints": [
+            "You'll need a variable (`activeController`) outside the function scope (or in a closure) to keep track of the currently active `AbortController`.",
+            "Before making a new fetch, check if `activeController` exists and call `activeController.abort()` if it does.",
+            "Pass the new `controller.signal` to your `fetch` call's options.",
+            "Wrap the `fetch` call in a `try...catch` block to specifically catch `AbortError` and handle it silently.",
+            "Be careful with race conditions: even if a `fetch` resolves, a new `debounceFetch` might have been called *just before* your `.then()` handler runs. You might need to check if `activeController` is still the same *inside* the `.then()` callback."
+          ],
+          "tags": [
+            "async",
+            "promises",
+            "cancellation",
+            "abortcontroller",
+            "debounce",
+            "frontend-architecture",
+            "race-conditions"
+          ],
+          "timeEstimate": 75,
+          "prerequisites": [
+            "theory_async_cancellable_promises",
+            "fetch_api",
+            "closures"
+          ],
+          "complexity": 9,
+          "interviewRelevance": 10,
+          "learningPath": "advanced",
+          "relatedConcepts": [
+            "event_loop",
+            "ui_patterns",
+            "resource_management"
+          ]
+        },
+        {
+          "id": "task_implement_shape_factory",
+          "title": "Implement a Flexible Shape Factory",
+          "description": "\nImplement a `createShape` factory function that can generate different geometric shape objects (e.g., `Circle`, `Rectangle`) based on an input `type`.\n\nEach shape object should have:\n\n1.  Properties specific to its type (e.g., `radius` for `Circle`, `width` and `height` for `Rectangle`).\n2.  A common method `getArea()` that calculates and returns the area of the shape.\n3.  A common method `getType()` that returns the shape's type (e.g., 'Circle', 'Rectangle').\n\nYour solution should:\n*   Use the Factory Function pattern.\n*   Avoid `new` keyword.\n*   Ensure that methods (`getArea`, `getType`) are defined efficiently (e.g., not recreated for every instance if possible, or explain why they are).\n*   Handle invalid `type` input by throwing an error.\n",
+          "difficulty": "medium",
+          "startingCode": "function createShape(type, options) {\n  switch (type.toLowerCase()) {\n    case 'circle':\n      // TODO: Create a circle object\n      // Properties: radius\n      // Methods: getArea(), getType()\n      break;\n    case 'rectangle':\n      // TODO: Create a rectangle object\n      // Properties: width, height\n      // Methods: getArea(), getType()\n      break;\n    default:\n      throw new Error(`Unknown shape type: ${type}`);\n  }\n}\n\n// Example Usage:\n// const circle = createShape('circle', { radius: 5 });\n// console.log(circle.getType()); // Output: Circle\n// console.log(circle.getArea()); // Output: 78.539...\n\n// const rectangle = createShape('rectangle', { width: 10, height: 4 });\n// console.log(rectangle.getType()); // Output: Rectangle\n// console.log(rectangle.getArea()); // Output: 40\n\n// try {\n//   createShape('triangle', { side1: 3 });\n// } catch (e) {\n//   console.error(e.message); // Output: Unknown shape type: triangle\n// }",
+          "solutionCode": "const PI = Math.PI;\n\n// Define common methods outside to avoid recreation per instance\nconst commonShapeMethods = {\n  getType() {\n    return this.type; // 'this' will refer to the specific shape object\n  },\n  // getArea will be defined per shape type or conditionally\n};\n\nfunction createShape(type, options) {\n  let shape;\n\n  switch (type.toLowerCase()) {\n    case 'circle':\n      if (typeof options.radius !== 'number' || options.radius < 0) {\n        throw new Error('Circle requires a positive numeric radius.');\n      }\n      shape = {\n        type: 'Circle',\n        radius: options.radius,\n        getArea: () => PI * options.radius * options.radius // Uses closure over options.radius\n      };\n      break;\n    case 'rectangle':\n      if (typeof options.width !== 'number' || typeof options.height !== 'number' || options.width < 0 || options.height < 0) {\n        throw new Error('Rectangle requires positive numeric width and height.');\n      }\n      shape = {\n        type: 'Rectangle',\n        width: options.width,\n        height: options.height,\n        getArea: () => options.width * options.height // Uses closure over options.width/height\n      };\n      break;\n    default:\n      throw new Error(`Unknown shape type: ${type}`);\n  }\n\n  // Merge common methods. Here, `getType` uses `this` which refers to the `shape` object.\n  // `getArea` is defined as a closure for specific properties, which is acceptable for factories\n  // for encapsulation, though it means a new function per instance.\n  return Object.assign(shape, commonShapeMethods);\n}\n\n// Example Usage:\n/*\nconst circle = createShape('circle', { radius: 5 });\nconsole.log(circle.getType()); // Output: Circle\nconsole.log(circle.getArea()); // Output: 78.53981633974483\n\nconst rectangle = createShape('rectangle', { width: 10, height: 4 });\nconsole.log(rectangle.getType()); // Output: Rectangle\nconsole.log(rectangle.getArea()); // Output: 40\n\nconsole.log(circle.getType === rectangle.getType); // true (shared method)\nconsole.log(circle.getArea === rectangle.getArea); // false (methods created per instance, using closure)\n\ntry {\n  createShape('triangle', { side1: 3 });\n} catch (e) {\n  console.error(e.message); // Output: Unknown shape type: triangle\n}\n\ntry {\n  createShape('circle', { radius: 'abc' });\n} catch (e) {\n  console.error(e.message); // Output: Circle requires a positive numeric radius.\n}\n\ntry {\n  createShape('rectangle', { width: -5, height: 10 });\n} catch (e) {\n  console.error(e.message); // Output: Rectangle requires positive numeric width and height.\n}\n*/",
+          "testCases": [
+            "Create a Circle: `createShape('circle', { radius: 7 })` should return a correct object with `type: 'Circle'`, `radius: 7`, and working `getArea()` and `getType()`.",
+            "Create a Rectangle: `createShape('rectangle', { width: 8, height: 5 })` should return a correct object with `type: 'Rectangle'`, `width: 8`, `height: 5`, and working `getArea()` and `getType()`.",
+            "Invalid type: `createShape('triangle', {})` should throw an `Error`.",
+            "Missing/invalid options for Circle: `createShape('circle', {})` or `createShape('circle', { radius: -1 })` or `createShape('circle', { radius: 'abc' })` should throw errors.",
+            "Missing/invalid options for Rectangle: `createShape('rectangle', { width: 5 })` or `createShape('rectangle', { width: -2, height: 5 })` should throw errors.",
+            "Verify `getType` method is shared (e.g., `circle.getType === rectangle.getType` should be `true` if implemented optimally).",
+            "Verify `getArea` method behavior (its specific calculation) for each shape."
+          ],
+          "hints": [
+            "Use a `switch` statement based on `type`.",
+            "For efficiency, `getType` could be a method defined once and applied to all shapes (e.g., using `Object.assign` or prototype chaining, though direct prototype is less common in pure factories).",
+            "For `getArea`, you might define it directly in the returned object, using a closure to capture the specific dimensions. This is a common factory pattern trade-off for encapsulation.",
+            "Remember to validate input `options` (e.g., `radius` must be a positive number)."
+          ],
+          "tags": [
+            "objects",
+            "factory-function",
+            "design-patterns",
+            "javascript-fundamentals",
+            "encapsulation"
+          ],
+          "timeEstimate": 45,
+          "prerequisites": [
+            "theory_object_creation_patterns",
+            "closures"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 8,
+          "learningPath": "intermediate",
+          "relatedConcepts": [
+            "polymorphism",
+            "creational_patterns",
+            "data_validation"
+          ]
+        },
+        {
+          "id": "task_create_user_manager",
+          "title": "Create a User Manager with Private State",
+          "description": "\nImplement a `createUserManager` factory function that returns an object capable of managing a collection of users. The user data (`users` array) should be private to the manager instance.\n\nThe returned manager object should expose the following public methods:\n\n1.  `addUser(user)`: Adds a user object (`{ id: string, name: string, email: string }`) to the internal collection. Throws an error if a user with the same `id` already exists.\n2.  `getUser(id)`: Returns the user object with the given `id`, or `null` if not found.\n3.  `updateUser(id, updates)`: Finds a user by `id` and applies partial `updates` to it. Throws an error if the user is not found. Ensures `id` is not modifiable.\n4.  `deleteUser(id)`: Removes a user by `id`. Returns `true` if deleted, `false` if not found.\n5.  `getAllUsers()`: Returns a *copy* of the internal user array to prevent direct modification of the private state.\n\nYour solution must:\n*   Use the **Factory Function** pattern.\n*   Utilize **closures** to keep the `users` array private.\n*   Perform basic **input validation** (e.g., user `id` uniqueness, user existence).\n",
+          "difficulty": "medium",
+          "startingCode": "function createUserManager() {\n  let users = []; // This array should be private\n\n  return {\n    addUser(user) {\n      // TODO: Implement user addition with ID uniqueness check\n    },\n    getUser(id) {\n      // TODO: Implement user retrieval\n    },\n    updateUser(id, updates) {\n      // TODO: Implement user update (prevent ID modification)\n    },\n    deleteUser(id) {\n      // TODO: Implement user deletion\n    },\n    getAllUsers() {\n      // TODO: Return a COPY of the users array\n    }\n  };\n}\n\n// Example Usage:\n// const userManager = createUserManager();\n\n// userManager.addUser({ id: '1', name: 'Alice', email: 'alice@example.com' });\n// userManager.addUser({ id: '2', name: 'Bob', email: 'bob@example.com' });\n// console.log('All users:', userManager.getAllUsers());\n\n// console.log('Get user 1:', userManager.getUser('1'));\n\n// userManager.updateUser('1', { name: 'Alicia' });\n// console.log('Updated user 1:', userManager.getUser('1'));\n\n// console.log('Delete user 2:', userManager.deleteUser('2'));\n// console.log('All users after delete:', userManager.getAllUsers());\n\n// try {\n//   userManager.addUser({ id: '1', name: 'Charlie', email: 'charlie@example.com' });\n// } catch (e) {\n//   console.error(e.message); // Should throw: User with ID '1' already exists.\n// }",
+          "solutionCode": "function createUserManager() {\n  // Private state using closure\n  let users = []; \n\n  return {\n    /**\n     * Adds a user to the manager.\n     * @param {object} user - The user object ({ id, name, email }).\n     * @throws {Error} If a user with the same ID already exists.\n     */\n    addUser(user) {\n      if (!user || !user.id) {\n        throw new Error('User object must have an id.');\n      }\n      if (users.some(u => u.id === user.id)) {\n        throw new Error(`User with ID '${user.id}' already exists.`);\n      }\n      users.push({ ...user }); // Store a copy to prevent external modification\n    },\n\n    /**\n     * Retrieves a user by ID.\n     * @param {string} id - The ID of the user to retrieve.\n     * @returns {object|null} The user object or null if not found.\n     */\n    getUser(id) {\n      const user = users.find(u => u.id === id);\n      return user ? { ...user } : null; // Return a copy\n    },\n\n    /**\n     * Updates an existing user by ID.\n     * @param {string} id - The ID of the user to update.\n     * @param {object} updates - An object containing partial updates.\n     * @throws {Error} If the user is not found.\n     */\n    updateUser(id, updates) {\n      const userIndex = users.findIndex(u => u.id === id);\n      if (userIndex === -1) {\n        throw new Error(`User with ID '${id}' not found.`);\n      }\n      // Prevent updating the ID\n      if (updates && updates.id && updates.id !== id) {\n        throw new Error('Cannot change user ID.');\n      }\n      users[userIndex] = { ...users[userIndex], ...updates };\n    },\n\n    /**\n     * Deletes a user by ID.\n     * @param {string} id - The ID of the user to delete.\n     * @returns {boolean} True if deleted, false if not found.\n     */\n    deleteUser(id) {\n      const initialLength = users.length;\n      users = users.filter(u => u.id !== id);\n      return users.length < initialLength;\n    },\n\n    /**\n     * Returns a copy of all users.\n     * @returns {Array<object>} A new array containing copies of all user objects.\n     */\n    getAllUsers() {\n      return users.map(user => ({ ...user })); // Return deep copy if users can be nested objects\n    }\n  };\n}\n\n// Example Usage:\n/*\nconst userManager = createUserManager();\n\nconsole.log('--- Add Users ---');\nuserManager.addUser({ id: '1', name: 'Alice', email: 'alice@example.com' });\nuserManager.addUser({ id: '2', name: 'Bob', email: 'bob@example.com' });\nuserManager.addUser({ id: '3', name: 'Charlie', email: 'charlie@example.com' });\nconsole.log('Initial users:', userManager.getAllUsers());\n\nconsole.log('\\n--- Get User ---');\nconsole.log('Get user 1:', userManager.getUser('1')); // { id: '1', name: 'Alice', email: 'alice@example.com' }\nconsole.log('Get non-existent user 99:', userManager.getUser('99')); // null\n\nconsole.log('\\n--- Update User ---');\nuserManager.updateUser('1', { name: 'Alicia Smith', email: 'alicia.s@example.com' });\nconsole.log('Updated user 1:', userManager.getUser('1'));\n\ntry {\n  userManager.updateUser('99', { name: 'NonExistent' });\n} catch (e) {\n  console.error('Update Error (expected):', e.message); // User with ID '99' not found.\n}\n\ntry {\n  userManager.updateUser('1', { id: 'newId' });\n} catch (e) {\n  console.error('Update ID Error (expected):', e.message); // Cannot change user ID.\n}\n\nconsole.log('\\n--- Delete User ---');\nconsole.log('Delete user 2:', userManager.deleteUser('2')); // true\nconsole.log('All users after deleting user 2:', userManager.getAllUsers());\nconsole.log('Delete non-existent user 99:', userManager.deleteUser('99')); // false\n\nconsole.log('\\n--- Add Duplicate User ---');\ntry {\n  userManager.addUser({ id: '1', name: 'Frank', email: 'frank@example.com' });\n} catch (e) {\n  console.error('Add Duplicate Error (expected):', e.message); // User with ID '1' already exists.\n}\n\nconsole.log('\\n--- Verify Privacy ---');\nconst allUsers = userManager.getAllUsers();\nallUsers.pop(); // Modify the returned copy\nconsole.log('Modified returned copy. Original users are still:', userManager.getAllUsers()); // Should be unchanged\n\nconst user1 = userManager.getUser('1');\nuser1.name = 'External Change'; // Modify the returned copy\nconsole.log('Modified returned user. Original user is still:', userManager.getUser('1')); // Should be unchanged\n*/",
+          "testCases": [
+            "**Add User**: Add multiple unique users. Verify `getAllUsers()` returns them correctly.",
+            "**Add Duplicate User**: Attempt to add a user with an existing `id`. Verify it throws an error.",
+            "**Get User**: Retrieve an existing user by `id`. Retrieve a non-existent user. Verify correct return values (`object` or `null`).",
+            "**Update User**: Update an existing user's properties. Verify changes are applied. Attempt to update a non-existent user; verify error. Attempt to change a user's `id`; verify error.",
+            "**Delete User**: Delete an existing user. Verify `getAllUsers()` reflects the change and `deleteUser` returns `true`. Attempt to delete a non-existent user; verify `deleteUser` returns `false`.",
+            "**Privacy**: After `getAllUsers()` or `getUser(id)` is called, modify the *returned* object/array (e.g., `returnedUsers.pop()`, `returnedUser.name = 'X'`). Verify that the internal `users` array in the `userManager` remains unchanged, demonstrating privacy through copying.",
+            "**Input Validation**: Test `addUser` with `null` or missing `id`."
+          ],
+          "hints": [
+            "The `users` array inside `createUserManager` is naturally private due to the closure.",
+            "For `getAllUsers()` and `getUser(id)`, remember to return *copies* of the user objects/array to prevent external code from directly modifying the private state (e.g., using `map` or spread syntax `{...user}` or `[...users]`).",
+            "Use array methods like `find()`, `findIndex()`, `some()`, and `filter()` for efficient data manipulation.",
+            "When updating a user, use the spread syntax (`{...existingUser, ...updates}`) to apply partial updates.",
+            "For `updateUser`, explicitly check if `updates.id` is present and if it's different from the original `id` to prevent ID modification."
+          ],
+          "tags": [
+            "objects",
+            "factory-function",
+            "closures",
+            "data-management",
+            "privacy",
+            "frontend-architecture"
+          ],
+          "timeEstimate": 60,
+          "prerequisites": [
+            "theory_object_creation_patterns",
+            "array_methods",
+            "closures"
+          ],
+          "complexity": 8,
+          "interviewRelevance": 9,
+          "learningPath": "intermediate",
+          "relatedConcepts": [
+            "crud_operations",
+            "state_management",
+            "encapsulation"
+          ]
+        }
+      ]
+    }
+  }
+]

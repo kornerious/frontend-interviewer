@@ -1,0 +1,1427 @@
+[
+  {
+    "id": "90b026f2-44aa-4400-acba-c556271a6c4c",
+    "startLine": 16800,
+    "endLine": 16899,
+    "processedDate": "2025-06-17T15:34:49.110Z",
+    "content": {
+      "logicalBlockInfo": {
+        "suggestedEndLine": -1
+      },
+      "theory": [
+        {
+          "id": "theory_react_user_search",
+          "title": "React Component: User Search Implementation",
+          "content": "This theory block describes a typical React functional component designed for searching and displaying user data. It covers fundamental React hooks like `useState` and `useEffect`, conditional rendering, and rendering lists of items.\n\n## Key Concepts\n-   **React Functional Component**: A JavaScript function that returns JSX (JavaScript XML) to describe UI elements. Functional components use hooks to manage state and side effects.\n-   **`useState` Hook**: Used to add state to functional components. It returns a stateful value and a function to update it. When the state changes, the component re-renders.\n-   **`useEffect` Hook**: Used to perform side effects in functional components, such as data fetching, subscriptions, or manually changing the DOM. It runs after every render by default, but its execution can be controlled by specifying dependencies.\n-   **Conditional Rendering**: Displaying different UI elements based on certain conditions (e.g., `isLoading`, `noResults`).\n-   **List Rendering**: Iterating over an array of data and rendering a component for each item. The `key` prop is crucial for performance and stable identity of items in a list, especially when items are added, removed, or reordered.\n-   **Event Handling**: Capturing user interactions (e.g., input changes) and updating component state or triggering logic.\n\n## Implementation Details\nThe `UserSearch` component demonstrates:\n1.  **State Management**: `searchText` (for input value), `users` (filtered user data), `isLoading` (for loading state), and `error` (for potential errors during data fetching/processing).\n2.  **Data Filtering/Search Logic**: The `useEffect` hook is used to simulate data fetching and filtering based on `searchText`. It includes a debouncing mechanism (via `setTimeout` and `clearTimeout`) to prevent excessive re-renders or API calls while the user is typing.\n3.  **Loading and Error States**: The component renders a 'Loading...' message when `isLoading` is true and a 'No results found' message if the filtered `users` array is empty after loading.\n4.  **Displaying Results**: Uses the `map` method to iterate over the `users` array and render each user's details, including address, zip code, and purchased items.",
+          "examples": [
+            {
+              "id": "example_react_user_search_1",
+              "title": "Basic useState and Conditional Rendering",
+              "code": "import React, { useState } from 'react';\n\nfunction LoadingSpinner() {\n  const [isLoading, setIsLoading] = useState(true);\n\n  // Simulate data loading\n  setTimeout(() => setIsLoading(false), 2000);\n\n  return (\n    <div>\n      {isLoading ? (\n        <p>Loading data...</p>\n      ) : (\n        <p>Data loaded successfully!</p>\n      )}\n    </div>\n  );\n}\n",
+              "explanation": "This example shows how `useState` manages a boolean loading state and how conditional rendering is used to display a loading message or the loaded content based on that state.",
+              "language": "typescript"
+            },
+            {
+              "id": "example_react_user_search_2",
+              "title": "List Rendering with map and Key Prop",
+              "code": "import React from 'react';\n\nconst items = [\n  { id: 1, name: 'Apple' },\n  { id: 2, name: 'Banana' },\n  { id: 3, name: 'Cherry' }\n];\n\nfunction ItemList() {\n  return (\n    <ul>\n      {items.map(item => (\n        <li key={item.id}>{item.name}</li>\n      ))}\n    </ul>\n  );\n}\n",
+              "explanation": "Demonstrates rendering a list of items using `Array.prototype.map()`. Each `<li>` element is given a unique `key` prop, which is essential for React's reconciliation process to efficiently update lists.",
+              "language": "typescript"
+            },
+            {
+              "id": "example_react_user_search_3",
+              "title": "Basic useEffect with Debounce",
+              "code": "import React, { useState, useEffect } from 'react';\n\nfunction SearchInput() {\n  const [query, setQuery] = useState('');\n  const [debouncedQuery, setDebouncedQuery] = useState('');\n\n  useEffect(() => {\n    const timerId = setTimeout(() => {\n      setDebouncedQuery(query);\n    }, 500);\n\n    return () => {\n      clearTimeout(timerId);\n    };\n  }, [query]);\n\n  return (\n    <input\n      type=\"text\"\n      value={query}\n      onChange={(e) => setQuery(e.target.value)}\n      placeholder=\"Type to search...\"\n    />\n  );\n}\n",
+              "explanation": "This example illustrates how `useEffect` can be used to debounce an input value. The `debouncedQuery` state only updates after a 500ms pause in typing, preventing excessive re-renders or API calls. The cleanup function (`return () => clearTimeout(timerId)`) is critical to clear the previous timer if the `query` changes before the timeout fires.",
+              "language": "typescript"
+            }
+          ],
+          "relatedQuestions": [],
+          "relatedTasks": [],
+          "tags": [
+            "React",
+            "Hooks",
+            "State Management",
+            "Conditional Rendering",
+            "List Rendering",
+            "Frontend Development",
+            "JavaScript"
+          ],
+          "technology": "React, TypeScript",
+          "prerequisites": [
+            "JavaScript Fundamentals",
+            "HTML Basics",
+            "CSS Basics",
+            "ES6+",
+            "JSX"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 9,
+          "learningPath": "intermediate",
+          "requiredFor": [
+            "Advanced React Hooks",
+            "Performance Optimization",
+            "Data Fetching"
+          ]
+        },
+        {
+          "id": "theory_dom_event_handling",
+          "title": "DOM Event Handling and Propagation",
+          "content": "DOM events are central to interactive web pages, allowing scripts to respond to user actions and browser occurrences. Understanding how events are processed and propagated is crucial for effective and performant frontend development.\n\n## Event Types and Differences\n-   **`mouseout` vs `mouseleave`**:\n    *   `mouseout`: Fires when the mouse pointer moves out of an element *or any of its children*. It bubbles up the DOM tree.\n    *   `mouseleave`: Fires *only* when the mouse pointer moves out of the direct bounds of the element it is registered on. It does *not* bubble. It's generally preferred for scenarios like tooltips or dropdown menus where you want the action to occur only when the mouse completely leaves the parent container, not just moves over a child.\n\n## Event Processing Order\n-   DOM events are typically processed in a **FIFO (First-In, First-Out)** manner. When an event (e.g., a click, key press) occurs, it's added to an event queue. The browser's event loop then picks events from this queue one by one and processes their associated handlers.\n\n## Event Propagation Phases\nWhen an event occurs on an element in the DOM, it doesn't just trigger handlers on that element; it goes through a specific lifecycle called event propagation, which consists of three phases:\n1.  **Capturing Phase**: The event starts from the `window` object and travels down through the target element's ancestors (e.g., `document`, `<html>`, `<body>`, `<div>`) until it reaches the parent of the target element. Event listeners registered with `useCapture` (the third argument in `addEventListener` set to `true`) are triggered during this phase.\n2.  **Target Phase**: The event reaches the actual element on which it occurred (the event target).\n3.  **Bubbling Phase**: After the target phase, the event propagates upwards from the target element's parent back to the `window` object. Most event handlers are registered for this phase by default (when `useCapture` is `false` or omitted).\n\n   <img src=\"https://www.w3.org/TR/DOM-Level-3-Events/images/eventflow.png\" alt=\"DOM Event Flow: Capturing, Target, Bubbling\" style=\"width: 60%;\" />\n\n   *Image source: W3C DOM Level 3 Events Specification*\n\n## Controlling Event Propagation\n-   **`event.stopPropagation()`**:\n    *   **Purpose**: Prevents the event from propagating further in either the capturing or bubbling phases. It stops the event from reaching parent or child elements (depending on which phase it's called).\n    *   **Limitation**: If multiple event listeners are attached to the *same element* for the *same event type*, `stopPropagation()` will *not* prevent other listeners on that *same element* from executing.\n-   **`event.stopImmediatePropagation()`**:\n    *   **Purpose**: Does everything `stopPropagation()` does, AND it also prevents any other event listeners attached to the *same element* for the *same event type* from being executed after the current one.\n    *   **Effect**: The event stops completely at the current element, affecting both propagation up/down the DOM tree and execution of same-element handlers.\n\n## Event Delegation\nEvent delegation is a technique where you attach a single event listener to a parent element, rather than attaching individual listeners to multiple child elements. This listener then handles events that bubble up from its children. It is highly efficient for lists of dynamically added/removed elements and reduces memory footprint.",
+          "examples": [
+            {
+              "id": "example_dom_event_1",
+              "title": "mouseout vs mouseleave",
+              "code": "<!-- HTML Structure -->\n<div id=\"parent\" style=\"border: 1px solid black; padding: 20px;\">\n  Parent\n  <div id=\"child\" style=\"border: 1px solid red; padding: 10px; margin-top: 10px;\">Child</div>\n</div>\n\n// JavaScript\nconst parent = document.getElementById('parent');\n\nparent.addEventListener('mouseout', () => {\n  console.log('Parent: mouseout fired'); // Fires when moving from parent to child\n});\n\nparent.addEventListener('mouseleave', () => {\n  console.log('Parent: mouseleave fired'); // Only fires when truly leaving the parent's boundary\n});\n",
+              "explanation": "This example highlights the difference: `mouseout` on the parent fires when the mouse moves from the parent to its child, because the mouse 'leaves' the parent's immediate area to enter the child. `mouseleave` only fires when the mouse moves completely outside the parent's boundaries, ignoring movement into its children.",
+              "language": "html+javascript"
+            },
+            {
+              "id": "example_dom_event_2",
+              "title": "Capturing and Bubbling Phases",
+              "code": "<!-- HTML Structure -->\n<div id=\"outer\" style=\"padding: 20px; background: lightblue;\">\n  Outer\n  <div id=\"inner\" style=\"padding: 20px; background: lightcoral;\">\n    Inner\n  </div>\n</div>\n\n// JavaScript\nconst outer = document.getElementById('outer');\nconst inner = document.getElementById('inner');\n\nouter.addEventListener('click', () => console.log('Outer (Bubbling)'), false); // Default: Bubbling\ninner.addEventListener('click', () => console.log('Inner (Bubbling)'), false); // Default: Bubbling\nouter.addEventListener('click', () => console.log('Outer (Capturing)'), true);  // Capturing\ninner.addEventListener('click', () => console.log('Inner (Capturing)'), true);  // Capturing\n\n// Click on 'Inner':\n// Output order:\n// Outer (Capturing)\n// Inner (Capturing)\n// Inner (Bubbling)\n// Outer (Bubbling)\n",
+              "explanation": "This example demonstrates the order of event listeners during capturing and bubbling phases. When 'Inner' is clicked, the event first travels down (capturing), then reaches the target, and finally bubbles up.",
+              "language": "html+javascript"
+            },
+            {
+              "id": "example_dom_event_3",
+              "title": "stopPropagation vs stopImmediatePropagation",
+              "code": "<!-- HTML Structure -->\n<button id=\"myButton\">Click me</button>\n<div id=\"parentDiv\">Parent Div</div>\n\n// JavaScript\nconst button = document.getElementById('myButton');\nconst parentDiv = document.getElementById('parentDiv');\n\nbutton.addEventListener('click', (event) => {\n  console.log('Button Listener 1');\n  event.stopPropagation(); // Stops bubbling to parentDiv\n  // event.stopImmediatePropagation(); // Would also stop 'Button Listener 2' from running\n});\n\nbutton.addEventListener('click', () => {\n  console.log('Button Listener 2'); // This will still run if only stopPropagation is used\n});\n\nparentDiv.addEventListener('click', () => {\n  console.log('Parent Div Listener'); // This will NOT run due to stopPropagation on button\n});\n",
+              "explanation": "`stopPropagation()` prevents the click event from bubbling up to `parentDiv`. However, `Button Listener 2` (another listener on the *same* `button` element) still executes. If `stopImmediatePropagation()` were used instead, `Button Listener 2` would also be prevented from running.",
+              "language": "html+javascript"
+            }
+          ],
+          "relatedQuestions": [],
+          "relatedTasks": [],
+          "tags": [
+            "DOM",
+            "Events",
+            "Event Propagation",
+            "JavaScript",
+            "Browser APIs",
+            "Performance"
+          ],
+          "technology": "JavaScript",
+          "prerequisites": [
+            "JavaScript Fundamentals",
+            "DOM Manipulation"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 9,
+          "learningPath": "intermediate",
+          "requiredFor": [
+            "Advanced DOM",
+            "React Event System",
+            "Performance Optimization"
+          ]
+        },
+        {
+          "id": "theory_web_accessibility",
+          "title": "Web Accessibility (a11y)",
+          "content": "Web Accessibility (often abbreviated as 'a11y' because there are 11 letters between 'a' and 'y') is the practice of designing and developing websites, tools, and technologies so that people with disabilities can use them effectively. This includes individuals with auditory, cognitive, neurological, physical, speech, and visual disabilities.\n\n## Core Principles\nAccessibility is about ensuring equal access and opportunity. It involves adhering to standards and best practices to remove barriers that prevent people with disabilities from interacting with or accessing digital content. Key aspects include:\n-   **Perceivable**: Information and user interface components must be presentable to users in ways they can perceive (e.g., provide text alternatives for images, captions for videos, sufficient color contrast).\n-   **Operable**: User interface components and navigation must be operable (e.g., keyboard navigability, enough time to read and use content, no seizures).\n-   **Understandable**: Information and the operation of user interface must be understandable (e.g., readable and understandable text, predictable functionality).\n-   **Robust**: Content must be robust enough that it can be interpreted reliably by a wide variety of user agents, including assistive technologies.\n\n## Key Standards and Techniques\n-   **WCAG (Web Content Accessibility Guidelines)**: The primary international standard for web accessibility, published by the W3C. It provides a set of guidelines and success criteria for making web content more accessible.\n-   **Semantic HTML**: Using HTML elements for their intended purpose (e.g., `<button>` for buttons, `<nav>` for navigation, `<header>`, `<footer>`, `<main>`, `<article>`, `<aside>`). Semantic HTML provides inherent meaning and structure that assistive technologies can understand.\n-   **Text Alternatives (`alt` attributes)**: Providing descriptive `alt` text for images (`<img src=\"cat.jpg\" alt=\"A fluffy orange cat sleeping on a chair\">`) so screen readers can convey visual information to users who cannot see the image.\n-   **Keyboard Navigability**: Ensuring all interactive elements can be accessed and operated using only a keyboard (e.g., `Tab` key for navigation, `Enter`/`Space` for activation). Proper focus management is essential.\n-   **Sufficient Color Contrast**: Ensuring there's enough contrast between text and its background for readability, especially for users with visual impairments.\n-   **ARIA (Accessible Rich Internet Applications)**: A set of attributes (`role`, `aria-label`, `aria-describedby`, `aria-live`, etc.) that define ways to make web content and web applications more accessible to people with disabilities, especially those with dynamic content and advanced UI controls developed with JavaScript. ARIA helps bridge the gap where native HTML elements are insufficient for conveying meaning to assistive technologies.\n\n## Benefits of Accessibility\nAccessibility benefits everyone, not just people with disabilities. It improves SEO, usability for mobile users, users with slow internet, and older users. It also demonstrates social responsibility and can be a legal requirement.",
+          "examples": [
+            {
+              "id": "example_a11y_1",
+              "title": "Semantic HTML vs Non-Semantic HTML",
+              "code": "<!-- Non-semantic (Div Soup) -->\n<div onclick=\"doSomething()\" style=\"cursor: pointer;\">Click me</div>\n\n<!-- Semantic and Accessible -->\n<button type=\"button\">Click me</button>\n\n<!-- Image with alt text -->\n<img src=\"product.jpg\" alt=\"A sleek silver smartphone with a large display\" />\n",
+              "explanation": "The semantic `<button>` element is inherently accessible: it's focusable by keyboard, actionable with Space/Enter, and conveys its purpose to assistive technologies without extra effort. The non-semantic `div` requires significant extra work (e.g., `tabindex`, ARIA roles, event listeners for keyboard) to achieve similar accessibility. The `alt` attribute for images is crucial for screen reader users.",
+              "language": "html"
+            },
+            {
+              "id": "example_a11y_2",
+              "title": "ARIA Attributes for Dynamic Content",
+              "code": "<!-- HTML -->\n<button aria-expanded=\"false\" aria-controls=\"menu-items\">Toggle Menu</button>\n<ul id=\"menu-items\" role=\"menu\" hidden>\n  <li role=\"menuitem\"><a href=\"#\">Item 1</a></li>\n  <li role=\"menuitem\"><a href=\"#\">Item 2</a></li>\n</ul>\n\n// JavaScript (simplified for concept)\nconst toggleButton = document.querySelector('button');\nconst menu = document.getElementById('menu-items');\n\ntoggleButton.addEventListener('click', () => {\n  const isExpanded = toggleButton.getAttribute('aria-expanded') === 'true';\n  toggleButton.setAttribute('aria-expanded', !isExpanded);\n  menu.hidden = isExpanded;\n});\n",
+              "explanation": "This example uses ARIA attributes (`aria-expanded`, `aria-controls`, `role=\"menu\"`, `role=\"menuitem\"`) to provide semantic meaning and state information for a custom toggle menu that is not natively supported by HTML. Screen readers can use this information to inform users about the menu's state and structure.",
+              "language": "html+javascript"
+            }
+          ],
+          "relatedQuestions": [],
+          "relatedTasks": [],
+          "tags": [
+            "Accessibility",
+            "A11y",
+            "WCAG",
+            "Semantic HTML",
+            "ARIA",
+            "Frontend Development",
+            "Inclusive Design"
+          ],
+          "technology": "HTML, CSS, JavaScript",
+          "prerequisites": [
+            "HTML Basics",
+            "CSS Basics",
+            "JavaScript Fundamentals"
+          ],
+          "complexity": 8,
+          "interviewRelevance": 8,
+          "learningPath": "intermediate",
+          "requiredFor": [
+            "Advanced Frontend",
+            "UI/UX Design",
+            "Product Development"
+          ]
+        },
+        {
+          "id": "theory_virtual_dom",
+          "title": "Virtual DOM (VDOM) and Reconciliation",
+          "content": "The Virtual DOM (VDOM) is a programming concept used by libraries like React, Vue, and others to optimize UI rendering performance. It's an abstract, lightweight copy of the 'real' (browser) DOM kept in memory. The core idea is to minimize direct manipulations of the actual DOM, which are computationally expensive.\n\n## How Virtual DOM Works\n1.  **Initial Render**: When a component first renders, the rendering library (e.g., React) creates a Virtual DOM tree representing the UI. This VDOM tree is then used to construct the actual browser DOM.\n2.  **State/Prop Update**: When the application's state or props change, instead of directly updating the real DOM, the library creates a *new* Virtual DOM tree.\n3.  **Diffing (Reconciliation)**: The library then compares this new VDOM tree with the previous VDOM snapshot. This comparison process is called 'diffing'. It identifies the minimal set of differences between the two trees.\n4.  **Batch Updates**: Once the differences are determined, the library calculates the most efficient way to apply these changes to the actual browser DOM. Multiple updates are often batched together and applied in a single pass to further optimize performance.\n5.  **Real DOM Update**: Only the necessary changes are then applied to the real DOM, leading to fewer and more targeted DOM manipulations.\n\n## Benefits of Virtual DOM\n-   **Performance Optimization**: Minimizes direct DOM manipulations, which are slow. By updating only the necessary parts of the DOM, VDOM significantly improves rendering efficiency.\n-   **Cross-Platform Compatibility**: The VDOM abstraction makes it easier for libraries to support different rendering environments (e.g., web, native mobile, desktop), as the core rendering logic is decoupled from specific DOM APIs.\n-   **Simplified Development**: Developers can treat the UI as a function of state without worrying about the specifics of DOM manipulation. The library handles the updates efficiently.\n-   **Predictable Updates**: The VDOM ensures that updates are applied in a controlled and predictable manner.\n\n## Limitations/Considerations\n-   **Memory Usage**: Maintaining two copies of the DOM (virtual and real) can consume more memory, though the virtual DOM is typically lighter.\n-   **Overhead for Small Updates**: For very small, isolated updates, the overhead of diffing and reconciliation might sometimes be slightly more than direct DOM manipulation, but this is rare in complex applications.\n\n## Comparison with Real DOM\nThe Real DOM (Document Object Model) is a tree-structure interface that browsers use to represent HTML documents. It's a programming interface for web documents. Browsers expose APIs to interact with this DOM (e.g., `document.createElement`, `element.appendChild`). Direct manipulation of the Real DOM can be slow because each change often triggers re-renders, reflows (recalculating element positions and dimensions), and repaints (redrawing elements) of parts of the page, which are expensive operations.",
+          "examples": [
+            {
+              "id": "example_virtual_dom_1",
+              "title": "Conceptual VDOM Update Flow",
+              "code": "/* \n  Conceptual steps in a React-like VDOM update:\n*/\n\n// 1. Initial Render: Component state initializes, VDOM tree 1 is created.\nconst vdomTree1 = {\n  type: 'div',\n  props: { className: 'container' },\n  children: [\n    { type: 'h1', props: {}, children: ['Hello'] },\n    { type: 'p', props: {}, children: ['World'] }\n  ]\n};\n// Render vdomTree1 to actual DOM\n\n// 2. State Update: User clicks a button, state changes.\n//    A new VDOM tree 2 is created based on the new state.\nconst vdomTree2 = {\n  type: 'div',\n  props: { className: 'container' },\n  children: [\n    { type: 'h1', props: {}, children: ['Hello'] },\n    { type: 'p', props: {}, children: ['React!'] } // 'World' changed to 'React!'\n  ]\n};\n\n// 3. Diffing: Compare vdomTree1 with vdomTree2.\n//    Identifies that only the text content of the <p> element changed.\n\n// 4. Batch Update & Real DOM Update:\n//    React generates a single efficient DOM operation:\n//    `document.querySelector('p').textContent = 'React!';`\n//    No need to re-render the entire <div> or <h1>.\n",
+              "explanation": "This conceptual example illustrates how React's VDOM works. Instead of recreating the entire `div` or even the `h1` and `p` elements, the diffing algorithm identifies only the minimal change required (updating the text content of the `p` tag) and applies only that specific change to the real DOM.",
+              "language": "javascript"
+            }
+          ],
+          "relatedQuestions": [],
+          "relatedTasks": [],
+          "tags": [
+            "Virtual DOM",
+            "Reconciliation",
+            "React",
+            "Performance",
+            "Frontend Architecture",
+            "JavaScript"
+          ],
+          "technology": "React, JavaScript",
+          "prerequisites": [
+            "JavaScript Fundamentals",
+            "DOM Manipulation",
+            "Basic Understanding of Frontend Frameworks"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 8,
+          "learningPath": "intermediate",
+          "requiredFor": [
+            "React Performance Optimization",
+            "Custom UI Libraries"
+          ]
+        },
+        {
+          "id": "theory_service_workers",
+          "title": "Service Workers and Offline Capabilities",
+          "content": "Service Workers are a type of web worker, a JavaScript file that runs in the background, separate from the main browser thread. They act as a programmable proxy between the browser and the network, enabling powerful features like offline experiences, push notifications, and background synchronization. They are a core component of Progressive Web Apps (PWAs).\n\n## Key Capabilities\n-   **Network Interception (Fetch Event)**: The most powerful feature. Service Workers can intercept all network requests made by pages under their scope. This allows them to decide how to respond to requests, e.g., by serving cached content, fetching from the network, or generating a response dynamically. The `self.addEventListener('fetch', event => {})` listener is used for this purpose.\n-   **Caching**: With the `CacheStorage` API, Service Workers can store and retrieve network responses. This is fundamental for offline support and faster loading times.\n-   **Push Notifications**: Enabling web applications to receive messages pushed from a server, even when the user is not actively using the application.\n-   **Background Sync**: Allowing deferred actions (e.g., submitting forms) to be synchronized with a server when a stable network connection is detected.\n-   **Offline Experience**: By combining network interception and caching, Service Workers can ensure that a web application remains usable even when the user is offline.\n\n## Service Worker Lifecycle\n1.  **Registration**: A web page registers a Service Worker (`navigator.serviceWorker.register('./sw.js')`).\n2.  **Installation**: The browser downloads the Service Worker file. The `install` event is fired. This is a good time to pre-cache static assets that are essential for the app's offline functionality.\n3.  **Activation**: Once installed, the Service Worker activates. The `activate` event is fired. This is a good time to clean up old caches or migrate data. A new Service Worker won't activate until all pages controlled by the old one are closed or refreshed.\n4.  **Controlling Pages**: After activation, the Service Worker can 'control' web pages within its defined scope. Controlled pages will have their network requests intercepted.\n5.  **Update**: If a new version of the Service Worker file is detected, it's downloaded and installed in the background, but it won't activate until all old clients are gone (closed/reloaded). `self.skipWaiting()` can force immediate activation for testing or specific use cases.\n\n## Caching Strategies\n-   **Cache First**: Try to get a response from the cache; if not found, go to the network.\n-   **Network First**: Try to get a response from the network; if that fails (e.g., offline), fall back to the cache.\n-   **Stale-While-Revalidate**: Serve content from the cache immediately, then fetch an updated version from the network in the background and update the cache for future requests.\n-   **Cache Only**: Serve only from the cache (useful for static assets pre-cached during install).\n-   **Network Only**: Serve only from the network (useful for non-cached dynamic content).\n\nService Workers run in a separate thread and do not have access to the DOM.",
+          "examples": [
+            {
+              "id": "example_service_worker_1",
+              "title": "Basic Service Worker Registration",
+              "code": "// In your main JavaScript file (e.g., index.js)\nif ('serviceWorker' in navigator) {\n  window.addEventListener('load', () => {\n    navigator.serviceWorker.register('/sw.js')\n      .then(registration => {\n        console.log('Service Worker registered with scope:', registration.scope);\n      })\n      .catch(error => {\n        console.error('Service Worker registration failed:', error);\n      });\n  });\n}\n\n// In your Service Worker file (sw.js)\nconsole.log('Service Worker loaded!');\n",
+              "explanation": "This code snippet shows how a Service Worker (`sw.js`) is registered in the main application's JavaScript. The `if ('serviceWorker' in navigator)` check ensures browser compatibility. The `register()` method returns a Promise that resolves with a `ServiceWorkerRegistration` object.",
+              "language": "javascript"
+            },
+            {
+              "id": "example_service_worker_2",
+              "title": "Cache-First Strategy using Fetch Event",
+              "code": "// In your Service Worker file (sw.js)\nconst CACHE_NAME = 'my-app-cache-v1';\nconst urlsToCache = [\n  '/',\n  '/index.html',\n  '/styles.css',\n  '/script.js'\n];\n\nself.addEventListener('install', event => {\n  event.waitUntil(\n    caches.open(CACHE_NAME)\n      .then(cache => {\n        console.log('Opened cache');\n        return cache.addAll(urlsToCache);\n      })\n  );\n});\n\nself.addEventListener('fetch', event => {\n  event.respondWith(\n    caches.match(event.request)\n      .then(response => {\n        // Cache hit - return response\n        if (response) {\n          console.log('Serving from cache:', event.request.url);\n          return response;\n        }\n        // No cache hit - fetch from network\n        console.log('Fetching from network:', event.request.url);\n        return fetch(event.request)\n          .then(networkResponse => {\n            // Check if we received a valid response\n            if (!networkResponse || networkResponse.status !== 200 || networkResponse.type !== 'basic') {\n              return networkResponse;\n            }\n            // IMPORTANT: Clone the response. A response is a stream\n            // and can only be consumed once. We must clone it so that\n            // we can consume the original and send one to the browser.\n            const responseToCache = networkResponse.clone();\n            caches.open(CACHE_NAME)\n              .then(cache => {\n                cache.put(event.request, responseToCache);\n              });\n            return networkResponse;\n          });\n      })\n  );\n});\n\nself.addEventListener('activate', event => {\n  const cacheWhitelist = [CACHE_NAME];\n  event.waitUntil(\n    caches.keys().then(cacheNames => {\n      return Promise.all(\n        cacheNames.map(cacheName => {\n          if (cacheWhitelist.indexOf(cacheName) === -1) {\n            console.log('Deleting old cache:', cacheName);\n            return caches.delete(cacheName);\n          }\n        })\n      );\n    })\n  );\n});\n",
+              "explanation": "This comprehensive example demonstrates a 'cache-first' strategy. During the `install` phase, essential assets are pre-cached. In the `fetch` phase, the Service Worker first tries to find a match in the cache. If found, it returns the cached response. If not, it fetches from the network, caches the response for future use, and then returns it to the page. The `activate` phase handles cleaning up old caches during updates.",
+              "language": "javascript"
+            }
+          ],
+          "relatedQuestions": [],
+          "relatedTasks": [],
+          "tags": [
+            "Service Workers",
+            "PWA",
+            "Offline",
+            "Caching",
+            "Web Workers",
+            "JavaScript",
+            "Web Performance"
+          ],
+          "technology": "JavaScript",
+          "prerequisites": [
+            "JavaScript Asynchronous Programming",
+            "Promises",
+            "Fetch API"
+          ],
+          "complexity": 8,
+          "interviewRelevance": 7,
+          "learningPath": "advanced",
+          "requiredFor": [
+            "Progressive Web Apps",
+            "Offline-first Applications"
+          ]
+        },
+        {
+          "id": "theory_web_performance_optimization",
+          "title": "Web Page Performance Optimization",
+          "content": "Optimizing web page performance is crucial for user experience, SEO, and business goals. A fast-loading website leads to better engagement, lower bounce rates, and improved conversions. Performance optimization involves a variety of techniques across different layers of the web stack.\n\n## Key Optimization Approaches\n1.  **Minimizing HTTP Requests**: Each asset (image, CSS, JS file, font) requires a separate HTTP request. Reducing the number of requests can significantly speed up loading.\n    *   **Techniques**: Bundling CSS/JS files into fewer larger files, using CSS sprites (combining multiple small images into one), inline small images/CSS/JS (for critical path).\n2.  **Optimizing Assets**: Reducing the file size of resources without compromising quality.\n    *   **Techniques**: Compressing images (lossy/lossless), minifying CSS/JS/HTML (removing whitespace, comments, shortening variable names), optimizing fonts.\n3.  **Using Browser Caching Effectively**: Instructing browsers to store resources locally so they don't need to be re-downloaded on subsequent visits.\n    *   **Techniques**: Setting appropriate `Cache-Control` headers (`max-age`, `no-cache`, `public`, `private`), using `ETags` for conditional requests.\n4.  **Leveraging Content Delivery Networks (CDNs)**: Distributing assets across multiple geographically dispersed servers. Users download assets from the closest server, reducing latency.\n5.  **Optimizing Rendering Path (Critical Rendering Path)**: Prioritizing the loading and processing of resources that are essential for the initial render of the page (above-the-fold content).\n    *   **Techniques**: Reducing render-blocking resources (CSS, JS), inlining critical CSS, deferring non-critical JS (`defer`, `async`), server-side rendering (SSR) or static site generation (SSG).\n6.  **Efficient JavaScript**: JavaScript can block rendering and cause long tasks, impacting responsiveness.\n    *   **Techniques**: Code splitting (loading JS only when needed), tree shaking (removing unused code), debouncing/throttling event handlers, using `requestAnimationFrame` for animations (browser-optimized timing).\n7.  **Lazy Loading Offscreen Images and Components**: Loading resources only when they are needed, typically when they enter the viewport.\n    *   **Techniques**: `loading=\"lazy\"` attribute for images/iframes, Intersection Observer API for custom lazy loading of components or videos.\n8.  **Using Modern Image Formats**: Employing formats that offer better compression and quality.\n    *   **Techniques**: WebP, AVIF, SVG for vector graphics. Serving appropriate formats based on browser support (`<picture>` element).\n9.  **Server-Side Optimizations**: Improving the responsiveness and efficiency of the server.\n    *   **Techniques**: Gzip/Brotli compression for text-based assets, fast server response time, efficient database queries.\n10. **Preloading, Prefetching, Preconnecting**: Giving hints to the browser about resources that will be needed soon.\n    *   **`preload`**: For resources needed in the current navigation as soon as possible (e.g., critical fonts, CSS, JS).\n    *   **`prefetch`**: For resources that might be needed in a future navigation.\n    *   **`preconnect`**: For establishing early connections to third-party origins.",
+          "examples": [
+            {
+              "id": "example_perf_opt_1",
+              "title": "Lazy Loading Images",
+              "code": "<!-- HTML with native lazy loading -->\n<img src=\"image-placeholder.jpg\" data-src=\"actual-image.jpg\" alt=\"A beautiful landscape\" loading=\"lazy\" />\n\n<!-- JavaScript to replace placeholder with actual image on load (for older browsers) -->\n<script>\n  document.addEventListener('DOMContentLoaded', () => {\n    const lazyImages = document.querySelectorAll('img[loading=\"lazy\"]');\n    lazyImages.forEach(img => {\n      if ('IntersectionObserver' in window) {\n        // Use IntersectionObserver for modern browsers\n        let observer = new IntersectionObserver((entries, observer) => {\n          entries.forEach(entry => {\n            if (entry.isIntersecting) {\n              const imgElement = entry.target;\n              imgElement.src = imgElement.dataset.src;\n              observer.unobserve(imgElement);\n            }\n          });\n        });\n        observer.observe(img);\n      } else {\n        // Fallback for older browsers\n        img.src = img.dataset.src;\n      }\n    });\n  });\n</script>\n",
+              "explanation": "This example shows two ways to lazy load images: using the native `loading=\"lazy\"` attribute (modern browsers) and a JavaScript fallback with `IntersectionObserver` or direct assignment. Lazy loading ensures images outside the viewport are only loaded when they become visible, improving initial page load time.",
+              "language": "html+javascript"
+            },
+            {
+              "id": "example_perf_opt_2",
+              "title": "Preload and Defer Scripts",
+              "code": "<!-- Preload a critical CSS file (as=style is important) -->\n<link rel=\"preload\" href=\"/css/critical.css\" as=\"style\" onload=\"this.rel='stylesheet'\">\n<noscript><link rel=\"stylesheet\" href=\"/css/critical.css\"></noscript>\n\n<!-- Defer non-critical JavaScript -->\n<script src=\"/js/non-critical.js\" defer></script>\n\n<!-- Async script (loads independently, executes when ready) -->\n<script src=\"/js/analytics.js\" async></script>\n",
+              "explanation": "The `preload` hint tells the browser to fetch `critical.css` with high priority without blocking rendering. The `onload` attribute then applies it as a stylesheet. `defer` scripts execute after HTML parsing is complete but before `DOMContentLoaded`. `async` scripts load and execute independently of the HTML parsing, suitable for non-blocking scripts like analytics.",
+              "language": "html"
+            }
+          ],
+          "relatedQuestions": [],
+          "relatedTasks": [],
+          "tags": [
+            "Web Performance",
+            "Optimization",
+            "Frontend Engineering",
+            "Browser APIs",
+            "HTTP",
+            "Caching",
+            "CDN",
+            "Core Web Vitals"
+          ],
+          "technology": "HTML, CSS, JavaScript, HTTP",
+          "prerequisites": [
+            "HTML Basics",
+            "CSS Basics",
+            "JavaScript Fundamentals",
+            "HTTP Protocol"
+          ],
+          "complexity": 9,
+          "interviewRelevance": 9,
+          "learningPath": "advanced",
+          "requiredFor": [
+            "Large-scale Applications",
+            "Performance Auditing",
+            "DevOps"
+          ]
+        },
+        {
+          "id": "theory_same_origin_policy",
+          "title": "Browser Security: Same-Origin Policy (SOP) and CORS",
+          "content": "The Same-Origin Policy (SOP) is a fundamental security mechanism implemented by web browsers. It restricts how a document or script loaded from one \"origin\" can interact with a resource from another \"origin.\" This policy is crucial for preventing malicious scripts on one website from accessing sensitive data on another website that a user might be logged into.\n\n## Definition of an Origin\nTwo URLs are considered to have the same origin if they have the identical:\n1.  **Protocol**: (e.g., `http`, `https`)\n2.  **Hostname**: (e.g., `www.example.com`)\n3.  **Port**: (e.g., `80`, `443` - if explicitly specified)\n\nFor example, `http://example.com:80/path/to/page.html` has the same origin as `http://example.com/another/page.html` (port 80 is default for HTTP), but a different origin from `https://example.com/`, `http://sub.example.com/`, or `http://example.com:8080/`.\n\n## Implementation in the Browser\nBrowsers enforce SOP by default. When a script requests a resource from a different origin, the browser typically blocks direct read access to the response data unless explicit permission is granted by the target server. Write actions (like sending form data) might sometimes be allowed, but reading the response is restricted.\n\n## Browser APIs Affected by SOP\nSOP primarily applies to interactions that allow scripts to read data from another origin. This includes:\n1.  **JavaScript access to DOM of other origins**: A script loaded from `example.com` cannot directly access the content (e.g., elements, forms) within an `<iframe>` whose source is `anothersite.com`.\n2.  **XMLHttpRequest (XHR) and Fetch API**: Network requests made via `XMLHttpRequest` or `fetch()` to a different origin are blocked from reading the response unless the server explicitly allows it using CORS headers.\n3.  **Web Storage (localStorage, sessionStorage)**: Data stored in `localStorage` or `sessionStorage` is scoped to its origin and cannot be accessed by scripts from other origins.\n4.  **WebSockets**: While WebSocket connections are technically a different protocol, the initial handshake often follows SOP, and the server must explicitly allow cross-origin connections.\n5.  **`canvas` (tainting)**: If an image from a different origin is loaded onto a `<canvas>`, the canvas becomes 'tainted', and its content cannot be read back by JavaScript. This prevents sensitive image data from being stolen.\n\n## How to Bypass SOP: Cross-Origin Resource Sharing (CORS)\nCORS is a W3C standard that allows a server to explicitly grant permission for cross-origin requests. It works by adding special HTTP headers to responses:\n-   `Access-Control-Allow-Origin`: Specifies which origins are allowed to access the resource (e.g., `*` for any origin, or a specific domain like `http://example.com`).\n-   `Access-Control-Allow-Methods`: Specifies which HTTP methods (GET, POST, PUT, DELETE, etc.) are allowed.\n-   `Access-Control-Allow-Headers`: Specifies which HTTP headers are allowed in the request.\n-   `Access-Control-Allow-Credentials`: Indicates whether the server allows credentials (cookies, HTTP authentication) to be sent with the request.\n-   **Preflight Requests**: For certain 'complex' requests (e.g., those using HTTP methods other than GET/POST/HEAD, or custom headers), the browser will automatically send an `OPTIONS` preflight request *before* the actual request. This preflight checks if the server is willing to accept the actual request. The server must respond to the `OPTIONS` request with appropriate CORS headers.",
+          "examples": [
+            {
+              "id": "example_sop_1",
+              "title": "SOP Blocking XHR Request",
+              "code": "// Script running on http://example.com\n\n// Attempt to fetch data from a different origin (http://api.anothersite.com)\nfetch('http://api.anothersite.com/data')\n  .then(response => response.json())\n  .then(data => console.log(data))\n  .catch(error => console.error('Fetch error:', error));\n\n// Without proper CORS headers on api.anothersite.com, this will result in a \n// 'Cross-Origin Request Blocked' error in the browser console, and the script\n// will not be able to read the response.\n",
+              "explanation": "This example demonstrates how SOP blocks a `fetch` request to a different origin by default. The browser will prevent the client-side JavaScript from accessing the response if the `api.anothersite.com` server does not send the necessary `Access-Control-Allow-Origin` header.",
+              "language": "javascript"
+            },
+            {
+              "id": "example_sop_2",
+              "title": "Server-Side CORS Configuration (Node.js/Express)",
+              "code": "// Example of server-side CORS configuration using Express.js\nconst express = require('express');\nconst app = express();\n\napp.use((req, res, next) => {\n  // Allow requests from a specific origin\n  res.setHeader('Access-Control-Allow-Origin', 'http://example.com'); \n  // Or allow all origins (less secure for sensitive data)\n  // res.setHeader('Access-Control-Allow-Origin', '*');\n\n  // Allow specific methods\n  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');\n\n  // Allow specific headers\n  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');\n\n  // Allow credentials (cookies, HTTP auth)\n  res.setHeader('Access-Control-Allow-Credentials', 'true');\n\n  // Handle preflight requests\n  if (req.method === 'OPTIONS') {\n    res.sendStatus(200);\n  } else {\n    next();\n  }\n});\n\napp.get('/data', (req, res) => {\n  res.json({ message: 'Data from cross-origin!' });\n});\n\napp.listen(3000, () => console.log('Server running on port 3000'));\n",
+              "explanation": "This Node.js/Express example demonstrates how a server can send CORS headers to allow cross-origin requests. By setting `Access-Control-Allow-Origin` to `http://example.com`, only requests from that specific origin will be permitted to read the response. It also shows how to handle `OPTIONS` preflight requests.",
+              "language": "javascript"
+            }
+          ],
+          "relatedQuestions": [],
+          "relatedTasks": [],
+          "tags": [
+            "Security",
+            "SOP",
+            "CORS",
+            "Browser Security",
+            "HTTP",
+            "Frontend Security",
+            "Web APIs"
+          ],
+          "technology": "HTTP, Browser Security, JavaScript",
+          "prerequisites": [
+            "HTTP Protocol",
+            "Web Security Basics",
+            "Fetch API"
+          ],
+          "complexity": 8,
+          "interviewRelevance": 7,
+          "learningPath": "advanced",
+          "requiredFor": [
+            "API Integration",
+            "Web Application Security",
+            "Backend Development"
+          ]
+        }
+      ],
+      "questions": [
+        {
+          "id": "question_user_search_1",
+          "topic": "React Component Structure and Hooks",
+          "level": "easy",
+          "type": "mcq",
+          "question": "Which React hook is primarily used in the `UserSearch` component to manage the search input value and the filtered list of users?",
+          "answer": "`useState`",
+          "options": [
+            "`useReducer`",
+            "`useState`",
+            "`useContext`",
+            "`useEffect`"
+          ],
+          "analysisPoints": [
+            "`useState` is used for managing component-local state like input values (`searchText`) and data lists (`users`).",
+            "`useEffect` is for side effects, often triggered by state changes, but not for direct state definition.",
+            "`useReducer` is for more complex state logic, and `useContext` for global state."
+          ],
+          "keyConcepts": [
+            "React Hooks",
+            "State Management",
+            "Functional Components"
+          ],
+          "evaluationCriteria": [
+            "Understanding of fundamental React hooks",
+            "Correct identification of hook purpose"
+          ],
+          "example": "```typescript\nimport React, { useState } from 'react';\n\nfunction MyComponent() {\n  const [count, setCount] = useState(0);\n  const [name, setName] = useState('');\n\n  return (\n    <div>\n      <p>Count: {count}</p>\n      <button onClick={() => setCount(count + 1)}>Increment</button>\n      <input type=\"text\" value={name} onChange={e => setName(e.target.value)} />\n    </div>\n  );\n}\n```",
+          "tags": [
+            "React",
+            "useState",
+            "Hooks",
+            "Beginner"
+          ],
+          "prerequisites": [
+            "React Basics",
+            "JavaScript Variables"
+          ],
+          "complexity": 3,
+          "interviewFrequency": 8,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_user_search_2",
+          "topic": "React useEffect and Debouncing",
+          "level": "medium",
+          "type": "open",
+          "question": "The `UserSearch` component uses `useEffect` with a `setTimeout` and `clearTimeout` for its search logic. Explain why this pattern is used and what problem it solves.",
+          "answer": "This pattern is known as **debouncing**. It is used to delay the execution of a function until a certain amount of time has passed without any further invocations. In the `UserSearch` component, it's applied to the search input.\n\n**Problem Solved**: When a user types into a search box, the `onChange` event fires rapidly for every keystroke. Without debouncing, each keystroke would trigger an immediate search operation (e.g., a filter on local data or an API call).\n\n*   **Excessive Operations**: This leads to an excessive number of search operations, which is inefficient and can cause performance issues (e.g., too many network requests, high CPU usage).\n*   **Poor User Experience**: The UI might feel sluggish or jumpy if re-renders happen too frequently.\n\n**How `setTimeout` and `clearTimeout` solve it**: The `useEffect` hook sets a timer (`setTimeout`) whenever the `searchText` changes. If `searchText` changes again before the timer expires, the previous timer is cleared (`clearTimeout`) and a new one is set. The search logic (filtering `allUsers`) only executes when the user pauses typing for the specified debounce duration (e.g., 500ms). This ensures the search operation runs only once per pause in typing, significantly optimizing performance and improving user experience.",
+          "analysisPoints": [
+            "Identifies 'debouncing' as the pattern.",
+            "Explains the problem of frequent re-renders/API calls without debouncing.",
+            "Describes how `setTimeout` and `clearTimeout` work together to delay and cancel previous operations.",
+            "Connects the solution back to performance and user experience benefits."
+          ],
+          "keyConcepts": [
+            "Debouncing",
+            "React useEffect Hook",
+            "Performance Optimization",
+            "Event Handling"
+          ],
+          "evaluationCriteria": [
+            "Understanding of debouncing concept",
+            "Ability to explain the mechanism of `setTimeout` and `clearTimeout` for debouncing",
+            "Insight into performance implications in React applications"
+          ],
+          "example": "See `example_react_user_search_3` in `theory_react_user_search` for a practical code example.",
+          "tags": [
+            "React",
+            "useEffect",
+            "Performance",
+            "Debouncing",
+            "JavaScript"
+          ],
+          "prerequisites": [
+            "React Hooks",
+            "JavaScript Timers",
+            "Event Loop"
+          ],
+          "complexity": 7,
+          "interviewFrequency": 9,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_user_search_3",
+          "topic": "Conditional and List Rendering in React",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "What is the purpose of the `key` prop when rendering a list of elements in React, as seen with `users.map(...)` in `UserSearch`?",
+          "answer": "The `key` prop helps React identify which items have changed, are added, or are removed. Keys should be unique among siblings to help React efficiently update the UI, improving performance and preventing bugs, especially when list items change order or are dynamically added/removed.",
+          "analysisPoints": [
+            "Identifies the primary role of `key` in reconciliation.",
+            "Emphasizes uniqueness among siblings.",
+            "Mentions performance and bug prevention (e.g., incorrect state updates, reordering issues)."
+          ],
+          "keyConcepts": [
+            "React List Rendering",
+            "Reconciliation",
+            "Key Prop"
+          ],
+          "evaluationCriteria": [
+            "Recall of fundamental React list rendering rules",
+            "Understanding of `key`'s role in React's internal processes"
+          ],
+          "example": null,
+          "tags": [
+            "React",
+            "List Rendering",
+            "Key Prop",
+            "Flashcard"
+          ],
+          "prerequisites": [
+            "React Basics"
+          ],
+          "complexity": 4,
+          "interviewFrequency": 8,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_user_search_4",
+          "topic": "React State vs Props",
+          "level": "medium",
+          "type": "mcq",
+          "question": "If the `UserSearch` component were to receive the initial list of `allUsers` from a parent component, how would this data typically be passed, and why is that method preferred over using `useState` for `allUsers` directly within `UserSearch`?",
+          "answer": "As a prop; because props are immutable and passed from parent to child, representing external data, whereas state is mutable internal data.",
+          "options": [
+            "As a prop; because props are immutable and passed from parent to child, representing external data, whereas state is mutable internal data.",
+            "As a state variable; because state is the only way to manage data that changes over time.",
+            "Via `useContext`; because `allUsers` is likely a global resource.",
+            "By directly importing `allUsers` from a data file; because it avoids prop drilling."
+          ],
+          "analysisPoints": [
+            "Correctly identifies 'prop' as the mechanism for passing external data.",
+            "Distinguishes between props (immutable, external) and state (mutable, internal).",
+            "Highlights the one-way data flow in React.",
+            "Incorrect options confuse state with props or suggest less common/appropriate methods for this scenario."
+          ],
+          "keyConcepts": [
+            "React Props",
+            "React State",
+            "Data Flow"
+          ],
+          "evaluationCriteria": [
+            "Understanding of React's data flow principles",
+            "Ability to differentiate between props and state usage"
+          ],
+          "example": "```typescript\n// ParentComponent.tsx\nfunction ParentComponent() {\n  const usersData = [...]; // Data coming from API or elsewhere\n  return <UserSearch allUsers={usersData} />;\n}\n\n// UserSearch.tsx\ninterface UserSearchProps {\n  allUsers: User[];\n}\n\nfunction UserSearch({ allUsers }: UserSearchProps) {\n  const [searchText, setSearchText] = useState('');\n  // ... useEffect to filter allUsers based on searchText ...\n  // allUsers is received as a prop, not managed as state here.\n}\n```",
+          "tags": [
+            "React",
+            "Props",
+            "State",
+            "Data Flow"
+          ],
+          "prerequisites": [
+            "React Basics"
+          ],
+          "complexity": 5,
+          "interviewFrequency": 7,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_dom_events_1",
+          "topic": "DOM Events: mouseleave vs mouseout",
+          "level": "easy",
+          "type": "mcq",
+          "question": "What is the principal difference between the `mouseleave` and `mouseout` events?",
+          "answer": "`mouseout` fires when the mouse pointer moves out of an element or any of its children; `mouseleave` fires only when the mouse pointer moves out of the bounds of the element it is registered on and does not bubble.",
+          "options": [
+            "`mouseleave` bubbles, `mouseout` does not.",
+            "`mouseout` fires when the mouse pointer moves out of an element or any of its children; `mouseleave` fires only when the mouse pointer moves out of the bounds of the element it is registered on and does not bubble.",
+            "`mouseleave` is deprecated, `mouseout` is preferred.",
+            "There is no practical difference; they are interchangeable."
+          ],
+          "analysisPoints": [
+            "Correctly identifies the difference in behavior concerning child elements.",
+            "Highlights the bubbling nature of `mouseout` and the non-bubbling nature of `mouseleave`.",
+            "Emphasizes `mouseleave` for specific UI scenarios like tooltips.",
+            "Incorrect options contain false information about deprecation or interchangeability."
+          ],
+          "keyConcepts": [
+            "DOM Events",
+            "Event Bubbling",
+            "Event Target"
+          ],
+          "evaluationCriteria": [
+            "Understanding of specific event behaviors",
+            "Knowledge of event propagation"
+          ],
+          "example": "```html\n<div id=\"parent\" style=\"border: 1px solid black; padding: 20px;\">\n  Parent\n  <div id=\"child\" style=\"border: 1px solid red; padding: 10px; margin-top: 10px;\">Child</div>\n</div>\n<script>\nconst parent = document.getElementById('parent');\nparent.addEventListener('mouseout', () => console.log('Parent mouseout')); // Fires Parent->Child\nparent.addEventListener('mouseleave', () => console.log('Parent mouseleave')); // Only fires Parent->Outside\n</script>\n```",
+          "tags": [
+            "DOM",
+            "Events",
+            "JavaScript",
+            "Beginner"
+          ],
+          "prerequisites": [
+            "JavaScript Events"
+          ],
+          "complexity": 4,
+          "interviewFrequency": 8,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_dom_events_2",
+          "topic": "DOM Event Processing Order",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "In what order are user events typically processed in the DOM (e.g., click, mouseover)? FIFO or LIFO?",
+          "answer": "FIFO (First-In, First-Out). Events are added to an event queue and processed one by one in the order they occurred.",
+          "analysisPoints": [
+            "Correctly states FIFO.",
+            "Briefly explains the role of the event queue and event loop."
+          ],
+          "keyConcepts": [
+            "Event Loop",
+            "Event Queue",
+            "DOM Events"
+          ],
+          "evaluationCriteria": [
+            "Recall of event queue behavior",
+            "Basic understanding of the event loop"
+          ],
+          "example": null,
+          "tags": [
+            "DOM",
+            "Events",
+            "Event Loop",
+            "Flashcard"
+          ],
+          "prerequisites": [
+            "JavaScript Event Loop"
+          ],
+          "complexity": 3,
+          "interviewFrequency": 6,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_dom_events_3",
+          "topic": "DOM Event Bubbling and Capturing",
+          "level": "medium",
+          "type": "open",
+          "question": "Describe the Event bubbling and Event capturing phases in the HTML DOM. Provide a scenario where understanding both phases is critical.",
+          "answer": "Event bubbling and capturing are two phases of event propagation in the HTML DOM, describing the order in which event listeners are triggered on an element's ancestors and descendants.\n\n**Capturing Phase**: When an event occurs on an element, the browser first checks for event listeners starting from the `window` object, then `document`, `<html>`, `<body>`, and down to the parent of the target element. Listeners registered with the `useCapture` argument set to `true` (e.g., `addEventListener('click', handler, true)`) are executed during this phase.\n\n**Target Phase**: The event reaches the actual target element where it originated.\n\n**Bubbling Phase**: After the target phase, the event 'bubbles up' from the target element's parent, through its ancestors, all the way up to the `window` object. Most event handlers are registered for this phase by default (when `useCapture` is `false` or omitted).\n\n**Scenario where understanding both is critical**: **Event Delegation**. If you have a large list of dynamically added or removed items (e.g., `<ul>` with many `<li>`s) and you want to attach a click listener to each `<li>`. Instead of attaching hundreds of listeners, you can attach a single listener to the `<ul>` (the parent). To make event delegation work reliably and handle specific scenarios (e.g., stopping an event that was triggered by a child from affecting a parent's capturing listener), understanding which phase an event is in, and thus which listener will fire first, is crucial. For instance, if you want a `click` on a `li` to trigger a specific action but prevent a general `click` handler on the `body` from also firing (perhaps for a modal close), you need to know if the `body` listener is capturing or bubbling and use `stopPropagation` accordingly.",
+          "analysisPoints": [
+            "Clearly defines capturing and bubbling phases.",
+            "Explains the direction of event flow for each phase.",
+            "Mentions the `useCapture` argument in `addEventListener`.",
+            "Provides a relevant and practical scenario (event delegation) where this knowledge is critical.",
+            "Connects the phases to real-world problem-solving."
+          ],
+          "keyConcepts": [
+            "DOM Events",
+            "Event Propagation",
+            "Event Bubbling",
+            "Event Capturing",
+            "Event Delegation"
+          ],
+          "evaluationCriteria": [
+            "Comprehensive explanation of event phases",
+            "Ability to provide a practical application of the concepts",
+            "Clarity and accuracy of definitions"
+          ],
+          "example": "```html\n<div id=\"ancestor\">\n  <div id=\"parent\">\n    <button id=\"child\">Click Me</button>\n  </div>\n</div>\n<script>\n  const ancestor = document.getElementById('ancestor');\n  const parent = document.getElementById('parent');\n  const child = document.getElementById('child');\n\n  ancestor.addEventListener('click', (e) => console.log('Ancestor (Capturing)'), true);\n  parent.addEventListener('click', (e) => console.log('Parent (Capturing)'), true);\n  child.addEventListener('click', (e) => console.log('Child (Target)')); // Target/Bubbling default\n  parent.addEventListener('click', (e) => console.log('Parent (Bubbling)'), false);\n  ancestor.addEventListener('click', (e) => console.log('Ancestor (Bubbling)'), false);\n\n  // Clicking 'Click Me' button will output:\n  // Ancestor (Capturing)\n  // Parent (Capturing)\n  // Child (Target)\n  // Parent (Bubbling)\n  // Ancestor (Bubbling)\n</script>\n```",
+          "tags": [
+            "DOM",
+            "Events",
+            "Event Propagation",
+            "JavaScript"
+          ],
+          "prerequisites": [
+            "JavaScript Events",
+            "DOM Structure"
+          ],
+          "complexity": 6,
+          "interviewFrequency": 9,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_dom_events_4",
+          "topic": "Controlling Event Propagation",
+          "level": "medium",
+          "type": "mcq",
+          "question": "You have a button with two click listeners attached to it. The first listener calls `event.stopPropagation()`. The button is inside a `div` element, which also has a click listener. What will happen when the button is clicked?",
+          "answer": "The first button listener will execute, the second button listener will execute, but the div listener will NOT execute.",
+          "options": [
+            "Only the first button listener will execute, and no other listeners.",
+            "The first button listener will execute, the second button listener will execute, but the div listener will NOT execute.",
+            "All three listeners (both button listeners and the div listener) will execute.",
+            "The first button listener will execute, but the second button listener and the div listener will NOT execute."
+          ],
+          "analysisPoints": [
+            "Correctly identifies that `stopPropagation()` prevents propagation to *parent/ancestor elements*.",
+            "Crucially, it recognizes that `stopPropagation()` *does not* prevent other listeners on the *same element* from running.",
+            "Distinguishes `stopPropagation()` from `stopImmediatePropagation()` implicitly."
+          ],
+          "keyConcepts": [
+            "DOM Events",
+            "Event Propagation",
+            "`stopPropagation()`",
+            "`stopImmediatePropagation()`"
+          ],
+          "evaluationCriteria": [
+            "Precise understanding of `stopPropagation()` behavior",
+            "Ability to differentiate its effect from `stopImmediatePropagation()`",
+            "Predicting event flow in a complex scenario"
+          ],
+          "example": "```html\n<div id=\"myDiv\">\n  <button id=\"myButton\">Click me</button>\n</div>\n<script>\n  const myButton = document.getElementById('myButton');\n  const myDiv = document.getElementById('myDiv');\n\n  myButton.addEventListener('click', (e) => {\n    console.log('Button Listener 1');\n    e.stopPropagation(); // Stops bubbling to myDiv\n  });\n\n  myButton.addEventListener('click', (e) => {\n    console.log('Button Listener 2'); // This still runs!\n  });\n\n  myDiv.addEventListener('click', (e) => {\n    console.log('Div Listener'); // This will NOT run\n  });\n</script>\n```",
+          "tags": [
+            "DOM",
+            "Events",
+            "JavaScript",
+            "Event Propagation"
+          ],
+          "prerequisites": [
+            "JavaScript Events",
+            "DOM Manipulation"
+          ],
+          "complexity": 6,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_dom_events_5",
+          "topic": "Event Delegation",
+          "level": "hard",
+          "type": "code",
+          "question": "Implement an event delegation mechanism for a dynamically generated list. The task is to create an unordered list (`<ul>`) and add 10 list items (`<li>`) to it. Each `<li>` should have a unique ID and display 'Item X'. When any `<li>` is clicked, log its ID to the console. You must use only *one* event listener on the `<ul>` element, not individual listeners on each `<li>`.",
+          "answer": "```typescript\n// HTML Setup (add this to your HTML body)\n// <ul id=\"myList\"></ul>\n\n// JavaScript solution:\nconst ulElement = document.getElementById('myList');\n\n// Generate list items dynamically\nfor (let i = 1; i <= 10; i++) {\n  const li = document.createElement('li');\n  li.id = `item-${i}`;\n  li.textContent = `Item ${i}`;\n  ulElement.appendChild(li);\n}\n\n// Implement event delegation\nulElement.addEventListener('click', (event) => {\n  // Check if the clicked element is an <li> or a descendant of an <li>\n  const targetLi = event.target.closest('li');\n  \n  // Ensure a valid <li> was clicked within the ul\n  if (targetLi && ulElement.contains(targetLi)) {\n    console.log(`Clicked item ID: ${targetLi.id}`);\n  }\n});\n```",
+          "analysisPoints": [
+            "Demonstrates understanding of event delegation.",
+            "Correctly attaches the listener to the parent `<ul>`.",
+            "Uses `event.target` to identify the actual clicked element.",
+            "Leverages `closest()` to find the nearest `<li>` ancestor, handling clicks on child elements within an `<li>`.",
+            "Includes a check (`ulElement.contains(targetLi)`) to ensure the `<li>` belongs to the correct `<ul>` (though `closest` implicitly handles this in simple cases, it's good practice for robustness).",
+            "Dynamically generates elements, showing the benefit of delegation."
+          ],
+          "keyConcepts": [
+            "Event Delegation",
+            "DOM Manipulation",
+            "Event Object",
+            "`event.target`",
+            "`closest()`"
+          ],
+          "evaluationCriteria": [
+            "Correct implementation of event delegation.",
+            "Effective use of DOM manipulation methods.",
+            "Proper handling of `event.target` and `closest()`.",
+            "Code cleanliness and efficiency."
+          ],
+          "example": "```html\n<ul id=\"myList\"></ul>\n```\n```typescript\nconst ul = document.getElementById('myList');\nfor (let i = 0; i < 5; i++) {\n  const li = document.createElement('li');\n  li.textContent = `List Item ${i}`; \n  li.id = `item-${i}`;\n  ul.appendChild(li);\n}\n\nul.addEventListener('click', (event) => {\n  if (event.target.tagName === 'LI') { // Simple check, but closest() is more robust\n    console.log(`Clicked on: ${event.target.id}`);\n  }\n});\n```",
+          "tags": [
+            "DOM",
+            "Events",
+            "JavaScript",
+            "Coding Challenge",
+            "Event Delegation"
+          ],
+          "prerequisites": [
+            "JavaScript DOM Manipulation",
+            "Event Listeners"
+          ],
+          "complexity": 6,
+          "interviewFrequency": 7,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_a11y_1",
+          "topic": "Web Accessibility Fundamentals",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "What is the primary goal of Web Accessibility (a11y)?",
+          "answer": "To design and develop websites, tools, and technologies so that people with disabilities (auditory, cognitive, neurological, physical, speech, visual) can use them effectively and have equal access.",
+          "analysisPoints": [
+            "Highlights inclusivity as the core.",
+            "Mentions different types of disabilities.",
+            "Focuses on equal access and effective use."
+          ],
+          "keyConcepts": [
+            "Web Accessibility",
+            "Inclusive Design",
+            "Disability"
+          ],
+          "evaluationCriteria": [
+            "Basic definition recall",
+            "Understanding of core purpose"
+          ],
+          "example": null,
+          "tags": [
+            "Accessibility",
+            "A11y",
+            "Flashcard"
+          ],
+          "prerequisites": [],
+          "complexity": 3,
+          "interviewFrequency": 7,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_a11y_2",
+          "topic": "Web Accessibility: Alt Attributes",
+          "level": "easy",
+          "type": "mcq",
+          "question": "Why is it important to include an `alt` attribute for images in HTML, and what should it contain?",
+          "answer": "It provides a text alternative for screen readers and when images fail to load; it should contain a concise description of the image's content or purpose.",
+          "options": [
+            "It provides a text alternative for screen readers and when images fail to load; it should contain a concise description of the image's content or purpose.",
+            "It's primarily for SEO purposes and should contain keywords related to the image.",
+            "It is only necessary for decorative images to hide them from screen readers.",
+            "It acts as a tooltip when the user hovers over the image."
+          ],
+          "analysisPoints": [
+            "Correctly identifies the primary purpose for accessibility (screen readers) and fallbacks (image load failure).",
+            "Stresses the importance of descriptive content.",
+            "Debunks common misconceptions about SEO, decorative images, and tooltips."
+          ],
+          "keyConcepts": [
+            "Accessibility",
+            "Alt Text",
+            "Semantic HTML",
+            "Screen Readers"
+          ],
+          "evaluationCriteria": [
+            "Understanding of `alt` attribute's role in accessibility",
+            "Knowledge of best practices for `alt` text content"
+          ],
+          "example": "```html\n<!-- Good alt text -->\n<img src=\"chart.png\" alt=\"Bar chart showing quarterly sales, Q1: 100, Q2: 150, Q3: 120, Q4: 180\">\n\n<!-- Bad alt text (just keywords or too generic) -->\n<img src=\"chart.png\" alt=\"chart sales data trend analytics\">\n\n<!-- Decorative image (empty alt for screen readers to ignore) -->\n<img src=\"decorative-border.png\" alt=\"\">\n```",
+          "tags": [
+            "Accessibility",
+            "HTML",
+            "A11y"
+          ],
+          "prerequisites": [
+            "HTML Basics"
+          ],
+          "complexity": 4,
+          "interviewFrequency": 8,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_a11y_3",
+          "topic": "Web Accessibility: Keyboard Navigation & ARIA",
+          "level": "medium",
+          "type": "open",
+          "question": "Beyond `alt` attributes and semantic HTML, what are two other critical aspects of web accessibility, and how can ARIA attributes contribute to them?",
+          "answer": "**1. Keyboard Navigability**: Ensuring that all interactive elements and content are accessible and operable using only a keyboard (e.g., `Tab`, `Enter`, `Space` keys). This is vital for users who cannot use a mouse, such as those with motor impairments or screen reader users.\n   *   **ARIA Contribution**: ARIA roles and properties can enhance keyboard navigability for custom widgets. For example:\n      *   `aria-expanded`: Indicates if a collapsible section (like a dropdown menu) is currently expanded or collapsed, assisting users in understanding its state.\n      *   `aria-haspopup`: Indicates that an element, when activated, will trigger a popup (e.g., a menu or dialog), informing screen reader users what to expect.\n      *   `role=\"tablist\"`, `role=\"tab\"`, `role=\"tabpanel\"`: Defines the structure and behavior of a tab interface, allowing screen readers to convey the correct keyboard interactions (e.g., arrow keys to switch tabs).\n      *   `tabindex`: While a native HTML attribute, ARIA often works in conjunction with `tabindex` to manage focus for non-interactive elements that need to be focusable or for custom focus traps.\n\n**2. Sufficient Color Contrast**: Ensuring there's enough contrast between foreground (text) and background colors to make content readable for users with visual impairments (e.g., color blindness) or in challenging lighting conditions.\n   *   **ARIA Contribution**: ARIA attributes generally *do not directly* address color contrast. Color contrast is primarily a CSS and design concern, measured against WCAG guidelines (e.g., WCAG 2.1 AA or AAA levels). While ARIA doesn't provide a direct solution, a well-structured and semantically rich page (aided by ARIA) ensures that even if contrast is suboptimal, other accessibility features (like screen readers) can still provide information. However, developers must ensure contrast is met through design and CSS.",
+          "analysisPoints": [
+            "Identifies keyboard navigability and color contrast as critical aspects.",
+            "Provides clear explanations for each aspect.",
+            "Articulates how specific ARIA attributes enhance keyboard navigability and convey state for custom components.",
+            "Accurately clarifies that ARIA doesn't directly solve color contrast but works with other techniques.",
+            "Demonstrates a nuanced understanding of ARIA's role."
+          ],
+          "keyConcepts": [
+            "Accessibility",
+            "Keyboard Navigation",
+            "Color Contrast",
+            "ARIA Attributes",
+            "WCAG"
+          ],
+          "evaluationCriteria": [
+            "Depth of understanding of accessibility principles.",
+            "Knowledge of specific ARIA attributes and their practical application.",
+            "Ability to distinguish responsibilities between ARIA and other web technologies (e.g., CSS for contrast).",
+            "Clarity and completeness of explanations."
+          ],
+          "example": "See `example_a11y_2` in `theory_web_accessibility` for ARIA usage.",
+          "tags": [
+            "Accessibility",
+            "A11y",
+            "ARIA",
+            "Keyboard Navigation",
+            "WCAG",
+            "CSS"
+          ],
+          "prerequisites": [
+            "HTML Semantic Elements",
+            "Basic CSS"
+          ],
+          "complexity": 7,
+          "interviewFrequency": 8,
+          "learningPath": "advanced"
+        },
+        {
+          "id": "question_virtual_dom_1",
+          "topic": "Virtual DOM Fundamentals",
+          "level": "medium",
+          "type": "mcq",
+          "question": "Which statement accurately describes the primary reason for using a Virtual DOM in frameworks like React?",
+          "answer": "To minimize direct manipulations of the actual browser DOM by batching and optimizing updates, leading to better performance.",
+          "options": [
+            "To allow direct manipulation of the DOM in a declarative way without re-rendering.",
+            "To fully replace the browser's DOM, making it unnecessary.",
+            "To minimize direct manipulations of the actual browser DOM by batching and optimizing updates, leading to better performance.",
+            "To enable server-side rendering exclusively without client-side JavaScript."
+          ],
+          "analysisPoints": [
+            "Correctly identifies the core benefit: performance optimization through minimized and batched DOM operations.",
+            "Highlights the VDOM's role as an *abstract representation*, not a replacement.",
+            "Distinguishes VDOM from declarative DOM manipulation *without* optimization or server-side rendering."
+          ],
+          "keyConcepts": [
+            "Virtual DOM",
+            "Reconciliation",
+            "Performance Optimization",
+            "Real DOM"
+          ],
+          "evaluationCriteria": [
+            "Understanding of VDOM's purpose and mechanism.",
+            "Ability to differentiate VDOM from other web concepts."
+          ],
+          "example": "See `example_virtual_dom_1` in `theory_virtual_dom` for a conceptual flow.",
+          "tags": [
+            "Virtual DOM",
+            "React",
+            "Performance",
+            "Frontend Architecture"
+          ],
+          "prerequisites": [
+            "DOM Basics"
+          ],
+          "complexity": 5,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_virtual_dom_2",
+          "topic": "Virtual DOM vs Real DOM",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "What is the 'diffing' process in the context of the Virtual DOM?",
+          "answer": "The 'diffing' process (also known as reconciliation) is when the VDOM library compares the new Virtual DOM tree (after a state/prop update) with the previous VDOM snapshot to identify the minimal set of changes needed to update the actual browser DOM.",
+          "analysisPoints": [
+            "Defines diffing as the comparison of VDOM trees.",
+            "Mentions its goal: finding minimal changes for the real DOM.",
+            "Links it to state/prop updates."
+          ],
+          "keyConcepts": [
+            "Virtual DOM",
+            "Reconciliation",
+            "Diffing Algorithm"
+          ],
+          "evaluationCriteria": [
+            "Recall of VDOM core concepts",
+            "Understanding of the reconciliation step"
+          ],
+          "example": null,
+          "tags": [
+            "Virtual DOM",
+            "React",
+            "Flashcard",
+            "Performance"
+          ],
+          "prerequisites": [
+            "Virtual DOM Basics"
+          ],
+          "complexity": 4,
+          "interviewFrequency": 7,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_virtual_dom_3",
+          "topic": "Virtual DOM Benefits and Trade-offs",
+          "level": "medium",
+          "type": "open",
+          "question": "While the Virtual DOM is highly beneficial for performance in most modern web applications, can you describe a scenario where its benefits might be less pronounced, or even where direct DOM manipulation could be equally or more efficient?",
+          "answer": "The Virtual DOM provides significant performance benefits by batching and optimizing updates to the real DOM. However, its benefits might be less pronounced, or direct DOM manipulation could be equally or more efficient, in the following scenarios:\n\n1.  **Very Small, Infrequent, or Isolated Updates**: For a static website with minimal interactivity, or if you only need to make a single, isolated change to a specific part of the DOM (e.g., updating a single text node without affecting its siblings or parents), the overhead of creating a VDOM, diffing it, and then applying changes might actually be slightly more expensive than directly manipulating that one element. The VDOM shines when many changes occur in rapid succession or across different parts of the UI.\n\n2.  **Performance-Critical Animations/High-Frequency Updates**: For highly optimized animations or games where every millisecond matters, or where DOM elements are changing at a very high frequency (e.g., 60 frames per second), bypassing the VDOM and directly manipulating the DOM (often using `requestAnimationFrame` for synchronization) might offer finer control and potentially better raw performance. Frameworks like React typically provide escape hatches (e.g., `useRef` for direct DOM access) for such niche performance-critical scenarios.\n\n3.  **Simple, Non-Interactive Websites**: For a simple informational website with no dynamic components or user interactions that change the UI, the overhead of a VDOM library and its runtime can be unnecessary. Plain HTML, CSS, and minimal JavaScript would be more efficient to load and render.\n\nIn essence, the VDOM introduces a layer of abstraction and computation (diffing) that, while amortized over many changes, adds a small fixed cost per update. For applications where this fixed cost outweighs the benefits of batching and optimized diffing (i.e., very few or extremely controlled changes), its advantages diminish.",
+          "analysisPoints": [
+            "Identifies scenarios where VDOM overhead might be an issue (small, infrequent updates).",
+            "Discusses performance-critical animations/games as an edge case.",
+            "Mentions simple, static websites where VDOM might be overkill.",
+            "Explains the trade-off: VDOM's fixed cost vs. batching benefits.",
+            "Shows a nuanced understanding of VDOM's optimization strategy."
+          ],
+          "keyConcepts": [
+            "Virtual DOM Trade-offs",
+            "Performance Optimization",
+            "Direct DOM Manipulation",
+            "Reconciliation Overhead"
+          ],
+          "evaluationCriteria": [
+            "Critical thinking about technology choices.",
+            "Understanding of the underlying mechanisms that make VDOM efficient or less efficient.",
+            "Ability to articulate edge cases for VDOM use.",
+            "Completeness of the explanation."
+          ],
+          "example": null,
+          "tags": [
+            "Virtual DOM",
+            "Performance",
+            "Trade-offs",
+            "Advanced React",
+            "Frontend Architecture"
+          ],
+          "prerequisites": [
+            "Virtual DOM Basics",
+            "DOM Manipulation",
+            "Web Performance"
+          ],
+          "complexity": 8,
+          "interviewFrequency": 6,
+          "learningPath": "advanced"
+        },
+        {
+          "id": "question_service_workers_1",
+          "topic": "Service Workers: Fetch Event",
+          "level": "medium",
+          "type": "mcq",
+          "question": "For what purpose can the event listener `self.addEventListener('fetch', event => {})` be used within a Service Worker?",
+          "answer": "To intercept network requests made from pages it controls and respond with cached assets, network responses, or dynamically generated content.",
+          "options": [
+            "To listen for changes in the browser's history and update the URL.",
+            "To intercept network requests made from pages it controls and respond with cached assets, network responses, or dynamically generated content.",
+            "To handle user interface events like clicks and form submissions directly in the background.",
+            "To execute JavaScript only when the browser tab is not active, saving CPU cycles."
+          ],
+          "analysisPoints": [
+            "Correctly identifies the primary function of the `fetch` event: network interception.",
+            "Highlights the flexibility of responding (cache, network, dynamic).",
+            "Distinguishes `fetch` event from other types of events or general background execution."
+          ],
+          "keyConcepts": [
+            "Service Workers",
+            "Fetch Event",
+            "Network Interception",
+            "Caching",
+            "PWA"
+          ],
+          "evaluationCriteria": [
+            "Understanding of Service Worker's core capabilities.",
+            "Knowledge of the `fetch` event's specific role."
+          ],
+          "example": "```typescript\n// sw.js\nself.addEventListener('fetch', event => {\n  event.respondWith(\n    caches.match(event.request).then(response => {\n      return response || fetch(event.request);\n    })\n  );\n});\n// This implements a cache-first strategy: try cache, then network.\n```",
+          "tags": [
+            "Service Workers",
+            "PWA",
+            "Caching",
+            "Frontend Architecture"
+          ],
+          "prerequisites": [
+            "JavaScript Promises",
+            "Fetch API"
+          ],
+          "complexity": 6,
+          "interviewFrequency": 7,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_service_workers_2",
+          "topic": "Service Worker Lifecycle",
+          "level": "medium",
+          "type": "flashcard",
+          "question": "Name and briefly describe the three main phases of a Service Worker's lifecycle after registration.",
+          "answer": "**Install**: The Service Worker is downloaded and the `install` event is fired. This is where pre-caching of assets often occurs.\n**Activate**: After installation, the Service Worker activates. The `activate` event is fired, often used for cleaning up old caches.\n**Controlled**: The Service Worker takes control of the pages within its scope, intercepting network requests via the `fetch` event.",
+          "analysisPoints": [
+            "Correctly names install, activate, and controlled phases.",
+            "Provides a concise description of each phase's purpose or common actions.",
+            "Demonstrates understanding of the sequential nature of the lifecycle."
+          ],
+          "keyConcepts": [
+            "Service Workers",
+            "Lifecycle",
+            "Caching",
+            "PWA"
+          ],
+          "evaluationCriteria": [
+            "Recall of Service Worker lifecycle stages.",
+            "Understanding of typical operations in each stage."
+          ],
+          "example": null,
+          "tags": [
+            "Service Workers",
+            "PWA",
+            "Lifecycle",
+            "Flashcard"
+          ],
+          "prerequisites": [
+            "Service Workers Basics"
+          ],
+          "complexity": 5,
+          "interviewFrequency": 6,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_perf_opt_1",
+          "topic": "Web Page Performance Optimization Approaches",
+          "level": "medium",
+          "type": "open",
+          "question": "List and briefly explain at least four distinct approaches to optimizing web page performance, including examples for each.",
+          "answer": "Here are four distinct approaches to optimizing web page performance:\n\n1.  **Optimizing Assets**: This involves reducing the file size of resources without compromising their quality.\n    *   **Explanation**: Smaller file sizes mean faster download times and less data consumed by users.\n    *   **Examples**: Compressing images (e.g., using WebP format, image optimizers), minifying CSS, JavaScript, and HTML files (removing unnecessary whitespace, comments), and tree-shaking JavaScript bundles to remove unused code.\n\n2.  **Browser Caching**: Leveraging the browser's ability to store resources locally so they don't need to be re-downloaded on subsequent visits.\n    *   **Explanation**: This drastically speeds up repeat visits as many assets can be served directly from the user's local cache.\n    *   **Examples**: Setting appropriate `Cache-Control` headers (e.g., `Cache-Control: max-age=31536000, public`) for static assets, using `ETags` for conditional requests to validate cached content.\n\n3.  **Lazy Loading**: Deferring the loading of non-critical resources (like images, videos, or components) until they are actually needed, typically when they enter the user's viewport.\n    *   **Explanation**: This improves the initial page load time and reduces initial bandwidth consumption, especially for pages with a lot of content below the fold.\n    *   **Examples**: Using the `loading=\"lazy\"` attribute on `<img>` or `<iframe>` tags, or implementing custom lazy loading with the `IntersectionObserver` API for React components or larger content blocks.\n\n4.  **Minimizing HTTP Requests & Bundling**: Reducing the number of distinct files (and thus network requests) a browser needs to download to render a page.\n    *   **Explanation**: Each HTTP request incurs overhead (DNS lookup, TCP handshake, SSL negotiation). Fewer requests mean less overhead.\n    *   **Examples**: Concatenating multiple CSS or JavaScript files into a single bundle, using CSS sprites for small icons, or embedding very small critical CSS/JS directly into the HTML.",
+          "analysisPoints": [
+            "Lists at least four distinct approaches.",
+            "Provides a clear and concise explanation for each.",
+            "Includes practical and specific examples for each approach.",
+            "Demonstrates knowledge across different optimization categories (asset, network, rendering)."
+          ],
+          "keyConcepts": [
+            "Web Performance",
+            "Asset Optimization",
+            "Caching",
+            "Lazy Loading",
+            "HTTP Requests",
+            "Bundling"
+          ],
+          "evaluationCriteria": [
+            "Breadth of knowledge in performance optimization.",
+            "Ability to explain concepts clearly.",
+            "Providing relevant and actionable examples.",
+            "Understanding of the 'why' behind each technique."
+          ],
+          "example": null,
+          "tags": [
+            "Web Performance",
+            "Optimization",
+            "Frontend Engineering"
+          ],
+          "prerequisites": [
+            "HTML Basics",
+            "CSS Basics",
+            "JavaScript Fundamentals",
+            "HTTP Protocol"
+          ],
+          "complexity": 7,
+          "interviewFrequency": 9,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_perf_opt_2",
+          "topic": "Critical Rendering Path",
+          "level": "hard",
+          "type": "open",
+          "question": "Explain the concept of the Critical Rendering Path (CRP) and how optimizing it contributes to perceived web page performance. What are two common techniques to optimize the CRP?",
+          "answer": "The **Critical Rendering Path (CRP)** is the sequence of steps the browser goes through to convert HTML, CSS, and JavaScript into pixels on the screen. Optimizing the CRP means prioritizing the display of content that's visible to the user as quickly as possible (above-the-fold content).\n\n**How it contributes to perceived performance**: By optimizing the CRP, you reduce the time it takes for the browser to render the initial view of the page, leading to a faster **First Contentful Paint (FCP)** and **Largest Contentful Paint (LCP)**. This makes the page *feel* faster to the user, even if the entire page hasn't finished loading. Perceived performance is often more important than actual raw load time for user satisfaction.\n\n**Two common techniques to optimize the CRP**:\n\n1.  **Minimizing Render-Blocking Resources**: By default, CSS and JavaScript are render-blocking. The browser cannot render any content until it has downloaded, parsed, and executed all render-blocking CSS and JavaScript in the `<head>`.\n    *   **Technique**: Place `<link>` tags for CSS in the `<head>` (but keep CSS small and inline critical CSS) and use `defer` or `async` attributes for non-critical `<script>` tags, or place them at the end of the `<body>`.\n    *   **Example**: ` <script src=\"non-critical.js\" defer></script>` or `<link rel=\"preload\" href=\"critical.css\" as=\"style\" onload=\"this.rel='stylesheet'\">`.\n\n2.  **Inlining Critical CSS**: For above-the-fold content, the small amount of CSS required to render it immediately can be inlined directly into the `<head>` of the HTML document.\n    *   **Technique**: Use build tools (like Webpack's mini-css-extract-plugin with critical CSS plugins) to extract the CSS needed for the initial viewport and embed it. This avoids an extra network request for the initial render.\n    *   **Example**: `<style>body { font-family: sans-serif; } .header { color: blue; }</style>` in the `<head>`.\n\nOther techniques include server-side rendering (SSR) or static site generation (SSG) to deliver pre-rendered HTML, reducing client-side rendering work.",
+          "analysisPoints": [
+            "Clear definition of CRP.",
+            "Explanation of its impact on perceived performance and Core Web Vitals (FCP, LCP).",
+            "Detailed explanation of two specific optimization techniques: minimizing render-blocking resources and inlining critical CSS.",
+            "Provides concrete examples for each technique."
+          ],
+          "keyConcepts": [
+            "Critical Rendering Path",
+            "Perceived Performance",
+            "Render-Blocking Resources",
+            "Inline CSS",
+            "Core Web Vitals",
+            "`defer`",
+            "`async`"
+          ],
+          "evaluationCriteria": [
+            "In-depth understanding of browser rendering processes.",
+            "Ability to connect technical details to user experience.",
+            "Knowledge of advanced performance optimization techniques.",
+            "Clarity and structure of the explanation."
+          ],
+          "example": null,
+          "tags": [
+            "Web Performance",
+            "Optimization",
+            "Browser Internals",
+            "Frontend Architecture"
+          ],
+          "prerequisites": [
+            "Browser Rendering",
+            "HTML Parsing",
+            "CSSOM",
+            "DOM"
+          ],
+          "complexity": 8,
+          "interviewFrequency": 7,
+          "learningPath": "advanced"
+        },
+        {
+          "id": "question_same_origin_policy_1",
+          "topic": "Same-Origin Policy Fundamentals",
+          "level": "medium",
+          "type": "mcq",
+          "question": "Which combination defines an 'origin' in the context of the Same-Origin Policy (SOP)?",
+          "answer": "Protocol, hostname, and port",
+          "options": [
+            "Protocol and hostname only",
+            "Hostname and path only",
+            "Protocol, hostname, and port",
+            "Hostname, port, and file extension"
+          ],
+          "analysisPoints": [
+            "Correctly identifies the three components of an origin: protocol, hostname, and port.",
+            "Distinguishes the strictness of SOP from less precise definitions.",
+            "Incorrect options include irrelevant components or omit critical ones."
+          ],
+          "keyConcepts": [
+            "Same-Origin Policy",
+            "Web Security",
+            "Origin Definition"
+          ],
+          "evaluationCriteria": [
+            "Accurate recall of SOP definition.",
+            "Understanding of the components that determine an origin."
+          ],
+          "example": "```\n// Same Origin:\n// http://example.com/path/a\n// http://example.com/path/b (Same protocol, host, default port 80)\n\n// Different Origin:\n// https://example.com/ (Different protocol)\n// http://sub.example.com/ (Different hostname)\n// http://example.com:8080/ (Different port)\n```",
+          "tags": [
+            "Security",
+            "SOP",
+            "HTTP",
+            "Flashcard"
+          ],
+          "prerequisites": [
+            "Basic HTTP"
+          ],
+          "complexity": 4,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_same_origin_policy_2",
+          "topic": "Same-Origin Policy and Browser APIs",
+          "level": "medium",
+          "type": "open",
+          "question": "The Same-Origin Policy is implemented in the browser to enhance security. Beyond `XMLHttpRequest`/`fetch`, name two other browser APIs or contexts where SOP applies, and explain the restriction.",
+          "answer": "Here are two other browser APIs/contexts where SOP applies:\n\n1.  **JavaScript access to DOM of other origins (e.g., `<iframe>` content)**:\n    *   **Restriction**: A script loaded from `http://mysite.com` cannot directly read or manipulate the content (e.g., elements, styles, forms) of an `<iframe>` whose `src` is set to `http://anothersite.com`. This prevents a malicious script from an embedded advertisement, for instance, from stealing user data from the parent page or vice-versa.\n    *   **Bypass**: Limited communication is possible via `postMessage` for specific, controlled data exchange.\n\n2.  **Web Storage (`localStorage`, `sessionStorage`)**:\n    *   **Restriction**: Data stored in `localStorage` or `sessionStorage` is strictly scoped to its origin. A script from `http://app.example.com` cannot access data stored by `http://auth.example.com` in either `localStorage` or `sessionStorage`. This ensures that sensitive user data stored client-side by one application is not accessible to other, potentially malicious, applications on different origins.\n\nAnother relevant example is the **`canvas` element tainting**: If you load an image from a different origin onto a `<canvas>` element using `drawImage()`, the canvas becomes 'tainted'. Once tainted, you cannot read pixel data back from the canvas using methods like `toDataURL()` or `getImageData()`. This prevents a malicious site from loading an image from a user's bank statement, for example, and then reading its contents pixel by pixel.",
+          "analysisPoints": [
+            "Clearly identifies `<iframe>` content and Web Storage as affected by SOP.",
+            "Explains the specific restriction for each identified context.",
+            "Articulates the security rationale behind each restriction.",
+            "Mentions `canvas` tainting as an additional relevant example, showing breadth of knowledge."
+          ],
+          "keyConcepts": [
+            "Same-Origin Policy",
+            "Web Security",
+            "DOM",
+            "<iframe>",
+            "Web Storage",
+            "localStorage",
+            "sessionStorage",
+            "canvas"
+          ],
+          "evaluationCriteria": [
+            "Detailed knowledge of SOP's application across various APIs.",
+            "Ability to explain specific restrictions and their security implications.",
+            "Demonstrates comprehensive understanding of browser security mechanisms."
+          ],
+          "example": null,
+          "tags": [
+            "Security",
+            "SOP",
+            "Browser APIs",
+            "Frontend Security"
+          ],
+          "prerequisites": [
+            "Browser APIs",
+            "Web Security"
+          ],
+          "complexity": 7,
+          "interviewFrequency": 7,
+          "learningPath": "advanced"
+        },
+        {
+          "id": "question_same_origin_policy_3",
+          "topic": "CORS and Preflight Requests",
+          "level": "hard",
+          "type": "open",
+          "question": "Explain how Cross-Origin Resource Sharing (CORS) allows bypassing the Same-Origin Policy. Specifically, describe what a 'preflight request' is, when it occurs, and its purpose in the CORS mechanism.",
+          "answer": "Cross-Origin Resource Sharing (CORS) is a mechanism that uses additional HTTP headers to tell browsers to give a web application running at one origin access to selected resources from a different origin. It's the standard way to allow cross-origin requests that would otherwise be blocked by the Same-Origin Policy.\n\n**How CORS Bypasses SOP**: When a browser makes a cross-origin request, it automatically includes an `Origin` header indicating where the request is coming from. The server, if configured for CORS, responds with `Access-Control-Allow-Origin` (and potentially other `Access-Control-Allow-*` headers). If the `Origin` header in the request matches the allowed origins specified by the server, the browser allows the client-side JavaScript to access the response.\n\n**Preflight Request**:\n*   **What it is**: A preflight request is an `OPTIONS` HTTP request sent by the browser to the server *before* the actual cross-origin request. It's a 'pre-check' to ensure that the server understands the CORS protocol and that the actual request it's about to send is safe and allowed by the server.\n*   **When it occurs**: A preflight request is automatically triggered by the browser for 'complex' HTTP requests. Complex requests are those that:\n    1.  Use HTTP methods other than `GET`, `POST`, or `HEAD` (e.g., `PUT`, `DELETE`).\n    2.  Include custom headers (headers not on the 'CORS-safelisted request-header' list, like `X-Custom-Header`).\n    3.  Have a `Content-Type` header value other than `application/x-www-form-urlencoded`, `multipart/form-data`, or `text/plain` (e.g., `application/json`).\n*   **Purpose**: The preflight request's purpose is to ask the server about the intended actual request's characteristics (method, headers). The server's response to the `OPTIONS` request (containing `Access-Control-Allow-Methods`, `Access-Control-Allow-Headers`, `Access-Control-Max-Age` etc.) informs the browser whether it is safe to proceed with the actual request. If the preflight fails (e.g., the server doesn't respond with appropriate CORS headers for the proposed actual request), the actual request is never sent, and the browser throws a CORS error.",
+          "analysisPoints": [
+            "Defines CORS as a mechanism for allowing cross-origin requests.",
+            "Explains how `Access-Control-Allow-Origin` header grants permission.",
+            "Provides a comprehensive explanation of preflight requests: what they are, when they occur (conditions for 'complex' requests), and their purpose in the security model.",
+            "Highlights the role of the `OPTIONS` method for preflights.",
+            "Demonstrates a deep understanding of browser-server interaction for CORS."
+          ],
+          "keyConcepts": [
+            "CORS",
+            "Same-Origin Policy",
+            "Preflight Request",
+            "HTTP Headers",
+            "Web Security",
+            "OPTIONS Method"
+          ],
+          "evaluationCriteria": [
+            "Thorough explanation of CORS and its relationship to SOP.",
+            "Accurate and detailed description of preflight requests.",
+            "Clarity on the conditions triggering preflights.",
+            "Understanding of the security implications and flow."
+          ],
+          "example": null,
+          "tags": [
+            "Security",
+            "CORS",
+            "HTTP",
+            "Frontend Security",
+            "Networking"
+          ],
+          "prerequisites": [
+            "HTTP Methods",
+            "HTTP Headers",
+            "Same-Origin Policy"
+          ],
+          "complexity": 8,
+          "interviewFrequency": 8,
+          "learningPath": "expert"
+        }
+      ],
+      "tasks": [
+        {
+          "id": "task_react_user_search_1",
+          "title": "Enhance User Search with Pagination",
+          "description": "\nEnhance the `UserSearch` component to include basic client-side pagination. Instead of showing all filtered results at once, display only a subset of users per page. Include controls to navigate between pages.\n\n**Requirements:**\n1.  Add new state variables for `currentPage` (starts at 1) and `usersPerPage` (e.g., 5).\n2.  Modify the filtering logic within `useEffect` to also slice the `users` array based on `currentPage` and `usersPerPage`.\n3.  Render pagination controls (e.g., 'Previous', 'Next' buttons or page numbers) below the user list.\n4.  Disable 'Previous' if on the first page, 'Next' if on the last page.\n5.  Ensure that when the `searchText` changes, the `currentPage` resets to 1.\n6.  Handle the 'No results found' message appropriately, even with pagination.\n",
+          "difficulty": "medium",
+          "startingCode": "import React, { useState, useEffect, useMemo } from 'react';\n\n// Assume this data is either imported or fetched from an API\nconst allUsersData = [\n  { id: 1, name: 'Alice Smith', email: 'alice@example.com', address: '123 Pine St', zipCode: '10001', purchased: ['Laptop', 'Mouse'] },\n  { id: 2, name: 'Bob Johnson', email: 'bob@example.com', address: '456 Oak Ave', zipCode: '20002', purchased: ['Keyboard', 'Monitor', 'Webcam'] },\n  { id: 3, name: 'Charlie Brown', email: 'charlie@example.com', address: '789 Elm Rd', zipCode: '30003', purchased: ['Headphones'] },\n  { id: 4, name: 'Diana Prince', email: 'diana@example.com', address: '101 Maple Ln', zipCode: '40004', purchased: ['Tablet', 'Stylus'] },\n  { id: 5, name: 'Eve Adams', email: 'eve@example.com', address: '202 Birch Dr', zipCode: '50005', purchased: ['Smartwatch'] },\n  { id: 6, name: 'Frank White', email: 'frank@example.com', address: '303 Cedar Ct', zipCode: '60006', purchased: ['Printer', 'Ink'] },\n  { id: 7, name: 'Grace Lee', email: 'grace@example.com', address: '404 Willow Way', zipCode: '70007', purchased: ['Router'] },\n  { id: 8, name: 'Henry Green', email: 'henry@example.com', address: '505 Poplar Pl', zipCode: '80008', purchased: ['SSD', 'RAM'] },\n  { id: 9, name: 'Ivy King', email: 'ivy@example.com', address: '606 Spruce Sq', zipCode: '90009', purchased: ['Microphone'] },\n  { id: 10, name: 'Jack Miller', email: 'jack@example.com', address: '707 Fir Fld', zipCode: '10010', purchased: ['Speaker', 'Amplifier'] },\n  { id: 11, name: 'Karen Davis', email: 'karen@example.com', address: '808 Palm Pk', zipCode: '11011', purchased: ['E-reader'] },\n  { id: 12, name: 'Liam Scott', email: 'liam@example.com', address: '909 Oak Gr', zipCode: '12012', purchased: ['Gaming Console', 'Controller'] }\n];\n\nfunction UserSearch() {\n  const [searchText, setSearchText] = useState('');\n  const [users, setUsers] = useState([]);\n  const [isLoading, setIsLoading] = useState(true);\n  const [error, setError] = useState(null);\n\n  useEffect(() => {\n    setIsLoading(true);\n    setError(null);\n\n    const handler = setTimeout(() => {\n      try {\n        const filteredUsers = allUsersData.filter(user =>\n          user.name.toLowerCase().includes(searchText.toLowerCase())\n        );\n        setUsers(filteredUsers);\n      } catch (err) {\n        setError('Failed to filter users.');\n        console.error(err);\n      } finally {\n        setIsLoading(false);\n      }\n    }, 500); // Debounce for 500ms\n\n    return () => {\n      clearTimeout(handler);\n    };\n  }, [searchText]);\n\n  return (\n    <div className=\"user-search-container\">\n      <h1>User Search</h1>\n      <input\n        type=\"text\"\n        placeholder=\"Search users by name...\"\n        value={searchText}\n        onChange={(e) => setSearchText(e.target.value)}\n        className=\"search-input\"\n      />\n\n      <div className=\"user-list-section\">\n        {isLoading ? (\n          <div className=\"loading\">Loading...</div>\n        ) : error ? (\n          <div className=\"error\">Error: {error}</div>\n        ) : (\n          <div className=\"user-cards-container\">\n            {users.length > 0 ? (\n              users.map((user) => (\n                <div key={user.id} className=\"user-card\">\n                  <h3>{user.name}</h3>\n                  <p>Email: {user.email}</p>\n                  <div className=\"user-details\">\n                    <div>Address: {user.address}</div>\n                    <div>Zip: {user.zipCode}</div>\n                    <div>Purchased: {user.purchased.join(', ')}</div>\n                  </div>\n                </div>\n              ))\n            ) : (\n              <div className=\"no-results\">No results found</div>\n            )}\n          </div>\n        )}\n      </div>\n    </div>\n  );\n}\n\nexport default UserSearch;\n",
+          "solutionCode": "import React, { useState, useEffect, useMemo } from 'react';\n\nconst allUsersData = [\n  { id: 1, name: 'Alice Smith', email: 'alice@example.com', address: '123 Pine St', zipCode: '10001', purchased: ['Laptop', 'Mouse'] },\n  { id: 2, name: 'Bob Johnson', email: 'bob@example.com', address: '456 Oak Ave', zipCode: '20002', purchased: ['Keyboard', 'Monitor', 'Webcam'] },\n  { id: 3, name: 'Charlie Brown', email: 'charlie@example.com', address: '789 Elm Rd', zipCode: '30003', purchased: ['Headphones'] },\n  { id: 4, name: 'Diana Prince', email: 'diana@example.com', address: '101 Maple Ln', zipCode: '40004', purchased: ['Tablet', 'Stylus'] },\n  { id: 5, name: 'Eve Adams', email: 'eve@example.com', address: '202 Birch Dr', zipCode: '50005', purchased: ['Smartwatch'] },\n  { id: 6, name: 'Frank White', email: 'frank@example.com', address: '303 Cedar Ct', zipCode: '60006', purchased: ['Printer', 'Ink'] },\n  { id: 7, name: 'Grace Lee', email: 'grace@example.com', address: '404 Willow Way', zipCode: '70007', purchased: ['Router'] },\n  { id: 8, name: 'Henry Green', email: 'henry@example.com', address: '505 Poplar Pl', zipCode: '80008', purchased: ['SSD', 'RAM'] },\n  { id: 9, name: 'Ivy King', email: 'ivy@example.com', address: '606 Spruce Sq', zipCode: '90009', purchased: ['Microphone'] },\n  { id: 10, name: 'Jack Miller', email: 'jack@example.com', address: '707 Fir Fld', zipCode: '10010', purchased: ['Speaker', 'Amplifier'] },\n  { id: 11, name: 'Karen Davis', email: 'karen@example.com', address: '808 Palm Pk', zipCode: '11011', purchased: ['E-reader'] },\n  { id: 12, name: 'Liam Scott', email: 'liam@example.com', address: '909 Oak Gr', zipCode: '12012', purchased: ['Gaming Console', 'Controller'] }\n];\n\nfunction UserSearch() {\n  const [searchText, setSearchText] = useState('');\n  const [filteredUsers, setFilteredUsers] = useState([]); // Store all filtered users\n  const [isLoading, setIsLoading] = useState(true);\n  const [error, setError] = useState(null);\n  \n  const [currentPage, setCurrentPage] = useState(1); // New state for current page\n  const usersPerPage = 5; // New constant for users per page\n\n  // Effect to filter users based on search text\n  useEffect(() => {\n    setIsLoading(true);\n    setError(null);\n    setCurrentPage(1); // Reset page to 1 on search text change\n\n    const handler = setTimeout(() => {\n      try {\n        const newFilteredUsers = allUsersData.filter(user =>\n          user.name.toLowerCase().includes(searchText.toLowerCase())\n        );\n        setFilteredUsers(newFilteredUsers); // Update the full filtered list\n      } catch (err) {\n        setError('Failed to filter users.');\n        console.error(err);\n      } finally {\n        setIsLoading(false);\n      }\n    }, 500); // Debounce for 500ms\n\n    return () => {\n      clearTimeout(handler);\n    };\n  }, [searchText]);\n\n  // Calculate users for the current page\n  const indexOfLastUser = currentPage * usersPerPage;\n  const indexOfFirstUser = indexOfLastUser - usersPerPage;\n  const currentUsers = filteredUsers.slice(indexOfFirstUser, indexOfLastUser);\n\n  const totalPages = Math.ceil(filteredUsers.length / usersPerPage);\n\n  const handlePageChange = (pageNumber) => {\n    setCurrentPage(pageNumber);\n  };\n\n  return (\n    <div className=\"user-search-container\">\n      <h1>User Search</h1>\n      <input\n        type=\"text\"\n        placeholder=\"Search users by name...\"\n        value={searchText}\n        onChange={(e) => setSearchText(e.target.value)}\n        className=\"search-input\"\n      />\n\n      <div className=\"user-list-section\">\n        {isLoading ? (\n          <div className=\"loading\">Loading...</div>\n        ) : error ? (\n          <div className=\"error\">Error: {error}</div>\n        ) : (\n          <div className=\"user-cards-container\">\n            {currentUsers.length > 0 ? (\n              currentUsers.map((user) => (\n                <div key={user.id} className=\"user-card\">\n                  <h3>{user.name}</h3>\n                  <p>Email: {user.email}</p>\n                  <div className=\"user-details\">\n                    <div>Address: {user.address}</div>\n                    <div>Zip: {user.zipCode}</div>\n                    <div>Purchased: {user.purchased.join(', ')}</div>\n                  </div>\n                </div>\n              ))\n            ) : (\n              <div className=\"no-results\">No results found</div>\n            )}\n          </div>\n        )}\n\n        {/* Pagination Controls */}\n        {!isLoading && !error && filteredUsers.length > 0 && (\n          <div className=\"pagination-controls\">\n            <button\n              onClick={() => handlePageChange(currentPage - 1)}\n              disabled={currentPage === 1}\n            >\n              Previous\n            </button>\n            <span>Page {currentPage} of {totalPages}</span>\n            <button\n              onClick={() => handlePageChange(currentPage + 1)}\n              disabled={currentPage === totalPages}\n            >\n              Next\n            </button>\n          </div>\n        )}\n      </div>\n    </div>\n  );\n}\n\nexport default UserSearch;\n",
+          "testCases": [
+            "Search for 'Alice': Only Alice should appear on page 1.",
+            "Search for 'a': Verify pagination is enabled, and only the correct number of users appear per page.",
+            "Navigate to the last page: Ensure 'Next' button is disabled.",
+            "Navigate to the first page: Ensure 'Previous' button is disabled.",
+            "Search for 'nonexistentuser': Verify 'No results found' message appears correctly, and pagination controls are hidden.",
+            "Change search text while on page 3: `currentPage` should reset to 1."
+          ],
+          "hints": [
+            "You'll need two new `useState` variables for pagination: `currentPage` and `usersPerPage` (or a constant).",
+            "The `slice()` method of arrays will be useful for extracting the users for the current page.",
+            "Remember to reset `currentPage` to 1 whenever the `searchText` changes to ensure fresh results start from the beginning.",
+            "Calculate `totalPages` using `Math.ceil()` on the total number of filtered users divided by `usersPerPage`."
+          ],
+          "tags": [
+            "React",
+            "Hooks",
+            "State Management",
+            "Pagination",
+            "List Rendering",
+            "Frontend Interview"
+          ],
+          "timeEstimate": 60,
+          "prerequisites": [
+            "React Hooks",
+            "Array Methods (slice, map, filter)",
+            "Conditional Rendering"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 8,
+          "learningPath": "intermediate",
+          "relatedConcepts": [
+            "Infinite Scroll",
+            "Server-Side Pagination"
+          ]
+        },
+        {
+          "id": "task_dom_event_delegation_1",
+          "title": "Implement a Clickable List with Event Delegation and Contextual Actions",
+          "description": "\nCreate an interactive task list using event delegation. The list items should be dynamically added. When a list item is clicked, its text should be logged. Additionally, implement a 'Delete' button within each list item. Clicking this 'Delete' button should remove its parent list item from the DOM, but *not* trigger the list item's general click logging.\n\n**Requirements:**\n1.  Create an HTML structure with an empty `<ul>` and an 'Add Task' button.\n2.  When 'Add Task' is clicked, a new `<li>` element is added to the `<ul>`. Each `<li>` should contain text 'Task X' and a `<button>` with text 'Delete'.\n3.  Implement **only one** click event listener on the `<ul>` element to handle both `<li>` clicks (logging text) and 'Delete' button clicks (removing the `<li>`).\n4.  Ensure that clicking the 'Delete' button *only* deletes the item and *does not* trigger the `<li>`'s click logging.\n5.  Use `event.target` and `closest()` for robust event delegation.\n",
+          "difficulty": "medium",
+          "startingCode": "<!-- HTML: index.html -->\n<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"UTF-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n  <title>Event Delegation Task List</title>\n  <style>\n    body { font-family: sans-serif; margin: 20px; }\n    ul { list-style: none; padding: 0; border: 1px solid #eee; min-height: 100px; }\n    li { padding: 10px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }\n    li:last-child { border-bottom: none; }\n    button { margin-left: 10px; padding: 5px 10px; cursor: pointer; }\n  </style>\n</head>\n<body>\n  <h1>My Tasks</h1>\n  <button id=\"addTaskButton\">Add Task</button>\n  <ul id=\"taskList\"></ul>\n\n  <script src=\"script.js\"></script>\n</body>\n</html>\n\n// JavaScript: script.js\n// TODO: Implement the task here\nlet taskCounter = 0;\nconst addTaskButton = document.getElementById('addTaskButton');\nconst taskList = document.getElementById('taskList');\n\naddTaskButton.addEventListener('click', () => {\n  taskCounter++;\n  const li = document.createElement('li');\n  li.textContent = `Task ${taskCounter}`;\n  const deleteButton = document.createElement('button');\n  deleteButton.textContent = 'Delete';\n  deleteButton.className = 'delete-btn'; // Add a class for identification\n  li.appendChild(deleteButton);\n  taskList.appendChild(li);\n});\n\n// Your event delegation logic goes here\n// taskList.addEventListener('click', (event) => { /* ... */ });\n",
+          "solutionCode": "<!-- HTML: index.html -->\n<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"UTF-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n  <title>Event Delegation Task List</title>\n  <style>\n    body { font-family: sans-serif; margin: 20px; }\n    ul { list-style: none; padding: 0; border: 1px solid #eee; min-height: 100px; }\n    li { padding: 10px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; cursor: pointer; }\n    li:hover { background-color: #f9f9f9; }\n    li:last-child { border-bottom: none; }\n    button { margin-left: 10px; padding: 5px 10px; cursor: pointer; background-color: #f44336; color: white; border: none; border-radius: 4px; }\n    button:hover { background-color: #d32f2f; }\n  </style>\n</head>\n<body>\n  <h1>My Tasks</h1>\n  <button id=\"addTaskButton\">Add Task</button>\n  <ul id=\"taskList\"></ul>\n\n  <script src=\"script.js\"></script>\n</body>\n</html>\n\n// JavaScript: script.js\nlet taskCounter = 0;\nconst addTaskButton = document.getElementById('addTaskButton');\nconst taskList = document.getElementById('taskList');\n\naddTaskButton.addEventListener('click', () => {\n  taskCounter++;\n  const li = document.createElement('li');\n  li.id = `task-${taskCounter}`;\n  li.textContent = `Task ${taskCounter}`;\n  const deleteButton = document.createElement('button');\n  deleteButton.textContent = 'Delete';\n  deleteButton.className = 'delete-btn';\n  li.appendChild(deleteButton);\n  taskList.appendChild(li);\n});\n\ntaskList.addEventListener('click', (event) => {\n  // Determine the actual element that was clicked\n  const clickedElement = event.target;\n\n  // Case 1: Delete button clicked\n  if (clickedElement.classList.contains('delete-btn')) {\n    const listItemToDelete = clickedElement.closest('li');\n    if (listItemToDelete) {\n      listItemToDelete.remove();\n      console.log(`Deleted item: ${listItemToDelete.id}`);\n      event.stopPropagation(); // Stop the event from bubbling up to the <li> itself\n    }\n  } \n  // Case 2: List item (or its text) clicked\n  else {\n    const listItem = clickedElement.closest('li');\n    // Ensure the click originated from an <li> within our taskList\n    if (listItem && taskList.contains(listItem)) {\n      // Check if it's not the delete button that was initially clicked AND it's a list item\n      // (event.target.tagName can be 'LI' or text content's parent)\n      console.log(`Clicked task: ${listItem.textContent.replace('Delete', '').trim()}`);\n    }\n  }\n});\n",
+          "testCases": [
+            "Click 'Add Task' multiple times: Verify new items appear with 'Delete' buttons.",
+            "Click on the text of a list item: Verify its text is logged to console, and the item is not deleted.",
+            "Click on a 'Delete' button: Verify the corresponding list item is removed from the DOM.",
+            "Click on a 'Delete' button: Verify only the item is deleted, and its text is NOT logged to the console (i.e., `stopPropagation` worked).",
+            "Click on the `<ul>` background (not an `<li>`): Verify no action occurs.",
+            "Add and delete items, then add more: Ensure the delegation logic still works for new elements."
+          ],
+          "hints": [
+            "The `event.target` property will tell you exactly which element was clicked.",
+            "The `closest()` method is useful for finding the nearest ancestor element matching a selector.",
+            "To prevent an event from bubbling up and triggering other listeners (like the `<li>`'s implied click), use `event.stopPropagation()`."
+          ],
+          "tags": [
+            "DOM",
+            "Events",
+            "Event Delegation",
+            "JavaScript",
+            "Frontend Interview",
+            "Manipulation"
+          ],
+          "timeEstimate": 45,
+          "prerequisites": [
+            "JavaScript DOM Manipulation",
+            "Event Listeners",
+            "Event Bubbling",
+            "`event.target`",
+            "`closest()`"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 9,
+          "learningPath": "intermediate",
+          "relatedConcepts": [
+            "Event Capturing",
+            "Synthetic Events (in React)"
+          ]
+        },
+        {
+          "id": "task_a11y_1",
+          "title": "Make a Custom Star Rating Component Accessible",
+          "description": "\nYou are given a non-accessible HTML and CSS structure for a star rating component. Your task is to make it fully accessible using semantic HTML, ARIA attributes, and JavaScript for keyboard interaction.\n\n**HTML Structure:**\n```html\n<div class=\"star-rating\">\n  <span class=\"star\" data-value=\"1\">&#9733;</span>\n  <span class=\"star\" data-value=\"2\">&#9733;</span>\n  <span class=\"star\" data-value=\"3\">&#9733;</span>\n  <span class=\"star\" data-value=\"4\">&#9733;</span>\n  <span class=\"star\" data-value=\"5\">&#9733;</span>\n</div>\n<div id=\"ratingValue\">Current Rating: 0 stars</div>\n```\n\n**Requirements:**\n1.  **Semantic HTML**: Wrap the star-rating in a more appropriate semantic element for a form control (e.g., `<fieldset>` and `<legend>`).\n2.  **ARIA Roles**: Apply appropriate ARIA roles to convey its purpose (e.g., `role=\"radiogroup\"` for the container, `role=\"radio\"` for each star).\n3.  **ARIA Properties**: Use `aria-checked` to indicate the currently selected rating and `aria-label` to describe each star (e.g., \"1 star rating\").\n4.  **Keyboard Navigation**: Ensure users can:\n    *   `Tab` into the star rating component.\n    *   Use `ArrowLeft`/`ArrowRight` keys to navigate between stars and change the selected rating.\n    *   `Space`/`Enter` key to select a star.\n5.  **Focus Management**: Only one star should be focusable at a time when tabbing into the component. When navigating with arrow keys, focus should move between stars.\n6.  **Visual Feedback**: Maintain visual focus indicators for keyboard users.\n7.  Update the `id=\"ratingValue\"` div with the current selected rating.",
+          "difficulty": "hard",
+          "startingCode": "<!-- HTML: index.html -->\n<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"UTF-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n  <title>Accessible Star Rating</title>\n  <style>\n    body { font-family: sans-serif; margin: 20px; }\n    .star-rating {\n      font-size: 2em;\n      color: #ccc; /* Unfilled star color */\n      display: inline-block;\n      margin-bottom: 10px;\n    }\n    .star {\n      cursor: pointer;\n      user-select: none;\n    }\n    .star.selected,\n    .star.hovered { /* Use hovered for visual feedback on mouseover/keyboard focus */\n      color: gold; /* Filled star color */\n    }\n    .star:focus { outline: 2px solid blue; }\n    /* Remove .star-rating:focus, as individual stars are focusable */\n  </style>\n</head>\n<body>\n  <h1>Rate our Product</h1>\n  <!-- Original non-accessible structure -->\n  <div class=\"star-rating\">\n    <span class=\"star\" data-value=\"1\">&#9733;</span>\n    <span class=\"star\" data-value=\"2\">&#9733;</span>\n    <span class=\"star\" data-value=\"3\">&#9733;</span>\n    <span class=\"star\" data-value=\"4\">&#9733;</span>\n    <span class=\"star\" data-value=\"5\">&#9733;</span>\n  </div>\n  <div id=\"ratingValue\">Current Rating: 0 stars</div>\n\n  <script src=\"script.js\"></script>\n</body>\n</html>\n\n// JavaScript: script.js\n// Your JavaScript will go here to add event listeners and manage accessibility.\nconst starsContainer = document.querySelector('.star-rating');\nconst stars = document.querySelectorAll('.star-rating .star');\nconst ratingValueDisplay = document.getElementById('ratingValue');\nlet currentRating = 0;\n\nstars.forEach(star => {\n  star.addEventListener('click', (e) => {\n    currentRating = parseInt(e.target.dataset.value);\n    updateStars();\n    updateRatingDisplay();\n  });\n\n  star.addEventListener('mouseover', (e) => {\n    const hoverValue = parseInt(e.target.dataset.value);\n    updateHoverStars(hoverValue);\n  });\n\n  star.addEventListener('mouseout', () => {\n    updateHoverStars(0);\n  });\n});\n\nfunction updateStars() {\n  stars.forEach(star => {\n    const value = parseInt(star.dataset.value);\n    if (value <= currentRating) {\n      star.classList.add('selected');\n    } else {\n      star.classList.remove('selected');\n    }\n  });\n}\n\nfunction updateHoverStars(hoverValue) {\n  stars.forEach(star => {\n    const value = parseInt(star.dataset.value);\n    if (value <= hoverValue && value > currentRating) {\n      star.classList.add('hovered');\n    } else {\n      star.classList.remove('hovered');\n    }\n  });\n}\n\nfunction updateRatingDisplay() {\n  ratingValueDisplay.textContent = `Current Rating: ${currentRating} stars`;\n}\n\nupdateStars(); // Initial call to set state\n",
+          "solutionCode": "<!-- HTML: index.html -->\n<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"UTF-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n  <title>Accessible Star Rating</title>\n  <style>\n    body { font-family: sans-serif; margin: 20px; }\n    .star-rating-fieldset {\n      border: none;\n      padding: 0;\n      margin: 0;\n      margin-bottom: 10px;\n      display: inline-block;\n    }\n    .star-rating-legend {\n      font-weight: bold;\n      margin-bottom: 5px;\n    }\n    .star-container {\n      font-size: 2em;\n      color: #ccc; /* Unfilled star color */\n      display: inline-block;\n    }\n    .star {\n      cursor: pointer;\n      user-select: none;\n      /* Focus styling - important for a11y */\n      outline: 2px solid transparent; /* default invisible outline */\n      outline-offset: 2px;\n      transition: outline-color 0.1s ease-in-out;\n    }\n    .star:focus {\n      outline-color: dodgerblue; /* Visible focus indicator */\n    }\n    .star.selected,\n    .star.hovered { /* Use hovered for visual feedback on mouseover/keyboard focus */\n      color: gold; /* Filled star color */\n    }\n  </style>\n</head>\n<body>\n  <h1>Rate our Product</h1>\n  \n  <!-- Accessible Structure -->\n  <fieldset class=\"star-rating-fieldset\">\n    <legend class=\"star-rating-legend\">Rate the product out of 5 stars</legend>\n    <div class=\"star-container\" role=\"radiogroup\" aria-label=\"Product rating\">\n      <span class=\"star\" data-value=\"1\" tabindex=\"0\" role=\"radio\" aria-label=\"1 star rating\">&#9733;</span>\n      <span class=\"star\" data-value=\"2\" tabindex=\"-1\" role=\"radio\" aria-label=\"2 star rating\">&#9733;</span>\n      <span class=\"star\" data-value=\"3\" tabindex=\"-1\" role=\"radio\" aria-label=\"3 star rating\">&#9733;</span>\n      <span class=\"star\" data-value=\"4\" tabindex=\"-1\" role=\"radio\" aria-label=\"4 star rating\">&#9733;</span>\n      <span class=\"star\" data-value=\"5\" tabindex=\"-1\" role=\"radio\" aria-label=\"5 star rating\">&#9733;</span>\n    </div>\n  </fieldset>\n  <div id=\"ratingValue\" aria-live=\"polite\">Current Rating: 0 stars</div>\n\n  <script src=\"script.js\"></script>\n</body>\n</html>\n\n// JavaScript: script.js\nconst starsContainer = document.querySelector('.star-container');\nconst stars = Array.from(document.querySelectorAll('.star-container .star')); // Convert NodeList to Array\nconst ratingValueDisplay = document.getElementById('ratingValue');\nlet currentRating = 0;\n\n// Helper to update ARIA properties and visual state\nfunction updateStarAccessibility(selectedRating) {\n  stars.forEach(star => {\n    const value = parseInt(star.dataset.value);\n    const isSelected = value === selectedRating;\n    \n    star.classList.toggle('selected', value <= selectedRating);\n    star.setAttribute('aria-checked', isSelected ? 'true' : 'false');\n    star.setAttribute('tabindex', isSelected ? '0' : '-1'); // Only selected star is tab-focusable\n  });\n  // If no star is selected (rating is 0), make the first star tab-focusable\n  if (selectedRating === 0 && stars.length > 0) {\n    stars[0].setAttribute('tabindex', '0');\n  }\n}\n\nfunction updateRatingDisplay() {\n  ratingValueDisplay.textContent = `Current Rating: ${currentRating} stars`;\n}\n\n// Handle click events\nstarsContainer.addEventListener('click', (e) => {\n  const targetStar = e.target.closest('.star');\n  if (targetStar) {\n    currentRating = parseInt(targetStar.dataset.value);\n    updateStarAccessibility(currentRating);\n    updateRatingDisplay();\n    targetStar.focus(); // Keep focus on the clicked star\n  }\n});\n\n// Handle keyboard navigation (Arrow keys, Space, Enter)\nstarsContainer.addEventListener('keydown', (e) => {\n  const focusedStar = document.activeElement;\n  if (!focusedStar || !focusedStar.classList.contains('star')) return;\n\n  let newIndex = stars.indexOf(focusedStar);\n  const currentFocusedValue = parseInt(focusedStar.dataset.value);\n\n  switch (e.key) {\n    case 'ArrowRight':\n      newIndex = Math.min(newIndex + 1, stars.length - 1);\n      stars[newIndex].focus();\n      e.preventDefault(); // Prevent page scrolling\n      break;\n    case 'ArrowLeft':\n      newIndex = Math.max(newIndex - 1, 0);\n      stars[newIndex].focus();\n      e.preventDefault(); // Prevent page scrolling\n      break;\n    case 'Enter':\n    case 'Space':\n      currentRating = parseInt(focusedStar.dataset.value);\n      updateStarAccessibility(currentRating);\n      updateRatingDisplay();\n      e.preventDefault(); // Prevent default space/enter behavior\n      break;\n    case 'Home': // Optional: go to first star\n      stars[0].focus();\n      e.preventDefault();\n      break;\n    case 'End': // Optional: go to last star\n      stars[stars.length - 1].focus();\n      e.preventDefault();\n      break;\n  }\n\n  // For arrow key navigation, update the visual hover state as focus moves\n  // Also update aria-checked for the currently focused star (even if not 'selected')\n  // so screen readers announce it as 'checked' when focused.\n  stars.forEach((star, index) => {\n    if (index === newIndex) {\n      star.classList.add('hovered'); // Visual feedback on keyboard navigation\n      star.setAttribute('aria-checked', 'true'); // For screen reader focus\n    } else {\n      star.classList.remove('hovered');\n      star.setAttribute('aria-checked', 'false');\n    }\n  });\n});\n\n// Handle focus leaving the container (remove hovered class)\nstarsContainer.addEventListener('focusout', () => {\n  stars.forEach(star => star.classList.remove('hovered'));\n  // Re-establish correct aria-checked for the *selected* star after focusout\n  updateStarAccessibility(currentRating);\n});\n\n// Mouse hover logic (optional, for visual feedback)\nstarsContainer.addEventListener('mouseover', (e) => {\n  const hoverTarget = e.target.closest('.star');\n  if (hoverTarget) {\n    const hoverValue = parseInt(hoverTarget.dataset.value);\n    stars.forEach(star => {\n      const value = parseInt(star.dataset.value);\n      star.classList.toggle('hovered', value <= hoverValue);\n    });\n  }\n});\n\nstarsContainer.addEventListener('mouseout', () => {\n  stars.forEach(star => star.classList.remove('hovered'));\n});\n\n// Initialize on load\nupdateStarAccessibility(currentRating);\nupdateRatingDisplay();\n",
+          "testCases": [
+            "**Semantic Structure**: Inspect HTML to confirm `<fieldset>`, `<legend>`, `role=\"radiogroup\"` are used.",
+            "**ARIA Attributes**: Verify `role=\"radio\"`, `aria-label`, `aria-checked` are present and updated correctly on stars.",
+            "**Initial Focus**: Press `Tab` – only the first star (or initially selected if any) should receive focus.",
+            "**Arrow Navigation**: With focus on a star, press `ArrowRight`/`ArrowLeft` – focus should move between stars.",
+            "**Selection with Keyboard**: With focus on a star, press `Space` or `Enter` – that star should be selected, and its `aria-checked` should be true. The `ratingValue` div should update.",
+            "**Mouse Click**: Click a star – it should be selected, `ratingValue` updates, and `aria-checked` is correct.",
+            "**Screen Reader Test (manual)**: Use a screen reader (e.g., NVDA, VoiceOver) to navigate and interact with the component. Verify announcements are meaningful (e.g., \"1 star rating, radio button, not checked\", \"3 star rating, radio button, checked\").",
+            "**Focus Loop**: Ensure `Tab` does not get stuck inside the component and `ArrowLeft`/`ArrowRight` wrap around or stop at ends."
+          ],
+          "hints": [
+            "Start by wrapping the `div.star-rating` in a `fieldset` and adding a `legend` for semantic grouping.",
+            "Apply `role=\"radiogroup\"` to the container of the stars and `role=\"radio\"` to each individual star.",
+            "For keyboard navigation like arrow keys within a radio group, typically only *one* radio button is `tabindex=\"0\"` (the currently selected one, or the first if none are selected). Others are `tabindex=\"-1\"`.",
+            "Use `aria-checked=\"true\"` or `\"false\"` to indicate the selected state to assistive technologies.",
+            "Remember to call `event.preventDefault()` for keyboard events like `ArrowLeft`, `ArrowRight`, `Space`, `Enter` to prevent default browser behavior (like scrolling)."
+          ],
+          "tags": [
+            "Accessibility",
+            "A11y",
+            "ARIA",
+            "Keyboard Navigation",
+            "DOM Manipulation",
+            "JavaScript",
+            "Frontend Interview",
+            "UI Component"
+          ],
+          "timeEstimate": 90,
+          "prerequisites": [
+            "HTML Semantic Elements",
+            "CSS Selectors",
+            "JavaScript DOM Events",
+            "Basic Understanding of ARIA"
+          ],
+          "complexity": 8,
+          "interviewRelevance": 8,
+          "learningPath": "advanced",
+          "relatedConcepts": [
+            "WCAG Guidelines",
+            "Custom Widget Accessibility",
+            "Focus Management"
+          ]
+        },
+        {
+          "id": "task_service_worker_offline_cache_1",
+          "title": "Implement a Basic Service Worker for Offline Caching",
+          "description": "\nCreate a simple web application with an `index.html`, `style.css`, and `app.js` file. Implement a Service Worker (`sw.js`) that precaches these core assets and serves them using a 'Cache First' strategy.\n\n**Requirements:**\n1.  **`index.html`**: Link `style.css` and `app.js`.\n2.  **`app.js`**: Register the Service Worker (`sw.js`). Log success/failure.\n3.  **`sw.js`**: Implement the Service Worker lifecycle:\n    *   **Install Phase**: Open a cache named `my-app-v1` and add `index.html`, `style.css`, and `app.js` to it. Log a message on successful installation.\n    *   **Fetch Phase**: Intercept all network requests. Try to serve responses from the cache first. If a resource is not in the cache, fetch it from the network, cache the response, and then return it.\n    *   **Activate Phase**: Clean up any old caches (e.g., `my-app-v0`) to ensure only the current version of the cache is active.\n",
+          "difficulty": "medium",
+          "startingCode": "<!-- index.html -->\n<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"UTF-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n  <title>Offline App</title>\n  <link rel=\"stylesheet\" href=\"style.css\">\n</head>\n<body>\n  <h1>Welcome to my Offline App!</h1>\n  <p>This page should work even when you're offline.</p>\n  <img src=\"https://via.placeholder.com/150\" alt=\"Placeholder Image\" class=\"placeholder-image\">\n  <script src=\"app.js\"></script>\n</body>\n</html>\n\n/* style.css */\nbody { font-family: sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; margin: 0; background-color: #f0f0f0; }\nh1 { color: #333; }\np { color: #555; text-align: center; }\n.placeholder-image { border: 2px solid #ccc; border-radius: 8px; }\n\n/* app.js */\n// TODO: Register Service Worker here\nconsole.log('App script loaded.');\n\n/* sw.js */\n// TODO: Implement Service Worker lifecycle events here\nconsole.log('Service Worker script loaded.');\n",
+          "solutionCode": "<!-- index.html -->\n<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"UTF-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n  <title>Offline App</title>\n  <link rel=\"stylesheet\" href=\"style.css\">\n</head>\n<body>\n  <h1>Welcome to my Offline App!</h1>\n  <p>This page should work even when you're offline.</p>\n  <img src=\"https://via.placeholder.com/150\" alt=\"Placeholder Image\" class=\"placeholder-image\">\n  <script src=\"app.js\"></script>\n</body>\n</html>\n\n/* style.css */\nbody { font-family: sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; margin: 0; background-color: #f0f0f0; }\nh1 { color: #333; }\np { color: #555; text-align: center; }\n.placeholder-image { border: 2px solid #ccc; border-radius: 8px; }\n\n/* app.js */\nif ('serviceWorker' in navigator) {\n  window.addEventListener('load', () => {\n    navigator.serviceWorker.register('/sw.js')\n      .then(registration => {\n        console.log('Service Worker registered with scope:', registration.scope);\n      })\n      .catch(error => {\n        console.error('Service Worker registration failed:', error);\n      });\n  });\n}\nconsole.log('App script loaded.');\n\n/* sw.js */\nconst CACHE_NAME = 'my-app-v1'; // Define cache name\nconst urlsToCache = [\n  '/', // The root path, often points to index.html\n  '/index.html',\n  '/style.css',\n  '/app.js',\n  'https://via.placeholder.com/150' // Also cache the external image\n];\n\n// Install event: Precache static assets\nself.addEventListener('install', (event) => {\n  console.log('[Service Worker] Installing...');\n  event.waitUntil(\n    caches.open(CACHE_NAME)\n      .then((cache) => {\n        console.log('[Service Worker] Caching app shell');\n        return cache.addAll(urlsToCache);\n      })\n      .catch(error => {\n        console.error('[Service Worker] Caching failed:', error);\n      })\n  );\n});\n\n// Fetch event: Serve from cache first, then network, and cache new responses\nself.addEventListener('fetch', (event) => {\n  console.log(`[Service Worker] Fetching: ${event.request.url}`);\n  event.respondWith(\n    caches.match(event.request)\n      .then((response) => {\n        // Cache hit - return cached response\n        if (response) {\n          console.log('[Service Worker] Serving from cache:', event.request.url);\n          return response;\n        }\n\n        // No cache hit - fetch from network\n        console.log('[Service Worker] Fetching from network:', event.request.url);\n        return fetch(event.request)\n          .then((networkResponse) => {\n            // Check if we received a valid response\n            if (!networkResponse || networkResponse.status !== 200 || networkResponse.type !== 'basic') {\n              return networkResponse;\n            }\n\n            // IMPORTANT: Clone the response. A response is a stream\n            // and can only be consumed once. We must clone it so that\n            // we can consume the original and send one to the browser.\n            const responseToCache = networkResponse.clone();\n            caches.open(CACHE_NAME)\n              .then((cache) => {\n                cache.put(event.request, responseToCache);\n                console.log('[Service Worker] Cached new resource:', event.request.url);\n              });\n\n            return networkResponse;\n          })\n          .catch(error => {\n            console.error('[Service Worker] Network fetch failed:', event.request.url, error);\n            // This is where you could return an offline fallback page/image\n            // return caches.match('/offline.html');\n          });\n      })\n  );\n});\n\n// Activate event: Clean up old caches\nself.addEventListener('activate', (event) => {\n  console.log('[Service Worker] Activating...');\n  const cacheWhitelist = [CACHE_NAME];\n\n  event.waitUntil(\n    caches.keys().then((cacheNames) => {\n      return Promise.all(\n        cacheNames.map((cacheName) => {\n          if (cacheWhitelist.indexOf(cacheName) === -1) {\n            console.log('[Service Worker] Deleting old cache:', cacheName);\n            return caches.delete(cacheName);\n          }\n        })\n      );\n    })\n  );\n  // Optional: Force immediate control of clients. Useful during development.\n  self.clients.claim();\n  console.log('[Service Worker] Activated and claiming clients.');\n});\n\nconsole.log('Service Worker script loaded.');\n",
+          "testCases": [
+            "**First Load**: Load `index.html` in a clean browser profile/incognito window. Check DevTools Network tab: verify all assets (html, css, js, image) are fetched from network (status 200). Check Application -> Service Workers and Cache Storage tabs: verify `sw.js` is active and `my-app-v1` cache exists with all specified assets.",
+            "**Offline Test**: Put browser in offline mode (DevTools Network tab -> Offline checkbox). Refresh the page. Verify the page loads completely and correctly, with all assets served from Service Worker (status 'from ServiceWorker').",
+            "**Image Caching**: Verify the `placeholder.com` image is also cached and served offline.",
+            "**Cache Update (Manual)**: Change a small piece of text in `style.css` and the `CACHE_NAME` in `sw.js` (e.g., `my-app-v2`). Refresh `index.html` twice. Check DevTools: `my-app-v1` should be deleted, `my-app-v2` should be active and contain new assets.",
+            "**Console Logs**: Check browser console for Service Worker lifecycle messages (installing, caching, fetching, activating, deleting old cache)."
+          ],
+          "hints": [
+            "Remember that the `install` event is your chance to pre-cache static assets.",
+            "The `fetch` event listener is where you decide *how* to respond to network requests. `event.respondWith()` is key here.",
+            "To implement 'Cache First', use `caches.match(event.request)` first, and only if it fails, then `fetch(event.request)`.",
+            "When fetching a response from the network and putting it in the cache, remember to `clone()` the response, as a response stream can only be consumed once.",
+            "The `activate` event is the ideal place to clean up old caches using `caches.keys()` and `caches.delete()`."
+          ],
+          "tags": [
+            "Service Workers",
+            "PWA",
+            "Offline",
+            "Caching",
+            "Frontend Interview",
+            "JavaScript"
+          ],
+          "timeEstimate": 75,
+          "prerequisites": [
+            "JavaScript Promises",
+            "Fetch API",
+            "Basic HTTP Concepts"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 7,
+          "learningPath": "advanced",
+          "relatedConcepts": [
+            "Background Sync",
+            "Push Notifications",
+            "Workbox"
+          ]
+        }
+      ]
+    }
+  }
+]

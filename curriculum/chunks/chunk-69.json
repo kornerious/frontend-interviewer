@@ -1,0 +1,1673 @@
+[
+  {
+    "id": "c0a1c00b-740e-4ca8-ad6e-eb034b19a51b",
+    "startLine": 14000,
+    "endLine": 14099,
+    "processedDate": "2025-06-17T13:46:23.763Z",
+    "content": {
+      "logicalBlockInfo": {
+        "suggestedEndLine": -1
+      },
+      "theory": [
+        {
+          "id": "theory_default_props_type_checking",
+          "title": "React Component Default Props and Type Checking with PropTypes, Flow, and TypeScript",
+          "content": "## Default Props\nIn React, `defaultProps` is a way to define default values for props if they are not explicitly passed to a component. This ensures that a component always has a default value for certain props, preventing `undefined` errors and making components more robust and predictable. `defaultProps` are evaluated before the props are passed to the component's `render` method or functional component body.\n\nEven when using static type checkers like Flow (or TypeScript), `defaultProps` continue to function as expected, providing default values for omitted properties. The type checker will correctly infer the type of the prop based on the default value if the prop is optional.\n\n## Runtime Type Checking with PropTypes\n`PropTypes` is a library provided by React (formerly part of the main React package, now a separate package `prop-types`) for runtime type checking of component props. It helps in validating the data type of props passed to a component, providing warnings in the development console if props don't match the expected types. This is particularly useful for catching errors early during development.\n\nWhile `PropTypes` performs checks at runtime (meaning errors are detected when the component renders), it does not prevent the application from compiling or running if there are type mismatches. It serves as a strong development-time tool for ensuring prop consistency.\n\n## Static Type Checking with Flow and TypeScript\nFlow and TypeScript are static type checkers. This means they analyze your code *before* it runs (at compile time or during development) to find type-related errors. They offer a more robust and comprehensive approach to type safety compared to `PropTypes`.\n\n**Flow** is a static type checker for JavaScript developed by Facebook. It focuses on finding type errors in JavaScript code. It requires specific configuration to integrate into a project.\n\n**TypeScript** is a superset of JavaScript that adds static types. It compiles down to plain JavaScript. TypeScript has gained widespread adoption due to its rich tooling, strong community support, and excellent IDE integration.\n\n### Comparing PropTypes vs. Flow/TypeScript\nThe choice between runtime type checking (like `PropTypes`) and static type checking (like Flow or TypeScript) depends on project requirements, team familiarity, and the desired level of type safety.\n\n| Feature           | PropTypes               | Flow / TypeScript               |\n|-------------------|-------------------------|---------------------------------|\n| Type checking     | Runtime                 | Static (compile time/build time) |\n| Setup complexity  | Simple, just import     | Requires configuration          |\n| Error detection   | Only when component renders | Before running code             |\n| Performance impact| Small runtime cost      | No runtime cost (in production) |\n| IDE integration   | Limited                 | Strong with proper setup        |\n| Learning curve    | Gentle                  | Steeper                         |\n| Type expressiveness| Good                    | Excellent                       |\n\nMany teams now opt for TypeScript due to its broader adoption, richer ecosystem, and superior tooling compared to Flow.",
+          "examples": [
+            {
+              "id": "example_default_props_1",
+              "title": "Basic Default Props Example",
+              "code": "import React from 'react';\nimport PropTypes from 'prop-types';\n\nfunction UserProfile(props) {\n  return (\n    <div>\n      <h2>{props.name}</h2>\n      <p>Age: {props.age}</p>\n      <p>Email: {props.contactInfo.email}</p>\n      <p>Hobbies: {props.hobbies.join(', ')}</p>\n    </div>\n  );\n}\n\nUserProfile.defaultProps = {\n  age: 25,\n  hobbies: [],\n  contactInfo: { email: 'user@example.com' }\n};\n\nUserProfile.propTypes = {\n  name: PropTypes.string.isRequired,\n  age: PropTypes.number,\n  hobbies: PropTypes.arrayOf(PropTypes.string),\n  contactInfo: PropTypes.shape({\n    email: PropTypes.string.isRequired\n  })\n};\n\n// Usage example (name is required, others will use default props if not provided):\n// <UserProfile name=\"Alice\" /> \n//    -> Renders Alice, Age: 25, Email: user@example.com, Hobbies: \n// <UserProfile name=\"Bob\" age={30} />\n//    -> Renders Bob, Age: 30, Email: user@example.com, Hobbies: \n// <UserProfile name=\"Charlie\" hobbies={['reading', 'hiking']} />\n//    -> Renders Charlie, Age: 25, Email: user@example.com, Hobbies: reading, hiking\n",
+              "explanation": "This example demonstrates how `defaultProps` are defined and used. If `age`, `hobbies`, or `contactInfo` are not provided when `UserProfile` is used, their default values from `UserProfile.defaultProps` will be applied. It also shows `PropTypes` for runtime validation, ensuring `name` is a required string and other props conform to their expected types.",
+              "language": "javascript"
+            },
+            {
+              "id": "example_flow_type_definition",
+              "title": "Conceptual Flow Type Definition for Component Props",
+              "code": "// @flow\nimport * as React from 'react';\n\ntype UserProfileProps = {\n  name: string,\n  age?: number, // Optional prop\n  hobbies?: Array<string>,\n  contactInfo?: { email: string }\n};\n\nfunction UserProfile(props: UserProfileProps): React.Node {\n  const { name, age, hobbies, contactInfo } = props;\n  const defaultAge = age === undefined ? 25 : age;\n  const defaultHobbies = hobbies === undefined ? [] : hobbies;\n  const defaultContactInfo = contactInfo === undefined ? { email: 'user@example.com' } : contactInfo;\n\n  return (\n    <div>\n      <h2>{name}</h2>\n      <p>Age: {defaultAge}</p>\n      <p>Email: {defaultContactInfo.email}</p>\n      <p>Hobbies: {defaultHobbies.join(', ')}</p>\n    </div>\n  );\n}\n\nexport default UserProfile;\n",
+              "explanation": "This is a conceptual example showing how Flow types might be defined for component props, including optional properties. While `defaultProps` can still be used, with static type checkers like Flow (and more commonly TypeScript), you often define default values directly within the function signature using destructuring with default assignment, or by explicitly checking for `undefined` as shown here, making the types `?` (optional) to reflect that they might not be passed. This allows the type system to catch errors if a required prop is missing or if an incorrect type is passed.",
+              "language": "javascript"
+            }
+          ],
+          "relatedQuestions": [
+            "question_default_props_1",
+            "question_default_props_2",
+            "question_prop_types_flow_mcq_1",
+            "question_prop_types_flow_open_1",
+            "question_prop_types_flow_flashcard_1"
+          ],
+          "relatedTasks": [
+            "task_default_props_prop_types_component",
+            "task_migrate_prop_types_to_ts_discussion"
+          ],
+          "tags": [
+            "React",
+            "defaultProps",
+            "PropTypes",
+            "Flow",
+            "TypeScript",
+            "type checking",
+            "static analysis",
+            "runtime analysis",
+            "frontend development"
+          ],
+          "technology": "React, JavaScript, Flow, TypeScript",
+          "prerequisites": [
+            "react_basics",
+            "javascript_es6_features"
+          ],
+          "complexity": 6,
+          "interviewRelevance": 8,
+          "learningPath": "intermediate",
+          "requiredFor": [
+            "robust_component_design",
+            "large_scale_app_development",
+            "team_collaboration"
+          ]
+        },
+        {
+          "id": "theory_react_animations",
+          "title": "Popular Animation Packages in React: React Transition Group and React Motion",
+          "content": "Animations play a crucial role in enhancing user experience by providing visual feedback, guiding user attention, and making interfaces feel more dynamic and engaging. In React, while you can certainly use plain CSS for animations, several libraries simplify the process and provide more powerful control over animation states and transitions.\n\nTwo popular choices for animations in React applications are `React Transition Group` and `React Motion`.\n\n### React Transition Group\n`React Transition Group` is not an animation library in itself, but rather a set of components that expose the stages of an element's entering and exiting the DOM. It helps manage the mounting and unmounting of components, allowing you to apply CSS transitions or animations at specific points in a component's lifecycle. It works by applying specific CSS classes to components at different stages of their transition, which you then define in your CSS stylesheet.\n\n**Key Components:**\n*   `Transition`: The base component that exposes the lifecycle of a component.\n*   `CSSTransition`: A helper component that applies a pair of CSS classes to children during their 'enter' and 'exit' states.\n*   `SwitchTransition`: Allows you to transition between two components. It waits for the outgoing component to exit before the incoming component enters.\n*   `TransitionGroup`: Manages a set of `Transition` components (typically `CSSTransition`s) in a list, making it easy to animate items entering or leaving a list.\n\n### React Motion\n`React Motion` is a more declarative, physics-based animation library. Instead of dealing with durations and easing curves, you define the 'stiffness' and 'damping' of a spring. The library then interpolates the values, creating natural, fluid animations. This approach can be very intuitive for complex, dynamic animations where you want to react to user input or data changes in a more organic way.\n\nWhile `React Motion` offers a unique approach to animations, `React Transition Group` remains a very common and effective choice for managing simple enter/exit transitions, especially when integrated with existing CSS animation frameworks.",
+          "examples": [
+            {
+              "id": "example_react_transition_group_csstransition",
+              "title": "React Transition Group CSSTransition Example",
+              "code": "import React, { useState } from 'react';\nimport { CSSTransition } from 'react-transition-group';\nimport './App.css'; // Assume this file contains the necessary CSS\n\n/* App.css content for this example:\n.my-node-enter {\n  opacity: 0;\n  transform: translateX(-100px);\n}\n\n.my-node-enter-active {\n  opacity: 1;\n  transform: translateX(0);\n  transition: opacity 200ms ease-in, transform 200ms ease-in;\n}\n\n.my-node-exit {\n  opacity: 1;\n  transform: translateX(0);\n}\n\n.my-node-exit-active {\n  opacity: 0;\n  transform: translateX(100px);\n  transition: opacity 200ms ease-out, transform 200ms ease-out;\n}\n*/\n\nfunction App() {\n  const [inProp, setInProp] = useState(false);\n  \n  return (\n    <div style={{ padding: '20px' }}>\n      <button onClick={() => setInProp(!inProp)}>\n        Toggle Message\n      </button>\n      <CSSTransition \n        in={inProp} \n        timeout={200} \n        classNames=\"my-node\"\n        unmountOnExit\n      >\n        <div style={{ marginTop: '20px', fontSize: '20px', fontWeight: 'bold' }}>\n          {\"I'll fade and slide in and out\"}\n        </div>\n      </CSSTransition>\n    </div>\n  );\n}\n\nexport default App;\n",
+              "explanation": "This example demonstrates `CSSTransition` from `React Transition Group`. The `in` prop controls whether the component is 'entered' or 'exited'. `timeout` defines the duration of the transition, which should match the CSS transition duration. `classNames` specifies the base name for the CSS classes (`my-node-enter`, `my-node-enter-active`, `my-node-exit`, `my-node-exit-active`). When `inProp` changes, `CSSTransition` applies the appropriate classes, allowing CSS to handle the actual animation. `unmountOnExit` ensures the component is removed from the DOM after it finishes exiting.",
+              "language": "javascript"
+            }
+          ],
+          "relatedQuestions": [
+            "question_react_animations_mcq_1",
+            "question_react_animations_open_1",
+            "question_react_animations_flashcard_1",
+            "question_react_animations_code_1"
+          ],
+          "relatedTasks": [
+            "task_csstransition_toggle_animation",
+            "task_list_item_animations"
+          ],
+          "tags": [
+            "React",
+            "animations",
+            "React Transition Group",
+            "CSSTransition",
+            "React Motion",
+            "UI/UX",
+            "frontend development"
+          ],
+          "technology": "React, JavaScript, CSS",
+          "prerequisites": [
+            "react_component_lifecycle",
+            "css_transitions_animations"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 7,
+          "learningPath": "intermediate",
+          "requiredFor": [
+            "interactive_uis",
+            "performance_optimization",
+            "user_experience"
+          ]
+        },
+        {
+          "id": "theory_error_boundaries",
+          "title": "Error Boundaries in React",
+          "content": "Error boundaries are React components that catch JavaScript errors anywhere in their child component tree, log those errors, and display a fallback UI instead of crashing the entire component tree. They were introduced in React 16 to prevent uncaught JavaScript errors from corrupting the entire UI and to provide a graceful degradation experience to the user.\n\n### How Error Boundaries Work\nAn error boundary is a class component that implements at least one of two specific lifecycle methods:\n\n1.  **`static getDerivedStateFromError(error)`**: This static method is called after an error has been thrown by a descendant component. It receives the error that was thrown as an argument. Its purpose is to update state so the next render will show a fallback UI. It should return an object to update the state.\n2.  **`componentDidCatch(error, errorInfo)`**: This method is called after an error has been thrown by a descendant component. It receives two arguments: `error` (the error that was thrown) and `errorInfo` (an object with a `componentStack` key containing information about which component threw the error). This method is typically used for side effects, such as logging the error information to an error reporting service.\n\nIf a class component defines either of these methods, it becomes an error boundary. You can then wrap problematic parts of your UI with this error boundary component. If an error occurs within the wrapped component tree, the error boundary will catch it, update its state via `getDerivedStateFromError`, and render its `fallback` UI defined in its `render` method.\n\n### Limitations of Error Boundaries\nError boundaries **do not** catch errors in:\n*   Event handlers (e.g., `onClick`, `onChange`). These errors occur outside of the `render` phase and typically need to be handled with `try-catch` blocks within the event handler itself.\n*   Asynchronous code (e.g., `setTimeout` or `requestAnimationFrame` callbacks).\n*   Server-side rendering.\n*   Errors thrown in the error boundary itself (if an error boundary's `render` method or `getDerivedStateFromError` throws an error, React will unmount the whole component tree).\n\nIt is good practice to place error boundaries around logical units of your application rather than wrapping the entire application. This way, if one part of the UI crashes, the rest of the application can remain functional.",
+          "examples": [
+            {
+              "id": "example_error_boundary_class_implementation",
+              "title": "Error Boundary Class Component Implementation and Usage",
+              "code": "import React from 'react';\n\n// --- Error Boundary Component ---\nclass ErrorBoundary extends React.Component {\n  constructor(props) {\n    super(props);\n    this.state = { hasError: false, error: null, errorInfo: null };\n  }\n\n  static getDerivedStateFromError(error) {\n    // Update state so the next render will show the fallback UI\n    return { hasError: true };\n  }\n\n  componentDidCatch(error, errorInfo) {\n    // You can also log the error to an error reporting service\n    console.error('Error caught by boundary:', error, errorInfo);\n    this.setState({\n      error: error,\n      errorInfo: errorInfo\n    });\n    // logErrorToMyService(error, errorInfo);\n  }\n\n  render() {\n    if (this.state.hasError) {\n      // You can render any custom fallback UI\n      return (\n        <div style={{ border: '2px solid red', padding: '20px', margin: '20px', backgroundColor: '#ffe6e6' }}>\n          <h1>Oops! Something went wrong.</h1>\n          <details style={{ whiteSpace: 'pre-wrap' }}>\n            {this.state.error && this.state.error.toString()}\n            <br />\n            {this.state.errorInfo && this.state.errorInfo.componentStack}\n          </details>\n          <p>Please try reloading the page or contact support.</p>\n        </div>\n      );\n    }\n\n    return this.props.children;\n  }\n}\n\n// --- Component That Might Error ---\nfunction MyComponentThatMightError({ shouldError }) {\n  if (shouldError) {\n    throw new Error('I crashed! This is a simulated error.');\n  }\n  return <h2>This component works perfectly!</h2>;\n}\n\n// --- Usage in Parent Component ---\nfunction App() {\n  const [triggerError, setTriggerError] = React.useState(false);\n\n  return (\n    <div style={{ fontFamily: 'Arial, sans-serif' }}>\n      <h1>My Application</h1>\n      <button onClick={() => setTriggerError(true)} style={{ marginBottom: '20px' }}>\n        Trigger Error in Child Component\n      </button>\n      \n      <ErrorBoundary>\n        <MyComponentThatMightError shouldError={triggerError} />\n      </ErrorBoundary>\n\n      <p>This part of the application is still working.</p>\n    </div>\n  );\n}\n\nexport default App;\n",
+              "explanation": "This example shows a complete implementation of an `ErrorBoundary` component. It uses `static getDerivedStateFromError` to update the state `hasError` to `true` when an error occurs, triggering a re-render to display the fallback UI. `componentDidCatch` is used for logging the error and its info. The `MyComponentThatMightError` component conditionally throws an error. When `MyComponentThatMightError` is wrapped by `ErrorBoundary` and `shouldError` is true, the error is caught, and the `ErrorBoundary`'s fallback UI is rendered, preventing the entire `App` from crashing.",
+              "language": "javascript"
+            }
+          ],
+          "relatedQuestions": [
+            "question_error_boundary_mcq_1",
+            "question_error_boundary_open_1",
+            "question_error_boundary_flashcard_1",
+            "question_error_boundary_code_1"
+          ],
+          "relatedTasks": [
+            "task_implement_generic_error_boundary",
+            "task_test_error_boundary_with_nested_component"
+          ],
+          "tags": [
+            "React",
+            "error handling",
+            "error boundaries",
+            "class components",
+            "lifecycle methods",
+            "getDerivedStateFromError",
+            "componentDidCatch",
+            "frontend development",
+            "robustness"
+          ],
+          "technology": "React, JavaScript",
+          "prerequisites": [
+            "react_class_components",
+            "react_lifecycle",
+            "state_management"
+          ],
+          "complexity": 8,
+          "interviewRelevance": 9,
+          "learningPath": "advanced",
+          "requiredFor": [
+            "production_grade_applications",
+            "fault_tolerant_uis",
+            "advanced_react_patterns"
+          ]
+        }
+      ],
+      "questions": [
+        {
+          "id": "question_default_props_1",
+          "topic": "React Default Props",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "What is the primary purpose of `defaultProps` in a React component?",
+          "answer": "To define default values for props that are not explicitly passed to a component, ensuring they are always available and preventing undefined errors.",
+          "options": [],
+          "analysisPoints": [
+            "Understanding of `defaultProps` basic utility.",
+            "Knowing when `defaultProps` are applied."
+          ],
+          "keyConcepts": [
+            "defaultProps",
+            "props",
+            "React component"
+          ],
+          "evaluationCriteria": [
+            "Direct recall",
+            "Correct definition"
+          ],
+          "example": "",
+          "tags": [
+            "React",
+            "defaultProps",
+            "props"
+          ],
+          "prerequisites": [
+            "react_props"
+          ],
+          "complexity": 2,
+          "interviewFrequency": 6,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_default_props_2",
+          "topic": "React Default Props",
+          "level": "medium",
+          "type": "mcq",
+          "question": "Consider the following React component and its `defaultProps`:\n\n```jsx\nfunction MyButton({ label, onClick, theme }) {\n  return (\n    <button onClick={onClick} className={theme}>\n      {label}\n    </button>\n  );\n}\n\nMyButton.defaultProps = {\n  label: 'Click Me',\n  onClick: () => console.log('Button clicked!'),\n  theme: 'primary'\n};\n\n// In your App component:\n<MyButton />\n<MyButton label=\"Submit\" />\n<MyButton theme=\"secondary\" />\n```\nWhat will be the `label`, `onClick`, and `theme` props for the component rendered as `<MyButton label=\"Submit\" />`?",
+          "answer": "`label`: 'Submit', `onClick`: default function, `theme`: 'primary'",
+          "options": [
+            "`label`: 'Click Me', `onClick`: default function, `theme`: 'primary'",
+            "`label`: 'Submit', `onClick`: default function, `theme`: 'primary'",
+            "`label`: 'Submit', `onClick`: undefined, `theme`: 'secondary'",
+            "`label`: 'Submit', `onClick`: default function, `theme`: undefined"
+          ],
+          "analysisPoints": [
+            "Understanding that defaultProps are used only when a prop is not explicitly provided.",
+            "Ability to trace prop values through defaultProps and explicit assignments."
+          ],
+          "keyConcepts": [
+            "defaultProps",
+            "props",
+            "component composition"
+          ],
+          "evaluationCriteria": [
+            "Accurate application of `defaultProps` logic.",
+            "Correct identification of prop resolution order."
+          ],
+          "example": "The component `<MyButton label=\"Submit\" />` explicitly provides the `label` prop, so its value will be 'Submit', overriding the default. However, `onClick` and `theme` are not provided, so they will fall back to their `defaultProps` values: the default `onClick` function and `theme: 'primary'`.",
+          "tags": [
+            "React",
+            "defaultProps",
+            "props"
+          ],
+          "prerequisites": [
+            "react_props"
+          ],
+          "complexity": 5,
+          "interviewFrequency": 7,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_prop_types_flow_mcq_1",
+          "topic": "PropTypes vs. Flow/TypeScript",
+          "level": "medium",
+          "type": "mcq",
+          "question": "Which of the following statements accurately describes a key difference between `PropTypes` and `Flow` (or TypeScript) for type checking in React applications?",
+          "answer": "`PropTypes` performs runtime type checking, whereas Flow/TypeScript perform static (compile-time) type checking.",
+          "options": [
+            "`PropTypes` offers superior IDE integration compared to Flow/TypeScript.",
+            "`PropTypes` has a steeper learning curve than Flow/TypeScript.",
+            "`PropTypes` performs runtime type checking, whereas Flow/TypeScript perform static (compile-time) type checking.",
+            "Flow/TypeScript introduce a significant runtime performance cost, unlike `PropTypes`."
+          ],
+          "analysisPoints": [
+            "Distinguishing between runtime and static type checking.",
+            "Understanding the performance implications of each approach.",
+            "Recognizing differences in IDE support and learning curve."
+          ],
+          "keyConcepts": [
+            "PropTypes",
+            "Flow",
+            "TypeScript",
+            "runtime type checking",
+            "static type checking",
+            "performance",
+            "IDE integration"
+          ],
+          "evaluationCriteria": [
+            "Correctly identifies the core difference in checking time.",
+            "Avoids common misconceptions about performance and tooling."
+          ],
+          "example": "The main distinction lies in *when* the type checks occur. `PropTypes` validates props when the component renders at runtime, leading to console warnings. Flow and TypeScript, being static analyzers, check types during development or build time, catching errors before the code even runs. Static type checkers typically have no runtime performance impact once compiled to plain JavaScript, and offer much richer IDE support.",
+          "tags": [
+            "React",
+            "PropTypes",
+            "Flow",
+            "TypeScript",
+            "type checking"
+          ],
+          "prerequisites": [
+            "javascript_types"
+          ],
+          "complexity": 6,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_prop_types_flow_open_1",
+          "topic": "PropTypes vs. Flow/TypeScript",
+          "level": "hard",
+          "type": "open",
+          "question": "You are starting a new large-scale React project with a team of 10 developers. Given the choice between using `PropTypes` and TypeScript for type checking, which would you choose and why? Discuss the trade-offs involved.",
+          "answer": "",
+          "options": [],
+          "analysisPoints": [
+            "Ability to articulate the pros and cons of both `PropTypes` and TypeScript.",
+            "Consideration of team size and collaboration in decision-making.",
+            "Understanding of long-term maintainability and scalability benefits.",
+            "Discussion of setup overhead vs. benefits."
+          ],
+          "keyConcepts": [
+            "PropTypes",
+            "TypeScript",
+            "static type checking",
+            "runtime type checking",
+            "scalability",
+            "maintainability",
+            "developer experience",
+            "tooling"
+          ],
+          "evaluationCriteria": [
+            "Comprehensive comparison of trade-offs.",
+            "Clear justification for the chosen technology.",
+            "Demonstrates understanding of real-world project considerations."
+          ],
+          "example": "For a large-scale project with a team of 10 developers, I would strongly choose TypeScript over `PropTypes`. \n\n**Arguments for TypeScript:**\n*   **Static Error Detection:** TypeScript catches errors *before* runtime, significantly reducing bugs in production and speeding up development by providing immediate feedback. With a large team, this prevents many integration issues.\n*   **Improved Developer Experience & Productivity:** Strong IDE support (autocompletion, refactoring, navigate-to-definition) makes coding faster and safer. Developers can confidently refactor and understand complex codebases.\n*   **Better Code Maintainability & Readability:** Types serve as living documentation, making it easier for new team members to understand the codebase and for existing members to remember complex interfaces.\n*   **Scalability:** As the project grows, managing prop types with `PropTypes` becomes cumbersome, especially with deeply nested objects or complex data structures. TypeScript handles this elegantly.\n*   **Wider Adoption & Ecosystem:** TypeScript has a vast and active community, extensive learning resources, and excellent support from popular libraries and frameworks.\n\n**Trade-offs/Considerations for TypeScript:**\n*   **Steeper Learning Curve:** Developers new to TypeScript will need time to learn the type system.\n*   **Initial Setup & Configuration:** Setting up TypeScript with a React project involves configuring `tsconfig.json` and potentially build tools, which adds initial overhead.\n*   **Compilation Step:** TypeScript requires a compilation step, which can slightly increase build times, though modern build tools make this largely imperceptible for incremental builds.\n\n**Arguments against PropTypes (for this scenario):**\n*   **Runtime Only:** Errors are caught only when components render, leading to potential production bugs that are harder to debug.\n*   **Limited Tooling:** Less powerful IDE support compared to TypeScript.\n*   **Verbosity for Complex Types:** Defining complex shapes can be verbose and error-prone.\n\n**Conclusion:** While `PropTypes` is simpler to set up initially, the long-term benefits of TypeScript in terms of error prevention, developer productivity, code maintainability, and scalability for a large team and large project far outweigh the initial learning curve and setup overhead.",
+          "tags": [
+            "React",
+            "TypeScript",
+            "PropTypes",
+            "project management",
+            "architecture",
+            "scalability"
+          ],
+          "prerequisites": [
+            "react_fundamentals",
+            "type_systems"
+          ],
+          "complexity": 9,
+          "interviewFrequency": 9,
+          "learningPath": "advanced"
+        },
+        {
+          "id": "question_prop_types_flow_flashcard_1",
+          "topic": "PropTypes vs. Flow/TypeScript",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "Name two key advantages of using static type checkers like Flow or TypeScript over runtime type checkers like PropTypes.",
+          "answer": "1. Error detection before runtime (at compile time/during development).\n2. Stronger IDE integration (autocompletion, refactoring support).",
+          "options": [],
+          "analysisPoints": [
+            "Recall of basic comparative advantages.",
+            "Understanding the practical benefits of static typing."
+          ],
+          "keyConcepts": [
+            "static type checking",
+            "runtime type checking",
+            "IDE integration",
+            "error detection"
+          ],
+          "evaluationCriteria": [
+            "Direct recall",
+            "Correct identification of benefits"
+          ],
+          "example": "",
+          "tags": [
+            "React",
+            "PropTypes",
+            "Flow",
+            "TypeScript"
+          ],
+          "prerequisites": [],
+          "complexity": 3,
+          "interviewFrequency": 7,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_https_cra_1",
+          "topic": "Create React App HTTPS",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "How can you enable HTTPS for a Create React App development server?",
+          "answer": "By setting the `HTTPS=true` environment variable before starting the development server (e.g., `HTTPS=true npm start` or `set HTTPS=true && npm start` on Windows).",
+          "options": [],
+          "analysisPoints": [
+            "Knowledge of CRA environment variables.",
+            "Understanding basic command-line usage for development."
+          ],
+          "keyConcepts": [
+            "Create React App",
+            "HTTPS",
+            "environment variables",
+            "development server"
+          ],
+          "evaluationCriteria": [
+            "Direct recall",
+            "Correct command"
+          ],
+          "example": "",
+          "tags": [
+            "React",
+            "CRA",
+            "HTTPS",
+            "development"
+          ],
+          "prerequisites": [
+            "node_npm_basics"
+          ],
+          "complexity": 2,
+          "interviewFrequency": 5,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_react_animations_mcq_1",
+          "topic": "React Animation Libraries",
+          "level": "medium",
+          "type": "mcq",
+          "question": "Which of the following statements is true regarding `React Transition Group`?",
+          "answer": "It helps manage the mounting and unmounting of components, allowing you to apply CSS transitions or animations.",
+          "options": [
+            "It is primarily a physics-based animation library that interpolates values based on stiffness and damping.",
+            "It directly handles all CSS animation properties without needing external CSS.",
+            "It helps manage the mounting and unmounting of components, allowing you to apply CSS transitions or animations.",
+            "It is designed to animate only individual React elements, not groups or lists."
+          ],
+          "analysisPoints": [
+            "Understanding the core function of `React Transition Group`.",
+            "Differentiating it from physics-based libraries like `React Motion`.",
+            "Knowing its reliance on external CSS."
+          ],
+          "keyConcepts": [
+            "React Transition Group",
+            "CSS animations",
+            "component lifecycle",
+            "mounting/unmounting"
+          ],
+          "evaluationCriteria": [
+            "Correctly identifies the purpose and mechanism.",
+            "Avoids confusion with other animation paradigms."
+          ],
+          "example": "React Transition Group provides components like `CSSTransition` that apply specific CSS classes (e.g., `my-node-enter`, `my-node-enter-active`) at different stages of a component's lifecycle (entering or exiting the DOM). You then define the actual animation rules in your CSS file using these classes. It doesn't handle the physics of animation itself.",
+          "tags": [
+            "React",
+            "animations",
+            "React Transition Group",
+            "CSSTransition"
+          ],
+          "prerequisites": [
+            "css_transitions_animations"
+          ],
+          "complexity": 6,
+          "interviewFrequency": 7,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_react_animations_open_1",
+          "topic": "React Animation Libraries",
+          "level": "hard",
+          "type": "open",
+          "question": "You need to implement an animation where an element smoothly expands from a small circle to a large square, and then shrinks back to a circle, responding to user clicks. Which animation library, `React Transition Group` or `React Motion`, would be more suitable for this specific scenario and why?",
+          "answer": "",
+          "options": [],
+          "analysisPoints": [
+            "Understanding the strengths of `React Transition Group` (enter/exit, CSS-driven).",
+            "Understanding the strengths of `React Motion` (physics-based, complex interpolations).",
+            "Ability to choose the right tool for a specific animation complexity.",
+            "Justification based on the nature of the animation (smooth, dynamic shape change)."
+          ],
+          "keyConcepts": [
+            "React Transition Group",
+            "React Motion",
+            "animations",
+            "physics-based animation",
+            "CSS transitions",
+            "dynamic styling"
+          ],
+          "evaluationCriteria": [
+            "Correct library choice with strong justification.",
+            "Demonstrates understanding of when each library shines."
+          ],
+          "example": "For an animation that involves smoothly expanding a circle into a square and then shrinking it back, responding to user clicks, `React Motion` would be more suitable than `React Transition Group`.\n\n**Why React Motion:**\n*   **Physics-Based:** `React Motion` excels at creating natural, fluid, and interruptible animations by interpolating values based on spring physics (stiffness and damping). This is perfect for dynamic transformations where you want a smooth, organic feel rather than fixed durations and easing curves.\n*   **Complex Property Interpolation:** Changing an element from a circle to a square involves animating multiple CSS properties simultaneously (e.g., `border-radius`, `width`, `height`, `background-color`). `React Motion` allows you to define the target values for these properties, and it handles the smooth interpolation between them. You can easily map state changes to a 'spring' and let the library handle the intermediate values.\n*   **Declarative for Dynamic Styles:** While `React Transition Group` manages mounting/unmounting and applies CSS classes at specific points, controlling a continuous, multi-property transformation like this with just CSS classes can become cumbersome and rigid. `React Motion` allows you to declare the 'end state' of your styles, and it calculates the 'in-between' states, making it more declarative for complex, state-driven visual changes.\n\n**Why React Transition Group is less suitable:**\n*   `React Transition Group` is excellent for managing *enter* and *exit* animations, typically by applying CSS classes to trigger predefined CSS transitions/animations. It's more about orchestrating the presence of components in the DOM and triggering static, pre-defined animations.\n*   While you could potentially define CSS classes for each stage of the circle-to-square transformation, managing the smooth, continuous, and potentially interruptible nature of the animation purely with CSS classes and `React Transition Group` would be significantly more complex and less flexible than using `React Motion`'s physics engine.",
+          "tags": [
+            "React",
+            "animations",
+            "React Motion",
+            "React Transition Group",
+            "UI/UX",
+            "design patterns"
+          ],
+          "prerequisites": [
+            "react_state_management",
+            "css_animations"
+          ],
+          "complexity": 8,
+          "interviewFrequency": 8,
+          "learningPath": "advanced"
+        },
+        {
+          "id": "question_react_animations_flashcard_1",
+          "topic": "React Animation Libraries",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "What is the primary difference in approach between `React Transition Group` and `React Motion`?",
+          "answer": "`React Transition Group` helps manage component mounting/unmounting to apply CSS transitions/animations, while `React Motion` uses a physics-based approach for smooth, fluid animations.",
+          "options": [],
+          "analysisPoints": [
+            "Identifying the core mechanism of each library.",
+            "Understanding their respective use cases."
+          ],
+          "keyConcepts": [
+            "React Transition Group",
+            "React Motion",
+            "CSS animations",
+            "physics-based animation"
+          ],
+          "evaluationCriteria": [
+            "Direct recall",
+            "Accurate differentiation"
+          ],
+          "example": "",
+          "tags": [
+            "React",
+            "animations",
+            "React Transition Group",
+            "React Motion"
+          ],
+          "prerequisites": [],
+          "complexity": 4,
+          "interviewFrequency": 6,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_react_animations_code_1",
+          "topic": "React Animation Libraries",
+          "level": "medium",
+          "type": "code",
+          "question": "Implement a simple React component that uses `CSSTransition` to fade in and out a text message when a button is clicked. You need to provide the React component and the necessary CSS.",
+          "answer": "```jsx\nimport React, { useState } from 'react';\nimport { CSSTransition } from 'react-transition-group';\nimport './FadeMessage.css'; // Assuming this file exists\n\nfunction FadeMessage() {\n  const [isVisible, setIsVisible] = useState(false);\n\n  return (\n    <div>\n      <button onClick={() => setIsVisible(!isVisible)}>\n        Toggle Message\n      </button>\n      <CSSTransition\n        in={isVisible}\n        timeout={300} // Matches CSS transition duration\n        classNames=\"fade-message\"\n        unmountOnExit\n        appear\n      >\n        <p className=\"message-text\">Hello, React Animations!</p>\n      </CSSTransition>\n    </div>\n  );\n}\n\nexport default FadeMessage;\n\n```\n\n```css\n/* FadeMessage.css */\n.fade-message-enter {\n  opacity: 0;\n}\n\n.fade-message-enter-active {\n  opacity: 1;\n  transition: opacity 300ms ease-in;\n}\n\n.fade-message-exit {\n  opacity: 1;\n}\n\n.fade-message-exit-active {\n  opacity: 0;\n  transition: opacity 300ms ease-out;\n}\n\n.fade-message-appear {\n  opacity: 0;\n}\n\n.fade-message-appear-active {\n  opacity: 1;\n  transition: opacity 300ms ease-in;\n}\n```",
+          "options": [],
+          "analysisPoints": [
+            "Correct usage of `useState` for toggling state.",
+            "Proper integration of `CSSTransition` component.",
+            "Understanding `in`, `timeout`, and `classNames` props.",
+            "Correct definition of CSS classes for enter/exit transitions (e.g., `-enter`, `-enter-active`, `-exit`, `-exit-active`).",
+            "Matching `timeout` with CSS transition duration.",
+            "Optional: Use of `unmountOnExit` for performance/DOM cleanup.",
+            "Optional: Use of `appear` for initial mount animation."
+          ],
+          "keyConcepts": [
+            "React Transition Group",
+            "CSSTransition",
+            "useState",
+            "CSS transitions",
+            "component lifecycle"
+          ],
+          "evaluationCriteria": [
+            "Functional animation implementation.",
+            "Correct `CSSTransition` prop usage.",
+            "Accurate CSS class definitions.",
+            "Clean and readable code."
+          ],
+          "example": "",
+          "tags": [
+            "React",
+            "animations",
+            "CSSTransition",
+            "coding challenge",
+            "CSS"
+          ],
+          "prerequisites": [
+            "react_hooks",
+            "css_fundamentals"
+          ],
+          "complexity": 7,
+          "interviewFrequency": 7,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_error_boundary_mcq_1",
+          "topic": "React Error Boundaries",
+          "level": "medium",
+          "type": "mcq",
+          "question": "Which of the following methods are essential for a React class component to function as an Error Boundary?",
+          "answer": "Both `static getDerivedStateFromError(error)` and `componentDidCatch(error, errorInfo)` (at least one is required, but typically both are used).",
+          "options": [
+            "`componentDidMount()` and `componentWillUnmount()`",
+            "`render()` and `setState()`",
+            "`static getDerivedStateFromError(error)` only.",
+            "Both `static getDerivedStateFromError(error)` and `componentDidCatch(error, errorInfo)` (at least one is required, but typically both are used)."
+          ],
+          "analysisPoints": [
+            "Identifying the specific lifecycle methods for error boundaries.",
+            "Understanding that `render` is for UI and `setState` is for state management, not error boundary definition.",
+            "Knowing that at least one of the two dedicated methods is required."
+          ],
+          "keyConcepts": [
+            "Error Boundary",
+            "lifecycle methods",
+            "getDerivedStateFromError",
+            "componentDidCatch"
+          ],
+          "evaluationCriteria": [
+            "Correct identification of error boundary methods.",
+            "Distinguishing error boundary methods from general lifecycle methods."
+          ],
+          "example": "To be an error boundary, a class component needs to implement either `static getDerivedStateFromError(error)` to update its state (for fallback UI) or `componentDidCatch(error, errorInfo)` for side effects like logging, or both. While `render` is part of any component, it's not what *makes* it an error boundary.",
+          "tags": [
+            "React",
+            "error boundaries",
+            "lifecycle methods",
+            "class components"
+          ],
+          "prerequisites": [
+            "react_class_components",
+            "react_lifecycle"
+          ],
+          "complexity": 6,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_error_boundary_open_1",
+          "topic": "React Error Boundaries",
+          "level": "hard",
+          "type": "open",
+          "question": "Explain the difference in purpose and usage between `static getDerivedStateFromError(error)` and `componentDidCatch(error, errorInfo)` within a React Error Boundary. Also, list two types of errors that React Error Boundaries do *not* catch.",
+          "answer": "",
+          "options": [],
+          "analysisPoints": [
+            "Clear distinction between the two lifecycle methods' roles.",
+            "Understanding `getDerivedStateFromError` for state updates (fallback UI).",
+            "Understanding `componentDidCatch` for side effects (logging).",
+            "Recalling common limitations of error boundaries (event handlers, async code, SSR, self-errors)."
+          ],
+          "keyConcepts": [
+            "Error Boundary",
+            "getDerivedStateFromError",
+            "componentDidCatch",
+            "lifecycle methods",
+            "error handling",
+            "limitations"
+          ],
+          "evaluationCriteria": [
+            "Accurate and comprehensive explanation of method purposes.",
+            "Correct identification of error boundary limitations.",
+            "Structured and clear answer."
+          ],
+          "example": "**`static getDerivedStateFromError(error)`:**\n*   **Purpose:** This is a static method used for updating the error boundary's state. When an error is thrown in a child component, this method is called, allowing the error boundary to update its state (e.g., `hasError: true`). This state change then triggers a re-render of the error boundary, displaying the fallback UI instead of the crashed child content.\n*   **Usage:** It must return an object to update the state, or `null` to indicate no state update. It's strictly for updating state derived from the error; no side effects should be performed here.\n\n**`componentDidCatch(error, errorInfo)`:**\n*   **Purpose:** This instance method is called after an error has been thrown by a descendant component. It's primarily used for performing side effects, such as logging the error to an external error tracking service (e.g., Sentry, Bugsnag) or a custom analytics system.\n*   **Usage:** It receives the error and an `errorInfo` object (which includes the component stack trace). You can perform any actions here that don't involve state updates that would trigger a re-render (since `getDerivedStateFromError` handles that).\n\n**Key Difference:** `getDerivedStateFromError` is for rendering a fallback UI by updating state, while `componentDidCatch` is for side effects like logging.\n\n**Two types of errors React Error Boundaries do NOT catch:**\n1.  **Errors inside event handlers:** Errors thrown inside `onClick`, `onChange`, etc., are not caught by error boundaries. These errors happen outside the render phase and require traditional `try-catch` blocks within the event handler itself.\n2.  **Asynchronous code:** Errors occurring in `setTimeout` callbacks, `requestAnimationFrame` callbacks, or `Promise.then()` callbacks (unless the Promise is explicitly rejected and caught by a `catch` block that re-throws) are not caught.\n\nOther types not caught include errors during server-side rendering and errors thrown within the error boundary component itself.",
+          "tags": [
+            "React",
+            "error boundaries",
+            "lifecycle methods",
+            "error handling",
+            "limitations"
+          ],
+          "prerequisites": [
+            "react_lifecycle",
+            "javascript_error_handling"
+          ],
+          "complexity": 9,
+          "interviewFrequency": 9,
+          "learningPath": "advanced"
+        },
+        {
+          "id": "question_error_boundary_flashcard_1",
+          "topic": "React Error Boundaries",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "What is the main benefit of using a React Error Boundary?",
+          "answer": "To prevent a single JavaScript error in a component tree from crashing the entire application and to display a fallback UI.",
+          "options": [],
+          "analysisPoints": [
+            "Understanding the core problem error boundaries solve.",
+            "Identifying the user experience improvement."
+          ],
+          "keyConcepts": [
+            "Error Boundary",
+            "error handling",
+            "fallback UI"
+          ],
+          "evaluationCriteria": [
+            "Direct recall",
+            "Correctly states primary benefit"
+          ],
+          "example": "",
+          "tags": [
+            "React",
+            "error boundaries",
+            "error handling"
+          ],
+          "prerequisites": [],
+          "complexity": 3,
+          "interviewFrequency": 7,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_error_boundary_code_1",
+          "topic": "React Error Boundaries",
+          "level": "medium",
+          "type": "code",
+          "question": "Given the `MyComponentThatMightError` component below, wrap it with an `ErrorBoundary` component (which you should also implement) such that if `MyComponentThatMightError` throws an error, a message 'Component failed to load.' is displayed instead. Assume a basic React setup.\n\n```jsx\nfunction MyComponentThatMightError({ shouldThrow }) {\n  if (shouldThrow) {\n    throw new Error('Simulated crash!');\n  }\n  return <div>Successfully loaded content.</div>;\n}\n\n// Your task is to implement ErrorBoundary and use it like this:\n// function App() {\n//   return (\n//     <ErrorBoundary>\n//       <MyComponentThatMightError shouldThrow={true} />\n//     </ErrorBoundary>\n//   );\n// }\n```",
+          "answer": "```jsx\nimport React from 'react';\n\n// Component that might throw an error\nfunction MyComponentThatMightError({ shouldThrow }) {\n  if (shouldThrow) {\n    throw new Error('Simulated crash!');\n  }\n  return <div>Successfully loaded content.</div>;\n}\n\n// Error Boundary Component implementation\nclass ErrorBoundary extends React.Component {\n  constructor(props) {\n    super(props);\n    this.state = { hasError: false };\n  }\n\n  static getDerivedStateFromError(error) {\n    // Update state so the next render will show the fallback UI\n    return { hasError: true };\n  }\n\n  componentDidCatch(error, errorInfo) {\n    // You can also log the error to an error reporting service\n    console.error('Error caught by ErrorBoundary:', error, errorInfo);\n  }\n\n  render() {\n    if (this.state.hasError) {\n      // Render any custom fallback UI\n      return <h1>Component failed to load.</h1>;\n    }\n\n    return this.props.children;\n  }\n}\n\n// Usage in App component\nfunction App() {\n  return (\n    <div>\n      <h2>Application Header</h2>\n      <ErrorBoundary>\n        <MyComponentThatMightError shouldThrow={true} />\n      </ErrorBoundary>\n      <p>This part of the app is still working.</p>\n    </div>\n  );\n}\n\nexport default App;\n```",
+          "options": [],
+          "analysisPoints": [
+            "Correctly defines `ErrorBoundary` as a class component.",
+            "Implements `static getDerivedStateFromError` to update `hasError` state.",
+            "Implements `componentDidCatch` for logging purposes (optional but good practice).",
+            "Uses the `hasError` state in the `render` method to conditionally display the fallback UI.",
+            "Wraps the potentially error-prone component with the `ErrorBoundary`.",
+            "Ensures the `props.children` is rendered when no error occurs."
+          ],
+          "keyConcepts": [
+            "Error Boundary",
+            "class components",
+            "lifecycle methods",
+            "getDerivedStateFromError",
+            "componentDidCatch",
+            "error handling"
+          ],
+          "evaluationCriteria": [
+            "Functional error boundary implementation.",
+            "Correct use of required lifecycle methods.",
+            "Appropriate fallback UI rendering.",
+            "Clean and executable code."
+          ],
+          "example": "",
+          "tags": [
+            "React",
+            "error boundaries",
+            "coding challenge",
+            "class components"
+          ],
+          "prerequisites": [
+            "react_class_components",
+            "react_lifecycle"
+          ],
+          "complexity": 7,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        }
+      ],
+      "tasks": [
+        {
+          "id": "task_default_props_prop_types_component",
+          "title": "Build a `Card` Component with Default Props and PropTypes",
+          "description": "\nCreate a `Card` React functional component that accepts the following props:\n\n1.  `title`: string (required)\n2.  `content`: string (required)\n3.  `imageUrl`: string (optional, default: 'https://via.placeholder.com/150')\n4.  `theme`: string (optional, default: 'light') - can be 'light' or 'dark'\n5.  `onClick`: function (optional, default: an empty function `() => {}`)\n\n**Requirements:**\n*   Use `defaultProps` to set default values for optional props.\n*   Use `PropTypes` to validate all props, ensuring `title` and `content` are required strings, `imageUrl` and `theme` are strings, and `onClick` is a function.\n*   The component should render the `title`, `content`, an `img` tag for `imageUrl`, and apply the `theme` as a CSS class to the main card div.\n*   Add a simple click handler to the card that calls the `onClick` prop.\n",
+          "difficulty": "medium",
+          "startingCode": "import React from 'react';\nimport PropTypes from 'prop-types';\n\nfunction Card(props) {\n  // Destructure props here, ensuring defaults are applied if not provided.\n  const { title, content, imageUrl, theme, onClick } = props;\n\n  return (\n    <div className={`card ${theme}`} onClick={onClick} style={{ border: '1px solid #ccc', padding: '15px', margin: '10px', borderRadius: '8px', cursor: 'pointer', maxWidth: '300px' }}>\n      {/* TODO: Render image if imageUrl is provided/defaulted */}\n      {/* TODO: Render title */}\n      {/* TODO: Render content */}\n    </div>\n  );\n}\n\n// TODO: Add defaultProps here\n// TODO: Add propTypes here\n\nexport default Card;\n\n// --- Usage Example (for testing) ---\n/*\nfunction App() {\n  return (\n    <div>\n      <Card title=\"Default Card\" content=\"This is a card with all default optional props.\" />\n      <Card \n        title=\"Dark Card\"\n        content=\"This card has a dark theme.\"\n        theme=\"dark\"\n        onClick={() => alert('Dark card clicked!')}\n      />\n      <Card \n        title=\"Image Card\"\n        content=\"This card features a custom image.\"\n        imageUrl=\"https://via.placeholder.com/200/0000FF/FFFFFF?text=CustomImage\"\n      />\n    </div>\n  );\n}\n*/",
+          "solutionCode": "import React from 'react';\nimport PropTypes from 'prop-types';\n\nfunction Card(props) {\n  const { title, content, imageUrl, theme, onClick } = props;\n\n  const cardStyle = {\n    border: theme === 'dark' ? '1px solid #555' : '1px solid #ccc',\n    backgroundColor: theme === 'dark' ? '#333' : '#fff',\n    color: theme === 'dark' ? '#eee' : '#333',\n    padding: '15px',\n    margin: '10px',\n    borderRadius: '8px',\n    cursor: 'pointer',\n    maxWidth: '300px',\n    boxShadow: '2px 2px 5px rgba(0,0,0,0.2)'\n  };\n\n  const imageStyle = {\n    width: '100%',\n    height: '150px',\n    objectFit: 'cover',\n    borderRadius: '4px',\n    marginBottom: '10px'\n  };\n\n  const titleStyle = {\n    fontSize: '1.5em',\n    marginBottom: '8px'\n  };\n\n  const contentStyle = {\n    fontSize: '0.9em',\n    lineHeight: '1.5'\n  };\n\n  return (\n    <div className={`card ${theme}`} onClick={onClick} style={cardStyle}>\n      {imageUrl && <img src={imageUrl} alt={title} style={imageStyle} />}\n      <h3 style={titleStyle}>{title}</h3>\n      <p style={contentStyle}>{content}</p>\n    </div>\n  );\n}\n\nCard.defaultProps = {\n  imageUrl: 'https://via.placeholder.com/150',\n  theme: 'light',\n  onClick: () => {}\n};\n\nCard.propTypes = {\n  title: PropTypes.string.isRequired,\n  content: PropTypes.string.isRequired,\n  imageUrl: PropTypes.string,\n  theme: PropTypes.oneOf(['light', 'dark']),\n  onClick: PropTypes.func\n};\n\nexport default Card;\n\n// --- Usage Example (for testing) ---\n/*\n// In App.js or a similar file:\nimport React from 'react';\nimport Card from './Card'; // Adjust path as needed\n\nfunction App() {\n  return (\n    <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center' }}>\n      <Card title=\"Default Card\" content=\"This is a card with all default optional props.\" />\n      <Card \n        title=\"Dark Themed Card\"\n        content=\"This card demonstrates the dark theme, and has a custom click handler.\"\n        theme=\"dark\"\n        onClick={() => alert('Dark card was clicked!')}\n      />\n      <Card \n        title=\"Custom Image Card\"\n        content=\"This card uses a specific image URL for its visual.\"\n        imageUrl=\"https://via.placeholder.com/200/FF5733/FFFFFF?text=CustomImg\"\n        onClick={() => console.log('Image card clicked.')}\n      />\n      <Card \n        title=\"Simple Card\"\n        content=\"Just title and content, all other props are default.\"\n      />\n      {/* Example of incorrect prop type (will cause console warning) *\\/\n      {/* <Card title=\"Invalid Prop Example\" content={123} /> *\\/ \n    </div>\n  );\n}\n\nexport default App;\n*/",
+          "testCases": [
+            "Render <Card title=\"Test\" content=\"Content\" />: Should display title, content, default image, light theme, and no console errors.",
+            "Render <Card title=\"Dark\" content=\"Dark content\" theme=\"dark\" />: Should apply dark theme styles.",
+            "Render <Card title=\"Image\" content=\"Image content\" imageUrl=\"https://via.placeholder.com/100\" />: Should display the specified image.",
+            "Render <Card title=\"Clickable\" content=\"Click me\" onClick={() => alert('Clicked!')} />: Should execute the alert on click.",
+            "Render <Card title=\"Invalid\" content={123} />: Should produce a PropTypes warning in the console for `content`."
+          ],
+          "hints": [
+            "Remember that `defaultProps` apply if a prop is `undefined`, not just falsy.",
+            "Use `PropTypes.oneOf` for the `theme` prop to restrict its values.",
+            "Ensure `propTypes` is defined *after* the component definition, usually on the component function directly.",
+            "For the `onClick` default, an empty arrow function `() => {}` is a common and safe practice."
+          ],
+          "tags": [
+            "React",
+            "defaultProps",
+            "PropTypes",
+            "component design",
+            "frontend interview"
+          ],
+          "timeEstimate": 45,
+          "prerequisites": [
+            "react_functional_components",
+            "prop_types_library"
+          ],
+          "complexity": 6,
+          "interviewRelevance": 8,
+          "learningPath": "intermediate",
+          "relatedConcepts": [
+            "component_reusability",
+            "prop_validation",
+            "component_api"
+          ]
+        },
+        {
+          "id": "task_migrate_prop_types_to_ts_discussion",
+          "title": "Architectural Discussion: Migrating from PropTypes to TypeScript",
+          "description": "\nImagine you are working on a medium-sized React application that currently uses `PropTypes` extensively for prop validation. Your team has decided to migrate the entire codebase to TypeScript to improve maintainability, reduce runtime errors, and enhance developer experience.\n\n**Your task is to outline a detailed plan for this migration. Your plan should cover:**\n\n1.  **Preparation Steps:** What should be done before starting the actual code conversion?\n2.  **Migration Strategy:** A step-by-step approach for converting components (e.g., all at once, module by module, top-down, bottom-up).\n3.  **Key Code Changes:** How would `PropTypes` definitions be replaced with TypeScript interfaces/types?\n4.  **Handling Edge Cases/Challenges:** What potential issues might arise (e.g., third-party libraries, complex prop types, higher-order components) and how would you address them?\n5.  **Testing and Verification:** How would you ensure the migration is successful and doesn't introduce new bugs?\n6.  **Tooling and Linting:** What tools would you leverage?\n",
+          "difficulty": "hard",
+          "startingCode": "/*\nThis task is a theoretical design task, not a coding implementation. \nYour response should be a detailed markdown explanation in the solutionCode field.\n*/\n",
+          "solutionCode": "## Detailed Plan for Migrating from PropTypes to TypeScript\n\n### 1. Preparation Steps\n\n*   **Educate the Team:** Provide training sessions on TypeScript fundamentals, common types, interfaces, and React-specific TypeScript patterns. Ensure everyone is comfortable with the new paradigm.\n*   **Create a `tsconfig.json`:** Set up the TypeScript configuration file. Start with a more permissive configuration (`noImplicitAny: false` initially) to get started, and then tighten it gradually. Essential options include `jsx: 'react-jsx'`, `esModuleInterop: true`, `strict: true` (eventually).\n*   **Install Dependencies:** Add `typescript`, `@types/react`, `@types/react-dom`, `@types/prop-types` (temporarily), and any other `@types` for third-party libraries used.\n*   **Update Build Tools:** Ensure your build system (Webpack, Rollup, Vite, Create React App) is configured to handle TypeScript files (e.g., use `ts-loader`, `@vitejs/plugin-react-ts`).\n*   **Linting Setup:** Configure ESLint with TypeScript support (`@typescript-eslint/parser`, `@typescript-eslint/eslint-plugin`). This helps enforce best practices and catches more errors early.\n*   **Version Control Branch:** Create a dedicated feature branch for the migration to isolate changes and allow for continuous integration.\n*   **Initial Type Audit:** Identify complex components, shared utility functions, and critical data structures that will require more attention during typing.\n\n### 2. Migration Strategy (Phased Approach)\n\nInstead of a 'big bang' migration, a phased approach is highly recommended for a medium-sized application.\n\n*   **Start with New Components/Features:** Any new code should be written directly in TypeScript from the start. This builds momentum and familiarizes the team.\n*   **Bottom-Up Component Conversion:** Begin with leaf components (components that don't render other components) and then move upwards to their parents. This ensures that when a parent component is converted, its children already have well-defined types, making the parent's conversion easier.\n*   **Module by Module:** Tackle specific feature modules or logical sections of the application one at a time. This keeps PRs manageable and reduces the scope of simultaneous changes.\n*   **Prioritize Critical Paths/Shared Utilities:** Convert core components, hooks, and utility functions first, as their correct typing will benefit many other parts of the application.\n*   **Gradual Type Strictness:** Start with `allowJs` and `noImplicitAny: false` to allow gradual typing. Once a section is converted, you can tighten the `tsconfig` rules for that area or for the entire project.\n*   **Remove PropTypes Gradually:** After a component is fully typed with TypeScript, its `PropTypes` definition can be removed. This ensures a period of overlap where both are present, providing a safety net.\n\n### 3. Key Code Changes\n\n*   **File Renaming:** Change `.js` / `.jsx` files to `.ts` / `.tsx`.\n*   **Replacing `PropTypes` with Interfaces/Types:**\n    *   Define `interface` or `type` for component props:\n        ```typescript\n        // Before PropTypes\n        // MyComponent.propTypes = {\n        //   name: PropTypes.string.isRequired,\n        //   age: PropTypes.number,\n        //   user: PropTypes.shape({\n        //     id: PropTypes.number,\n        //     email: PropTypes.string.isRequired\n        //   })\n        // };\n\n        // After TypeScript\n        interface User {\n          id?: number;\n          email: string;\n        }\n\n        interface MyComponentProps {\n          name: string;\n          age?: number; // Optional prop\n          user?: User;\n        }\n\n        const MyComponent: React.FC<MyComponentProps> = ({ name, age, user }) => { ... };\n        // Or for class components:\n        // class MyComponent extends React.Component<MyComponentProps> { ... }\n        ```\n    *   Use `?` for optional props.\n    *   Use `| undefined` for props that can be explicitly `undefined`.\n    *   For `defaultProps`, use destructuring with default values directly in the functional component signature:\n        ```typescript\n        interface MyButtonProps {\n          label?: string;\n          onClick?: () => void;\n        }\n\n        const MyButton: React.FC<MyButtonProps> = ({ \n          label = 'Default Button', \n          onClick = () => {} \n        }) => { ... };\n        ```\n*   **Typing State and Hooks:** Explicitly type `useState`, `useReducer`, `useRef`, `useContext`, etc.\n    ```typescript\n    const [count, setCount] = useState<number>(0);\n    const inputRef = useRef<HTMLInputElement>(null);\n    ```\n*   **Typing Event Handlers:** Use React's synthetic event types (`React.MouseEvent`, `React.ChangeEvent<HTMLInputElement>`).\n*   **Function Signatures:** Add types to function parameters and return values.\n\n### 4. Handling Edge Cases/Challenges\n\n*   **Third-Party Libraries:** Most popular libraries have `@types` packages (`npm install @types/library-name`). For libraries without types, you can create ambient declarations (`.d.ts` files) or use `declare module 'library-name'`. Use `any` as a last resort for complex/untyped parts, but add a `TODO` to type it later.\n*   **Higher-Order Components (HOCs) and Render Props:** These can be tricky to type. Leverage utility types like `React.ComponentProps`, `React.ComponentType`, and conditional types.\n*   **Legacy JavaScript:** For large, stable legacy parts, consider leaving them as `.js` files and using `allowJs` in `tsconfig.json`. You can then create definition files (`.d.ts`) for them as needed.\n*   **`any` Usage:** Resist the urge to overuse `any`. While it can quickly resolve type errors, it defeats the purpose of TypeScript. Use `unknown` or `T extends SomeType` for safer approaches.\n*   **Type Coercion:** Be explicit with type assertions (`as Type`) when you are certain about a type, but use them sparingly and with caution.\n\n### 5. Testing and Verification\n\n*   **Existing Test Suite:** Leverage your existing unit, integration, and end-to-end tests. A successful migration should not break any existing functionality.\n*   **TypeScript Compiler:** The primary 'test' is whether the TypeScript compiler runs without errors. Fix all reported type errors.\n*   **Linting:** Ensure ESLint (with TypeScript rules) passes cleanly.\n*   **Code Reviews:** Conduct thorough code reviews, specifically looking at type definitions and adherence to new TypeScript conventions.\n*   **Runtime Checks (Temporary):** Keep `PropTypes` in place for a transitional period after conversion of a component. This provides a safety net for any overlooked type issues that might manifest at runtime. Once confident, remove `PropTypes`.\n*   **Staging/QA Deployment:** Deploy the migrated codebase to a staging environment and conduct extensive QA testing to catch any runtime regressions not caught by static analysis or automated tests.\n\n### 6. Tooling and Linting\n\n*   **TypeScript Compiler (`tsc`):** The core tool for type checking.\n*   **ESLint with `@typescript-eslint`:** Essential for enforcing code style and catching more complex linting issues.\n*   **Prettier:** Integrate Prettier for consistent code formatting, which works well with TypeScript.\n*   **IDE Support:** Leverage powerful IDE features (VS Code is excellent) for type inference, autocompletion, refactoring, and error highlighting.\n*   **Type Coverage Tools:** Consider tools like `ts-prune` or `type-coverage` to track and improve the overall type coverage of the codebase.",
+          "testCases": [
+            "N/A - This is a theoretical discussion task."
+          ],
+          "hints": [
+            "Think about a phased approach: what components would you convert first?",
+            "Consider the role of the TypeScript compiler itself as a 'testing' tool.",
+            "How would you ensure existing JavaScript code and third-party libraries integrate with the new TypeScript code?"
+          ],
+          "tags": [
+            "TypeScript",
+            "migration",
+            "PropTypes",
+            "architecture",
+            "best practices",
+            "frontend interview"
+          ],
+          "timeEstimate": 90,
+          "prerequisites": [
+            "typescript_fundamentals",
+            "react_component_design",
+            "software_architecture_principles"
+          ],
+          "complexity": 9,
+          "interviewRelevance": 10,
+          "learningPath": "advanced",
+          "relatedConcepts": [
+            "type_safety",
+            "code_maintainability",
+            "developer_experience",
+            "refactoring"
+          ]
+        },
+        {
+          "id": "task_csstransition_toggle_animation",
+          "title": "Animate a Toggling Section with CSSTransition",
+          "description": "\nImplement a React functional component `AnimatedSection` that displays a hidden section (e.g., a div with text) when a button is clicked, and hides it again when the button is clicked a second time. The section should animate its appearance and disappearance using `CSSTransition` from `react-transition-group`.\n\n**Requirements:**\n1.  Use `useState` to manage the visibility state of the section.\n2.  Integrate `CSSTransition` to animate the section.\n3.  Define CSS classes (e.g., `section-enter`, `section-enter-active`, `section-exit`, `section-exit-active`) in an accompanying CSS file for a fade and slide animation.\n4.  Ensure the section unmounts from the DOM when it's hidden to improve performance and accessibility.\n5.  The animation duration should be 300ms.\n",
+          "difficulty": "medium",
+          "startingCode": "import React, { useState } from 'react';\nimport { CSSTransition } from 'react-transition-group';\nimport './AnimatedSection.css'; // You'll need to create this file\n\nfunction AnimatedSection() {\n  const [showSection, setShowSection] = useState(false);\n\n  return (\n    <div style={{ padding: '20px' }}>\n      <button onClick={() => setShowSection(!showSection)}>\n        Toggle Section\n      </button>\n\n      {/* TODO: Implement CSSTransition here to wrap the section content */}\n      {/* Use 'section' as the base classNames prop value */}\n      {/* Ensure unmountOnExit is true */}\n      {/* Make sure timeout matches your CSS transition duration */}\n\n      {/* Section content to be animated */}\n      <div style={{ marginTop: '20px', padding: '15px', border: '1px solid #ddd', borderRadius: '5px' }}>\n        <h3>Welcome to the Animated Section!</h3>\n        <p>This content should smoothly fade and slide in and out.</p>\n      </div>\n    </div>\n  );\n}\n\nexport default AnimatedSection;\n\n/* Example CSS (to be put in AnimatedSection.css)\n.section-enter {\n  opacity: 0;\n  transform: translateY(-20px);\n}\n\n.section-enter-active {\n  opacity: 1;\n  transform: translateY(0);\n  transition: opacity 300ms ease-out, transform 300ms ease-out;\n}\n\n.section-exit {\n  opacity: 1;\n  transform: translateY(0);\n}\n\n.section-exit-active {\n  opacity: 0;\n  transform: translateY(20px);\n  transition: opacity 300ms ease-in, transform 300ms ease-in;\n}\n*/",
+          "solutionCode": "import React, { useState } from 'react';\nimport { CSSTransition } from 'react-transition-group';\nimport './AnimatedSection.css';\n\nfunction AnimatedSection() {\n  const [showSection, setShowSection] = useState(false);\n\n  return (\n    <div style={{ padding: '20px', maxWidth: '500px', margin: 'auto', textAlign: 'center' }}>\n      <button \n        onClick={() => setShowSection(!showSection)}\n        style={{\n          padding: '10px 20px',\n          fontSize: '1em',\n          cursor: 'pointer',\n          backgroundColor: '#007bff',\n          color: 'white',\n          border: 'none',\n          borderRadius: '5px'\n        }}\n      >\n        {showSection ? 'Hide Section' : 'Show Section'}\n      </button>\n\n      <CSSTransition\n        in={showSection}\n        timeout={300} \n        classNames=\"section\"\n        unmountOnExit\n      >\n        <div \n          style={{\n            marginTop: '20px',\n            padding: '15px',\n            border: '1px solid #ddd',\n            borderRadius: '5px',\n            backgroundColor: '#f9f9f9',\n            boxShadow: '0 2px 5px rgba(0,0,0,0.1)'\n          }}\n        >\n          <h3>Welcome to the Animated Section!</h3>\n          <p>This content should smoothly fade and slide in and out.</p>\n          <p>This text disappears completely when hidden (unmountOnExit).</p>\n        </div>\n      </CSSTransition>\n    </div>\n  );\n}\n\nexport default AnimatedSection;\n\n/* \n   Content for AnimatedSection.css:\n\n   .section-enter {\n     opacity: 0;\n     transform: translateY(-20px);\n   }\n\n   .section-enter-active {\n     opacity: 1;\n     transform: translateY(0);\n     transition: opacity 300ms ease-out, transform 300ms ease-out;\n   }\n\n   .section-exit {\n     opacity: 1;\n     transform: translateY(0);\n   }\n\n   .section-exit-active {\n     opacity: 0;\n     transform: translateY(20px);\n     transition: opacity 300ms ease-in, transform 300ms ease-in;\n   }\n*/",
+          "testCases": [
+            "Clicking the 'Toggle Section' button should make the section appear with a fade and slide animation.",
+            "Clicking the 'Toggle Section' button again should make the section disappear with a fade and slide animation.",
+            "After the section disappears, it should be removed from the DOM (verify using browser developer tools).",
+            "Animations should be smooth and complete within approximately 300ms."
+          ],
+          "hints": [
+            "Remember to import `CSSTransition` from `react-transition-group`.",
+            "The `in` prop of `CSSTransition` controls whether the component is entering or exiting.",
+            "The `timeout` prop must match the duration defined in your CSS `transition` property.",
+            "`unmountOnExit` is crucial for removing the element from the DOM when it's not visible, otherwise it just becomes `display: none`.",
+            "Make sure your CSS classes are correctly defined, e.g., `.section-enter`, `.section-enter-active`, `.section-exit`, `.section-exit-active`."
+          ],
+          "tags": [
+            "React",
+            "animations",
+            "CSSTransition",
+            "hooks",
+            "UI/UX",
+            "frontend interview"
+          ],
+          "timeEstimate": 60,
+          "prerequisites": [
+            "react_functional_components",
+            "react_hooks_useState",
+            "css_transitions_animations"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 7,
+          "learningPath": "intermediate",
+          "relatedConcepts": [
+            "component_state",
+            "conditional_rendering",
+            "user_interaction"
+          ]
+        },
+        {
+          "id": "task_list_item_animations",
+          "title": "Animate List Item Addition/Removal with TransitionGroup",
+          "description": "\nCreate a React component that manages a list of items (e.g., strings). Implement functionality to:\n\n1.  **Add a new item** to the list (e.g., via an input field and button).\n2.  **Remove an item** from the list (e.g., via a 'delete' button next to each item).\n\n**Requirements:**\n*   Use `TransitionGroup` and `CSSTransition` from `react-transition-group` to animate the addition and removal of list items.\n*   Each list item should have its own unique key.\n*   Implement CSS for a simple fade-in/fade-out animation for list items.\n*   The animation duration should be 500ms.\n",
+          "difficulty": "hard",
+          "startingCode": "import React, { useState } from 'react';\nimport { CSSTransition, TransitionGroup } from 'react-transition-group';\nimport './ListAnimator.css'; // Create this CSS file\n\nfunction ListAnimator() {\n  const [items, setItems] = useState(['Item 1', 'Item 2', 'Item 3']);\n  const [newItemText, setNewItemText] = useState('');\n\n  const handleAddItem = () => {\n    if (newItemText.trim() === '') return;\n    setItems(prevItems => [...prevItems, newItemText.trim()]);\n    setNewItemText('');\n  };\n\n  const handleRemoveItem = (itemToRemove) => {\n    setItems(prevItems => prevItems.filter(item => item !== itemToRemove));\n  };\n\n  return (\n    <div style={{ padding: '20px', maxWidth: '400px', margin: 'auto' }}>\n      <h2>Animated List</h2>\n      <div style={{ marginBottom: '25px' }}>\n        <input \n          type=\"text\" \n          value={newItemText} \n          onChange={(e) => setNewItemText(e.target.value)}\n          placeholder=\"New list item\"\n          style={{ padding: '8px', marginRight: '10px', width: '200px' }}\n        />\n        <button \n          onClick={handleAddItem}\n          style={{ padding: '8px 15px', backgroundColor: '#28a745', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}\n        >\n          Add Item\n        </button>\n      </div>\n\n      {/* TODO: Wrap the list rendering with TransitionGroup and CSSTransition */}\n      <ul style={{ listStyleType: 'none', padding: 0 }}>\n        {items.map((item, index) => (\n          <li \n            key={item} // Consider a more robust key for production, like a unique ID\n            style={{\n              display: 'flex', \n              justifyContent: 'space-between', \n              alignItems: 'center',\n              padding: '10px',\n              border: '1px solid #eee',\n              marginBottom: '5px',\n              backgroundColor: '#f8f8f8',\n              borderRadius: '4px'\n            }}\n          >\n            {item}\n            <button \n              onClick={() => handleRemoveItem(item)}\n              style={{ padding: '5px 10px', backgroundColor: '#dc3545', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}\n            >\n              Remove\n            </button>\n          </li>\n        ))}\n      </ul>\n    </div>\n  );\n}\n\nexport default ListAnimator;\n\n/* Example CSS (to be put in ListAnimator.css):\n.list-item-enter {\n  opacity: 0;\n  transform: translateX(-50px);\n}\n\n.list-item-enter-active {\n  opacity: 1;\n  transform: translateX(0);\n  transition: opacity 500ms ease-out, transform 500ms ease-out;\n}\n\n.list-item-exit {\n  opacity: 1;\n  transform: translateX(0);\n}\n\n.list-item-exit-active {\n  opacity: 0;\n  transform: translateX(50px);\n  transition: opacity 500ms ease-in, transform 500ms ease-in;\n}\n*/",
+          "solutionCode": "import React, { useState } from 'react';\nimport { CSSTransition, TransitionGroup } from 'react-transition-group';\nimport './ListAnimator.css';\n\nfunction ListAnimator() {\n  const [items, setItems] = useState(['Item A', 'Item B', 'Item C'].map(text => ({ id: Math.random().toString(36).substring(7), text: text })));\n  const [newItemText, setNewItemText] = useState('');\n\n  const handleAddItem = () => {\n    if (newItemText.trim() === '') return;\n    const newItem = { id: Math.random().toString(36).substring(7), text: newItemText.trim() };\n    setItems(prevItems => [...prevItems, newItem]);\n    setNewItemText('');\n  };\n\n  const handleRemoveItem = (idToRemove) => {\n    setItems(prevItems => prevItems.filter(item => item.id !== idToRemove));\n  };\n\n  return (\n    <div style={{ padding: '20px', maxWidth: '400px', margin: 'auto', fontFamily: 'Arial, sans-serif' }}>\n      <h2 style={{ textAlign: 'center', color: '#333' }}>Animated List</h2>\n      <div style={{ marginBottom: '25px', display: 'flex', justifyContent: 'center' }}>\n        <input \n          type=\"text\" \n          value={newItemText} \n          onChange={(e) => setNewItemText(e.target.value)}\n          placeholder=\"New list item\"\n          style={{ \n            padding: '10px', \n            marginRight: '10px', \n            width: '200px', \n            border: '1px solid #ccc', \n            borderRadius: '4px',\n            fontSize: '1em'\n          }}\n        />\n        <button \n          onClick={handleAddItem}\n          style={{ \n            padding: '10px 15px', \n            backgroundColor: '#28a745', \n            color: 'white', \n            border: 'none', \n            borderRadius: '4px', \n            cursor: 'pointer',\n            fontSize: '1em'\n          }}\n        >\n          Add Item\n        </button>\n      </div>\n\n      <TransitionGroup component=\"ul\" style={{ listStyleType: 'none', padding: 0 }}>\n        {items.map((item) => (\n          <CSSTransition \n            key={item.id} \n            timeout={500} \n            classNames=\"list-item\"\n          >\n            <li \n              style={{\n                display: 'flex', \n                justifyContent: 'space-between', \n                alignItems: 'center',\n                padding: '12px',\n                border: '1px solid #eee',\n                marginBottom: '8px',\n                backgroundColor: '#f8f8f8',\n                borderRadius: '5px',\n                boxShadow: '0 1px 3px rgba(0,0,0,0.05)'\n              }}\n            >\n              {item.text}\n              <button \n                onClick={() => handleRemoveItem(item.id)}\n                style={{ \n                  padding: '6px 12px', \n                  backgroundColor: '#dc3545', \n                  color: 'white', \n                  border: 'none', \n                  borderRadius: '4px', \n                  cursor: 'pointer',\n                  fontSize: '0.9em'\n                }}\n              >\n                Remove\n              </button>\n            </li>\n          </CSSTransition>\n        ))}\n      </TransitionGroup>\n    </div>\n  );\n}\n\nexport default ListAnimator;\n\n/* \n   Content for ListAnimator.css:\n\n   .list-item-enter {\n     opacity: 0;\n     transform: translateX(-50px);\n   }\n\n   .list-item-enter-active {\n     opacity: 1;\n     transform: translateX(0);\n     transition: opacity 500ms ease-out, transform 500ms ease-out;\n   }\n\n   .list-item-exit {\n     opacity: 1;\n     transform: translateX(0);\n   }\n\n   .list-item-exit-active {\n     opacity: 0;\n     transform: translateX(50px);\n     transition: opacity 500ms ease-in, transform 500ms ease-in;\n   }\n*/",
+          "testCases": [
+            "Adding a new item should make it appear with a fade-in and slide animation.",
+            "Removing an existing item should make it disappear with a fade-out and slide animation.",
+            "Adding multiple items quickly should animate each one individually.",
+            "Removing multiple items quickly should animate each one individually.",
+            "Ensure unique keys are used for list items, especially when adding/removing, to prevent React warnings and ensure proper animations.",
+            "The list should maintain correct order after additions/removals."
+          ],
+          "hints": [
+            "Wrap the mapping of your list items with `<TransitionGroup>`. Remember that `TransitionGroup` itself does not apply animations, it just manages its children's transition state.",
+            "Each direct child of `TransitionGroup` (in this case, each `CSSTransition` component) *must* have a unique `key` prop. This key is crucial for React to identify which items are entering, staying, or exiting.",
+            "Inside `TransitionGroup`, each item you want to animate should be wrapped in a `CSSTransition` component.",
+            "Set the `timeout` prop on `CSSTransition` to match your CSS transition duration.",
+            "Use `Math.random().toString(36).substring(7)` or a similar method to generate unique IDs for new items if they don't already have one, as simply using the item text as a key can lead to issues if text duplicates."
+          ],
+          "tags": [
+            "React",
+            "animations",
+            "TransitionGroup",
+            "CSSTransition",
+            "lists",
+            "hooks",
+            "UI/UX"
+          ],
+          "timeEstimate": 90,
+          "prerequisites": [
+            "react_hooks_useState",
+            "react_lists_keys",
+            "css_transitions_animations",
+            "react_transition_group_basics"
+          ],
+          "complexity": 8,
+          "interviewRelevance": 8,
+          "learningPath": "advanced",
+          "relatedConcepts": [
+            "dynamic_lists",
+            "user_interaction",
+            "component_lifecycle"
+          ]
+        },
+        {
+          "id": "task_implement_generic_error_boundary",
+          "title": "Implement a Reusable React Error Boundary",
+          "description": "\nCreate a generic `ErrorBoundary` class component that can be reused across different parts of a React application. This error boundary should:\n\n1.  Catch JavaScript errors anywhere in its child component tree.\n2.  Display a user-friendly fallback UI (e.g., 'Something went wrong, please try again.').\n3.  Log the error and error information to the console using `console.error`.\n4.  Optionally, accept a `fallbackComponent` prop, which if provided, should be rendered instead of the default fallback message.\n\n**Requirements:**\n*   Use `static getDerivedStateFromError(error)` to update the component's state to trigger the fallback UI.\n*   Use `componentDidCatch(error, errorInfo)` to log error details.\n*   Demonstrate its usage by wrapping a component that intentionally throws an error.\n",
+          "difficulty": "medium",
+          "startingCode": "import React from 'react';\n\n// Component that intentionally throws an error\nfunction BuggyComponent({ shouldThrow }) {\n  if (shouldThrow) {\n    throw new Error('I am a buggy component and I crashed!');\n  }\n  return <div>This is the perfectly working component content.</div>;\n}\n\n// TODO: Implement the ErrorBoundary class component here\nclass ErrorBoundary extends React.Component {\n  // constructor\n  // state: { hasError: false, error: null, errorInfo: null }\n  \n  // static getDerivedStateFromError\n\n  // componentDidCatch\n\n  // render\n}\n\n// Application entry point for demonstration\nfunction App() {\n  return (\n    <div style={{ fontFamily: 'Arial, sans-serif', padding: '20px' }}>\n      <h1>My Application</h1>\n      \n      {/* TODO: Use the ErrorBoundary to wrap BuggyComponent */}\n      {/* Test with shouldThrow={true} and shouldThrow={false} */}\n      {/* Test with a custom fallbackComponent prop */}\n      <BuggyComponent shouldThrow={false} /> {/* No error here */}\n\n      <hr />\n      <p>This part of the application remains visible.</p>\n    </div>\n  );\n}\n\nexport default App;\n",
+          "solutionCode": "import React from 'react';\n\n// Component that intentionally throws an error\nfunction BuggyComponent({ shouldThrow }) {\n  if (shouldThrow) {\n    // Simulate an error that would crash part of the UI\n    throw new Error('I am a buggy component and I crashed!');\n  }\n  return <div style={{ border: '1px dashed lightgreen', padding: '10px', margin: '10px' }}>This is the perfectly working component content.</div>;\n}\n\n// ErrorBoundary class component implementation\nclass ErrorBoundary extends React.Component {\n  constructor(props) {\n    super(props);\n    this.state = { hasError: false, error: null, errorInfo: null };\n  }\n\n  static getDerivedStateFromError(error) {\n    // Update state so the next render will show the fallback UI.\n    // This method is called during the render phase, so it should only update state.\n    return { hasError: true };\n  }\n\n  componentDidCatch(error, errorInfo) {\n    // This method is called during the commit phase (after render).\n    // Use it for side effects like logging errors to a service.\n    console.error('Caught by ErrorBoundary:', error, errorInfo);\n    this.setState({\n      error: error,\n      errorInfo: errorInfo\n    });\n    // Example: logErrorToMyService(error, errorInfo);\n  }\n\n  render() {\n    if (this.state.hasError) {\n      // Check if a custom fallback component was provided\n      if (this.props.fallbackComponent) {\n        return this.props.fallbackComponent;\n      }\n      // Default fallback UI\n      return (\n        <div style={{ border: '2px solid red', padding: '15px', margin: '10px', backgroundColor: '#ffe6e6', borderRadius: '5px' }}>\n          <h2>Oops! Something went wrong.</h2>\n          <p>We're sorry for the inconvenience. Please try again later.</p>\n          {/* Optional: show error details in development */}\n          {process.env.NODE_ENV === 'development' && this.state.error && (\n            <details style={{ whiteSpace: 'pre-wrap', marginTop: '10px' }}>\n              <summary>Error Details</summary>\n              {this.state.error.toString()}\n              <br />\n              {this.state.errorInfo && this.state.errorInfo.componentStack}\n            </details>\n          )}\n        </div>\n      );\n    }\n\n    return this.props.children;\n  }\n}\n\n// Add PropTypes for better development-time validation (optional but good practice)\nErrorBoundary.propTypes = {\n  children: PropTypes.node.isRequired,\n  fallbackComponent: PropTypes.node // Can be a React element or component\n};\n\n// Custom fallback component example\nconst CustomFallback = () => (\n  <div style={{ border: '2px dashed blue', padding: '15px', margin: '10px', backgroundColor: '#e6f2ff', borderRadius: '5px' }}>\n    <h3>A specific section failed to load!</h3>\n    <p>Please contact support with this error code: XYZ123.</p>\n  </div>\n);\n\n// Application entry point for demonstration\nimport PropTypes from 'prop-types'; // Import PropTypes for the example\n\nfunction App() {\n  const [triggerErrorDefault, setTriggerErrorDefault] = React.useState(false);\n  const [triggerErrorCustom, setTriggerErrorCustom] = React.useState(false);\n\n  return (\n    <div style={{ fontFamily: 'Arial, sans-serif', padding: '20px' }}>\n      <h1>My Application</h1>\n      \n      <hr />\n      <h2>Section 1: Default Error Boundary</h2>\n      <button onClick={() => setTriggerErrorDefault(true)} style={{ marginBottom: '15px' }}>\n        Trigger Default Error\n      </button>\n      <ErrorBoundary>\n        <BuggyComponent shouldThrow={triggerErrorDefault} />\n      </ErrorBoundary>\n\n      <hr />\n      <h2>Section 2: Custom Fallback Component</h2>\n      <button onClick={() => setTriggerErrorCustom(true)} style={{ marginBottom: '15px' }}>\n        Trigger Custom Fallback Error\n      </button>\n      <ErrorBoundary fallbackComponent={<CustomFallback />}>\n        <BuggyComponent shouldThrow={triggerErrorCustom} />\n      </ErrorBoundary>\n\n      <hr />\n      <p>This part of the application remains functional and visible.</p>\n    </div>\n  );\n}\n\nexport default App;\n",
+          "testCases": [
+            "Wrap `BuggyComponent` with `shouldThrow={false}`: `ErrorBoundary` should render `BuggyComponent` normally.",
+            "Wrap `BuggyComponent` with `shouldThrow={true}`: `ErrorBoundary` should catch the error and display its default fallback UI. Console should show the error logged by `componentDidCatch`.",
+            "Wrap `BuggyComponent` with `shouldThrow={true}` and pass a custom `fallbackComponent` prop: `ErrorBoundary` should render the custom fallback component instead of its default UI.",
+            "Verify that components outside the error boundary's scope continue to render and function normally even if an error is caught within the boundary."
+          ],
+          "hints": [
+            "An `ErrorBoundary` must be a class component.",
+            "`static getDerivedStateFromError` is a static method and should return an object to update state (e.g., `{ hasError: true }`). It does not have access to `this`.",
+            "`componentDidCatch` is an instance method and can be used for side effects like logging. It also receives `errorInfo` which is useful for debugging.",
+            "The `render` method of the `ErrorBoundary` will conditionally render `this.props.children` or the fallback UI based on `this.state.hasError`.",
+            "To accept a custom `fallbackComponent`, you can check `this.props.fallbackComponent` in the `render` method and render it if it exists."
+          ],
+          "tags": [
+            "React",
+            "error boundaries",
+            "class components",
+            "error handling",
+            "reusability",
+            "frontend interview"
+          ],
+          "timeEstimate": 75,
+          "prerequisites": [
+            "react_class_components",
+            "react_lifecycle_methods",
+            "state_management"
+          ],
+          "complexity": 8,
+          "interviewRelevance": 9,
+          "learningPath": "advanced",
+          "relatedConcepts": [
+            "fault_tolerance",
+            "user_experience",
+            "component_design_patterns"
+          ]
+        },
+        {
+          "id": "task_test_error_boundary_with_nested_component",
+          "title": "Test Error Boundary with Nested Component Structure",
+          "description": "\nBuilding upon the reusable `ErrorBoundary` from the previous task, create a more complex component hierarchy to demonstrate its effectiveness. \n\n**Requirements:**\n1.  Create a `ParentComponent` that renders two `ChildComponent` instances.\n2.  One `ChildComponent` should always work fine.\n3.  The second `ChildComponent` should conditionally throw an error (e.g., based on a prop).\n4.  Wrap only the potentially buggy `ChildComponent` with an `ErrorBoundary`.\n5.  Demonstrate that when the error is triggered in the buggy child, only that specific part of the UI shows the fallback, while the rest of the `ParentComponent` and other `ChildComponent` instances remain fully functional and visible.\n\nThis task emphasizes the selective application of error boundaries to prevent full application crashes.\n",
+          "difficulty": "medium",
+          "startingCode": "import React from 'react';\n\n// Reusable ErrorBoundary (assume it's implemented correctly from previous task)\n// Paste your ErrorBoundary class component here for self-containment.\n\nclass ErrorBoundary extends React.Component {\n  constructor(props) {\n    super(props);\n    this.state = { hasError: false, error: null, errorInfo: null };\n  }\n\n  static getDerivedStateFromError(error) {\n    return { hasError: true };\n  }\n\n  componentDidCatch(error, errorInfo) {\n    console.error('Caught by ErrorBoundary:', error, errorInfo);\n    this.setState({\n      error: error,\n      errorInfo: errorInfo\n    });\n  }\n\n  render() {\n    if (this.state.hasError) {\n      if (this.props.fallbackComponent) {\n        return this.props.fallbackComponent;\n      }\n      return (\n        <div style={{ border: '2px solid red', padding: '15px', margin: '10px', backgroundColor: '#ffe6e6', borderRadius: '5px' }}>\n          <h2>Oops! Something went wrong in this section.</h2>\n          <p>Please try again later.</p>\n        </div>\n      );\n    }\n    return this.props.children;\n  }\n}\n\n// Child component that might throw an error\nfunction ChildComponent({ id, shouldThrow }) {\n  if (shouldThrow) {\n    throw new Error(`Error in ChildComponent ${id}`);\n  }\n  return (\n    <div style={{ border: '1px solid lightblue', padding: '10px', margin: '5px' }}>\n      Child Component {id}: All good!\n    </div>\n  );\n}\n\n// Parent component to demonstrate error boundary scope\nfunction ParentComponent() {\n  const [triggerBuggyChild, setTriggerBuggyChild] = React.useState(false);\n\n  return (\n    <div style={{ border: '2px solid purple', padding: '20px', margin: '20px' }}>\n      <h3>Parent Component</h3>\n      <button onClick={() => setTriggerBuggyChild(true)} style={{ marginBottom: '15px' }}>\n        Trigger Error in Buggy Child\n      </button>\n      \n      {/* This child should always work */}\n      <ChildComponent id=\"A\" shouldThrow={false} />\n\n      {/* TODO: Wrap this buggy child with the ErrorBoundary */}\n      <ChildComponent id=\"B\" shouldThrow={triggerBuggyChild} />\n      \n      <p>Parent footer content.</p>\n    </div>\n  );\n}\n\n// App component to render the ParentComponent\nfunction App() {\n  return (\n    <div style={{ fontFamily: 'Arial, sans-serif' }}>\n      <h1>Application Root</h1>\n      <ParentComponent />\n      <p>Application footer.</p>\n    </div>\n  );\n}\n\nexport default App;\n",
+          "solutionCode": "import React from 'react';\nimport PropTypes from 'prop-types';\n\n// Reusable ErrorBoundary (from previous task, with PropTypes for robustness)\nclass ErrorBoundary extends React.Component {\n  constructor(props) {\n    super(props);\n    this.state = { hasError: false, error: null, errorInfo: null };\n  }\n\n  static getDerivedStateFromError(error) {\n    return { hasError: true };\n  }\n\n  componentDidCatch(error, errorInfo) {\n    console.error('Caught by ErrorBoundary:', error, errorInfo);\n    this.setState({\n      error: error,\n      errorInfo: errorInfo\n    });\n  }\n\n  render() {\n    if (this.state.hasError) {\n      if (this.props.fallbackComponent) {\n        return this.props.fallbackComponent;\n      }\n      return (\n        <div style={{ border: '2px solid red', padding: '15px', margin: '10px', backgroundColor: '#ffe6e6', borderRadius: '5px' }}>\n          <h2>Oops! Something went wrong in this section.</h2>\n          <p>We're sorry for the inconvenience. Please try again later.</p>\n          {process.env.NODE_ENV === 'development' && this.state.error && (\n            <details style={{ whiteSpace: 'pre-wrap', marginTop: '10px' }}>\n              <summary>Error Details</summary>\n              {this.state.error.toString()}\n              <br />\n              {this.state.errorInfo && this.state.errorInfo.componentStack}\n            </details>\n          )}\n        </div>\n      );\n    }\n    return this.props.children;\n  }\n}\n\nErrorBoundary.propTypes = {\n  children: PropTypes.node.isRequired,\n  fallbackComponent: PropTypes.node\n};\n\n// Child component that might throw an error\nfunction ChildComponent({ id, shouldThrow }) {\n  if (shouldThrow) {\n    throw new Error(`Error in ChildComponent ${id}`);\n  }\n  return (\n    <div style={{ border: '1px solid lightblue', padding: '10px', margin: '5px', backgroundColor: '#e0f7fa' }}>\n      Child Component {id}: All good!\n    </div>\n  );\n}\n\n// Parent component to demonstrate error boundary scope\nfunction ParentComponent() {\n  const [triggerBuggyChild, setTriggerBuggyChild] = React.useState(false);\n\n  return (\n    <div style={{ border: '2px solid purple', padding: '20px', margin: '20px', backgroundColor: '#f3e5f5' }}>\n      <h3 style={{ color: '#673ab7' }}>Parent Component</h3>\n      <button \n        onClick={() => setTriggerBuggyChild(true)}\n        style={{\n          padding: '8px 15px',\n          fontSize: '0.9em',\n          cursor: 'pointer',\n          backgroundColor: '#ff9800',\n          color: 'white',\n          border: 'none',\n          borderRadius: '4px',\n          marginBottom: '15px'\n        }}\n      >\n        Trigger Error in Buggy Child B\n      </button>\n      \n      {/* This child should always work, outside the boundary to show unaffected parts */}\n      <ChildComponent id=\"A\" shouldThrow={false} />\n\n      {/* Wrap this buggy child with the ErrorBoundary */}\n      <ErrorBoundary>\n        <ChildComponent id=\"B\" shouldThrow={triggerBuggyChild} />\n      </ErrorBoundary>\n      \n      <p style={{ marginTop: '15px', borderTop: '1px dashed #9c27b0', paddingTop: '10px' }}>\n        Parent footer content. This should always be visible.\n      </p>\n    </div>\n  );\n}\n\n// App component to render the ParentComponent\nfunction App() {\n  return (\n    <div style={{ fontFamily: 'Arial, sans-serif', padding: '20px', backgroundColor: '#f0f0f0' }}>\n      <h1 style={{ color: '#333' }}>Application Root</h1>\n      <ParentComponent />\n      <p style={{ borderTop: '1px solid #bbb', paddingTop: '10px', marginTop: '20px' }}>\n        Application footer. This is also always visible.\n      </p>\n    </div>\n  );\n}\n\nexport default App;\n",
+          "testCases": [
+            "Initial render: Both ChildComponent A and B should display their 'All good!' messages. No error boundary fallback should be visible.",
+            "Click 'Trigger Error in Buggy Child B': ChildComponent A should remain visible and functional. ChildComponent B's content should be replaced by the ErrorBoundary's fallback UI. ParentComponent's header and footer should remain visible.",
+            "Check console: `componentDidCatch` should log the error from ChildComponent B."
+          ],
+          "hints": [
+            "The key to this task is correctly placing the `ErrorBoundary` **only** around the part of the UI you want to protect, not the entire application.",
+            "Ensure `ChildComponent` takes a `shouldThrow` prop to easily simulate errors.",
+            "Use console logs to verify which components render and which errors are caught."
+          ],
+          "tags": [
+            "React",
+            "error boundaries",
+            "component hierarchy",
+            "error handling",
+            "scope",
+            "frontend interview"
+          ],
+          "timeEstimate": 60,
+          "prerequisites": [
+            "task_implement_generic_error_boundary",
+            "react_component_composition"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 8,
+          "learningPath": "advanced",
+          "relatedConcepts": [
+            "application_resilience",
+            "fault_tolerance",
+            "component_isolation"
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "5d100d10-74ee-45f1-b151-bccda1809f34",
+    "startLine": 14100,
+    "endLine": 14199,
+    "processedDate": "2025-06-17T13:48:38.825Z",
+    "content": {
+      "logicalBlockInfo": {
+        "suggestedEndLine": -1
+      },
+      "theory": [
+        {
+          "id": "theory_react_error_boundaries",
+          "title": "React Error Boundaries",
+          "content": "Error Boundaries are React components that catch JavaScript errors anywhere in their child component tree, log those errors, and display a fallback UI instead of the crashed component tree. They allow you to gracefully handle errors without unmounting the entire application.\n\n## Key Concepts\n*   **Purpose**: Catch errors in the component tree, log them, and display a fallback UI.\n*   **Mechanism**: Implemented as class components using `static getDerivedStateFromError()` and/or `componentDidCatch()` lifecycle methods.\n    *   `static getDerivedStateFromError(error)`: A static method called during the render phase. It receives the error that was thrown and should return a state object to update the component's state, causing it to re-render with the fallback UI.\n    *   `componentDidCatch(error, errorInfo)`: An instance method called during the commit phase. It receives the error and an object with `componentStack` (information about which component threw the error). This method is typically used for side effects like logging errors to an error reporting service.\n\n## Important Notes on Error Boundaries\n1.  Error boundaries **only catch errors in the components below them in the tree**. They do not catch errors within:\n    *   Event handlers (e.g., `onClick`, `onChange`).\n    *   Asynchronous code (e.g., `setTimeout` or `requestAnimationFrame` callbacks, `Promise` callbacks).\n    *   Server-side rendering (SSR).\n    *   Errors thrown in the error boundary itself.\n2.  As of React 16, errors that are *not* caught by any error boundary will result in the unmounting of the entire React component tree, leaving a blank page.\n3.  Error boundaries **must be class components**. There is no direct hook equivalent provided by React itself. However, third-party libraries offer functional alternatives.\n4.  You would typically place error boundaries at strategic locations in your app, such as route-level components or wrapping widgets that might fail independently, to isolate potential crashes.\n\n## Using a Third-Party Library (e.g., `react-error-boundary`)\nFor functional components, libraries like `react-error-boundary` provide a convenient way to implement error boundaries without writing a class component. They abstract the class component implementation behind a functional API.\n\nThe `ErrorBoundary` component from `react-error-boundary` typically accepts a `FallbackComponent` prop (a component to render when an error occurs), `onReset` (a function called when the `resetErrorBoundary` callback is invoked), and `resetKeys` (an array of keys that, when changed, will reset the error boundary's state, allowing a retry).\n\n",
+          "examples": [
+            {
+              "id": "example_error_boundary_class_component",
+              "title": "Basic Class Component Error Boundary",
+              "code": "import React, { Component } from 'react';\n\nclass MyErrorBoundary extends Component {\n  constructor(props) {\n    super(props);\n    this.state = { hasError: false, error: null, errorInfo: null };\n  }\n\n  static getDerivedStateFromError(error) {\n    // Update state so the next render shows the fallback UI.\n    return { hasError: true };\n  }\n\n  componentDidCatch(error, errorInfo) {\n    // You can also log the error to an error reporting service\n    console.error(\"Caught an error:\", error, errorInfo);\n    this.setState({\n      error: error,\n      errorInfo: errorInfo\n    });\n  }\n\n  render() {\n    if (this.state.hasError) {\n      // You can render any custom fallback UI\n      return (\n        <div style={{ padding: '20px', border: '1px solid red', color: 'red' }}>\n          <h2>Something went wrong.</h2>\n          <details style={{ whiteSpace: 'pre-wrap' }}>\n            {this.state.error && this.state.error.toString()}\n            <br />\n            {this.state.errorInfo && this.state.errorInfo.componentStack}\n          </details>\n        </div>\n      );\n    }\n    return this.props.children;\n  }\n}\n\n// Usage example:\n// function App() {\n//   return (\n//     <MyErrorBoundary>\n//       <ComponentThatMightThrow />\n//     </MyErrorBoundary>\n//   );\n// }\n",
+              "explanation": "This example demonstrates a fundamental class-based error boundary. `getDerivedStateFromError` is used to update the component's state to trigger a re-render with the fallback UI, while `componentDidCatch` is used for logging the error or performing other side effects. The `render` method conditionally displays the children or the fallback UI based on `hasError` state. This pattern isolates errors within a part of the UI, preventing the entire application from crashing.",
+              "language": "typescript"
+            },
+            {
+              "id": "example_error_boundary_third_party",
+              "title": "Using `react-error-boundary` Library",
+              "code": "import { ErrorBoundary } from 'react-error-boundary';\nimport React from 'react';\n\nfunction ErrorFallback({ error, resetErrorBoundary }) {\n  return (\n    <div role=\"alert\" style={{ padding: '20px', border: '1px solid orange', color: 'orange' }}>\n      <p>Something went wrong (via `react-error-boundary`):</p>\n      <pre>{error.message}</pre>\n      <button onClick={resetErrorBoundary}>Try again</button>\n    </div>\n  );\n}\n\nfunction ComponentThatMightThrow() {\n  // Simulate an error for demonstration\n  const [shouldThrow, setShouldThrow] = React.useState(false);\n  \n  if (shouldThrow) {\n    throw new Error('I crashed!');\n  }\n\n  return (\n    <div>\n      <p>This is a component that might throw an error.</p>\n      <button onClick={() => setShouldThrow(true)}>Trigger Error</button>\n    </div>\n  );\n}\n\nfunction AppWithErrorBoundary() {\n  return (\n    <ErrorBoundary \n      FallbackComponent={ErrorFallback}\n      onReset={() => {\n        // Reset the state of your app here, e.g., navigate home or clear data\n        console.log('Error boundary reset!');\n      }}\n      resetKeys={['someKey']} // Changing this key would reset the boundary\n    >\n      <ComponentThatMightThrow />\n    </ErrorBoundary>\n  );\n}\n\nexport default AppWithErrorBoundary;\n",
+              "explanation": "This example shows how to use the popular `react-error-boundary` library. It provides a simple `ErrorBoundary` component that accepts a `FallbackComponent` (a functional component to render on error), `onReset` callback for recovery logic, and `resetKeys` to imperatively reset the error state. This abstracts away the need for a class component, making error handling more convenient in functional component heavy applications.",
+              "language": "typescript"
+            }
+          ],
+          "relatedQuestions": [
+            "question_error_boundary_mcq_1",
+            "question_error_boundary_mcq_2",
+            "question_error_boundary_open_1",
+            "question_error_boundary_flashcard_1",
+            "question_error_boundary_code_1"
+          ],
+          "relatedTasks": [
+            "task_implement_class_error_boundary",
+            "task_integrate_react_error_boundary"
+          ],
+          "tags": [
+            "React",
+            "Error Handling",
+            "Error Boundaries",
+            "Component Lifecycle",
+            "Class Components",
+            "Functional Components"
+          ],
+          "technology": "React",
+          "prerequisites": [
+            "React Components",
+            "Class Components",
+            "Functional Components",
+            "State Management",
+            "Lifecycle Methods"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 8,
+          "learningPath": "intermediate",
+          "requiredFor": [
+            "Robust Applications",
+            "Production Readiness"
+          ]
+        },
+        {
+          "id": "theory_form_handling_controlled_components",
+          "title": "React Form Handling: Controlled Components",
+          "content": "Form handling is a fundamental aspect of interactive web applications. React provides powerful ways to manage form state and user input. In React, form components can broadly be categorized into controlled or uncontrolled components.\n\n## Controlled Components\nIn controlled components, form data is entirely handled and managed by React state. This means that every input element's value is controlled by React through its `value` prop, and any changes to the input are reflected by updating the React state via an `onChange` event handler. This pattern establishes React state as the \"single source of truth\" for the form data.\n\n### How They Work\n1.  **State Management**: You declare a piece of state (e.g., using `useState` in functional components or `this.state` in class components) to hold the current value of the form input.\n2.  **`value` Prop**: The `value` prop of the input element is bound to this state variable. This makes the input a \"controlled\" component, as React now dictates its value.\n3.  **`onChange` Event Handler**: An `onChange` event handler is attached to the input. Whenever the user types or changes the input, this event fires.\n4.  **State Update**: Inside the `onChange` handler, you update the React state with the new input value (typically `e.target.value`). This update triggers a re-render of the component, causing the input's `value` prop to reflect the new state, and thus the input displays the updated value.\n\n### Advantages of Controlled Components\n*   **Instant Validation**: You can implement real-time input validation as the user types.\n*   **Conditional Inputs**: Easily enable/disable or show/hide inputs based on other form values.\n*   **Input Formatting**: Format input values on the fly (e.g., credit card numbers, phone numbers).\n*   **Predictable State**: The form's state is always in your React component's state, making debugging and data flow management straightforward.\n*   **Easy Submission**: All form data is readily available in your component's state when the form is submitted.\n\n",
+          "examples": [
+            {
+              "id": "example_controlled_form",
+              "title": "Basic Controlled Form in React",
+              "code": "import React, { useState } from 'react';\n\nfunction ControlledForm() {\n  const [formData, setFormData] = useState({\n    name: '',\n    email: '',\n    message: ''\n  });\n\n  const handleChange = (e) => {\n    const { name, value } = e.target;\n    setFormData(prevData => ({\n      ...prevData,\n      [name]: value\n    }));\n  };\n\n  const handleSubmit = (e) => {\n    e.preventDefault();\n    console.log('Form submitted:', formData);\n    // In a real application, you would send formData to a server, etc.\n    alert(`Form Submitted!\\nName: ${formData.name}\\nEmail: ${formData.email}\\nMessage: ${formData.message}`);\n  };\n\n  return (\n    <form onSubmit={handleSubmit} style={{ border: '1px solid #ccc', padding: '20px', borderRadius: '8px' }}>\n      <h2>Controlled Form Example</h2>\n      <div style={{ marginBottom: '10px' }}>\n        <label htmlFor=\"name\" style={{ display: 'block', marginBottom: '5px' }}>Name:</label>\n        <input\n          type=\"text\"\n          id=\"name\"\n          name=\"name\"\n          value={formData.name}\n          onChange={handleChange}\n          style={{ width: '100%', padding: '8px', boxSizing: 'border-box' }}\n        />\n      </div>\n      <div style={{ marginBottom: '10px' }}>\n        <label htmlFor=\"email\" style={{ display: 'block', marginBottom: '5px' }}>Email:</label>\n        <input\n          type=\"email\"\n          id=\"email\"\n          name=\"email\"\n          value={formData.email}\n          onChange={handleChange}\n          style={{ width: '100%', padding: '8px', boxSizing: 'border-box' }}\n        />\n      </div>\n      <div style={{ marginBottom: '10px' }}>\n        <label htmlFor=\"message\" style={{ display: 'block', marginBottom: '5px' }}>Message:</label>\n        <textarea\n          id=\"message\"\n          name=\"message\"\n          value={formData.message}\n          onChange={handleChange}\n          rows=\"4\"\n          style={{ width: '100%', padding: '8px', boxSizing: 'border-box' }}\n        />\n      </div>\n      <button type=\"submit\" style={{ padding: '10px 20px', backgroundColor: '#007bff', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>\n        Submit\n      </button>\n    </form>\n  );\n}\n\nexport default ControlledForm;\n",
+              "explanation": "This example illustrates a basic controlled form. The `formData` state object holds the values for all input fields. The `handleChange` function is generic, using the `name` attribute of the input to update the corresponding property in the `formData` state. The `value` prop of each input is bound to its respective state property, making the input 'controlled' by React state. The `handleSubmit` function prevents default form submission and logs the collected `formData`, demonstrating how to access the form's state.",
+              "language": "typescript"
+            }
+          ],
+          "relatedQuestions": [
+            "question_controlled_vs_uncontrolled_open_1",
+            "question_controlled_component_mcq_1",
+            "question_controlled_component_mcq_2",
+            "question_controlled_component_flashcard_1",
+            "question_controlled_component_code_1"
+          ],
+          "relatedTasks": [
+            "task_build_controlled_feedback_form",
+            "task_refactor_uncontrolled_to_controlled"
+          ],
+          "tags": [
+            "React",
+            "Forms",
+            "Controlled Components",
+            "State Management",
+            "useState",
+            "Event Handling",
+            "Input Management"
+          ],
+          "technology": "React",
+          "prerequisites": [
+            "React State",
+            "Functional Components",
+            "Event Handling in React",
+            "ES6 Destructuring"
+          ],
+          "complexity": 6,
+          "interviewRelevance": 9,
+          "learningPath": "intermediate",
+          "requiredFor": [
+            "Interactive Applications",
+            "Data Input Forms"
+          ]
+        }
+      ],
+      "questions": [
+        {
+          "id": "question_error_boundary_mcq_1",
+          "topic": "React Error Boundaries",
+          "level": "medium",
+          "type": "mcq",
+          "question": "Which of the following types of errors are NOT caught by React Error Boundaries?",
+          "answer": "Errors inside event handlers",
+          "options": [
+            "Errors during component rendering",
+            "Errors inside lifecycle methods (e.g., componentDidMount)",
+            "Errors inside constructors",
+            "Errors inside event handlers"
+          ],
+          "analysisPoints": [
+            "Error boundaries are designed to catch errors during the rendering phase (e.g., render method, constructors, lifecycle methods).",
+            "Errors in event handlers occur outside the render tree, so React does not catch them automatically with error boundaries. They need traditional `try...catch` blocks or careful handling.",
+            "Asynchronous code errors, server-side rendering errors, and errors within the error boundary itself are also not caught."
+          ],
+          "keyConcepts": [
+            "Error Boundary limitations",
+            "React render phase",
+            "Event handling"
+          ],
+          "evaluationCriteria": [
+            "Understanding of Error Boundary scope",
+            "Distinguishing between synchronous and asynchronous contexts in React",
+            "Knowledge of React's error handling mechanisms"
+          ],
+          "example": "Error boundaries are specifically designed to catch errors that occur during the component's rendering, lifecycle methods, and constructors. They do not catch errors originating from: \n- Event handlers (e.g., `onClick`, `onChange`)\n- Asynchronous code (`setTimeout`, `Promise.then`)\n- Server-side rendering\n- Errors thrown within the error boundary itself",
+          "tags": [
+            "React",
+            "Error Boundaries",
+            "Error Handling",
+            "Limitations"
+          ],
+          "prerequisites": [
+            "React Error Handling",
+            "Event Handling"
+          ],
+          "complexity": 6,
+          "interviewFrequency": 7,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_error_boundary_mcq_2",
+          "topic": "React Error Boundaries",
+          "level": "easy",
+          "type": "mcq",
+          "question": "As of React 16, what is the consequence if an error is thrown in a component and is NOT caught by any Error Boundary?",
+          "answer": "The entire React component tree will unmount.",
+          "options": [
+            "Only the component that threw the error will unmount.",
+            "React will display a default error message at the component's location.",
+            "The entire React component tree will unmount.",
+            "The application will pause and prompt the user to refresh."
+          ],
+          "analysisPoints": [
+            "Before React 16, an uncaught error would corrupt React's internal state, leading to cryptic errors on subsequent renders.",
+            "React 16 introduced the behavior of unmounting the entire component tree to prevent corrupted state and make errors more predictable, albeit at the cost of losing the entire UI.",
+            "Error boundaries were introduced as the solution to prevent this full unmount."
+          ],
+          "keyConcepts": [
+            "React 16 error handling",
+            "Uncaught errors behavior",
+            "Purpose of Error Boundaries"
+          ],
+          "evaluationCriteria": [
+            "Knowledge of React's error handling evolution",
+            "Understanding the severity of uncaught errors"
+          ],
+          "example": "Before React 16, uncaught errors could leave the UI in a broken state and lead to inconsistent behavior. With React 16, React implemented a more robust error handling strategy: if an error is not caught by an error boundary, it results in the unmounting of the entire React component tree to ensure consistency. This emphasizes the importance of implementing error boundaries.",
+          "tags": [
+            "React",
+            "Error Boundaries",
+            "React 16",
+            "Error Handling"
+          ],
+          "prerequisites": [
+            "React Basics"
+          ],
+          "complexity": 5,
+          "interviewFrequency": 6,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_error_boundary_open_1",
+          "topic": "React Error Boundaries",
+          "level": "medium",
+          "type": "open",
+          "question": "Explain what React Error Boundaries are, how they are implemented, and list at least three types of errors they do not catch. Provide an example use case.",
+          "answer": "React Error Boundaries are special React components that are designed to catch JavaScript errors in their child component tree, log those errors, and display a fallback UI instead of the component tree that crashed. This prevents the entire application from breaking due to an error in a single component.\n\n**Implementation:**\nError Boundaries are implemented as class components. They use one or both of the following lifecycle methods:\n1.  `static getDerivedStateFromError(error)`: This method is called after an error has been thrown by a descendant component. It should return a state update to display a fallback UI.\n2.  `componentDidCatch(error, errorInfo)`: This method is called after an error has been thrown. It's used for side effects, such as logging the error to an error reporting service.\n\n**Errors they do NOT catch:**\n1.  Errors inside event handlers (e.g., `onClick`, `onChange`).\n2.  Errors in asynchronous code (e.g., `setTimeout`, `Promise` callbacks).\n3.  Errors thrown in the error boundary component itself.\n4.  Errors during server-side rendering.\n\n**Example Use Case:**\nA common use case is to wrap a `Dashboard` component or a `Widget` component that fetches data and renders complex UI. If a `Chart` component inside the `Dashboard` fails to render due to invalid data, the Error Boundary around the `Chart` (or `Dashboard`) can catch the error and display a message like 'Chart failed to load' while the rest of the dashboard remains functional. Another common place is at the route level, ensuring that if a specific page (route) fails, only that page's content is replaced with a fallback, not the entire application.",
+          "analysisPoints": [
+            "Clear definition of Error Boundaries.",
+            "Accurate description of `static getDerivedStateFromError` and `componentDidCatch`.",
+            "Correct identification of error types not caught by boundaries.",
+            "Practical and relevant example use case provided."
+          ],
+          "keyConcepts": [
+            "Error Boundary definition",
+            "Lifecycle methods for error handling",
+            "Limitations of Error Boundaries",
+            "Application of error handling"
+          ],
+          "evaluationCriteria": [
+            "Comprehensive understanding of Error Boundary mechanics",
+            "Ability to articulate core concepts and limitations",
+            "Practical problem-solving skills through use case examples"
+          ],
+          "example": "See the detailed answer above for the explanation and example.",
+          "tags": [
+            "React",
+            "Error Boundaries",
+            "Interview Question",
+            "Deep Dive"
+          ],
+          "prerequisites": [
+            "React Component Lifecycle",
+            "Error Handling"
+          ],
+          "complexity": 7,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_error_boundary_flashcard_1",
+          "topic": "React Error Boundaries",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "What two lifecycle methods are primarily used to implement a React Error Boundary class component?",
+          "answer": "`static getDerivedStateFromError` and `componentDidCatch`",
+          "analysisPoints": [
+            "Tests recall of the specific API for error boundaries."
+          ],
+          "keyConcepts": [
+            "Error Boundary API",
+            "React Lifecycle"
+          ],
+          "evaluationCriteria": [
+            "Basic knowledge recall"
+          ],
+          "example": "`static getDerivedStateFromError(error)` is used to update state for fallback UI, and `componentDidCatch(error, errorInfo)` is used for logging errors.",
+          "tags": [
+            "React",
+            "Error Boundaries",
+            "Flashcard",
+            "Lifecycle Methods"
+          ],
+          "prerequisites": [
+            "React Lifecycle"
+          ],
+          "complexity": 3,
+          "interviewFrequency": 6,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_error_boundary_code_1",
+          "topic": "React Error Boundaries",
+          "level": "medium",
+          "type": "code",
+          "question": "Given the following functional component that might throw an error, complete the `App` component by wrapping `BrokenComponent` with an `ErrorBoundary` from the `react-error-boundary` library. Ensure a fallback UI is displayed and a reset mechanism is available.",
+          "answer": "```typescript\nimport { ErrorBoundary } from 'react-error-boundary';\nimport React, { useState } from 'react';\n\nfunction BrokenComponent({ shouldError }) {\n  if (shouldError) {\n    throw new Error('This component unexpectedly crashed!');\n  }\n  return <div>I am a healthy component!</div>;\n}\n\nfunction ErrorFallback({ error, resetErrorBoundary }) {\n  return (\n    <div role=\"alert\" style={{ border: '1px solid red', padding: '10px' }}>\n      <p>Something went wrong:</p>\n      <pre style={{ color: 'red' }}>{error.message}</pre>\n      <button onClick={resetErrorBoundary}>Try again</button>\n    </div>\n  );\n}\n\nfunction App() {\n  const [triggerError, setTriggerError] = useState(false);\n\n  const handleReset = () => {\n    // This function will be called when 'Try again' button is clicked\n    console.log('Resetting error boundary...');\n    setTriggerError(false); // Reset the state that caused the error\n  };\n\n  return (\n    <div style={{ padding: '20px' }}>\n      <h1>Error Boundary Demo</h1>\n      <button onClick={() => setTriggerError(true)} disabled={triggerError}>\n        Trigger Component Error\n      </button>\n      <hr />\n      <ErrorBoundary \n        FallbackComponent={ErrorFallback}\n        onReset={handleReset}\n      >\n        <BrokenComponent shouldError={triggerError} />\n      </ErrorBoundary>\n    </div>\n  );\n}\n\nexport default App;\n```",
+          "options": [],
+          "analysisPoints": [
+            "Correct usage of `ErrorBoundary` component from `react-error-boundary`.",
+            "Properly defining and passing `FallbackComponent`.",
+            "Implementing `onReset` callback for recovery, demonstrating how to clear the error state.",
+            "Understanding how to pass props (`error`, `resetErrorBoundary`) to the `FallbackComponent`."
+          ],
+          "keyConcepts": [
+            "Third-party error boundary library usage",
+            "Functional components error handling",
+            "State management for error triggers"
+          ],
+          "evaluationCriteria": [
+            "Ability to integrate external libraries for error handling",
+            "Understanding of the `FallbackComponent` and `onReset` props",
+            "Practical application of error recovery logic"
+          ],
+          "example": "```typescript\nimport React from 'react';\n\nfunction BrokenComponent({ shouldError }) {\n  if (shouldError) {\n    throw new Error('This component unexpectedly crashed!');\n  }\n  return <div>I am a healthy component!</div>;\n}\n\n// Your task is to complete the App component below\n// import { ErrorBoundary } from 'react-error-boundary';\n\nfunction App() {\n  const [triggerError, setTriggerError] = React.useState(false);\n\n  // You need to define ErrorFallback and integrate ErrorBoundary here\n  // ...\n\n  return (\n    <div style={{ padding: '20px' }}>\n      <h1>Error Boundary Demo</h1>\n      <button onClick={() => setTriggerError(true)} disabled={triggerError}>\n        Trigger Component Error\n      </button>\n      <hr />\n      {/* Insert your ErrorBoundary here */}\n      <BrokenComponent shouldError={triggerError} />\n    </div>\n  );\n}\n\nexport default App;\n```",
+          "tags": [
+            "React",
+            "Error Boundaries",
+            "Coding Challenge",
+            "react-error-boundary"
+          ],
+          "prerequisites": [
+            "React Functional Components",
+            "useState Hook",
+            "Third-party libraries"
+          ],
+          "complexity": 7,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_controlled_vs_uncontrolled_open_1",
+          "topic": "Controlled vs. Uncontrolled Components",
+          "level": "medium",
+          "type": "open",
+          "question": "Compare and contrast controlled and uncontrolled components in React forms. Discuss their key differences, advantages, and when you would choose one over the other.",
+          "answer": "**Controlled Components:**\n*   **Key Idea**: React state is the \"single source of truth\" for the form data. Every change to an input is directly managed by React state.\n*   **How it Works**: The input's `value` prop is bound to a state variable, and an `onChange` event handler updates that state with `e.target.value`.\n*   **Advantages**: Facilitates real-time input validation, conditional rendering based on input, input formatting, and easier handling of form submission as all data is in state.\n*   **When to Use**: Ideal for most form scenarios, especially when you need immediate feedback, complex validation, or dynamic interaction with form fields.\n\n**Uncontrolled Components:**\n*   **Key Idea**: Form data is handled by the DOM itself, similar to traditional HTML forms. React doesn't control the input's value directly.\n*   **How it Works**: You use a `ref` to get the DOM element and access its current value when needed (e.g., on form submission). You might use `defaultValue` for initial values.\n*   **Advantages**: Simpler to implement for very basic forms where you only need the value on submission. Can be slightly faster for very high-frequency updates if you don't need real-time validation.\n*   **When to Use**: Rarely recommended for complex applications. Might be used for a simple file input (which is typically uncontrolled by default) or for integrating with non-React DOM libraries.\n\n**Comparison:**\n| Feature           | Controlled Component                     | Uncontrolled Component                   |\n|-------------------|------------------------------------------|------------------------------------------|\n| **Data Source**   | React State                              | DOM                                      |\n| **Value Prop**    | Required (`value={stateVar}`)            | Not typically used (`defaultValue` instead)|\n| **Change Handling**| `onChange` event updates state           | Access value via `ref` on submission     |\n| **Validation**    | Real-time, easier to implement           | Typically on submission                  |\n| **Complexity**    | More boilerplate (state, onChange)       | Less boilerplate                         |\n| **Flexibility**   | Highly flexible, powerful                | Limited functionality                    |\n\n**Choice Criteria:**\nFor the vast majority of cases in modern React development, **controlled components are preferred** due to their predictability, power, and ease of integration with React's data flow. Uncontrolled components are a niche solution for very simple cases or specific integrations.",
+          "analysisPoints": [
+            "Clear and accurate definitions for both types.",
+            "Detailed explanation of their operational mechanisms (`value` prop, `onChange` for controlled; `ref` for uncontrolled).",
+            "Comprehensive list of advantages for each.",
+            "Sensible recommendations on when to use each type, highlighting controlled components as the default choice.",
+            "Structured comparison (e.g., table) to clearly show differences."
+          ],
+          "keyConcepts": [
+            "Controlled components",
+            "Uncontrolled components",
+            "React forms",
+            "State management",
+            "DOM interaction",
+            "Refs"
+          ],
+          "evaluationCriteria": [
+            "In-depth understanding of React form patterns",
+            "Ability to articulate trade-offs",
+            "Knowledge of best practices in React form development"
+          ],
+          "example": "See the detailed answer above for the explanation.",
+          "tags": [
+            "React",
+            "Forms",
+            "Controlled Components",
+            "Uncontrolled Components",
+            "Interview Question",
+            "Design Patterns"
+          ],
+          "prerequisites": [
+            "React State",
+            "React Refs",
+            "Event Handling"
+          ],
+          "complexity": 7,
+          "interviewFrequency": 9,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_controlled_component_mcq_1",
+          "topic": "Controlled Components",
+          "level": "easy",
+          "type": "mcq",
+          "question": "In a controlled React component, what is considered the 'single source of truth' for the form data?",
+          "answer": "React state",
+          "options": [
+            "The DOM element's `value` attribute",
+            "The browser's default form behavior",
+            "React state",
+            "A global Redux store"
+          ],
+          "analysisPoints": [
+            "The core principle of controlled components is that React's component state always reflects the input's value.",
+            "Changes to the input update the state, which in turn re-renders the input with the new `value` prop.",
+            "While a global store like Redux *could* hold form data, for a single component, its local React state (via `useState` or `this.state`) is the immediate source of truth."
+          ],
+          "keyConcepts": [
+            "Controlled components principle",
+            "Single source of truth",
+            "React state management"
+          ],
+          "evaluationCriteria": [
+            "Understanding of controlled component fundamentals",
+            "Knowledge of React state principles"
+          ],
+          "example": "In a controlled component, the input element's `value` is driven by React state. When the user types, an `onChange` handler updates the state, and the input then re-renders to reflect that state. This makes the React state the authoritative source for the input's current value.",
+          "tags": [
+            "React",
+            "Forms",
+            "Controlled Components",
+            "State Management"
+          ],
+          "prerequisites": [
+            "React State"
+          ],
+          "complexity": 4,
+          "interviewFrequency": 8,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_controlled_component_mcq_2",
+          "topic": "Controlled Components",
+          "level": "medium",
+          "type": "mcq",
+          "question": "Consider the following React functional component for a controlled input field. Which line of code correctly binds the input's value and handles its changes?",
+          "answer": "`<input type=\"text\" value={inputValue} onChange={e => setInputValue(e.target.value)} />`",
+          "options": [
+            "`<input type=\"text\" defaultValue={inputValue} />`",
+            "`<input type=\"text\" ref={inputRef} />`",
+            "`<input type=\"text\" value={inputValue} />`",
+            "`<input type=\"text\" value={inputValue} onChange={e => setInputValue(e.target.value)} />`"
+          ],
+          "analysisPoints": [
+            "For a controlled component, both the `value` prop and an `onChange` handler are essential.",
+            "The `value` prop makes the component 'controlled' by React state.",
+            "The `onChange` handler is responsible for updating the state with the new input value, completing the data flow loop.",
+            "`defaultValue` is for uncontrolled components, `ref` is for accessing the DOM directly (uncontrolled or imperative interactions), and `value` alone would make the input read-only without an `onChange` handler."
+          ],
+          "keyConcepts": [
+            "Controlled components implementation",
+            "`value` prop",
+            "`onChange` event",
+            "`useState` hook"
+          ],
+          "evaluationCriteria": [
+            "Ability to identify correct syntax for controlled inputs",
+            "Understanding of the two-way data binding concept in React controlled components"
+          ],
+          "example": "In React, a controlled input needs its `value` prop to be tied to a state variable (e.g., `inputValue`), and its `onChange` prop to a function that updates that state (e.g., `setInputValue(e.target.value)`). This ensures that React is always aware of and controls the input's current value.",
+          "tags": [
+            "React",
+            "Forms",
+            "Controlled Components",
+            "Syntax",
+            "useState"
+          ],
+          "prerequisites": [
+            "React State",
+            "Event Handling"
+          ],
+          "complexity": 5,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_controlled_component_flashcard_1",
+          "topic": "Controlled Components",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "What two essential props/attributes are required on an HTML input element to make it a controlled component in React?",
+          "answer": "`value` and `onChange`",
+          "analysisPoints": [
+            "Tests basic recall of controlled component essentials."
+          ],
+          "keyConcepts": [
+            "Controlled components",
+            "Input props"
+          ],
+          "evaluationCriteria": [
+            "Basic knowledge recall"
+          ],
+          "example": "The `value` prop explicitly sets the input's value from React state, and the `onChange` prop provides the mechanism to update that state when the user interacts with the input, thus closing the control loop.",
+          "tags": [
+            "React",
+            "Forms",
+            "Controlled Components",
+            "Flashcard"
+          ],
+          "prerequisites": [
+            "React Forms"
+          ],
+          "complexity": 3,
+          "interviewFrequency": 7,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_controlled_component_code_1",
+          "topic": "Controlled Components",
+          "level": "medium",
+          "type": "code",
+          "question": "Convert the following uncontrolled React input into a controlled component. The input should display and update its value based on React state.",
+          "answer": "```typescript\nimport React, { useState } from 'react';\n\nfunction ControlledInputConverter() {\n  const [text, setText] = useState('');\n\n  const handleInputChange = (event) => {\n    setText(event.target.value);\n  };\n\n  return (\n    <div>\n      <h2>Controlled Input</h2>\n      <input\n        type=\"text\"\n        value={text} // Bind value to state\n        onChange={handleInputChange} // Update state on change\n        placeholder=\"Type something...\"\n      />\n      <p>Current input value: {text}</p>\n    </div>\n  );\n}\n\nexport default ControlledInputConverter;\n```",
+          "options": [],
+          "analysisPoints": [
+            "Correct use of `useState` to declare state for the input's value.",
+            "Binding the `value` prop of the input to the state variable.",
+            "Implementing an `onChange` handler that updates the state with `event.target.value`."
+          ],
+          "keyConcepts": [
+            "Controlled components implementation",
+            "`useState` hook",
+            "Event handling in forms",
+            "Input value binding"
+          ],
+          "evaluationCriteria": [
+            "Ability to transform uncontrolled to controlled components",
+            "Correct application of `useState` and `onChange`",
+            "Understanding of the data flow in controlled inputs"
+          ],
+          "example": "```typescript\nimport React from 'react';\n\nfunction UncontrolledInput() {\n  // This input is currently uncontrolled\n  // Your task: Make it controlled using React state\n  return (\n    <div>\n      <h2>Uncontrolled Input (to be converted)</h2>\n      <input type=\"text\" placeholder=\"Type something...\" />\n      <p>Current input value: (Not controlled yet)</p>\n    </div>\n  );\n}\n\nexport default UncontrolledInput;\n```",
+          "tags": [
+            "React",
+            "Forms",
+            "Controlled Components",
+            "Coding Challenge",
+            "useState"
+          ],
+          "prerequisites": [
+            "React State",
+            "Functional Components"
+          ],
+          "complexity": 6,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        }
+      ],
+      "tasks": [
+        {
+          "id": "task_implement_class_error_boundary",
+          "title": "Implement a Class Component Error Boundary",
+          "description": "\nCreate a React class component that acts as an Error Boundary. This boundary should:\n\n1.  Catch JavaScript errors in its child component tree.\n2.  Display a fallback UI when an error occurs, indicating that something went wrong.\n3.  Log the error and its component stack information to the console.\n\nThen, create a simple `BuggyComponent` that conditionally throws an error, and demonstrate your `ErrorBoundary` by wrapping `BuggyComponent` with it.\n",
+          "difficulty": "medium",
+          "startingCode": "import React, { Component } from 'react';\n\nclass BuggyComponent extends Component {\n  constructor(props) {\n    super(props);\n    this.state = { throwError: false };\n  }\n\n  handleClick = () => {\n    this.setState({ throwError: true });\n  };\n\n  render() {\n    if (this.state.throwError) {\n      throw new Error('I crashed!');\n    }\n    return (\n      <div>\n        <p>This component will crash if you click the button.</p>\n        <button onClick={this.handleClick}>Cause Error</button>\n      </div>\n    );\n  }\n}\n\n// Your ErrorBoundary implementation goes here\nclass MyErrorBoundary extends Component {\n  // TODO: Implement constructor, static getDerivedStateFromError, componentDidCatch, and render\n  render() {\n    return this.props.children;\n  }\n}\n\n// How to use your ErrorBoundary\nfunction App() {\n  return (\n    <div>\n      <h1>Error Boundary Demo</h1>\n      <MyErrorBoundary>\n        <BuggyComponent />\n      </MyErrorBoundary>\n      <p>This text should still be visible even if the component above crashes.</p>\n    </div>\n  );\n}\n\nexport default App;\n",
+          "solutionCode": "import React, { Component } from 'react';\n\nclass BuggyComponent extends Component {\n  constructor(props) {\n    super(props);\n    this.state = { throwError: false };\n  }\n\n  handleClick = () => {\n    this.setState({ throwError: true });\n  };\n\n  render() {\n    if (this.state.throwError) {\n      throw new Error('I crashed!');\n    }\n    return (\n      <div style={{ border: '1px dashed grey', padding: '10px' }}>\n        <p>This component will crash if you click the button.</p>\n        <button onClick={this.handleClick}>Cause Error</button>\n      </div>\n    );\n  }\n}\n\nclass MyErrorBoundary extends Component {\n  constructor(props) {\n    super(props);\n    this.state = { hasError: false, error: null, errorInfo: null };\n  }\n\n  static getDerivedStateFromError(error) {\n    // Update state so the next render shows the fallback UI.\n    return { hasError: true };\n  }\n\n  componentDidCatch(error, errorInfo) {\n    // You can also log error messages to an error reporting service here\n    console.error(\"Error caught by Error Boundary:\", error, errorInfo);\n    this.setState({\n      error: error,\n      errorInfo: errorInfo\n    });\n  }\n\n  render() {\n    if (this.state.hasError) {\n      // You can render any custom fallback UI\n      return (\n        <div style={{ border: '2px solid red', padding: '20px', backgroundColor: '#fee', color: '#a00' }}>\n          <h2>Oops! Something went wrong in this section.</h2>\n          <p>Please try again or contact support.</p>\n          <details style={{ whiteSpace: 'pre-wrap', fontSize: '0.8em' }}>\n            {this.state.error && this.state.error.toString()}\n            <br />\n            {this.state.errorInfo && this.state.errorInfo.componentStack}\n          </details>\n        </div>\n      );\n    }\n\n    return this.props.children;\n  }\n}\n\nfunction App() {\n  return (\n    <div style={{ fontFamily: 'Arial, sans-serif', padding: '20px' }}>\n      <h1>React Error Boundary Example</h1>\n      <p>This part of the app should remain functional even if a child component crashes.</p>\n      <MyErrorBoundary>\n        <BuggyComponent />\n      </MyErrorBoundary>\n      <p>This text is outside the error boundary and demonstrates that the rest of the application remains mounted.</p>\n      <hr/>\n      <h2>Another section (not handled by the first boundary)</h2>\n      <div>This content should always be visible.</div>\n    </div>\n  );\n}\n\nexport default App;\n",
+          "testCases": [
+            "Verify that clicking 'Cause Error' button in `BuggyComponent` triggers the error boundary.",
+            "Confirm that the `Fallback UI` is displayed when an error occurs.",
+            "Check the console for the error message and component stack logged by `componentDidCatch`.",
+            "Ensure that components outside the `ErrorBoundary` (e.g., 'This text is outside the error boundary...') remain rendered and functional."
+          ],
+          "hints": [
+            "Remember to initialize `hasError` state in the constructor.",
+            "`static getDerivedStateFromError` is for updating state to render fallback UI.",
+            "`componentDidCatch` is for logging errors or other side effects.",
+            "The `render` method of the error boundary should conditionally render `this.props.children` or the fallback UI."
+          ],
+          "tags": [
+            "React",
+            "Error Handling",
+            "Error Boundaries",
+            "Class Components",
+            "Lifecycle Methods",
+            "Testing"
+          ],
+          "timeEstimate": 45,
+          "prerequisites": [
+            "React Class Components",
+            "State Management",
+            "Component Lifecycle"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 8,
+          "learningPath": "intermediate",
+          "relatedConcepts": [
+            "static getDerivedStateFromError",
+            "componentDidCatch",
+            "Error Propagation"
+          ]
+        },
+        {
+          "id": "task_integrate_react_error_boundary",
+          "title": "Integrate `react-error-boundary` into a Functional Component Application",
+          "description": "\nRefactor the `App` component to use the `ErrorBoundary` component from the `react-error-boundary` library. Your solution should:\n\n1.  Define a functional `ErrorFallback` component that receives `error` and `resetErrorBoundary` props and displays a user-friendly error message along with a 'Try again' button.\n2.  Wrap a potentially error-prone functional component (provided) with the `ErrorBoundary`.\n3.  Implement the `onReset` callback for the `ErrorBoundary` to clear any state that might have caused the error, allowing the user to 'Try again'.\n\n",
+          "difficulty": "medium",
+          "startingCode": "import React, { useState } from 'react';\n// import { ErrorBoundary } from 'react-error-boundary'; // You'll need to import this\n\nfunction BuggyFunctionalComponent() {\n  const [count, setCount] = useState(0);\n\n  const handleClick = () => {\n    // Simulate an error if count reaches 3\n    if (count === 2) {\n      throw new Error('Crash! Count reached critical level.');\n    }\n    setCount(prevCount => prevCount + 1);\n  };\n\n  return (\n    <div style={{ border: '1px dashed lightblue', padding: '10px', marginBottom: '20px' }}>\n      <p>Current count: {count}</p>\n      <button onClick={handleClick}>Increment Count</button>\n      <p>Clicking 3 times will cause an error.</p>\n    </div>\n  );\n}\n\n// Your ErrorFallback component and ErrorBoundary integration goes here\nfunction App() {\n  return (\n    <div style={{ fontFamily: 'Arial, sans-serif', padding: '20px' }}>\n      <h1>Using `react-error-boundary`</h1>\n      {/* TODO: Implement ErrorBoundary here */}\n      <BuggyFunctionalComponent />\n      <p>This text should always be visible.</p>\n    </div>\n  );\n}\n\nexport default App;\n",
+          "solutionCode": "import React, { useState } from 'react';\nimport { ErrorBoundary } from 'react-error-boundary';\n\nfunction BuggyFunctionalComponent() {\n  const [count, setCount] = useState(0);\n\n  const handleClick = () => {\n    // Simulate an error if count reaches 3\n    if (count === 2) {\n      throw new Error('Crash! Count reached critical level.');\n    }\n    setCount(prevCount => prevCount + 1);\n  };\n\n  return (\n    <div style={{ border: '1px dashed lightblue', padding: '10px', marginBottom: '20px' }}>\n      <p>Current count: {count}</p>\n      <button onClick={handleClick}>Increment Count</button>\n      <p>Clicking 3 times will cause an error.</p>\n    </div>\n  );\n}\n\nfunction ErrorFallback({ error, resetErrorBoundary }) {\n  return (\n    <div role=\"alert\" style={{ border: '2px solid orange', padding: '20px', backgroundColor: '#ffe', color: '#b60' }}>\n      <h2>Something went wrong in this component:</h2>\n      <pre style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word', color: '#d9534f' }}>{error.message}</pre>\n      <button onClick={resetErrorBoundary} style={{ padding: '8px 15px', backgroundColor: '#f0ad4e', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', marginTop: '10px' }}>\n        Try again\n      </button>\n    </div>\n  );\n}\n\nfunction App() {\n  const [showBuggyComponent, setShowBuggyComponent] = useState(true);\n\n  const handleResetError = () => {\n    // This function is called when the 'Try again' button in ErrorFallback is clicked.\n    // Here, we reset the state that might have caused the error, or re-mount the component.\n    console.log('Error boundary reset initiated.');\n    setShowBuggyComponent(false); // Unmount current buggy component instance\n    setTimeout(() => setShowBuggyComponent(true), 0); // Re-mount a new instance\n  };\n\n  return (\n    <div style={{ fontFamily: 'Arial, sans-serif', padding: '20px' }}>\n      <h1>Using `react-error-boundary`</h1>\n      <ErrorBoundary \n        FallbackComponent={ErrorFallback}\n        onReset={handleResetError}\n        // Adding resetKeys prop is another way to imperatively reset the boundary\n        // resetKeys={[showBuggyComponent]}\n      >\n        {showBuggyComponent ? <BuggyFunctionalComponent /> : null}\n      </ErrorBoundary>\n      <p>This text is outside the error boundary and demonstrates that the rest of the application remains mounted.</p>\n    </div>\n  );\n}\n\nexport default App;\n",
+          "testCases": [
+            "Verify that clicking 'Increment Count' button 3 times in `BuggyFunctionalComponent` causes an error.",
+            "Confirm that `ErrorFallback` UI is displayed when the error occurs.",
+            "Verify that clicking 'Try again' button in `ErrorFallback` resets the `BuggyFunctionalComponent` and allows it to be used again (e.g., starts count from 0).",
+            "Ensure that other parts of the application outside the `ErrorBoundary` remain unaffected."
+          ],
+          "hints": [
+            "Remember to import `ErrorBoundary` from `react-error-boundary`.",
+            "The `FallbackComponent` prop should be a reference to your `ErrorFallback` function, not an invoked component.",
+            "The `onReset` prop is a function that `react-error-boundary` calls when its `resetErrorBoundary` function is triggered from the fallback UI. Use this to reset any state that might lead to the error, or re-mount the child component (e.g., by changing a key prop or unmounting/re-mounting)."
+          ],
+          "tags": [
+            "React",
+            "Error Handling",
+            "Error Boundaries",
+            "Functional Components",
+            "Third-Party Libraries",
+            "react-error-boundary"
+          ],
+          "timeEstimate": 60,
+          "prerequisites": [
+            "React Functional Components",
+            "useState Hook",
+            "JSX"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 9,
+          "learningPath": "intermediate",
+          "relatedConcepts": [
+            "Error Recovery",
+            "Controlled vs. Uncontrolled Reset",
+            "Component State Management"
+          ]
+        },
+        {
+          "id": "task_build_controlled_feedback_form",
+          "title": "Build a Multi-Input Controlled Feedback Form with Basic Validation",
+          "description": "\nCreate a React functional component for a feedback form that includes the following controlled input fields:\n\n1.  **Name**: Text input.\n2.  **Email**: Email input with basic client-side validation (must contain '@' and '.').\n3.  **Subject**: Dropdown (select) with at least three predefined options (e.g., 'General Inquiry', 'Feature Request', 'Bug Report').\n4.  **Message**: Textarea.\n\nAll fields should be controlled components. Implement a single `handleChange` function to manage updates for all input types. On form submission, log the collected `formData` object to the console and display a confirmation message. Implement simple validation for the email field (e.g., check for '@' and '.') and prevent submission if invalid, displaying an error message.\n",
+          "difficulty": "medium",
+          "startingCode": "import React, { useState } from 'react';\n\nfunction FeedbackForm() {\n  const [formData, setFormData] = useState({\n    name: '',\n    email: '',\n    subject: '', // Default or first option value\n    message: ''\n  });\n\n  const [errors, setErrors] = useState({});\n\n  const handleChange = (e) => {\n    // TODO: Implement a single handleChange for all inputs\n  };\n\n  const validateForm = () => {\n    // TODO: Implement validation logic here\n    return {}; // Return errors object\n  };\n\n  const handleSubmit = (e) => {\n    e.preventDefault();\n    // TODO: Validate and submit form\n  };\n\n  return (\n    <form onSubmit={handleSubmit} style={{ padding: '20px', maxWidth: '500px', margin: '0 auto', border: '1px solid #ddd', borderRadius: '8px' }}>\n      <h2>Send Us Feedback</h2>\n      {/* TODO: Add input fields for name, email, subject, message */}\n      {/* Example for one field: */}\n      <div>\n        <label htmlFor=\"name\">Name:</label>\n        <input type=\"text\" id=\"name\" name=\"name\" value={formData.name} onChange={handleChange} />\n        {errors.name && <p style={{ color: 'red' }}>{errors.name}</p>}\n      </div>\n      \n      <button type=\"submit\">Submit Feedback</button>\n    </form>\n  );\n}\n\nexport default FeedbackForm;\n",
+          "solutionCode": "import React, { useState } from 'react';\n\nfunction FeedbackForm() {\n  const [formData, setFormData] = useState({\n    name: '',\n    email: '',\n    subject: 'General Inquiry', // Set a default subject\n    message: ''\n  });\n\n  const [errors, setErrors] = useState({});\n  const [submissionMessage, setSubmissionMessage] = useState('');\n\n  const handleChange = (e) => {\n    const { name, value } = e.target;\n    setFormData(prevData => ({\n      ...prevData,\n      [name]: value\n    }));\n\n    // Clear error for the field being changed\n    if (errors[name]) {\n      setErrors(prevErrors => {\n        const newErrors = { ...prevErrors };\n        delete newErrors[name];\n        return newErrors;\n      });\n    }\n  };\n\n  const validateForm = () => {\n    const newErrors = {};\n    if (!formData.name.trim()) {\n      newErrors.name = 'Name is required.';\n    }\n    if (!formData.email.trim()) {\n      newErrors.email = 'Email is required.';\n    } else if (!formData.email.includes('@') || !formData.email.includes('.')) {\n      newErrors.email = 'Invalid email format.';\n    }\n    if (!formData.message.trim()) {\n      newErrors.message = 'Message is required.';\n    }\n    return newErrors;\n  };\n\n  const handleSubmit = (e) => {\n    e.preventDefault();\n    setSubmissionMessage(''); // Clear previous messages\n\n    const validationErrors = validateForm();\n    if (Object.keys(validationErrors).length > 0) {\n      setErrors(validationErrors);\n      setSubmissionMessage('Please correct the errors above.');\n      return;\n    }\n\n    console.log('Form submitted successfully:', formData);\n    setSubmissionMessage('Thank you for your feedback!');\n    // Optionally reset form after successful submission\n    setFormData({\n      name: '',\n      email: '',\n      subject: 'General Inquiry',\n      message: ''\n    });\n    setErrors({});\n  };\n\n  return (\n    <form onSubmit={handleSubmit} style={{ padding: '20px', maxWidth: '500px', margin: '0 auto', border: '1px solid #ddd', borderRadius: '8px', boxShadow: '2px 2px 8px rgba(0,0,0,0.1)' }}>\n      <h2 style={{ textAlign: 'center', marginBottom: '20px' }}>Send Us Feedback</h2>\n      \n      <div style={{ marginBottom: '15px' }}>\n        <label htmlFor=\"name\" style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>Name:</label>\n        <input type=\"text\" id=\"name\" name=\"name\" value={formData.name} onChange={handleChange} \n               style={{ width: '100%', padding: '10px', border: errors.name ? '1px solid red' : '1px solid #ccc', borderRadius: '4px', boxSizing: 'border-box' }} />\n        {errors.name && <p style={{ color: 'red', fontSize: '0.85em', marginTop: '5px' }}>{errors.name}</p>}\n      </div>\n\n      <div style={{ marginBottom: '15px' }}>\n        <label htmlFor=\"email\" style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>Email:</label>\n        <input type=\"email\" id=\"email\" name=\"email\" value={formData.email} onChange={handleChange}\n               style={{ width: '100%', padding: '10px', border: errors.email ? '1px solid red' : '1px solid #ccc', borderRadius: '4px', boxSizing: 'border-box' }} />\n        {errors.email && <p style={{ color: 'red', fontSize: '0.85em', marginTop: '5px' }}>{errors.email}</p>}\n      </div>\n\n      <div style={{ marginBottom: '15px' }}>\n        <label htmlFor=\"subject\" style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>Subject:</label>\n        <select id=\"subject\" name=\"subject\" value={formData.subject} onChange={handleChange}\n                style={{ width: '100%', padding: '10px', border: errors.subject ? '1px solid red' : '1px solid #ccc', borderRadius: '4px', boxSizing: 'border-box' }}>\n          <option value=\"General Inquiry\">General Inquiry</option>\n          <option value=\"Feature Request\">Feature Request</option>\n          <option value=\"Bug Report\">Bug Report</option>\n          <option value=\"Other\">Other</option>\n        </select>\n        {errors.subject && <p style={{ color: 'red', fontSize: '0.85em', marginTop: '5px' }}>{errors.subject}</p>}\n      </div>\n\n      <div style={{ marginBottom: '20px' }}>\n        <label htmlFor=\"message\" style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>Message:</label>\n        <textarea id=\"message\" name=\"message\" value={formData.message} onChange={handleChange} rows=\"5\"\n                  style={{ width: '100%', padding: '10px', border: errors.message ? '1px solid red' : '1px solid #ccc', borderRadius: '4px', boxSizing: 'border-box', resize: 'vertical' }}></textarea>\n        {errors.message && <p style={{ color: 'red', fontSize: '0.85em', marginTop: '5px' }}>{errors.message}</p>}\n      </div>\n\n      <button type=\"submit\" style={{ width: '100%', padding: '12px', backgroundColor: '#007bff', color: 'white', border: 'none', borderRadius: '4px', fontSize: '1em', cursor: 'pointer', transition: 'background-color 0.3s ease' }}>\n        Submit Feedback\n      </button>\n      {submissionMessage && <p style={{ textAlign: 'center', marginTop: '15px', color: submissionMessage.includes('Thank') ? 'green' : 'red' }}>{submissionMessage}</p>}\n    </form>\n  );\n}\n\nexport default FeedbackForm;\n",
+          "testCases": [
+            "Submit form with all fields empty: Expect validation errors for all fields.",
+            "Submit form with valid name and message, but invalid email (e.g., 'test@'): Expect email validation error.",
+            "Submit form with valid name and message, but email missing '.': Expect email validation error.",
+            "Submit form with all valid data: Expect console log of `formData` and a success message.",
+            "Verify that `handleChange` correctly updates state for text, email, select, and textarea fields.",
+            "Check that errors are cleared for a field once the user starts typing/changing that field."
+          ],
+          "hints": [
+            "The `handleChange` function can use `e.target.name` and `e.target.value` to update the corresponding state property dynamically.",
+            "For the `select` element, its `value` prop should be bound to the state, and `onChange` will handle updates just like text inputs.",
+            "Validation logic can be extracted into a separate function that returns an errors object.",
+            "Use `Object.keys(errors).length > 0` to check if there are any validation errors."
+          ],
+          "tags": [
+            "React",
+            "Forms",
+            "Controlled Components",
+            "Validation",
+            "State Management",
+            "Functional Components"
+          ],
+          "timeEstimate": 90,
+          "prerequisites": [
+            "React Functional Components",
+            "useState Hook",
+            "Event Handling",
+            "JavaScript Objects"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 9,
+          "learningPath": "intermediate",
+          "relatedConcepts": [
+            "Form Validation Patterns",
+            "Dynamic Input Handling",
+            "User Experience"
+          ]
+        },
+        {
+          "id": "task_refactor_uncontrolled_to_controlled",
+          "title": "Refactor an Uncontrolled Login Form to Controlled Components",
+          "description": "\nGiven an uncontrolled login form, refactor it to use controlled components. The form should include:\n\n1.  **Username**: Text input.\n2.  **Password**: Password input.\n\nBoth inputs should be controlled by React state. On form submission, prevent the default browser behavior and log the username and password from the component's state to the console. Add a simple client-side validation that requires both fields to be non-empty before submission.\n",
+          "difficulty": "medium",
+          "startingCode": "import React, { useRef } from 'react';\n\nfunction UncontrolledLoginForm() {\n  const usernameRef = useRef(null);\n  const passwordRef = useRef(null);\n\n  const handleSubmit = (event) => {\n    event.preventDefault();\n    // Currently accessing DOM directly (uncontrolled)\n    const username = usernameRef.current.value;\n    const password = passwordRef.current.value;\n    console.log('Uncontrolled Form Submit - Username:', username, 'Password:', password);\n    alert(`Username: ${username}, Password: ${password}`);\n  };\n\n  return (\n    <form onSubmit={handleSubmit} style={{ padding: '20px', maxWidth: '400px', margin: '20px auto', border: '1px solid #ccc', borderRadius: '8px' }}>\n      <h2>Uncontrolled Login (Refactor Me!)</h2>\n      <div style={{ marginBottom: '10px' }}>\n        <label htmlFor=\"username\">Username:</label>\n        <input type=\"text\" id=\"username\" ref={usernameRef} style={{ width: '100%', padding: '8px' }} />\n      </div>\n      <div style={{ marginBottom: '20px' }}>\n        <label htmlFor=\"password\">Password:</label>\n        <input type=\"password\" id=\"password\" ref={passwordRef} style={{ width: '100%', padding: '8px' }} />\n      </div>\n      <button type=\"submit\" style={{ width: '100%', padding: '10px', backgroundColor: '#007bff', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>Login</button>\n    </form>\n  );\n}\n\nexport default UncontrolledLoginForm;\n",
+          "solutionCode": "import React, { useState } from 'react';\n\nfunction ControlledLoginForm() {\n  const [formData, setFormData] = useState({\n    username: '',\n    password: ''\n  });\n\n  const [errors, setErrors] = useState({});\n  const [loginMessage, setLoginMessage] = useState('');\n\n  const handleChange = (e) => {\n    const { name, value } = e.target;\n    setFormData(prevData => ({\n      ...prevData,\n      [name]: value\n    }));\n    // Clear error for the field being changed\n    if (errors[name]) {\n      setErrors(prevErrors => {\n        const newErrors = { ...prevErrors };\n        delete newErrors[name];\n        return newErrors;\n      });\n    }\n  };\n\n  const validate = () => {\n    const newErrors = {};\n    if (!formData.username.trim()) {\n      newErrors.username = 'Username is required.';\n    }\n    if (!formData.password.trim()) {\n      newErrors.password = 'Password is required.';\n    }\n    return newErrors;\n  };\n\n  const handleSubmit = (event) => {\n    event.preventDefault();\n    setLoginMessage('');\n\n    const validationErrors = validate();\n    if (Object.keys(validationErrors).length > 0) {\n      setErrors(validationErrors);\n      setLoginMessage('Please fill in all required fields.');\n      return;\n    }\n\n    console.log('Controlled Form Submit - Username:', formData.username, 'Password:', formData.password);\n    setLoginMessage('Logged in successfully!');\n    // In a real app, you'd send this to an authentication API\n    setFormData({ username: '', password: '' }); // Clear form\n    setErrors({});\n  };\n\n  return (\n    <form onSubmit={handleSubmit} style={{ padding: '20px', maxWidth: '400px', margin: '20px auto', border: '1px solid #ccc', borderRadius: '8px', boxShadow: '2px 2px 8px rgba(0,0,0,0.1)' }}>\n      <h2 style={{ textAlign: 'center', marginBottom: '20px' }}>Controlled Login Form</h2>\n      <div style={{ marginBottom: '15px' }}>\n        <label htmlFor=\"username\" style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>Username:</label>\n        <input \n          type=\"text\" \n          id=\"username\" \n          name=\"username\" \n          value={formData.username} \n          onChange={handleChange} \n          style={{ width: '100%', padding: '10px', border: errors.username ? '1px solid red' : '1px solid #ccc', borderRadius: '4px', boxSizing: 'border-box' }} \n        />\n        {errors.username && <p style={{ color: 'red', fontSize: '0.85em', marginTop: '5px' }}>{errors.username}</p>}\n      </div>\n      <div style={{ marginBottom: '20px' }}>\n        <label htmlFor=\"password\" style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>Password:</label>\n        <input \n          type=\"password\" \n          id=\"password\" \n          name=\"password\" \n          value={formData.password} \n          onChange={handleChange} \n          style={{ width: '100%', padding: '10px', border: errors.password ? '1px solid red' : '1px solid #ccc', borderRadius: '4px', boxSizing: 'border-box' }} \n        />\n        {errors.password && <p style={{ color: 'red', fontSize: '0.85em', marginTop: '5px' }}>{errors.password}</p>}\n      </div>\n      <button type=\"submit\" style={{ width: '100%', padding: '12px', backgroundColor: '#28a745', color: 'white', border: 'none', borderRadius: '4px', fontSize: '1em', cursor: 'pointer', transition: 'background-color 0.3s ease' }}>Login</button>\n      {loginMessage && <p style={{ textAlign: 'center', marginTop: '15px', color: loginMessage.includes('successful') ? 'green' : 'red' }}>{loginMessage}</p>}\n    </form>\n  );\n}\n\nexport default ControlledLoginForm;\n",
+          "testCases": [
+            "Submit form with both fields empty: Expect validation errors and no console log.",
+            "Submit form with only username filled: Expect password validation error.",
+            "Submit form with only password filled: Expect username validation error.",
+            "Submit form with both fields filled: Expect username and password logged to console, and a success message.",
+            "Verify that typing in input fields updates the component's state and reflects in the input."
+          ],
+          "hints": [
+            "Replace `useRef` with `useState` for both username and password.",
+            "Each input's `value` prop should be bound to its corresponding state variable.",
+            "Implement a single `onChange` handler that updates the `formData` state object based on `e.target.name` and `e.target.value`.",
+            "The `handleSubmit` function should now access data from `formData` state, not `ref.current.value`.",
+            "Implement validation within `handleSubmit` or a separate `validate` function."
+          ],
+          "tags": [
+            "React",
+            "Forms",
+            "Controlled Components",
+            "Refactoring",
+            "useState",
+            "Validation"
+          ],
+          "timeEstimate": 75,
+          "prerequisites": [
+            "React State",
+            "Functional Components",
+            "Refs (to understand difference)"
+          ],
+          "complexity": 6,
+          "interviewRelevance": 8,
+          "learningPath": "intermediate",
+          "relatedConcepts": [
+            "Form Design",
+            "User Input Handling",
+            "Data Flow in React"
+          ]
+        }
+      ]
+    }
+  }
+]

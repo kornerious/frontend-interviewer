@@ -1,0 +1,1479 @@
+[
+  {
+    "id": "268fd6b8-c384-42e6-b131-ccc273800cdd",
+    "startLine": 5100,
+    "endLine": 5199,
+    "processedDate": "2025-06-17T09:25:34.682Z",
+    "content": {
+      "logicalBlockInfo": {
+        "suggestedEndLine": -1
+      },
+      "theory": [
+        {
+          "id": "theory_react_testing_best_practices",
+          "title": "React Component Testing Best Practices",
+          "content": "Testing React components effectively ensures their reliability and maintainability. It's crucial to focus on robust testing practices.\n\n## Snapshot Testing\nSnapshot testing, often used with libraries like Jest and React Test Renderer, captures the rendered output of a component and compares it to a previously saved snapshot. If the new output differs, the test fails, indicating an unintentional change or requiring an update to the snapshot. It's useful for ensuring UI consistency.\n\n## Core Testing Best Practices\n1.  **Test behavior, not implementation**: Focus on *what* the component does and its observable outputs, rather than its internal methods or state management. This makes tests more resilient to refactoring.\n2.  **Use `data-testid` for test selectors**: Relying on CSS classes or IDs for selecting elements in tests can lead to brittle tests, as these might change for styling or refactoring purposes. `data-testid` attributes are specifically for testing and provide stable selectors.\n3.  **Mock external dependencies**: Isolate your component tests by mocking any external APIs, services, or modules (e.g., network requests, third-party libraries). This ensures tests are fast, deterministic, and only fail due to issues within the component under test.\n4.  **Test edge cases**: Thoroughly test your components with various scenarios, including empty states (e.g., empty arrays passed as props), error states (e.g., API call failure), and boundary conditions (e.g., minimum/maximum input values). This helps uncover unexpected bugs.\n5.  **Keep tests fast**: Slow tests discourage developers from running them frequently. Optimize test performance by avoiding unnecessary complex setups, limiting the scope of tests, and effectively mocking dependencies.",
+          "examples": [
+            {
+              "id": "example_testing_snapshot",
+              "title": "Basic Snapshot Test",
+              "code": "import renderer from 'react-test-renderer';\nimport Button from './Button';\n\ntest('Button component renders correctly', () => {\n  const component = renderer.create(\n    <Button text=\"Click me\" onClick={() => {}} />\n  );\n  let tree = component.toJSON();\n  expect(tree).toMatchSnapshot();\n});",
+              "explanation": "This example demonstrates a basic snapshot test for a `Button` component using `react-test-renderer` and Jest. The rendered component is serialized to a JSON snapshot file, and `toMatchSnapshot()` asserts that future renders match this saved snapshot, ensuring UI consistency.",
+              "language": "typescript"
+            },
+            {
+              "id": "example_testing_data_testid",
+              "title": "Using data-testid for Selection",
+              "code": "import { render, screen, fireEvent } from '@testing-library/react';\nimport React from 'react';\n\nfunction Counter() {\n  const [count, setCount] = React.useState(0);\n  return (\n    <div>\n      <button onClick={() => setCount(count + 1)} data-testid=\"increment-button\">Increment</button>\n      <p data-testid=\"count-display\">Count: {count}</p>\n    </div>\n  );\n}\n\ntest('Counter increments count on button click', () => {\n  render(<Counter />);\n  const button = screen.getByTestId('increment-button');\n  const countDisplay = screen.getByTestId('count-display');\n  \n  fireEvent.click(button);\n  expect(countDisplay).toHaveTextContent('Count: 1');\n});",
+              "explanation": "This example illustrates the use of `data-testid` for reliably selecting elements in tests with `@testing-library/react`. Elements are given `data-testid` attributes, which are then used with `screen.getByTestId` to locate them, making tests resilient to changes in CSS classes or element structure.",
+              "language": "typescript"
+            }
+          ],
+          "relatedQuestions": [
+            "question_testing_data_testid_1",
+            "question_testing_behavior_vs_implementation_1",
+            "question_testing_mocking_rationale_1",
+            "question_testing_fast_tests_1",
+            "question_flashcard_snapshot_testing",
+            "question_flashcard_data_testid",
+            "question_flashcard_test_behavior"
+          ],
+          "relatedTasks": [
+            "task_component_testing_with_best_practices"
+          ],
+          "tags": [
+            "testing",
+            "react",
+            "jest",
+            "react-testing-library",
+            "best-practices",
+            "snapshot-testing"
+          ],
+          "technology": "React",
+          "prerequisites": [
+            "react_basics",
+            "javascript_fundamentals"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 9,
+          "learningPath": "intermediate",
+          "requiredFor": [
+            "component_development",
+            "qa"
+          ]
+        },
+        {
+          "id": "theory_react_performance_core_concepts",
+          "title": "React Performance Optimization: Core Concepts",
+          "content": "Optimizing React application performance is crucial for a smooth user experience. The primary goal is to minimize unnecessary re-renders and reduce initial load times.\n\n## Key Optimization Techniques\n1.  **Preventing Unnecessary Re-renders**: React's re-rendering process can be costly if components re-render when their props or state haven't meaningfully changed. Techniques like `React.memo`, `React.PureComponent`, and `shouldComponentUpdate` help control this.\n    *   **`React.PureComponent` (Class Components)**: A base class for React components that automatically implements `shouldComponentUpdate` with a shallow comparison of props and state. If the shallow comparison finds no differences, the component will not re-render.\n    *   **`React.memo` (Function Components)**: A higher-order component (HOC) that memoizes the result of a function component. It works similarly to `PureComponent` by shallowly comparing props. If props are the same, it reuses the last rendered result.\n    *   **`shouldComponentUpdate` (Class Components)**: A lifecycle method in class components that allows manual control over when a component should re-render. It receives `nextProps` and `nextState` and must return `true` (re-render) or `false` (do not re-render).\n\n2.  **Code Splitting and Lazy Loading**: Large JavaScript bundles can significantly slow down initial page loads. Code splitting breaks the bundle into smaller chunks that can be loaded on demand.\n    *   **`React.lazy`**: A function that lets you render a dynamic `import()` as a regular component. It defers loading the component's code until it's actually rendered.\n    *   **`React.Suspense`**: A component that lets you 'wait' for some code to load and declaratively specify a loading indicator (fallback UI) while waiting.\n\n3.  **Other Optimization Strategies**:\n    *   **Avoid unnecessary re-renders**: Use React DevTools Profiler to identify components that re-render frequently without a good reason. This might involve restructuring state or using `useCallback`/`useMemo` hooks (though not directly mentioned in source, it's a critical related concept for function components).\n    *   **Optimize rendering**: Techniques like list virtualization (rendering only visible items in long lists), data immutability, and batch updates (React automatically batches state updates in event handlers) contribute to smoother rendering.\n    *   **Memoization and Caching**: Beyond `React.memo`, general memoization (e.g., with `useMemo` or custom memoization functions) and caching frequently computed values can prevent redundant calculations.",
+          "examples": [],
+          "relatedQuestions": [
+            "question_performance_primary_goal_1",
+            "question_performance_shallow_comparison_1",
+            "question_performance_when_to_optimize_1",
+            "question_performance_identify_re_renders_1",
+            "question_flashcard_react_memo_purecomponent_difference",
+            "question_flashcard_code_splitting_benefit",
+            "question_flashcard_unnecessary_re_renders"
+          ],
+          "relatedTasks": [],
+          "tags": [
+            "react",
+            "performance",
+            "optimization",
+            "re-renders",
+            "code-splitting",
+            "memoization",
+            "lazy-loading"
+          ],
+          "technology": "React",
+          "prerequisites": [
+            "react_components",
+            "react_state_props"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 9,
+          "learningPath": "intermediate",
+          "requiredFor": [
+            "high_performance_apps"
+          ]
+        },
+        {
+          "id": "theory_react_memo",
+          "title": "Using React.memo for Function Components",
+          "content": "`React.memo` is a higher-order component (HOC) designed to optimize the performance of functional components by preventing unnecessary re-renders. It works by memoizing the rendered output of the component and only re-rendering it if its props have changed.\n\n## How `React.memo` Works\nWhen a component is wrapped with `React.memo`, React performs a shallow comparison of its props with the previous props. If all props are shallowly equal, React skips rendering the component and reuses the last rendered result. This can lead to significant performance improvements for components that receive complex props or perform expensive computations.\n\n## Custom Comparison Function\nBy default, `React.memo` performs a shallow comparison. However, you can provide a custom comparison function as the second argument to `React.memo`. This function receives `prevProps` and `nextProps` and should return `true` if the props are equal (i.e., the component should *not* re-render) and `false` if they are different (i.e., the component *should* re-render).\n\nThis custom comparison is useful when:\n*   You need a deep comparison for certain props (though often it's better to make props immutable).\n*   You want to ignore specific props during the comparison.\n*   The default shallow comparison is not sufficient for your specific optimization needs.\n\n**Note**: `React.memo` only checks for prop changes. If a functional component uses `useState` or `useContext`, it will still re-render when its own state or context changes, regardless of `React.memo`.",
+          "examples": [
+            {
+              "id": "example_react_memo_basic",
+              "title": "Basic React.memo Usage",
+              "code": "import React from 'react';\n\nconst ExpensiveComponent = React.memo(function ExpensiveComponent(props) {\n  // This component will only re-render if props change\n  console.log('ExpensiveComponent rendering...');\n  return (\n    <div>\n      <h3>Expensive Component</h3>\n      {/* Expensive rendering logic, e.g., mapping a large array */}\n      {props.data.map(item => <div key={item.id}>{item.name}</div>)}\n    </div>\n  );\n});\n\n// Usage in a parent component:\nfunction ParentComponent() {\n  const [count, setCount] = React.useState(0);\n  const data = React.useMemo(() => [{ id: 1, name: 'Item A' }, { id: 2, name: 'Item B' }], []);\n\n  return (\n    <div>\n      <button onClick={() => setCount(c => c + 1)}>Parent Count: {count}</button>\n      <ExpensiveComponent data={data} />\n    </div>\n  );\n}",
+              "explanation": "In this example, `ExpensiveComponent` is wrapped with `React.memo`. When `ParentComponent` re-renders due to its `count` state changing, `ExpensiveComponent` will *not* re-render because its `data` prop (which is memoized with `useMemo`) remains referentially equal. The 'ExpensiveComponent rendering...' log will only appear on initial mount.",
+              "language": "typescript"
+            },
+            {
+              "id": "example_react_memo_custom_comparison",
+              "title": "React.memo with Custom Comparison",
+              "code": "import React from 'react';\n\nconst areEqual = (prevProps, nextProps) => {\n  // Return true if passing nextProps to render would return\n  // the same result as passing prevProps to render; otherwise return false\n  // Here, we only re-render if the length of the data array changes\n  return prevProps.data.length === nextProps.data.length;\n};\n\nconst MemoizedComponentWithCustomComparison = React.memo(function ExpensiveComponent(props) {\n  console.log('MemoizedComponentWithCustomComparison rendering...');\n  return (\n    <div>\n      <h4>Custom Memoized Component</h4>\n      {props.data.map(item => <div key={item.id}>{item.name}</div>)}\n    </div>\n  );\n}, areEqual);\n\n// Example usage:\nfunction ParentWithCustomMemo() {\n  const [value, setValue] = React.useState(0);\n  const [items, setItems] = React.useState([\n    { id: 1, name: 'Apple' },\n    { id: 2, name: 'Banana' }\n  ]);\n\n  // This will cause re-renders if the custom comparison only checks length\n  // while other properties of an object in the array change\n  const updateItemName = () => {\n    setItems(prev => prev.map(item => \n      item.id === 1 ? { ...item, name: 'New Apple ' + Math.random() } : item\n    ));\n  };\n\n  return (\n    <div>\n      <button onClick={() => setValue(v => v + 1)}>Parent Value: {value}</button>\n      <button onClick={updateItemName}>Change Item Name</button>\n      <MemoizedComponentWithCustomComparison data={items} />\n    </div>\n  );\n}",
+              "explanation": "This example shows `React.memo` with a custom `areEqual` function. The component `MemoizedComponentWithCustomComparison` will only re-render if the `length` of its `data` prop array changes, even if individual items within the array are modified (e.g., their `name` property changes). This highlights how a custom comparison can be more specific than a shallow comparison, but also how it might miss changes if not implemented carefully.",
+              "language": "typescript"
+            }
+          ],
+          "relatedQuestions": [
+            "question_react_memo_purpose_1",
+            "question_react_memo_custom_comparison_1",
+            "question_react_memo_with_state_1",
+            "question_react_memo_shallow_comparison_1",
+            "question_flashcard_react_memo_arguments",
+            "question_flashcard_react_memo_return_true_false"
+          ],
+          "relatedTasks": [
+            "task_optimize_functional_component_with_memo"
+          ],
+          "tags": [
+            "react",
+            "performance",
+            "optimization",
+            "react-memo",
+            "hoc",
+            "functional-component",
+            "shallow-comparison"
+          ],
+          "technology": "React",
+          "prerequisites": [
+            "react_hooks",
+            "react_functional_components"
+          ],
+          "complexity": 8,
+          "interviewRelevance": 9,
+          "learningPath": "intermediate",
+          "requiredFor": [
+            "performance_tuning",
+            "advanced_react"
+          ]
+        },
+        {
+          "id": "theory_react_purecomponent",
+          "title": "Using PureComponent for Class Components",
+          "content": "`React.PureComponent` is a base class that React class components can extend to gain automatic performance optimizations. It extends `React.Component` but includes a default implementation of the `shouldComponentUpdate` lifecycle method.\n\n## How `React.PureComponent` Works\n`React.PureComponent`'s `shouldComponentUpdate` performs a shallow comparison of the component's `props` and `state` with their previous values. If this shallow comparison determines that neither props nor state have changed, `shouldComponentUpdate` returns `false`, preventing the component from re-rendering. This is highly effective for components that have simple props and state structures or use immutable data.\n\n## Benefits and Considerations\n*   **Automatic Optimization**: It provides an easy way to optimize class components without manually implementing `shouldComponentUpdate`.\n*   **Shallow Comparison**: It only performs a shallow comparison. For deeply nested objects or arrays, it might not detect changes, leading to components *not* re-rendering when they should, or requiring immutable data structures.\n*   **Alternative to `shouldComponentUpdate`**: While you can still override `shouldComponentUpdate` in a `PureComponent`, doing so negates the benefit of `PureComponent`'s automatic comparison.\n\n**Comparison with `React.memo`**: `React.PureComponent` is to class components what `React.memo` is to functional components. Both provide performance optimization by preventing unnecessary re-renders based on shallow prop/state comparisons.",
+          "examples": [
+            {
+              "id": "example_react_purecomponent_basic",
+              "title": "Basic PureComponent Usage",
+              "code": "import React from 'react';\n\nclass OptimizedList extends React.PureComponent {\n  // PureComponent automatically implements shouldComponentUpdate\n  // with a shallow comparison of props and state\n  render() {\n    console.log('OptimizedList rendering...');\n    return (\n      <ul>\n        {this.props.items.map(item => (\n          <li key={item.id}>{item.name}</li>\n        ))}\n      </ul>\n    );\n  }\n}\n\n// Usage in a parent component:\nclass ParentComponentWithPure extends React.Component {\n  state = {\n    count: 0,\n    items: [{ id: 1, name: 'Apple' }, { id: 2, name: 'Banana' }]\n  };\n\n  render() {\n    return (\n      <div>\n        <button onClick={() => this.setState({ count: this.state.count + 1 })}>\n          Parent Count: {this.state.count}\n        </button>\n        <OptimizedList items={this.state.items} />\n      </div>\n    );\n  }\n}",
+              "explanation": "In this example, `OptimizedList` extends `React.PureComponent`. When the `ParentComponentWithPure`'s `count` state changes, `OptimizedList` will not re-render because its `items` prop remains referentially the same (a shallow comparison will find no change). The 'OptimizedList rendering...' log will only appear on initial mount.",
+              "language": "typescript"
+            },
+            {
+              "id": "example_react_purecomponent_immutable_data",
+              "title": "PureComponent with Immutable Data",
+              "code": "import React from 'react';\n\nclass OptimizedDataDisplay extends React.PureComponent {\n  render() {\n    console.log('OptimizedDataDisplay rendering...');\n    return (\n      <div>\n        <h3>Data Display</h3>\n        <p>Value: {this.props.data.value}</p>\n        <p>Timestamp: {this.props.data.timestamp}</p>\n      </div>\n    );\n  }\n}\n\nclass AppWithImmutablePure extends React.Component {\n  state = {\n    data: { value: 10, timestamp: Date.now() },\n    toggle: false\n  };\n\n  updateData = () => {\n    // Create a new object for state update to trigger re-render in PureComponent\n    this.setState(prevState => ({\n      data: { ...prevState.data, value: prevState.data.value + 1, timestamp: Date.now() }\n    }));\n  };\n\n  toggleState = () => {\n    this.setState(prevState => ({ toggle: !prevState.toggle }));\n  };\n\n  render() {\n    return (\n      <div>\n        <button onClick={this.updateData}>Update Data</button>\n        <button onClick={this.toggleState}>Toggle App State</button>\n        <p>App Toggle: {this.state.toggle ? 'On' : 'Off'}</p>\n        <OptimizedDataDisplay data={this.state.data} />\n      </div>\n    );\n  }\n}",
+              "explanation": "This example demonstrates `PureComponent` used with immutable data. `OptimizedDataDisplay` will only re-render when its `data` prop object itself changes (i.e., a new object reference is passed). When `updateData` is called, a *new* `data` object is created, causing `OptimizedDataDisplay` to re-render. However, when `toggleState` is called, only `AppWithImmutablePure`'s own state changes, and `OptimizedDataDisplay` will *not* re-render because its `data` prop reference remains the same.",
+              "language": "typescript"
+            }
+          ],
+          "relatedQuestions": [
+            "question_purecomponent_how_it_works_1",
+            "question_purecomponent_shallow_comparison_issue_1",
+            "question_purecomponent_override_shouldcomponentupdate_1",
+            "question_purecomponent_vs_memo_1",
+            "question_flashcard_purecomponent_behavior"
+          ],
+          "relatedTasks": [
+            "task_optimize_class_component_with_purecomponent"
+          ],
+          "tags": [
+            "react",
+            "performance",
+            "optimization",
+            "purecomponent",
+            "class-component",
+            "shallow-comparison",
+            "shouldcomponentupdate"
+          ],
+          "technology": "React",
+          "prerequisites": [
+            "react_class_components",
+            "react_state_props"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 8,
+          "learningPath": "intermediate",
+          "requiredFor": [
+            "performance_tuning",
+            "legacy_react_apps"
+          ]
+        },
+        {
+          "id": "theory_react_lazy_suspense",
+          "title": "React.lazy and React.Suspense for Code Splitting",
+          "content": "Code splitting is a technique that allows you to split your code into various bundles which can then be loaded on demand. This improves the application's initial load time by reducing the amount of JavaScript that needs to be downloaded upfront. React provides built-in support for code splitting with `React.lazy` and `React.Suspense`.\n\n## `React.lazy`\n`React.lazy` is a function that lets you render a dynamic `import()` as a regular React component. It takes a function that returns a `Promise` (which resolves to a module with a default export containing a React component). The component will only be loaded when it's actually rendered for the first time.\n\n**Key Characteristics:**\n*   Works with default exports.\n*   Must be rendered inside a `Suspense` component.\n*   Not suitable for server-side rendering (SSR) unless specific solutions like `@loadable/component` are used.\n\n## `React.Suspense`\n`React.Suspense` is a component that lets you 'wait' for some code to load (e.g., a component loaded with `React.lazy`) and declaratively specify a loading indicator (fallback UI) while waiting. If multiple lazy components are rendered within the same `Suspense` boundary, `Suspense` waits for all of them to load before rendering the `children`.\n\n**Key Characteristics:**\n*   Requires a `fallback` prop, which can be any React elements (e.g., a loading spinner, skeleton UI).\n*   Can wrap multiple lazy components.\n*   Can be nested to provide more granular loading states.\n\n## Benefits of Code Splitting\n*   **Faster Initial Page Loads**: Users download less JavaScript upfront.\n*   **Improved User Experience**: A snappier initial load leads to better user satisfaction.\n*   **Better Resource Utilization**: Only necessary code is loaded, saving bandwidth.\n*   **Reduced Bundle Size**: The main bundle becomes smaller.",
+          "examples": [
+            {
+              "id": "example_react_lazy_suspense_basic",
+              "title": "Basic Code Splitting with React.lazy and Suspense",
+              "code": "import React, { Suspense } from 'react';\n\n// Instead of importing directly:\n// import HeavyComponent from './HeavyComponent';\n\n// Use lazy loading for a potentially large component\nconst HeavyComponent = React.lazy(() => import('./HeavyComponent'));\n\nfunction App() {\n  const [showHeavy, setShowHeavy] = React.useState(false);\n\n  return (\n    <div>\n      <h1>Main Application</h1>\n      <button onClick={() => setShowHeavy(true)}>Load Heavy Component</button>\n      {showHeavy && (\n        <Suspense fallback={<div>Loading Heavy Component...</div>}>\n          <HeavyComponent />\n        </Suspense>\n      )}\n    </div>\n  );\n}\n\n// Example HeavyComponent.js (in a separate file)\n/*\n// HeavyComponent.js\nimport React from 'react';\n\nconst HeavyComponent = () => {\n  // Simulate a heavy component with some rendering\n  const items = Array.from({ length: 1000 }, (_, i) => `Item ${i}`);\n  return (\n    <div style={{ border: '1px solid gray', padding: '10px', marginTop: '20px' }}>\n      <h2>This is a Heavy Component</h2>\n      <p>Loaded on demand!</p>\n      <ul>\n        {items.map(item => <li key={item}>{item}</li>)}\n      </ul>\n    </div>\n  );\n};\n\nexport default HeavyComponent;\n*/",
+              "explanation": "This example demonstrates how to use `React.lazy` and `React.Suspense` for code splitting. The `HeavyComponent`'s code is not loaded until the `Load Heavy Component` button is clicked and `showHeavy` becomes `true`. While the component is loading, the `Suspense` fallback ('Loading Heavy Component...') is displayed. This helps improve the initial load time of the main `App` bundle.",
+              "language": "typescript"
+            },
+            {
+              "id": "example_react_lazy_suspense_multiple_components",
+              "title": "Suspense with Multiple Lazy Components",
+              "code": "import React, { Suspense } from 'react';\n\nconst LazyComponentA = React.lazy(() => import('./LazyComponentA'));\nconst LazyComponentB = React.lazy(() => import('./LazyComponentB'));\n\nfunction Dashboard() {\n  const [showComponents, setShowComponents] = React.useState(false);\n\n  return (\n    <div>\n      <h1>Dashboard</h1>\n      <button onClick={() => setShowComponents(true)}>Show Dashboard Components</button>\n      {showComponents && (\n        <Suspense fallback={<div>Loading Dashboard Widgets...</div>}>\n          <LazyComponentA />\n          <LazyComponentB />\n        </Suspense>\n      )}\n    </div>\n  );\n}\n\n// Dummy LazyComponentA.js and LazyComponentB.js\n/*\n// LazyComponentA.js\nimport React from 'react';\nconst LazyComponentA = () => <p>Widget A Loaded!</p>;\nexport default LazyComponentA;\n\n// LazyComponentB.js\nimport React from 'react';\nconst LazyComponentB = () => <p>Widget B Loaded!</p>;\nexport default LazyComponentB;\n*/",
+              "explanation": "This example shows how a single `Suspense` boundary can wrap multiple `React.lazy` components. The 'Loading Dashboard Widgets...' fallback will be displayed until *both* `LazyComponentA` and `LazyComponentB` have finished loading their respective code bundles. Once both are ready, they will render together.",
+              "language": "typescript"
+            }
+          ],
+          "relatedQuestions": [
+            "question_lazy_suspense_purpose_1",
+            "question_lazy_suspense_fallback_1",
+            "question_lazy_suspense_benefits_1",
+            "question_lazy_suspense_ssr_1",
+            "question_flashcard_react_lazy",
+            "question_flashcard_react_suspense",
+            "question_flashcard_code_splitting"
+          ],
+          "relatedTasks": [
+            "task_implement_lazy_loading_with_suspense"
+          ],
+          "tags": [
+            "react",
+            "code-splitting",
+            "lazy-loading",
+            "suspense",
+            "performance",
+            "webpack"
+          ],
+          "technology": "React",
+          "prerequisites": [
+            "react_components",
+            "javascript_modules"
+          ],
+          "complexity": 8,
+          "interviewRelevance": 9,
+          "learningPath": "advanced",
+          "requiredFor": [
+            "large_scale_apps",
+            "performance_optimization"
+          ]
+        }
+      ],
+      "questions": [
+        {
+          "id": "question_testing_data_testid_1",
+          "topic": "React Component Testing Best Practices",
+          "level": "easy",
+          "type": "mcq",
+          "question": "Which of the following is the recommended approach for selecting elements in React component tests to ensure stability against styling changes?",
+          "answer": "Using `data-testid` attributes.",
+          "options": [
+            "Using CSS class names.",
+            "Using element IDs.",
+            "Using `data-testid` attributes.",
+            "Using HTML tag names."
+          ],
+          "analysisPoints": [
+            "CSS class names and element IDs are primarily for styling or JavaScript logic, and can change frequently.",
+            "`data-testid` is specifically designed for testing, providing a stable hook that is less likely to change due to refactoring or styling updates.",
+            "HTML tag names are too generic and don't provide specific identification for unique elements or interactions."
+          ],
+          "keyConcepts": [
+            "data-testid",
+            "test selectors",
+            "test stability",
+            "testing best practices"
+          ],
+          "evaluationCriteria": [
+            "Understanding of best practices for test selectors.",
+            "Ability to distinguish between robust and brittle testing methods."
+          ],
+          "example": "```html\n<button data-testid=\"submit-button\">Submit</button>\n```\nIn tests, you would use `screen.getByTestId('submit-button')` to find this button.",
+          "tags": [
+            "testing",
+            "react-testing-library",
+            "data-testid"
+          ],
+          "prerequisites": [
+            "react_basics",
+            "testing_basics"
+          ],
+          "complexity": 4,
+          "interviewFrequency": 7,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_testing_behavior_vs_implementation_1",
+          "topic": "React Component Testing Best Practices",
+          "level": "medium",
+          "type": "open",
+          "question": "Explain the principle of 'testing behavior, not implementation' in the context of React components. Why is this considered a best practice, and what are the potential pitfalls of violating it?",
+          "answer": "The principle of 'testing behavior, not implementation' means that tests should focus on the observable outcomes and user interactions of a component (its behavior) rather than its internal working mechanisms (its implementation details, like state variables, private methods, or specific component lifecycle calls). \n\n**Why it's a best practice:**\n1.  **Resilience to Refactoring**: Tests become less brittle. If you refactor the internal logic of a component without changing its external behavior, the tests should still pass. This allows developers to improve code quality without breaking tests.\n2.  **Focus on User Experience**: It aligns tests with how a user interacts with the component. Users care about what the component *does*, not how it does it. This ensures the component meets functional requirements from a user's perspective.\n3.  **Encourages Better Design**: It encourages designing components with clear public APIs and predictable behavior, as these are what will be tested.\n\n**Potential pitfalls of violating it (testing implementation):**\n1.  **Brittle Tests**: Tests break frequently even when the component's user-facing functionality hasn't changed. This leads to developer frustration and a tendency to ignore failing tests.\n2.  **Maintenance Overhead**: Developers spend more time fixing tests after internal refactoring, slowing down development.\n3.  **False Confidence**: Passing tests might not truly reflect that the component works correctly from a user's perspective if the implementation details they test are not directly tied to observable behavior.",
+          "analysisPoints": [
+            "Defines the principle clearly.",
+            "Explains benefits like refactoring resilience.",
+            "Details pitfalls like brittle tests and maintenance overhead.",
+            "Connects the practice to user experience and design."
+          ],
+          "keyConcepts": [
+            "testing best practices",
+            "behavioral testing",
+            "implementation details",
+            "refactoring",
+            "test maintenance"
+          ],
+          "evaluationCriteria": [
+            "Clarity and completeness of explanation.",
+            "Understanding of the rationale behind the best practice.",
+            "Ability to articulate the negative consequences of violating the principle."
+          ],
+          "example": "A test for a 'Counter' component should assert that clicking an 'Increment' button *changes the displayed count* (behavior), not that a specific `setCount` function was called (implementation detail).",
+          "tags": [
+            "testing",
+            "react",
+            "best-practices",
+            "software-design"
+          ],
+          "prerequisites": [
+            "unit_testing",
+            "react_component_lifecycle"
+          ],
+          "complexity": 7,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_testing_mocking_rationale_1",
+          "topic": "React Component Testing Best Practices",
+          "level": "medium",
+          "type": "mcq",
+          "question": "When testing a React component that makes an API call, why is it considered a best practice to mock the external API dependency?",
+          "answer": "To isolate the component under test and ensure deterministic and fast tests.",
+          "options": [
+            "To make the tests more complex and realistic.",
+            "To ensure the component always gets real-time data.",
+            "To isolate the component under test and ensure deterministic and fast tests.",
+            "To reduce the number of test cases needed."
+          ],
+          "analysisPoints": [
+            "Mocking isolates the component, so its test only fails if there's an issue with the component itself, not the external API.",
+            "Mocked API calls are faster than real network requests, speeding up the test suite.",
+            "Mocking makes tests deterministic because the mocked response is predictable, unlike a real API which might vary or be unavailable.",
+            "Making tests more complex or relying on real-time data goes against the principles of unit testing.",
+            "Mocking does not necessarily reduce test cases; it just makes existing cases more reliable and efficient."
+          ],
+          "keyConcepts": [
+            "mocking",
+            "test isolation",
+            "deterministic tests",
+            "test speed",
+            "external dependencies"
+          ],
+          "evaluationCriteria": [
+            "Understanding of mocking's purpose in testing.",
+            "Ability to identify the benefits of test isolation."
+          ],
+          "example": "```typescript\n// Example using Jest to mock a fetch call\nglobal.fetch = jest.fn(() =>\n  Promise.resolve({\n    json: () => Promise.resolve({ data: 'mocked data' }),\n  })\n);\n\ntest('Component fetches data correctly', async () => {\n  render(<DataFetcherComponent />);\n  expect(await screen.findByText('mocked data')).toBeInTheDocument();\n  expect(global.fetch).toHaveBeenCalledWith('/api/data');\n});\n```",
+          "tags": [
+            "testing",
+            "jest",
+            "mocking",
+            "api"
+          ],
+          "prerequisites": [
+            "javascript_async",
+            "testing_fundamentals"
+          ],
+          "complexity": 6,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_testing_fast_tests_1",
+          "topic": "React Component Testing Best Practices",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "Why is it important to keep React component tests fast?",
+          "answer": "Fast tests encourage developers to run them frequently, leading to quicker feedback loops and earlier detection of bugs.",
+          "keyConcepts": [
+            "test speed",
+            "developer experience",
+            "feedback loop",
+            "bug detection"
+          ],
+          "evaluationCriteria": [
+            "Recall of the importance of test suite performance."
+          ],
+          "tags": [
+            "testing",
+            "best-practices",
+            "developer-experience"
+          ],
+          "prerequisites": [],
+          "complexity": 3,
+          "interviewFrequency": 6,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_performance_primary_goal_1",
+          "topic": "React Performance Optimization",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "What is the primary goal of React performance optimization?",
+          "answer": "To minimize unnecessary re-renders and reduce initial load times.",
+          "keyConcepts": [
+            "performance optimization",
+            "re-renders",
+            "initial load time"
+          ],
+          "evaluationCriteria": [
+            "Recall of fundamental performance goals in React."
+          ],
+          "tags": [
+            "react",
+            "performance",
+            "optimization"
+          ],
+          "prerequisites": [],
+          "complexity": 3,
+          "interviewFrequency": 7,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_performance_shallow_comparison_1",
+          "topic": "React Performance Optimization",
+          "level": "medium",
+          "type": "open",
+          "question": "Explain what a 'shallow comparison' means in the context of React's performance optimizations (e.g., `React.memo` or `PureComponent`), and why it's used instead of a deep comparison. What are its limitations?",
+          "answer": "A 'shallow comparison' in React's performance optimizations (like `React.memo` for function components or `React.PureComponent` for class components) refers to checking if the *references* of props and state values have changed, rather than comparing their actual content if they are objects or arrays.\n\n**How it works:**\n*   **Primitive values (numbers, strings, booleans, null, undefined)**: Compared by value.\n*   **Objects and Arrays**: Compared by reference. If the memory address of an object/array is the same, it's considered 'equal', even if its internal properties have changed. If a new object/array is created (even with the same content), it's considered 'different'.\n\n**Why it's used instead of deep comparison:**\n1.  **Performance**: Deep comparison, especially for large or deeply nested data structures, can be computationally expensive and time-consuming. It could negate the performance benefits that `memo`/`PureComponent` aim to provide.\n2.  **Simplicity**: Shallow comparison is much simpler and faster to implement than a recursive deep comparison.\n\n**Limitations:**\n1.  **Mutable Data**: If you mutate an object or array prop/state (e.g., `arr.push(item)` or `obj.prop = newValue`) instead of creating a new one (e.g., `[...arr, item]` or `{...obj, prop: newValue}`), a shallow comparison will *not* detect the change because the reference remains the same. This will prevent the component from re-rendering when it should, leading to stale UI.\n2.  **Deeply Nested Data**: For components that receive deeply nested objects or arrays as props, a shallow comparison will only check the top-level reference. If a nested property changes but the parent object's reference remains the same, the component will not re-render.",
+          "analysisPoints": [
+            "Clearly defines shallow comparison for primitives and objects/arrays.",
+            "Explains the performance and simplicity reasons for using shallow comparison.",
+            "Highlights the key limitations, especially with mutable data and deeply nested structures."
+          ],
+          "keyConcepts": [
+            "shallow comparison",
+            "deep comparison",
+            "React.memo",
+            "React.PureComponent",
+            "immutability",
+            "re-rendering"
+          ],
+          "evaluationCriteria": [
+            "Accuracy of shallow comparison definition.",
+            "Understanding of the trade-offs (performance vs. comprehensiveness).",
+            "Identification of real-world pitfalls."
+          ],
+          "example": "```javascript\nconst obj1 = { a: 1, b: { c: 2 } };\nconst obj2 = { a: 1, b: { c: 2 } };\nconst obj3 = obj1;\n\nconsole.log(obj1 === obj2); // false (different references, even if content is deep-equal)\nconsole.log(obj1 === obj3); // true (same reference)\n```\n`React.memo` or `PureComponent` would treat `obj1` and `obj2` as different, but `obj1` and `obj3` as the same.",
+          "tags": [
+            "react",
+            "performance",
+            "optimization",
+            "javascript",
+            "data-structures"
+          ],
+          "prerequisites": [
+            "javascript_object_references",
+            "react_performance_basics"
+          ],
+          "complexity": 8,
+          "interviewFrequency": 9,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_performance_when_to_optimize_1",
+          "topic": "React Performance Optimization",
+          "level": "medium",
+          "type": "open",
+          "question": "When should you start thinking about optimizing React component performance? What tools or indicators might suggest that optimization is needed?",
+          "answer": "Performance optimization should generally be a secondary concern, after achieving correct functionality and a clear architecture. The common adage is 'premature optimization is the root of all evil.'\n\n**When to start thinking about optimization:**\n1.  **Perceived Slowness**: Users report a slow or unresponsive application, especially during interactions or initial load.\n2.  **Quantitative Metrics**: When monitoring tools (like Lighthouse, Web Vitals) show poor performance scores (e.g., high FID, LCP, CLS, or slow TBT).\n3.  **Specific Bottlenecks**: When specific parts of the application, like complex lists, frequent animations, or large data tables, are visibly sluggish.\n\n**Tools or Indicators that suggest optimization is needed:**\n1.  **React DevTools Profiler**: This tool allows you to record rendering cycles and identify which components are re-rendering, how often, and why. It visually highlights expensive renders.\n2.  **Browser Developer Tools (Performance Tab)**: Can help identify long-running JavaScript tasks, layout thrashing, and paint bottlenecks.\n3.  **Lighthouse / Web Vitals**: Provides an objective score and actionable insights into various performance metrics.\n4.  **CPU/Memory Usage**: High CPU usage in the browser's task manager or increasing memory consumption can indicate inefficiencies.\n5.  **User Complaints**: Direct feedback from users about the application feeling slow or unresponsive is a strong indicator.\n6.  **Unresponsive UI**: Janky animations, delayed responses to clicks/inputs, or frozen UI segments.\n\nIn essence, you optimize when there's a *demonstrated* performance problem affecting the user experience, rather than pre-emptively optimizing every component.",
+          "analysisPoints": [
+            "Emphasizes optimizing based on actual problems, not prematurely.",
+            "Lists clear indicators like user perception and quantitative metrics.",
+            "Provides concrete tools for identifying performance bottlenecks.",
+            "Connects optimization back to user experience."
+          ],
+          "keyConcepts": [
+            "performance optimization",
+            "profiling",
+            "browser dev tools",
+            "web vitals",
+            "user experience",
+            "premature optimization"
+          ],
+          "evaluationCriteria": [
+            "Understanding of when to initiate performance work.",
+            "Knowledge of common tools and indicators.",
+            "Ability to articulate the 'why' behind optimization."
+          ],
+          "example": "Using React DevTools Profiler, if you see a component re-rendering many times when only a small piece of data changed, and its render time is significant, it's a candidate for optimization with `React.memo` or `PureComponent`.",
+          "tags": [
+            "react",
+            "performance",
+            "debugging",
+            "tooling",
+            "best-practices"
+          ],
+          "prerequisites": [
+            "react_basics",
+            "web_performance"
+          ],
+          "complexity": 7,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_performance_identify_re_renders_1",
+          "topic": "React Performance Optimization",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "What tool can help you identify unnecessary re-renders in a React application?",
+          "answer": "React DevTools Profiler (or the 'Highlight updates when components render' option in React DevTools settings).",
+          "keyConcepts": [
+            "re-renders",
+            "react devtools",
+            "profiling",
+            "performance"
+          ],
+          "evaluationCriteria": [
+            "Recall of basic React performance debugging tools."
+          ],
+          "tags": [
+            "react",
+            "performance",
+            "tooling"
+          ],
+          "prerequisites": [],
+          "complexity": 3,
+          "interviewFrequency": 7,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_flashcard_react_memo_purecomponent_difference",
+          "topic": "React Performance Optimization",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "What is the primary difference between `React.memo` and `React.PureComponent`?",
+          "answer": "`React.memo` is used for functional components, while `React.PureComponent` is used for class components. Both perform shallow prop/state comparisons to prevent unnecessary re-renders.",
+          "keyConcepts": [
+            "React.memo",
+            "React.PureComponent",
+            "functional components",
+            "class components",
+            "shallow comparison"
+          ],
+          "evaluationCriteria": [
+            "Recall of the distinction between `React.memo` and `PureComponent`."
+          ],
+          "tags": [
+            "react",
+            "performance",
+            "optimization",
+            "flashcard"
+          ],
+          "prerequisites": [],
+          "complexity": 4,
+          "interviewFrequency": 8,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_react_memo_purpose_1",
+          "topic": "React.memo",
+          "level": "easy",
+          "type": "mcq",
+          "question": "What is the primary purpose of `React.memo`?",
+          "answer": "To prevent a functional component from re-rendering if its props have not shallowly changed.",
+          "options": [
+            "To perform deep comparisons of props and state.",
+            "To replace `shouldComponentUpdate` in class components.",
+            "To lazy-load components.",
+            "To prevent a functional component from re-rendering if its props have not shallowly changed."
+          ],
+          "analysisPoints": [
+            "`React.memo` specifically targets functional components and uses shallow comparison.",
+            "It does not perform deep comparisons by default.",
+            "`shouldComponentUpdate` is for class components; `PureComponent` is its class equivalent for automatic shallow comparison.",
+            "`React.lazy` is for lazy-loading, not `React.memo`."
+          ],
+          "keyConcepts": [
+            "React.memo",
+            "re-rendering",
+            "functional components",
+            "shallow comparison",
+            "performance optimization"
+          ],
+          "evaluationCriteria": [
+            "Understanding of `React.memo`'s core functionality.",
+            "Ability to differentiate it from other optimization techniques."
+          ],
+          "example": "```typescript\nconst MyComponent = React.memo((props) => {\n  console.log('MyComponent rendered');\n  return <div>{props.value}</div>;\n});\n// MyComponent will only log 'MyComponent rendered' if `props.value` changes.\n```",
+          "tags": [
+            "react",
+            "performance",
+            "react-memo"
+          ],
+          "prerequisites": [
+            "react_functional_components"
+          ],
+          "complexity": 5,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_react_memo_custom_comparison_1",
+          "topic": "React.memo",
+          "level": "medium",
+          "type": "open",
+          "question": "When and why would you provide a custom comparison function as the second argument to `React.memo`? What should this function return?",
+          "answer": "You would provide a custom comparison function as the second argument to `React.memo` when the default shallow comparison is not sufficient for your optimization needs. This is typically the case when:\n\n1.  **Deeply Nested Props**: If a prop is an object or array and changes within its nested structure should *not* trigger a re-render, but the default shallow comparison would always see the same reference.\n2.  **Ignoring Specific Props**: If certain props change frequently but do not affect the component's rendered output, you might want to exclude them from the comparison.\n3.  **Complex Comparison Logic**: When you need more nuanced control over the re-render condition than a simple shallow check provides (e.g., comparing only certain properties of an object prop, or using a custom equality check).\n\n**Why**: The goal is to prevent unnecessary re-renders in scenarios where the default shallow comparison would cause one, or to allow re-renders in cases where the default would prevent one mistakenly (e.g., with mutable data where the reference doesn't change but the content does).\n\n**Return Value**: The custom comparison function `areEqual(prevProps, nextProps)` should return:\n*   `true`: If passing `nextProps` to render would produce the *same result* as passing `prevProps`. This means the component should **NOT** re-render.\n*   `false`: If passing `nextProps` would produce a *different result*. This means the component **SHOULD** re-render.",
+          "analysisPoints": [
+            "Identifies scenarios for custom comparison (nested props, ignoring props, complex logic).",
+            "Explains the 'why' (addressing default shallow comparison limitations).",
+            "Correctly states the `true`/`false` return logic for `areEqual`.",
+            "Highlights the counter-intuitive `true` for no re-render."
+          ],
+          "keyConcepts": [
+            "React.memo",
+            "custom comparison function",
+            "areEqual",
+            "re-rendering control",
+            "shallow comparison limitations"
+          ],
+          "evaluationCriteria": [
+            "Understanding of advanced `React.memo` usage.",
+            "Clarity on the `areEqual` function's behavior.",
+            "Ability to explain practical use cases."
+          ],
+          "example": "```typescript\nconst areEqual = (prevProps, nextProps) => {\n  // Only re-render if the 'id' of the user changes, ignore 'lastLogin' for re-renders\n  return prevProps.user.id === nextProps.user.id;\n};\n\nconst UserDisplay = React.memo(({ user }) => {\n  console.log('UserDisplay rendered');\n  return (\n    <div>\n      User: {user.name}, ID: {user.id}\n    </div>\n  );\n}, areEqual);\n```",
+          "tags": [
+            "react",
+            "performance",
+            "react-memo",
+            "advanced-react"
+          ],
+          "prerequisites": [
+            "react_memo",
+            "javascript_functions"
+          ],
+          "complexity": 8,
+          "interviewFrequency": 9,
+          "learningPath": "advanced"
+        },
+        {
+          "id": "question_react_memo_with_state_1",
+          "topic": "React.memo",
+          "level": "medium",
+          "type": "mcq",
+          "question": "Consider the following React functional component:\n\n```typescript\nimport React from 'react';\n\nconst MyMemoizedComponent = React.memo(({ data }) => {\n  const [internalCount, setInternalCount] = React.useState(0);\n  console.log('MyMemoizedComponent rendered');\n  return (\n    <div>\n      <p>Data: {data}</p>\n      <button onClick={() => setInternalCount(internalCount + 1)}>Increment Internal: {internalCount}</button>\n    </div>\n  );\n});\n\nfunction ParentComponent() {\n  const [parentData, setParentData] = React.useState('initial');\n  const [parentTrigger, setParentTrigger] = React.useState(0);\n\n  return (\n    <div>\n      <button onClick={() => setParentTrigger(parentTrigger + 1)}>Trigger Parent Re-render</button>\n      <MyMemoizedComponent data={parentData} />\n    </div>\n  );\n}\n```\nIf `setInternalCount` is called within `MyMemoizedComponent`, causing `internalCount` to change, what will happen to `MyMemoizedComponent`?",
+          "answer": "It will re-render, as `React.memo` only checks props, not internal state changes.",
+          "options": [
+            "It will not re-render because it is wrapped with `React.memo`.",
+            "It will re-render, as `React.memo` only checks props, not internal state changes.",
+            "It will throw an error because `React.memo` cannot be used with components that have internal state.",
+            "It will re-render only if `parentData` also changes."
+          ],
+          "analysisPoints": [
+            "`React.memo` optimizes based on prop changes. It does not prevent re-renders caused by internal state updates within the memoized component itself.",
+            "If `internalCount` changes, `MyMemoizedComponent` needs to re-render to reflect the new state, regardless of its props.",
+            "The error option is incorrect; `React.memo` can be used with components having internal state.",
+            "The re-render tied to `parentData` is about the parent component triggering a prop change, not an internal state change."
+          ],
+          "keyConcepts": [
+            "React.memo",
+            "internal state",
+            "re-rendering",
+            "functional components",
+            "useState"
+          ],
+          "evaluationCriteria": [
+            "Understanding of `React.memo`'s scope (props only).",
+            "Knowledge of how state changes trigger re-renders in functional components."
+          ],
+          "example": "In the provided code, if you click the 'Increment Internal' button, `MyMemoizedComponent` will log 'MyMemoizedComponent rendered' even if `parentData` hasn't changed, because its own internal state has updated.",
+          "tags": [
+            "react",
+            "performance",
+            "react-memo",
+            "state"
+          ],
+          "prerequisites": [
+            "react_hooks",
+            "react_memo"
+          ],
+          "complexity": 7,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_react_memo_shallow_comparison_1",
+          "topic": "React.memo",
+          "level": "medium",
+          "type": "code",
+          "question": "Given the following React component setup:\n\n```typescript\nimport React from 'react';\n\nconst DisplayNumbers = React.memo(({ numbers }) => {\n  console.log('DisplayNumbers rendered');\n  return (\n    <div>\n      {numbers.map((num, index) => <span key={index}>{num} </span>)}\n    </div>\n  );\n});\n\nfunction App() {\n  const [count, setCount] = React.useState(0);\n  const [data, setData] = React.useState([1, 2, 3]);\n\n  const updateData = () => {\n    // OPTION 1: Mutate the existing array\n    // data.push(data.length + 1);\n    // setData(data);\n\n    // OPTION 2: Create a new array\n    setData([...data, data.length + 1]);\n  };\n\n  return (\n    <div>\n      <button onClick={() => setCount(count + 1)}>Increment Parent Count ({count})</button>\n      <button onClick={updateData}>Add Number to Data</button>\n      <DisplayNumbers numbers={data} />\n    </div>\n  );\n}\n```\n\nWhich `updateData` implementation (OPTION 1 or OPTION 2) will correctly trigger a re-render of `DisplayNumbers` when the 'Add Number to Data' button is clicked, and why? Explain the behavior of the *other* option.",
+          "answer": "The correct answer is OPTION 2:\n\n```typescript\n// OPTION 2: Create a new array\nsetData([...data, data.length + 1]);\n```\n\n**Explanation:**\n\n`DisplayNumbers` is wrapped with `React.memo`, which performs a shallow comparison of its props. \n\n*   **OPTION 2 (`setData([...data, data.length + 1]);`)**: This implementation creates a *new array* by spreading the existing `data` and adding a new element. When `setData` is called with this new array, the `numbers` prop passed to `DisplayNumbers` now has a different reference than its previous value. `React.memo`'s shallow comparison detects this change in reference, and thus `DisplayNumbers` will correctly re-render.\n\n*   **OPTION 1 (Commented out: `data.push(data.length + 1); setData(data);`)**: This implementation *mutates* the existing `data` array by using `push()` and then attempts to update the state with the *same array reference*. Because `React.memo` performs a shallow comparison (which checks if the `numbers` prop's reference has changed), it will see that the reference is still the same, even though the array's contents have changed. As a result, `React.memo` will incorrectly decide that the `numbers` prop has not changed, and `DisplayNumbers` will **not** re-render, leading to stale UI.",
+          "analysisPoints": [
+            "Demonstrates understanding of `React.memo`'s shallow comparison.",
+            "Highlights the importance of immutability with memoized components.",
+            "Explains why mutating an array and passing the same reference prevents re-renders.",
+            "Explains why creating a new array reference triggers re-renders."
+          ],
+          "keyConcepts": [
+            "React.memo",
+            "shallow comparison",
+            "immutability",
+            "array mutation",
+            "state update",
+            "re-rendering"
+          ],
+          "evaluationCriteria": [
+            "Ability to debug and explain re-render behavior with `React.memo`.",
+            "Understanding of shallow comparison implications for complex data types.",
+            "Knowledge of immutable updates in React state."
+          ],
+          "example": "To confirm, run the provided code with each option. With OPTION 1, 'DisplayNumbers rendered' will not log again after the initial render, even after clicking 'Add Number'. With OPTION 2, it will log every time 'Add Number' is clicked.",
+          "tags": [
+            "react",
+            "performance",
+            "react-memo",
+            "state",
+            "immutability",
+            "javascript"
+          ],
+          "prerequisites": [
+            "react_state",
+            "javascript_array_methods",
+            "react_memo"
+          ],
+          "complexity": 8,
+          "interviewFrequency": 9,
+          "learningPath": "advanced"
+        },
+        {
+          "id": "question_flashcard_react_memo_arguments",
+          "topic": "React.memo",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "What are the two arguments that can be passed to `React.memo`?",
+          "answer": "1. The functional component to be memoized. \n2. (Optional) A custom comparison function (`areEqual`) that determines if props are equal.",
+          "keyConcepts": [
+            "React.memo",
+            "arguments",
+            "functional component",
+            "custom comparison"
+          ],
+          "evaluationCriteria": [
+            "Recall of `React.memo`'s signature."
+          ],
+          "tags": [
+            "react",
+            "react-memo",
+            "flashcard"
+          ],
+          "prerequisites": [],
+          "complexity": 3,
+          "interviewFrequency": 6,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_flashcard_react_memo_return_true_false",
+          "topic": "React.memo",
+          "level": "medium",
+          "type": "flashcard",
+          "question": "If you provide a custom comparison function to `React.memo`, what should it return if the component should *not* re-render?",
+          "answer": "`true` (if `prevProps` and `nextProps` are considered equal, thus skipping re-render).",
+          "keyConcepts": [
+            "React.memo",
+            "custom comparison",
+            "areEqual",
+            "re-rendering"
+          ],
+          "evaluationCriteria": [
+            "Recall of `areEqual` function's return value logic."
+          ],
+          "tags": [
+            "react",
+            "react-memo",
+            "flashcard"
+          ],
+          "prerequisites": [
+            "react_memo"
+          ],
+          "complexity": 5,
+          "interviewFrequency": 7,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_purecomponent_how_it_works_1",
+          "topic": "React.PureComponent",
+          "level": "easy",
+          "type": "mcq",
+          "question": "How does `React.PureComponent` automatically optimize re-renders for class components?",
+          "answer": "It implements `shouldComponentUpdate` with a shallow comparison of props and state.",
+          "options": [
+            "It automatically memoizes the render function.",
+            "It uses a deep comparison of all props and state.",
+            "It only re-renders if the component's internal state changes.",
+            "It implements `shouldComponentUpdate` with a shallow comparison of props and state."
+          ],
+          "analysisPoints": [
+            "The core mechanism of `PureComponent` is its overridden `shouldComponentUpdate`.",
+            "This `shouldComponentUpdate` performs a shallow comparison, not a deep one.",
+            "It re-renders based on prop *or* state changes, not just state.",
+            "Memoization is a concept, but specifically, it's about the `shouldComponentUpdate` check."
+          ],
+          "keyConcepts": [
+            "React.PureComponent",
+            "shouldComponentUpdate",
+            "shallow comparison",
+            "class components",
+            "re-rendering"
+          ],
+          "evaluationCriteria": [
+            "Understanding of `PureComponent`'s underlying mechanism.",
+            "Differentiating shallow from deep comparison."
+          ],
+          "example": "```typescript\nclass MyPureComponent extends React.PureComponent {\n  render() {\n    // This will only render if props or state change shallowly\n    return <div>{this.props.value}</div>;\n  }\n}\n```",
+          "tags": [
+            "react",
+            "performance",
+            "purecomponent"
+          ],
+          "prerequisites": [
+            "react_class_components",
+            "react_lifecycle"
+          ],
+          "complexity": 5,
+          "interviewFrequency": 7,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_purecomponent_shallow_comparison_issue_1",
+          "topic": "React.PureComponent",
+          "level": "medium",
+          "type": "open",
+          "question": "Describe a scenario where using `React.PureComponent` (or `React.memo` without a custom comparison) might lead to a component *not* re-rendering when it logically should, and how to address this.",
+          "answer": "This scenario typically occurs when a component receives a prop that is an object or an array, and that object/array is mutated *in place* rather than being replaced with a new one. Since `React.PureComponent` (and `React.memo`) performs a shallow comparison, it only checks if the reference of the prop has changed, not its internal contents.\n\n**Scenario Example:**\nConsider a `PureComponent` called `ItemList` that receives an array of `items` as a prop:\n\n```typescript\nclass ItemList extends React.PureComponent {\n  render() {\n    console.log('ItemList rendered');\n    return (\n      <ul>\n        {this.props.items.map(item => <li key={item.id}>{item.name}</li>)}\n      </ul>\n    );\n  }\n}\n\nclass Parent extends React.Component {\n  state = { \n    data: [{ id: 1, name: 'Apple' }, { id: 2, name: 'Banana' }] \n  };\n\n  addItem = () => {\n    // Mutating the existing array\n    this.state.data.push({ id: this.state.data.length + 1, name: 'New Item' });\n    this.setState({ data: this.state.data }); // Setting state with the same reference\n  };\n\n  render() {\n    return (\n      <div>\n        <button onClick={this.addItem}>Add Item (Faulty)</button>\n        <ItemList items={this.state.data} />\n      </div>\n    );\n  }\n}\n```\nWhen `addItem` is called, the `data` array is mutated directly (`push`). Then `setState` is called, but the `data` prop passed to `ItemList` still has the *same reference* as before. `ItemList` (being a `PureComponent`) will see that `prevProps.items` and `nextProps.items` are referentially equal, and thus `shouldComponentUpdate` will return `false`, preventing the component from re-rendering and displaying the new item.\n\n**How to address this:**\nThe solution is to always treat props and state as immutable when working with `PureComponent` or `React.memo`. Instead of mutating the original object/array, create a *new* object or array with the desired changes. This ensures that the reference changes, triggering `PureComponent`'s shallow comparison to return `true` and cause a re-render.\n\n**Corrected `addItem`:**\n```typescript\n  addItem = () => {\n    // Creating a new array to trigger re-render\n    this.setState(prevState => ({\n      data: [...prevState.data, { id: prevState.data.length + 1, name: 'New Item' }]\n    }));\n  };\n```\nThis creates a new array for `data`, so `ItemList` receives a new prop reference and re-renders correctly.",
+          "analysisPoints": [
+            "Clearly describes the mutable data scenario.",
+            "Provides a concrete code example of the problem.",
+            "Explains why the shallow comparison fails in this case.",
+            "Offers the correct solution using immutability (spreading/new object creation)."
+          ],
+          "keyConcepts": [
+            "React.PureComponent",
+            "React.memo",
+            "shallow comparison",
+            "immutability",
+            "mutable data",
+            "re-rendering issues",
+            "state management"
+          ],
+          "evaluationCriteria": [
+            "Ability to identify and explain a common pitfall of shallow comparison.",
+            "Provision of a clear example.",
+            "Presentation of a correct and idiomatic React solution."
+          ],
+          "example": "See the provided code example in the answer.",
+          "tags": [
+            "react",
+            "performance",
+            "purecomponent",
+            "immutability",
+            "bugs",
+            "state-management"
+          ],
+          "prerequisites": [
+            "react_state_props",
+            "javascript_objects_arrays"
+          ],
+          "complexity": 8,
+          "interviewFrequency": 9,
+          "learningPath": "advanced"
+        },
+        {
+          "id": "question_purecomponent_override_shouldcomponentupdate_1",
+          "topic": "React.PureComponent",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "Can you override `shouldComponentUpdate` in a `React.PureComponent`? What is the consequence?",
+          "answer": "Yes, you can. However, doing so overrides `PureComponent`'s built-in shallow comparison, effectively negating its primary benefit and making it behave like a regular `React.Component` unless your custom `shouldComponentUpdate` explicitly re-implements memoization logic.",
+          "keyConcepts": [
+            "React.PureComponent",
+            "shouldComponentUpdate",
+            "override",
+            "performance",
+            "consequences"
+          ],
+          "evaluationCriteria": [
+            "Recall of `PureComponent`'s behavior with `shouldComponentUpdate`."
+          ],
+          "tags": [
+            "react",
+            "purecomponent",
+            "lifecycle",
+            "flashcard"
+          ],
+          "prerequisites": [
+            "react_lifecycle"
+          ],
+          "complexity": 4,
+          "interviewFrequency": 6,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_purecomponent_vs_memo_1",
+          "topic": "React.PureComponent",
+          "level": "medium",
+          "type": "code",
+          "question": "You have a complex class component that extends `React.Component`. You want to optimize its performance by preventing unnecessary re-renders. Refactor the component to use `React.PureComponent` instead. Provide a small code snippet demonstrating the change and explain why this is an improvement.",
+          "answer": "Original Component (before optimization):\n```typescript\nimport React from 'react';\n\nclass UnoptimizedDisplay extends React.Component {\n  render() {\n    console.log('UnoptimizedDisplay rendered');\n    return (\n      <div>\n        <p>Value: {this.props.value}</p>\n        <p>Label: {this.props.label}</p>\n      </div>\n    );\n  }\n}\n\n// Parent usage example:\n// class Parent extends React.Component {\n//   state = { count: 0 };\n//   render() {\n//     return (\n//       <div>\n//         <button onClick={() => this.setState({ count: this.state.count + 1 })}>\n//           Update Parent ({this.state.count})\n//         </button>\n//         <UnoptimizedDisplay value={10} label=\"Fixed Label\" />\n//       </div>\n//     );\n//   }\n// }\n```\n\nOptimized Component using `React.PureComponent`:\n\n```typescript\nimport React from 'react';\n\nclass OptimizedDisplay extends React.PureComponent {\n  render() {\n    console.log('OptimizedDisplay rendered');\n    return (\n      <div>\n        <p>Value: {this.props.value}</p>\n        <p>Label: {this.props.label}</p>\n      </div>\n    );\n  }\n}\n\n// Parent usage example:\nfunction ParentOptimized() {\n  const [count, setCount] = React.useState(0);\n  const fixedLabel = \"Fixed Label\";\n  const fixedValue = 10;\n\n  return (\n    <div>\n      <button onClick={() => setCount(count + 1)}>\n        Update Parent ({count})\n      </button>\n      <OptimizedDisplay value={fixedValue} label={fixedLabel} />\n    </div>\n  );\n}\n```\n\n**Explanation of Improvement:**\n\nBy changing `extends React.Component` to `extends React.PureComponent`, the `OptimizedDisplay` component automatically inherits a `shouldComponentUpdate` method. This method performs a shallow comparison of the component's current `props` and `state` with its next `props` and `state`.\n\nIn the `ParentOptimized` example, when the `count` state changes, `ParentOptimized` re-renders. However, the `value` (10) and `label` (\"Fixed Label\") props passed to `OptimizedDisplay` remain referentially (and value-wise) the same. Because `OptimizedDisplay` is a `PureComponent`, its `shouldComponentUpdate` will return `false`, preventing it from re-rendering unnecessarily. The `console.log('OptimizedDisplay rendered')` will therefore only appear on the initial mount, and not on subsequent parent re-renders when the props haven't changed.\n\nThis is an improvement because it saves React from performing the rendering work (reconciling the virtual DOM, potentially updating the real DOM) for `OptimizedDisplay` when its output would be identical, leading to better performance, especially for complex or deeply nested components.",
+          "analysisPoints": [
+            "Correctly refactors the class component to extend `React.PureComponent`.",
+            "Clearly explains the mechanism (automatic shallow comparison via `shouldComponentUpdate`).",
+            "Demonstrates the performance benefit with a clear example (prevents re-render when parent updates but props don't change).",
+            "Highlights the 'why' behind the improvement (saving rendering work)."
+          ],
+          "keyConcepts": [
+            "React.PureComponent",
+            "shouldComponentUpdate",
+            "re-rendering",
+            "performance optimization",
+            "class components",
+            "shallow comparison"
+          ],
+          "evaluationCriteria": [
+            "Ability to apply `PureComponent` for optimization.",
+            "Understanding of the performance mechanism.",
+            "Clarity of the explanation.",
+            "Correctness of code snippet."
+          ],
+          "example": "See the code in the answer.",
+          "tags": [
+            "react",
+            "performance",
+            "purecomponent",
+            "code-challenge",
+            "refactoring"
+          ],
+          "prerequisites": [
+            "react_class_components",
+            "react_state_props"
+          ],
+          "complexity": 7,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_flashcard_purecomponent_behavior",
+          "topic": "React.PureComponent",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "What kind of comparison does `React.PureComponent` use for its props and state?",
+          "answer": "Shallow comparison.",
+          "keyConcepts": [
+            "React.PureComponent",
+            "shallow comparison",
+            "props",
+            "state"
+          ],
+          "evaluationCriteria": [
+            "Recall of `PureComponent`'s comparison type."
+          ],
+          "tags": [
+            "react",
+            "purecomponent",
+            "flashcard"
+          ],
+          "prerequisites": [],
+          "complexity": 3,
+          "interviewFrequency": 6,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_lazy_suspense_purpose_1",
+          "topic": "React.lazy and React.Suspense",
+          "level": "easy",
+          "type": "mcq",
+          "question": "What is the primary benefit of using `React.lazy` and `React.Suspense` together?",
+          "answer": "To enable code splitting, reducing initial bundle size and improving load times.",
+          "options": [
+            "To provide server-side rendering capabilities.",
+            "To perform deep prop comparisons for performance.",
+            "To enable code splitting, reducing initial bundle size and improving load times.",
+            "To manage global state across the application."
+          ],
+          "analysisPoints": [
+            "Code splitting is the core feature enabled by `React.lazy` and `Suspense`.",
+            "Reducing initial bundle size and improving load times are the direct benefits.",
+            "SSR requires more advanced setups (like `@loadable/component`) beyond basic `React.lazy`.",
+            "Deep prop comparison is related to `shouldComponentUpdate` or custom `React.memo` functions, not `lazy`/`Suspense`.",
+            "State management is handled by Context API, Redux, etc."
+          ],
+          "keyConcepts": [
+            "React.lazy",
+            "React.Suspense",
+            "code splitting",
+            "lazy loading",
+            "bundle size",
+            "performance"
+          ],
+          "evaluationCriteria": [
+            "Understanding of the main purpose and benefits.",
+            "Differentiating from other React features."
+          ],
+          "example": "```typescript\nconst MyLazyComponent = React.lazy(() => import('./MyHeavyComponent'));\nfunction App() {\n  return (\n    <Suspense fallback={<div>Loading...</div>}>\n      <MyLazyComponent />\n    </Suspense>\n  );\n}\n```\nHere, `MyHeavyComponent`'s code is only loaded when `MyLazyComponent` is first rendered.",
+          "tags": [
+            "react",
+            "code-splitting",
+            "lazy-loading",
+            "suspense"
+          ],
+          "prerequisites": [
+            "javascript_modules"
+          ],
+          "complexity": 5,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_lazy_suspense_fallback_1",
+          "topic": "React.lazy and React.Suspense",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "What is the purpose of the `fallback` prop in `React.Suspense`?",
+          "answer": "It specifies the UI to display while the lazy-loaded components within the `Suspense` boundary are loading.",
+          "keyConcepts": [
+            "React.Suspense",
+            "fallback",
+            "lazy loading",
+            "loading indicator"
+          ],
+          "evaluationCriteria": [
+            "Recall of `Suspense`'s primary prop and its function."
+          ],
+          "tags": [
+            "react",
+            "suspense",
+            "flashcard"
+          ],
+          "prerequisites": [],
+          "complexity": 3,
+          "interviewFrequency": 7,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_lazy_suspense_benefits_1",
+          "topic": "React.lazy and React.Suspense",
+          "level": "medium",
+          "type": "open",
+          "question": "Beyond initial load time, what other benefits does code splitting with `React.lazy` and `React.Suspense` offer to a React application?",
+          "answer": "Beyond improving initial load time, code splitting with `React.lazy` and `React.Suspense` offers several other significant benefits:\n\n1.  **Improved User Experience**: A faster initial load translates directly to a better user experience. Users perceive the application as more responsive and snappier, reducing bounce rates and increasing engagement.\n2.  **Better Resource Utilization**: Only the code necessary for the current view or functionality is downloaded. This conserves user bandwidth and reduces the amount of data transferred, which is particularly beneficial for users on limited data plans or slower network connections.\n3.  **Reduced Memory Footprint**: Less JavaScript code is parsed and executed upfront, which can lead to lower memory consumption in the browser. This is helpful for devices with limited memory.\n4.  **Better Caching**: Smaller, separate chunks of code can be cached independently by the browser. If only a small part of the application changes, users only need to download the updated chunk, rather than the entire large bundle.\n5.  **Faster Subsequent Loads**: Once a chunk is downloaded and cached, subsequent visits to features requiring that chunk will load almost instantly.\n6.  **Error Isolation**: If there's an error in a dynamically loaded chunk, it might not prevent the rest of the application from rendering or functioning correctly, as opposed to a single monolithic bundle where a single error might crash the entire app.",
+          "analysisPoints": [
+            "Lists multiple benefits beyond just initial load time.",
+            "Explains how each benefit contributes to a better application.",
+            "Covers user experience, resource utilization, caching, and error handling."
+          ],
+          "keyConcepts": [
+            "code splitting",
+            "React.lazy",
+            "React.Suspense",
+            "user experience",
+            "bandwidth",
+            "caching",
+            "memory consumption"
+          ],
+          "evaluationCriteria": [
+            "Comprehensive understanding of code splitting advantages.",
+            "Ability to articulate the impact on different aspects of application performance and user interaction."
+          ],
+          "example": "An e-commerce site might lazy-load the checkout page component only when a user clicks 'Checkout', preventing unnecessary code download for users who are just browsing products.",
+          "tags": [
+            "react",
+            "code-splitting",
+            "performance",
+            "architecture"
+          ],
+          "prerequisites": [
+            "web_performance",
+            "javascript_modules"
+          ],
+          "complexity": 7,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_lazy_suspense_ssr_1",
+          "topic": "React.lazy and React.Suspense",
+          "level": "hard",
+          "type": "open",
+          "question": "Are `React.lazy` and `React.Suspense` directly compatible with Server-Side Rendering (SSR)? If not, what considerations or alternative solutions exist?",
+          "answer": "`React.lazy` and `React.Suspense` are primarily designed for client-side code splitting and hydration. They are **not directly compatible with traditional Server-Side Rendering (SSR)** out-of-the-box.\n\n**Why they are not directly compatible:**\nWhen a server renders a React application, it needs synchronous access to all components to generate the full HTML string. `React.lazy` relies on dynamic `import()` statements, which are asynchronous. The server wouldn't know which code chunks to load and would likely fail when trying to render a lazy component without its corresponding code being immediately available.\n\n**Considerations and Alternative Solutions:**\n1.  **Hydration Mismatch**: If the server renders a fallback (e.g., `Loading...`) while the client expects a full component (which is lazy-loaded), it can lead to a hydration mismatch, causing re-renders or even errors on the client side.\n\n2.  **External Libraries**: For SSR with code splitting, developers typically use specialized libraries that integrate with build tools (like Webpack) to handle this complexity:\n    *   **`@loadable/component`**: This is a very popular solution. It provides a `loadable` HOC that works similarly to `React.lazy` but is designed for SSR. It allows you to specify components to be loaded dynamically, and during SSR, it collects the necessary bundles so they can be synchronously rendered on the server and then preloaded on the client.\n    *   **Next.js Dynamic Imports**: Frameworks like Next.js have their own built-in `next/dynamic` feature, which is an abstraction over `@loadable/component` (or similar logic) to handle code splitting and SSR seamlessly. It allows you to import components dynamically while still ensuring they are properly rendered on the server.\n\n3.  **No Code Splitting on Server**: An alternative is to simply bundle all code together for server-side rendering, and only apply code splitting for the client-side bundle. This means the server-rendered HTML will include all components, and the client will then hydrate it, potentially downloading smaller chunks for future interactions. This sacrifices the 'smallest initial HTML' benefit but simplifies SSR setup.\n\nIn summary, while `React.lazy` and `Suspense` are powerful for client-side performance, SSR requires specific tooling or frameworks to handle the asynchronous nature of dynamic imports during the server-side rendering process.",
+          "analysisPoints": [
+            "Clearly states the incompatibility with traditional SSR.",
+            "Explains the technical reason (asynchronous nature of `import()`).",
+            "Discusses the hydration mismatch issue.",
+            "Provides specific, widely used alternative solutions (`@loadable/component`, Next.js dynamic imports).",
+            "Mentions the simpler workaround of no code splitting on the server side."
+          ],
+          "keyConcepts": [
+            "React.lazy",
+            "React.Suspense",
+            "SSR (Server-Side Rendering)",
+            "code splitting",
+            "hydration",
+            "loadable/component",
+            "Next.js"
+          ],
+          "evaluationCriteria": [
+            "Deep understanding of `lazy`/`Suspense` limitations.",
+            "Knowledge of SSR principles and challenges.",
+            "Familiarity with common solutions and trade-offs."
+          ],
+          "example": "Using `@loadable/component` for SSR-compatible lazy loading:\n```typescript\n// Client-side:\nimport loadable from '@loadable/component';\nconst MyComponent = loadable(() => import('./MyComponent'));\n\n// On the server, @loadable/server handles collecting chunks:\n// import { ChunkExtractor } from '@loadable/server';\n// const extractor = new ChunkExtractor({ statsFile });\n// const jsx = extractor.collectChunks(<MyComponent />);\n// const html = renderToString(jsx);\n```",
+          "tags": [
+            "react",
+            "code-splitting",
+            "ssr",
+            "performance",
+            "advanced-react"
+          ],
+          "prerequisites": [
+            "react_lazy_suspense",
+            "ssr_basics"
+          ],
+          "complexity": 9,
+          "interviewFrequency": 7,
+          "learningPath": "expert"
+        },
+        {
+          "id": "question_flashcard_react_lazy",
+          "topic": "React.lazy and React.Suspense",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "What does `React.lazy` allow you to do with components?",
+          "answer": "It allows you to lazy-load (dynamically import) components, rendering a dynamic `import()` as a regular React component.",
+          "keyConcepts": [
+            "React.lazy",
+            "lazy loading",
+            "dynamic import",
+            "code splitting"
+          ],
+          "evaluationCriteria": [
+            "Recall of `React.lazy`'s function."
+          ],
+          "tags": [
+            "react",
+            "lazy-loading",
+            "flashcard"
+          ],
+          "prerequisites": [],
+          "complexity": 3,
+          "interviewFrequency": 7,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_flashcard_react_suspense",
+          "topic": "React.lazy and React.Suspense",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "What is the role of `React.Suspense` in code splitting?",
+          "answer": "It allows you to display a fallback UI while code for lazy-loaded components is being downloaded.",
+          "keyConcepts": [
+            "React.Suspense",
+            "fallback",
+            "code splitting",
+            "loading state"
+          ],
+          "evaluationCriteria": [
+            "Recall of `React.Suspense`'s role in the lazy loading pattern."
+          ],
+          "tags": [
+            "react",
+            "suspense",
+            "flashcard"
+          ],
+          "prerequisites": [],
+          "complexity": 3,
+          "interviewFrequency": 7,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_flashcard_code_splitting",
+          "topic": "React.lazy and React.Suspense",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "What is 'code splitting' in web development?",
+          "answer": "Code splitting is a technique to break a large JavaScript bundle into smaller chunks that can be loaded on demand, improving initial page load times.",
+          "keyConcepts": [
+            "code splitting",
+            "bundle size",
+            "lazy loading",
+            "performance"
+          ],
+          "evaluationCriteria": [
+            "Recall of the definition of code splitting."
+          ],
+          "tags": [
+            "web-performance",
+            "webpack",
+            "flashcard"
+          ],
+          "prerequisites": [],
+          "complexity": 3,
+          "interviewFrequency": 6,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_flashcard_snapshot_testing",
+          "topic": "React Component Testing Best Practices",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "What is snapshot testing primarily used for?",
+          "answer": "To ensure the UI of a component does not unintentionally change over time by comparing its rendered output to a saved snapshot.",
+          "keyConcepts": [
+            "snapshot testing",
+            "UI consistency",
+            "regression testing"
+          ],
+          "evaluationCriteria": [
+            "Recall of snapshot testing's main purpose."
+          ],
+          "tags": [
+            "testing",
+            "jest",
+            "snapshot"
+          ],
+          "prerequisites": [],
+          "complexity": 3,
+          "interviewFrequency": 6,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_flashcard_test_behavior",
+          "topic": "React Component Testing Best Practices",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "What does 'test behavior, not implementation' mean in unit testing?",
+          "answer": "It means testing what the component *does* from a user's perspective (its observable outputs) rather than *how* it does it (its internal methods or state).",
+          "keyConcepts": [
+            "behavioral testing",
+            "unit testing",
+            "implementation details",
+            "refactoring"
+          ],
+          "evaluationCriteria": [
+            "Recall of the core principle of behavioral testing."
+          ],
+          "tags": [
+            "testing",
+            "best-practices",
+            "flashcard"
+          ],
+          "prerequisites": [],
+          "complexity": 4,
+          "interviewFrequency": 7,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_flashcard_unnecessary_re_renders",
+          "topic": "React Performance Optimization",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "Why are unnecessary re-renders a performance concern in React?",
+          "answer": "They cause React to perform redundant reconciliation and potentially DOM updates, wasting CPU cycles and leading to slower UI updates and a less responsive application.",
+          "keyConcepts": [
+            "re-renders",
+            "performance",
+            "reconciliation",
+            "DOM updates"
+          ],
+          "evaluationCriteria": [
+            "Recall of the impact of re-renders on performance."
+          ],
+          "tags": [
+            "react",
+            "performance",
+            "flashcard"
+          ],
+          "prerequisites": [],
+          "complexity": 4,
+          "interviewFrequency": 7,
+          "learningPath": "beginner"
+        }
+      ],
+      "tasks": [
+        {
+          "id": "task_component_testing_with_best_practices",
+          "title": "Implement a Toggle Button and Test with Best Practices",
+          "description": "\nImplement a simple `ToggleButton` React component and write a comprehensive test suite for it, adhering to the specified testing best practices.\n\n**Component Requirements:**\n1.  The `ToggleButton` should accept `initialState` (boolean, default `false`) and `onToggle` (function) props.\n2.  It should display text indicating its current state (e.g., 'ON' or 'OFF').\n3.  Clicking the button should toggle its internal state and call the `onToggle` prop with the new state.\n\n**Testing Requirements:**\n1.  Use `@testing-library/react`.\n2.  **Snapshot Testing**: Include a snapshot test to ensure the component's structure remains consistent.\n3.  **Behavioral Testing**: Write a test that verifies the button toggles its state and calls `onToggle` correctly. Focus on user perception, not internal state details.\n4.  **`data-testid`**: Use `data-testid` for selecting elements in your behavioral tests.\n5.  **Edge Cases**: Test that the component correctly initializes with `initialState`.\n",
+          "difficulty": "medium",
+          "startingCode": "import React from 'react';\n\n// --- Component File: ToggleButton.tsx ---\nexport function ToggleButton({ initialState = false, onToggle }) {\n  const [isOn, setIsOn] = React.useState(initialState);\n\n  const handleClick = () => {\n    const newState = !isOn;\n    setIsOn(newState);\n    onToggle(newState);\n  };\n\n  return (\n    <button onClick={handleClick} data-testid=\"toggle-button\">\n      {isOn ? 'ON' : 'OFF'}\n    </button>\n  );\n}\n\n// --- Test File: ToggleButton.test.tsx ---\nimport { render, screen, fireEvent } from '@testing-library/react';\nimport renderer from 'react-test-renderer';\nimport { ToggleButton } from './ToggleButton';\n\ndescribe('ToggleButton', () => {\n  // Implement tests here\n\n  test('should render correctly and match snapshot', () => {\n    // TODO: Implement snapshot test\n    const component = renderer.create(\n      <ToggleButton onToggle={() => {}} />\n    );\n    let tree = component.toJSON();\n    expect(tree).toMatchSnapshot();\n  });\n\n  test('should toggle state and call onToggle when clicked', () => {\n    // TODO: Implement behavioral test using data-testid\n    const mockOnToggle = jest.fn();\n    render(<ToggleButton onToggle={mockOnToggle} initialState={false} />);\n    \n    const button = screen.getByTestId('toggle-button');\n    expect(button).toHaveTextContent('OFF');\n\n    fireEvent.click(button);\n    expect(button).toHaveTextContent('ON');\n    expect(mockOnToggle).toHaveBeenCalledWith(true);\n    expect(mockOnToggle).toHaveBeenCalledTimes(1);\n\n    fireEvent.click(button);\n    expect(button).toHaveTextContent('OFF');\n    expect(mockOnToggle).toHaveBeenCalledWith(false);\n    expect(mockOnToggle).toHaveBeenCalledTimes(2);\n  });\n\n  test('should initialize with provided initialState', () => {\n    // TODO: Implement test for initialState\n    const mockOnToggle = jest.fn();\n    render(<ToggleButton onToggle={mockOnToggle} initialState={true} />);\n    \n    const button = screen.getByTestId('toggle-button');\n    expect(button).toHaveTextContent('ON');\n\n    fireEvent.click(button);\n    expect(button).toHaveTextContent('OFF');\n    expect(mockOnToggle).toHaveBeenCalledWith(false);\n  });\n\n});\n",
+          "solutionCode": "import React from 'react';\n\n// --- Component File: ToggleButton.tsx ---\nexport function ToggleButton({ initialState = false, onToggle }) {\n  const [isOn, setIsOn] = React.useState(initialState);\n\n  const handleClick = () => {\n    const newState = !isOn;\n    setIsOn(newState);\n    onToggle(newState);\n  };\n\n  return (\n    <button onClick={handleClick} data-testid=\"toggle-button\">\n      {isOn ? 'ON' : 'OFF'}\n    </button>\n  );\n}\n\n// --- Test File: ToggleButton.test.tsx ---\nimport { render, screen, fireEvent } from '@testing-library/react';\nimport renderer from 'react-test-renderer';\nimport { ToggleButton } from './ToggleButton';\n\ndescribe('ToggleButton', () => {\n\n  test('should render correctly and match snapshot', () => {\n    const component = renderer.create(\n      <ToggleButton onToggle={() => {}} />\n    );\n    let tree = component.toJSON();\n    expect(tree).toMatchSnapshot();\n  });\n\n  test('should toggle state and call onToggle when clicked', () => {\n    const mockOnToggle = jest.fn();\n    render(<ToggleButton onToggle={mockOnToggle} initialState={false} />);\n    \n    const button = screen.getByTestId('toggle-button');\n    expect(button).toHaveTextContent('OFF');\n\n    fireEvent.click(button);\n    expect(button).toHaveTextContent('ON');\n    expect(mockOnToggle).toHaveBeenCalledWith(true);\n    expect(mockOnToggle).toHaveBeenCalledTimes(1);\n\n    fireEvent.click(button);\n    expect(button).toHaveTextContent('OFF');\n    expect(mockOnToggle).toHaveBeenCalledWith(false);\n    expect(mockOnToggle).toHaveBeenCalledTimes(2);\n  });\n\n  test('should initialize with provided initialState', () => {\n    const mockOnToggle = jest.fn();\n    render(<ToggleButton onToggle={mockOnToggle} initialState={true} />);\n    \n    const button = screen.getByTestId('toggle-button');\n    expect(button).toHaveTextContent('ON');\n\n    fireEvent.click(button);\n    expect(button).toHaveTextContent('OFF');\n    expect(mockOnToggle).toHaveBeenCalledWith(false);\n  });\n\n  test('should call onToggle with the correct new state after multiple clicks', () => {\n    const mockOnToggle = jest.fn();\n    render(<ToggleButton onToggle={mockOnToggle} initialState={false} />);\n    const button = screen.getByTestId('toggle-button');\n    \n    fireEvent.click(button); // OFF -> ON\n    fireEvent.click(button); // ON -> OFF\n    fireEvent.click(button); // OFF -> ON\n\n    expect(mockOnToggle).toHaveBeenCalledTimes(3);\n    expect(mockOnToggle).toHaveBeenLastCalledWith(true); // Last call was to set ON\n  });\n\n});\n",
+          "testCases": [
+            "The component should render 'OFF' by default and match its snapshot.",
+            "Clicking the button should change its text from 'OFF' to 'ON' and call `onToggle` with `true`.",
+            "Clicking again should change text from 'ON' to 'OFF' and call `onToggle` with `false`.",
+            "The `onToggle` mock function should be called the correct number of times.",
+            "The component should render 'ON' if `initialState` is set to `true`.",
+            "After initializing with `true`, a click should change it to 'OFF' and call `onToggle` with `false`."
+          ],
+          "hints": [
+            "Remember that `renderer.create` is used for snapshot testing, while `render` from `@testing-library/react` is for DOM-based tests.",
+            "Use `jest.fn()` to create mock functions for callbacks like `onToggle` and assert on their calls.",
+            "For `data-testid`, use `screen.getByTestId('your-id')` to select elements.",
+            "Focus on `toHaveTextContent` for UI state and `toHaveBeenCalledWith`/`toHaveBeenCalledTimes` for function calls.",
+            "Snapshot tests capture the full component tree, so ensure your component's rendering is stable."
+          ],
+          "tags": [
+            "react",
+            "testing",
+            "unit-testing",
+            "jest",
+            "react-testing-library",
+            "best-practices",
+            "frontend"
+          ],
+          "timeEstimate": 45,
+          "prerequisites": [
+            "theory_react_testing_best_practices",
+            "react_functional_components",
+            "jest_basics"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 9,
+          "learningPath": "intermediate",
+          "relatedConcepts": [
+            "snapshot_testing",
+            "behavioral_testing",
+            "data_testid",
+            "mocking"
+          ]
+        },
+        {
+          "id": "task_optimize_functional_component_with_memo",
+          "title": "Optimize a Functional Component using `React.memo`",
+          "description": "\nCreate two React functional components: a `ParentComponent` and an `ExpensiveChild`. Optimize `ExpensiveChild` using `React.memo` to prevent unnecessary re-renders.\n\n**Component Requirements:**\n1.  **`ExpensiveChild` (Functional Component):**\n    *   Accepts a `data` prop (an array of objects: `{ id: number, name: string }`).\n    *   Logs 'ExpensiveChild rendered' to the console every time it renders.\n    *   Renders a list of items from its `data` prop.\n    *   **Optimize it using `React.memo`.**\n2.  **`ParentComponent` (Functional Component):**\n    *   Manages an `integer` state (`count`).\n    *   Manages an `array` state (`items`) which is passed as `data` to `ExpensiveChild`.\n    *   Has a button to increment `count`.\n    *   Has a button to add a new item to `items` (ensure this operation correctly triggers a re-render of `ExpensiveChild`).\n    *   Ensure the `items` prop passed to `ExpensiveChild` is stable using `useMemo` when it's not meant to change.\n\n**Verification:**\n*   Observe console logs: `ExpensiveChild` should *not* re-render when only `ParentComponent`'s `count` changes.\n*   `ExpensiveChild` *should* re-render when a new item is added to `items`.\n",
+          "difficulty": "medium",
+          "startingCode": "import React from 'react';\n\n// --- ExpensiveChild.tsx ---\nfunction ExpensiveChild({ data }) {\n  console.log('ExpensiveChild rendered');\n  return (\n    <div style={{ border: '1px solid gray', padding: '10px', margin: '10px' }}>\n      <h3>Expensive Child Component</h3>\n      <ul>\n        {data.map(item => (\n          <li key={item.id}>{item.name}</li>\n        ))}\n      </ul>\n    </div>\n  );\n}\n\n// TODO: Wrap ExpensiveChild with React.memo here\nconst MemoizedExpensiveChild = ExpensiveChild; // Replace this line\n\n// --- ParentComponent.tsx ---\nexport function ParentComponent() {\n  const [count, setCount] = React.useState(0);\n  const [items, setItems] = React.useState([\n    { id: 1, name: 'Item A' },\n    { id: 2, name: 'Item B' }\n  ]);\n\n  // TODO: Ensure `fixedItems` doesn't cause unnecessary re-renders\n  const fixedItems = React.useMemo(() => [\n    { id: 100, name: 'Fixed Item X' },\n    { id: 101, name: 'Fixed Item Y' }\n  ], []);\n\n  const addNewItem = () => {\n    // TODO: Ensure this correctly updates the `items` array to trigger re-render in MemoizedExpensiveChild\n    setItems(prevItems => [...prevItems, { id: prevItems.length + 1, name: `New Item ${prevItems.length + 1}` }]);\n  };\n\n  return (\n    <div style={{ border: '1px solid blue', padding: '20px' }}>\n      <h2>Parent Component</h2>\n      <button onClick={() => setCount(count + 1)}>\n        Increment Parent Count: {count}\n      </button>\n      <button onClick={addNewItem}>Add New Item to Child Data</button>\n      \n      {/* Pass the optimized child here */}\n      <MemoizedExpensiveChild data={fixedItems} />\n      <hr />\n      <MemoizedExpensiveChild data={items} />\n    </div>\n  );\n}\n",
+          "solutionCode": "import React from 'react';\n\n// --- ExpensiveChild.tsx ---\nfunction ExpensiveChild({ data }) {\n  console.log('ExpensiveChild rendered');\n  return (\n    <div style={{ border: '1px solid gray', padding: '10px', margin: '10px' }}>\n      <h3>Expensive Child Component</h3>\n      <ul>\n        {data.map(item => (\n          <li key={item.id}>{item.name}</li>\n        ))}\n      </ul>\n    </div>\n  );\n}\n\n// Wrapped with React.memo for optimization\nconst MemoizedExpensiveChild = React.memo(ExpensiveChild);\n\n// --- ParentComponent.tsx ---\nexport function ParentComponent() {\n  const [count, setCount] = React.useState(0);\n  const [items, setItems] = React.useState([\n    { id: 1, name: 'Item A' },\n    { id: 2, name: 'Item B' }\n  ]);\n\n  // fixedItems is memoized using useMemo to ensure its reference doesn't change\n  // on ParentComponent re-renders, thereby not triggering MemoizedExpensiveChild.\n  const fixedItems = React.useMemo(() => [\n    { id: 100, name: 'Fixed Item X' },\n    { id: 101, name: 'Fixed Item Y' }\n  ], []);\n\n  const addNewItem = () => {\n    // Creating a new array reference to trigger re-render in MemoizedExpensiveChild\n    setItems(prevItems => [...prevItems, { id: prevItems.length + 1, name: `New Item ${prevItems.length + 1}` }]);\n  };\n\n  return (\n    <div style={{ border: '1px solid blue', padding: '20px' }}>\n      <h2>Parent Component</h2>\n      <button onClick={() => setCount(count + 1)}>\n        Increment Parent Count: {count}\n      </button>\n      <button onClick={addNewItem}>Add New Item to Child Data</button>\n      \n      {/* This instance will only re-render if fixedItems (reference) changes */}\n      <MemoizedExpensiveChild data={fixedItems} />\n      <hr />\n      {/* This instance will re-render if `items` (reference) changes */}\n      <MemoizedExpensiveChild data={items} />\n    </div>\n  );\n}\n",
+          "testCases": [
+            "Initial render: Both 'ExpensiveChild rendered' logs should appear once.",
+            "Click 'Increment Parent Count': Only 'Parent Component' should re-render. Neither 'ExpensiveChild rendered' log should appear again for `fixedItems` or `items` (before 'Add New Item' is clicked for `items`).",
+            "Click 'Add New Item to Child Data': The `MemoizedExpensiveChild` receiving `items` should re-render. The `MemoizedExpensiveChild` receiving `fixedItems` should *not* re-render.",
+            "Verify that new items are correctly displayed in the `items`-fed `ExpensiveChild`."
+          ],
+          "hints": [
+            "Remember that `React.memo` by default performs a shallow comparison of props.",
+            "To ensure a prop does not change its reference when the parent re-renders, consider using `React.useMemo` for static or memoized values.",
+            "When updating an array or object in state, always create a *new* array/object reference; never mutate the existing one directly if you want `React.memo` (or `PureComponent`) to detect the change."
+          ],
+          "tags": [
+            "react",
+            "performance",
+            "react-memo",
+            "useMemo",
+            "functional-component",
+            "optimization"
+          ],
+          "timeEstimate": 60,
+          "prerequisites": [
+            "theory_react_memo",
+            "react_hooks_useState_useMemo"
+          ],
+          "complexity": 8,
+          "interviewRelevance": 9,
+          "learningPath": "intermediate",
+          "relatedConcepts": [
+            "shallow_comparison",
+            "immutability",
+            "re-rendering"
+          ]
+        },
+        {
+          "id": "task_optimize_class_component_with_purecomponent",
+          "title": "Optimize a Class Component using `React.PureComponent`",
+          "description": "\nRefactor a standard `React.Component` class component into a `React.PureComponent` to demonstrate performance optimization. Observe the effect on re-renders.\n\n**Component Requirements:**\n1.  **`DataDisplay` (Class Component):**\n    *   Initially, make it extend `React.Component`.\n    *   It should accept a `data` prop (an object like `{ value: number, label: string }`).\n    *   Logs 'DataDisplay rendered' to the console every time it renders.\n    *   Displays the `value` and `label` from its `data` prop.\n    *   **Refactor it to extend `React.PureComponent`.**\n2.  **`App` (Class Component or Functional):**\n    *   Manages a `count` state.\n    *   Manages a `config` state (an object like `{ theme: string, options: { debug: boolean } }`).\n    *   Pass `config` as the `data` prop to `DataDisplay`.\n    *   Include a button to increment `count` (should not re-render `DataDisplay`).\n    *   Include a button to change `config.theme` (should re-render `DataDisplay`).\n    *   Include a button to change `config.options.debug` (should *not* re-render `DataDisplay` if `config` object reference remains same).\n\n**Verification:**\n*   Observe console logs: `DataDisplay` should *not* re-render when only `App`'s `count` changes.\n*   `DataDisplay` *should* re-render when `config.theme` changes (by creating a new `config` object).\n*   `DataDisplay` should *not* re-render when `config.options.debug` changes *if* the `config` object itself is mutated rather than replaced.\n",
+          "difficulty": "hard",
+          "startingCode": "import React from 'react';\n\n// --- DataDisplay.tsx ---\nclass DataDisplay extends React.Component { // TODO: Change to React.PureComponent\n  render() {\n    console.log('DataDisplay rendered');\n    const { data } = this.props;\n    return (\n      <div style={{ border: '1px solid green', padding: '10px', margin: '10px' }}>\n        <h3>Data Display Component</h3>\n        <p>Theme: {data.theme}</p>\n        <p>Debug: {data.options.debug ? 'Enabled' : 'Disabled'}</p>\n      </div>\n    );\n  }\n}\n\n// --- App.tsx ---\nexport class App extends React.Component {\n  state = {\n    count: 0,\n    config: {\n      theme: 'light',\n      options: {\n        debug: false\n      }\n    }\n  };\n\n  handleIncrementCount = () => {\n    this.setState(prevState => ({ count: prevState.count + 1 }));\n  };\n\n  handleChangeTheme = () => {\n    this.setState(prevState => ({\n      config: { ...prevState.config, theme: prevState.config.theme === 'light' ? 'dark' : 'light' }\n    }));\n  };\n\n  handleToggleDebug = () => {\n    // TODO: This operation will NOT trigger re-render if not handled correctly for PureComponent\n    // Need to ensure new object reference for `options` and `config`.\n    this.setState(prevState => ({\n      config: {\n        ...prevState.config,\n        options: { ...prevState.config.options, debug: !prevState.config.options.debug }\n      }\n    }));\n  };\n\n  render() {\n    return (\n      <div style={{ border: '1px solid red', padding: '20px' }}>\n        <h2>App Component</h2>\n        <button onClick={this.handleIncrementCount}>\n          Increment App Count: {this.state.count}\n        </button>\n        <button onClick={this.handleChangeTheme}>\n          Change Theme ({this.state.config.theme})\n        </button>\n        <button onClick={this.handleToggleDebug}>\n          Toggle Debug ({this.state.config.options.debug ? 'On' : 'Off'})\n        </button>\n        \n        <DataDisplay data={this.state.config} />\n      </div>\n    );\n  }\n}\n",
+          "solutionCode": "import React from 'react';\n\n// --- DataDisplay.tsx ---\nclass DataDisplay extends React.PureComponent { // Changed to React.PureComponent\n  render() {\n    console.log('DataDisplay rendered');\n    const { data } = this.props;\n    return (\n      <div style={{ border: '1px solid green', padding: '10px', margin: '10px' }}>\n        <h3>Data Display Component</h3>\n        <p>Theme: {data.theme}</p>\n        <p>Debug: {data.options.debug ? 'Enabled' : 'Disabled'}</p>\n      </div>\n    );\n  }\n}\n\n// --- App.tsx ---\nexport class App extends React.Component {\n  state = {\n    count: 0,\n    config: {\n      theme: 'light',\n      options: {\n        debug: false\n      }\n    }\n  };\n\n  handleIncrementCount = () => {\n    this.setState(prevState => ({ count: prevState.count + 1 }));\n  };\n\n  handleChangeTheme = () => {\n    this.setState(prevState => ({\n      // Create new config object to trigger re-render\n      config: { ...prevState.config, theme: prevState.config.theme === 'light' ? 'dark' : 'light' }\n    }));\n  };\n\n  handleToggleDebug = () => {\n    // To trigger re-render for nested object changes, both the nested object\n    // AND the parent object (config) must be new references.\n    this.setState(prevState => ({\n      config: {\n        ...prevState.config,\n        options: { ...prevState.config.options, debug: !prevState.config.options.debug }\n      }\n    }));\n  };\n\n  render() {\n    return (\n      <div style={{ border: '1px solid red', padding: '20px' }}>\n        <h2>App Component</h2>\n        <button onClick={this.handleIncrementCount}>\n          Increment App Count: {this.state.count}\n        </button>\n        <button onClick={this.handleChangeTheme}>\n          Change Theme ({this.state.config.theme})\n        </button>\n        <button onClick={this.handleToggleDebug}>\n          Toggle Debug ({this.state.config.options.debug ? 'On' : 'Off'})\n        </button>\n        \n        <DataDisplay data={this.state.config} />\n      </div>\n    );\n  }\n}\n",
+          "testCases": [
+            "Initial render: 'DataDisplay rendered' should appear once.",
+            "Click 'Increment App Count': `DataDisplay` should *not* re-render (no new 'DataDisplay rendered' log).",
+            "Click 'Change Theme': `DataDisplay` *should* re-render (a new 'DataDisplay rendered' log should appear), and the displayed theme should change.",
+            "Click 'Toggle Debug': `DataDisplay` *should* re-render (a new 'DataDisplay rendered' log should appear), and the displayed debug status should change (due to correct immutable update).",
+            "Verify that if `handleToggleDebug` was initially implemented without creating a new `options` object (e.g., `prevState.config.options.debug = !prevState.config.options.debug; this.setState(prevState.config);`), `DataDisplay` would *not* re-render, demonstrating the shallow comparison limitation."
+          ],
+          "hints": [
+            "The key to `React.PureComponent` detecting changes in props (especially objects) is that the *reference* to the prop object must change.",
+            "When updating nested objects in state, you must create new objects for every level of the nested structure that has changed, all the way up to the top-level state property. Use the spread operator (`...`) for this.",
+            "Pay close attention to the console logs to verify re-render behavior."
+          ],
+          "tags": [
+            "react",
+            "performance",
+            "purecomponent",
+            "class-component",
+            "immutability",
+            "optimization",
+            "frontend"
+          ],
+          "timeEstimate": 75,
+          "prerequisites": [
+            "theory_react_purecomponent",
+            "react_class_components",
+            "javascript_objects_arrays"
+          ],
+          "complexity": 9,
+          "interviewRelevance": 9,
+          "learningPath": "advanced",
+          "relatedConcepts": [
+            "shallow_comparison",
+            "state_management",
+            "re-rendering"
+          ]
+        },
+        {
+          "id": "task_implement_lazy_loading_with_suspense",
+          "title": "Implement Lazy Loading and Fallback UI with `React.lazy` and `React.Suspense`",
+          "description": "\nCreate a React application that dynamically loads a 'heavy' component only when needed, using `React.lazy` and `React.Suspense`.\n\n**Component Requirements:**\n1.  **`App` Component (Main Application):**\n    *   Contains a button that, when clicked, sets a state variable (`showHeavyComponent`) to `true`.\n    *   Conditionally renders the `HeavyComponent` only when `showHeavyComponent` is `true`.\n2.  **`HeavyComponent` (Separate File):**\n    *   Simulate a 'heavy' component by performing a small, time-consuming operation (e.g., generating a large array) within its render function. \n    *   Logs 'HeavyComponent loaded and rendered' to the console upon rendering.\n    *   Export it as a `default` export.\n\n**Implementation Requirements:**\n1.  Use `React.lazy` to dynamically import `HeavyComponent`.\n2.  Wrap the `HeavyComponent` with `React.Suspense`.\n3.  Provide a clear `fallback` UI for `Suspense` (e.g., 'Loading Heavy Component...').\n\n**Verification:**\n*   Initial page load: `HeavyComponent`'s log should *not* appear.\n*   Clicking the button: The fallback UI should momentarily appear, followed by `HeavyComponent`'s content and its console log.\n",
+          "difficulty": "medium",
+          "startingCode": "import React, { Suspense } from 'react';\n\n// --- App.tsx ---\n// TODO: Use React.lazy to import HeavyComponent dynamically\n// const HeavyComponent = ...\n\n// --- HeavyComponent.tsx (create this file separately) ---\n// const HeavyComponent = () => {\n//   // Simulate a heavy operation (e.g., generate a large array)\n//   const items = Array.from({ length: 5000 }, (_, i) => `Simulated Heavy Item ${i}`);\n//   console.log('HeavyComponent loaded and rendered');\n//   return (\n//     <div style={{ border: '1px dashed orange', padding: '15px', marginTop: '20px' }}>\n//       <h2>Heavy Component Content</h2>\n//       <p>This component was lazy-loaded!</p>\n//       {/* Render a small part or skip rendering the full list if too large */}\n//       <p>First item: {items[0]}</p>\n//     </div>\n//   );\n// };\n// export default HeavyComponent;\n\n// --- Main App Component ---\nexport function App() {\n  const [showHeavyComponent, setShowHeavyComponent] = React.useState(false);\n\n  return (\n    <div style={{ border: '1px solid purple', padding: '20px' }}>\n      <h1>Main Application</h1>\n      <button onClick={() => setShowHeavyComponent(true)}>\n        Load Heavy Component\n      </button>\n\n      {showHeavyComponent && (\n        // TODO: Wrap the dynamically imported component with Suspense\n        // <Suspense fallback={...}> \n        //   <HeavyComponent />\n        // </Suspense>\n        <div>Placeholder for Heavy Component</div> // Replace this\n      )}\n    </div>\n  );\n}\n",
+          "solutionCode": "import React, { Suspense } from 'react';\n\n// --- App.tsx ---\n// Dynamically import HeavyComponent using React.lazy\nconst HeavyComponent = React.lazy(() => import('./HeavyComponent'));\n\n// --- HeavyComponent.tsx (in a separate file) ---\n/*\n// HeavyComponent.tsx\nimport React from 'react';\n\nconst HeavyComponent = () => {\n  // Simulate a heavy operation (e.g., generate a large array)\n  const items = Array.from({ length: 5000 }, (_, i) => `Simulated Heavy Item ${i}`);\n  console.log('HeavyComponent loaded and rendered');\n  return (\n    <div style={{ border: '1px dashed orange', padding: '15px', marginTop: '20px' }}>\n      <h2>Heavy Component Content</h2>\n      <p>This component was lazy-loaded!</p>\n      <p>First item: {items[0]}</p>\n      {/ * Render a small part or skip rendering the full list if too large * /}\n    </div>\n  );\n};\n\nexport default HeavyComponent;\n*/\n\n// --- Main App Component ---\nexport function App() {\n  const [showHeavyComponent, setShowHeavyComponent] = React.useState(false);\n\n  return (\n    <div style={{ border: '1px solid purple', padding: '20px' }}>\n      <h1>Main Application</h1>\n      <button onClick={() => setShowHeavyComponent(true)}>\n        Load Heavy Component\n      </button>\n\n      {showHeavyComponent && (\n        <Suspense fallback={<div>Loading Heavy Component...</div>}>\n          <HeavyComponent />\n        </Suspense>\n      )}\n    </div>\n  );\n}\n",
+          "testCases": [
+            "Verify that 'HeavyComponent loaded and rendered' does NOT appear in the console on initial page load.",
+            "Click the 'Load Heavy Component' button.",
+            "Observe that 'Loading Heavy Component...' text appears briefly.",
+            "Observe that 'HeavyComponent loaded and rendered' appears in the console after the fallback text disappears.",
+            "Verify that the content of `HeavyComponent` (e.g., 'Heavy Component Content', 'This component was lazy-loaded!') is visible on the screen."
+          ],
+          "hints": [
+            "Ensure `HeavyComponent.tsx` is in a separate file and exported as a `default` export.",
+            "`React.lazy` takes a function that returns `import('./path/to/component')`.",
+            "`React.Suspense` needs a `fallback` prop, which can be any valid React element.",
+            "Use your browser's network tab to confirm that the `HeavyComponent`'s chunk is only downloaded after the button click."
+          ],
+          "tags": [
+            "react",
+            "code-splitting",
+            "lazy-loading",
+            "suspense",
+            "performance",
+            "frontend"
+          ],
+          "timeEstimate": 60,
+          "prerequisites": [
+            "theory_react_lazy_suspense",
+            "react_functional_components",
+            "javascript_modules"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 9,
+          "learningPath": "advanced",
+          "relatedConcepts": [
+            "dynamic_import",
+            "webpack",
+            "bundle_size"
+          ]
+        }
+      ]
+    }
+  }
+]

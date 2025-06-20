@@ -1,0 +1,1571 @@
+[
+  {
+    "id": "c08a9f74-fa83-457a-a59a-7b0704e2564c",
+    "startLine": 9300,
+    "endLine": 9399,
+    "processedDate": "2025-06-17T11:01:47.248Z",
+    "content": {
+      "logicalBlockInfo": {
+        "suggestedEndLine": -1
+      },
+      "theory": [
+        {
+          "id": "theory_redux_thunk_intro",
+          "title": "Introduction to Redux Thunk and Asynchronous Actions",
+          "content": "Redux Thunk is a middleware for Redux that allows you to write action creators that return a function instead of a plain action object. This function, often called a 'thunk', receives the store's `dispatch` method and `getState` function as its arguments.\n\nThe core problem Redux Thunk solves is enabling Redux to handle side effects, such as asynchronous operations (e.g., API calls, timers) and complex synchronous logic, without making reducers impure. Reducers in Redux must be pure functions, meaning they take the current state and an action, and return a new state without any side effects or modifications to the original state.\n\nWithout middleware like Redux Thunk, action creators can only return plain JavaScript objects. This works well for synchronous actions but falls short when dealing with operations that take time or depend on the current state. Redux Thunk acts as an intermediary: when an action creator returns a function, the middleware intercepts it and executes that function, passing `dispatch` and `getState` as arguments. This allows you to dispatch multiple actions at different points in time (e.g., before an async call, after success, or after failure) and access the current state to make decisions.\n\n## Key Principles\n*   **Functions as Actions:** Instead of returning `{ type: 'ACTION_TYPE' }`, action creators return `(dispatch, getState) => { /* async logic */ }`.\n*   **Side Effect Management:** Centralizes complex logic and asynchronous operations outside of components and reducers.\n*   **Access to `dispatch` and `getState`:** The thunk function receives `dispatch` to dispatch regular actions (or other thunks) and `getState` to read the current state of the Redux store.",
+          "examples": [
+            {
+              "id": "example_redux_thunk_intro_1",
+              "title": "Basic Thunk Action Creator",
+              "code": "const delayedIncrement = () => {\n  return (dispatch) => {\n    // Simulate an async operation\n    setTimeout(() => {\n      dispatch({ type: 'INCREMENT' });\n    }, 1000);\n  };\n};\n\n// Usage in a component:\n// import { useDispatch } from 'react-redux';\n// const dispatch = useDispatch();\n// dispatch(delayedIncrement());",
+              "explanation": "This example shows a simple thunk action creator `delayedIncrement`. Instead of returning a plain action, it returns a function. This function takes `dispatch` as an argument. Inside the function, a `setTimeout` simulates an asynchronous delay, after which a regular `INCREMENT` action is dispatched. This demonstrates how a thunk can delay a dispatch or perform operations before dispatching.",
+              "language": "typescript"
+            },
+            {
+              "id": "example_redux_thunk_intro_2",
+              "title": "Thunk with `getState`",
+              "code": "const incrementIfOdd = () => {\n  return (dispatch, getState) => {\n    const state = getState(); // Get the current Redux state\n    const { counter } = state; // Assuming 'counter' is a slice of state\n    \n    if (counter % 2 !== 0) {\n      dispatch({ type: 'INCREMENT' });\n    }\n  };\n};\n\n// Usage:\n// dispatch(incrementIfOdd()); // Only increments if 'counter' state is odd",
+              "explanation": "This example demonstrates using the `getState` argument within a thunk. The `incrementIfOdd` thunk checks the current value of `counter` from the Redux store's state. It only dispatches the `INCREMENT` action if the `counter` value is odd, showcasing conditional logic based on the application's current state.",
+              "language": "typescript"
+            }
+          ],
+          "relatedQuestions": [
+            "question_redux_thunk_mcq_1",
+            "question_redux_thunk_mcq_2",
+            "question_redux_thunk_open_1",
+            "question_redux_thunk_flashcard_1",
+            "question_redux_thunk_code_1"
+          ],
+          "relatedTasks": [
+            "task_simple_delayed_dispatch",
+            "task_conditional_increment"
+          ],
+          "tags": [
+            "Redux",
+            "Redux Thunk",
+            "Middleware",
+            "Asynchronous Programming",
+            "State Management"
+          ],
+          "technology": "TypeScript",
+          "prerequisites": [
+            "Redux_basics",
+            "JavaScript_async_basics"
+          ],
+          "complexity": 6,
+          "interviewRelevance": 8,
+          "learningPath": "intermediate",
+          "requiredFor": [
+            "complex_redux_apps",
+            "data_fetching_redux"
+          ]
+        },
+        {
+          "id": "theory_async_data_fetching_pattern",
+          "title": "Standard Pattern for Asynchronous Data Fetching with Thunks",
+          "content": "A common and recommended pattern for handling asynchronous data fetching in Redux applications using Thunk involves dispatching three distinct actions: one before the request, one upon successful completion, and one upon failure. This pattern allows your reducers to manage different states of the asynchronous operation (loading, data, error) effectively.\n\n## The Three Action Types Pattern\n1.  **`_REQUEST` Action:** Dispatched at the beginning of the asynchronous operation. Its primary purpose is to signal that a data fetch has started. The reducer typically responds by setting a `isLoading` or `loading` state to `true` and clearing any previous error state.\n2.  **`_SUCCESS` Action:** Dispatched when the asynchronous operation successfully completes. It carries the fetched data in its `payload`. The reducer updates the state with the received data, sets `isLoading` to `false`, and clears any error.\n3.  **`_FAILURE` Action:** Dispatched if the asynchronous operation encounters an error. It typically carries the error message or object in its `payload`. The reducer sets `isLoading` to `false` and stores the error information.\n\nThis pattern provides clear, predictable state transitions and allows UI components to react appropriately to loading states, display fetched data, or show error messages.",
+          "examples": [
+            {
+              "id": "example_async_data_fetching_1",
+              "title": "Thunk Action Creator for Data Fetching (Promise-based)",
+              "code": "const FETCH_DATA_REQUEST = 'FETCH_DATA_REQUEST';\nconst FETCH_DATA_SUCCESS = 'FETCH_DATA_SUCCESS';\nconst FETCH_DATA_FAILURE = 'FETCH_DATA_FAILURE';\n\nconst fetchData = () => {\n  return (dispatch) => {\n    // 1. Dispatch request action\n    dispatch({ type: FETCH_DATA_REQUEST });\n\n    fetch('https://api.example.com/data')\n      .then(response => {\n        if (!response.ok) {\n          throw new Error(`HTTP error! status: ${response.status}`);\n        }\n        return response.json();\n      })\n      .then(data => {\n        // 2. Dispatch success action with data\n        dispatch({ \n          type: FETCH_DATA_SUCCESS,\n          payload: data \n        });\n      })\n      .catch(error => {\n        // 3. Dispatch failure action with error\n        dispatch({ \n          type: FETCH_DATA_FAILURE, \n          error: true,\n          payload: error.message \n        });\n      });\n  };\n};",
+              "explanation": "This thunk demonstrates the `REQUEST/SUCCESS/FAILURE` pattern using traditional Promise chaining. It dispatches `FETCH_DATA_REQUEST` before the `fetch` call. On a successful response, `FETCH_DATA_SUCCESS` is dispatched with the fetched data. If an error occurs, `FETCH_DATA_FAILURE` is dispatched with the error message. This orchestrated sequence of dispatches allows the reducer to manage the UI state (loading, data, error) throughout the async operation.",
+              "language": "typescript"
+            },
+            {
+              "id": "example_async_data_fetching_2",
+              "title": "Reducer Handling Async Actions",
+              "code": "const initialState = {\n  data: [],\n  isLoading: false,\n  error: null\n};\n\nfunction dataReducer(state = initialState, action) {\n  switch (action.type) {\n    case 'FETCH_DATA_REQUEST':\n      // Show loading indicator, clear previous error\n      return { ...state, isLoading: true, error: null };\n      \n    case 'FETCH_DATA_SUCCESS':\n      // Hide loading, display data, clear error\n      return { \n        ...state, \n        isLoading: false, \n        data: action.payload,\n        error: null\n      };\n      \n    case 'FETCH_DATA_FAILURE':\n      // Hide loading, display error, clear data (optional)\n      return {\n        ...state,\n        isLoading: false,\n        error: action.payload\n      };\n      \n    default:\n      return state;\n  }\n}",
+              "explanation": "This reducer illustrates how to handle the three action types. When `FETCH_DATA_REQUEST` is dispatched, `isLoading` is set to `true` and any previous `error` is cleared. Upon `FETCH_DATA_SUCCESS`, `isLoading` becomes `false`, `data` is populated with the payload, and `error` is `null`. If `FETCH_DATA_FAILURE` occurs, `isLoading` is `false`, and `error` is set to the error payload. This state management pattern ensures that the UI can always reflect the current status of the data fetching operation.",
+              "language": "typescript"
+            }
+          ],
+          "relatedQuestions": [
+            "question_async_pattern_mcq_1",
+            "question_async_pattern_code_1",
+            "question_async_pattern_open_1",
+            "question_async_pattern_flashcard_1"
+          ],
+          "relatedTasks": [
+            "task_implement_data_fetch_flow"
+          ],
+          "tags": [
+            "Redux",
+            "Redux Thunk",
+            "Data Fetching",
+            "Async Pattern",
+            "API Integration",
+            "State Management"
+          ],
+          "technology": "TypeScript",
+          "prerequisites": [
+            "theory_redux_thunk_intro"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 9,
+          "learningPath": "intermediate",
+          "requiredFor": [
+            "real_world_redux_apps",
+            "error_handling_redux"
+          ]
+        },
+        {
+          "id": "theory_advanced_thunk_data_fetching",
+          "title": "Advanced Thunk Data Fetching with Async/Await",
+          "content": "Modern JavaScript provides `async/await` syntax for writing asynchronous code that looks and behaves more like synchronous code, making it easier to read and maintain. This syntax can be seamlessly integrated into Redux Thunk action creators, providing a cleaner way to handle promises.\n\nInstead of chaining `.then()` and `.catch()` blocks, you can use `await` inside an `async` function. The thunk action creator itself can return an `async` function, which will then allow you to use `await` for your API calls. This significantly improves readability, especially for complex sequences of asynchronous operations.\n\n## Key Advantages of `async/await` with Thunks\n*   **Readability:** Code flow is more linear and intuitive.\n*   **Error Handling:** `try...catch` blocks provide a familiar way to handle errors, similar to synchronous code.\n*   **Simplicity:** Reduces callback hell and nested `.then()` calls.\n\nWhen using `async/await`, the principles of dispatching `_REQUEST`, `_SUCCESS`, and `_FAILURE` actions remain the same. The `try` block handles the success path, and the `catch` block handles errors.",
+          "examples": [
+            {
+              "id": "example_advanced_thunk_data_fetching_1",
+              "title": "Action Types and Creators",
+              "code": "// Action Types\nconst FETCH_USERS_REQUEST = 'FETCH_USERS_REQUEST';\nconst FETCH_USERS_SUCCESS = 'FETCH_USERS_SUCCESS';\nconst FETCH_USERS_FAILURE = 'FETCH_USERS_FAILURE';\n\n// Action Creators\nconst fetchUsersRequest = () => ({ type: FETCH_USERS_REQUEST });\nconst fetchUsersSuccess = users => ({ type: FETCH_USERS_SUCCESS, payload: users });\nconst fetchUsersFailure = error => ({ type: FETCH_USERS_FAILURE, payload: error });",
+              "explanation": "These are the standard action types and simple action creators for a user fetching operation. They define the three states of the asynchronous request: pending, success, and failure. Using dedicated action creators (even for simple actions) promotes consistency and reduces boilerplate in the thunk.",
+              "language": "typescript"
+            },
+            {
+              "id": "example_advanced_thunk_data_fetching_2",
+              "title": "Thunk with `async/await` for Fetching Users",
+              "code": "const fetchUsers = () => {\n  return async dispatch => {\n    dispatch(fetchUsersRequest()); // Dispatch request action\n    \n    try {\n      const response = await fetch('https://jsonplaceholder.typicode.com/users');\n      if (!response.ok) {\n          throw new Error(`HTTP error! status: ${response.status}`);\n      }\n      const data = await response.json();\n      dispatch(fetchUsersSuccess(data)); // Dispatch success action\n    } catch (error) {\n      dispatch(fetchUsersFailure(error.message)); // Dispatch failure action\n    }\n  };\n};\n\n// Usage in a React component (assuming react-redux hooks):\n// import { useDispatch, useSelector } from 'react-redux';\n// import React, { useEffect } from 'react';\n\n// function UserList() {\n//   const dispatch = useDispatch();\n//   const { users, loading, error } = useSelector(state => state.users);\n  \n//   useEffect(() => {\n//     dispatch(fetchUsers());\n//   }, [dispatch]);\n\n//   if (loading) return <div>Loading users...</div>;\n//   if (error) return <div>Error: {error}</div>;\n//   if (!users.length) return <div>No users found.</div>;\n\n//   return (\n//     <ul>\n//       {users.map(user => <li key={user.id}>{user.name}</li>)}\n//     </ul>\n//   );\n// }",
+              "explanation": "This example demonstrates how to integrate `async/await` into a Redux Thunk for fetching data. The thunk returns an `async` function, allowing the use of `await` for the `fetch` call and `response.json()`. A `try...catch` block handles both successful data retrieval and potential network or parsing errors. This pattern is widely used in modern Redux applications for cleaner asynchronous code. The commented-out 'Usage in component' section illustrates how React components interact with this Redux flow using `useDispatch` and `useSelector`.",
+              "language": "typescript"
+            }
+          ],
+          "relatedQuestions": [
+            "question_async_await_thunk_mcq_1",
+            "question_async_await_thunk_open_1",
+            "question_async_await_thunk_flashcard_1"
+          ],
+          "relatedTasks": [
+            "task_fetch_users_with_async_await"
+          ],
+          "tags": [
+            "Redux",
+            "Redux Thunk",
+            "Async/Await",
+            "Data Fetching",
+            "Error Handling",
+            "Modern JavaScript"
+          ],
+          "technology": "TypeScript",
+          "prerequisites": [
+            "theory_async_data_fetching_pattern",
+            "JavaScript_async_await"
+          ],
+          "complexity": 8,
+          "interviewRelevance": 9,
+          "learningPath": "advanced",
+          "requiredFor": [
+            "production_ready_redux_apps",
+            "complex_api_integrations"
+          ]
+        }
+      ],
+      "questions": [
+        {
+          "id": "question_redux_thunk_mcq_1",
+          "topic": "Redux Thunk Fundamentals",
+          "level": "easy",
+          "type": "mcq",
+          "question": "What is the primary purpose of Redux Thunk middleware?",
+          "answer": "To allow action creators to return functions for handling side effects.",
+          "options": [
+            "To make Redux reducers asynchronous.",
+            "To allow action creators to return functions for handling side effects.",
+            "To replace Redux actions with plain JavaScript objects.",
+            "To directly modify the Redux state from components."
+          ],
+          "analysisPoints": [
+            "Redux Thunk enables asynchronous logic and side effects.",
+            "It achieves this by allowing action creators to return functions.",
+            "Reducers must remain pure and synchronous.",
+            "State modification always happens via reducers responding to actions."
+          ],
+          "keyConcepts": [
+            "Redux Thunk",
+            "Middleware",
+            "Action Creators",
+            "Side Effects"
+          ],
+          "evaluationCriteria": [
+            "Understanding of Redux Thunk's core function.",
+            "Ability to differentiate between synchronous and asynchronous Redux flows."
+          ],
+          "example": "Redux Thunk allows dispatching functions: `dispatch(aThunkFunction())` instead of just plain objects: `dispatch({ type: 'SOME_ACTION' })`.",
+          "tags": [
+            "Redux",
+            "Redux Thunk",
+            "Middleware",
+            "Fundamentals"
+          ],
+          "prerequisites": [
+            "Redux_basics"
+          ],
+          "complexity": 3,
+          "interviewFrequency": 8,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_redux_thunk_mcq_2",
+          "topic": "Arguments of a Thunk Function",
+          "level": "easy",
+          "type": "mcq",
+          "question": "What arguments does a Redux Thunk function receive when it is executed by the middleware?",
+          "answer": "`dispatch` and `getState`",
+          "options": [
+            "`state` and `action`",
+            "`dispatch` and `action`",
+            "`dispatch` and `getState`",
+            "`getState` and `payload`"
+          ],
+          "analysisPoints": [
+            "A thunk function provides direct access to dispatch actions.",
+            "It provides access to the current Redux state via `getState`.",
+            "This allows thunks to read the store state and dispatch new actions based on it.",
+            "It does not receive `action` or `payload` directly as arguments from the middleware."
+          ],
+          "keyConcepts": [
+            "Redux Thunk",
+            "dispatch",
+            "getState",
+            "Middleware"
+          ],
+          "evaluationCriteria": [
+            "Knowledge of Redux Thunk function signature.",
+            "Understanding of how thunks interact with the Redux store."
+          ],
+          "example": "```typescript\nconst myThunk = () => {\n  return (dispatch, getState) => {\n    // dispatch a regular action\n    dispatch({ type: 'SOME_ACTION' });\n    \n    // get current state\n    const state = getState();\n    console.log(state.user.id);\n  };\n};\n```",
+          "tags": [
+            "Redux",
+            "Redux Thunk",
+            "Fundamentals"
+          ],
+          "prerequisites": [
+            "Redux_basics"
+          ],
+          "complexity": 3,
+          "interviewFrequency": 7,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_async_pattern_mcq_1",
+          "topic": "Async Action Pattern",
+          "level": "medium",
+          "type": "mcq",
+          "question": "In the standard Redux Thunk pattern for data fetching, what is the purpose of the `FETCH_DATA_REQUEST` action?",
+          "answer": "To indicate that a data fetch operation has started and to show a loading indicator.",
+          "options": [
+            "To carry the fetched data payload.",
+            "To indicate that a data fetch operation has started and to show a loading indicator.",
+            "To signal that an error occurred during data fetching.",
+            "To finalize the state update after data has been processed."
+          ],
+          "analysisPoints": [
+            "The `_REQUEST` action is dispatched at the beginning of an async operation.",
+            "It typically triggers a loading state in the UI.",
+            "It also often clears previous error messages.",
+            "It does not carry data or error information; those are for `_SUCCESS` and `_FAILURE` respectively."
+          ],
+          "keyConcepts": [
+            "Async Redux Pattern",
+            "Loading State",
+            "Action Types"
+          ],
+          "evaluationCriteria": [
+            "Understanding the lifecycle of an async operation in Redux.",
+            "Knowledge of state transitions in a Redux reducer."
+          ],
+          "example": "```typescript\nconst fetchData = () => {\n  return (dispatch) => {\n    dispatch({ type: 'FETCH_DATA_REQUEST' }); // This is the first action dispatched\n    // ... fetch logic ...\n  };\n};\n\nfunction dataReducer(state, action) {\n  switch (action.type) {\n    case 'FETCH_DATA_REQUEST':\n      return { ...state, isLoading: true, error: null };\n    // ... other cases ...\n  }\n}\n```",
+          "tags": [
+            "Redux",
+            "Redux Thunk",
+            "Data Fetching",
+            "Async Pattern"
+          ],
+          "prerequisites": [
+            "theory_async_data_fetching_pattern"
+          ],
+          "complexity": 5,
+          "interviewFrequency": 9,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_async_await_thunk_mcq_1",
+          "topic": "Async/Await with Thunks",
+          "level": "medium",
+          "type": "mcq",
+          "question": "Consider the following Redux Thunk implementation for fetching users:\n\n```typescript\nconst fetchUsers = () => {\n  return async dispatch => {\n    dispatch({ type: 'FETCH_USERS_REQUEST' });\n    try {\n      const response = await fetch('https://api.example.com/users');\n      // [MISSING CODE]\n    } catch (error) {\n      dispatch({ type: 'FETCH_USERS_FAILURE', payload: error.message });\n    }\n  };\n};\n```\n\nWhich of the following code snippets correctly completes the `[MISSING CODE]` section to handle a successful response?",
+          "answer": "```typescript\n      if (!response.ok) {\n          throw new Error(`HTTP error! status: ${response.status}`);\n      }\n      const data = await response.json();\n      dispatch({ type: 'FETCH_USERS_SUCCESS', payload: data });\n```",
+          "options": [
+            "```typescript\n      const data = response.json();\n      dispatch({ type: 'FETCH_USERS_SUCCESS', payload: data });\n```",
+            "```typescript\n      if (response.status === 200) {\n          const data = await response.json();\n          dispatch({ type: 'FETCH_USERS_SUCCESS', payload: data });\n      }\n```",
+            "```typescript\n      if (!response.ok) {\n          throw new Error(`HTTP error! status: ${response.status}`);\n      }\n      const data = await response.json();\n      dispatch({ type: 'FETCH_USERS_SUCCESS', payload: data });\n```",
+            "```typescript\n      const data = response.json().then(d => d);\n      dispatch({ type: 'FETCH_USERS_SUCCESS', payload: data });\n```"
+          ],
+          "analysisPoints": [
+            "The `response.ok` property is the most robust way to check for HTTP success (status 200-299).",
+            "`response.json()` returns a Promise, so `await` is necessary.",
+            "The `_SUCCESS` action should be dispatched with the parsed data as payload.",
+            "Missing `await` for `response.json()` or checking only `status === 200` are common mistakes."
+          ],
+          "keyConcepts": [
+            "Async/Await",
+            "Fetch API",
+            "Error Handling",
+            "Redux Thunk"
+          ],
+          "evaluationCriteria": [
+            "Correct use of `async/await` with Fetch API.",
+            "Proper error checking for HTTP responses.",
+            "Understanding of the async action success flow.",
+            "Ability to write robust asynchronous code."
+          ],
+          "example": "The correct option ensures both a proper HTTP status check and correctly awaits the JSON parsing, dispatching the success action only after data is ready.",
+          "tags": [
+            "Redux",
+            "Redux Thunk",
+            "Async/Await",
+            "Fetch API",
+            "Error Handling"
+          ],
+          "prerequisites": [
+            "theory_advanced_thunk_data_fetching",
+            "JavaScript_async_await",
+            "Fetch_API"
+          ],
+          "complexity": 7,
+          "interviewFrequency": 9,
+          "learningPath": "advanced"
+        },
+        {
+          "id": "question_redux_thunk_code_1",
+          "topic": "Conditional Thunk Logic",
+          "level": "medium",
+          "type": "code",
+          "question": "Write a Redux Thunk action creator called `decrementIfEven` that only dispatches a `DECREMENT` action if the current value of the `counter` state (from `getState()`) is an even number. If it's odd, it should dispatch no action.",
+          "answer": "```typescript\nconst decrementIfEven = () => {\n  return (dispatch, getState) => {\n    const state = getState();\n    // Assuming 'counter' is directly at the root of the state or under state.counter.value\n    const counterValue = state.counter; // Adjust this line based on your actual state shape\n    \n    if (typeof counterValue === 'number' && counterValue % 2 === 0) {\n      dispatch({ type: 'DECREMENT' });\n    }\n  };\n};\n```",
+          "analysisPoints": [
+            "The action creator must return a function.",
+            "The function must accept `dispatch` and `getState` as arguments.",
+            "`getState()` is used to access the current Redux store state.",
+            "Conditional logic (`if (counterValue % 2 === 0)`) is applied based on the state.",
+            "A regular action (`{ type: 'DECREMENT' }`) is dispatched only if the condition is met.",
+            "Considered edge case: `typeof counterValue === 'number'` check for robustness, and clarifying state shape access."
+          ],
+          "keyConcepts": [
+            "Redux Thunk",
+            "getState",
+            "Conditional Dispatch",
+            "Pure Functions (reducers)"
+          ],
+          "evaluationCriteria": [
+            "Correct Redux Thunk signature.",
+            "Proper usage of `getState`.",
+            "Accurate implementation of conditional logic.",
+            "Understanding of when/how to dispatch actions from a thunk."
+          ],
+          "example": "This task tests the ability to use `getState` within a thunk to perform actions conditionally, which is a common pattern for optimizing dispatches or preventing unnecessary operations.",
+          "tags": [
+            "Redux",
+            "Redux Thunk",
+            "Code Challenge",
+            "getState"
+          ],
+          "prerequisites": [
+            "theory_redux_thunk_intro"
+          ],
+          "complexity": 6,
+          "interviewFrequency": 7,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_async_pattern_code_1",
+          "topic": "Redux Reducer for Async Flow",
+          "level": "medium",
+          "type": "code",
+          "question": "Complete the Redux reducer for a `products` state slice that handles the following actions for fetching product data:\n\n- `FETCH_PRODUCTS_REQUEST`\n- `FETCH_PRODUCTS_SUCCESS` (payload: `productsData: Product[]`)\n- `FETCH_PRODUCTS_FAILURE` (payload: `errorMessage: string`)\n\nThe initial state should include `products: []`, `loading: false`, and `error: null`.",
+          "answer": "```typescript\ninterface Product {\n  id: number;\n  name: string;\n  price: number;\n}\n\ninterface ProductsState {\n  products: Product[];\n  loading: boolean;\n  error: string | null;\n}\n\nconst initialState: ProductsState = {\n  products: [],\n  loading: false,\n  error: null\n};\n\nfunction productsReducer(state: ProductsState = initialState, action: any): ProductsState {\n  switch (action.type) {\n    case 'FETCH_PRODUCTS_REQUEST':\n      return { ...state, loading: true, error: null };\n      \n    case 'FETCH_PRODUCTS_SUCCESS':\n      return { \n        ...state, \n        loading: false, \n        products: action.payload,\n        error: null\n      };\n      \n    case 'FETCH_PRODUCTS_FAILURE':\n      return {\n        ...state,\n        loading: false,\n        error: action.payload\n      };\n      \n    default:\n      return state;\n  }\n}\n```",
+          "analysisPoints": [
+            "The reducer must have an `initialState` with `products`, `loading`, and `error` properties.",
+            "Each case (`_REQUEST`, `_SUCCESS`, `_FAILURE`) must return a new state object (immutability).",
+            "`_REQUEST` sets `loading: true` and clears `error`.",
+            "`_SUCCESS` sets `loading: false`, populates `products` with `action.payload`, and clears `error`.",
+            "`_FAILURE` sets `loading: false` and populates `error` with `action.payload`.",
+            "A `default` case must return the current `state`."
+          ],
+          "keyConcepts": [
+            "Redux Reducer",
+            "Immutability",
+            "Async Action Pattern",
+            "State Management"
+          ],
+          "evaluationCriteria": [
+            "Correct reducer structure and immutability.",
+            "Accurate state transitions for each async action type.",
+            "Proper handling of loading, data, and error states."
+          ],
+          "example": "This task assesses the ability to implement the reducer side of the common async data fetching pattern, ensuring proper state updates for different phases of an API call.",
+          "tags": [
+            "Redux",
+            "Reducer",
+            "Async Pattern",
+            "State Management",
+            "Code Challenge"
+          ],
+          "prerequisites": [
+            "theory_async_data_fetching_pattern"
+          ],
+          "complexity": 6,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_redux_thunk_open_1",
+          "topic": "Benefits of Redux Thunk",
+          "level": "medium",
+          "type": "open",
+          "question": "Explain why Redux Thunk is considered a valuable middleware for Redux applications, particularly when dealing with asynchronous operations. What problems does it solve?",
+          "answer": "Redux Thunk is valuable because it bridges the gap between synchronous Redux actions and the need to perform asynchronous logic (side effects) without violating Redux's core principles. Reducers must be pure functions, meaning they cannot perform side effects or directly interact with external APIs.\n\n**Problems it solves:**\n1.  **Handling Side Effects:** It allows you to encapsulate `fetch` requests, timers, or other non-pure logic within action creators by returning a function instead of a plain action object. This function then performs the async operation.\n2.  **Dispatching Multiple Actions:** Within a thunk, you can dispatch multiple actions at different stages of an async operation (e.g., `REQUEST`, `SUCCESS`, `FAILURE`). This enables precise control over UI state (loading indicators, data display, error messages).\n3.  **Accessing Store State (`getState`):** Thunks receive `getState` as an argument, enabling conditional logic based on the current Redux store state before dispatching actions or making API calls. For example, preventing a fetch if data already exists in the store.\n4.  **Keeping Reducers Pure:** By moving side effects out of reducers and into thunks, Redux Thunk helps maintain the purity of reducers, making them predictable, testable, and easier to reason about.\n5.  **Centralizing Logic:** It provides a central place for complex asynchronous business logic, keeping components cleaner and more focused on rendering.",
+          "analysisPoints": [
+            "Discusses how thunks enable side effects in Redux.",
+            "Explains the ability to dispatch multiple actions over time.",
+            "Highlights the utility of `getState` for conditional logic.",
+            "Emphasizes the preservation of reducer purity.",
+            "Mentions centralization of complex logic."
+          ],
+          "keyConcepts": [
+            "Redux Thunk",
+            "Middleware",
+            "Side Effects",
+            "Pure Functions",
+            "Async Operations",
+            "dispatch",
+            "getState"
+          ],
+          "evaluationCriteria": [
+            "Comprehensive understanding of Redux Thunk's role.",
+            "Ability to articulate its advantages for async operations.",
+            "Clear explanation of how it maintains Redux principles.",
+            "Identification of specific problems solved."
+          ],
+          "example": "This question assesses the fundamental understanding of Redux Thunk's purpose and its practical benefits in a real-world Redux application.",
+          "tags": [
+            "Redux",
+            "Redux Thunk",
+            "Theory",
+            "Architecture"
+          ],
+          "prerequisites": [
+            "Redux_basics"
+          ],
+          "complexity": 7,
+          "interviewFrequency": 9,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_async_await_thunk_open_1",
+          "topic": "Async/Await vs. Promises in Thunks",
+          "level": "hard",
+          "type": "open",
+          "question": "Compare and contrast using traditional Promise chaining (`.then().catch()`) versus `async/await` syntax within Redux Thunks for handling asynchronous data fetching. Discuss the advantages and disadvantages of each approach in this context.",
+          "answer": "Both Promise chaining and `async/await` are valid ways to handle asynchronous operations within Redux Thunks. `async/await` is essentially syntactic sugar over Promises, but it offers significant readability and maintainability benefits.\n\n**Traditional Promise Chaining (`.then().catch()`):**\n*   **Advantages:**\n    *   More explicit about the Promise lifecycle.\n    *   Easily supports parallel execution of multiple promises (e.g., `Promise.all`).\n*   **Disadvantages:**\n    *   Can lead to 'callback hell' or deeply nested `.then()` calls with complex logic.\n    *   Error handling can become tricky if not all chains are correctly `.catch()`'d or errors are re-thrown.\n    *   Code flow is less linear, requiring mental jumps between `.then()` blocks.\n\n**`async/await` Syntax:**\n*   **Advantages:**\n    *   **Readability:** Asynchronous code looks and feels like synchronous code, making it much easier to follow the logic flow.\n    *   **Error Handling:** Uses familiar `try...catch` blocks for error management, consistent with synchronous error handling.\n    *   **Debugging:** Easier to debug as breakpoints behave more predictably with linear code flow.\n    *   **Simplicity:** Reduces nesting and boilerplate compared to extensive `.then()` chains.\n*   **Disadvantages:**\n    *   **Propagation:** Requires `await` keyword for every Promise, and the containing function must be `async`. If `await` is forgotten, the Promise will not resolve before the next line executes.\n    *   **Blocking (potential):** An `await` effectively pauses execution within the `async` function. While this is the desired behavior for sequential operations, care must be taken not to block the main thread or prevent parallel execution when it's desired (though `Promise.all` can still be used with `await`).\n\n**In Redux Thunks Context:**\n`async/await` is generally preferred for data fetching in thunks due to its superior readability and simpler error handling. It allows developers to write cleaner, more intuitive thunks for fetching data, making the asynchronous logic within Redux more manageable and less prone to errors.",
+          "analysisPoints": [
+            "Compares syntax and control flow differences.",
+            "Discusses advantages of Promise chaining (explicit Promise lifecycle, `Promise.all`).",
+            "Discusses disadvantages of Promise chaining (callback hell, error handling complexity).",
+            "Discusses advantages of `async/await` (readability, `try...catch`, debugging).",
+            "Discusses disadvantages of `async/await` (need for `await`/`async`, potential for sequential blocking if not managed).",
+            "Concludes with preference for `async/await` in modern Redux Thunks for readability."
+          ],
+          "keyConcepts": [
+            "Async/Await",
+            "Promises",
+            "Redux Thunk",
+            "Asynchronous Programming",
+            "Error Handling"
+          ],
+          "evaluationCriteria": [
+            "In-depth knowledge of JavaScript async patterns.",
+            "Ability to analyze trade-offs between different approaches.",
+            "Understanding of how these patterns apply specifically to Redux Thunks.",
+            "Clarity and completeness of explanation."
+          ],
+          "example": "This question requires a nuanced understanding of JavaScript's asynchronous features and their practical application in a Redux context, a common interview topic.",
+          "tags": [
+            "Redux",
+            "Redux Thunk",
+            "Async/Await",
+            "Promises",
+            "Architecture",
+            "Advanced"
+          ],
+          "prerequisites": [
+            "JavaScript_async_await",
+            "JavaScript_promises",
+            "theory_advanced_thunk_data_fetching"
+          ],
+          "complexity": 8,
+          "interviewFrequency": 8,
+          "learningPath": "advanced"
+        },
+        {
+          "id": "question_redux_thunk_flashcard_1",
+          "topic": "Redux Thunk Definition",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "What is a 'thunk' in the context of Redux Thunk?",
+          "answer": "A 'thunk' is a function returned by an action creator, which receives `dispatch` and `getState` as arguments, allowing for asynchronous logic and side effects before dispatching a plain action.",
+          "analysisPoints": [],
+          "keyConcepts": [
+            "Redux Thunk",
+            "Middleware",
+            "Action Creators",
+            "Asynchronous"
+          ],
+          "evaluationCriteria": [],
+          "example": "",
+          "tags": [
+            "Redux",
+            "Redux Thunk",
+            "Definition"
+          ],
+          "prerequisites": [],
+          "complexity": 2,
+          "interviewFrequency": 6,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_async_pattern_flashcard_1",
+          "topic": "Async Redux Action Types",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "Name the three common types of actions typically dispatched during an asynchronous data fetching operation with Redux Thunk.",
+          "answer": "Request (e.g., `FETCH_DATA_REQUEST`), Success (e.g., `FETCH_DATA_SUCCESS`), and Failure (e.g., `FETCH_DATA_FAILURE`).",
+          "analysisPoints": [],
+          "keyConcepts": [
+            "Async Redux Pattern",
+            "Action Types"
+          ],
+          "evaluationCriteria": [],
+          "example": "",
+          "tags": [
+            "Redux",
+            "Data Fetching",
+            "Action Types"
+          ],
+          "prerequisites": [],
+          "complexity": 3,
+          "interviewFrequency": 7,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_async_await_thunk_flashcard_1",
+          "topic": "Async/Await Benefit in Thunks",
+          "level": "medium",
+          "type": "flashcard",
+          "question": "What is the primary benefit of using `async/await` syntax within Redux Thunks for data fetching?",
+          "answer": "Improved readability and simpler error handling (via `try...catch`) compared to traditional Promise chaining, making asynchronous code look and behave more like synchronous code.",
+          "analysisPoints": [],
+          "keyConcepts": [
+            "Async/Await",
+            "Redux Thunk",
+            "Readability",
+            "Error Handling"
+          ],
+          "evaluationCriteria": [],
+          "example": "",
+          "tags": [
+            "Redux",
+            "Async/Await",
+            "Benefit"
+          ],
+          "prerequisites": [
+            "JavaScript_async_await"
+          ],
+          "complexity": 5,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        }
+      ],
+      "tasks": [
+        {
+          "id": "task_simple_delayed_dispatch",
+          "title": "Implement a Delayed Action with Redux Thunk",
+          "description": "\nYour task is to create a Redux Thunk action creator `dispatchDelayedMessage` that dispatches a plain Redux action `{ type: 'SHOW_MESSAGE', payload: 'Hello after 2 seconds!' }` after a delay of 2000 milliseconds. This task will test your understanding of basic Redux Thunk usage for handling simple asynchronous operations.\n\n**Requirements:**\n1.  Create a thunk action creator named `dispatchDelayedMessage`.\n2.  This thunk should return a function that receives `dispatch` as its argument.\n3.  Inside this function, use `setTimeout` to delay the dispatch of the `SHOW_MESSAGE` action.\n4.  The action dispatched should have `type: 'SHOW_MESSAGE'` and `payload: 'Hello after 2 seconds!'`.\n\n",
+          "difficulty": "easy",
+          "startingCode": "import { AnyAction, Dispatch } from 'redux';\n\n// Action Type\nconst SHOW_MESSAGE = 'SHOW_MESSAGE';\n\n// You will implement this thunk action creator\nconst dispatchDelayedMessage = () => {\n  // TODO: Return a function that dispatches SHOW_MESSAGE after 2000ms\n  // The function should take 'dispatch' as an argument.\n};\n\n// Example Reducer (for testing purposes, no need to modify)\ninterface MessageState { message: string | null; }\nconst initialMessageState: MessageState = { message: null };\nfunction messageReducer(state: MessageState = initialMessageState, action: AnyAction): MessageState {\n  switch (action.type) {\n    case SHOW_MESSAGE:\n      return { ...state, message: action.payload };\n    default:\n      return state;\n  }\n}\n\n// To simulate Redux store setup and dispatch for local testing:\n// import { createStore, applyMiddleware, combineReducers } from 'redux';\n// import { thunk } from 'redux-thunk'; // In newer versions, it's named 'redux-thunk'\n\n// const rootReducer = combineReducers({ message: messageReducer });\n// const store = createStore(rootReducer, applyMiddleware(thunk));\n\n// console.log('Initial state:', store.getState());\n// store.dispatch(dispatchDelayedMessage());\n// setTimeout(() => console.log('State after delay:', store.getState()), 2500);\n",
+          "solutionCode": "import { AnyAction, Dispatch } from 'redux';\n\n// Action Type\nconst SHOW_MESSAGE = 'SHOW_MESSAGE';\n\n// Thunk Action Creator\nconst dispatchDelayedMessage = () => {\n  return (dispatch: Dispatch<AnyAction>) => {\n    setTimeout(() => {\n      dispatch({ type: SHOW_MESSAGE, payload: 'Hello after 2 seconds!' });\n    }, 2000);\n  };\n};\n\n// Example Reducer (for testing purposes, no need to modify)\ninterface MessageState { message: string | null; }\nconst initialMessageState: MessageState = { message: null };\nfunction messageReducer(state: MessageState = initialMessageState, action: AnyAction): MessageState {\n  switch (action.type) {\n    case SHOW_MESSAGE:\n      return { ...state, message: action.payload };\n    default:\n      return state;\n  }\n}\n",
+          "testCases": [
+            "Calling `dispatchDelayedMessage()` should cause the `SHOW_MESSAGE` action to be dispatched exactly after 2000ms.",
+            "The dispatched action should have `type: 'SHOW_MESSAGE'`.",
+            "The dispatched action should have `payload: 'Hello after 2 seconds!'`."
+          ],
+          "hints": [
+            "Remember that a thunk action creator returns a function.",
+            "The inner function receives `dispatch` as its first argument.",
+            "`setTimeout` is the standard JavaScript function for delaying execution."
+          ],
+          "tags": [
+            "Redux",
+            "Redux Thunk",
+            "Asynchronous",
+            "setTimeout",
+            "Beginner"
+          ],
+          "timeEstimate": 20,
+          "prerequisites": [
+            "Redux_basics",
+            "JavaScript_setTimeout"
+          ],
+          "complexity": 4,
+          "interviewRelevance": 7,
+          "learningPath": "beginner",
+          "relatedConcepts": [
+            "Middleware",
+            "Action Creators",
+            "Side Effects"
+          ]
+        },
+        {
+          "id": "task_implement_data_fetch_flow",
+          "title": "Implement Full Redux Thunk Data Fetching Flow (Request/Success/Failure)",
+          "description": "\nImplement a complete asynchronous data fetching flow using Redux Thunk for a 'todos' application. You need to create action types, action creators, a thunk for fetching data, and a corresponding reducer that manages `loading`, `error`, and `todos` state.\n\n**Requirements:**\n1.  Define three action types: `FETCH_TODOS_REQUEST`, `FETCH_TODOS_SUCCESS`, `FETCH_TODOS_FAILURE`.\n2.  Create corresponding action creators for each type (e.g., `fetchTodosRequest`, `fetchTodosSuccess`, `fetchTodosFailure`).\n3.  Implement a thunk action creator `fetchTodos` that:\n    *   Dispatches `FETCH_TODOS_REQUEST` immediately.\n    *   Fetches data from `https://jsonplaceholder.typicode.com/todos`.\n    *   On success, dispatches `FETCH_TODOS_SUCCESS` with the fetched array of todos as payload.\n    *   On failure, dispatches `FETCH_TODOS_FAILURE` with the error message as payload.\n    *   Handles network errors and non-OK HTTP responses.\n4.  Implement a `todosReducer` with an initial state of `todos: [], loading: false, error: null`.\n    *   This reducer should update `loading`, `error`, and `todos` based on the dispatched actions.\n5.  (Optional but recommended for testing) Simulate Redux store setup and dispatch the `fetchTodos` thunk to observe state changes.\n",
+          "difficulty": "medium",
+          "startingCode": "import { AnyAction, Dispatch, createStore, applyMiddleware, combineReducers } from 'redux';\nimport { thunk } from 'redux-thunk';\n\ninterface Todo { id: number; title: string; completed: boolean; }\n\ninterface TodosState {\n  todos: Todo[];\n  loading: boolean;\n  error: string | null;\n}\n\n// 1. Action Types - Define them here\n// TODO: const FETCH_TODOS_REQUEST = '...';\n// TODO: const FETCH_TODOS_SUCCESS = '...';\n// TODO: const FETCH_TODOS_FAILURE = '...';\n\n// 2. Action Creators - Implement them here\n// TODO: const fetchTodosRequest = () => ({ ... });\n// TODO: const fetchTodosSuccess = (todos: Todo[]) => ({ ... });\n// TODO: const fetchTodosFailure = (error: string) => ({ ... });\n\n// 3. Thunk Action Creator - Implement fetchTodos here\nconst fetchTodos = () => {\n  return async (dispatch: Dispatch<AnyAction>) => {\n    // TODO: Implement the request/success/failure flow using fetch and async/await\n    // Remember to dispatch the corresponding actions.\n  };\n};\n\n// 4. Reducer - Implement todosReducer here\nconst initialTodosState: TodosState = {\n  todos: [],\n  loading: false,\n  error: null\n};\n\nfunction todosReducer(state: TodosState = initialTodosState, action: AnyAction): TodosState {\n  // TODO: Handle FETCH_TODOS_REQUEST, FETCH_TODOS_SUCCESS, FETCH_TODOS_FAILURE\n  // Ensure state immutability.\n  return state;\n}\n\n// Optional: Simulate store setup for testing\n/*\nconst rootReducer = combineReducers({ todos: todosReducer });\nconst store = createStore(rootReducer, applyMiddleware(thunk));\n\nconsole.log('Initial State:', store.getState());\n\nstore.dispatch(fetchTodos() as any);\n\nsetTimeout(() => {\n  console.log('State after fetch attempt:', store.getState());\n}, 3000);\n*/\n",
+          "solutionCode": "import { AnyAction, Dispatch, createStore, applyMiddleware, combineReducers } from 'redux';\nimport { thunk } from 'redux-thunk';\n\ninterface Todo { id: number; title: string; completed: boolean; }\n\ninterface TodosState {\n  todos: Todo[];\n  loading: boolean;\n  error: string | null;\n}\n\n// 1. Action Types\nconst FETCH_TODOS_REQUEST = 'FETCH_TODOS_REQUEST';\nconst FETCH_TODOS_SUCCESS = 'FETCH_TODOS_SUCCESS';\nconst FETCH_TODOS_FAILURE = 'FETCH_TODOS_FAILURE';\n\n// 2. Action Creators\nconst fetchTodosRequest = () => ({ type: FETCH_TODOS_REQUEST });\nconst fetchTodosSuccess = (todos: Todo[]) => ({ type: FETCH_TODOS_SUCCESS, payload: todos });\nconst fetchTodosFailure = (error: string) => ({ type: FETCH_TODOS_FAILURE, payload: error });\n\n// 3. Thunk Action Creator\nconst fetchTodos = () => {\n  return async (dispatch: Dispatch<AnyAction>) => {\n    dispatch(fetchTodosRequest());\n    \n    try {\n      const response = await fetch('https://jsonplaceholder.typicode.com/todos');\n      if (!response.ok) {\n        throw new Error(`HTTP error! status: ${response.status}`);\n      }\n      const data: Todo[] = await response.json();\n      dispatch(fetchTodosSuccess(data));\n    } catch (error: any) {\n      dispatch(fetchTodosFailure(error.message || 'An unknown error occurred'));\n    }\n  };\n};\n\n// 4. Reducer\nconst initialTodosState: TodosState = {\n  todos: [],\n  loading: false,\n  error: null\n};\n\nfunction todosReducer(state: TodosState = initialTodosState, action: AnyAction): TodosState {\n  switch (action.type) {\n    case FETCH_TODOS_REQUEST:\n      return { ...state, loading: true, error: null };\n      \n    case FETCH_TODOS_SUCCESS:\n      return { \n        ...state, \n        loading: false, \n        todos: action.payload,\n        error: null\n      };\n      \n    case FETCH_TODOS_FAILURE:\n      return {\n        ...state,\n        loading: false,\n        error: action.payload\n      };\n      \n    default:\n      return state;\n  }\n}\n",
+          "testCases": [
+            "Dispatching `fetchTodos()` should immediately set `loading` to `true` and `error` to `null` in the state.",
+            "After a successful fetch, `loading` should be `false`, `todos` should be populated with an array of objects, and `error` should be `null`.",
+            "If the fetch URL is invalid (e.g., `invalid-url`), `loading` should be `false`, `todos` should remain empty, and `error` should contain an error message.",
+            "If the server returns a non-OK status (e.g., simulate `response.status = 404`), `loading` should be `false`, `todos` should remain empty, and `error` should contain an appropriate error message (e.g., 'HTTP error! status: 404')."
+          ],
+          "hints": [
+            "Remember to use `async/await` for cleaner Promise handling within your thunk.",
+            "The `response.ok` property of a `fetch` response is a convenient way to check for HTTP success.",
+            "Ensure your reducer creates new state objects and doesn't mutate the original state.",
+            "Use a `try...catch` block around your `fetch` call in the thunk to handle potential errors."
+          ],
+          "tags": [
+            "Redux",
+            "Redux Thunk",
+            "Data Fetching",
+            "Async Pattern",
+            "API Integration",
+            "Error Handling"
+          ],
+          "timeEstimate": 45,
+          "prerequisites": [
+            "theory_async_data_fetching_pattern",
+            "theory_advanced_thunk_data_fetching"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 9,
+          "learningPath": "intermediate",
+          "relatedConcepts": [
+            "Middleware",
+            "Reducers",
+            "Action Creators",
+            "Fetch API",
+            "Async/Await"
+          ]
+        },
+        {
+          "id": "task_fetch_users_with_async_await",
+          "title": "Build a User Fetching Module with `async/await` Thunks and `getState`",
+          "description": "\nExtend the previous data fetching pattern by creating a dedicated module for fetching users. This task focuses on utilizing `async/await` for API calls within thunks and demonstrates conditional fetching based on the existing state using `getState()`.\n\n**Requirements:**\n1.  Define action types: `FETCH_USERS_REQUEST`, `FETCH_USERS_SUCCESS`, `FETCH_USERS_FAILURE`.\n2.  Create action creators: `fetchUsersRequest`, `fetchUsersSuccess`, `fetchUsersFailure`.\n3.  Implement a `usersReducer` to manage `users: User[]`, `loading: boolean`, `error: string | null`.\n4.  Implement a thunk action creator `fetchUsers` that:\n    *   Returns an `async` function.\n    *   Receives `dispatch` and `getState` as arguments.\n    *   **Conditional Fetching:** Before fetching, check if `users.length > 0` and `!loading` in the current `getState()`. If users already exist and are not loading, the thunk should immediately dispatch a `USERS_ALREADY_LOADED` action (a new custom action type) and do nothing else. Otherwise, proceed with the fetch.\n    *   Fetches data from `https://jsonplaceholder.typicode.com/users` using `async/await`.\n    *   Handles successful responses (200-299) and dispatches `FETCH_USERS_SUCCESS`.\n    *   Handles errors (network, non-OK HTTP) and dispatches `FETCH_USERS_FAILURE`.\n5.  Include a new action type `USERS_ALREADY_LOADED` and handle it in the reducer (e.g., log a message, keep current state).\n",
+          "difficulty": "hard",
+          "startingCode": "import { AnyAction, Dispatch, createStore, applyMiddleware, combineReducers, Store } from 'redux';\nimport { thunk, ThunkMiddleware } from 'redux-thunk';\n\ninterface User { id: number; name: string; email: string; }\n\ninterface UsersState {\n  users: User[];\n  loading: boolean;\n  error: string | null;\n}\n\ninterface RootState { users: UsersState; }\n\n// 1. Action Types\nconst FETCH_USERS_REQUEST = 'FETCH_USERS_REQUEST';\nconst FETCH_USERS_SUCCESS = 'FETCH_USERS_SUCCESS';\nconst FETCH_USERS_FAILURE = 'FETCH_USERS_FAILURE';\nconst USERS_ALREADY_LOADED = 'USERS_ALREADY_LOADED'; // New action type\n\n// 2. Action Creators\nconst fetchUsersRequest = () => ({ type: FETCH_USERS_REQUEST });\nconst fetchUsersSuccess = (users: User[]) => ({ type: FETCH_USERS_SUCCESS, payload: users });\nconst fetchUsersFailure = (error: string) => ({ type: FETCH_USERS_FAILURE, payload: error });\nconst usersAlreadyLoaded = () => ({ type: USERS_ALREADY_LOADED }); // New action creator\n\n// 3. Reducer\nconst initialUsersState: UsersState = {\n  users: [],\n  loading: false,\n  error: null\n};\n\nfunction usersReducer(state: UsersState = initialUsersState, action: AnyAction): UsersState {\n  switch (action.type) {\n    case FETCH_USERS_REQUEST:\n      return { ...state, loading: true, error: null };\n    case FETCH_USERS_SUCCESS:\n      return { ...state, loading: false, users: action.payload, error: null };\n    case FETCH_USERS_FAILURE:\n      return { ...state, loading: false, error: action.payload };\n    case USERS_ALREADY_LOADED:\n        // TODO: Handle this action - perhaps just return current state or log\n      return state; // Placeholder\n    default:\n      return state;\n  }\n}\n\n// 4. Thunk Action Creator - Implement fetchUsers here\nconst fetchUsers = () => {\n  return async (dispatch: Dispatch<AnyAction>, getState: () => RootState) => {\n    // TODO: Implement conditional fetching using getState()\n    // TODO: Implement async/await fetch logic for users\n  };\n};\n\n// Optional: Simulate store setup for testing\n/*\nconst rootReducer = combineReducers({ users: usersReducer });\nconst store = createStore(\n  rootReducer,\n  applyMiddleware(thunk as ThunkMiddleware<RootState, AnyAction>)\n);\n\nconsole.log('Initial State:', store.getState());\n\n// First dispatch: Should fetch users\nstore.dispatch(fetchUsers() as any);\n\nsetTimeout(() => {\n  console.log('State after first fetch attempt:', store.getState());\n  // Second dispatch: Should trigger USERS_ALREADY_LOADED if users are present\n  store.dispatch(fetchUsers() as any);\n  setTimeout(() => {\n      console.log('State after second fetch attempt (should be same as first):', store.getState());\n  }, 500); // Small delay to allow thunk to execute\n}, 3000);\n*/\n",
+          "solutionCode": "import { AnyAction, Dispatch, createStore, applyMiddleware, combineReducers, Store } from 'redux';\nimport { thunk, ThunkMiddleware } from 'redux-thunk';\n\ninterface User { id: number; name: string; email: string; }\n\ninterface UsersState {\n  users: User[];\n  loading: boolean;\n  error: string | null;\n}\n\ninterface RootState { users: UsersState; }\n\n// 1. Action Types\nconst FETCH_USERS_REQUEST = 'FETCH_USERS_REQUEST';\nconst FETCH_USERS_SUCCESS = 'FETCH_USERS_SUCCESS';\nconst FETCH_USERS_FAILURE = 'FETCH_USERS_FAILURE';\nconst USERS_ALREADY_LOADED = 'USERS_ALREADY_LOADED'; // New action type\n\n// 2. Action Creators\nconst fetchUsersRequest = () => ({ type: FETCH_USERS_REQUEST });\nconst fetchUsersSuccess = (users: User[]) => ({ type: FETCH_USERS_SUCCESS, payload: users });\nconst fetchUsersFailure = (error: string) => ({ type: FETCH_USERS_FAILURE, payload: error });\nconst usersAlreadyLoaded = () => ({ type: USERS_ALREADY_LOADED }); // New action creator\n\n// 3. Reducer\nconst initialUsersState: UsersState = {\n  users: [],\n  loading: false,\n  error: null\n};\n\nfunction usersReducer(state: UsersState = initialUsersState, action: AnyAction): UsersState {\n  switch (action.type) {\n    case FETCH_USERS_REQUEST:\n      return { ...state, loading: true, error: null };\n    case FETCH_USERS_SUCCESS:\n      return { ...state, loading: false, users: action.payload, error: null };\n    case FETCH_USERS_FAILURE:\n      return { ...state, loading: false, error: action.payload };\n    case USERS_ALREADY_LOADED:\n        // Optionally log or just return current state as no change is needed\n      console.log('Users already loaded, skipping fetch.');\n      return state;\n    default:\n      return state;\n  }\n}\n\n// 4. Thunk Action Creator\nconst fetchUsers = () => {\n  return async (dispatch: Dispatch<AnyAction>, getState: () => RootState) => {\n    const state = getState();\n    const { users, loading } = state.users; // Access users slice of state\n\n    // Conditional Fetching: If users are already loaded and not currently loading, dispatch and exit\n    if (users.length > 0 && !loading) {\n      dispatch(usersAlreadyLoaded());\n      return; // Exit the thunk\n    }\n\n    dispatch(fetchUsersRequest());\n    \n    try {\n      const response = await fetch('https://jsonplaceholder.typicode.com/users');\n      if (!response.ok) {\n        throw new Error(`HTTP error! status: ${response.status}`);\n      }\n      const data: User[] = await response.json();\n      dispatch(fetchUsersSuccess(data));\n    } catch (error: any) {\n      dispatch(fetchUsersFailure(error.message || 'An unknown error occurred'));\n    }\n  };\n};\n",
+          "testCases": [
+            "First dispatch of `fetchUsers()` should initiate a fetch and populate `users` array, setting `loading` to `false` and `error` to `null` on success.",
+            "Subsequent dispatch of `fetchUsers()` (when users are already loaded and not loading) should dispatch `USERS_ALREADY_LOADED` and *not* initiate another network request.",
+            "If a network error occurs during the fetch, `loading` should be `false`, `users` should remain empty, and `error` should be populated.",
+            "If the initial state has an empty `users` array but `loading` is `true`, a new fetch *should not* be initiated immediately by the conditional logic (this is implicitly covered by the `!loading` check, but worth noting it prevents redundant fetches if one is already in progress).",
+            "Verify `error` is cleared on `_REQUEST` even if it was previously set."
+          ],
+          "hints": [
+            "The `getState()` function provides access to the entire Redux state tree.",
+            "Ensure your conditional logic for `getState()` correctly prevents redundant API calls.",
+            "Remember to use `return;` inside the thunk function if you decide to stop execution early based on your `getState()` check.",
+            "The `USERS_ALREADY_LOADED` action can simply be handled by returning the current state in the reducer, as no state change is required."
+          ],
+          "tags": [
+            "Redux",
+            "Redux Thunk",
+            "Async/Await",
+            "getState",
+            "Conditional Logic",
+            "API Optimization"
+          ],
+          "timeEstimate": 60,
+          "prerequisites": [
+            "theory_advanced_thunk_data_fetching",
+            "task_implement_data_fetch_flow"
+          ],
+          "complexity": 8,
+          "interviewRelevance": 9,
+          "learningPath": "advanced",
+          "relatedConcepts": [
+            "Memoization",
+            "Caching",
+            "Performance Optimization"
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "6794ade6-7a42-4322-95f1-c1106ed265e8",
+    "startLine": 9400,
+    "endLine": 9499,
+    "processedDate": "2025-06-17T11:03:49.542Z",
+    "content": {
+      "logicalBlockInfo": {
+        "suggestedEndLine": -1
+      },
+      "theory": [
+        {
+          "id": "theory_redux_saga_introduction",
+          "title": "Introduction to Redux Saga for Asynchronous Operations",
+          "content": "Redux Saga is a middleware library designed to manage side effects (like asynchronous data fetching and impure actions) in Redux applications. It leverages ES6 Generators to make these complex asynchronous flows easier to read, write, and test. By abstracting side effects away from your core application logic and reducers, Redux Saga helps maintain pure reducers and a more predictable state management.\n\n### Why Redux Saga?\n*   **Declarative Effects**: Sagas yield plain JavaScript objects called 'Effects', which are instructions for the middleware to perform. This makes sagas highly testable and easy to reason about, as they don't directly execute side effects but rather describe them.\n*   **Easier Error Handling**: `try/catch` blocks can be used directly within generator functions for robust error handling.\n*   **Concurrency Management**: Provides effects like `takeEvery`, `takeLatest`, `throttle` to manage how concurrent actions are handled.\n*   **Testability**: Because sagas yield simple objects (Effects), you can easily test their yielded values without mocking actual asynchronous operations.\n\n### Generators in Redux Saga\nRedux Saga uses ES6 generator functions (`function*`). Generators are functions that can be paused and resumed, and they return an iterator. Each time `yield` is encountered, the generator pauses, and the value after `yield` is returned. When `next()` is called on the iterator, the generator resumes execution from where it left off. This behavior is crucial for Redux Saga, as it allows the middleware to execute effects step-by-step and control the flow of asynchronous operations.",
+          "examples": [
+            {
+              "id": "example_redux_saga_intro_1",
+              "title": "Basic Generator Function",
+              "code": "function* myGenerator() {\n  yield 'Hello';\n  yield 'World';\n  return 'Done';\n}\n\nconst generator = myGenerator();\nconsole.log(generator.next()); // { value: 'Hello', done: false }\nconsole.log(generator.next()); // { value: 'World', done: false }\nconsole.log(generator.next()); // { value: 'Done', done: true }\nconsole.log(generator.next()); // { value: undefined, done: true }",
+              "explanation": "This example demonstrates a basic generator function. When `myGenerator()` is called, it doesn't execute immediately but returns an iterator. Each call to `generator.next()` executes the function up to the next `yield` expression, returning an object with `value` and `done` properties. Once the generator finishes (or encounters a `return`), `done` becomes `true`.",
+              "language": "typescript"
+            },
+            {
+              "id": "example_redux_saga_intro_2",
+              "title": "Redux Saga Middleware Setup",
+              "code": "import { createStore, applyMiddleware } from 'redux';\nimport createSagaMiddleware from 'redux-saga';\nimport rootReducer from './reducers';\nimport rootSaga from './sagas';\n\n// Create the saga middleware\nconst sagaMiddleware = createSagaMiddleware();\n\n// Mount it on the Store\nconst store = createStore(\n  rootReducer,\n  applyMiddleware(sagaMiddleware)\n);\n\n// Then run the root saga\nsagaMiddleware.run(rootSaga);\n\nexport default store;",
+              "explanation": "This code snippet shows how to integrate Redux Saga into your Redux store. First, `createSagaMiddleware()` is called to create the middleware. Then, it's applied to the Redux store using `applyMiddleware()`. Finally, the `sagaMiddleware.run()` method is called with your `rootSaga` to start listening for actions.",
+              "language": "typescript"
+            }
+          ],
+          "relatedQuestions": [
+            "question_redux_saga_intro_1",
+            "question_redux_saga_intro_2",
+            "question_redux_saga_intro_3",
+            "question_redux_saga_intro_4"
+          ],
+          "relatedTasks": [
+            "task_implement_user_data_fetch_saga"
+          ],
+          "tags": [
+            "Redux Saga",
+            "Asynchronous JavaScript",
+            "Generators",
+            "Middleware",
+            "Redux"
+          ],
+          "technology": "TypeScript, Redux, Redux Saga",
+          "prerequisites": [
+            "Redux_Basics",
+            "JavaScript_Generators",
+            "Asynchronous_JavaScript"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 8,
+          "learningPath": "intermediate",
+          "requiredFor": [
+            "Complex_Side_Effects",
+            "Advanced_Redux_Patterns"
+          ]
+        },
+        {
+          "id": "theory_redux_saga_effects",
+          "title": "Core Redux Saga Effects: Call, Put, TakeEvery, TakeLatest, All",
+          "content": "Redux Saga effects are plain JavaScript objects that instruct the middleware to perform certain operations. They are the core building blocks of sagas and are yielded by generator functions.\n\n### `call` Effect\nThe `call` effect is used to call a function. It's typically used for asynchronous operations that return a Promise, like API calls. When `yield call(fn, ...args)` is encountered, the saga pauses until the promise returned by `fn(...args)` resolves or rejects. If the promise resolves, the resolved value is returned. If it rejects, an error is thrown, which can be caught in a `try...catch` block.\n\n### `put` Effect\nThe `put` effect is used to dispatch an action to the Redux store. It's similar to `store.dispatch(action)`, but `put` is used within sagas to interact with the Redux store. When `yield put(action)` is executed, the specified action is dispatched, and the Redux reducers will process it.\n\n### `takeEvery` Effect\nThe `takeEvery` effect listens for every action of a specific type that is dispatched to the store. For each matching action, it forks a new saga task to execute the provided worker saga. This means if the action is dispatched multiple times concurrently, `takeEvery` will run multiple instances of the worker saga in parallel.\n\n### `takeLatest` Effect\nThe `takeLatest` effect also listens for actions of a specific type. However, if a new action of the same type is dispatched while a previous worker saga is still running, `takeLatest` will cancel the currently running saga task and start a new one with the latest action. This is useful for scenarios like search suggestions, where you only care about the result of the last request.\n\n### `all` Effect\nThe `all` effect is used to run multiple effects in parallel. It works similarly to `Promise.all()`. It takes an array of effects, and the saga will pause until all the effects in the array have completed. If any of the effects fail, the `all` effect will also fail.",
+          "examples": [
+            {
+              "id": "example_redux_saga_effects_1",
+              "title": "Fetch Users Saga with Call and Put",
+              "code": "import { call, put } from 'redux-saga/effects';\n\n// Action Types (for demonstration)\nconst FETCH_USERS_REQUEST = 'FETCH_USERS_REQUEST';\nconst FETCH_USERS_SUCCESS = 'FETCH_USERS_SUCCESS';\nconst FETCH_USERS_FAILURE = 'FETCH_USERS_FAILURE';\n\n// Mock API call function\nconst fetchUsersApi = async () => {\n  const response = await fetch('https://jsonplaceholder.typicode.com/users');\n  if (!response.ok) {\n    throw new Error('Network response was not ok.');\n  }\n  return await response.json();\n};\n\n// Worker Saga\nfunction* fetchUsersWorker() {\n  try {\n    // call effect suspends the saga until the promise resolves\n    const data = yield call(fetchUsersApi);\n    \n    // put effect dispatches an action to the store\n    yield put({ type: FETCH_USERS_SUCCESS, payload: data });\n  } catch (error: any) {\n    yield put({ type: FETCH_USERS_FAILURE, payload: error.message });\n  }\n}",
+              "explanation": "This saga demonstrates `call` and `put`. `call(fetchUsersApi)` executes the `fetchUsersApi` function, pausing the saga until the API call completes. Upon success, `put({ type: FETCH_USERS_SUCCESS, payload: data })` dispatches a success action. In case of an error, a failure action is dispatched.",
+              "language": "typescript"
+            },
+            {
+              "id": "example_redux_saga_effects_2",
+              "title": "Watcher Sagas with TakeEvery and TakeLatest",
+              "code": "import { takeEvery, takeLatest, call, put } from 'redux-saga/effects';\n\n// Action Types\nconst FETCH_USERS_REQUEST = 'FETCH_USERS_REQUEST';\nconst FETCH_SEARCH_RESULTS_REQUEST = 'FETCH_SEARCH_RESULTS_REQUEST';\nconst FETCH_USERS_SUCCESS = 'FETCH_USERS_SUCCESS';\nconst FETCH_SEARCH_RESULTS_SUCCESS = 'FETCH_SEARCH_RESULTS_SUCCESS';\n\n// Worker Sagas (simplified for brevity)\nfunction* handleFetchUsers() {\n  // ... API call and put success/failure ...\n  yield put({ type: FETCH_USERS_SUCCESS, payload: [] });\n}\n\nfunction* handleSearch(action: { type: string; payload: string }) {\n  // Simulate API call for search\n  const results = yield call(() => Promise.resolve([`Result for ${action.payload}`]));\n  yield put({ type: FETCH_SEARCH_RESULTS_SUCCESS, payload: results });\n}\n\n// Watcher Saga\nfunction* rootWatcherSaga() {\n  // takeEvery: allows multiple concurrent fetches\n  yield takeEvery(FETCH_USERS_REQUEST, handleFetchUsers);\n  \n  // takeLatest: cancels ongoing search if a new request comes in\n  yield takeLatest(FETCH_SEARCH_RESULTS_REQUEST, handleSearch);\n}",
+              "explanation": "This example showcases `takeEvery` and `takeLatest`. `takeEvery` allows `handleFetchUsers` to run concurrently for every `FETCH_USERS_REQUEST` action. `takeLatest` ensures that only the most recent `FETCH_SEARCH_RESULTS_REQUEST` action triggers `handleSearch`, canceling any previous, still-running `handleSearch` tasks.",
+              "language": "typescript"
+            },
+            {
+              "id": "example_redux_saga_effects_3",
+              "title": "Combining Sagas with All",
+              "code": "import { all, fork } from 'redux-saga/effects';\n\nfunction* usersSaga() {\n  // ... sagas related to users ...\n}\n\nfunction* productsSaga() {\n  // ... sagas related to products ...\n}\n\n// Root Saga: Combines all individual watcher sagas\nexport default function* rootSaga() {\n  yield all([\n    fork(usersSaga),\n    fork(productsSaga)\n    // Add more sagas here\n  ]);\n}",
+              "explanation": "The `all` effect is used in the `rootSaga` to run multiple sagas in parallel. The `fork` effect is used here to non-blockingly start each saga, meaning the `all` effect will not wait for `usersSaga` or `productsSaga` to complete before proceeding, but rather simply starts them and then completes its own execution. This is typical for root sagas that set up listeners.",
+              "language": "typescript"
+            }
+          ],
+          "relatedQuestions": [
+            "question_redux_saga_effects_1",
+            "question_redux_saga_effects_2",
+            "question_redux_saga_effects_3",
+            "question_redux_saga_effects_4",
+            "question_redux_saga_effects_5",
+            "question_redux_saga_effects_6",
+            "question_redux_saga_effects_7"
+          ],
+          "relatedTasks": [
+            "task_implement_user_data_fetch_saga",
+            "task_implement_dog_image_fetcher_saga"
+          ],
+          "tags": [
+            "Redux Saga",
+            "Effects",
+            "call",
+            "put",
+            "takeEvery",
+            "takeLatest",
+            "all",
+            "Concurrency",
+            "Side Effects"
+          ],
+          "technology": "TypeScript, Redux Saga",
+          "prerequisites": [
+            "Redux_Saga_Introduction",
+            "Asynchronous_JavaScript"
+          ],
+          "complexity": 8,
+          "interviewRelevance": 9,
+          "learningPath": "intermediate",
+          "requiredFor": [
+            "Advanced_Saga_Flows",
+            "Real-world_Redux_Applications"
+          ]
+        },
+        {
+          "id": "theory_redux_saga_complete_example",
+          "title": "Complete Redux Saga Integration: Dog Image Fetcher",
+          "content": "Integrating Redux Saga into a React-Redux application involves setting up the middleware, defining actions, reducers, and sagas, and finally connecting everything in your React components.\n\nThis example demonstrates a complete flow for fetching a random dog image using Redux Saga. It includes:\n\n1.  **Actions**: Defining constants and action creators for initiating a request, handling success, and handling errors.\n2.  **Reducer**: Managing the state (image URL, loading status, error status) based on dispatched actions.\n3.  **Sagas**: Defining a worker saga for the actual API call and a watcher saga to listen for the request action.\n4.  **React Component**: Dispatching the request action and rendering the image, loading indicator, or error message based on the Redux store's state.\n\nThis setup ensures a clear separation of concerns: React handles UI, Redux manages state, and Redux Saga manages the asynchronous side effects.",
+          "examples": [
+            {
+              "id": "example_redux_saga_dog_fetcher_1",
+              "title": "Actions and Action Creators for Dog Image Fetcher",
+              "code": "// Actions\nconst FETCHED_DOG = 'FETCHED_DOG'; // Initial action to kick off saga (can be renamed to REQUEST_DOG for clarity)\nconst REQUEST_DOG = 'REQUEST_DOG'; // Action dispatched by component to trigger saga\nconst REQUEST_DOG_SUCCESS = 'REQUEST_DOG_SUCCESS';\nconst REQUEST_DOG_ERROR = 'REQUEST_DOG_ERROR';\n\n// Action Creators\nexport const requestDog = () => ({ type: REQUEST_DOG });\nexport const requestDogSuccess = (data: { message: string }) => ({\n  type: REQUEST_DOG_SUCCESS,\n  url: data.message // API returns image URL in 'message' field\n});\nexport const requestDogError = () => ({ type: REQUEST_DOG_ERROR });\n\n// Note: FETCHED_DOG is not used in this pattern, REQUEST_DOG directly triggers the saga.",
+              "explanation": "This defines the action types as constants and corresponding action creators. `REQUEST_DOG` is dispatched from the component to initiate the fetch. `REQUEST_DOG_SUCCESS` and `REQUEST_DOG_ERROR` are dispatched by the saga to update the store based on the API response.",
+              "language": "typescript"
+            },
+            {
+              "id": "example_redux_saga_dog_fetcher_2",
+              "title": "Reducer for Dog Image State",
+              "code": "import { REQUEST_DOG, REQUEST_DOG_SUCCESS, REQUEST_DOG_ERROR } from './actions';\n\ninterface DogState {\n  url: string;\n  loading: boolean;\n  error: boolean;\n}\n\nconst initialState: DogState = {\n  url: '',\n  loading: false,\n  error: false\n};\n\nconst dogsReducer = (state: DogState = initialState, action: any): DogState => {\n  switch (action.type) {\n    case REQUEST_DOG:\n      return {\n        ...state,\n        loading: true,\n        error: false\n      };\n    case REQUEST_DOG_SUCCESS:\n      return {\n        ...state,\n        url: action.url,\n        loading: false,\n        error: false\n      };\n    case REQUEST_DOG_ERROR:\n      return {\n        ...state,\n        loading: false,\n        error: true\n      };\n    default:\n      return state;\n  }\n};",
+              "explanation": "This reducer manages the `dogState`. When `REQUEST_DOG` is dispatched, `loading` is set to `true`. On `REQUEST_DOG_SUCCESS`, the `url` is updated and `loading` becomes `false`. On `REQUEST_DOG_ERROR`, `error` is set to `true` and `loading` becomes `false`.",
+              "language": "typescript"
+            },
+            {
+              "id": "example_redux_saga_dog_fetcher_3",
+              "title": "Sagas for Dog Image Fetcher",
+              "code": "import { call, put, takeLatest } from 'redux-saga/effects';\nimport { requestDogSuccess, requestDogError, REQUEST_DOG } from './actions';\n\n// API call function\nconst fetchDogImageApi = async () => {\n  const response = await fetch('https://dog.ceo/api/breeds/image/random');\n  if (!response.ok) {\n    throw new Error('Failed to fetch dog image');\n  }\n  return await response.json();\n};\n\n// Worker Saga\nfunction* fetchDogWorker() {\n  try {\n    const data = yield call(fetchDogImageApi);\n    yield put(requestDogSuccess(data));\n  } catch (error) {\n    console.error(\"Error fetching dog image:\", error);\n    yield put(requestDogError());\n  }\n}\n\n// Watcher Saga\nexport function* dogWatcherSaga() {\n  yield takeLatest(REQUEST_DOG, fetchDogWorker);\n}\n\n// Root Saga (assuming other sagas might exist)\n// import { all } from 'redux-saga/effects';\n// export default function* rootSaga() {\n//   yield all([\n//     dogWatcherSaga(),\n//     // ... other sagas\n//   ]);\n// }",
+              "explanation": "The `fetchDogWorker` saga performs the API call using `call` and then dispatches `requestDogSuccess` or `requestDogError` using `put`. The `dogWatcherSaga` uses `takeLatest` to ensure that if the user clicks the 'fetch dog' button rapidly, only the most recent request is processed.",
+              "language": "typescript"
+            },
+            {
+              "id": "example_redux_saga_dog_fetcher_4",
+              "title": "React Component Integration with Redux Saga",
+              "code": "import React from 'react';\nimport { useSelector, useDispatch } from 'react-redux';\nimport { requestDog } from './actions'; // Import your action creator\nimport { RootState } from './store'; // Assume you have a RootState type from your Redux store setup\n\nfunction DogImageFetcher() {\n  const dispatch = useDispatch();\n  const { url, loading, error } = useSelector((state: RootState) => state.dogs); // 'dogs' is the slice name in your rootReducer\n\n  const handleFetchDog = () => {\n    dispatch(requestDog()); // Dispatch the action that Redux Saga listens for\n  };\n\n  if (loading) return <p>Loading dog image...</p>;\n  if (error) return <p style={{ color: 'red' }}>Error: Could not fetch dog image.</p>;\n\n  return (\n    <div>\n      <button onClick={handleFetchDog} disabled={loading}>\n        Fetch New Dog Image\n      </button>\n      {url && (\n        <img\n          src={url}\n          alt=\"Random Dog\" \n          style={{ maxWidth: '300px', maxHeight: '300px', display: 'block', marginTop: '20px' }}\n        />\n      )}\n      {!url && !loading && !error && <p>Click the button to fetch a dog image!</p>}\n    </div>\n  );\n}",
+              "explanation": "This React component uses `useDispatch` to dispatch the `requestDog` action when the button is clicked. It uses `useSelector` to read the `url`, `loading`, and `error` states from the Redux store, and conditionally renders content based on these states.",
+              "language": "typescript"
+            }
+          ],
+          "relatedQuestions": [
+            "question_redux_saga_complete_1",
+            "question_redux_saga_complete_2",
+            "question_redux_saga_complete_3",
+            "question_redux_saga_complete_4"
+          ],
+          "relatedTasks": [
+            "task_implement_dog_image_fetcher_saga"
+          ],
+          "tags": [
+            "Redux Saga",
+            "React-Redux",
+            "Complete Example",
+            "State Management",
+            "Asynchronous Operations"
+          ],
+          "technology": "TypeScript, React, Redux, Redux Saga",
+          "prerequisites": [
+            "Redux_Saga_Effects",
+            "React_Redux_Hooks"
+          ],
+          "complexity": 8,
+          "interviewRelevance": 9,
+          "learningPath": "intermediate",
+          "requiredFor": [
+            "Building_Full_Redux_Applications",
+            "Complex_UI_State_Management"
+          ]
+        }
+      ],
+      "questions": [
+        {
+          "id": "question_redux_saga_intro_1",
+          "topic": "Redux Saga Fundamentals",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "What is the primary purpose of Redux Saga?",
+          "answer": "Redux Saga is a middleware library used to manage side effects (like asynchronous data fetching, accessing browser cache, etc.) in Redux applications, making them easier to manage, read, and test.",
+          "analysisPoints": [],
+          "keyConcepts": [
+            "Redux Saga",
+            "Middleware",
+            "Side Effects"
+          ],
+          "evaluationCriteria": [
+            "Understanding of core definition",
+            "Ability to identify its role"
+          ],
+          "example": "",
+          "tags": [
+            "Redux Saga",
+            "Definition",
+            "Middleware"
+          ],
+          "prerequisites": [
+            "Redux_Basics"
+          ],
+          "complexity": 3,
+          "interviewFrequency": 7,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_redux_saga_intro_2",
+          "topic": "Redux Saga and Generators",
+          "level": "medium",
+          "type": "open",
+          "question": "How do ES6 Generators contribute to Redux Saga's functionality and benefits?",
+          "answer": "ES6 Generators (`function*`) allow functions to be paused and resumed. In Redux Saga, sagas are implemented as generator functions that 'yield' plain JavaScript objects called 'Effects'. The Redux Saga middleware intercepts these yielded Effects and executes the actual side effect. This makes sagas highly declarative, testable (you can test the yielded effects without executing the actual side effect), and allows for complex asynchronous flows to be written in a synchronous-looking, imperative style, improving readability and error handling (e.g., using `try...catch` blocks directly).",
+          "analysisPoints": [
+            "Mention of `function*` and `yield` keyword.",
+            "Explanation of pausing/resuming execution.",
+            "Connection to 'Effects' as plain objects.",
+            "Benefits: testability, readability, error handling, declarative nature."
+          ],
+          "keyConcepts": [
+            "Generators",
+            "Effects",
+            "Declarative Programming",
+            "Testability"
+          ],
+          "evaluationCriteria": [
+            "Deep understanding of Generator role",
+            "Ability to articulate benefits",
+            "Link between generators and Redux Saga's design principles"
+          ],
+          "example": "",
+          "tags": [
+            "Redux Saga",
+            "Generators",
+            "ES6",
+            "Concepts"
+          ],
+          "prerequisites": [
+            "JavaScript_Generators",
+            "Redux_Saga_Introduction"
+          ],
+          "complexity": 6,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_redux_saga_intro_3",
+          "topic": "Redux Saga Middleware Setup",
+          "level": "easy",
+          "type": "mcq",
+          "question": "Which of the following is the correct way to integrate Redux Saga into a Redux store?",
+          "answer": "Create saga middleware, apply it to the store, and then run the root saga.",
+          "options": [
+            "Call `sagaMiddleware.run()` before creating the store.",
+            "Pass the root saga directly to `createStore()`.",
+            "Create saga middleware, apply it to the store, and then run the root saga.",
+            "Redux Saga integrates automatically without explicit setup."
+          ],
+          "analysisPoints": [
+            "Correct order of operations: `createSagaMiddleware`, `applyMiddleware`, `sagaMiddleware.run`.",
+            "Understanding that `sagaMiddleware.run` initiates the saga execution."
+          ],
+          "keyConcepts": [
+            "Redux Saga",
+            "Middleware",
+            "Store Setup"
+          ],
+          "evaluationCriteria": [
+            "Knowledge of Redux Saga initialization process",
+            "Recognition of common setup patterns"
+          ],
+          "example": "```typescript\nimport { createStore, applyMiddleware } from 'redux';\nimport createSagaMiddleware from 'redux-saga';\nimport rootReducer from './reducers';\nimport rootSaga from './sagas';\n\nconst sagaMiddleware = createSagaMiddleware();\nconst store = createStore(\n  rootReducer,\n  applyMiddleware(sagaMiddleware)\n);\nsagaMiddleware.run(rootSaga);\n```",
+          "tags": [
+            "Redux Saga",
+            "Setup",
+            "Middleware",
+            "MCQ"
+          ],
+          "prerequisites": [
+            "Redux_Basics"
+          ],
+          "complexity": 4,
+          "interviewFrequency": 6,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_redux_saga_intro_4",
+          "topic": "Redux Saga vs. Redux Thunk",
+          "level": "hard",
+          "type": "open",
+          "question": "Compare and contrast Redux Saga and Redux Thunk for handling asynchronous operations in Redux. Discuss their primary differences, advantages, and disadvantages.",
+          "answer": "Redux Thunk and Redux Saga are both middleware for Redux to handle side effects, but they approach the problem differently.\n\n**Redux Thunk:**\n*   **Approach**: Simple function-based middleware. Actions can return a function instead of a plain object. This function receives `dispatch` and `getState` as arguments, allowing for asynchronous logic and conditional dispatching.\n*   **Advantages**: Simple to learn and set up for basic async operations. Uses Promises, which are familiar to most JavaScript developers. Smaller bundle size.\n*   **Disadvantages**: Can lead to 'callback hell' for complex flows. Logic is imperative and can be harder to test (requires mocking `dispatch` and `getState`). Less control over concurrency and cancellation.\n\n**Redux Saga:**\n*   **Approach**: Uses ES6 Generators and 'Effects' (plain objects) to describe side effects declaratively. The middleware interprets these effects and executes them.\n*   **Advantages**: Highly testable (you test yielded effects, not actual side effects). Excellent for complex, long-running, or race-prone async flows (e.g., debouncing, throttling, cancellation using `takeLatest`). Centralized error handling with `try/catch` within sagas. Sagas are pure functions until an actual side effect is performed by the middleware.\n*   **Disadvantages**: Steeper learning curve due to Generators and a new mental model of 'Effects'. Can result in more boilerplate for simple cases. Larger bundle size.\n\n**Primary Differences:**\n*   **Control Flow**: Thunks use callbacks/Promises (imperative). Sagas use Generators/Effects (declarative, synchronous-looking).\n*   **Testability**: Sagas are generally easier to test due to declarative Effects. Thunks require more mocking.\n*   **Complexity**: Thunks are simpler for basic async. Sagas excel at complex, concurrent, or cancellable flows.\n*   **Concurrency**: Sagas offer advanced concurrency control (`takeEvery`, `takeLatest`, `throttle`, `debounce`). Thunks have limited native concurrency control.\n\n**When to choose which:**\n*   **Redux Thunk**: For simpler applications with infrequent or straightforward async operations, or when familiarity with Promises is prioritized.\n*   **Redux Saga**: For large, complex applications with numerous, interconnected, or concurrent side effects, where advanced control, testability, and maintainability are critical.",
+          "analysisPoints": [
+            "Clearly differentiate between function-based (Thunk) and generator/effect-based (Saga) approaches.",
+            "List specific advantages and disadvantages for each.",
+            "Highlight testability as a key differentiator.",
+            "Discuss concurrency control.",
+            "Provide scenarios where one might be preferred over the other."
+          ],
+          "keyConcepts": [
+            "Redux Saga",
+            "Redux Thunk",
+            "Middleware",
+            "Asynchronous Operations",
+            "Generators",
+            "Promises",
+            "Testability",
+            "Concurrency"
+          ],
+          "evaluationCriteria": [
+            "Comprehensive comparison",
+            "Depth of understanding of both middleware",
+            "Ability to articulate trade-offs",
+            "Structured explanation"
+          ],
+          "example": "",
+          "tags": [
+            "Redux Saga",
+            "Redux Thunk",
+            "Comparison",
+            "Architecture",
+            "Advanced"
+          ],
+          "prerequisites": [
+            "Redux_Basics",
+            "Redux_Saga_Introduction"
+          ],
+          "complexity": 9,
+          "interviewFrequency": 9,
+          "learningPath": "advanced"
+        },
+        {
+          "id": "question_redux_saga_effects_1",
+          "topic": "Redux Saga `call` Effect",
+          "level": "medium",
+          "type": "mcq",
+          "question": "What is the primary purpose of the `call` effect in Redux Saga?",
+          "answer": "To call a function and wait for its result, typically for asynchronous operations returning a Promise.",
+          "options": [
+            "To dispatch an action to the Redux store.",
+            "To listen for a specific action type.",
+            "To call a function and wait for its result, typically for asynchronous operations returning a Promise.",
+            "To cancel a running saga task."
+          ],
+          "analysisPoints": [
+            "Distinguish `call` from other effects like `put` or `takeEvery`.",
+            "Emphasize its use for waiting on function execution, especially promises."
+          ],
+          "keyConcepts": [
+            "Redux Saga",
+            "call effect",
+            "Asynchronous",
+            "Promises"
+          ],
+          "evaluationCriteria": [
+            "Correct identification of `call` purpose",
+            "Understanding of its blocking nature within a saga"
+          ],
+          "example": "```typescript\nimport { call } from 'redux-saga/effects';\n\nfunction* fetchDataSaga(apiFunc: Function) {\n  try {\n    const data = yield call(apiFunc, 'some_param');\n    // ... process data\n  } catch (error) {\n    // ... handle error\n  }\n}\n```",
+          "tags": [
+            "Redux Saga",
+            "call",
+            "Effects",
+            "MCQ"
+          ],
+          "prerequisites": [
+            "Redux_Saga_Effects"
+          ],
+          "complexity": 5,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_redux_saga_effects_2",
+          "topic": "Redux Saga `put` Effect",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "What Redux Saga effect is used to dispatch an action to the Redux store?",
+          "answer": "`put` effect.",
+          "analysisPoints": [],
+          "keyConcepts": [
+            "Redux Saga",
+            "put effect",
+            "Dispatching Actions"
+          ],
+          "evaluationCriteria": [
+            "Quick recall of `put` effect's function"
+          ],
+          "example": "",
+          "tags": [
+            "Redux Saga",
+            "put",
+            "Effects",
+            "Flashcard"
+          ],
+          "prerequisites": [
+            "Redux_Saga_Effects"
+          ],
+          "complexity": 3,
+          "interviewFrequency": 7,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_redux_saga_effects_3",
+          "topic": "Redux Saga `takeEvery` vs. `takeLatest`",
+          "level": "medium",
+          "type": "mcq",
+          "question": "Consider a scenario where a user repeatedly clicks a 'search' button. Which Redux Saga effect would you use to ensure that only the most recent search request is processed, canceling any previous ongoing searches?",
+          "answer": "`takeLatest`",
+          "options": [
+            "`takeEvery`",
+            "`takeLatest`",
+            "`call`",
+            "`fork`"
+          ],
+          "analysisPoints": [
+            "Understand the difference in concurrency handling between `takeEvery` (all tasks run) and `takeLatest` (cancels previous tasks).",
+            "Identify the appropriate effect for a 'type-ahead' or 'latest request only' scenario."
+          ],
+          "keyConcepts": [
+            "Redux Saga",
+            "takeEvery",
+            "takeLatest",
+            "Concurrency",
+            "Cancellation"
+          ],
+          "evaluationCriteria": [
+            "Ability to differentiate `takeEvery` and `takeLatest`",
+            "Application of concepts to a real-world scenario"
+          ],
+          "example": "```typescript\nimport { takeLatest, call, put } from 'redux-saga/effects';\n\nconst SEARCH_REQUEST = 'SEARCH_REQUEST';\nconst SEARCH_SUCCESS = 'SEARCH_SUCCESS';\n\nfunction* performSearch(action: { type: string; payload: string }) {\n  try {\n    // Simulate API call\n    const result = yield call(fetch, `/api/search?q=${action.payload}`);\n    const data = yield call([result, 'json']);\n    yield put({ type: SEARCH_SUCCESS, payload: data });\n  } catch (error) {\n    // Handle error\n  }\n}\n\nfunction* watchSearch() {\n  yield takeLatest(SEARCH_REQUEST, performSearch);\n}\n```",
+          "tags": [
+            "Redux Saga",
+            "takeEvery",
+            "takeLatest",
+            "Concurrency",
+            "MCQ"
+          ],
+          "prerequisites": [
+            "Redux_Saga_Effects"
+          ],
+          "complexity": 6,
+          "interviewFrequency": 9,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_redux_saga_effects_4",
+          "topic": "Redux Saga `all` Effect",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "How do you run multiple Redux Sagas concurrently, waiting for all of them to complete?",
+          "answer": "Using the `all` effect, similar to `Promise.all()`.",
+          "analysisPoints": [],
+          "keyConcepts": [
+            "Redux Saga",
+            "all effect",
+            "Concurrency"
+          ],
+          "evaluationCriteria": [
+            "Recall of `all` effect's purpose"
+          ],
+          "example": "",
+          "tags": [
+            "Redux Saga",
+            "all",
+            "Effects",
+            "Flashcard"
+          ],
+          "prerequisites": [
+            "Redux_Saga_Effects"
+          ],
+          "complexity": 4,
+          "interviewFrequency": 6,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_redux_saga_effects_5",
+          "topic": "Redux Saga Error Handling",
+          "level": "medium",
+          "type": "open",
+          "question": "Explain how error handling is typically performed within Redux Sagas. Provide a simple code example.",
+          "answer": "Error handling in Redux Sagas is straightforward due to the synchronous-looking nature of generator functions. You can use standard JavaScript `try...catch` blocks around `yield` expressions, especially around effects like `call` that might throw an error (e.g., an API request failing). If an error occurs within the `try` block, execution jumps to the `catch` block, allowing you to gracefully handle the error, often by dispatching an error action to update the Redux store.\n\n```typescript\nimport { call, put } from 'redux-saga/effects';\n\nconst FETCH_DATA_FAILURE = 'FETCH_DATA_FAILURE';\n\nfunction* fetchDataWorker(apiCall: Function) {\n  try {\n    const data = yield call(apiCall);\n    yield put({ type: 'FETCH_DATA_SUCCESS', payload: data });\n  } catch (error: any) {\n    // Dispatch an error action to the store\n    yield put({ type: FETCH_DATA_FAILURE, payload: error.message });\n    // You can also log the error, show a toast, etc.\n    console.error('Saga error:', error);\n  }\n}\n```",
+          "analysisPoints": [
+            "Mention `try...catch` blocks.",
+            "Emphasize `yield call` as the common point for errors.",
+            "Explain dispatching an error action.",
+            "Provide a clear, simple code example."
+          ],
+          "keyConcepts": [
+            "Redux Saga",
+            "Error Handling",
+            "try...catch",
+            "call effect",
+            "put effect"
+          ],
+          "evaluationCriteria": [
+            "Correct error handling mechanism",
+            "Demonstration with code example",
+            "Clarity of explanation"
+          ],
+          "example": "```typescript\nimport { call, put } from 'redux-saga/effects';\n\nconst FETCH_DATA_FAILURE = 'FETCH_DATA_FAILURE';\n\nfunction* fetchDataWorker(apiCall: Function) {\n  try {\n    const data = yield call(apiCall);\n    yield put({ type: 'FETCH_DATA_SUCCESS', payload: data });\n  } catch (error: any) {\n    yield put({ type: FETCH_DATA_FAILURE, payload: error.message });\n    console.error('Saga error:', error);\n  }\n}\n```",
+          "tags": [
+            "Redux Saga",
+            "Error Handling",
+            "Open-ended"
+          ],
+          "prerequisites": [
+            "Redux_Saga_Effects",
+            "JavaScript_Error_Handling"
+          ],
+          "complexity": 7,
+          "interviewFrequency": 7,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_redux_saga_effects_6",
+          "topic": "Redux Saga Fork vs. Call",
+          "level": "hard",
+          "type": "open",
+          "question": "While `call` and `fork` both execute functions, they differ significantly in their behavior within a saga. Explain the key differences between `yield call(fn)` and `yield fork(fn)`, and provide a use case for each.",
+          "answer": "Both `call` and `fork` effects are used to execute functions, but they determine whether the function runs in a blocking or non-blocking manner relative to the current saga.\n\n*   **`yield call(fn, ...args)` (Blocking Call):**\n    *   **Behavior**: The saga pauses its execution until the invoked function (`fn`) completes (i.e., its Promise resolves or rejects). If `fn` returns a Promise, `call` waits for it. If `fn` throws an error, the error propagates back to the calling saga, which can then catch it with `try...catch`.\n    *   **Use Case**: Ideal for sequences of operations where each step depends on the previous one's completion, such as making an API call and then dispatching a success action based on the response. The `fetchUsers` example uses `call` because the `put` action depends on the `fetch` completion.\n    *   **Cancellation**: If the parent saga is cancelled, the task created by `call` is also cancelled.\n\n*   **`yield fork(fn, ...args)` (Non-Blocking Call):**\n    *   **Behavior**: The saga immediately resumes execution after forking the new task. It does not wait for the forked function (`fn`) to complete. The forked task runs independently in the background. Errors in a forked task do not automatically propagate back to the parent saga (unless explicitly handled, e.g., by joining or monitoring).\n    *   **Use Case**: Primarily used for starting 'watcher' sagas (e.g., `takeEvery`, `takeLatest`) that need to run continuously in the background, listening for actions, without blocking the `rootSaga`. It's also suitable for fire-and-forget side effects that don't need to block the current flow.\n    *   **Cancellation**: If the parent saga is cancelled, the forked task is also cancelled. However, if the forked task fails, the parent saga doesn't automatically fail.\n\n**Analogy**: Think of `call` as calling a subroutine and waiting for it to return, while `fork` is like spawning a new thread that runs independently.",
+          "analysisPoints": [
+            "Clearly define blocking vs. non-blocking behavior.",
+            "Explain how error propagation differs.",
+            "Provide a distinct, common use case for each effect (e.g., `call` for API, `fork` for watchers).",
+            "Mention cancellation behavior."
+          ],
+          "keyConcepts": [
+            "Redux Saga",
+            "call",
+            "fork",
+            "Blocking vs Non-Blocking",
+            "Concurrency",
+            "Error Propagation",
+            "Task Management"
+          ],
+          "evaluationCriteria": [
+            "Precise differentiation",
+            "Accurate use cases",
+            "Understanding of deeper implications (error, cancellation)",
+            "Conceptual clarity"
+          ],
+          "example": "",
+          "tags": [
+            "Redux Saga",
+            "Effects",
+            "call",
+            "fork",
+            "Advanced",
+            "Concurrency"
+          ],
+          "prerequisites": [
+            "Redux_Saga_Effects",
+            "JavaScript_Generators"
+          ],
+          "complexity": 8,
+          "interviewFrequency": 8,
+          "learningPath": "advanced"
+        },
+        {
+          "id": "question_redux_saga_effects_7",
+          "topic": "Redux Saga Effects (Flashcards)",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "What is the primary difference in behavior between `takeEvery` and `takeLatest` when multiple actions of the same type are dispatched rapidly?",
+          "answer": "`takeEvery` will run all instances of the worker saga concurrently, whereas `takeLatest` will cancel any currently running worker saga and start a new one with the latest action.",
+          "analysisPoints": [],
+          "keyConcepts": [
+            "Redux Saga",
+            "takeEvery",
+            "takeLatest",
+            "Concurrency",
+            "Cancellation"
+          ],
+          "evaluationCriteria": [
+            "Ability to quickly differentiate the two core watcher effects"
+          ],
+          "example": "",
+          "tags": [
+            "Redux Saga",
+            "takeEvery",
+            "takeLatest",
+            "Flashcard"
+          ],
+          "prerequisites": [
+            "Redux_Saga_Effects"
+          ],
+          "complexity": 5,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_redux_saga_complete_1",
+          "topic": "Redux Saga Full Flow",
+          "level": "medium",
+          "type": "code",
+          "question": "Given the following Redux action types for a user authentication flow, write a Redux Saga worker function (`loginWorker`) that handles a login request. It should make an API call (simulated by a `mockLoginApi` function), dispatch a success action on successful login, and an error action on failure. Assume `mockLoginApi` returns a promise.",
+          "answer": "```typescript\nimport { call, put } from 'redux-saga/effects';\n\n// Action Types\nconst LOGIN_REQUEST = 'LOGIN_REQUEST';\nconst LOGIN_SUCCESS = 'LOGIN_SUCCESS';\nconst LOGIN_FAILURE = 'LOGIN_FAILURE';\n\n// Mock API function\nconst mockLoginApi = async (credentials: { username: string; password: string }) => {\n  return new Promise((resolve, reject) => {\n    setTimeout(() => {\n      if (credentials.username === 'user' && credentials.password === 'pass') {\n        resolve({ token: 'mock_jwt_token', user: { id: 1, username: 'user' } });\n      } else {\n        reject(new Error('Invalid credentials'));\n      }\n    }, 500);\n  });\n};\n\n// Worker Saga\nfunction* loginWorker(action: { type: typeof LOGIN_REQUEST; payload: any }) {\n  try {\n    const response = yield call(mockLoginApi, action.payload.credentials);\n    yield put({ type: LOGIN_SUCCESS, payload: response });\n  } catch (error: any) {\n    yield put({ type: LOGIN_FAILURE, payload: error.message });\n  }\n}\n\n// To integrate, you'd typically have a watcher saga:\n// function* watchLoginRequests() {\n//   yield takeLatest(LOGIN_REQUEST, loginWorker);\n// }\n```",
+          "options": [],
+          "analysisPoints": [
+            "Correct usage of `call` for the API request.",
+            "Correct usage of `put` for dispatching success and failure actions.",
+            "Proper error handling using `try...catch`.",
+            "Understanding of saga function signature (receiving action)."
+          ],
+          "keyConcepts": [
+            "Redux Saga",
+            "call effect",
+            "put effect",
+            "Error Handling",
+            "Worker Saga",
+            "API Integration"
+          ],
+          "evaluationCriteria": [
+            "Functional saga implementation",
+            "Correct effect usage",
+            "Robust error handling",
+            "Code clarity"
+          ],
+          "example": "```typescript\nimport { call, put } from 'redux-saga/effects';\n\nconst LOGIN_REQUEST = 'LOGIN_REQUEST';\nconst LOGIN_SUCCESS = 'LOGIN_SUCCESS';\nconst LOGIN_FAILURE = 'LOGIN_FAILURE';\n\nconst mockLoginApi = async (credentials: { username: string; password: string }) => {\n  return new Promise((resolve, reject) => {\n    setTimeout(() => {\n      if (credentials.username === 'user' && credentials.password === 'pass') {\n        resolve({ token: 'mock_jwt_token', user: { id: 1, username: 'user' } });\n      } else {\n        reject(new Error('Invalid credentials'));\n      }\n    }, 500);\n  });\n};\n\nfunction* loginWorker(action: { type: typeof LOGIN_REQUEST; payload: any }) {\n  try {\n    const response = yield call(mockLoginApi, action.payload.credentials);\n    yield put({ type: LOGIN_SUCCESS, payload: response });\n  } catch (error: any) {\n    yield put({ type: LOGIN_FAILURE, payload: error.message });\n  }\n}\n```",
+          "tags": [
+            "Redux Saga",
+            "Code Challenge",
+            "Login Flow",
+            "API",
+            "Medium"
+          ],
+          "prerequisites": [
+            "Redux_Saga_Effects"
+          ],
+          "complexity": 7,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_redux_saga_complete_2",
+          "topic": "React-Redux-Saga Integration",
+          "level": "medium",
+          "type": "code",
+          "question": "Write a simple React functional component that displays 'Loading...' when data is being fetched, 'Error: [message]' on error, and a list of users when data is successfully loaded. It should dispatch a `FETCH_USERS_REQUEST` action when a 'Fetch Users' button is clicked. Assume the Redux store slice for users is named `users` and contains `loading: boolean`, `error: string | null`, and `data: User[]`.",
+          "answer": "```typescript\nimport React from 'react';\nimport { useSelector, useDispatch } from 'react-redux';\n\n// Assume these action types and types are defined elsewhere:\n// const FETCH_USERS_REQUEST = 'FETCH_USERS_REQUEST';\n// interface User { id: number; name: string; }\n// interface RootState { users: { loading: boolean; error: string | null; data: User[]; }; }\n\nconst FETCH_USERS_REQUEST = 'FETCH_USERS_REQUEST'; // For demonstration\n\ninterface User { id: number; name: string; }\n\n// A minimal RootState for type safety in this example\ninterface RootState {\n  users: {\n    loading: boolean;\n    error: string | null;\n    data: User[];\n  };\n}\n\nfunction UsersList() {\n  const dispatch = useDispatch();\n  const { loading, error, data: users } = useSelector((state: RootState) => state.users);\n\n  const handleFetchUsers = () => {\n    dispatch({ type: FETCH_USERS_REQUEST });\n  };\n\n  return (\n    <div>\n      <button onClick={handleFetchUsers} disabled={loading}>\n        {loading ? 'Fetching...' : 'Fetch Users'}\n      </button>\n      {loading && <p>Loading users...</p>}\n      {error && <p style={{ color: 'red' }}>Error: {error}</p>}\n      {users.length > 0 && (\n        <ul>\n          {users.map(user => (\n            <li key={user.id}>{user.name}</li>\n          ))}\n        </ul>\n      )}\n      {!loading && !error && users.length === 0 && <p>No users loaded yet. Click 'Fetch Users'.</p>}\n    </div>\n  );\n}\n```",
+          "options": [],
+          "analysisPoints": [
+            "Correct usage of `useSelector` to read state from Redux store.",
+            "Correct usage of `useDispatch` to dispatch actions.",
+            "Conditional rendering based on `loading`, `error`, and `data` states.",
+            "Button disable state based on loading."
+          ],
+          "keyConcepts": [
+            "React-Redux",
+            "useSelector",
+            "useDispatch",
+            "Redux State",
+            "Conditional Rendering",
+            "Frontend Integration"
+          ],
+          "evaluationCriteria": [
+            "Functional React component",
+            "Proper Redux hook usage",
+            "Effective UI state management",
+            "Code readability"
+          ],
+          "example": "```typescript\nimport React from 'react';\nimport { useSelector, useDispatch } from 'react-redux';\n\nconst FETCH_USERS_REQUEST = 'FETCH_USERS_REQUEST';\n\ninterface User { id: number; name: string; }\n\ninterface RootState {\n  users: {\n    loading: boolean;\n    error: string | null;\n    data: User[];\n  };\n}\n\nfunction UsersList() {\n  const dispatch = useDispatch();\n  const { loading, error, data: users } = useSelector((state: RootState) => state.users);\n\n  const handleFetchUsers = () => {\n    dispatch({ type: FETCH_USERS_REQUEST });\n  };\n\n  return (\n    <div>\n      <button onClick={handleFetchUsers} disabled={loading}>\n        {loading ? 'Fetching...' : 'Fetch Users'}\n      </button>\n      {loading && <p>Loading users...</p>}\n      {error && <p style={{ color: 'red' }}>Error: {error}</p>}\n      {users.length > 0 && (\n        <ul>\n          {users.map(user => (\n            <li key={user.id}>{user.name}</li>\n          ))}\n        </ul>\n      )}\n      {!loading && !error && users.length === 0 && <p>No users loaded yet. Click 'Fetch Users'.</p>}\n    </div>\n  );\n}\n```",
+          "tags": [
+            "React",
+            "Redux",
+            "Redux Saga",
+            "Integration",
+            "Code Challenge"
+          ],
+          "prerequisites": [
+            "React_Basics",
+            "Redux_Basics",
+            "React_Redux_Hooks"
+          ],
+          "complexity": 6,
+          "interviewFrequency": 7,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_redux_saga_complete_3",
+          "topic": "Redux Saga Actions and Reducer",
+          "level": "medium",
+          "type": "code",
+          "question": "Complete the Redux reducer for a 'cart' feature. It should handle `ADD_TO_CART`, `REMOVE_FROM_CART`, and `UPDATE_CART_QUANTITY` actions. The state should store an array of `items`, where each item has `id`, `name`, and `quantity`.",
+          "answer": "```typescript\n// Action Types\nconst ADD_TO_CART = 'ADD_TO_CART';\nconst REMOVE_FROM_CART = 'REMOVE_FROM_CART';\nconst UPDATE_CART_QUANTITY = 'UPDATE_CART_QUANTITY';\n\ninterface CartItem {\n  id: string;\n  name: string;\n  quantity: number;\n}\n\ninterface CartState {\n  items: CartItem[];\n}\n\nconst initialState: CartState = {\n  items: []\n};\n\nconst cartReducer = (state: CartState = initialState, action: any): CartState => {\n  switch (action.type) {\n    case ADD_TO_CART:\n      {\n        const existingItem = state.items.find(item => item.id === action.payload.id);\n        if (existingItem) {\n          return {\n            ...state,\n            items: state.items.map(item =>\n              item.id === action.payload.id\n                ? { ...item, quantity: item.quantity + (action.payload.quantity || 1) }\n                : item\n            )\n          };\n        } else {\n          return {\n            ...state,\n            items: [...state.items, { ...action.payload, quantity: action.payload.quantity || 1 }]\n          };\n        }\n      }\n    case REMOVE_FROM_CART:\n      return {\n        ...state,\n        items: state.items.filter(item => item.id !== action.payload.id)\n      };\n    case UPDATE_CART_QUANTITY:\n      return {\n        ...state,\n        items: state.items.map(item =>\n          item.id === action.payload.id\n            ? { ...item, quantity: action.payload.quantity }\n            : item\n        ).filter(item => item.quantity > 0) // Remove item if quantity becomes 0 or less\n      };\n    default:\n      return state;\n  }\n};\n```",
+          "options": [],
+          "analysisPoints": [
+            "Correct handling of immutable updates for arrays and objects in Redux.",
+            "Logic for adding new items vs. updating quantity of existing items.",
+            "Handling edge cases like removing an item if its quantity becomes zero.",
+            "Clear and concise reducer logic."
+          ],
+          "keyConcepts": [
+            "Redux",
+            "Reducer",
+            "Immutable Updates",
+            "State Management",
+            "Actions",
+            "Cart Feature"
+          ],
+          "evaluationCriteria": [
+            "Correct reducer implementation",
+            "Adherence to Redux principles (immutability)",
+            "Handling of various action types"
+          ],
+          "example": "```typescript\n// Action Types\nconst ADD_TO_CART = 'ADD_TO_CART';\nconst REMOVE_FROM_CART = 'REMOVE_FROM_CART';\nconst UPDATE_CART_QUANTITY = 'UPDATE_CART_QUANTITY';\n\ninterface CartItem {\n  id: string;\n  name: string;\n  quantity: number;\n}\n\ninterface CartState {\n  items: CartItem[];\n}\n\nconst initialState: CartState = {\n  items: []\n};\n\nconst cartReducer = (state: CartState = initialState, action: any): CartState => {\n  switch (action.type) {\n    case ADD_TO_CART:\n      {\n        const existingItem = state.items.find(item => item.id === action.payload.id);\n        if (existingItem) {\n          return {\n            ...state,\n            items: state.items.map(item =>\n              item.id === action.payload.id\n                ? { ...item, quantity: item.quantity + (action.payload.quantity || 1) }\n                : item\n            )\n          };\n        } else {\n          return {\n            ...state,\n            items: [...state.items, { ...action.payload, quantity: action.payload.quantity || 1 }]\n          };\n        }\n      }\n    case REMOVE_FROM_CART:\n      return {\n        ...state,\n        items: state.items.filter(item => item.id !== action.payload.id)\n      };\n    case UPDATE_CART_QUANTITY:\n      return {\n        ...state,\n        items: state.items.map(item =>\n          item.id === action.payload.id\n            ? { ...item, quantity: action.payload.quantity }\n            : item\n        ).filter(item => item.quantity > 0) \n      };\n    default:\n      return state;\n  }\n};\n```",
+          "tags": [
+            "Redux",
+            "Reducer",
+            "State Management",
+            "Code Challenge"
+          ],
+          "prerequisites": [
+            "Redux_Basics"
+          ],
+          "complexity": 7,
+          "interviewFrequency": 7,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_redux_saga_complete_4",
+          "topic": "Redux Saga Integration Components (Flashcard)",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "What React-Redux hooks are commonly used in a React component to dispatch Redux Saga actions and read state from the store?",
+          "answer": "`useDispatch` to dispatch actions and `useSelector` to read state.",
+          "analysisPoints": [],
+          "keyConcepts": [
+            "React-Redux",
+            "Hooks",
+            "useDispatch",
+            "useSelector"
+          ],
+          "evaluationCriteria": [
+            "Recall of fundamental React-Redux hooks for integration"
+          ],
+          "example": "",
+          "tags": [
+            "React",
+            "Redux",
+            "Hooks",
+            "Flashcard"
+          ],
+          "prerequisites": [
+            "React_Redux_Hooks"
+          ],
+          "complexity": 3,
+          "interviewFrequency": 8,
+          "learningPath": "beginner"
+        }
+      ],
+      "tasks": [
+        {
+          "id": "task_implement_user_data_fetch_saga",
+          "title": "Implement a User Data Fetching Saga with Loading and Error States",
+          "description": "\nImplement a complete Redux Saga flow for fetching a list of users from a public API (`https://jsonplaceholder.typicode.com/users`).\n\nYour solution should include:\n\n1.  **Redux Action Types**: Define `FETCH_USERS_REQUEST`, `FETCH_USERS_SUCCESS`, `FETCH_USERS_FAILURE`.\n2.  **Action Creators**: Create corresponding action creators.\n3.  **Reducer**: A Redux reducer that manages the `users` slice of the state, including `data` (an array of users), `loading` (boolean), and `error` (string or null).\n    *   When `FETCH_USERS_REQUEST` is dispatched, set `loading` to `true` and clear `error`.\n    *   When `FETCH_USERS_SUCCESS` is dispatched, set `loading` to `false`, `error` to `null`, and `data` to the fetched users.\n    *   When `FETCH_USERS_FAILURE` is dispatched, set `loading` to `false`, `error` to the error message, and `data` to an empty array.\n4.  **Sagas**: \n    *   A `fetchUsersWorker` saga that performs the API call using `call` and dispatches `FETCH_USERS_SUCCESS` or `FETCH_USERS_FAILURE` using `put`.\n    *   A `usersWatcherSaga` that uses `takeEvery` to listen for `FETCH_USERS_REQUEST`.\n5.  **Root Saga**: Integrate `usersWatcherSaga` into a `rootSaga` using `all`.\n6.  **React Component**: A simple React component that:\n    *   Displays a button to `Fetch Users`.\n    *   Shows 'Loading...' when `loading` is true.\n    *   Shows 'Error: [message]' when `error` is present.\n    *   Displays a list of user names when `data` is available.\n\nUse TypeScript for all definitions.\n",
+          "difficulty": "medium",
+          "startingCode": "import { createStore, applyMiddleware, combineReducers } from 'redux';\nimport createSagaMiddleware from 'redux-saga';\nimport { call, put, takeEvery, all } from 'redux-saga/effects';\nimport React from 'react';\nimport { useSelector, useDispatch, Provider } from 'react-redux';\n\n// 1. Action Types\nconst FETCH_USERS_REQUEST = 'FETCH_USERS_REQUEST';\nconst FETCH_USERS_SUCCESS = 'FETCH_USERS_SUCCESS';\nconst FETCH_USERS_FAILURE = 'FETCH_USERS_FAILURE';\n\n// 2. Action Creators\ninterface User {\n  id: number;\n  name: string;\n  email: string;\n}\n\ninterface FetchUsersRequestAction { type: typeof FETCH_USERS_REQUEST; }\ninterface FetchUsersSuccessAction { type: typeof FETCH_USERS_SUCCESS; payload: User[]; }\ninterface FetchUsersFailureAction { type: typeof FETCH_USERS_FAILURE; payload: string; }\n\ntype UserActions = FetchUsersRequestAction | FetchUsersSuccessAction | FetchUsersFailureAction;\n\nexport const fetchUsersRequest = (): FetchUsersRequestAction => ({ type: FETCH_USERS_REQUEST });\nexport const fetchUsersSuccess = (users: User[]): FetchUsersSuccessAction => ({ type: FETCH_USERS_SUCCESS, payload: users });\nexport const fetchUsersFailure = (error: string): FetchUsersFailureAction => ({ type: FETCH_USERS_FAILURE, payload: error });\n\n// 3. Reducer\ninterface UsersState {\n  data: User[];\n  loading: boolean;\n  error: string | null;\n}\n\nconst initialUsersState: UsersState = {\n  data: [],\n  loading: false,\n  error: null,\n};\n\nconst usersReducer = (state: UsersState = initialUsersState, action: UserActions): UsersState => {\n  switch (action.type) {\n    case FETCH_USERS_REQUEST:\n      return {\n        ...state,\n        loading: true,\n        error: null,\n      };\n    case FETCH_USERS_SUCCESS:\n      return {\n        ...state,\n        loading: false,\n        data: action.payload,\n      };\n    case FETCH_USERS_FAILURE:\n      return {\n        ...state,\n        loading: false,\n        error: action.payload,\n        data: [],\n      };\n    default:\n      return state;\n  }\n};\n\n// 4. Sagas - Implement these\nfunction* fetchUsersWorker(): Generator<any, void, any> {\n  // TODO: Implement the worker saga\n  // Use try/catch for error handling.\n  // Call the API: https://jsonplaceholder.typicode.com/users\n  // Dispatch success/failure actions.\n}\n\nfunction* usersWatcherSaga(): Generator<any, void, any> {\n  // TODO: Implement the watcher saga\n  // Listen for FETCH_USERS_REQUEST.\n}\n\n// 5. Root Saga - Combine sagas here\nfunction* rootSaga(): Generator<any, void, any> {\n  // TODO: Use 'all' to combine your watcher sagas.\n}\n\n// Redux Store Setup\nconst sagaMiddleware = createSagaMiddleware();\nconst rootReducer = combineReducers({\n  users: usersReducer,\n});\n\nconst store = createStore(\n  rootReducer,\n  applyMiddleware(sagaMiddleware)\n);\nsagaMiddleware.run(rootSaga);\n\n// RootState for useSelector type safety\ntype RootState = ReturnType<typeof rootReducer>;\n\n// 6. React Component - Implement this\nfunction UserList(): JSX.Element {\n  // TODO: Implement the React component\n  // Use useSelector to get state, useDispatch to dispatch actions.\n  // Render loading, error, or user list.\n  return <div></div>;\n}\n\n// App component to render everything\nexport default function App() {\n  return (\n    <Provider store={store}>\n      <UserList />\n    </Provider>\n  );\n}\n",
+          "solutionCode": "import { createStore, applyMiddleware, combineReducers } from 'redux';\nimport createSagaMiddleware from 'redux-saga';\nimport { call, put, takeEvery, all } from 'redux-saga/effects';\nimport React from 'react';\nimport { useSelector, useDispatch, Provider } from 'react-redux';\n\n// 1. Action Types\nconst FETCH_USERS_REQUEST = 'FETCH_USERS_REQUEST';\nconst FETCH_USERS_SUCCESS = 'FETCH_USERS_SUCCESS';\nconst FETCH_USERS_FAILURE = 'FETCH_USERS_FAILURE';\n\n// 2. Action Creators\ninterface User {\n  id: number;\n  name: string;\n  email: string;\n}\n\ninterface FetchUsersRequestAction { type: typeof FETCH_USERS_REQUEST; }\ninterface FetchUsersSuccessAction { type: typeof FETCH_USERS_SUCCESS; payload: User[]; }\ninterface FetchUsersFailureAction { type: typeof FETCH_USERS_FAILURE; payload: string; }\n\ntype UserActions = FetchUsersRequestAction | FetchUsersSuccessAction | FetchUsersFailureAction;\n\nexport const fetchUsersRequest = (): FetchUsersRequestAction => ({ type: FETCH_USERS_REQUEST });\nexport const fetchUsersSuccess = (users: User[]): FetchUsersSuccessAction => ({ type: FETCH_USERS_SUCCESS, payload: users });\nexport const fetchUsersFailure = (error: string): FetchUsersFailureAction => ({ type: FETCH_USERS_FAILURE, payload: error });\n\n// 3. Reducer\ninterface UsersState {\n  data: User[];\n  loading: boolean;\n  error: string | null;\n}\n\nconst initialUsersState: UsersState = {\n  data: [],\n  loading: false,\n  error: null,\n};\n\nconst usersReducer = (state: UsersState = initialUsersState, action: UserActions): UsersState => {\n  switch (action.type) {\n    case FETCH_USERS_REQUEST:\n      return {\n        ...state,\n        loading: true,\n        error: null,\n      };\n    case FETCH_USERS_SUCCESS:\n      return {\n        ...state,\n        loading: false,\n        data: action.payload,\n      };\n    case FETCH_USERS_FAILURE:\n      return {\n        ...state,\n        loading: false,\n        error: action.payload,\n        data: [],\n      };\n    default:\n      return state;\n  }\n};\n\n// API call function\nconst getUsersApi = async () => {\n  const response = await fetch('https://jsonplaceholder.typicode.com/users');\n  if (!response.ok) {\n    throw new Error(`HTTP error! status: ${response.status}`);\n  }\n  return await response.json();\n};\n\n// 4. Sagas - Implement these\nfunction* fetchUsersWorker(): Generator<any, void, any> {\n  try {\n    const users: User[] = yield call(getUsersApi);\n    yield put(fetchUsersSuccess(users));\n  } catch (error: any) {\n    yield put(fetchUsersFailure(error.message || 'An unknown error occurred'));\n  }\n}\n\nfunction* usersWatcherSaga(): Generator<any, void, any> {\n  yield takeEvery(FETCH_USERS_REQUEST, fetchUsersWorker);\n}\n\n// 5. Root Saga - Combine sagas here\nfunction* rootSaga(): Generator<any, void, any> {\n  yield all([\n    usersWatcherSaga(),\n  ]);\n}\n\n// Redux Store Setup\nconst sagaMiddleware = createSagaMiddleware();\nconst rootReducer = combineReducers({\n  users: usersReducer,\n});\n\nconst store = createStore(\n  rootReducer,\n  applyMiddleware(sagaMiddleware)\n);\nsagaMiddleware.run(rootSaga);\n\n// RootState for useSelector type safety\ntype RootState = ReturnType<typeof rootReducer>;\n\n// 6. React Component - Implement this\nfunction UserList(): JSX.Element {\n  const dispatch = useDispatch();\n  const { loading, error, data: users } = useSelector((state: RootState) => state.users);\n\n  const handleFetchUsers = () => {\n    dispatch(fetchUsersRequest());\n  };\n\n  return (\n    <div>\n      <h1>Users List (Redux Saga)</h1>\n      <button onClick={handleFetchUsers} disabled={loading}>\n        {loading ? 'Loading...' : 'Fetch Users'}\n      </button>\n      {error && <p style={{ color: 'red' }}>Error: {error}</p>}\n      {loading && <p>Loading users...</p>}\n      {!loading && users.length > 0 && (\n        <div>\n          <h2>Users:</h2>\n          <ul>\n            {users.map(user => (\n              <li key={user.id}>{user.name} ({user.email})</li>\n            ))}\n          </ul>\n        </div>\n      )}\n       {!loading && !error && users.length === 0 && <p>Click the button to fetch users.</p>}\n    </div>\n  );\n}\n\n// App component to render everything\nexport default function App() {\n  return (\n    <Provider store={store}>\n      <UserList />\n    </Provider>\n  );\n}\n",
+          "testCases": [
+            "Initial state: `loading` is `false`, `error` is `null`, `data` is empty array. UI shows 'Fetch Users' button and a message about fetching.",
+            "Click 'Fetch Users' button: `loading` becomes `true`. UI shows 'Loading...' message and button is disabled.",
+            "API success: `loading` becomes `false`, `error` is `null`, `data` contains fetched users. UI shows list of users.",
+            "API failure: `loading` becomes `false`, `error` contains error message, `data` is empty. UI shows error message.",
+            "Click 'Fetch Users' again after success: New fetch initiated, previous data cleared, `loading` becomes `true`."
+          ],
+          "hints": [
+            "Remember to `yield call` your API function within the worker saga.",
+            "`put` is used to dispatch actions from sagas.",
+            "The `takeEvery` effect is suitable for this scenario as it allows multiple concurrent fetches if the user somehow dispatches the action rapidly (though typically a single button click won't cause this, it's good practice for `takeEvery`).",
+            "Ensure your reducer correctly handles the three action types to update `loading`, `error`, and `data` states immutably."
+          ],
+          "tags": [
+            "Redux Saga",
+            "API Integration",
+            "State Management",
+            "React-Redux",
+            "Data Fetching",
+            "Frontend"
+          ],
+          "timeEstimate": 60,
+          "prerequisites": [
+            "Redux_Basics",
+            "React_Redux_Hooks",
+            "Redux_Saga_Effects"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 9,
+          "learningPath": "intermediate",
+          "relatedConcepts": [
+            "Redux Middleware",
+            "ES6 Generators",
+            "Asynchronous JavaScript"
+          ]
+        },
+        {
+          "id": "task_implement_dog_image_fetcher_saga",
+          "title": "Enhance Dog Image Fetcher with TakeLatest and UI Feedback",
+          "description": "\nExpand on the Dog Image Fetcher example to incorporate `takeLatest` for handling rapid clicks and improve UI feedback.\n\nYour task is to complete and refine the provided structure for the Dog Image Fetcher, ensuring all parts work together seamlessly.\n\n1.  **Review and Complete Actions/Reducer**: Ensure `REQUEST_DOG`, `REQUEST_DOG_SUCCESS`, `REQUEST_DOG_ERROR` actions and the `dogsReducer` are correctly implemented to manage `url`, `loading`, and `error` states.\n2.  **Implement Sagas**: \n    *   Create `fetchDogImageApi` function that fetches from `https://dog.ceo/api/breeds/image/random`.\n    *   Implement `fetchDogWorker` saga using `call` for the API and `put` for success/error actions.\n    *   Implement `dogWatcherSaga` using `takeLatest(REQUEST_DOG, fetchDogWorker)`. This is critical for handling rapid button clicks correctly.\n    *   Integrate `dogWatcherSaga` into a `rootSaga`.\n3.  **Refine React Component**: \n    *   Display a button `Fetch New Dog Image`. Disable it while `loading`.\n    *   Show 'Loading dog image...' when `loading` is true.\n    *   Show an appropriate error message if `error` is true.\n    *   Display the dog image when `url` is available.\n    *   Add a default message when no image is loaded yet.\n\nUse TypeScript for all definitions.\n",
+          "difficulty": "medium",
+          "startingCode": "import { createStore, applyMiddleware, combineReducers } from 'redux';\nimport createSagaMiddleware from 'redux-saga';\nimport { call, put, takeLatest, all } from 'redux-saga/effects';\nimport React from 'react';\nimport { useSelector, useDispatch, Provider } from 'react-redux';\n\n// 1. Actions\nconst REQUEST_DOG = 'REQUEST_DOG';\nconst REQUEST_DOG_SUCCESS = 'REQUEST_DOG_SUCCESS';\nconst REQUEST_DOG_ERROR = 'REQUEST_DOG_ERROR';\n\n// Action Creators\nexport const requestDog = () => ({ type: REQUEST_DOG });\nexport const requestDogSuccess = (data: { message: string }) => ({ \n  type: REQUEST_DOG_SUCCESS, \n  url: data.message \n});\nexport const requestDogError = () => ({ type: REQUEST_DOG_ERROR });\n\n// 2. Reducer\ninterface DogState {\n  url: string;\n  loading: boolean;\n  error: boolean;\n}\n\nconst initialState: DogState = {\n  url: '',\n  loading: false,\n  error: false\n};\n\nconst dogsReducer = (state: DogState = initialState, action: any): DogState => {\n  switch (action.type) {\n    case REQUEST_DOG:\n      return {\n        ...state,\n        loading: true,\n        error: false\n      };\n    case REQUEST_DOG_SUCCESS:\n      return {\n        ...state,\n        url: action.url,\n        loading: false,\n        error: false\n      };\n    case REQUEST_DOG_ERROR:\n      return {\n        ...state,\n        loading: false,\n        error: true\n      };\n    default:\n      return state;\n  }\n};\n\n// 3. Sagas - Implement these\nconst fetchDogImageApi = async () => {\n  // TODO: Implement actual fetch call\n  // return new Promise(resolve => setTimeout(() => resolve({ message: 'https://via.placeholder.com/150' }), 1000)); // Placeholder\n};\n\nfunction* fetchDogWorker(): Generator<any, void, any> {\n  // TODO: Implement the worker saga\n  // Use call for the API, put for success/error\n}\n\nexport function* dogWatcherSaga(): Generator<any, void, any> {\n  // TODO: Use takeLatest here\n}\n\nfunction* rootSaga(): Generator<any, void, any> {\n  // TODO: Combine sagas here\n  yield all([\n    // dogWatcherSaga(),\n  ]);\n}\n\n// Redux Store Setup\nconst sagaMiddleware = createSagaMiddleware();\nconst rootReducer = combineReducers({\n  dogs: dogsReducer,\n});\n\nconst store = createStore(\n  rootReducer,\n  applyMiddleware(sagaMiddleware)\n);\nsagaMiddleware.run(rootSaga);\n\ntype RootState = ReturnType<typeof rootReducer>;\n\n// 4. React Component - Implement this\nfunction DogImageFetcher(): JSX.Element {\n  // TODO: Implement the React component\n  // Use useSelector to get state, useDispatch to dispatch actions.\n  // Render loading, error, or image.\n  return <div></div>;\n}\n\nexport default function App() {\n  return (\n    <Provider store={store}>\n      <DogImageFetcher />\n    </Provider>\n  );\n}\n",
+          "solutionCode": "import { createStore, applyMiddleware, combineReducers } from 'redux';\nimport createSagaMiddleware from 'redux-saga';\nimport { call, put, takeLatest, all } from 'redux-saga/effects';\nimport React from 'react';\nimport { useSelector, useDispatch, Provider } from 'react-redux';\n\n// 1. Actions\nconst REQUEST_DOG = 'REQUEST_DOG';\nconst REQUEST_DOG_SUCCESS = 'REQUEST_DOG_SUCCESS';\nconst REQUEST_DOG_ERROR = 'REQUEST_DOG_ERROR';\n\n// Action Creators\nexport const requestDog = () => ({ type: REQUEST_DOG });\nexport const requestDogSuccess = (data: { message: string }) => ({ \n  type: REQUEST_DOG_SUCCESS, \n  url: data.message \n});\nexport const requestDogError = () => ({ type: REQUEST_DOG_ERROR });\n\n// 2. Reducer\ninterface DogState {\n  url: string;\n  loading: boolean;\n  error: boolean;\n}\n\nconst initialState: DogState = {\n  url: '',\n  loading: false,\n  error: false\n};\n\nconst dogsReducer = (state: DogState = initialState, action: any): DogState => {\n  switch (action.type) {\n    case REQUEST_DOG:\n      return {\n        ...state,\n        loading: true,\n        error: false\n      };\n    case REQUEST_DOG_SUCCESS:\n      return {\n        ...state,\n        url: action.url,\n        loading: false,\n        error: false\n      };\n    case REQUEST_DOG_ERROR:\n      return {\n        ...state,\n        loading: false,\n        error: true\n      };\n    default:\n      return state;\n  }\n};\n\n// 3. Sagas - Implement these\nconst fetchDogImageApi = async () => {\n  const response = await fetch('https://dog.ceo/api/breeds/image/random');\n  if (!response.ok) {\n    throw new Error('Failed to fetch dog image');\n  }\n  return await response.json();\n};\n\nfunction* fetchDogWorker(): Generator<any, void, any> {\n  try {\n    const data: { message: string } = yield call(fetchDogImageApi);\n    yield put(requestDogSuccess(data));\n  } catch (error) {\n    console.error(\"Error fetching dog image:\", error);\n    yield put(requestDogError());\n  }\n}\n\nexport function* dogWatcherSaga(): Generator<any, void, any> {\n  yield takeLatest(REQUEST_DOG, fetchDogWorker);\n}\n\nfunction* rootSaga(): Generator<any, void, any> {\n  yield all([\n    dogWatcherSaga(),\n  ]);\n}\n\n// Redux Store Setup\nconst sagaMiddleware = createSagaMiddleware();\nconst rootReducer = combineReducers({\n  dogs: dogsReducer,\n});\n\nconst store = createStore(\n  rootReducer,\n  applyMiddleware(sagaMiddleware)\n);\nsagaMiddleware.run(rootSaga);\n\ntype RootState = ReturnType<typeof rootReducer>;\n\n// 4. React Component - Implement this\nfunction DogImageFetcher(): JSX.Element {\n  const dispatch = useDispatch();\n  const { url, loading, error } = useSelector((state: RootState) => state.dogs);\n\n  const handleFetchDog = () => {\n    dispatch(requestDog());\n  };\n\n  return (\n    <div>\n      <h1>Random Dog Image</h1>\n      <button onClick={handleFetchDog} disabled={loading}>\n        {loading ? 'Fetching...' : 'Fetch New Dog Image'}\n      </button>\n      {loading && <p>Loading dog image...</p>}\n      {error && <p style={{ color: 'red' }}>Error: Could not fetch dog image.</p>}\n      {url && (\n        <img\n          src={url}\n          alt=\"Random Dog\" \n          style={{ maxWidth: '300px', maxHeight: '300px', display: 'block', marginTop: '20px' }}\n        />\n      )}\n      {!url && !loading && !error && <p>Click the button to fetch a dog image!</p>}\n    </div>\n  );\n}\n\nexport default function App() {\n  return (\n    <Provider store={store}>\n      <DogImageFetcher />\n    </Provider>\n  );\n}\n",
+          "testCases": [
+            "Initial state: No image, no loading, no error. Button is enabled, default message is shown.",
+            "Click button once: `loading` becomes true, button disables. Shows 'Loading...'. After a short delay (API response), image appears, `loading` false, button enabled.",
+            "Click button multiple times rapidly: `loading` becomes true. Only the _last_ API request's result should be displayed. Previous requests should be cancelled. (Visually, you should only see one loading state transition, then the final image).",
+            "API error (e.g., mock fetch to a bad URL): `loading` becomes false, `error` becomes true. Error message is displayed.",
+            "Click button after error: New fetch initiated, `error` clears, `loading` becomes true, then proceeds as normal success/failure."
+          ],
+          "hints": [
+            "Remember that `takeLatest` automatically cancels any in-flight tasks when a new action of the same type is dispatched.",
+            "Ensure your `fetchDogImageApi` correctly throws an error if the `response.ok` is false to trigger the `catch` block in your saga.",
+            "The React component needs to derive its UI state (`loading`, `error`, `url`) directly from the Redux store using `useSelector`.",
+            "Think about the order of `loading`, `error`, and `url` checks in your JSX to ensure the correct message/image is displayed."
+          ],
+          "tags": [
+            "Redux Saga",
+            "takeLatest",
+            "API Integration",
+            "UI Feedback",
+            "React-Redux",
+            "Concurrency",
+            "Frontend"
+          ],
+          "timeEstimate": 75,
+          "prerequisites": [
+            "Redux_Saga_Effects",
+            "React_Redux_Hooks",
+            "Redux_State_Management"
+          ],
+          "complexity": 8,
+          "interviewRelevance": 9,
+          "learningPath": "intermediate",
+          "relatedConcepts": [
+            "Side Effects",
+            "Asynchronous Operations",
+            "Declarative UI"
+          ]
+        }
+      ]
+    }
+  }
+]

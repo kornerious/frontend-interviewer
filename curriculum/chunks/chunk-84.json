@@ -1,0 +1,1263 @@
+[
+  {
+    "id": "d232b8b8-83f4-4108-9e64-d2b27dc41e25",
+    "startLine": 17000,
+    "endLine": 17099,
+    "processedDate": "2025-06-17T15:45:54.894Z",
+    "content": {
+      "logicalBlockInfo": {
+        "suggestedEndLine": -1
+      },
+      "theory": [
+        {
+          "id": "theory_html_whitespace_minification",
+          "title": "HTML Whitespace Minification and Page Load Performance",
+          "content": "Minification is the process of removing unnecessary characters from code without changing its functionality. For HTML, this primarily involves eliminating extra whitespace characters (spaces, tabs, newlines) and comments. While modern web browsers are robust in parsing HTML and will collapse multiple spaces into a single space for display, the presence of these extra characters directly impacts the file size of the HTML document.\n\n### Impact on Performance\n1.  **Faster Download Time**: A smaller file size means fewer bytes need to be transferred over the network. This directly reduces the time it takes for the browser to download the HTML document, which is a critical factor for initial page loading metrics like Time to First Byte (TTFB) and overall page load time.\n2.  **Reduced Bandwidth Consumption**: Smaller file sizes conserve network bandwidth for users, which is particularly beneficial for those on limited data plans or slower connections. For server operators, it translates to reduced data transfer costs.\n\n### Browser Parsing vs. Network Transfer\nIt's important to distinguish between how browsers *parse* HTML and how the HTML file is *transferred*. Browsers are indeed efficient at parsing, and extra whitespace might not significantly affect the *rendering* phase once the document is fully downloaded and the DOM is constructed. However, the time spent *downloading* the file, including all its characters (visible or not), is a separate and often more critical bottleneck for initial page load performance. Therefore, minification is a standard and effective optimization practice.\n\n### Common Misconception\nThe original statement in the markdown content, \"removing extra whitespace characters (and newline characters) in HTML not affect the final page loading performance\" is generally incorrect. While the visual rendering might appear the same, the underlying network transfer performance is indeed affected positively by minification. The perceived negligible difference might only apply to extremely small HTML documents where network latency overshadows the download time difference.",
+          "examples": [
+            {
+              "id": "example_html_whitespace_1",
+              "title": "Unminified vs. Minified HTML",
+              "code": "<!-- Unminified HTML -->\n<!DOCTYPE html>\n<html>\n<head>\n    <title>   My Page   </title>\n</head>\n<body>\n    <p>\n        Hello     World\n    </p>\n    <!-- This is a comment -->\n    <div>\n\n        Another section with   lots of space.\n\n    </div>\n</body>\n</html>\n\n<!-- Minified HTML -->\n<!DOCTYPE html><html><head><title>My Page</title></head><body><p>Hello World</p><div>Another section with lots of space.</div></body></html>",
+              "explanation": "This example clearly shows the difference in character count between unminified and minified HTML. The minified version eliminates all unnecessary spaces, tabs, newlines, and comments, resulting in a significantly smaller file size. This reduction directly leads to faster download times over the network, improving initial page load performance.",
+              "language": "html"
+            }
+          ],
+          "relatedQuestions": [
+            "question_html_whitespace_1",
+            "question_html_whitespace_2",
+            "question_html_whitespace_3",
+            "question_html_whitespace_4"
+          ],
+          "relatedTasks": [
+            "task_html_minify_calculator"
+          ],
+          "tags": [
+            "HTML",
+            "Performance Optimization",
+            "Minification",
+            "Web Performance",
+            "Frontend Optimization"
+          ],
+          "technology": "HTML",
+          "prerequisites": [
+            "Networking Basics",
+            "HTTP Fundamentals"
+          ],
+          "complexity": 5,
+          "interviewRelevance": 7,
+          "learningPath": "intermediate",
+          "requiredFor": [
+            "Web Performance Auditing",
+            "Build Process Optimization"
+          ]
+        },
+        {
+          "id": "theory_canvas_rendering_context",
+          "title": "Canvas Rendering Contexts",
+          "content": "A canvas rendering context is an object that provides methods and properties for drawing and manipulating graphics on an HTML `<canvas>` element. You obtain this context by calling the `getContext()` method on a canvas element, specifying the type of context you want.\n\n### Types of Canvas Contexts\n\n1.  **`'2d'` (CanvasRenderingContext2D)**:\n    *   **Purpose**: This is the most widely used context for drawing two-dimensional shapes, paths, text, images, and animations. It provides a rich API for basic drawing operations.\n    *   **Usage**: Ideal for charts, graphs, simple games, and custom UI elements.\n    *   **Example**: Drawing rectangles, circles, lines, filling areas with colors or gradients, adding text.\n\n2.  **`'webgl'` and `'webgl2'` (WebGLRenderingContext, WebGL2RenderingContext)**:\n    *   **Purpose**: These contexts are used for rendering hardware-accelerated 3D (and complex 2D) graphics. They are based on OpenGL ES, allowing direct interaction with the GPU for high-performance rendering.\n    *   **Usage**: Complex 3D visualizations, advanced games, real-time data visualization, virtual reality applications.\n    *   **Differences**: WebGL2 is a newer version based on OpenGL ES 3.0, offering more advanced features, improved performance, and better access to modern GPU capabilities compared to WebGL1 (based on OpenGL ES 2.0).\n\n3.  **`'bitmaprenderer'` (ImageBitmapRenderingContext)**:\n    *   **Purpose**: This context is designed for efficient, low-overhead transfer and display of `ImageBitmap` objects onto the canvas. It's particularly useful when you need to quickly render pre-processed image data, often from an `OffscreenCanvas` or image decoding operations without traditional drawing commands.\n    *   **Usage**: High-performance image processing pipelines, displaying frames from video streams, transferring images between web workers and the main thread.\n\n4.  **`'webgpu'` (GPUCanvasContext - Experimental/Future)**:\n    *   **Purpose**: WebGPU is a modern web API (still experimental and under development) that aims to be the successor to WebGL. It provides a more explicit and low-level API for interacting with the GPU, closely mapping to modern native graphics APIs like Vulkan, Metal, and Direct3D 12.\n    *   **Benefits**: Offers better performance, more control over the rendering pipeline, and access to more powerful GPU features compared to WebGL, making it suitable for even more demanding graphics applications.\n    *   **Usage**: Future-proof 3D applications, compute shaders, machine learning inference on the GPU.\n\nEach context type provides a specialized set of APIs tailored to its specific rendering domain.",
+          "examples": [
+            {
+              "id": "example_canvas_context_2d",
+              "title": "Basic 2D Canvas Drawing",
+              "code": "const canvas = document.getElementById('myCanvas');\nconst ctx2d = canvas.getContext('2d');\n\nif (ctx2d) {\n  ctx2d.fillStyle = 'red';\n  ctx2d.fillRect(10, 10, 100, 50); // Draws a red rectangle\n\n  ctx2d.strokeStyle = 'blue';\n  ctx2d.lineWidth = 3;\n  ctx2d.strokeRect(30, 70, 80, 40); // Draws a blue stroked rectangle\n\n  ctx2d.font = '20px Arial';\n  ctx2d.fillStyle = 'black';\n  ctx2d.fillText('Hello Canvas!', 10, 150); // Draws text\n} else {\n  console.error('2D context not supported');\n}",
+              "explanation": "This example demonstrates how to obtain a '2d' rendering context and use its basic methods to draw a filled rectangle, a stroked rectangle, and text. It shows the typical workflow for 2D graphics programming on the canvas.",
+              "language": "javascript"
+            },
+            {
+              "id": "example_canvas_context_webgl",
+              "title": "Initializing WebGL Context",
+              "code": "const canvas = document.getElementById('myCanvas');\nconst gl = canvas.getContext('webgl');\n\nif (gl) {\n  gl.clearColor(0.0, 0.0, 0.0, 1.0); // Set clear color to black\n  gl.clear(gl.COLOR_BUFFER_BIT); // Clear the canvas\n  console.log('WebGL context initialized successfully.');\n  // Further WebGL drawing logic would go here, involving shaders, buffers, etc.\n} else {\n  console.error('WebGL context not supported or failed to initialize.');\n  alert('Your browser does not support WebGL!');\n}",
+              "explanation": "This example shows the initialization of a 'webgl' context. Unlike '2d', WebGL requires more complex setup involving shaders and buffers for drawing, but this snippet demonstrates the initial step of getting the context and clearing the canvas.",
+              "language": "javascript"
+            }
+          ],
+          "relatedQuestions": [
+            "question_canvas_context_1",
+            "question_canvas_context_2",
+            "question_canvas_context_3",
+            "question_canvas_context_4",
+            "question_canvas_context_5",
+            "question_canvas_context_6"
+          ],
+          "relatedTasks": [
+            "task_draw_shapes_2d_canvas",
+            "task_webgl_context_check"
+          ],
+          "tags": [
+            "HTML Canvas",
+            "Graphics",
+            "2D Graphics",
+            "3D Graphics",
+            "WebGL",
+            "WebGPU",
+            "Frontend API"
+          ],
+          "technology": "HTML, JavaScript",
+          "prerequisites": [
+            "DOM Manipulation",
+            "Basic JavaScript"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 8,
+          "learningPath": "advanced",
+          "requiredFor": [
+            "Interactive Graphics Development",
+            "Game Development (Web)",
+            "Data Visualization"
+          ]
+        },
+        {
+          "id": "theory_frontend_architecture",
+          "title": "Front-End Application Architecture and Structure",
+          "content": "A well-structured front-end application is crucial for maintainability, scalability, and collaboration, especially as the application grows in complexity. The goal is to separate concerns effectively, making different parts of the codebase independent and easy to understand, test, and modify.\n\n### Core Structure Principles\n1.  **Feature-based Organization (Domains/Modules)**: Instead of organizing by type (e.g., all components in one folder, all services in another), group files by feature. Each feature (e.g., 'user', 'product', 'cart') gets its own directory containing all related components, state, services, and logic. This enhances discoverability and cohesion.\n2.  **Clear Separation of Concerns**: Divide the application into distinct layers responsible for specific functionalities:\n    *   **UI Components**: Responsible solely for rendering and user interaction.\n    *   **Business Logic**: Contains the core rules and operations of the application.\n    *   **Data Access**: Handles communication with APIs and data persistence.\n3.  **Consistent Naming Conventions and Folder Structure**: Adhering to a standardized naming and directory structure across the project makes it predictable and easier for new team members to onboard and navigate.\n\n### Key Layers in a Front-End Application\nWhile naming conventions can vary, a common architectural pattern includes:\n1.  **UI Layer (Presentation Layer)**:\n    *   **Contents**: Reusable UI components (buttons, inputs, cards), page-level components (layouts, views), styling.\n    *   **Responsibility**: How the application looks and how users interact with it. Should be as 'dumb' as possible, focusing on presentation.\n    *   **Example**: `components/`, `pages/`, `assets/styles/`\n2.  **Application Layer (Service Layer / State Management)**:\n    *   **Contents**: Global state management (e.g., Redux stores, React Contexts, Zustand, Vuex), application-specific services that orchestrate operations between the UI and domain layers.\n    *   **Responsibility**: Manages application flow, orchestrates domain logic, handles shared state, and coordinates data fetching and updates.\n    *   **Example**: `store/`, `contexts/`, `hooks/` (for custom hooks encapsulating app logic)\n3.  **Domain Layer (Business Logic Layer)**:\n    *   **Contents**: Core business logic, data models, validation rules, utility functions specific to the domain.\n    *   **Responsibility**: Encapsulates the 'what' and 'how' of the business rules, independent of UI or data persistence details.\n    *   **Example**: `models/`, `utils/`, `domain/`, `lib/`\n4.  **Infrastructure Layer (Data Access Layer)**:\n    *   **Contents**: API clients, services for data fetching (e.g., `axios` instances, `fetch` wrappers), authentication tokens handling, local storage interactions.\n    *   **Responsibility**: Handles external integrations, data persistence, and communication with backend services.\n    *   **Example**: `api/`, `services/`, `config/`\n\n### Cross-Cutting Concerns\nThese are functionalities that are relevant across multiple layers or features and need to be handled consistently:\n*   **Authentication/Authorization**: User login, session management, access control.\n*   **Error Handling**: Centralized error reporting, displaying user-friendly messages.\n*   **Logging**: Tracking application events and user actions.\n*   **Performance Monitoring**: Metrics collection for performance analysis.\n*   **Internationalization (i18n)**: Supporting multiple languages.\n\n### Best Practices\n*   **Atomic Design for Components**: A methodology for crafting design systems. It breaks UI into atoms (basic HTML tags), molecules (groups of atoms), organisms (groups of molecules), templates (page-level objects), and pages (instances of templates). This promotes reusability and consistency.\n*   **Container/Presentational Component Pattern**: Separates components into 'presentational' (dumb, concerned with how things look) and 'container' (smart, concerned with how things work, data fetching, logic). Though less strictly adhered to with Hooks, the underlying principle of separating concerns remains vital.\n*   **Code Splitting and Lazy Loading**: Optimizes initial load time by deferring the loading of non-critical JavaScript, CSS, and other assets until they are needed.\n*   **Testing Strategy**: Implement a comprehensive testing strategy (unit, integration, end-to-end) across all layers.\n*   **Dependency Injection/Inversion of Control**: For managing dependencies and increasing testability.\n\nAdopting these principles leads to a more robust, scalable, and maintainable front-end application.",
+          "examples": [
+            {
+              "id": "example_frontend_structure_1",
+              "title": "Feature-Based Directory Structure (Conceptual)",
+              "code": "src/\n├── features/\n│   ├── auth/\n│   │   ├── components/\n│   │   │   ├── LoginForm.tsx\n│   │   │   └── AuthProvider.tsx\n│   │   ├── hooks/\n│   │   │   └── useAuth.ts\n│   │   ├── services/\n│   │   │   └── authApi.ts\n│   │   └── pages/\n│   │       └── LoginPage.tsx\n│   ├── products/\n│   │   ├── components/\n│   │   │   ├── ProductCard.tsx\n│   │   │   └── ProductList.tsx\n│   │   ├── hooks/\n│   │   │   └── useProducts.ts\n│   │   ├── services/\n│   │   │   └── productsApi.ts\n│   │   └── pages/\n│   │       └── ProductsPage.tsx\n├── components/ (shared UI components)\n│   ├── Button.tsx\n│   └── Modal.tsx\n├── hooks/ (shared application hooks)\n│   └── useDebounce.ts\n├── services/ (shared infrastructure services)\n│   └── apiClient.ts\n├── styles/\n│   ├── global.css\n│   └── variables.css\n├── utils/\n│   └── validators.ts\n├── App.tsx\n├── index.tsx",
+              "explanation": "This conceptual directory structure illustrates a feature-based organization. Each major feature (e.g., `auth`, `products`) has its own encapsulated folder containing all related components, hooks (application logic), services (data access), and pages. Shared resources like generic UI components, global styles, or common utilities reside at the root level, promoting modularity and easier navigation.",
+              "language": "shell"
+            }
+          ],
+          "relatedQuestions": [
+            "question_frontend_architecture_1",
+            "question_frontend_architecture_2",
+            "question_frontend_architecture_3",
+            "question_frontend_architecture_4",
+            "question_frontend_architecture_5",
+            "question_frontend_architecture_6"
+          ],
+          "relatedTasks": [
+            "task_refactor_ecommerce_app"
+          ],
+          "tags": [
+            "Frontend Architecture",
+            "Software Design",
+            "Scalability",
+            "Maintainability",
+            "Modularity",
+            "Design Patterns",
+            "React",
+            "Vue",
+            "Angular"
+          ],
+          "technology": "General Frontend",
+          "prerequisites": [
+            "JavaScript Fundamentals",
+            "Component-Based UI"
+          ],
+          "complexity": 8,
+          "interviewRelevance": 9,
+          "learningPath": "advanced",
+          "requiredFor": [
+            "Lead Frontend Developer",
+            "Architecting Large-Scale Applications"
+          ]
+        },
+        {
+          "id": "theory_image_lazy_loading",
+          "title": "Image Lazy Loading for Performance Optimization",
+          "content": "Lazy loading images is a performance optimization technique where images are loaded only when they are needed, typically when they are about to enter or are within the user's viewport. This contrasts with eager loading, where all images on a page are downloaded immediately upon page load. The primary benefits of lazy loading are:\n\n1.  **Faster Initial Page Load**: Reduces the number of requests and the amount of data transferred on initial page load, leading to quicker Time to Interactive (TTI) and overall page load times.\n2.  **Reduced Bandwidth Consumption**: Saves data for users, especially on mobile devices or limited data plans, by only loading images that are actually seen.\n3.  **Improved Core Web Vitals**: Positively impacts metrics like Largest Contentful Paint (LCP) by prioritizing visible content and deferring off-screen images.\n\n### Implementation Techniques\n\n1.  **Native Browser Lazy Loading (`loading='lazy'`)**:\n    *   **Description**: Modern browsers (Chrome, Firefox, Edge, Safari since iOS 15/macOS Monterey) provide a native `loading` attribute for `<img>` and `<iframe>` elements.\n    *   **Usage**: Set `loading='lazy'` on the `<img>` tag. The browser automatically handles the intersection observation and loading logic.\n    *   **Pros**: Simplest implementation, no JavaScript required, efficient, handled directly by the browser.\n    *   **Cons**: Not supported by all older browsers (though widely supported now).\n\n    ```html\n    <img src=\"placeholder.jpg\" loading=\"lazy\" data-src=\"actual-image.jpg\" alt=\"Description\">\n    ```\n    *Note: While `loading=\"lazy\"` handles the lazy loading behavior, you might still use a `placeholder.jpg` for initial display and `data-src` for the actual image path, which would then be swapped in by JavaScript if `loading=\"lazy\"` isn't fully robust for edge cases or specific fallback requirements.* However, the `src` attribute itself should typically point to the actual image for native lazy loading, or `data-src` if you're managing the `src` swap yourself with JS for older browser compatibility.\n\n2.  **Intersection Observer API**:\n    *   **Description**: A JavaScript API that provides a way to asynchronously observe changes in the intersection of a target element with an ancestor element or with the top-level document's viewport.\n    *   **Usage**: Create an `IntersectionObserver` instance, provide a callback function, and observe target elements. When an element intersects (enters the viewport), the callback fires, and you can then update its `src` attribute.\n    *   **Pros**: Highly performant as it avoids polling, flexible, good browser support (polyfills available for older browsers).\n    *   **Cons**: Requires JavaScript, more complex to implement than native lazy loading.\n\n    ```javascript\n    document.addEventListener(\"DOMContentLoaded\", function() {\n      const lazyImages = document.querySelectorAll(\"img[data-src]\");\n      \n      const imageObserver = new IntersectionObserver((entries, observer) => {\n        entries.forEach(entry => {\n          if (entry.isIntersecting) {\n            const img = entry.target; // The <img> element being observed\n            img.src = img.dataset.src; // Set the actual image source\n            img.removeAttribute(\"data-src\"); // Remove data-src to prevent re-processing\n            observer.unobserve(img); // Stop observing once loaded\n          }\n        });\n      }, {\n        rootMargin: '0px 0px 50px 0px' // Load images 50px before they enter viewport\n      });\n      \n      lazyImages.forEach(img => imageObserver.observe(img));\n    });\n    ```\n\n3.  **React-Specific Implementation (using Hooks)**:\n    *   **Description**: In component-based frameworks like React, you can encapsulate lazy loading logic within a reusable component, often using `useState`, `useRef`, and `useEffect` hooks along with `IntersectionObserver`.\n    *   **Usage**: Create a `LazyImage` component that conditionally renders the actual image once it's in view.\n    *   **Pros**: Reusable, fits into component-based architecture, allows for placeholder states and error handling.\n    *   **Cons**: Requires React, adds component overhead.\n\n    ```typescript\n    import { useEffect, useRef, useState } from \"react\";\n\n    interface LazyImageProps {\n      src: string;\n      alt: string;\n      placeholder?: string;\n    }\n\n    function LazyImage({ src, alt, placeholder }: LazyImageProps) {\n      const [isLoaded, setIsLoaded] = useState(false);\n      const [imgSrc, setImgSrc] = useState(placeholder || ''); // Start with placeholder or empty\n      const imgRef = useRef<HTMLImageElement>(null);\n      \n      useEffect(() => {\n        if (!imgRef.current) return;\n\n        const observer = new IntersectionObserver(\n          (entries) => {\n            entries.forEach((entry) => {\n              if (entry.isIntersecting && !isLoaded) {\n                setImgSrc(src); // Set actual image source\n                setIsLoaded(true);\n                observer.unobserve(entry.target); // Stop observing\n              }\n            });\n          },\n          { rootMargin: '0px 0px 100px 0px' } // Load 100px before entering viewport\n        );\n\n        observer.observe(imgRef.current);\n\n        return () => {\n          if (imgRef.current) {\n            observer.unobserve(imgRef.current);\n          }\n        };\n      }, [src, isLoaded]); // Re-run effect if src changes or image becomes loaded\n\n      const handleImageLoad = () => {\n        setIsLoaded(true);\n      };\n\n      return (\n        <img\n          ref={imgRef}\n          src={imgSrc}\n          alt={alt}\n          onLoad={handleImageLoad}\n          style={{ opacity: isLoaded ? 1 : 0, transition: 'opacity 0.3s ease-in-out' }}\n        />\n      );\n    }\n\n    // Example usage:\n    // <LazyImage src=\"actual-high-res.jpg\" alt=\"A beautiful landscape\" placeholder=\"low-res-placeholder.jpg\" />\n    ```\n    *Note: The provided markdown snippet for React was incomplete. I've completed it to demonstrate a functional lazy loading component.*",
+          "examples": [
+            {
+              "id": "example_lazy_loading_native",
+              "title": "Native Lazy Loading Example",
+              "code": "<!-- Simple native lazy loading -->\n<img src=\"https://via.placeholder.com/600x400/FF0000/FFFFFF?text=Placeholder\" \n     data-actual-src=\"https://source.unsplash.com/random/600x400?nature\" \n     alt=\"Random Nature Image\" \n     loading=\"lazy\" \n     style=\"width: 100%; height: auto; display: block; margin-bottom: 20px;\">\n\n<!-- Another lazy image -->\n<img src=\"https://via.placeholder.com/600x400/0000FF/FFFFFF?text=Placeholder\" \n     data-actual-src=\"https://source.unsplash.com/random/600x400?city\" \n     alt=\"Random City Image\" \n     loading=\"lazy\" \n     style=\"width: 100%; height: auto; display: block; margin-bottom: 20px;\">",
+              "explanation": "This example shows the `loading=\"lazy\"` attribute in action. Modern browsers will automatically defer loading these images until they are close to the viewport. The `src` here is a placeholder, and `data-actual-src` is a common pattern for JavaScript fallbacks if native support isn't present or if more control is desired over the source swap. For pure native lazy loading, the `src` attribute itself would typically hold the high-res image and the browser would manage its loading.",
+              "language": "html"
+            }
+          ],
+          "relatedQuestions": [
+            "question_lazy_loading_1",
+            "question_lazy_loading_2",
+            "question_lazy_loading_3",
+            "question_lazy_loading_4",
+            "question_lazy_loading_5"
+          ],
+          "relatedTasks": [
+            "task_implement_lazy_loading_observer"
+          ],
+          "tags": [
+            "Performance Optimization",
+            "Lazy Loading",
+            "Images",
+            "Intersection Observer API",
+            "React",
+            "Frontend Performance",
+            "Core Web Vitals"
+          ],
+          "technology": "HTML, JavaScript, React",
+          "prerequisites": [
+            "DOM Manipulation",
+            "JavaScript Event Listeners",
+            "Asynchronous JavaScript"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 9,
+          "learningPath": "intermediate",
+          "requiredFor": [
+            "Web Performance Optimization",
+            "Building High-Performance Websites"
+          ]
+        }
+      ],
+      "questions": [
+        {
+          "id": "question_html_whitespace_1",
+          "topic": "HTML Minification Performance",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "What is the primary benefit of minifying HTML files?",
+          "answer": "Reduced file size, leading to faster download times.",
+          "analysisPoints": [
+            "Minification removes unnecessary characters like whitespace and comments.",
+            "Smaller file size directly impacts network transfer time.",
+            "Faster download time contributes to better page loading performance metrics like TTFB."
+          ],
+          "keyConcepts": [
+            "HTML Minification",
+            "File Size",
+            "Download Time",
+            "Performance Optimization"
+          ],
+          "evaluationCriteria": [
+            "Ability to recall core benefit",
+            "Understanding of basic web performance concepts"
+          ],
+          "example": "",
+          "tags": [
+            "HTML",
+            "Performance",
+            "Minification",
+            "Basics"
+          ],
+          "prerequisites": [
+            "HTML Fundamentals"
+          ],
+          "complexity": 3,
+          "interviewFrequency": 6,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_html_whitespace_2",
+          "topic": "HTML Whitespace Impact",
+          "level": "medium",
+          "type": "mcq",
+          "question": "Which of the following statements is **most accurate** regarding the effect of extra whitespace characters in HTML on final page loading performance?",
+          "answer": "Extra whitespace increases file size, leading to slower download times.",
+          "options": [
+            "Extra whitespace increases file size, leading to slower download times.",
+            "Extra whitespace has no impact on performance because browsers ignore it during parsing.",
+            "Extra whitespace improves readability for developers but degrades rendering speed significantly.",
+            "Extra whitespace causes layout shifts and poor user experience, but doesn't affect download time."
+          ],
+          "analysisPoints": [
+            "The correct answer highlights the impact on file size and download time, which is the primary performance concern with unminified HTML.",
+            "Browsers do ignore extra whitespace during *parsing for rendering*, but they still have to *download* it, which takes time and bandwidth.",
+            "Readability is a benefit of unminified code, but performance is the inverse.",
+            "Layout shifts are usually due to dynamic content or image loading issues, not static whitespace."
+          ],
+          "keyConcepts": [
+            "HTML Minification",
+            "Network Performance",
+            "File Size",
+            "Browser Parsing"
+          ],
+          "evaluationCriteria": [
+            "Understanding the difference between parsing/rendering and network transfer.",
+            "Ability to identify the core performance bottleneck related to whitespace."
+          ],
+          "example": "The key distinction is that while browsers are good at collapsing whitespace for display, the actual bytes of whitespace still need to be transferred over the network. More bytes, even 'invisible' ones, means longer download times. Minification addresses this network transfer overhead.",
+          "tags": [
+            "HTML",
+            "Performance",
+            "Minification",
+            "Network"
+          ],
+          "prerequisites": [
+            "HTTP Fundamentals",
+            "Web Browsers"
+          ],
+          "complexity": 6,
+          "interviewFrequency": 7,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_html_whitespace_3",
+          "topic": "HTML Performance Practices",
+          "level": "hard",
+          "type": "open",
+          "question": "Discuss how various types of content minification (HTML, CSS, JavaScript) contribute to overall web performance. What specific metrics are most impacted by these practices, and are there any scenarios where aggressive minification might have negative side effects?",
+          "answer": "Minification across HTML, CSS, and JavaScript significantly reduces file sizes, leading to faster download times and lower bandwidth consumption. This primarily impacts network-related performance metrics such as:\n\n*   **Time to First Byte (TTFB)**: While not directly impacted by client-side minification (TTFB measures server response time for the initial document), if the HTML document itself is large due to lack of minification, the *full download time* for the HTML will be longer.\n*   **First Contentful Paint (FCP)** and **Largest Contentful Paint (LCP)**: Faster download of critical HTML, CSS, and JS (especially render-blocking resources) means these paints can occur sooner.\n*   **Total Blocking Time (TBT)**: Minified JavaScript can reduce parsing and execution time, indirectly reducing TBT.\n*   **Speed Index**: Overall visual completion speed.\n\nMinification benefits user experience by making pages load quicker, especially on slower networks. It also reduces server load and bandwidth costs for websites.\n\n**Potential Negative Side Effects of Aggressive Minification:**\n\n1.  **Debugging Difficulty**: Minified code is very difficult to read and debug in development tools. Source maps are essential to mitigate this by mapping the minified code back to the original source.\n2.  **Build Process Complexity**: Integrating minification into the build pipeline adds a step, and if not configured correctly, can lead to errors or broken deployments (e.g., if a minifier incorrectly removes critical code).\n3.  **Potential for Errors**: While rare with mature minifiers, extremely aggressive settings or bugs in the minifier could theoretically alter code behavior, though this is highly unlikely for HTML/CSS and less common for JS with standard tools like Terser/UglifyJS.",
+          "analysisPoints": [
+            "Comprehensive understanding of minification's benefits across different file types.",
+            "Knowledge of relevant performance metrics (TTFB, FCP, LCP, TBT, Speed Index).",
+            "Ability to identify potential downsides and mitigation strategies (source maps).",
+            "Understanding of the trade-offs between performance and development experience."
+          ],
+          "keyConcepts": [
+            "Minification",
+            "Web Performance",
+            "Performance Metrics",
+            "Source Maps",
+            "Build Process",
+            "Debugging"
+          ],
+          "evaluationCriteria": [
+            "Depth of knowledge on minification's impact.",
+            "Accuracy in correlating minification to specific metrics.",
+            "Awareness of practical challenges and solutions.",
+            "Structured and comprehensive explanation."
+          ],
+          "example": "",
+          "tags": [
+            "Performance",
+            "Minification",
+            "HTML",
+            "CSS",
+            "JavaScript",
+            "Web Vitals",
+            "Optimization"
+          ],
+          "prerequisites": [
+            "Web Performance Concepts",
+            "Build Tools"
+          ],
+          "complexity": 8,
+          "interviewFrequency": 8,
+          "learningPath": "advanced"
+        },
+        {
+          "id": "question_html_whitespace_4",
+          "topic": "Browser vs. Network for Whitespace",
+          "level": "medium",
+          "type": "flashcard",
+          "question": "True or False: Browsers are efficient at handling extra whitespace, so network transfer time is not affected by it.",
+          "answer": "False",
+          "analysisPoints": [
+            "While browsers are efficient at parsing and collapsing whitespace for *display*, they still have to *download* all the bytes.",
+            "The network transfer time is directly proportional to the file size.",
+            "Minification reduces file size, which in turn reduces network transfer time, thus improving initial page load performance."
+          ],
+          "keyConcepts": [
+            "Network Transfer",
+            "Browser Parsing",
+            "File Size",
+            "Performance"
+          ],
+          "evaluationCriteria": [
+            "Ability to distinguish network vs. parsing impact",
+            "Correctly identifying false statement reason"
+          ],
+          "example": "",
+          "tags": [
+            "HTML",
+            "Performance",
+            "Network",
+            "Browser"
+          ],
+          "prerequisites": [
+            "HTTP Basics"
+          ],
+          "complexity": 5,
+          "interviewFrequency": 6,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_canvas_context_1",
+          "topic": "Canvas Rendering Context Definition",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "What is the purpose of a canvas rendering context?",
+          "answer": "It's an object with properties and methods that allow you to draw graphics onto an HTML `<canvas>` element.",
+          "analysisPoints": [
+            "A canvas context provides the API for interacting with the canvas.",
+            "It's obtained via the `getContext()` method."
+          ],
+          "keyConcepts": [
+            "HTML Canvas",
+            "Rendering Context",
+            "Drawing API"
+          ],
+          "evaluationCriteria": [
+            "Recall of fundamental definition"
+          ],
+          "example": "",
+          "tags": [
+            "HTML Canvas",
+            "Graphics",
+            "Basics"
+          ],
+          "prerequisites": [
+            "HTML Canvas Element"
+          ],
+          "complexity": 3,
+          "interviewFrequency": 7,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_canvas_context_2",
+          "topic": "Canvas Context Types",
+          "level": "medium",
+          "type": "mcq",
+          "question": "Which `getContext()` argument is used for drawing hardware-accelerated 3D graphics on an HTML canvas?",
+          "answer": "`'webgl'` or `'webgl2'`",
+          "options": [
+            "`'2d'`",
+            "`'webgl'` or `'webgl2'`",
+            "`'3d'`",
+            "`'canvas-3d'`"
+          ],
+          "analysisPoints": [
+            "The `'webgl'` and `'webgl2'` contexts are specifically designed for 3D graphics, leveraging OpenGL ES.",
+            "`'2d'` is for 2D graphics.",
+            "Options like `'3d'` or `'canvas-3d'` are not standard canvas context types."
+          ],
+          "keyConcepts": [
+            "HTML Canvas",
+            "WebGL",
+            "3D Graphics",
+            "Rendering Context"
+          ],
+          "evaluationCriteria": [
+            "Knowledge of specific canvas context types.",
+            "Ability to differentiate between 2D and 3D contexts."
+          ],
+          "example": "The `webgl` context exposes the `WebGLRenderingContext` API, which provides low-level functions for interacting with the GPU, such as setting up shaders, buffers, and textures to render 3D scenes. `webgl2` is its updated version with more features.",
+          "tags": [
+            "HTML Canvas",
+            "WebGL",
+            "3D",
+            "Graphics"
+          ],
+          "prerequisites": [
+            "Canvas Context Basics"
+          ],
+          "complexity": 6,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_canvas_context_3",
+          "topic": "Canvas 2D Drawing",
+          "level": "easy",
+          "type": "code",
+          "question": "Write JavaScript code to draw a blue square of size 50x50 pixels at coordinates (20, 20) on an HTML canvas with the ID `myCanvas`.",
+          "answer": "```javascript\nconst canvas = document.getElementById('myCanvas');\nconst ctx = canvas.getContext('2d');\n\nif (ctx) {\n  ctx.fillStyle = 'blue';\n  ctx.fillRect(20, 20, 50, 50);\n} else {\n  console.error('2D canvas context not available.');\n}\n```",
+          "analysisPoints": [
+            "Correctly identifies the `getContext('2d')` method.",
+            "Uses `fillStyle` to set the color.",
+            "Uses `fillRect()` to draw a filled rectangle with specified position and dimensions.",
+            "Includes basic error handling for context availability."
+          ],
+          "keyConcepts": [
+            "HTML Canvas",
+            "2D Context",
+            "Drawing Shapes",
+            "JavaScript DOM Manipulation"
+          ],
+          "evaluationCriteria": [
+            "Ability to apply basic canvas drawing commands.",
+            "Correct syntax for `getContext()`, `fillStyle`, `fillRect()`."
+          ],
+          "example": "",
+          "tags": [
+            "HTML Canvas",
+            "JavaScript",
+            "2D Graphics",
+            "Coding"
+          ],
+          "prerequisites": [
+            "Basic JavaScript",
+            "DOM Manipulation"
+          ],
+          "complexity": 4,
+          "interviewFrequency": 7,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_canvas_context_4",
+          "topic": "WebGPU vs. WebGL",
+          "level": "hard",
+          "type": "open",
+          "question": "Compare and contrast WebGL and WebGPU. What are the key advantages WebGPU aims to offer over WebGL, and in what scenarios would a developer choose one over the other?",
+          "answer": "**WebGL** is an older API (based on OpenGL ES 2.0/3.0) that provides a JavaScript API for rendering interactive 2D and 3D graphics within any compatible web browser without the use of plug-ins. It's widely supported and has a mature ecosystem.\n\n**WebGPU** is a newer, still experimental, web standard that aims to replace WebGL. It offers a more modern, lower-level API for GPU access, designed to map more closely to contemporary native graphics APIs like Vulkan, Metal, and Direct3D 12.\n\n**Key Advantages of WebGPU over WebGL:**\n\n1.  **Performance**: WebGPU offers more explicit control over the GPU, leading to potentially higher performance, especially for complex scenes and compute-intensive tasks, due to its closer mapping to modern GPU architectures.\n2.  **Modern API Design**: It moves away from the stateful OpenGL API to a more explicit, object-oriented, and less error-prone API, making it easier to optimize and debug.\n3.  **Compute Shaders**: WebGPU supports compute shaders, allowing developers to perform general-purpose computations on the GPU, which is highly beneficial for tasks like machine learning, physics simulations, and advanced image processing.\n4.  **Multi-threading**: Designed with multi-threading in mind, enabling better utilization of modern CPUs and potentially allowing some GPU work to be prepared in web workers.\n5.  **Texture Formats and Features**: Supports more modern texture formats and features, offering greater flexibility and efficiency.\n\n**Scenario Choices:**\n\n*   **Choose WebGL if:**\n    *   Broad browser compatibility (including older browsers) is a strict requirement.\n    *   The project involves simpler 2D or 3D graphics that don't push the limits of GPU performance.\n    *   Existing codebase is in WebGL, and migration costs are high.\n    *   Immediate production deployment is needed, as WebGL is stable and widely deployed.\n\n*   **Choose WebGPU if:**\n    *   Cutting-edge performance for demanding 3D applications (e.g., AAA web games, complex simulations, professional design tools) is critical.\n    *   Compute shaders and GPU compute capabilities are required.\n    *   The project is forward-looking and can tolerate experimental API status or requires the latest GPU features.\n    *   Development involves porting from modern native graphics APIs (Vulkan, Metal, D3D12), as WebGPU's design aligns better.\n    *   The target audience uses modern browsers that support WebGPU (currently Chrome, Edge, Firefox Nightly).",
+          "analysisPoints": [
+            "In-depth comparison of WebGL and WebGPU, covering their underlying philosophies.",
+            "Clear articulation of WebGPU's advantages (performance, modern API, compute shaders, multi-threading).",
+            "Ability to recommend the appropriate API based on project requirements (compatibility vs. performance/features).",
+            "Demonstrates awareness of current browser support for WebGPU."
+          ],
+          "keyConcepts": [
+            "WebGL",
+            "WebGPU",
+            "3D Graphics",
+            "GPU Computing",
+            "Graphics API",
+            "Performance",
+            "Browser Compatibility"
+          ],
+          "evaluationCriteria": [
+            "Comprehensive knowledge of graphics APIs.",
+            "Ability to analyze trade-offs.",
+            "Strategic decision-making for technology adoption."
+          ],
+          "example": "",
+          "tags": [
+            "WebGL",
+            "WebGPU",
+            "Graphics",
+            "Performance",
+            "Architecture",
+            "Future"
+          ],
+          "prerequisites": [
+            "Advanced JavaScript",
+            "Computer Graphics Concepts"
+          ],
+          "complexity": 9,
+          "interviewFrequency": 7,
+          "learningPath": "expert"
+        },
+        {
+          "id": "question_canvas_context_5",
+          "topic": "ImageBitmapRenderingContext Purpose",
+          "level": "medium",
+          "type": "flashcard",
+          "question": "What is the primary use case for the `'bitmaprenderer'` context?",
+          "answer": "To efficiently transfer and display `ImageBitmap` objects onto the canvas with low overhead, often for pre-processed image data or offscreen rendering.",
+          "analysisPoints": [
+            "The `'bitmaprenderer'` context is optimized for displaying `ImageBitmap` objects.",
+            "It's useful for scenarios where image data is already prepared (e.g., from `createImageBitmap` or `OffscreenCanvas`).",
+            "Its focus is on low-overhead, quick display, not general drawing."
+          ],
+          "keyConcepts": [
+            "HTML Canvas",
+            "ImageBitmap",
+            "Performance",
+            "OffscreenCanvas"
+          ],
+          "evaluationCriteria": [
+            "Understanding of specialized canvas contexts",
+            "Knowledge of `ImageBitmap`"
+          ],
+          "example": "",
+          "tags": [
+            "HTML Canvas",
+            "Performance",
+            "Image Processing",
+            "Web Workers"
+          ],
+          "prerequisites": [
+            "HTML Canvas",
+            "Image Processing Basics"
+          ],
+          "complexity": 6,
+          "interviewFrequency": 5,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_canvas_context_6",
+          "topic": "Canvas Context Availability",
+          "level": "easy",
+          "type": "code",
+          "question": "Consider the following HTML: `<canvas id=\"myDrawingCanvas\"></canvas>`. Write JavaScript code to check if a `'2d'` context is available for this canvas, and if not, log an appropriate message to the console.",
+          "answer": "```javascript\nconst canvas = document.getElementById('myDrawingCanvas');\n\nif (canvas) {\n  const ctx = canvas.getContext('2d');\n  if (ctx) {\n    console.log('2D canvas context is available.');\n    // You can now proceed with 2D drawing operations using 'ctx'\n  } else {\n    console.error('2D canvas context is not available on this browser.');\n  }\n} else {\n  console.error('Canvas element with ID \"myDrawingCanvas\" not found.');\n}\n```",
+          "analysisPoints": [
+            "Correctly retrieves the canvas element by ID.",
+            "Properly uses `getContext('2d')`.",
+            "Includes a check for the existence of the canvas element itself.",
+            "Provides clear console messages for success and failure scenarios."
+          ],
+          "keyConcepts": [
+            "HTML Canvas",
+            "getContext",
+            "Browser Compatibility",
+            "Error Handling"
+          ],
+          "evaluationCriteria": [
+            "Ability to safely access DOM elements.",
+            "Correct application of `getContext()`.",
+            "Robustness through availability checks."
+          ],
+          "example": "",
+          "tags": [
+            "HTML Canvas",
+            "JavaScript",
+            "DOM",
+            "Error Handling"
+          ],
+          "prerequisites": [
+            "DOM Manipulation"
+          ],
+          "complexity": 4,
+          "interviewFrequency": 6,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_frontend_architecture_1",
+          "topic": "Frontend Application Structure",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "What is the main benefit of organizing a front-end application by features (domains/modules)?",
+          "answer": "It enhances discoverability and cohesion, as all related files for a specific feature are grouped together, making it easier to find and manage.",
+          "analysisPoints": [
+            "Feature-based organization improves modularity.",
+            "Reduces cognitive load when navigating the codebase.",
+            "Supports independent development and deployment of features."
+          ],
+          "keyConcepts": [
+            "Frontend Architecture",
+            "Modularity",
+            "Feature-Based Development"
+          ],
+          "evaluationCriteria": [
+            "Recall of core architectural principle"
+          ],
+          "example": "",
+          "tags": [
+            "Architecture",
+            "Structure",
+            "Modularity",
+            "Basics"
+          ],
+          "prerequisites": [
+            "Basic Software Development Concepts"
+          ],
+          "complexity": 3,
+          "interviewFrequency": 7,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_frontend_architecture_2",
+          "topic": "Frontend Application Layers",
+          "level": "medium",
+          "type": "mcq",
+          "question": "In a well-structured front-end application, which layer is primarily responsible for handling API communication and data persistence?",
+          "answer": "Infrastructure Layer",
+          "options": [
+            "UI Layer",
+            "Application Layer",
+            "Domain Layer",
+            "Infrastructure Layer"
+          ],
+          "analysisPoints": [
+            "The Infrastructure Layer is where external integrations, such as API clients and data persistence mechanisms (like local storage), are managed.",
+            "UI Layer focuses on presentation.",
+            "Application Layer manages state and orchestrates flow.",
+            "Domain Layer encapsulates business logic and models."
+          ],
+          "keyConcepts": [
+            "Frontend Architecture",
+            "Layered Architecture",
+            "Infrastructure Layer",
+            "Data Access"
+          ],
+          "evaluationCriteria": [
+            "Understanding of responsibilities of different architectural layers.",
+            "Ability to correctly categorize data access concerns."
+          ],
+          "example": "The Infrastructure Layer might contain files like `apiClient.ts` for making HTTP requests, `localStorageService.ts` for handling local storage, or `websocketClient.ts` for real-time communication. Its role is to provide data to the layers above without concerning itself with how that data is displayed or processed by business rules.",
+          "tags": [
+            "Architecture",
+            "Layers",
+            "API",
+            "Data"
+          ],
+          "prerequisites": [
+            "Software Design Principles"
+          ],
+          "complexity": 6,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_frontend_architecture_3",
+          "topic": "Cross-Cutting Concerns",
+          "level": "medium",
+          "type": "open",
+          "question": "Identify and explain three examples of 'cross-cutting concerns' in a typical front-end application. How would you generally approach implementing one of these concerns (e.g., error handling) across your application to ensure consistency and maintainability?",
+          "answer": "Three examples of cross-cutting concerns are:\n\n1.  **Authentication/Authorization**: Managing user login, session, and access control across different parts of the application.\n2.  **Error Handling**: Catching and processing errors, displaying user-friendly messages, and logging issues.\n3.  **Logging**: Recording events, user interactions, and debug information for monitoring and analysis.\n\n**Implementing Centralized Error Handling:**\n\nTo ensure consistency and maintainability, centralized error handling is crucial. Here's a general approach:\n\n*   **Global Error Boundaries/Catchers**: For UI frameworks like React, use Error Boundaries (for React component errors) or a global `window.onerror` and `unhandledrejection` event listeners (for unhandled JavaScript errors and promise rejections). These act as a safety net, preventing the entire application from crashing and allowing a fallback UI to be displayed.\n*   **Centralized Error Service/Module**: Create a dedicated service or module (e.g., `errorService.ts`) responsible for:\n    *   **Normalization**: Transforming various error types (network errors, validation errors, unexpected errors) into a consistent format.\n    *   **Reporting**: Sending errors to a logging service (e.g., Sentry, LogRocket) for monitoring and debugging.\n    *   **Notification**: Displaying user-friendly messages (toasts, modals) to the user based on the error type and severity.\n*   **API Error Interceptors**: For network requests, implement interceptors (e.g., with `axios`) to catch HTTP errors globally, refresh tokens if needed, and route specific error codes to the central error service.\n*   **Custom Error Classes**: Define custom error classes (e.g., `NetworkError`, `ValidationError`) to provide more specific context and make error handling more semantic within the application.\n*   **Controlled Error Propagation**: Encourage developers to throw specific errors at lower levels and catch them at higher, more appropriate levels (e.g., in an application service or component responsible for user interaction) to handle them gracefully.\n\nThis approach ensures that errors are consistently caught, processed, and reported, improving both user experience and developer debugging efficiency.",
+          "analysisPoints": [
+            "Correctly identifies and explains cross-cutting concerns.",
+            "Provides a detailed, practical approach to implementing error handling.",
+            "Covers different levels of error handling (global, service, API, custom).",
+            "Demonstrates understanding of maintainability and consistency goals."
+          ],
+          "keyConcepts": [
+            "Cross-Cutting Concerns",
+            "Error Handling",
+            "Authentication",
+            "Logging",
+            "Frontend Architecture",
+            "Design Patterns"
+          ],
+          "evaluationCriteria": [
+            "Breadth of examples for cross-cutting concerns.",
+            "Depth and practicality of implementation strategy.",
+            "Understanding of benefits of centralized approaches."
+          ],
+          "example": "",
+          "tags": [
+            "Architecture",
+            "Design Patterns",
+            "Error Handling",
+            "Security",
+            "Best Practices"
+          ],
+          "prerequisites": [
+            "Software Design",
+            "JavaScript Asynchronicity"
+          ],
+          "complexity": 8,
+          "interviewFrequency": 9,
+          "learningPath": "advanced"
+        },
+        {
+          "id": "question_frontend_architecture_4",
+          "topic": "Atomic Design",
+          "level": "medium",
+          "type": "flashcard",
+          "question": "Briefly explain the 'Atomic Design' methodology in the context of front-end component organization.",
+          "answer": "Atomic Design breaks UI into five stages: atoms (basic HTML tags/styles), molecules (groups of atoms forming simple components like search forms), organisms (groups of molecules forming complex sections like headers), templates (page-level object layouts), and pages (specific instances of templates with real content). It promotes reusability, consistency, and scalable design systems.",
+          "analysisPoints": [
+            "Defines the five levels of Atomic Design.",
+            "Explains the progression from simple to complex components.",
+            "Highlights the benefits of the methodology."
+          ],
+          "keyConcepts": [
+            "Atomic Design",
+            "Component-Based Architecture",
+            "Design Systems",
+            "UI/UX"
+          ],
+          "evaluationCriteria": [
+            "Recall of design methodology",
+            "Ability to explain its purpose"
+          ],
+          "example": "",
+          "tags": [
+            "Architecture",
+            "Components",
+            "Design System",
+            "UI"
+          ],
+          "prerequisites": [
+            "Component-Based Development"
+          ],
+          "complexity": 5,
+          "interviewFrequency": 6,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_frontend_architecture_5",
+          "topic": "Container/Presentational Pattern",
+          "level": "medium",
+          "type": "mcq",
+          "question": "Which of the following best describes the role of a 'Presentational Component' in the Container/Presentational component pattern?",
+          "answer": "It is primarily concerned with *how things look*, receiving data and callbacks via props and rendering UI.",
+          "options": [
+            "It is primarily concerned with *how things look*, receiving data and callbacks via props and rendering UI.",
+            "It manages application state, fetches data, and contains business logic.",
+            "It directly interacts with APIs and handles data persistence.",
+            "It orchestrates communication between different modules and services."
+          ],
+          "analysisPoints": [
+            "Presentational components are 'dumb' components focused on UI, styling, and rendering based on props.",
+            "Container components (not presentational) handle state, data fetching, and business logic.",
+            "API interaction belongs to the infrastructure layer.",
+            "Orchestration belongs to the application layer or container components."
+          ],
+          "keyConcepts": [
+            "Container/Presentational Pattern",
+            "Component Design",
+            "Separation of Concerns",
+            "React"
+          ],
+          "evaluationCriteria": [
+            "Understanding of component pattern roles.",
+            "Ability to differentiate component types based on responsibility."
+          ],
+          "example": "A `Button` component that just renders a button and takes `onClick` and `text` props is a presentational component. It doesn't know where the click comes from or what it does, just that it needs to show text and react to clicks. A `UserListContainer` that fetches user data, filters it, and passes it to a `UserList` (presentational) would be a container.",
+          "tags": [
+            "Architecture",
+            "Components",
+            "Design Pattern",
+            "React"
+          ],
+          "prerequisites": [
+            "Component-Based UI"
+          ],
+          "complexity": 7,
+          "interviewFrequency": 7,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_frontend_architecture_6",
+          "topic": "Architectural Benefits",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "Name two key benefits of having a well-structured front-end application architecture.",
+          "answer": "Maintainability and Scalability (others include testability, collaboration, readability, faster onboarding).",
+          "analysisPoints": [
+            "A clear structure makes code easier to understand and modify.",
+            "It allows the application to grow in size and complexity without becoming unmanageable.",
+            "Good architecture facilitates parallel development by multiple teams."
+          ],
+          "keyConcepts": [
+            "Frontend Architecture",
+            "Maintainability",
+            "Scalability"
+          ],
+          "evaluationCriteria": [
+            "Recall of core benefits"
+          ],
+          "example": "",
+          "tags": [
+            "Architecture",
+            "Benefits",
+            "Foundations"
+          ],
+          "prerequisites": [
+            "Software Engineering Principles"
+          ],
+          "complexity": 3,
+          "interviewFrequency": 6,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_lazy_loading_1",
+          "topic": "Lazy Loading Benefit",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "What is the primary performance benefit of lazy loading images?",
+          "answer": "Faster initial page load time and reduced bandwidth consumption.",
+          "analysisPoints": [
+            "Lazy loading defers loading of non-critical assets.",
+            "This reduces the initial payload size and the number of HTTP requests.",
+            "Resulting in quicker rendering of above-the-fold content."
+          ],
+          "keyConcepts": [
+            "Lazy Loading",
+            "Performance Optimization",
+            "Page Load Time",
+            "Bandwidth"
+          ],
+          "evaluationCriteria": [
+            "Recall of fundamental benefit"
+          ],
+          "example": "",
+          "tags": [
+            "Performance",
+            "Lazy Loading",
+            "Images",
+            "Basics"
+          ],
+          "prerequisites": [
+            "Web Performance Concepts"
+          ],
+          "complexity": 3,
+          "interviewFrequency": 8,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_lazy_loading_2",
+          "topic": "Native Lazy Loading",
+          "level": "medium",
+          "type": "mcq",
+          "question": "Which HTML attribute enables native browser lazy loading for images?",
+          "answer": "`loading=\"lazy\"`",
+          "options": [
+            "`data-lazy=\"true\"`",
+            "`lazyload=\"true\"`",
+            "`loading=\"lazy\"`",
+            "`defer=\"image\"`"
+          ],
+          "analysisPoints": [
+            "The `loading` attribute with value `lazy` is the standard HTML attribute.",
+            "Other options are either non-standard or relate to different concepts (like `defer` for scripts)."
+          ],
+          "keyConcepts": [
+            "Native Lazy Loading",
+            "HTML Attributes",
+            "Performance"
+          ],
+          "evaluationCriteria": [
+            "Knowledge of modern HTML features",
+            "Correct attribute identification"
+          ],
+          "example": "```html\n<img src=\"placeholder.jpg\" loading=\"lazy\" alt=\"Example image\">\n```\nThis simple attribute tells the browser to defer loading the image until it is deemed to be within a calculated distance from the viewport.",
+          "tags": [
+            "HTML",
+            "Performance",
+            "Lazy Loading",
+            "Native"
+          ],
+          "prerequisites": [
+            "HTML Image Element"
+          ],
+          "complexity": 5,
+          "interviewFrequency": 9,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_lazy_loading_3",
+          "topic": "Intersection Observer API for Lazy Loading",
+          "level": "medium",
+          "type": "code",
+          "question": "Given an HTML structure where images have a `data-src` attribute for their actual source and a placeholder `src`. Complete the JavaScript code using `IntersectionObserver` to lazy load these images. Assume the images have the class `lazy-img`.",
+          "answer": "```javascript\ndocument.addEventListener(\"DOMContentLoaded\", function() {\n  const lazyImages = document.querySelectorAll(\"img.lazy-img[data-src]\");\n  \n  const imageObserver = new IntersectionObserver((entries, observer) => {\n    entries.forEach(entry => {\n      if (entry.isIntersecting) {\n        const img = entry.target; // The <img> element\n        img.src = img.dataset.src; // Set actual source\n        img.removeAttribute(\"data-src\"); // Clean up\n        observer.unobserve(img); // Stop observing\n      }\n    });\n  }, {\n    rootMargin: '0px 0px 50px 0px' // Option: Load 50px before entering viewport\n  });\n  \n  lazyImages.forEach(img => imageObserver.observe(img));\n});\n```",
+          "analysisPoints": [
+            "Correctly selects target images using `querySelectorAll`.",
+            "Initializes `IntersectionObserver` with a callback.",
+            "Iterates over `entries` to check `isIntersecting`.",
+            "Sets the `src` attribute from `dataset.src`.",
+            "Removes `data-src` and `unobserve`s the element after loading for efficiency.",
+            "Demonstrates optional `rootMargin` for pre-loading."
+          ],
+          "keyConcepts": [
+            "Intersection Observer API",
+            "Lazy Loading",
+            "DOM Manipulation",
+            "JavaScript Events"
+          ],
+          "evaluationCriteria": [
+            "Correct use of `IntersectionObserver` API.",
+            "Understanding of `isIntersecting` and `unobserve`.",
+            "Efficient DOM manipulation for lazy loading."
+          ],
+          "example": "```html\n<img class=\"lazy-img\" src=\"placeholder.gif\" data-src=\"https://source.unsplash.com/random/400x300?forest\" alt=\"Forest image\">\n<img class=\"lazy-img\" src=\"placeholder.gif\" data-src=\"https://source.unsplash.com/random/400x300?mountain\" alt=\"Mountain image\">\n<!-- ... more images ... -->\n```",
+          "tags": [
+            "JavaScript",
+            "Performance",
+            "Lazy Loading",
+            "Intersection Observer",
+            "Coding"
+          ],
+          "prerequisites": [
+            "DOM Manipulation",
+            "Asynchronous JavaScript"
+          ],
+          "complexity": 7,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_lazy_loading_4",
+          "topic": "Lazy Loading and Core Web Vitals",
+          "level": "hard",
+          "type": "open",
+          "question": "Explain how lazy loading images can positively impact Google's Core Web Vitals, specifically Largest Contentful Paint (LCP) and Cumulative Layout Shift (CLS). Are there any edge cases or best practices to consider to avoid negative impacts on these metrics?",
+          "answer": "Lazy loading images primarily impacts Core Web Vitals in the following ways:\n\n*   **Largest Contentful Paint (LCP)**: LCP measures when the largest content element in the viewport becomes visible. By deferring off-screen images, lazy loading reduces the overall page weight and the number of critical resources the browser needs to download and render initially. This allows the browser to prioritize and render above-the-fold content, including the LCP element, more quickly. A smaller initial payload means less network contention and faster rendering for critical elements.\n\n*   **Cumulative Layout Shift (CLS)**: CLS measures the sum of all individual layout shift scores for every unexpected layout shift that occurs during the entire lifespan of the page. Lazy loading, if implemented without proper care, can *negatively* impact CLS. If images are loaded without reserving space for them (i.e., specifying their `width` and `height`), they will cause content below them to jump around when they finally load, leading to a high CLS score.\n\n**Edge Cases and Best Practices for Avoiding Negative Impacts:**\n\n1.  **Always specify `width` and `height` (or aspect-ratio) for images**: This is crucial to prevent CLS. Even if the actual image is lazy-loaded, the browser will reserve the correct amount of space, preventing layout shifts when the image appears.\n2.  **Use `loading=\"lazy\"` for most images**: It's the most efficient and performant method, handled directly by the browser. It automatically preloads images when they are just outside the viewport, often before a user scrolls.\n3.  **Don't lazy load LCP image**: The LCP image (the largest image in the initial viewport) should *not* be lazy-loaded. It should be loaded eagerly (or preloaded) to ensure it appears as quickly as possible, as lazy loading would delay its render and negatively impact LCP.\n4.  **Consider a small `rootMargin` for `IntersectionObserver`**: If using `IntersectionObserver`, setting a positive `rootMargin` (e.g., `'0px 0px 200px 0px'`) ensures images start loading slightly *before* they enter the viewport, improving the user experience and reducing the chance of a visible loading state.\n5.  **Provide low-quality image placeholders (LQIP) or blurred placeholders**: For a better user experience and to avoid blank spaces, use small, low-resolution placeholders that are replaced by the high-resolution image when it loads. This can also help with CLS if the placeholder has the correct dimensions.",
+          "analysisPoints": [
+            "Detailed explanation of lazy loading's impact on LCP and CLS.",
+            "Identifies both positive (LCP) and potential negative (CLS) impacts.",
+            "Provides actionable best practices and edge case considerations.",
+            "Demonstrates a nuanced understanding of Core Web Vitals."
+          ],
+          "keyConcepts": [
+            "Lazy Loading",
+            "Core Web Vitals",
+            "LCP",
+            "CLS",
+            "Performance Optimization",
+            "Image Optimization",
+            "User Experience"
+          ],
+          "evaluationCriteria": [
+            "In-depth knowledge of web performance metrics.",
+            "Ability to analyze practical implications of optimization techniques.",
+            "Provision of concrete best practices.",
+            "Holistic understanding of user experience and technical implementation."
+          ],
+          "example": "",
+          "tags": [
+            "Performance",
+            "Lazy Loading",
+            "Web Vitals",
+            "Optimization",
+            "Images",
+            "Best Practices"
+          ],
+          "prerequisites": [
+            "Core Web Vitals",
+            "Image Optimization"
+          ],
+          "complexity": 9,
+          "interviewFrequency": 9,
+          "learningPath": "expert"
+        },
+        {
+          "id": "question_lazy_loading_5",
+          "topic": "Lazy Loading React Component",
+          "level": "medium",
+          "type": "code",
+          "question": "Create a `LazyImage` React component that accepts `src` (the actual image URL) and `alt` props. The component should initially render a blank space or placeholder and use `IntersectionObserver` to load the `src` image when it enters the viewport. Include a `useState` for loading state and `useRef` for the image element.",
+          "answer": "```typescript\nimport React, { useEffect, useRef, useState } from 'react';\n\ninterface LazyImageProps {\n  src: string;\n  alt: string;\n  placeholder?: string; // Optional placeholder image URL\n  className?: string;\n  style?: React.CSSProperties;\n}\n\nconst LazyImage: React.FC<LazyImageProps> = ({\n  src,\n  alt,\n  placeholder = 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=', // Tiny transparent GIF as default placeholder\n  className,\n  style\n}) => {\n  const [imageSrc, setImageSrc] = useState(placeholder);\n  const [isLoaded, setIsLoaded] = useState(false);\n  const imgRef = useRef<HTMLImageElement>(null);\n\n  useEffect(() => {\n    if (!imgRef.current) return;\n\n    const observer = new IntersectionObserver(\n      (entries) => {\n        entries.forEach((entry) => {\n          if (entry.isIntersecting && !isLoaded) {\n            setImageSrc(src); // Start loading the actual image\n            // No setIsLoaded(true) here yet, as image might still be loading\n            observer.unobserve(entry.target); // Stop observing once trigger to load\n          }\n        });\n      },\n      { rootMargin: '100px 0px' } // Load when 100px from viewport\n    );\n\n    observer.observe(imgRef.current);\n\n    // Cleanup function\n    return () => {\n      if (imgRef.current) {\n        observer.unobserve(imgRef.current);\n      }\n    };\n  }, [src, isLoaded]); // Depend on src changing and isLoaded state for effect re-runs\n\n  const handleImageLoad = () => {\n    setIsLoaded(true);\n  };\n\n  return (\n    <img\n      ref={imgRef}\n      src={imageSrc}\n      alt={alt}\n      onLoad={handleImageLoad}\n      className={className}\n      style={{\n        ...style,\n        opacity: isLoaded ? 1 : 0.7, // Visual feedback for loading\n        transition: 'opacity 0.3s ease-in-out',\n      }}\n    />\n  );\n};\n\nexport default LazyImage;\n```",
+          "analysisPoints": [
+            "Correctly uses `useState` to manage the image source and loading status.",
+            "Properly utilizes `useRef` to get a reference to the DOM image element.",
+            "Implements `useEffect` to create, observe, and clean up the `IntersectionObserver` instance.",
+            "Sets the `src` attribute only when the image enters the viewport.",
+            "Handles `onLoad` event to update the `isLoaded` state, providing a visual transition.",
+            "Includes a default placeholder and optional styling/classname passing.",
+            "Proper cleanup of the observer on component unmount."
+          ],
+          "keyConcepts": [
+            "React Hooks",
+            "Lazy Loading",
+            "Intersection Observer API",
+            "Component Design",
+            "State Management"
+          ],
+          "evaluationCriteria": [
+            "Proficient use of React Hooks (`useEffect`, `useState`, `useRef`).",
+            "Correct implementation of `IntersectionObserver` in a React context.",
+            "Clean component design and proper prop handling.",
+            "Attention to lifecycle and cleanup."
+          ],
+          "example": "```typescript jsx\n// Usage Example\nimport LazyImage from './LazyImage';\n\nconst App = () => {\n  return (\n    <div>\n      <h1>Scroll down to see images load</h1>\n      <div style={{ height: '100vh', background: '#eee' }}>\n        Scroll past this section\n      </div>\n      <LazyImage \n        src=\"https://source.unsplash.com/random/800x600?nature,landscape\" \n        alt=\"A beautiful nature landscape\"\n        placeholder=\"https://via.placeholder.com/800x600/CCCCCC/FFFFFF?text=Loading...\"\n        style={{ width: '100%', height: 'auto', display: 'block', marginBottom: '20px' }}\n      />\n      <LazyImage \n        src=\"https://source.unsplash.com/random/800x600?city,skyline\" \n        alt=\"A vibrant city skyline\"\n        style={{ width: '100%', height: 'auto', display: 'block', marginBottom: '20px' }}\n      />\n      <div style={{ height: '100vh', background: '#eee' }}>\n        End of page\n      </div>\n    </div>\n  );\n};\n\nexport default App;\n```",
+          "tags": [
+            "React",
+            "JavaScript",
+            "Performance",
+            "Lazy Loading",
+            "Intersection Observer",
+            "Coding"
+          ],
+          "prerequisites": [
+            "React Fundamentals",
+            "Intersection Observer API"
+          ],
+          "complexity": 8,
+          "interviewFrequency": 9,
+          "learningPath": "advanced"
+        }
+      ],
+      "tasks": [
+        {
+          "id": "task_html_minify_calculator",
+          "title": "HTML Minification Size Calculator",
+          "description": "\nImplement a JavaScript function that takes an unminified HTML string as input and returns an object containing:\n1.  The minified HTML string.\n2.  The original size (in bytes) of the unminified HTML.\n3.  The minified size (in bytes) of the minified HTML.\n4.  The percentage reduction in size.\n\nFor minification, remove all HTML comments (`<!-- ... -->`), and replace sequences of whitespace characters (spaces, tabs, newlines) with a single space. Be careful not to remove whitespace characters within text content or within HTML attributes if they are semantically important (e.g., `&nbsp;` or spaces in a `title` attribute). For simplicity, you can focus on collapsing multiple whitespace characters outside of tags and removing comments.\n",
+          "difficulty": "medium",
+          "startingCode": "function calculateHtmlMinification(htmlString) {\n  // Implement minification logic here\n  // 1. Remove HTML comments\n  // 2. Collapse multiple whitespace characters (including newlines and tabs) to a single space.\n  //    Be careful with spaces inside tags (e.g., attributes) or text content.\n  //    For this task, a simpler approach of replacing all sequences of non-tag whitespace\n  //    and comments is acceptable, but mention limitations.\n\n  let minifiedHtml = htmlString;\n\n  // Step 1: Remove HTML comments\n  minifiedHtml = minifiedHtml.replace(/<!--[\\s\\S]*?-->/g, '');\n\n  // Step 2: Collapse multiple whitespaces (including newlines/tabs) to single space\n  // This regex targets sequences of whitespace characters that are NOT inside a HTML tag's attributes\n  // For simplicity, we'll do a general whitespace collapse, acknowledging it might be imperfect\n  // minifiedHtml = minifiedHtml.replace(/\\s+/g, ' ').trim(); // Simple but potentially aggressive\n  // A more robust approach would require a proper HTML parser or more complex regex, but for interview, this can be discussed.\n\n  // Let's try a slightly better regex that avoids collapsing spaces inside attribute values \n  // and also removes leading/trailing whitespace around block elements more carefully.\n  // For simplicity in this task, let's use a common minification strategy:\n  minifiedHtml = minifiedHtml.replace(/>\\s+</g, '><'); // Remove spaces between tags\n  minifiedHtml = minifiedHtml.replace(/\\s+/g, ' '); // Collapse all remaining multiple spaces to single space\n  minifiedHtml = minifiedHtml.trim(); // Trim leading/trailing whitespace of the whole document\n\n  // Calculate sizes\n  const originalSize = new TextEncoder().encode(htmlString).length;\n  const minifiedSize = new TextEncoder().encode(minifiedHtml).length;\n\n  const reductionPercentage = ((originalSize - minifiedSize) / originalSize) * 100;\n\n  return {\n    minifiedHtml,\n    originalSize,\n    minifiedSize,\n    reductionPercentage: isNaN(reductionPercentage) ? 0 : parseFloat(reductionPercentage.toFixed(2))\n  };\n}\n\n// Example usage:\n// const unminified = `\n//   <!DOCTYPE html>\n//   <html>\n//   <head>\n//       <title>My   Page</title>\n//   </head>\n//   <body>\n//       <!-- A test comment -->\n//       <p>\n//           Hello     World\n//       </p>\n//   </body>\n//   </html>\n// `;\n// console.log(calculateHtmlMinification(unminified));\n",
+          "solutionCode": "function calculateHtmlMinification(htmlString) {\n  let minifiedHtml = htmlString;\n\n  // 1. Remove HTML comments (multiline and single line)\n  minifiedHtml = minifiedHtml.replace(/<!--[\\s\\S]*?-->/g, '');\n\n  // 2. Remove whitespace between HTML tags\n  // This ensures that `<div>   <p>` becomes `<div><p>`\n  minifiedHtml = minifiedHtml.replace(/>\\s+</g, '><');\n\n  // 3. Collapse multiple whitespace characters (including newlines and tabs) to a single space.\n  // This applies to whitespace within text nodes but also removes unnecessary spaces.\n  // This regex carefully avoids collapsing spaces within attribute values (e.g. title=\"my title\")\n  // For simplicity in a regex-based approach, we'll mostly target spaces not within angle brackets.\n  // A common approach for production minifiers is to use an HTML parser.\n  // For this task, we can use a simpler, effective regex for common cases:\n  minifiedHtml = minifiedHtml.replace(/\\s\\s+/g, ' '); // Replace 2+ spaces with a single space\n\n  // 4. Trim leading/trailing whitespace from the entire document\n  minifiedHtml = minifiedHtml.trim();\n\n  // Calculate sizes in bytes using TextEncoder for accurate byte length\n  const originalSize = new TextEncoder().encode(htmlString).length;\n  const minifiedSize = new TextEncoder().encode(minifiedHtml).length;\n\n  const reductionPercentage = ((originalSize - minifiedSize) / originalSize) * 100;\n\n  return {\n    minifiedHtml,\n    originalSize,\n    minifiedSize,\n    reductionPercentage: isNaN(reductionPercentage) || originalSize === 0 ? 0 : parseFloat(reductionPercentage.toFixed(2))\n  };\n}",
+          "testCases": [
+            "Test with simple HTML: `calculateHtmlMinification('  <p>  Hello  World  </p>  ')` should return `minifiedHtml: '<p>Hello World</p>'` and correct sizes.",
+            "Test with HTML comments: `calculateHtmlMinification('<div><!-- comment --><span>text</span></div>')` should remove the comment.",
+            "Test with newlines and tabs: `calculateHtmlMinification('<div>\\n\\t<span>Item 1</span>\\n</div>')` should collapse internal whitespace.",
+            "Test with empty string: `calculateHtmlMinification('')` should return 0 sizes and 0% reduction.",
+            "Test with HTML containing inline spaces that should be preserved (e.g., in a `title` attribute or `alt` text): `calculateHtmlMinification('<img title=\"my image title\" alt=\"An image with spaces\">')` should preserve spaces within attributes.",
+            "Test with complex, multi-line HTML with mixed content and comments to ensure comprehensive minification.",
+            "Test HTML with `<pre>` or `<textarea>` tags if applicable (though often minifiers avoid these or require special handling, for this task, a general regex is fine if its limitations are noted)."
+          ],
+          "hints": [
+            "Regular expressions are your friend for pattern matching and replacement. Look into `String.prototype.replace()`.",
+            "Consider using `TextEncoder` to get the byte length of strings accurately, as `String.length` counts code units, not bytes.",
+            "The `.trim()` method can be useful for removing leading and trailing whitespace from the entire document.",
+            "Be careful with whitespace removal between `>` and `<` tags to prevent issues, and ensure spaces within actual text content are preserved correctly (e.g., 'Hello World' should not become 'HelloWorld')."
+          ],
+          "tags": [
+            "HTML",
+            "String Manipulation",
+            "Performance",
+            "Minification",
+            "Regex",
+            "Utility"
+          ],
+          "timeEstimate": 45,
+          "prerequisites": [
+            "JavaScript Strings",
+            "Regular Expressions"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 7,
+          "learningPath": "intermediate",
+          "relatedConcepts": [
+            "Web Performance Optimization",
+            "Build Tools"
+          ]
+        },
+        {
+          "id": "task_draw_shapes_2d_canvas",
+          "title": "Interactive 2D Canvas Drawing Application",
+          "description": "\nCreate a simple HTML page with a `<canvas>` element and JavaScript. Implement the following features:\n\n1.  **Canvas Setup**: Initialize a 2D rendering context for the canvas.\n2.  **Draw a Rectangle**: Draw a solid blue rectangle (100x70 pixels) at position (50, 50).\n3.  **Draw a Circle**: Draw a red circle with a radius of 40 pixels, centered at (200, 100).\n4.  **Draw Text**: Display the text \"Canvas Fun!\" in black, 30px Arial font, at position (50, 200).\n5.  **Clear Canvas Button**: Add an HTML button. When clicked, it should clear the entire canvas.\n6.  **Bonus: Mouse Drawing**: Allow the user to draw freehand lines on the canvas when the mouse is clicked and dragged. The lines should be green and 2 pixels wide.\n",
+          "difficulty": "medium",
+          "startingCode": "<!-- index.html -->\n<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n    <meta charset=\"UTF-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <title>Canvas Drawing App</title>\n    <style>\n        body { font-family: sans-serif; display: flex; flex-direction: column; align-items: center; margin-top: 20px; }\n        canvas { border: 1px solid black; background-color: #f0f0f0; }\n        button { margin-top: 10px; padding: 10px 20px; cursor: pointer; }\n    </style>\n</head>\n<body>\n    <h1>Simple Canvas Drawing</h1>\n    <canvas id=\"myCanvas\" width=\"600\" height=\"400\"></canvas>\n    <button id=\"clearCanvasBtn\">Clear Canvas</button>\n\n    <script>\n        const canvas = document.getElementById('myCanvas');\n        const ctx = canvas.getContext('2d');\n        const clearBtn = document.getElementById('clearCanvasBtn');\n\n        // 1. Initial Drawings (Rectangle, Circle, Text)\n        function drawInitialShapes() {\n          if (!ctx) return console.error('2D canvas context not supported');\n          \n          // Your code for drawing rectangle, circle, text here\n          // ctx.fillStyle = 'blue';\n          // ctx.fillRect(50, 50, 100, 70);\n          // ...\n        }\n\n        // 2. Clear Canvas Functionality\n        clearBtn.addEventListener('click', () => {\n            // Your code to clear canvas here\n            // ctx.clearRect(0, 0, canvas.width, canvas.height);\n        });\n\n        // 3. Bonus: Mouse Drawing\n        let isDrawing = false;\n        let lastX = 0;\n        let lastY = 0;\n\n        canvas.addEventListener('mousedown', (e) => {\n            // Your code here\n        });\n\n        canvas.addEventListener('mousemove', (e) => {\n            // Your code here\n        });\n\n        canvas.addEventListener('mouseup', () => {\n            // Your code here\n        });\n\n        canvas.addEventListener('mouseout', () => {\n            // Your code here\n        });\n\n        drawInitialShapes(); // Call to draw initial shapes on load\n\n    </script>\n</body>\n</html>\n",
+          "solutionCode": "<!-- index.html -->\n<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n    <meta charset=\"UTF-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <title>Canvas Drawing App</title>\n    <style>\n        body { font-family: sans-serif; display: flex; flex-direction: column; align-items: center; margin-top: 20px; }\n        canvas { border: 1px solid black; background-color: #f0f0f0; }\n        button { margin-top: 10px; padding: 10px 20px; cursor: pointer; }\n    </style>\n</head>\n<body>\n    <h1>Simple Canvas Drawing</h1>\n    <canvas id=\"myCanvas\" width=\"600\" height=\"400\"></canvas>\n    <button id=\"clearCanvasBtn\">Clear Canvas</button>\n\n    <script>\n        const canvas = document.getElementById('myCanvas');\n        const ctx = canvas.getContext('2d');\n        const clearBtn = document.getElementById('clearCanvasBtn');\n\n        // 1. Initial Drawings (Rectangle, Circle, Text)\n        function drawInitialShapes() {\n          if (!ctx) return console.error('2D canvas context not supported');\n          \n          // Draw a Rectangle\n          ctx.fillStyle = 'blue';\n          ctx.fillRect(50, 50, 100, 70);\n\n          // Draw a Circle\n          ctx.beginPath(); // Start a new path\n          ctx.arc(200, 100, 40, 0, Math.PI * 2, true); // (x, y, radius, startAngle, endAngle, anticlockwise)\n          ctx.fillStyle = 'red';\n          ctx.fill(); // Fill the circle\n          ctx.closePath(); // Close the path\n\n          // Draw Text\n          ctx.font = '30px Arial';\n          ctx.fillStyle = 'black';\n          ctx.fillText('Canvas Fun!', 50, 200);\n        }\n\n        // 2. Clear Canvas Functionality\n        clearBtn.addEventListener('click', () => {\n            ctx.clearRect(0, 0, canvas.width, canvas.height); // Clears the entire canvas\n            drawInitialShapes(); // Redraw initial shapes after clearing\n        });\n\n        // 3. Bonus: Mouse Drawing\n        let isDrawing = false;\n        let lastX = 0;\n        let lastY = 0;\n\n        function draw(e) {\n            if (!isDrawing) return; // Stop the fn from running when they are not moused down\n            if (!ctx) return;\n\n            ctx.beginPath();\n            ctx.moveTo(lastX, lastY);\n            ctx.lineTo(e.offsetX, e.offsetY);\n            ctx.strokeStyle = 'green';\n            ctx.lineWidth = 2;\n            ctx.stroke();\n            [lastX, lastY] = [e.offsetX, e.offsetY];\n        }\n\n        canvas.addEventListener('mousedown', (e) => {\n            isDrawing = true;\n            [lastX, lastY] = [e.offsetX, e.offsetY]; // Set starting point\n        });\n\n        canvas.addEventListener('mousemove', draw);\n\n        canvas.addEventListener('mouseup', () => isDrawing = false);\n        canvas.addEventListener('mouseout', () => isDrawing = false); // Stop drawing if mouse leaves canvas\n\n        drawInitialShapes(); // Call to draw initial shapes on load\n\n    </script>\n</body>\n</html>\n",
+          "testCases": [
+            "Verify blue rectangle is drawn at (50, 50) with dimensions 100x70.",
+            "Verify red circle is drawn at (200, 100) with radius 40.",
+            "Verify \"Canvas Fun!\" text is displayed in black, 30px Arial at (50, 200).",
+            "Clicking 'Clear Canvas' button should erase all drawings.",
+            "After clearing, the initial shapes should reappear (as per `drawInitialShapes` call in solution).",
+            "Dragging the mouse on the canvas should draw continuous green lines.",
+            "Releasing the mouse or moving it off the canvas should stop drawing."
+          ],
+          "hints": [
+            "For drawing paths (like lines or circles), remember `ctx.beginPath()`, `ctx.moveTo()`, `ctx.lineTo()`, `ctx.arc()`, `ctx.stroke()`, and `ctx.fill()`.",
+            "To clear the canvas, `ctx.clearRect(x, y, width, height)` is the standard method.",
+            "For mouse drawing, track a `isDrawing` boolean state and capture mouse coordinates (e.g., `e.offsetX`, `e.offsetY`).",
+            "Make sure to set `strokeStyle` and `lineWidth` for lines.",
+            "Don't forget to call `drawInitialShapes()` when the page loads and after clearing if you want them to persist/redraw."
+          ],
+          "tags": [
+            "HTML Canvas",
+            "JavaScript",
+            "DOM Events",
+            "2D Graphics",
+            "Interactive UI"
+          ],
+          "timeEstimate": 60,
+          "prerequisites": [
+            "HTML Basics",
+            "JavaScript DOM Manipulation",
+            "Basic Canvas API"
+          ],
+          "complexity": 6,
+          "interviewRelevance": 7,
+          "learningPath": "intermediate",
+          "relatedConcepts": [
+            "Event Handling",
+            "State Management (simple)"
+          ]
+        },
+        {
+          "id": "task_webgl_context_check",
+          "title": "WebGL Context Availability and Capabilities Check",
+          "description": "\nCreate an HTML page with a canvas. Implement JavaScript to:\n\n1.  Attempt to get a `'webgl'` context. If successful, log \"WebGL is supported!\".\n2.  If `'webgl'` is not available, try to get a `'webgl2'` context. If successful, log \"WebGL2 is supported!\".\n3.  If neither is available, log \"WebGL is not supported in this browser.\"\n4.  If a WebGL context (either 1 or 2) is obtained, also log some basic capabilities of that context, such as `MAX_TEXTURE_SIZE` and `MAX_VIEWPORT_DIMS`.\n",
+          "difficulty": "medium",
+          "startingCode": "<!-- index.html -->\n<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n    <meta charset=\"UTF-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <title>WebGL Capability Check</title>\n    <style>\n        body { font-family: sans-serif; display: flex; flex-direction: column; align-items: center; margin-top: 20px; }\n        canvas { border: 1px solid black; background-color: #f0f0f0; width: 300px; height: 200px; }\n    </style>\n</head>\n<body>\n    <h1>WebGL Capability Check</h1>\n    <canvas id=\"webglCanvas\"></canvas>\n    <p>Check console for WebGL capabilities.</p>\n\n    <script>\n        const canvas = document.getElementById('webglCanvas');\n        let gl = null;\n\n        // Try to get WebGL context\n        gl = canvas.getContext('webgl');\n\n        if (gl) {\n            console.log('WebGL is supported!');\n            // Log capabilities here\n            // const maxTextureSize = gl.getParameter(gl.MAX_TEXTURE_SIZE);\n            // console.log(`Max Texture Size: ${maxTextureSize}`);\n        } else {\n            // Try to get WebGL2 context if WebGL1 failed\n            gl = canvas.getContext('webgl2');\n            if (gl) {\n                console.log('WebGL2 is supported!');\n                // Log capabilities here\n            } else {\n                console.log('WebGL is not supported in this browser.');\n            }\n        }\n    </script>\n</body>\n</html>\n",
+          "solutionCode": "<!-- index.html -->\n<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n    <meta charset=\"UTF-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <title>WebGL Capability Check</title>\n    <style>\n        body { font-family: sans-serif; display: flex; flex-direction: column; align-items: center; margin-top: 20px; }\n        canvas { border: 1px solid black; background-color: #f0f0f0; width: 300px; height: 200px; }\n    </style>\n</head>\n<body>\n    <h1>WebGL Capability Check</h1>\n    <canvas id=\"webglCanvas\"></canvas>\n    <p>Check console for WebGL capabilities.</p>\n\n    <script>\n        const canvas = document.getElementById('webglCanvas');\n        let gl = null;\n\n        // Try to get WebGL context options (e.g., enable antialias)\n        const contextOptions = { antialias: true, alpha: false };\n\n        // 1. Try to get WebGL (version 1) context\n        gl = canvas.getContext('webgl', contextOptions) || canvas.getContext('experimental-webgl', contextOptions);\n\n        if (gl) {\n            console.log('WebGL is supported!');\n        } else {\n            // 2. If WebGL1 failed, try to get WebGL2 context\n            gl = canvas.getContext('webgl2', contextOptions);\n            if (gl) {\n                console.log('WebGL2 is supported!');\n            } else {\n                // 3. Neither WebGL1 nor WebGL2 supported\n                console.log('WebGL is not supported in this browser.');\n            }\n        }\n\n        // 4. Log capabilities if a context was obtained\n        if (gl) {\n            console.log(`Max Texture Size: ${gl.getParameter(gl.MAX_TEXTURE_SIZE)}`);\n            console.log(`Max Viewport Dims: ${gl.getParameter(gl.MAX_VIEWPORT_DIMS)}`);\n            console.log(`Max Vertex Uniform Vectors: ${gl.getParameter(gl.MAX_VERTEX_UNIFORM_VECTORS)}`);\n            console.log(`Drawing Buffer Width: ${gl.drawingBufferWidth}`);\n            console.log(`Drawing Buffer Height: ${gl.drawingBufferHeight}`);\n\n            // Basic clear to show context is active\n            gl.clearColor(0.0, 0.0, 0.0, 1.0); // Clear to black, opaque\n            gl.clear(gl.COLOR_BUFFER_BIT); // Clear the color buffer\n        }\n    </script>\n</body>\n</html>\n",
+          "testCases": [
+            "Run in a modern browser (e.g., Chrome, Firefox, Edge) with WebGL enabled: Should log \"WebGL is supported!\" or \"WebGL2 is supported!\" and show capabilities.",
+            "Run in an older browser or environment without WebGL support (e.g., by disabling it in browser flags if possible): Should log \"WebGL is not supported in this browser.\"",
+            "Verify that `MAX_TEXTURE_SIZE` and `MAX_VIEWPORT_DIMS` are correctly logged as numbers.",
+            "Check if `gl.drawingBufferWidth` and `gl.drawingBufferHeight` match the canvas dimensions if a context is obtained."
+          ],
+          "hints": [
+            "The `getContext()` method returns `null` if the requested context type is not supported.",
+            "Remember to try `'webgl'` first, then `'webgl2'`. Some browsers historically used `'experimental-webgl'` for the first version.",
+            "Once you have a `gl` (WebGLRenderingContext or WebGL2RenderingContext) object, you can access various system capabilities using `gl.getParameter(gl.CONSTANT_NAME)`.",
+            "Common constants to check include `gl.MAX_TEXTURE_SIZE`, `gl.MAX_VIEWPORT_DIMS`, `gl.MAX_RENDERBUFFER_SIZE`."
+          ],
+          "tags": [
+            "WebGL",
+            "WebGL2",
+            "HTML Canvas",
+            "Browser Compatibility",
+            "Graphics",
+            "Hardware Acceleration"
+          ],
+          "timeEstimate": 30,
+          "prerequisites": [
+            "HTML Canvas Basics",
+            "JavaScript Fundamentals"
+          ],
+          "complexity": 5,
+          "interviewRelevance": 6,
+          "learningPath": "intermediate",
+          "relatedConcepts": [
+            "Feature Detection",
+            "Error Handling"
+          ]
+        },
+        {
+          "id": "task_refactor_ecommerce_app",
+          "title": "Refactor E-commerce Product Listing (Architectural Principles)",
+          "description": "\nYou are given a simplified React application that displays a list of products. Currently, all logic (data fetching, state management, component rendering) is tightly coupled within a single `ProductList` component or its parent `App` component.\n\nYour task is to refactor this application by applying good frontend architectural principles, specifically focusing on:\n\n1.  **Separation of Concerns**: Distribute logic into appropriate layers (UI, Application/State, Infrastructure/API).\n2.  **Feature-Based Organization**: If there were more features, how would you structure `products` feature?\n3.  **Container/Presentational Pattern (or similar for Hooks)**: Separate data-fetching/logic from pure rendering concerns for `ProductList`.\n\n**Requirements:**\n*   Create a `ProductCard` component (presentational) that displays a single product.\n*   Create a `ProductList` component (presentational) that renders a list of `ProductCard`s.\n*   Create a custom hook `useProducts` (application layer) responsible for fetching products and managing loading/error states.\n*   Create a `productApi` service (infrastructure layer) that handles the actual `fetch` call to the mock API.\n*   The main `App` component should orchestrate by using the `useProducts` hook and passing data to the `ProductList`.\n\n**Mock API Endpoint:** `https://fakestoreapi.com/products?limit=5`\n",
+          "difficulty": "hard",
+          "startingCode": "import React, { useState, useEffect } from 'react';\nimport './App.css';\n\ninterface Product {\n  id: number;\n  title: string;\n  price: number;\n  description: string;\n  category: string;\n  image: string;\n}\n\n// Current monolithic approach (all in one place)\nfunction ProductListMonolithic() {\n  const [products, setProducts] = useState<Product[]>([]);\n  const [loading, setLoading] = useState(true);\n  const [error, setError] = useState<string | null>(null);\n\n  useEffect(() => {\n    const fetchProducts = async () => {\n      try {\n        const response = await fetch('https://fakestoreapi.com/products?limit=5');\n        if (!response.ok) {\n          throw new Error(`HTTP error! status: ${response.status}`);\n        }\n        const data: Product[] = await response.json();\n        setProducts(data);\n      } catch (e: any) {\n        setError(e.message);\n      } finally {\n        setLoading(false);\n      }\n    };\n    fetchProducts();\n  }, []);\n\n  if (loading) return <div>Loading products...</div>;\n  if (error) return <div>Error: {error}</div>;\n\n  return (\n    <div className=\"product-list-container\">\n      {products.map((product) => (\n        <div key={product.id} className=\"product-card-monolithic\">\n          <img src={product.image} alt={product.title} style={{ width: '100px', height: '100px', objectFit: 'cover' }} />\n          <h3>{product.title}</h3>\n          <p>${product.price.toFixed(2)}</p>\n          <p>{product.description.substring(0, 100)}...</p>\n        </div>\n      ))}\n    </div>\n  );\n}\n\nfunction App() {\n  return (\n    <div className=\"App\">\n      <h1>Our Products (Monolithic)</h1>\n      <ProductListMonolithic />\n    </div>\n  );\n}\n\nexport default App;\n\n// Minimal App.css\n/* .App { text-align: center; padding: 20px; }\n.product-list-container { display: flex; flex-wrap: wrap; justify-content: center; gap: 20px; }\n.product-card-monolithic { border: 1px solid #ccc; padding: 15px; border-radius: 8px; width: 250px; text-align: left; } */\n",
+          "solutionCode": "import React, { useState, useEffect, useCallback } from 'react';\nimport './App.css'; // Assume App.css provides basic styling\n\n// --- 1. Domain Layer: Product Model --- (Implicit in interface, explicit if complex validation needed)\ninterface Product {\n  id: number;\n  title: string;\n  price: number;\n  description: string;\n  category: string;\n  image: string;\n}\n\n// --- 2. Infrastructure Layer: productApi Service ---\nconst productApi = {\n  fetchProducts: async (limit: number = 5): Promise<Product[]> => {\n    const response = await fetch(`https://fakestoreapi.com/products?limit=${limit}`);\n    if (!response.ok) {\n      throw new Error(`Failed to fetch products: ${response.statusText}`);\n    }\n    return response.json();\n  },\n};\n\n// --- 3. Application Layer: useProducts Custom Hook ---\nconst useProducts = (limit?: number) => {\n  const [products, setProducts] = useState<Product[]>([]);\n  const [loading, setLoading] = useState(true);\n  const [error, setError] = useState<string | null>(null);\n\n  useEffect(() => {\n    const loadProducts = async () => {\n      setLoading(true);\n      setError(null);\n      try {\n        const data = await productApi.fetchProducts(limit);\n        setProducts(data);\n      } catch (e: any) {\n        setError(e.message);\n      } finally {\n        setLoading(false);\n      }\n    };\n    loadProducts();\n  }, [limit]); // Re-fetch if limit changes\n\n  return { products, loading, error };\n};\n\n// --- 4. UI Layer: Presentational Components ---\n\ninterface ProductCardProps {\n  product: Product;\n}\n\nconst ProductCard: React.FC<ProductCardProps> = React.memo(({ product }) => {\n  console.log(`Rendering ProductCard: ${product.title}`);\n  return (\n    <div className=\"product-card\">\n      <img src={product.image} alt={product.title} style={{ width: '100px', height: '100px', objectFit: 'cover' }} />\n      <h3>{product.title}</h3>\n      <p>${product.price.toFixed(2)}</p>\n      <p>{product.description.substring(0, 70)}...</p>\n    </div>\n  );\n});\n\ninterface ProductListProps {\n  products: Product[];\n}\n\nconst ProductList: React.FC<ProductListProps> = React.memo(({ products }) => {\n  console.log('Rendering ProductList');\n  return (\n    <div className=\"product-list-container\">\n      {products.map((product) => (\n        <ProductCard key={product.id} product={product} />\n      ))}\n    </div>\n  );\n});\n\n// --- 5. Main Application Orchestration --- (App Component)\nfunction App() {\n  const { products, loading, error } = useProducts(5); // Fetch 5 products\n\n  if (loading) return <div className=\"app-status\">Loading products...</div>;\n  if (error) return <div className=\"app-status\">Error: {error}</div>;\n\n  return (\n    <div className=\"App\">\n      <h1>Our Products (Refactored)</h1>\n      <ProductList products={products} />\n    </div>\n  );\n}\n\nexport default App;\n\n/* App.css (for reference, assume basic styles exist) */\n/*\n.App { text-align: center; padding: 20px; }\n.app-status { margin-top: 20px; font-size: 1.2em; color: #555; }\n.product-list-container { display: flex; flex-wrap: wrap; justify-content: center; gap: 20px; margin-top: 20px; }\n.product-card { border: 1px solid #ddd; padding: 15px; border-radius: 8px; width: 280px; text-align: left; box-shadow: 0 2px 4px rgba(0,0,0,0.1); display: flex; flex-direction: column; align-items: flex-start; }\n.product-card img { border-radius: 4px; margin-bottom: 10px; }\n.product-card h3 { font-size: 1.1em; margin: 0 0 5px; color: #333; }\n.product-card p { font-size: 0.9em; color: #666; margin: 0; }\n*/\n",
+          "testCases": [
+            "Application loads successfully and displays 5 products.",
+            "Loading state is shown while data is being fetched.",
+            "Error message is displayed if the API call fails (e.g., by changing the API URL to an invalid one).",
+            "`ProductCard` and `ProductList` are pure presentational components, receiving data via props.",
+            "`useProducts` hook encapsulates data fetching logic and state.",
+            "`productApi` service handles the direct `fetch` call.",
+            "Ensure `ProductCard` and `ProductList` use `React.memo` for performance optimization, demonstrating awareness of common React best practices for presentational components."
+          ],
+          "hints": [
+            "Start by defining your `Product` interface (model).",
+            "Create the `productApi` object with a `fetchProducts` method first. This is your infrastructure layer.",
+            "Then, build the `useProducts` custom hook. It will utilize `useState` and `useEffect` and call `productApi.fetchProducts`. This is your application layer.",
+            "Next, create the `ProductCard` component. It should be a functional component that accepts a `product` prop and renders its details. Think about making it a `React.memo` component.",
+            "Similarly, create the `ProductList` component. It should accept an array of `products` and map over them to render `ProductCard` components. Also consider `React.memo` here.",
+            "Finally, update your `App` component to use the `useProducts` hook and pass the `products` to the `ProductList` component.",
+            "For the file structure, imagine a `features/products/` directory containing `components/ProductCard.tsx`, `components/ProductList.tsx`, `hooks/useProducts.ts`, and `services/productApi.ts`."
+          ],
+          "tags": [
+            "React",
+            "Architecture",
+            "Design Patterns",
+            "Hooks",
+            "API Integration",
+            "Refactoring",
+            "State Management"
+          ],
+          "timeEstimate": 90,
+          "prerequisites": [
+            "React Components",
+            "React Hooks",
+            "Asynchronous JavaScript (Fetch API)"
+          ],
+          "complexity": 8,
+          "interviewRelevance": 10,
+          "learningPath": "advanced",
+          "relatedConcepts": [
+            "Modular Programming",
+            "Dependency Injection",
+            "Single Responsibility Principle"
+          ]
+        },
+        {
+          "id": "task_implement_lazy_loading_observer",
+          "title": "Implement Lazy Loading for Image Gallery (IntersectionObserver)",
+          "description": "\nBuild a simple HTML page with a gallery of images. Implement lazy loading for these images using the `IntersectionObserver` API.\n\n**Requirements:**\n1.  **HTML Structure**: Create at least 10 `<img>` tags. Each image should initially have a low-resolution placeholder `src` (e.g., a tiny GIF or data URL) and the actual high-resolution image URL stored in a `data-src` attribute.\n    *   Example: `<img src=\"data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=\" data-src=\"https://source.unsplash.com/random/400x300?landscape&sig=1\" alt=\"Random Image\" class=\"lazy-img\">`\n2.  **CSS for Scrollability**: Ensure there's enough content on the page (e.g., using `height: 100vh` on `div`s before some images) so that images are initially off-screen and require scrolling to become visible.\n3.  **JavaScript Logic**: Implement `IntersectionObserver`:\n    *   Select all images with the class `lazy-img`.\n    *   For each image, observe its intersection with the viewport.\n    *   When an image becomes intersecting (`entry.isIntersecting` is true):\n        *   Set its `src` attribute to the value from its `data-src` attribute.\n        *   Remove the `data-src` attribute to prevent re-processing.\n        *   Stop observing the image (using `observer.unobserve()`) to free up resources.\n4.  **Placeholder/Loading Feedback**: Optionally, add a visual effect (e.g., a smooth opacity transition or a subtle background color) to indicate when an image loads.\n5.  **Robustness**: Ensure the script runs only after the DOM is fully loaded (`DOMContentLoaded`).\n",
+          "difficulty": "medium",
+          "startingCode": "<!-- index.html -->\n<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n    <meta charset=\"UTF-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <title>Lazy Load Image Gallery</title>\n    <style>\n        body { font-family: sans-serif; text-align: center; margin: 0; padding: 0; }\n        .intro-section { height: 100vh; display: flex; align-items: center; justify-content: center; background-color: #f5f5f5; font-size: 2em; }\n        .image-gallery { display: flex; flex-direction: column; align-items: center; padding: 20px; }\n        .lazy-img {\n            width: 80%; /* Adjust as needed */\n            max-width: 600px;\n            height: 300px; /* Fixed height to demonstrate layout shift if not careful */\n            background-color: #eee;\n            margin-bottom: 30px;\n            opacity: 0.7; /* Initial slight opacity */\n            transition: opacity 0.5s ease-in-out; /* Smooth transition */\n        }\n        .lazy-img.loaded {\n            opacity: 1;\n        }\n    </style>\n</head>\n<body>\n    <div class=\"intro-section\">Scroll Down to See Images Load!</div>\n\n    <div class=\"image-gallery\">\n        <img class=\"lazy-img\" src=\"data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=\" data-src=\"https://source.unsplash.com/random/600x300?nature&sig=1\" alt=\"Nature 1\">\n        <img class=\"lazy-img\" src=\"data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=\" data-src=\"https://source.unsplash.com/random/600x300?city&sig=2\" alt=\"City 1\">\n        <img class=\"lazy-img\" src=\"data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=\" data-src=\"https://source.unsplash.com/random/600x300?animals&sig=3\" alt=\"Animals 1\">\n        <img class=\"lazy-img\" src=\"data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=\" data-src=\"https://source.unsplash.com/random/600x300?food&sig=4\" alt=\"Food 1\">\n        <img class=\"lazy-img\" src=\"data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=\" data-src=\"https://source.unsplash.com/random/600x300?travel&sig=5\" alt=\"Travel 1\">\n        <img class=\"lazy-img\" src=\"data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=\" data-src=\"https://source.unsplash.com/random/600x300?ocean&sig=6\" alt=\"Ocean 1\">\n        <img class=\"lazy-img\" src=\"data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=\" data-src=\"https://source.unsplash.com/random/600x300?mountains&sig=7\" alt=\"Mountains 1\">\n        <img class=\"lazy-img\" src=\"data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=\" data-src=\"https://source.unsplash.com/random/600x300?deserts&sig=8\" alt=\"Deserts 1\">\n        <img class=\"lazy-img\" src=\"data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=\" data-src=\"https://source.unsplash.com/random/600x300?forests&sig=9\" alt=\"Forests 1\">\n        <img class=\"lazy-img\" src=\"data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=\" data-src=\"https://source.unsplash.com/random/600x300?lakes&sig=10\" alt=\"Lakes 1\">\n    </div>\n\n    <script>\n        document.addEventListener(\"DOMContentLoaded\", function() {\n            const lazyImages = document.querySelectorAll(\"img.lazy-img\");\n\n            const imageObserver = new IntersectionObserver((entries, observer) => {\n                entries.forEach(entry => {\n                    if (entry.isIntersecting) {\n                        // Implement the logic to load the actual image\n                        const img = entry.target;\n                        // img.src = img.dataset.src;\n                        // img.removeAttribute('data-src');\n                        // img.classList.add('loaded');\n                        // observer.unobserve(img);\n                    }\n                });\n            }, {\n                // Optional: set a rootMargin to load images a bit before they hit the viewport\n                // rootMargin: '0px 0px 50px 0px'\n            });\n\n            lazyImages.forEach(img => {\n                imageObserver.observe(img);\n            });\n        });\n    </script>\n</body>\n</html>\n",
+          "solutionCode": "<!-- index.html -->\n<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n    <meta charset=\"UTF-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <title>Lazy Load Image Gallery</title>\n    <style>\n        body { font-family: sans-serif; text-align: center; margin: 0; padding: 0; }\n        .intro-section { height: 100vh; display: flex; align-items: center; justify-content: center; background-color: #f5f5f5; font-size: 2em; color: #333; }\n        .image-gallery { display: flex; flex-direction: column; align-items: center; padding: 20px; }\n        .lazy-img {\n            width: 80%; /* Adjust as needed */\n            max-width: 600px;\n            height: 300px; /* Fixed height to reserve space and prevent CLS */\n            background-color: #eee;\n            margin-bottom: 30px;\n            opacity: 0.7; /* Initial slight opacity */\n            transition: opacity 0.5s ease-in-out, background-color 0.5s ease-in-out; /* Smooth transition for opacity and background */\n        }\n        .lazy-img.loaded {\n            opacity: 1;\n            background-color: transparent; /* Remove placeholder background after load */\n        }\n        /* Ensure images take up their space initially to avoid CLS */\n        .lazy-img[data-src] {\n            /* You can add a placeholder image here or use a background-image */\n            /* For a better UX, consider aspect-ratio padding-bottom trick */\n            /* Or simply ensure width/height are set in HTML or CSS */\n        }\n    </style>\n</head>\n<body>\n    <div class=\"intro-section\">Scroll Down to See Images Load!</div>\n\n    <div class=\"image-gallery\">\n        <!-- Note: Added width/height for better CLS prevention, even if using CSS height -->\n        <img class=\"lazy-img\" src=\"data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=\" data-src=\"https://source.unsplash.com/random/600x300?nature&sig=1\" alt=\"Nature 1\" width=\"600\" height=\"300\">\n        <img class=\"lazy-img\" src=\"data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=\" data-src=\"https://source.unsplash.com/random/600x300?city&sig=2\" alt=\"City 1\" width=\"600\" height=\"300\">\n        <img class=\"lazy-img\" src=\"data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=\" data-src=\"https://source.unsplash.com/random/600x300?animals&sig=3\" alt=\"Animals 1\" width=\"600\" height=\"300\">\n        <img class=\"lazy-img\" src=\"data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=\" data-src=\"https://source.unsplash.com/random/600x300?food&sig=4\" alt=\"Food 1\" width=\"600\" height=\"300\">\n        <img class=\"lazy-img\" src=\"data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=\" data-src=\"https://source.unsplash.com/random/600x300?travel&sig=5\" alt=\"Travel 1\" width=\"600\" height=\"300\">\n        <img class=\"lazy-img\" src=\"data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=\" data-src=\"https://source.unsplash.com/random/600x300?ocean&sig=6\" alt=\"Ocean 1\" width=\"600\" height=\"300\">\n        <img class=\"lazy-img\" src=\"data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=\" data-src=\"https://source.unsplash.com/random/600x300?mountains&sig=7\" alt=\"Mountains 1\" width=\"600\" height=\"300\">\n        <img class=\"lazy-img\" src=\"data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=\" data-src=\"https://source.unsplash.com/random/600x300?deserts&sig=8\" alt=\"Deserts 1\" width=\"600\" height=\"300\">\n        <img class=\"lazy-img\" src=\"data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=\" data-src=\"https://source.unsplash.com/random/600x300?forests&sig=9\" alt=\"Forests 1\" width=\"600\" height=\"300\">\n        <img class=\"lazy-img\" src=\"data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=\" data-src=\"https://source.unsplash.com/random/600x300?lakes&sig=10\" alt=\"Lakes 1\" width=\"600\" height=\"300\">\n    </div>\n\n    <script>\n        document.addEventListener(\"DOMContentLoaded\", function() {\n            const lazyImages = document.querySelectorAll(\"img.lazy-img\");\n\n            const imageObserver = new IntersectionObserver((entries, observer) => {\n                entries.forEach(entry => {\n                    if (entry.isIntersecting) {\n                        const img = entry.target; // The <img> element that intersected\n                        const dataSrc = img.getAttribute('data-src');\n\n                        if (dataSrc) { // Ensure data-src exists\n                            img.src = dataSrc; // Set the actual image source\n                            img.removeAttribute('data-src'); // Remove data-src once loaded\n                            img.onload = () => {\n                                img.classList.add('loaded'); // Add 'loaded' class for visual feedback\n                            };\n                        }\n                        observer.unobserve(img); // Stop observing this image\n                    }\n                });\n            }, {\n                // Optional: rootMargin loads images earlier, e.g., 50px before entering viewport\n                rootMargin: '0px 0px 50px 0px'\n            });\n\n            lazyImages.forEach(img => {\n                imageObserver.observe(img);\n            });\n        });\n    </script>\n</body>\n</html>\n",
+          "testCases": [
+            "Initially, only the 'Scroll Down' section is visible, and images below are not loaded (check network tab).",
+            "Scrolling down the page causes images to load as they approach the viewport (check network tab and visual appearance).",
+            "The `src` attribute of loaded images should match their original `data-src` value.",
+            "The `data-src` attribute should be removed from images once they are loaded.",
+            "Images should transition smoothly (opacity) as they load.",
+            "No significant layout shifts should occur when images load (due to `width` and `height` attributes or CSS preventing content reflow)."
+          ],
+          "hints": [
+            "Use `document.querySelectorAll()` to get a NodeList of all your target images.",
+            "The `IntersectionObserver` constructor takes a callback function and an optional `options` object.",
+            "Inside the callback, `entries` is an array of `IntersectionObserverEntry` objects. Check `entry.isIntersecting`.",
+            "Once an image is loaded, call `observer.unobserve(entry.target)` to stop watching it; this is crucial for performance.",
+            "Remember to set both `width` and `height` attributes directly on the `<img>` tags or use CSS to reserve space to prevent Cumulative Layout Shift (CLS)."
+          ],
+          "tags": [
+            "Lazy Loading",
+            "Performance",
+            "Intersection Observer API",
+            "JavaScript",
+            "DOM Manipulation",
+            "Frontend Optimization"
+          ],
+          "timeEstimate": 60,
+          "prerequisites": [
+            "HTML Basics",
+            "CSS Layout",
+            "JavaScript DOM Events",
+            "Asynchronous JavaScript"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 9,
+          "learningPath": "intermediate",
+          "relatedConcepts": [
+            "Core Web Vitals",
+            "Image Optimization",
+            "User Experience"
+          ]
+        }
+      ]
+    }
+  }
+]

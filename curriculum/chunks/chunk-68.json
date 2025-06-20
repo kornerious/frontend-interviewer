@@ -1,0 +1,2047 @@
+[
+  {
+    "id": "78267e58-be43-481c-b514-df0c4e26f988",
+    "startLine": 13800,
+    "endLine": 13899,
+    "processedDate": "2025-06-17T13:37:20.812Z",
+    "content": {
+      "logicalBlockInfo": {
+        "suggestedEndLine": -1
+      },
+      "theory": [
+        {
+          "id": "theory_react_re_rendering",
+          "title": "React Component Re-rendering Triggers and `forceUpdate`",
+          "content": "In React, components re-render when their displayed output might need to change. This ensures the UI stays synchronized with the application's state and props. There are three primary reasons a class component will re-render:\n\n### 1. Changes in Props\nWhen a component receives new `props` from its parent, React detects this change and triggers a re-render of the component and its children. This is a fundamental mechanism for data flow in React applications.\n\n### 2. State Updates via `setState()`\nCalling `this.setState()` is the standard way to update a component's internal `state`. When `setState()` is called, React schedules a re-render. It then merges the new state into the current state and re-renders the component. This is the primary mechanism for managing dynamic data within a component.\n\n### 3. Explicit Re-render via `forceUpdate()`\nAs a last resort, `this.forceUpdate()` can be called to explicitly force a component to re-render. Unlike `setState()`, `forceUpdate()` will bypass the `shouldComponentUpdate()` lifecycle method for the component itself, meaning it will re-render even if `shouldComponentUpdate()` returns `false` or if no state or props have actually changed. However, it will still trigger the normal lifecycle methods for child components. This method should be used sparingly, as it circumvents React's optimized reconciliation process and can lead to performance issues if misused. It's typically reserved for situations where external, non-React controlled data changes require a UI update.\n",
+          "examples": [
+            {
+              "id": "example_force_update_1",
+              "title": "Using `forceUpdate` to Trigger Re-render",
+              "code": "import React from 'react';\n\nclass ForceUpdateExample extends React.Component {\n  handleClick = () => {\n    // This will force a re-render regardless of whether state or props changed\n    this.forceUpdate();\n    console.log('Component was forcibly re-rendered');\n  }\n  \n  render() {\n    console.log('Render method called');\n    return (\n      <div>\n        <button onClick={this.handleClick}>Force Update</button>\n        <p>Current time: {new Date().toLocaleTimeString()}</p>\n      </div>\n    );\n  }\n}\n\n// To use this component:\n// ReactDOM.render(<ForceUpdateExample />, document.getElementById('root'));",
+              "explanation": "This example demonstrates the `forceUpdate` method. Each time the button is clicked, `forceUpdate()` is called, which immediately triggers the `render()` method, updating the displayed time even though no state or props explicitly changed within the component itself. The console logs illustrate that `render` is indeed called.",
+              "language": "typescript"
+            },
+            {
+              "id": "example_state_props_re_render_2",
+              "title": "Re-rendering via State and Props Changes",
+              "code": "import React, { useState } from 'react';\n\n// Parent Component (changes props)\nfunction ParentComponent() {\n  const [count, setCount] = useState(0);\n\n  const increment = () => setCount(prev => prev + 1);\n\n  console.log('ParentComponent rendered');\n\n  return (\n    <div>\n      <button onClick={increment}>Increment Count</button>\n      <ChildComponent count={count} />\n    </div>\n  );\n}\n\n// Child Component (re-renders on prop change)\nclass ChildComponent extends React.Component {\n  constructor(props) {\n    super(props);\n    this.state = { localValue: 0 };\n  }\n\n  handleLocalChange = () => {\n    this.setState(prevState => ({ localValue: prevState.localValue + 1 }));\n  };\n\n  render() {\n    console.log(`ChildComponent rendered. Props count: ${this.props.count}, Local value: ${this.state.localValue}`);\n    return (\n      <div>\n        <p>Prop from parent: {this.props.count}</p>\n        <p>Local state value: {this.state.localValue}</p>\n        <button onClick={this.handleLocalChange}>Change Local State</button>\n      </div>\n    );\n  }\n}\n\n// To use:\n// ReactDOM.render(<ParentComponent />, document.getElementById('root'));",
+              "explanation": "This example showcases re-rendering due to prop and state changes. When the parent component's `count` state changes, it passes a new `count` prop to `ChildComponent`, causing the child to re-render. Additionally, when `ChildComponent`'s internal `localValue` state is updated via `this.setState()`, it triggers its own re-render, independent of the parent's props.",
+              "language": "typescript"
+            }
+          ],
+          "relatedQuestions": [
+            "question_react_re_render_1",
+            "question_force_update_2",
+            "question_force_update_3",
+            "question_re_render_flashcard_4",
+            "question_re_render_mcq_5"
+          ],
+          "relatedTasks": [
+            "task_re_render_simulation"
+          ],
+          "tags": [
+            "React",
+            "re-render",
+            "props",
+            "state",
+            "setState",
+            "forceUpdate",
+            "lifecycle"
+          ],
+          "technology": "React",
+          "prerequisites": [
+            "react_component_basics",
+            "javascript_this_context"
+          ],
+          "complexity": 6,
+          "interviewRelevance": 8,
+          "learningPath": "intermediate",
+          "requiredFor": [
+            "react_performance_optimization",
+            "react_lifecycle_methods"
+          ]
+        },
+        {
+          "id": "theory_component_will_unmount",
+          "title": "`componentWillUnmount` Lifecycle Method",
+          "content": "`componentWillUnmount` is a lifecycle method in React class components that is invoked immediately before a component is unmounted and destroyed from the DOM. It is a critical method for performing cleanup operations to prevent memory leaks and ensure that your application behaves correctly when components are removed.\n\n### Why `componentWillUnmount` is Important:\n\nIt's the perfect place to:\n\n1.  **Remove Event Listeners**: If you added global event listeners (e.g., to `window`, `document`, or a specific DOM element) in `componentDidMount` or elsewhere, you must remove them here. Failure to do so can lead to memory leaks and unexpected behavior, as the listener might still try to access the unmounted component's methods or state.\n2.  **Cancel Network Requests**: If a component initiates network requests (e.g., API calls) in `componentDidMount` and the component unmounts before the request completes, you should cancel the request to prevent unnecessary state updates on an unmounted component, which can lead to warnings or errors.\n3.  **Clean Up Timers**: Any timers set using `setTimeout` or `setInterval` must be cleared in `componentWillUnmount`. If not cleared, they will continue to execute even after the component is gone, potentially causing errors or wasting resources.\n4.  **Unsubscribe from Subscriptions**: If the component subscribed to a data store, an observable, or any other external service (e.g., a Redux store, a WebSocket), it should unsubscribe in `componentWillUnmount` to prevent memory leaks and ensure the component doesn't react to updates after it's unmounted.\n\nFailing to perform these cleanup actions can lead to memory leaks, incorrect application behavior, and performance degradation over time.\n",
+          "examples": [
+            {
+              "id": "example_cleanup_event_listener_1",
+              "title": "Cleaning Up Event Listener",
+              "code": "import React from 'react';\n\nclass ResizableComponent extends React.Component {\n  constructor(props) {\n    super(props);\n    this.state = { width: window.innerWidth, height: window.innerHeight };\n  }\n\n  componentDidMount() {\n    // Add event listener when component mounts\n    window.addEventListener('resize', this.handleResize);\n    console.log('Event listener added.');\n  }\n\n  componentWillUnmount() {\n    // Remove event listener when component unmounts\n    window.removeEventListener('resize', this.handleResize);\n    console.log('Event listener removed.');\n  }\n\n  handleResize = () => {\n    this.setState({\n      width: window.innerWidth,\n      height: window.innerHeight,\n    });\n  };\n\n  render() {\n    return (\n      <div>\n        <p>Window size: {this.state.width}x{this.state.height}</p>\n        <p>Resize your browser window to see changes.</p>\n      </div>\n    );\n  }\n}\n\n// To see componentWillUnmount in action, render this component conditionally\n// For example, toggle its presence in a parent component.",
+              "explanation": "This example shows how to properly add and remove an event listener. The `handleResize` function is attached to the `window`'s `resize` event in `componentDidMount`. Crucially, it's removed in `componentWillUnmount` to prevent the listener from persisting and trying to update the state of a component that no longer exists in the DOM, which would cause a memory leak.",
+              "language": "typescript"
+            },
+            {
+              "id": "example_cleanup_timer_2",
+              "title": "Cleaning Up a Timer",
+              "code": "import React from 'react';\n\nclass TimerComponent extends React.Component {\n  constructor(props) {\n    super(props);\n    this.state = { seconds: 0 };\n    this.timerId = null; // To store the timer ID\n  }\n\n  componentDidMount() {\n    this.timerId = setInterval(() => {\n      this.setState(prevState => ({ seconds: prevState.seconds + 1 }));\n    }, 1000);\n    console.log('Timer started.');\n  }\n\n  componentWillUnmount() {\n    if (this.timerId) {\n      clearInterval(this.timerId);\n      console.log('Timer cleared.');\n    }\n  }\n\n  render() {\n    return (\n      <div>\n        <p>Seconds elapsed: {this.state.seconds}</p>\n        <p>This timer will stop when the component unmounts.</p>\n      </div>\n    );\n  }\n}\n\n// To demonstrate, render this component, then unmount it (e.g., navigate away or conditionally render false).",
+              "explanation": "This example demonstrates cleaning up a `setInterval` timer. The timer is initiated in `componentDidMount` and its ID is stored. In `componentWillUnmount`, `clearInterval` is called with this ID, stopping the timer and preventing it from continuing to run in the background after the component is removed, thus avoiding resource waste and potential errors.",
+              "language": "typescript"
+            }
+          ],
+          "relatedQuestions": [
+            "question_component_will_unmount_1",
+            "question_component_will_unmount_2",
+            "question_component_will_unmount_3",
+            "question_component_will_unmount_flashcard_4",
+            "question_component_will_unmount_mcq_5"
+          ],
+          "relatedTasks": [
+            "task_timer_cleanup",
+            "task_event_listener_cleanup"
+          ],
+          "tags": [
+            "React",
+            "lifecycle",
+            "componentWillUnmount",
+            "cleanup",
+            "memory-leaks",
+            "event-listeners",
+            "timers",
+            "subscriptions"
+          ],
+          "technology": "React",
+          "prerequisites": [
+            "react_lifecycle_basics",
+            "javascript_timers",
+            "javascript_event_listeners"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 9,
+          "learningPath": "intermediate",
+          "requiredFor": [
+            "robust_react_components",
+            "react_performance_optimization"
+          ]
+        },
+        {
+          "id": "theory_react_list_keys",
+          "title": "Importance and Best Practices of Keys in React Lists",
+          "content": "When rendering lists of elements in React, the `key` prop is a special string attribute you need to include for each item. Keys play a crucial role in React's reconciliation process, enabling it to efficiently update and manage list items.\n\n### Why Keys are Important:\nKeys help React identify which items have been changed, added, or removed from a list. When a list is updated, React uses keys to match existing list items with new ones in the virtual DOM. Without stable keys, React would struggle to determine precisely what changed, potentially leading to inefficient re-renders or incorrect component state.\n\nThis stability is crucial for React's reconciliation algorithm to work efficiently. When React processes a list with properly keyed items, it can efficiently update only the components that have changed instead of re-rendering the entire list or incorrectly re-using component instances.\n\n### Important Considerations for React Keys:\n\n1.  **Keys must be unique among siblings**: Two items in the *same* list (at the same level in the component tree) cannot have the same key. However, keys do not need to be globally unique across the entire application; they only need to be unique among their immediate siblings.\n2.  **Keys should be stable across renders**: A key should uniquely identify an item and should not change between renders unless the underlying item's identity truly changes (e.g., the item is deleted and a new one replaces it). If keys are unstable, React might re-create component instances unnecessarily, leading to performance issues and loss of internal component state (e.g., input values, scroll positions).\n3.  **Using index as keys can lead to problems**: While using an item's array index (`item, index) => <li key={index}>...</li>`) as a key might seem convenient, it's generally discouraged if:\n    *   The list items can be reordered.\n    *   Items can be added to or removed from the middle of the list.\n    *   Using index as a key in these scenarios can negatively affect performance, cause state issues (e.g., wrong item being updated), and potentially lead to bugs (e.g., incorrect data associated with a component).\n4.  **Unique Identifier from Data**: When iterating through data to create components, the key should ideally be a unique and stable identifier from your data source (like a database ID or a UUID). This ensures that each item has a consistent and distinct identity across renders.\n5.  **Keys are not passed as props**: Keys are used internally by React and are not accessible to the component itself via `this.props.key`. If you need the key value within your component, you should pass it as a separate prop (e.g., `<ListItem id={item.id} />`).\n",
+          "examples": [
+            {
+              "id": "example_keys_correct_usage_1",
+              "title": "Correct Key Usage with Unique IDs",
+              "code": "import React from 'react';\n\nclass TodoList extends React.Component {\n  constructor(props) {\n    super(props);\n    this.state = {\n      todoItems: [\n        { uid: 'a1', task: 'Learn React' },\n        { uid: 'b2', task: 'Build a project' },\n        { uid: 'c3', task: 'Deploy application' },\n      ],\n    };\n  }\n\n  render() {\n    return (\n      <div>\n        <h2>My Todo List</h2>\n        <ul>\n          {this.state.todoItems.map(item => (\n            <li key={item.uid}>{item.task}</li>\n          ))}\n        </ul>\n      </div>\n    );\n  }\n}\n\n// Usage: ReactDOM.render(<TodoList />, document.getElementById('root'));",
+              "explanation": "This example demonstrates the correct usage of keys. Each `todoItem` has a unique `uid` (a stable identifier from the data), which is used as the `key`. This allows React to efficiently update the list if items are reordered, added, or removed, preserving the internal state of list items and optimizing performance.",
+              "language": "typescript"
+            },
+            {
+              "id": "example_keys_incorrect_usage_2",
+              "title": "Problematic Key Usage with Index",
+              "code": "import React, { useState } from 'react';\n\nfunction BadKeyExample() {\n  const [items, setItems] = useState(['Apple', 'Banana', 'Cherry']);\n\n  const removeItem = (indexToRemove) => {\n    setItems(items.filter((_, index) => index !== indexToRemove));\n  };\n\n  const addItemAtStart = () => {\n    setItems(['New Fruit', ...items]);\n  };\n\n  return (\n    <div>\n      <h2>Fruit List (Bad Keys)</h2>\n      <button onClick={addItemAtStart}>Add Item at Start</button>\n      <ul>\n        {items.map((item, index) => (\n          // Using index as key - problematic if items change order or are removed/added\n          <li key={index}>\n            <input type=\"text\" defaultValue={item} />\n            <button onClick={() => removeItem(index)}>Remove</button>\n          </li>\n        ))}\n      </ul>\n    </div>\n  );\n}\n\n// Usage: ReactDOM.render(<BadKeyExample />, document.getElementById('root'));\n// Test by typing into inputs, then adding/removing items from the middle/start.",
+              "explanation": "This example illustrates the problems of using array `index` as a key when the list order can change or items are added/removed. If you type text into the input fields and then add an item at the start or remove an item from the middle, you'll notice that the input values might 'jump' or become associated with the wrong items. This happens because React reuses the component instances based on their indices, which have shifted, rather than their stable identities. This leads to incorrect UI state and potential bugs.",
+              "language": "typescript"
+            }
+          ],
+          "relatedQuestions": [
+            "question_react_keys_1",
+            "question_react_keys_2",
+            "question_react_keys_3",
+            "question_react_keys_flashcard_4",
+            "question_react_keys_mcq_5"
+          ],
+          "relatedTasks": [
+            "task_list_rendering_keys",
+            "task_dynamic_list_keys"
+          ],
+          "tags": [
+            "React",
+            "keys",
+            "lists",
+            "reconciliation",
+            "performance",
+            "virtual-dom",
+            "best-practices"
+          ],
+          "technology": "React",
+          "prerequisites": [
+            "react_component_rendering",
+            "javascript_array_methods"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 9,
+          "learningPath": "intermediate",
+          "requiredFor": [
+            "react_performance_optimization",
+            "react_advanced_concepts"
+          ]
+        },
+        {
+          "id": "theory_binding_event_handlers",
+          "title": "Binding Event Handlers in React Class Components",
+          "content": "In traditional JavaScript, the `this` context inside a function depends on how the function is called. When a class method is passed as an event handler (e.g., `onClick`, `onChange`), it often loses its `this` context, meaning `this` inside the method will be `undefined` or refer to the event target instead of the component instance.\n\n### Why Binding is Necessary:\nIn React class components, methods like `render`, `componentDidMount`, etc., are automatically bound to the component instance by React. However, custom methods that you define (like `handleClick`, `onInputChange`) are not automatically bound to `this` when they are passed as callbacks to event handlers. This means that inside such methods, `this` will be `undefined` by default when strict mode is enabled, or it will refer to the global object (in non-strict mode) or the element that triggered the event. This prevents you from accessing `this.state` or `this.props` or calling `this.setState()`.\n\nBinding methods to the component instance ensures that `this` inside the event handler always refers to the correct component instance, allowing you to safely access its `props`, `state`, and other methods.\n\n### Common Binding Approaches:\n\n1.  **Binding in the Constructor (Recommended for Class Components)**:\n    This is a common and efficient approach. You bind the method once in the constructor, and then it's always available with the correct `this` context. This avoids creating a new function on every render, which can be a performance concern.\n    ```javascript\n    class MyComponent extends React.Component {\n      constructor(props) {\n        super(props);\n        this.handleClick = this.handleClick.bind(this); // Binding here\n      }\n    \n      handleClick() {\n        console.log(this); // 'this' refers to the component instance\n        this.setState({ clicked: true });\n      }\n    \n      render() {\n        return <button onClick={this.handleClick}>Click me</button>;\n      }\n    }\n    ```\n\n2.  **Using Arrow Functions in Class Properties (Recommended)**:\n    This approach uses public class field syntax (part of ECMAScript but requires Babel for older environments). Arrow functions lexically bind `this`, so they automatically capture the `this` context of the class instance they are defined within. This is often the preferred way in modern React for its conciseness.\n    ```javascript\n    class MyComponent extends React.Component {\n      // handleClick is an arrow function class property\n      handleClick = () => {\n        console.log(this); // 'this' refers to the component instance\n        this.setState({ clicked: true });\n      }\n    \n      render() {\n        return <button onClick={this.handleClick}>Click me</button>;\n      }\n    }\n    ```\n\n3.  **Binding in the Render Method (Avoid for Performance)**:\n    You can bind the method directly in the render method using `bind` or an arrow function. However, this creates a *new function* on every render, which can negatively impact performance (especially for large lists or frequent re-renders) as React's reconciliation might struggle to optimize. It also makes `shouldComponentUpdate` less effective.\n    ```javascript\n    // Using .bind() in render (creates new function on each render)\n    <button onClick={this.handleClick.bind(this)}>Click me</button>\n\n    // Using arrow function in render (creates new function on each render)\n    <button onClick={() => this.handleClick()}>Click me</button>\n    ```\n\nUnderstanding `this` context and proper binding is fundamental for working with class components and handling user interactions effectively.\n",
+          "examples": [
+            {
+              "id": "example_binding_constructor_1",
+              "title": "Binding in Constructor",
+              "code": "import React from 'react';\n\nclass InputHandler extends React.Component {\n  constructor(props) {\n    super(props);\n    this.state = { data: '' };\n    // Binding the method in the constructor\n    this.onInputChange = this.onInputChange.bind(this);\n    console.log('Constructor: this.onInputChange is bound');\n  }\n\n  onInputChange(e) {\n    // 'this' refers to the component instance because it's bound\n    console.log('onInputChange: this is', this);\n    this.setState({ data: e.target.value });\n  }\n\n  render() {\n    return (\n      <div>\n        <input type=\"text\" onChange={this.onInputChange} value={this.state.data} />\n        <p>Input Value: {this.state.data}</p>\n      </div>\n    );\n  }\n}\n\n// Usage: ReactDOM.render(<InputHandler />, document.getElementById('root'));",
+              "explanation": "This example demonstrates the recommended way to bind an event handler in a class component: in the constructor. By calling `this.onInputChange = this.onInputChange.bind(this);`, `onInputChange` is permanently bound to the component's `this` instance. This ensures that when `onInputChange` is called as a callback by React's event system, `this` inside the method correctly refers to the component, allowing `this.setState` to function as expected.",
+              "language": "typescript"
+            },
+            {
+              "id": "example_binding_class_property_2",
+              "title": "Binding with Arrow Function Class Property",
+              "code": "import React from 'react';\n\nclass Counter extends React.Component {\n  state = { count: 0 }; // Class property syntax for state\n\n  // Using an arrow function as a class property for the handler\n  // 'this' is lexically bound to the component instance\n  handleIncrement = () => {\n    console.log('handleIncrement: this is', this);\n    this.setState(prevState => ({ count: prevState.count + 1 }));\n  };\n\n  render() {\n    return (\n      <div>\n        <p>Count: {this.state.count}</p>\n        <button onClick={this.handleIncrement}>Increment</button>\n      </div>\n    );\n  }\n}\n\n// Usage: ReactDOM.render(<Counter />, document.getElementById('root'));",
+              "explanation": "This example showcases using an arrow function as a class property, a modern and concise way to bind methods in React. The `handleIncrement` method is an arrow function, which inherently binds `this` to the instance of `Counter` where it's defined. This eliminates the need for explicit binding in the constructor and is generally preferred for its readability and ease of use.",
+              "language": "typescript"
+            }
+          ],
+          "relatedQuestions": [
+            "question_binding_handlers_1",
+            "question_binding_handlers_2",
+            "question_binding_handlers_3",
+            "question_binding_handlers_flashcard_4",
+            "question_binding_handlers_mcq_5"
+          ],
+          "relatedTasks": [
+            "task_input_handler_binding",
+            "task_event_handler_multiple_bindings"
+          ],
+          "tags": [
+            "React",
+            "event-handlers",
+            "binding",
+            "this-context",
+            "class-components",
+            "javascript",
+            "ES6"
+          ],
+          "technology": "React",
+          "prerequisites": [
+            "javascript_this_context",
+            "javascript_arrow_functions",
+            "react_class_components"
+          ],
+          "complexity": 6,
+          "interviewRelevance": 8,
+          "learningPath": "intermediate",
+          "requiredFor": [
+            "react_form_handling",
+            "react_component_patterns"
+          ]
+        }
+      ],
+      "questions": [
+        {
+          "id": "question_react_re_render_1",
+          "topic": "React Component Re-rendering Triggers",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "List the three primary triggers for a React class component to re-render.",
+          "answer": "1. Props change.\n2. State update (via `setState()`).\n3. Explicit call to `forceUpdate()`.",
+          "options": [],
+          "analysisPoints": [
+            "Identifies the core mechanisms of React's update cycle.",
+            "Distinguishes between data-driven updates (props, state) and explicit control (`forceUpdate`)."
+          ],
+          "keyConcepts": [
+            "React re-rendering",
+            "Props",
+            "State",
+            "setState()",
+            "forceUpdate()"
+          ],
+          "evaluationCriteria": [
+            "Ability to recall fundamental React concepts."
+          ],
+          "example": "",
+          "tags": [
+            "React",
+            "re-render",
+            "props",
+            "state",
+            "forceUpdate",
+            "flashcard"
+          ],
+          "prerequisites": [
+            "react_component_basics"
+          ],
+          "complexity": 3,
+          "interviewFrequency": 7,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_force_update_2",
+          "topic": "`forceUpdate` Method in React",
+          "level": "medium",
+          "type": "mcq",
+          "question": "Consider the following React class component:\n\n```javascript\nclass MyComponent extends React.Component {\n  shouldComponentUpdate(nextProps, nextState) {\n    console.log('shouldComponentUpdate called');\n    return false; // Always prevent re-render\n  }\n\n  handleClick = () => {\n    this.forceUpdate();\n    console.log('Forcing update');\n  }\n\n  render() {\n    console.log('Render called');\n    return (\n      <div>\n        <button onClick={this.handleClick}>Force Render</button>\n      </div>\n    );\n  }\n}\n```\n\nIf the `Force Render` button is clicked, what will be logged to the console?",
+          "answer": "Forcing update\nRender called",
+          "options": [
+            "Forcing update\nshouldComponentUpdate called\nRender called",
+            "Forcing update\nRender called",
+            "Forcing update",
+            "shouldComponentUpdate called\nRender called"
+          ],
+          "analysisPoints": [
+            "Tests understanding of `forceUpdate`'s behavior regarding `shouldComponentUpdate`.",
+            "Highlights the explicit bypass nature of `forceUpdate`."
+          ],
+          "keyConcepts": [
+            "forceUpdate()",
+            "shouldComponentUpdate()",
+            "React lifecycle",
+            "Re-rendering"
+          ],
+          "evaluationCriteria": [
+            "Understanding of React's reconciliation process.",
+            "Knowledge of `forceUpdate`'s specific interaction with lifecycle methods."
+          ],
+          "example": "The key detail is that `forceUpdate()` skips `shouldComponentUpdate()` for the component itself. Therefore, 'shouldComponentUpdate called' will not be logged. `render()` will be called directly after `forceUpdate()` is invoked.",
+          "tags": [
+            "React",
+            "forceUpdate",
+            "shouldComponentUpdate",
+            "lifecycle",
+            "re-render",
+            "mcq"
+          ],
+          "prerequisites": [
+            "react_lifecycle_methods"
+          ],
+          "complexity": 6,
+          "interviewFrequency": 7,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_force_update_3",
+          "topic": "When to Use `forceUpdate`",
+          "level": "hard",
+          "type": "open",
+          "question": "You have a React class component that displays data fetched from a third-party library, which manages its own internal data store and doesn't expose its changes through props or state. Explain a scenario where `this.forceUpdate()` might be a necessary, albeit less ideal, solution. Discuss the potential drawbacks of using `forceUpdate` in such a scenario and suggest alternative, more React-idiomatic approaches if possible.",
+          "answer": "In a scenario where a React component relies on data managed by a third-party library that doesn't trigger React's update cycle (i.e., doesn't update component props or state directly), `this.forceUpdate()` might be used. For example, if the library directly manipulates the DOM or maintains its own data store without providing a mechanism to subscribe to changes or integrate with React's state management, `forceUpdate()` could be used to manually trigger a re-render when the external data changes.\n\n**Potential Drawbacks of `forceUpdate`:**\n1.  **Bypasses Optimization**: `forceUpdate()` skips `shouldComponentUpdate()`, which is a key optimization point in React. This means even if the component's visible output hasn't actually changed, it will still re-render, potentially leading to unnecessary computations and performance degradation.\n2.  **Loss of Control**: It breaks React's predictable data flow and reconciliation process, making debugging harder as updates are no longer solely tied to prop/state changes.\n3.  **Performance Overhead**: Frequent calls to `forceUpdate()` can lead to poor performance, especially in complex component trees, as it forces re-renders of the component and its children without React's usual diffing optimizations.\n4.  **Difficult to Maintain**: Code that relies on `forceUpdate` can be harder to understand and maintain, as the reasons for re-renders are less explicit.\n\n**Alternative, More React-Idiomatic Approaches:**\n1.  **Wrapper Component with Internal State**: Create a wrapper React component that subscribes to the third-party library's data changes. When the library notifies of a change (if it offers a subscription API), the wrapper component can update its *own* state using `this.setState()`. This state change will then trigger a re-render of the wrapper and its children, allowing data to flow through React's prop/state mechanism.\n2.  **Context API or Redux-like Store**: For more complex data needs, encapsulate the third-party library within a React Context Provider or a Redux store. The library's data updates can then trigger updates to the Context value or Redux store, which React components can consume, leading to efficient, granular re-renders.\n3.  **Refactoring/Revisiting the Third-Party Integration**: Ideally, the integration with any external library should involve methods that allow React components to react to data changes using `setState` or `useState` hooks (for functional components). This might involve writing a custom hook or higher-order component (HOC) that abstracts away the library's specifics and exposes data as React state/props.\n\nIn essence, `forceUpdate` is a blunt instrument. While it can solve immediate problems, it often indicates an underlying architectural challenge in integrating external systems with React's declarative nature.",
+          "options": [],
+          "analysisPoints": [
+            "Evaluates understanding of `forceUpdate`'s role and limitations.",
+            "Tests ability to identify and articulate performance and maintainability drawbacks.",
+            "Requires suggesting and explaining more appropriate React patterns for integration scenarios."
+          ],
+          "keyConcepts": [
+            "forceUpdate()",
+            "React reconciliation",
+            "Performance optimization",
+            "External data integration",
+            "State management",
+            "Context API",
+            "Third-party libraries"
+          ],
+          "evaluationCriteria": [
+            "Depth of knowledge regarding `forceUpdate`.",
+            "Ability to critically analyze architectural design choices.",
+            "Proficiency in proposing and explaining alternative React patterns.",
+            "Understanding of React's core principles (declarative UI, data flow)."
+          ],
+          "example": "",
+          "tags": [
+            "React",
+            "forceUpdate",
+            "performance",
+            "architecture",
+            "state-management",
+            "open-ended"
+          ],
+          "prerequisites": [
+            "react_lifecycle_methods",
+            "react_state_management",
+            "react_performance_optimization"
+          ],
+          "complexity": 8,
+          "interviewFrequency": 6,
+          "learningPath": "advanced"
+        },
+        {
+          "id": "question_re_render_flashcard_4",
+          "topic": "Re-rendering and `shouldComponentUpdate`",
+          "level": "medium",
+          "type": "flashcard",
+          "question": "Does `this.forceUpdate()` call `shouldComponentUpdate()`?",
+          "answer": "No, `this.forceUpdate()` bypasses `shouldComponentUpdate()` for the component on which it is called.",
+          "options": [],
+          "analysisPoints": [
+            "Tests recall of a specific behavior of `forceUpdate`.",
+            "Reinforces the understanding of `shouldComponentUpdate`'s role in optimization."
+          ],
+          "keyConcepts": [
+            "forceUpdate()",
+            "shouldComponentUpdate()",
+            "React lifecycle"
+          ],
+          "evaluationCriteria": [
+            "Accuracy of recall.",
+            "Conciseness of answer."
+          ],
+          "example": "",
+          "tags": [
+            "React",
+            "forceUpdate",
+            "shouldComponentUpdate",
+            "lifecycle",
+            "flashcard"
+          ],
+          "prerequisites": [
+            "react_lifecycle_methods"
+          ],
+          "complexity": 5,
+          "interviewFrequency": 7,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_re_render_mcq_5",
+          "topic": "React Re-rendering Triggers and `setState`",
+          "level": "easy",
+          "type": "mcq",
+          "question": "Which of the following actions will trigger a re-render of a React class component?\n\nI. A parent component passes new props to the component.\nII. The component's internal state is updated using `this.setState()`.\nIII. A direct DOM manipulation is performed on the component's root element.\nIV. `this.forceUpdate()` is explicitly called on the component instance.",
+          "answer": "I, II, and IV only",
+          "options": [
+            "I and II only",
+            "I, II, and III only",
+            "I, II, and IV only",
+            "All of the above"
+          ],
+          "analysisPoints": [
+            "Tests comprehensive understanding of React's re-rendering mechanisms.",
+            "Distinguishes between React's declarative updates and direct imperative DOM manipulation."
+          ],
+          "keyConcepts": [
+            "React re-rendering",
+            "Props update",
+            "State update",
+            "setState()",
+            "forceUpdate()",
+            "DOM manipulation"
+          ],
+          "evaluationCriteria": [
+            "Accuracy in identifying valid re-render triggers.",
+            "Understanding of React's control over the DOM vs. external manipulation."
+          ],
+          "example": "Options I and II are the standard, most common ways React components re-render. Option IV is an explicit, less common way to force a re-render. Option III, direct DOM manipulation, is outside of React's control and will not trigger a React re-render. React's virtual DOM would not be aware of such a change and the component's internal representation would become out of sync with the actual DOM.",
+          "tags": [
+            "React",
+            "re-render",
+            "props",
+            "state",
+            "setState",
+            "forceUpdate",
+            "mcq"
+          ],
+          "prerequisites": [
+            "react_component_basics"
+          ],
+          "complexity": 4,
+          "interviewFrequency": 8,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_component_will_unmount_1",
+          "topic": "`componentWillUnmount` Cleanup",
+          "level": "easy",
+          "type": "open",
+          "question": "Why is `componentWillUnmount` important in React class components?",
+          "answer": "`componentWillUnmount` is crucial for performing cleanup operations before a component is removed from the DOM. This prevents memory leaks and ensures that resources are properly released, maintaining application performance and stability.",
+          "options": [],
+          "analysisPoints": [
+            "Identifies the core purpose of `componentWillUnmount`.",
+            "Highlights the consequence of not performing cleanup (memory leaks)."
+          ],
+          "keyConcepts": [
+            "componentWillUnmount",
+            "Cleanup",
+            "Memory leaks",
+            "Lifecycle methods"
+          ],
+          "evaluationCriteria": [
+            "Understanding the fundamental reason for using the method."
+          ],
+          "example": "",
+          "tags": [
+            "React",
+            "lifecycle",
+            "componentWillUnmount",
+            "cleanup",
+            "open-ended"
+          ],
+          "prerequisites": [
+            "react_lifecycle_basics"
+          ],
+          "complexity": 4,
+          "interviewFrequency": 8,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_component_will_unmount_2",
+          "topic": "Actions in `componentWillUnmount`",
+          "level": "medium",
+          "type": "mcq",
+          "question": "Which of the following operations is typically recommended to be performed within the `componentWillUnmount` lifecycle method of a React class component?\n\nA) Initializing state from props.\nB) Making initial API calls to fetch data.\nC) Setting up global event listeners.\nD) Clearing timers set with `setInterval`.",
+          "answer": "D) Clearing timers set with `setInterval`.",
+          "options": [
+            "A) Initializing state from props.",
+            "B) Making initial API calls to fetch data.",
+            "C) Setting up global event listeners.",
+            "D) Clearing timers set with `setInterval`."
+          ],
+          "analysisPoints": [
+            "Tests knowledge of appropriate actions for `componentWillUnmount`.",
+            "Distinguishes `componentWillUnmount` from other lifecycle phases (`constructor`, `componentDidMount`)."
+          ],
+          "keyConcepts": [
+            "componentWillUnmount",
+            "Cleanup",
+            "Timers",
+            "Event listeners",
+            "API calls",
+            "Lifecycle methods"
+          ],
+          "evaluationCriteria": [
+            "Correctly identifying cleanup tasks.",
+            "Understanding the purpose of different lifecycle methods."
+          ],
+          "example": "Initializing state from props (A) is done in the constructor or using `static getDerivedStateFromProps`. Making initial API calls (B) and setting up global event listeners (C) are typically done in `componentDidMount`. Clearing timers (D) is a classic cleanup operation, precisely what `componentWillUnmount` is for.",
+          "tags": [
+            "React",
+            "lifecycle",
+            "componentWillUnmount",
+            "cleanup",
+            "timers",
+            "mcq"
+          ],
+          "prerequisites": [
+            "react_lifecycle_methods"
+          ],
+          "complexity": 5,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_component_will_unmount_3",
+          "topic": "`componentWillUnmount` and Event Listeners",
+          "level": "hard",
+          "type": "code",
+          "question": "You have a React class component that displays the current window width and updates it on resize. Complete the component to correctly add and remove the resize event listener to prevent memory leaks.\n\n```javascript\nimport React from 'react';\n\nclass WindowResizer extends React.Component {\n  constructor(props) {\n    super(props);\n    this.state = { width: window.innerWidth };\n  }\n\n  handleResize = () => {\n    this.setState({ width: window.innerWidth });\n  };\n\n  // Add lifecycle method to attach listener\n\n  // Add lifecycle method to remove listener\n\n  render() {\n    return (\n      <div>\n        <p>Window width: {this.state.width}px</p>\n        <p>Resize your browser window.</p>\n      </div>\n    );\n  }\n}\n```",
+          "answer": "```javascript\nimport React from 'react';\n\nclass WindowResizer extends React.Component {\n  constructor(props) {\n    super(props);\n    this.state = { width: window.innerWidth };\n  }\n\n  handleResize = () => {\n    this.setState({ width: window.innerWidth });\n  };\n\n  componentDidMount() {\n    // Add event listener when component mounts\n    window.addEventListener('resize', this.handleResize);\n  }\n\n  componentWillUnmount() {\n    // Remove event listener when component unmounts\n    window.removeEventListener('resize', this.handleResize);\n  }\n\n  render() {\n    return (\n      <div>\n        <p>Window width: {this.state.width}px</p>\n        <p>Resize your browser window.</p>\n      </div>\n    );\n  }\n}\n```",
+          "options": [],
+          "analysisPoints": [
+            "Tests practical application of `componentDidMount` and `componentWillUnmount`.",
+            "Emphasizes the importance of pairing listener attachment and removal.",
+            "Assesses understanding of common memory leak prevention techniques."
+          ],
+          "keyConcepts": [
+            "componentDidMount",
+            "componentWillUnmount",
+            "Event listeners",
+            "Memory leaks",
+            "Lifecycle methods",
+            "Class components"
+          ],
+          "evaluationCriteria": [
+            "Correct implementation of lifecycle methods.",
+            "Proper attachment and detachment of global event listeners.",
+            "Demonstrates understanding of cleanup necessity."
+          ],
+          "example": "The event listener is added in `componentDidMount` because that's when the component is available in the DOM. It's then crucial to remove it in `componentWillUnmount` to prevent the listener from remaining active after the component is unmounted, which would lead to a memory leak and potential errors if it tries to access the state of a non-existent component.",
+          "tags": [
+            "React",
+            "lifecycle",
+            "componentWillUnmount",
+            "componentDidMount",
+            "event-listeners",
+            "memory-leaks",
+            "code"
+          ],
+          "prerequisites": [
+            "react_lifecycle_methods",
+            "javascript_event_listeners"
+          ],
+          "complexity": 7,
+          "interviewFrequency": 9,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_component_will_unmount_flashcard_4",
+          "topic": "Purpose of `componentWillUnmount`",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "What is the primary purpose of the `componentWillUnmount` lifecycle method?",
+          "answer": "To perform any necessary cleanup before a component is unmounted and destroyed.",
+          "options": [],
+          "analysisPoints": [
+            "Tests basic recall of the method's function."
+          ],
+          "keyConcepts": [
+            "componentWillUnmount",
+            "Cleanup",
+            "Lifecycle methods"
+          ],
+          "evaluationCriteria": [
+            "Accuracy and conciseness."
+          ],
+          "example": "",
+          "tags": [
+            "React",
+            "lifecycle",
+            "componentWillUnmount",
+            "flashcard"
+          ],
+          "prerequisites": [
+            "react_lifecycle_basics"
+          ],
+          "complexity": 3,
+          "interviewFrequency": 7,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_component_will_unmount_mcq_5",
+          "topic": "Unnecessary Call in `componentWillUnmount`",
+          "level": "medium",
+          "type": "mcq",
+          "question": "Which of the following actions is generally **NOT** necessary or recommended within `componentWillUnmount`?\n\nA) Canceling pending network requests.\nB) Removing subscriptions to external data sources.\nC) Calling `this.setState()` to update the component's state.\nD) Clearing `setTimeout` or `setInterval` calls.",
+          "answer": "C) Calling `this.setState()` to update the component's state.",
+          "options": [
+            "A) Canceling pending network requests.",
+            "B) Removing subscriptions to external data sources.",
+            "C) Calling `this.setState()` to update the component's state.",
+            "D) Clearing `setTimeout` or `setInterval` calls."
+          ],
+          "analysisPoints": [
+            "Tests understanding of what `componentWillUnmount` is *not* for.",
+            "Highlights the component's state after unmounting is initiated."
+          ],
+          "keyConcepts": [
+            "componentWillUnmount",
+            "Cleanup",
+            "setState()",
+            "Memory leaks",
+            "Lifecycle methods"
+          ],
+          "evaluationCriteria": [
+            "Ability to distinguish appropriate from inappropriate actions.",
+            "Understanding of component lifecycle phases."
+          ],
+          "example": "`componentWillUnmount` is called just before the component is unmounted, meaning it will no longer be part of the DOM. Attempting to call `this.setState()` at this point would be pointless as the component is about to be destroyed, and React would likely issue a warning about updating an unmounted component. The other options (A, B, D) are all crucial cleanup tasks to prevent memory leaks and ensure proper resource management.",
+          "tags": [
+            "React",
+            "lifecycle",
+            "componentWillUnmount",
+            "cleanup",
+            "setState",
+            "mcq"
+          ],
+          "prerequisites": [
+            "react_lifecycle_methods"
+          ],
+          "complexity": 6,
+          "interviewFrequency": 7,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_react_keys_1",
+          "topic": "Importance of Keys in React Lists",
+          "level": "easy",
+          "type": "open",
+          "question": "Why are keys important when rendering lists in React?",
+          "answer": "Keys help React identify which elements in a list have changed, been added, or removed. They provide a stable identity to elements across re-renders, which is crucial for React's reconciliation algorithm to efficiently update the UI and maintain component state.",
+          "options": [],
+          "analysisPoints": [
+            "Explains the core function of keys.",
+            "Connects keys to React's reconciliation process and efficiency."
+          ],
+          "keyConcepts": [
+            "React keys",
+            "Lists",
+            "Reconciliation",
+            "Performance",
+            "Virtual DOM"
+          ],
+          "evaluationCriteria": [
+            "Clear and concise explanation of key purpose."
+          ],
+          "example": "",
+          "tags": [
+            "React",
+            "keys",
+            "lists",
+            "reconciliation",
+            "performance",
+            "open-ended"
+          ],
+          "prerequisites": [
+            "react_component_rendering"
+          ],
+          "complexity": 4,
+          "interviewFrequency": 9,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_react_keys_2",
+          "topic": "Problems with Index as Keys",
+          "level": "medium",
+          "type": "code",
+          "question": "Consider the following React component that uses array index as a key:\n\n```javascript\nimport React, { useState } from 'react';\n\nfunction ShoppingList() {\n  const [items, setItems] = useState([\n    { id: 1, name: 'Milk', quantity: 1 },\n    { id: 2, name: 'Eggs', quantity: 12 },\n    { id: 3, name: 'Bread', quantity: 1 },\n  ]);\n\n  const addItem = () => {\n    const newItem = { id: Date.now(), name: 'New Item', quantity: 1 };\n    setItems([newItem, ...items]); // Add to the beginning\n  };\n\n  const removeItem = (idToRemove) => {\n    setItems(items.filter(item => item.id !== idToRemove));\n  };\n\n  return (\n    <div>\n      <button onClick={addItem}>Add New Item to Start</button>\n      <ul>\n        {items.map((item, index) => (\n          <li key={index}>\n            <input type=\"text\" defaultValue={item.name} />\n            <input type=\"number\" defaultValue={item.quantity} />\n            <button onClick={() => removeItem(item.id)}>Remove</button>\n          </li>\n        ))}\n      </ul>\n    </div>\n  );\n}\n```\n\nExplain the potential issues with using `index` as the `key` in this scenario, especially after adding a new item to the beginning of the list. How would you fix this code to adhere to React's best practices for keys?",
+          "answer": "### Potential Issues with `index` as `key`:\nWhen a new item is added to the beginning of the `items` array, the indices of all subsequent items shift. For example, the item that was at `index=0` (Milk) moves to `index=1`, Eggs from `index=1` to `index=2`, and so on. Since React uses the `key` to identify components, it perceives the component at `key=0` as a *new* component, and the component previously at `key=0` is now associated with `key=1`, etc. Instead of updating the existing components, React will effectively:\n1.  Create a new component for the new item at `key=0`.\n2.  Reuse the component previously at `key=0` for `key=1`, the component previously at `key=1` for `key=2`, and so on.\n\nThis leads to problems such as:\n*   **Incorrect State Preservation**: If users had typed values into the `input` fields for 'Milk' or 'Eggs', those values would 'jump' to the wrong item when a new item is added at the start. The `input` for 'Milk' (original index 0) would now display the text typed into the 'Eggs' input (original index 1), and so on, because React reuses the component instance based on the key, not the content.\n*   **Performance Issues**: React cannot efficiently determine which items have truly changed. It might re-render more components than necessary or perform unnecessary DOM manipulations instead of simply inserting the new item.\n*   **Bugs**: Could lead to unexpected behavior, especially with complex components that manage their own internal state or have side effects.\n\n### Fix to Adhere to Best Practices:\nTo fix this, use a stable, unique identifier from your data as the key, such as the `id` property of each item.\n\n```javascript\nimport React, { useState } from 'react';\n\nfunction ShoppingList() {\n  const [items, setItems] = useState([\n    { id: 1, name: 'Milk', quantity: 1 },\n    { id: 2, name: 'Eggs', quantity: 12 },\n    { id: 3, name: 'Bread', quantity: 1 },\n  ]);\n\n  const addItem = () => {\n    const newItem = { id: Date.now(), name: 'New Item', quantity: 1 };\n    setItems([newItem, ...items]); // Add to the beginning\n  };\n\n  const removeItem = (idToRemove) => {\n    setItems(items.filter(item => item.id !== idToRemove));\n  };\n\n  return (\n    <div>\n      <button onClick={addItem}>Add New Item to Start</button>\n      <ul>\n        {items.map((item) => (\n          <li key={item.id}> {/* Fix: Use item.id as the key */}\n            <input type=\"text\" defaultValue={item.name} />\n            <input type=\"number\" defaultValue={item.quantity} />\n            <button onClick={() => removeItem(item.id)}>Remove</button>\n          </li>\n        ))}\n      </ul>\n    </div>\n  );\n}\n```",
+          "options": [],
+          "analysisPoints": [
+            "Identifies the root cause of issues with index keys when list order changes.",
+            "Explains the impact on state preservation and performance.",
+            "Provides a correct, React-idiomatic solution using unique IDs.",
+            "Demonstrates understanding of React's reconciliation algorithm."
+          ],
+          "keyConcepts": [
+            "React keys",
+            "Index as key",
+            "Reconciliation",
+            "State preservation",
+            "Performance optimization",
+            "Unique identifiers"
+          ],
+          "evaluationCriteria": [
+            "Accuracy of problem explanation.",
+            "Correctness of the proposed solution.",
+            "Clarity in connecting `key` usage to React's internal mechanisms."
+          ],
+          "example": "To observe the issue: run the original code, type different values into the 'Milk' and 'Eggs' inputs. Then click 'Add New Item to Start'. You'll notice the typed values shift to the wrong items. After applying the fix, the inputs will correctly stay associated with their original items.",
+          "tags": [
+            "React",
+            "keys",
+            "lists",
+            "reconciliation",
+            "performance",
+            "code",
+            "best-practices"
+          ],
+          "prerequisites": [
+            "react_component_rendering",
+            "react_state_hooks"
+          ],
+          "complexity": 8,
+          "interviewFrequency": 9,
+          "learningPath": "advanced"
+        },
+        {
+          "id": "question_react_keys_3",
+          "topic": "React Keys Properties",
+          "level": "medium",
+          "type": "mcq",
+          "question": "Which of the following statements about React keys is **FALSE**?\n\nA) Keys must be unique among siblings in a list.\nB) Keys should be stable across renders for the same item.\nC) Keys are passed as props to the component they are assigned to.\nD) Using an array index as a key can be problematic if the list order changes.",
+          "answer": "C) Keys are passed as props to the component they are assigned to.",
+          "options": [
+            "A) Keys must be unique among siblings in a list.",
+            "B) Keys should be stable across renders for the same item.",
+            "C) Keys are passed as props to the component they are assigned to.",
+            "D) Using an array index as a key can be problematic if the list order changes."
+          ],
+          "analysisPoints": [
+            "Tests comprehensive knowledge of React key rules and common misconceptions.",
+            "Clarifies the internal nature of the `key` prop."
+          ],
+          "keyConcepts": [
+            "React keys",
+            "Unique keys",
+            "Stable keys",
+            "Index as key",
+            "Props",
+            "Reconciliation"
+          ],
+          "evaluationCriteria": [
+            "Accuracy in identifying false statements about React keys.",
+            "Understanding of the internal handling of keys by React."
+          ],
+          "example": "Statement C is false. Keys are a special attribute used by React internally for reconciliation and are not accessible within the component itself via `this.props.key` (for class components) or `props.key` (for functional components). If you need to access the unique identifier within the component, you should pass it as a separate prop (e.g., `<ListItem id={item.id} key={item.id} />`).",
+          "tags": [
+            "React",
+            "keys",
+            "lists",
+            "mcq",
+            "best-practices"
+          ],
+          "prerequisites": [
+            "react_component_rendering"
+          ],
+          "complexity": 6,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_react_keys_flashcard_4",
+          "topic": "React Keys Best Practice",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "What is the recommended source for a React key when rendering dynamic lists?",
+          "answer": "A unique and stable identifier from your data (e.g., a database ID or UUID).",
+          "options": [],
+          "analysisPoints": [
+            "Tests recall of the best practice for key selection.",
+            "Emphasizes stability and uniqueness."
+          ],
+          "keyConcepts": [
+            "React keys",
+            "Best practices",
+            "Unique ID",
+            "Stable key"
+          ],
+          "evaluationCriteria": [
+            "Accuracy and conciseness of the answer."
+          ],
+          "example": "",
+          "tags": [
+            "React",
+            "keys",
+            "lists",
+            "flashcard",
+            "best-practices"
+          ],
+          "prerequisites": [
+            "react_component_rendering"
+          ],
+          "complexity": 4,
+          "interviewFrequency": 8,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_react_keys_mcq_5",
+          "topic": "Key Uniqueness Scope",
+          "level": "medium",
+          "type": "mcq",
+          "question": "Consider the following React components:\n\n```javascript\nfunction ParentComponent() {\n  const items1 = [{ id: 1, text: 'A' }, { id: 2, text: 'B' }];\n  const items2 = [{ id: 1, text: 'X' }, { id: 2, text: 'Y' }];\n\n  return (\n    <div>\n      <ul>\n        {items1.map(item => (\n          <li key={item.id}>{item.text}</li>\n        ))}\n      </ul>\n      <ol>\n        {items2.map(item => (\n          <li key={item.id}>{item.text}</li>\n        ))}\n      </ol>\n    </div>\n  );\n}\n```\n\nIs the usage of `key={item.id}` for both lists `items1` and `items2` valid and without potential issues?",
+          "answer": "Yes, it is valid because keys only need to be unique among siblings.",
+          "options": [
+            "No, it's invalid because keys must be globally unique across the entire application.",
+            "No, it's invalid because `id: 1` and `id: 2` are duplicated across the two lists.",
+            "Yes, it is valid because keys only need to be unique among siblings.",
+            "Yes, but only if `items1` and `items2` are always rendered conditionally, never at the same time."
+          ],
+          "analysisPoints": [
+            "Tests understanding of the scope of key uniqueness.",
+            "Clarifies that keys are unique within a specific list, not globally."
+          ],
+          "keyConcepts": [
+            "React keys",
+            "Key uniqueness",
+            "Siblings",
+            "Lists"
+          ],
+          "evaluationCriteria": [
+            "Correctly identifying the scope of key uniqueness.",
+            "Understanding React's internal handling of keys."
+          ],
+          "example": "Keys only need to be unique among *siblings*. In this example, the `ul` and `ol` lists are distinct sets of siblings. The `<li>` elements within the `<ul>` are siblings to each other, and the `<li>` elements within the `<ol>` are siblings to each other. Therefore, `id: 1` and `id: 2` are unique within their respective `ul` and `ol` parents, making this a valid and correct use of keys.",
+          "tags": [
+            "React",
+            "keys",
+            "lists",
+            "mcq"
+          ],
+          "prerequisites": [
+            "react_component_rendering"
+          ],
+          "complexity": 7,
+          "interviewFrequency": 7,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_binding_handlers_1",
+          "topic": "Binding Event Handlers in Class Components",
+          "level": "easy",
+          "type": "open",
+          "question": "Why do we need to bind event handlers in React class components?",
+          "answer": "Binding methods to the component instance is necessary to maintain the correct `this` context. In JavaScript, when a class method is used as an event handler callback, `this` inside that method would by default be `undefined` (in strict mode) or refer to the event target/global object. Binding ensures `this` correctly refers to the component instance, allowing access to `this.state`, `this.props`, and `this.setState()`.",
+          "options": [],
+          "analysisPoints": [
+            "Explains the JavaScript `this` context issue.",
+            "Connects the problem directly to accessing component properties/methods."
+          ],
+          "keyConcepts": [
+            "this context",
+            "Event handlers",
+            "Binding",
+            "Class components",
+            "JavaScript"
+          ],
+          "evaluationCriteria": [
+            "Clear explanation of `this` context problem.",
+            "Understanding of why binding is a solution."
+          ],
+          "example": "",
+          "tags": [
+            "React",
+            "event-handlers",
+            "binding",
+            "this-context",
+            "class-components",
+            "open-ended"
+          ],
+          "prerequisites": [
+            "javascript_this_context",
+            "react_class_components"
+          ],
+          "complexity": 5,
+          "interviewFrequency": 9,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_binding_handlers_2",
+          "topic": "Binding Methods - Best Practice",
+          "level": "medium",
+          "type": "mcq",
+          "question": "Which of the following is considered the most performant and idiomatic way to bind an event handler method in a React class component?\n\nA) Binding in the render method using `this.handleClick.bind(this)`.\nB) Defining the method using an arrow function as a class property (`handleClick = () => { ... }`).\nC) Binding in the render method using an arrow function `onClick={() => this.handleClick()}`.\nD) Not binding at all, expecting React to handle `this` automatically.",
+          "answer": "B) Defining the method using an arrow function as a class property (`handleClick = () => { ... }`).",
+          "options": [
+            "A) Binding in the render method using `this.handleClick.bind(this)`.",
+            "B) Defining the method using an arrow function as a class property (`handleClick = () => { ... }`).",
+            "C) Binding in the render method using an arrow function `onClick={() => this.handleClick()}`.",
+            "D) Not binding at all, expecting React to handle `this` automatically."
+          ],
+          "analysisPoints": [
+            "Tests knowledge of different binding approaches and their performance implications.",
+            "Identifies the modern best practice for binding in class components."
+          ],
+          "keyConcepts": [
+            "Binding",
+            "this context",
+            "Arrow functions",
+            "Class properties",
+            "Performance optimization",
+            "Class components"
+          ],
+          "evaluationCriteria": [
+            "Correctly identifies the recommended binding method.",
+            "Understanding of why other methods are less ideal (performance)."
+          ],
+          "example": "Options A and C create a new function on every render, which can lead to performance issues and negatively affect `shouldComponentUpdate` optimizations. Option D is incorrect as `this` context would be lost without binding. Option B, using an arrow function as a class property, is the preferred modern approach because arrow functions lexically bind `this` (they capture `this` from their surrounding context) and the function is created only once when the component instance is created, not on every render.",
+          "tags": [
+            "React",
+            "event-handlers",
+            "binding",
+            "performance",
+            "best-practices",
+            "class-components",
+            "mcq"
+          ],
+          "prerequisites": [
+            "javascript_this_context",
+            "javascript_arrow_functions"
+          ],
+          "complexity": 7,
+          "interviewFrequency": 9,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_binding_handlers_3",
+          "topic": "Correcting `this` Context Issue",
+          "level": "medium",
+          "type": "code",
+          "question": "The following React class component aims to update its state based on input changes, but it has a `this` context issue. Fix the `onInputChange` method so that `this.setState` can be called correctly.\n\n```javascript\nimport React from 'react';\n\nclass DataInput extends React.Component {\n  constructor(props) {\n    super(props);\n    this.state = { data: '' };\n  }\n\n  onInputChange(e) {\n    // Problem: 'this' is undefined here\n    this.setState({ data: e.currentTarget.value });\n  }\n\n  render() {\n    return (\n      <div>\n        <input type=\"text\" onChange={this.onInputChange} value={this.state.data} />\n        <p>Input: {this.state.data}</p>\n      </div>\n    );\n  }\n}\n```",
+          "answer": "```javascript\nimport React from 'react';\n\nclass DataInput extends React.Component {\n  constructor(props) {\n    super(props);\n    this.state = { data: '' };\n    // Fix 1: Bind in the constructor\n    this.onInputChange = this.onInputChange.bind(this);\n  }\n\n  onInputChange(e) {\n    this.setState({ data: e.currentTarget.value });\n  }\n\n  render() {\n    return (\n      <div>\n        <input type=\"text\" onChange={this.onInputChange} value={this.state.data} />\n        <p>Input: {this.state.data}</p>\n      </div>\n    );\n  }\n}\n\n// Alternative Fix 2: Use arrow function as class property\n/*\nclass DataInput extends React.Component {\n  state = { data: '' }; // Modern way to declare state\n\n  onInputChange = (e) => {\n    this.setState({ data: e.currentTarget.value });\n  };\n\n  render() {\n    return (\n      <div>\n        <input type=\"text\" onChange={this.onInputChange} value={this.state.data} />\n        <p>Input: {this.state.data}</p>\n      </div>\n    );\n  }\n}\n*/\n```",
+          "options": [],
+          "analysisPoints": [
+            "Tests ability to diagnose and fix `this` context issues in React.",
+            "Demonstrates knowledge of common binding patterns.",
+            "Provides alternative solutions."
+          ],
+          "keyConcepts": [
+            "this context",
+            "Binding",
+            "Constructor binding",
+            "Arrow functions",
+            "Class properties",
+            "Event handlers"
+          ],
+          "evaluationCriteria": [
+            "Correctly implements a binding solution.",
+            "Understanding of why the original code fails.",
+            "Familiarity with multiple binding approaches."
+          ],
+          "example": "The original `onInputChange` method loses its `this` context when passed as a callback to `onChange`. The most common and performant fixes are either binding it explicitly in the constructor (as shown in Fix 1) or defining it as an arrow function class property (as shown in Alternative Fix 2), which lexically binds `this`.",
+          "tags": [
+            "React",
+            "event-handlers",
+            "binding",
+            "this-context",
+            "code",
+            "class-components"
+          ],
+          "prerequisites": [
+            "javascript_this_context",
+            "react_class_components"
+          ],
+          "complexity": 6,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_binding_handlers_flashcard_4",
+          "topic": "Binding `this` in JavaScript",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "What is the primary reason for `this` context issues when passing class methods as event handlers in JavaScript?",
+          "answer": "The way a function is called determines its `this` context. When a class method is passed as a callback, it loses its original binding to the class instance.",
+          "options": [],
+          "analysisPoints": [
+            "Tests understanding of JavaScript's `this` binding rules.",
+            "Relates `this` behavior to callback scenarios."
+          ],
+          "keyConcepts": [
+            "this context",
+            "JavaScript functions",
+            "Callbacks",
+            "Event handlers"
+          ],
+          "evaluationCriteria": [
+            "Accuracy of `this` context explanation."
+          ],
+          "example": "",
+          "tags": [
+            "JavaScript",
+            "this-context",
+            "binding",
+            "flashcard"
+          ],
+          "prerequisites": [
+            "javascript_this_context"
+          ],
+          "complexity": 4,
+          "interviewFrequency": 7,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_binding_handlers_mcq_5",
+          "topic": "Impact of Incorrect Binding",
+          "level": "medium",
+          "type": "mcq",
+          "question": "A React class component has a button with an `onClick` handler. If the handler method `handleClick` is NOT bound to the component instance, what will happen when the button is clicked and `handleClick` tries to call `this.setState`?\n\n```javascript\nclass MyComponent extends React.Component {\n  state = { count: 0 };\n\n  handleClick() {\n    console.log(this); // What will 'this' be here?\n    this.setState({ count: this.state.count + 1 }); // This line will cause an error\n  }\n\n  render() {\n    return (\n      <button onClick={this.handleClick}>Increment</button>\n    );\n  }\n}\n```",
+          "answer": "An error will occur because `this` will be `undefined` (in strict mode) or refer to the button element.",
+          "options": [
+            "The state will update successfully, as React automatically binds event handlers.",
+            "An error will occur because `this` will be `undefined` (in strict mode) or refer to the button element.",
+            "The component will re-render, but `this.state` will not be updated.",
+            "The `handleClick` method will not be called at all."
+          ],
+          "analysisPoints": [
+            "Tests understanding of the direct consequence of unbound `this` in a React event handler.",
+            "Reinforces the necessity of binding for state manipulation."
+          ],
+          "keyConcepts": [
+            "this context",
+            "Binding",
+            "setState()",
+            "Event handlers",
+            "Strict mode"
+          ],
+          "evaluationCriteria": [
+            "Correctly predicts the runtime behavior and error.",
+            "Demonstrates knowledge of JavaScript `this` rules in React context."
+          ],
+          "example": "In a modern React environment (which runs in strict mode), `this` inside an unbound `handleClick` method will be `undefined`. Attempting to access properties like `this.state` or methods like `this.setState()` on `undefined` will result in a TypeError, crashing the application. In non-strict mode, `this` would refer to the global object or the element that triggered the event, still leading to an error for `this.setState` as it's not a function on those objects.",
+          "tags": [
+            "React",
+            "event-handlers",
+            "binding",
+            "this-context",
+            "mcq",
+            "error-handling"
+          ],
+          "prerequisites": [
+            "javascript_this_context",
+            "react_class_components"
+          ],
+          "complexity": 6,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        }
+      ],
+      "tasks": [
+        {
+          "id": "task_re_render_simulation",
+          "title": "Simulate Re-rendering Behavior",
+          "description": "\nCreate a React class component that demonstrates the three different ways a component can be re-rendered: changing props, updating state, and using `forceUpdate()`. \n\n**Requirements:**\n1.  The component should display a simple text or number that updates on re-render (e.g., current timestamp or a counter).\n2.  Include a button that, when clicked, updates the component's internal state via `this.setState()`, triggering a re-render.\n3.  Include another button that explicitly calls `this.forceUpdate()`, triggering a re-render regardless of state/prop changes.\n4.  Demonstrate prop change re-rendering by having a parent component pass a changing prop to your component.\n5.  Add `console.log` statements in the `render` method and in the `forceUpdate` handler to visibly confirm when `render` is called and when `forceUpdate` is triggered.\n6.  (Optional but recommended for advanced understanding) Implement `shouldComponentUpdate` to return `false` for certain conditions, and observe how `forceUpdate` bypasses it while `setState` does not.",
+          "difficulty": "medium",
+          "startingCode": "import React from 'react';\n\nclass ChildComponent extends React.Component {\n  constructor(props) {\n    super(props);\n    this.state = {\n      localCount: 0\n    };\n  }\n\n  // Optional: Implement shouldComponentUpdate for observation\n  // shouldComponentUpdate(nextProps, nextState) {\n  //   console.log('shouldComponentUpdate called');\n  //   // Return false to prevent re-render unless forceUpdate is called\n  //   return nextProps.parentCount !== this.props.parentCount || nextState.localCount !== this.state.localCount;\n  // }\n\n  handleStateUpdate = () => {\n    // TODO: Update local state to trigger re-render\n  };\n\n  handleForceUpdate = () => {\n    // TODO: Call forceUpdate to trigger re-render\n  };\n\n  render() {\n    console.log('ChildComponent rendered');\n    return (\n      <div style={{ border: '1px solid black', padding: '10px', margin: '10px' }}>\n        <h3>Child Component (Prop: {this.props.parentCount})</h3>\n        <p>Local State Count: {this.state.localCount}</p>\n        <p>Current Timestamp: {new Date().toLocaleTimeString()}</p>\n        <button onClick={this.handleStateUpdate}>Update Local State</button>\n        <button onClick={this.handleForceUpdate}>Force Re-render</button>\n      </div>\n    );\n  }\n}\n\nclass ParentComponent extends React.Component {\n  constructor(props) {\n    super(props);\n    this.state = {\n      parentCounter: 0\n    };\n  }\n\n  handleParentPropChange = () => {\n    // TODO: Update parent state to change prop passed to child\n  };\n\n  render() {\n    console.log('ParentComponent rendered');\n    return (\n      <div>\n        <h2>Parent Component</h2>\n        <button onClick={this.handleParentPropChange}>Change Parent Prop (Re-renders Child)</button>\n        <ChildComponent parentCount={this.state.parentCounter} />\n      </div>\n    );\n  }\n}\n\n// Usage: <ParentComponent />",
+          "solutionCode": "import React from 'react';\n\nclass ChildComponent extends React.Component {\n  constructor(props) {\n    super(props);\n    this.state = {\n      localCount: 0\n    };\n  }\n\n  shouldComponentUpdate(nextProps, nextState) {\n    console.log('ChildComponent: shouldComponentUpdate called');\n    // Only re-render if parentCount or localCount changes\n    return nextProps.parentCount !== this.props.parentCount || nextState.localCount !== this.state.localCount;\n  }\n\n  handleStateUpdate = () => {\n    console.log('ChildComponent: setState called');\n    this.setState(prevState => ({ localCount: prevState.localCount + 1 }));\n  };\n\n  handleForceUpdate = () => {\n    console.log('ChildComponent: forceUpdate called');\n    this.forceUpdate();\n  };\n\n  render() {\n    console.log('ChildComponent: Render method called');\n    return (\n      <div style={{ border: '1px solid black', padding: '10px', margin: '10px' }}>\n        <h3>Child Component (Prop: {this.props.parentCount})</h3>\n        <p>Local State Count: {this.state.localCount}</p>\n        <p>Current Timestamp: {new Date().toLocaleTimeString()}</p>\n        <button onClick={this.handleStateUpdate}>Update Local State (setState)</button>\n        <button onClick={this.handleForceUpdate}>Force Re-render (forceUpdate)</button>\n      </div>\n    );\n  }\n}\n\nclass ParentComponent extends React.Component {\n  constructor(props) {\n    super(props);\n    this.state = {\n      parentCounter: 0\n    };\n  }\n\n  handleParentPropChange = () => {\n    console.log('ParentComponent: setState called to update child prop');\n    this.setState(prevState => ({ parentCounter: prevState.parentCounter + 1 }));\n  };\n\n  render() {\n    console.log('ParentComponent: Render method called');\n    return (\n      <div>\n        <h2>Parent Component</h2>\n        <button onClick={this.handleParentPropChange}>Change Parent Prop (Re-renders Child)</button>\n        <ChildComponent parentCount={this.state.parentCounter} />\n      </div>\n    );\n  }\n}\n\n// To use this in a React app:\n// import ReactDOM from 'react-dom';\n// ReactDOM.render(<ParentComponent />, document.getElementById('root'));",
+          "testCases": [
+            "Click 'Change Parent Prop': Both ParentComponent and ChildComponent should log 'Render method called'. ChildComponent's `parentCount` should increase.",
+            "Click 'Update Local State (setState)': Only ChildComponent should log 'Render method called'. ChildComponent's `localCount` should increase.",
+            "Click 'Force Re-render (forceUpdate)': Only ChildComponent should log 'Render method called'. If `shouldComponentUpdate` is implemented and returns `false` (for unchanging props/state), 'shouldComponentUpdate called' should NOT appear, but 'Render method called' still should.",
+            "Initial render: Both ParentComponent and ChildComponent should log 'Render method called'."
+          ],
+          "hints": [
+            "Remember that `this.setState()` triggers a re-render. You can update a counter.",
+            "`this.forceUpdate()` explicitly bypasses `shouldComponentUpdate()` for the component where it's called.",
+            "To show prop change, the parent component needs to update its state, which then passes a new prop to the child.",
+            "Use `console.log` in `render` and `shouldComponentUpdate` to trace the re-rendering process."
+          ],
+          "tags": [
+            "React",
+            "re-render",
+            "props",
+            "state",
+            "setState",
+            "forceUpdate",
+            "lifecycle",
+            "testing"
+          ],
+          "timeEstimate": 45,
+          "prerequisites": [
+            "react_class_components",
+            "react_state_props",
+            "react_lifecycle_methods"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 8,
+          "learningPath": "intermediate",
+          "relatedConcepts": [
+            "react_reconciliation",
+            "should_component_update"
+          ]
+        },
+        {
+          "id": "task_timer_cleanup",
+          "title": "Implement a Timer with Cleanup",
+          "description": "\nCreate a React class component that displays a countdown timer. The timer should start when the component mounts and stop/clear when the component unmounts.\n\n**Requirements:**\n1.  The component should have a state variable for the countdown `secondsLeft`.\n2.  Use `setInterval` to decrement `secondsLeft` every second.\n3.  Start the timer when the component mounts using `componentDidMount`.\n4.  Crucially, clear the `setInterval` in `componentWillUnmount` to prevent memory leaks.\n5.  Display the remaining seconds in the component.\n6.  Provide a mechanism (e.g., a parent component with a toggle button) to mount and unmount your timer component to test the cleanup functionality.\n",
+          "difficulty": "medium",
+          "startingCode": "import React from 'react';\n\nclass CountdownTimer extends React.Component {\n  constructor(props) {\n    super(props);\n    this.state = { secondsLeft: 10 };\n    this.timerId = null; // To store the interval ID\n  }\n\n  // TODO: Implement componentDidMount to start the timer\n\n  // TODO: Implement componentWillUnmount to clear the timer\n\n  render() {\n    return (\n      <div style={{ border: '1px solid blue', padding: '15px', margin: '10px' }}>\n        <h3>Countdown Timer</h3>\n        <p>Time remaining: {this.state.secondsLeft} seconds</p>\n        {this.state.secondsLeft === 0 && <p>Time's Up!</p>}\n      </div>\n    );\n  }\n}\n\nclass App extends React.Component {\n  constructor(props) {\n    super(props);\n    this.state = { showTimer: true };\n  }\n\n  toggleTimer = () => {\n    this.setState(prevState => ({ showTimer: !prevState.showTimer }));\n  };\n\n  render() {\n    return (\n      <div>\n        <h1>Timer App</h1>\n        <button onClick={this.toggleTimer}>\n          {this.state.showTimer ? 'Hide Timer' : 'Show Timer'}\n        </button>\n        {this.state.showTimer && <CountdownTimer />}\n      </div>\n    );\n  }\n}\n\n// Usage: <App />",
+          "solutionCode": "import React from 'react';\n\nclass CountdownTimer extends React.Component {\n  constructor(props) {\n    super(props);\n    this.state = { secondsLeft: 10 };\n    this.timerId = null; // To store the interval ID\n  }\n\n  componentDidMount() {\n    console.log('CountdownTimer: Component mounted, starting timer.');\n    this.timerId = setInterval(() => {\n      this.setState(prevState => {\n        if (prevState.secondsLeft > 0) {\n          return { secondsLeft: prevState.secondsLeft - 1 };\n        } else {\n          clearInterval(this.timerId);\n          return null; // Stop updating state if already 0\n        }\n      });\n    }, 1000);\n  }\n\n  componentWillUnmount() {\n    if (this.timerId) {\n      clearInterval(this.timerId);\n      console.log('CountdownTimer: Component unmounted, timer cleared.');\n    }\n  }\n\n  render() {\n    return (\n      <div style={{ border: '1px solid blue', padding: '15px', margin: '10px' }}>\n        <h3>Countdown Timer</h3>\n        <p>Time remaining: {this.state.secondsLeft} seconds</p>\n        {this.state.secondsLeft === 0 && <p>Time's Up!</p>}\n      </div>\n    );\n  }\n}\n\nclass App extends React.Component {\n  constructor(props) {\n    super(props);\n    this.state = { showTimer: true };\n  }\n\n  toggleTimer = () => {\n    this.setState(prevState => ({ showTimer: !prevState.showTimer }));\n  };\n\n  render() {\n    return (\n      <div>\n        <h1>Timer App</h1>\n        <button onClick={this.toggleTimer}>\n          {this.state.showTimer ? 'Hide Timer' : 'Show Timer'}\n        </button>\n        {this.state.showTimer && <CountdownTimer />}\n      </div>\n    );\n  }\n}\n",
+          "testCases": [
+            "Initial load: Timer should start counting down from 10.",
+            "Click 'Hide Timer': The timer should stop, and 'CountdownTimer: Component unmounted, timer cleared.' should be logged to console.",
+            "Click 'Show Timer': A new timer should start from 10, and 'CountdownTimer: Component mounted, starting timer.' should be logged.",
+            "Observe for long periods: Confirm no memory leaks or errors in console when toggling multiple times.",
+            "Allow timer to reach 0: Verify it stops naturally and message changes to 'Time's Up!'. (Although cleanup on unmount is primary goal here)."
+          ],
+          "hints": [
+            "Remember `componentDidMount` for effects that rely on the DOM or need to run once after mount.",
+            "`componentWillUnmount` is the place for `clearInterval` or `clearTimeout`.",
+            "Store the `setInterval` ID in a class property (e.g., `this.timerId`) so you can access it for clearing.",
+            "Use `console.log` in both `componentDidMount` and `componentWillUnmount` to verify when they are called."
+          ],
+          "tags": [
+            "React",
+            "lifecycle",
+            "componentWillUnmount",
+            "componentDidMount",
+            "timers",
+            "cleanup",
+            "state",
+            "memory-leaks"
+          ],
+          "timeEstimate": 60,
+          "prerequisites": [
+            "react_class_components",
+            "react_lifecycle_methods",
+            "javascript_timers"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 9,
+          "learningPath": "intermediate",
+          "relatedConcepts": [
+            "use_effect_cleanup_hook",
+            "resource_management"
+          ]
+        },
+        {
+          "id": "task_event_listener_cleanup",
+          "title": "Build a Resizable Text Area with Cleanup",
+          "description": "\nCreate a React class component that displays the current width of a `<textarea>` element and updates this width as the user resizes the textarea. Crucially, ensure that the resize event listener is properly attached and removed.\n\n**Requirements:**\n1.  A class component that renders a `<textarea>` element.\n2.  The component's state should hold the current width of the textarea.\n3.  Attach a `resize` event listener to the `textarea` element when the component mounts. This listener should update the state with the new width.\n4.  Remove the `resize` event listener when the component unmounts using `componentWillUnmount`.\n5.  Display the current width prominently above the textarea.\n6.  (Challenge) Implement `componentDidUpdate` to re-attach the listener if the textarea ref changes (e.g., due to conditional rendering or some other change), though for this simple case, `componentDidMount`/`componentWillUnmount` suffice if the ref is stable.\n",
+          "difficulty": "hard",
+          "startingCode": "import React from 'react';\n\nclass ResizableTextArea extends React.Component {\n  constructor(props) {\n    super(props);\n    this.state = { textareaWidth: 0 };\n    this.textareaRef = React.createRef(); // Create a ref for the textarea\n  }\n\n  handleTextAreaResize = () => {\n    if (this.textareaRef.current) {\n      this.setState({ textareaWidth: this.textareaRef.current.offsetWidth });\n    }\n  };\n\n  // TODO: Implement componentDidMount to attach the event listener\n\n  // TODO: Implement componentWillUnmount to remove the event listener\n\n  render() {\n    return (\n      <div style={{ padding: '20px' }}>\n        <h3>Resizable Textarea</h3>\n        <p>Current Textarea Width: {this.state.textareaWidth}px</p>\n        <textarea\n          ref={this.textareaRef}\n          style={{\n            width: '300px',\n            height: '100px',\n            resize: 'both',\n            overflow: 'auto',\n            border: '1px solid grey',\n          }}\n        ></textarea>\n      </div>\n    );\n  }\n}\n\n// For testing cleanup, use a parent component to conditionally render:\n/*\nclass App extends React.Component {\n  state = { showTextarea: true };\n  render() {\n    return (\n      <div>\n        <button onClick={() => this.setState(prev => ({ showTextarea: !prev.showTextarea }))}>\n          Toggle Textarea\n        </button>\n        {this.state.showTextarea && <ResizableTextArea />}\n      </div>\n    );\n  }\n}\n*/",
+          "solutionCode": "import React from 'react';\n\nclass ResizableTextArea extends React.Component {\n  constructor(props) {\n    super(props);\n    this.state = { textareaWidth: 0 };\n    this.textareaRef = React.createRef(); // Create a ref for the textarea\n  }\n\n  handleTextAreaResize = () => {\n    if (this.textareaRef.current) {\n      const newWidth = this.textareaRef.current.offsetWidth;\n      // Only update if width actually changed to avoid unnecessary re-renders\n      if (newWidth !== this.state.textareaWidth) {\n        this.setState({ textareaWidth: newWidth });\n      }\n    }\n  };\n\n  componentDidMount() {\n    console.log('ResizableTextArea: Mounted, attaching listener.');\n    // Attach the event listener to the textarea element itself\n    if (this.textareaRef.current) {\n      this.textareaRef.current.addEventListener('resize', this.handleTextAreaResize);\n      // Set initial width\n      this.setState({ textareaWidth: this.textareaRef.current.offsetWidth });\n    }\n  }\n\n  componentWillUnmount() {\n    console.log('ResizableTextArea: Unmounting, removing listener.');\n    // Remove the event listener\n    if (this.textareaRef.current) {\n      this.textareaRef.current.removeEventListener('resize', this.handleTextAreaResize);\n    }\n  }\n\n  // Challenge: If the ref itself could change (e.g., conditional rendering affecting the element)\n  // componentDidUpdate(prevProps, prevState) {\n  //   if (this.textareaRef.current && this.textareaRef.current !== this.prevTextareaRef.current) {\n  //     // If ref changed, remove listener from old and add to new\n  //     if (this.prevTextareaRef.current) {\n  //       this.prevTextareaRef.current.removeEventListener('resize', this.handleTextAreaResize);\n  //     }\n  //     this.textareaRef.current.addEventListener('resize', this.handleTextAreaResize);\n  //   }\n  //   this.prevTextareaRef.current = this.textareaRef.current; // Store current ref for next update\n  // }\n\n  render() {\n    return (\n      <div style={{ padding: '20px' }}>\n        <h3>Resizable Textarea</h3>\n        <p>Current Textarea Width: {this.state.textareaWidth}px</p>\n        <textarea\n          ref={this.textareaRef}\n          style={{\n            width: '300px',\n            height: '100px',\n            resize: 'both',\n            overflow: 'auto',\n            border: '1px solid grey',\n            boxSizing: 'border-box' // Important for predictable sizing\n          }}\n          placeholder=\"Try resizing me!\"\n        ></textarea>\n      </div>\n    );\n  }\n}\n\n// Parent component for testing unmount\nclass App extends React.Component {\n  state = { showTextarea: true };\n  render() {\n    return (\n      <div>\n        <h1>Resizable Textarea Demo</h1>\n        <button onClick={() => this.setState(prev => ({ showTextarea: !prev.showTextarea }))}>\n          {this.state.showTextarea ? 'Hide Textarea' : 'Show Textarea'}\n        </button>\n        {this.state.showTextarea && <ResizableTextArea />}\n      </div>\n    );\n  }\n}\n\n// Usage: <App />",
+          "testCases": [
+            "Initial load: Textarea should appear, and initial width displayed.",
+            "Resize textarea manually: The displayed width should update in real-time.",
+            "Click 'Hide Textarea': Component should unmount, 'ResizableTextArea: Unmounting, removing listener.' should be logged, and no width updates should occur if you resize the window (as the listener should be gone).",
+            "Click 'Show Textarea': Component should mount again, 'ResizableTextArea: Mounted, attaching listener.' should be logged, and resizing should work again.",
+            "Rapid toggling: No memory leaks or warnings/errors should appear in the console over prolonged testing."
+          ],
+          "hints": [
+            "To attach an event listener directly to a DOM element managed by React, you'll need to use a React Ref (`React.createRef()` and `ref={this.myRef}` attribute).",
+            "The DOM element will be available in `this.myRef.current` inside `componentDidMount`.",
+            "Remember to call `removeEventListener` in `componentWillUnmount`.",
+            "The `resize` event on `textarea` is specifically for when the user drags the resize handle, not when the window resizes. If you want window resize, attach to `window`.",
+            "Consider adding `box-sizing: border-box` to your textarea CSS for more predictable sizing if issues arise."
+          ],
+          "tags": [
+            "React",
+            "lifecycle",
+            "componentDidMount",
+            "componentWillUnmount",
+            "refs",
+            "event-listeners",
+            "DOM",
+            "cleanup",
+            "memory-leaks"
+          ],
+          "timeEstimate": 90,
+          "prerequisites": [
+            "react_class_components",
+            "react_refs",
+            "react_lifecycle_methods",
+            "javascript_event_listeners"
+          ],
+          "complexity": 8,
+          "interviewRelevance": 8,
+          "learningPath": "advanced",
+          "relatedConcepts": [
+            "imperative_react",
+            "custom_hooks_for_dom_interaction"
+          ]
+        },
+        {
+          "id": "task_list_rendering_keys",
+          "title": "Implement a Todo List with Correct Keys",
+          "description": "\nCreate a React component that renders a dynamic list of todo items. The list should allow adding new items and removing existing ones. Ensure proper usage of `key` props to avoid reconciliation issues.\n\n**Requirements:**\n1.  A functional or class component (`TodoList`) that manages a list of todo items in its state.\n2.  Each todo item should have a unique ID (e.g., generated using `Date.now()` or a UUID library) and a `task` string.\n3.  Render the list using `Array.prototype.map()`.\n4.  Assign a stable and unique `key` prop to each list item, using the item's unique ID.\n5.  Implement an 'Add Todo' button that adds a new todo item to the list.\n6.  Implement a 'Remove' button next to each todo item to remove it from the list.\n7.  (Optional) Add a text input to add custom todo tasks.\n",
+          "difficulty": "medium",
+          "startingCode": "import React, { useState } from 'react';\n\nfunction TodoList() {\n  const [todos, setTodos] = useState([\n    { id: 1, task: 'Learn React Hooks' },\n    { id: 2, task: 'Master JavaScript' },\n    { id: 3, task: 'Build a Portfolio' },\n  ]);\n\n  const addTodo = (text = 'New Todo') => {\n    // TODO: Add a new todo with a unique ID and the given text\n  };\n\n  const removeTodo = (idToRemove) => {\n    // TODO: Remove the todo item with the given ID\n  };\n\n  return (\n    <div style={{ padding: '20px' }}>\n      <h2>My Todo List</h2>\n      <input type=\"text\" placeholder=\"Add a new todo\" />\n      <button onClick={() => addTodo()}>Add Todo</button>\n      <ul>\n        {todos.map((todo) => (\n          // TODO: Ensure correct key usage here\n          <li>\n            {todo.task}\n            <button onClick={() => removeTodo(todo.id)}>Remove</button>\n          </li>\n        ))}\n      </ul>\n    </div>\n  );\n}\n\n// Usage: <TodoList />",
+          "solutionCode": "import React, { useState } from 'react';\n\nfunction TodoList() {\n  const [todos, setTodos] = useState([\n    { id: 1, task: 'Learn React Hooks' },\n    { id: 2, task: 'Master JavaScript' },\n    { id: 3, task: 'Build a Portfolio' },\n  ]);\n\n  const [newTodoText, setNewTodoText] = useState('');\n\n  const addTodo = () => {\n    if (newTodoText.trim() === '') return; // Prevent adding empty todos\n    const newTodo = { id: Date.now(), task: newTodoText.trim() }; // Use Date.now() for unique ID\n    setTodos([...todos, newTodo]);\n    setNewTodoText(''); // Clear input after adding\n  };\n\n  const removeTodo = (idToRemove) => {\n    setTodos(todos.filter(todo => todo.id !== idToRemove));\n  };\n\n  return (\n    <div style={{ padding: '20px', maxWidth: '400px', margin: '0 auto', border: '1px solid #ccc', borderRadius: '8px' }}>\n      <h2>My Todo List</h2>\n      <div style={{ display: 'flex', gap: '10px', marginBottom: '20px' }}>\n        <input\n          type=\"text\"\n          placeholder=\"Add a new todo\"\n          value={newTodoText}\n          onChange={(e) => setNewTodoText(e.target.value)}\n          style={{ flexGrow: 1, padding: '8px' }}\n        />\n        <button onClick={addTodo} style={{ padding: '8px 15px' }}>Add Todo</button>\n      </div>\n      <ul style={{ listStyleType: 'none', padding: 0 }}>\n        {todos.map((todo) => (\n          // Correct Key Usage: using item.id ensures stable identity\n          <li key={todo.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 0', borderBottom: '1px dashed #eee' }}>\n            <span>{todo.task}</span>\n            <button onClick={() => removeTodo(todo.id)} style={{ background: '#ff4d4d', color: 'white', border: 'none', padding: '5px 10px', borderRadius: '4px', cursor: 'pointer' }}>Remove</button>\n          </li>\n        ))}\n      </ul>\n    </div>\n  );\n}\n",
+          "testCases": [
+            "Initial render: Three todo items should be displayed correctly.",
+            "Add a new todo: A new item should appear at the end of the list. Verify its input field is clear.",
+            "Add multiple todos: All new items should be added correctly and appear in the list.",
+            "Remove a todo from the middle: The correct item should be removed, and the remaining items should retain their integrity (e.g., if you had an input field, its value should stay with the correct item).",
+            "Add/Remove multiple times: Verify no warnings about keys or unexpected behavior in the console.",
+            "Add an empty todo: Should not add an empty todo item."
+          ],
+          "hints": [
+            "Use `Date.now()` or a simple incrementing counter for generating unique IDs for new items.",
+            "Remember that `key` is a special prop directly on the JSX element in the `map`'s return.",
+            "The `filter` array method is useful for removing items from a list in an immutable way.",
+            "Make sure your `addTodo` function creates a *new* array for the state update, not mutates the existing one."
+          ],
+          "tags": [
+            "React",
+            "lists",
+            "keys",
+            "state-management",
+            "functional-components",
+            "best-practices",
+            "CRUD"
+          ],
+          "timeEstimate": 60,
+          "prerequisites": [
+            "react_state_hooks",
+            "javascript_array_methods",
+            "react_component_rendering"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 9,
+          "learningPath": "intermediate",
+          "relatedConcepts": [
+            "react_reconciliation",
+            "immutability"
+          ]
+        },
+        {
+          "id": "task_dynamic_list_keys",
+          "title": "Visualize Key Effects on Component State",
+          "description": "\nCreate a React component that vividly demonstrates the importance of using stable, unique keys (vs. array index) when list items can change order or be removed/added. The goal is to show how internal component state (like an input value) can be incorrectly associated with the wrong item if keys are misused.\n\n**Requirements:**\n1.  A parent component that manages a list of objects in its state. Each object should have a unique `id` and a `value` (e.g., initial text).\n2.  Render each list item as a separate child component. Each child component should contain an `<input type='text'>` whose value is managed internally by the child component's state, initialized from its `value` prop.\n3.  Provide two versions of the list rendering: one using `item.id` as the key, and one using `index` as the key. You can toggle between them or render both side-by-side.\n4.  Include a button to 'Reverse Order' of the list items.\n5.  Include a button to 'Remove First Item'.\n6.  Crucially, interact with the input fields (type some text) *before* reversing or removing items. Observe and explain the behavior difference between the correctly keyed list and the incorrectly keyed list.\n",
+          "difficulty": "hard",
+          "startingCode": "import React, { useState } from 'react';\n\n// Child component with internal state (input value)\nclass ListItem extends React.Component {\n  constructor(props) {\n    super(props);\n    this.state = { inputValue: props.initialValue };\n  }\n\n  handleChange = (e) => {\n    this.setState({ inputValue: e.target.value });\n  };\n\n  render() {\n    return (\n      <li style={{ padding: '5px', border: '1px solid #ccc', marginBottom: '5px' }}>\n        ID: {this.props.id}, Initial Value: {this.props.initialValue} &nbsp;\n        <input type=\"text\" value={this.state.inputValue} onChange={this.handleChange} />\n      </li>\n    );\n  }\n}\n\nfunction KeyDemonstrator() {\n  const initialItems = [\n    { id: 'uuid1', value: 'First Item' },\n    { id: 'uuid2', value: 'Second Item' },\n    { id: 'uuid3', value: 'Third Item' },\n  ];\n  const [items, setItems] = useState(initialItems);\n\n  const reverseItems = () => {\n    setItems([...items].reverse());\n  };\n\n  const removeFirstItem = () => {\n    setItems(items.slice(1));\n  };\n\n  return (\n    <div style={{ display: 'flex', justifyContent: 'space-around', padding: '20px' }}>\n      <div>\n        <h3>Correct Keys (item.id)</h3>\n        <button onClick={reverseItems}>Reverse Order</button>\n        <button onClick={removeFirstItem}>Remove First</button>\n        <ul>\n          {items.map(item => (\n            <ListItem key={item.id} id={item.id} initialValue={item.value} />\n          ))}\n        </ul>\n      </div>\n\n      <div>\n        <h3>Incorrect Keys (index)</h3>\n        {/* TODO: Render a duplicate list but with index as key */}\n        <button onClick={reverseItems}>Reverse Order</button>\n        <button onClick={removeFirstItem}>Remove First</button>\n        <ul>\n          {initialItems.map((item, index) => (\n            // This list needs to be independent for demonstration.\n            // You might need a separate state for itemsWithBadKeys\n            // or duplicate the state management logic.\n            <ListItem key={index} id={item.id} initialValue={item.value} />\n          ))}\n        </ul>\n      </div>\n    </div>\n  );\n}\n\n// Usage: <KeyDemonstrator />",
+          "solutionCode": "import React, { useState } from 'react';\n\n// Child component with internal state (input value)\nclass ListItem extends React.Component {\n  constructor(props) {\n    super(props);\n    this.state = { inputValue: props.initialValue };\n    console.log(`ListItem ${props.id} (key: ${props.reactKey}): Constructor, initialValue=${props.initialValue}`);\n  }\n\n  // This method will be called if the component instance is *reused* but props change\n  static getDerivedStateFromProps(nextProps, prevState) {\n    // console.log(`ListItem ${nextProps.id} (key: ${nextProps.reactKey}): getDerivedStateFromProps, nextProps.initialValue=${nextProps.initialValue}`);\n    // In this specific demo, we want to see state *stick* to the wrong item if keys are bad.\n    // So we avoid updating internal state from props here, as it would mask the key issue.\n    return null;\n  }\n\n  componentWillUnmount() {\n    console.log(`ListItem ${this.props.id} (key: ${this.props.reactKey}): Will Unmount`);\n  }\n\n  render() {\n    console.log(`ListItem ${this.props.id} (key: ${this.props.reactKey}): Render, inputValue=${this.state.inputValue}`);\n    return (\n      <li style={{ padding: '5px', border: '1px solid #ccc', marginBottom: '5px', backgroundColor: this.props.bgColor || 'white' }}>\n        <span>ID: {this.props.id} </span>\n        <input type=\"text\" value={this.state.inputValue} onChange={this.handleChange} style={{ marginLeft: '10px' }} />\n      </li>\n    );\n  }\n\n  handleChange = (e) => {\n    this.setState({ inputValue: e.target.value });\n  };\n}\n\nfunction KeyDemonstrator() {\n  const initialItems = [\n    { id: 'uuid1', value: 'First Item', color: '#e0ffe0' },\n    { id: 'uuid2', value: 'Second Item', color: '#ffe0e0' },\n    { id: 'uuid3', value: 'Third Item', color: '#e0e0ff' },\n  ];\n\n  // Separate state for each list to allow independent manipulation for demo clarity\n  const [goodKeyItems, setGoodKeyItems] = useState(initialItems);\n  const [badKeyItems, setBadKeyItems] = useState(initialItems);\n\n  const reverseItemsGood = () => {\n    setGoodKeyItems([...goodKeyItems].reverse());\n  };\n\n  const removeFirstItemGood = () => {\n    setGoodKeyItems(goodKeyItems.slice(1));\n  };\n\n  const reverseItemsBad = () => {\n    setBadKeyItems([...badKeyItems].reverse());\n  };\n\n  const removeFirstItemBad = () => {\n    setBadKeyItems(badKeyItems.slice(1));\n  };\n\n  return (\n    <div style={{ display: 'flex', justifyContent: 'space-around', padding: '20px' }}>\n      <div style={{ border: '1px solid green', padding: '15px', borderRadius: '8px' }}>\n        <h3>Correct Keys (item.id)</h3>\n        <p>Type into inputs, then reverse/remove. Values stay with correct item.</p>\n        <button onClick={reverseItemsGood} style={{ marginRight: '10px' }}>Reverse Order</button>\n        <button onClick={removeFirstItemGood}>Remove First</button>\n        <ul style={{ listStyleType: 'none', padding: 0 }}>\n          {goodKeyItems.map(item => (\n            <ListItem key={item.id} reactKey={item.id} id={item.id} initialValue={item.value} bgColor={item.color} />\n          ))}\n        </ul>\n      </div>\n\n      <div style={{ border: '1px solid red', padding: '15px', borderRadius: '8px' }}>\n        <h3>Incorrect Keys (index)</h3>\n        <p>Type into inputs, then reverse/remove. Values 'jump' to wrong item.</p>\n        <button onClick={reverseItemsBad} style={{ marginRight: '10px' }}>Reverse Order</button>\n        <button onClick={removeFirstItemBad}>Remove First</button>\n        <ul style={{ listStyleType: 'none', padding: 0 }}>\n          {badKeyItems.map((item, index) => (\n            // Passing index as reactKey prop for logging, but key prop is actual index\n            <ListItem key={index} reactKey={index} id={item.id} initialValue={item.value} bgColor={item.color} />\n          ))}\n        </ul>\n      </div>\n    </div>\n  );\n}\n",
+          "testCases": [
+            "Initial render: Both lists should display the initial items with their values.",
+            "Good Keys Test: For the 'Correct Keys' list, type distinct text into each input (e.g., 'A1', 'B2', 'C3'). Click 'Reverse Order'. Observe that the typed text remains associated with its original item (e.g., 'A1' still with 'uuid1'). Click 'Remove First'. 'A1' (uuid1) should be removed, and 'B2' (uuid2) should move to the top, still displaying 'B2'.",
+            "Bad Keys Test: For the 'Incorrect Keys' list, type distinct text into each input (e.g., 'X1', 'Y2', 'Z3'). Click 'Reverse Order'. Observe that the typed text 'jumps' to the wrong item (e.g., the input that displayed 'X1' now displays 'Z3'). Click 'Remove First'. The input values will shift incorrectly.",
+            "Console logs: Observe constructor/render/unmount logs to see which `ListItem` instances are created/destroyed/reused for each key strategy.",
+            "Edge case: Try adding items (if extending the task) and observe behavior."
+          ],
+          "hints": [
+            "Create a separate state for the 'bad keys' list so its manipulation doesn't affect the 'good keys' list.",
+            "The child `ListItem` component needs its own internal state (`inputValue`) to truly demonstrate the state preservation issue.",
+            "Use `console.log` in the `ListItem`'s constructor, `render` method, and `componentWillUnmount` to visualize when instances are created, re-rendered, or destroyed. This will be very insightful for understanding how keys affect reconciliation.",
+            "Remember that `key` is a special prop and is not passed to `this.props`. If you want to display the key value in the `ListItem` for debugging, pass it as a separate prop (e.g., `reactKey={index}`)."
+          ],
+          "tags": [
+            "React",
+            "keys",
+            "lists",
+            "reconciliation",
+            "state-preservation",
+            "performance",
+            "best-practices",
+            "visualization"
+          ],
+          "timeEstimate": 120,
+          "prerequisites": [
+            "react_state_hooks",
+            "react_class_components",
+            "javascript_array_methods",
+            "react_component_lifecycle"
+          ],
+          "complexity": 9,
+          "interviewRelevance": 9,
+          "learningPath": "advanced",
+          "relatedConcepts": [
+            "virtual_dom",
+            "diffing_algorithm",
+            "component_identity"
+          ]
+        },
+        {
+          "id": "task_input_handler_binding",
+          "title": "Implement an Input Component with Correct Binding",
+          "description": "\nCreate a React class component that manages an input field's value. Ensure that the input's `onChange` handler is correctly bound to the component instance.\n\n**Requirements:**\n1.  A class component named `ControlledInput`.\n2.  The component should have a state variable, e.g., `inputValue`, initialized to an empty string.\n3.  Render an `<input type=\"text\">` element.\n4.  The input's `value` prop should be controlled by `this.state.inputValue`.\n5.  Implement an `onChange` handler method (`handleInputChange`) that updates `this.state.inputValue` using `this.setState()`.\n6.  Bind `handleInputChange` to `this` using the constructor binding method.\n7.  Display the current input value next to the input field.\n",
+          "difficulty": "easy",
+          "startingCode": "import React from 'react';\n\nclass ControlledInput extends React.Component {\n  constructor(props) {\n    super(props);\n    this.state = {\n      inputValue: ''\n    };\n    // TODO: Bind handleInputChange here\n  }\n\n  handleInputChange(event) {\n    // TODO: Update state with input value\n  }\n\n  render() {\n    return (\n      <div style={{ padding: '20px' }}>\n        <h3>Controlled Input Demo (Class Component)</h3>\n        <input\n          type=\"text\"\n          // TODO: Set value and onChange props\n        />\n        <p>Current Value: </p>\n      </div>\n    );\n  }\n}\n\n// Usage: <ControlledInput />",
+          "solutionCode": "import React from 'react';\n\nclass ControlledInput extends React.Component {\n  constructor(props) {\n    super(props);\n    this.state = {\n      inputValue: ''\n    };\n    // Correct binding in the constructor\n    this.handleInputChange = this.handleInputChange.bind(this);\n  }\n\n  handleInputChange(event) {\n    // 'this' is correctly bound to the component instance\n    this.setState({ inputValue: event.target.value });\n  }\n\n  render() {\n    return (\n      <div style={{ padding: '20px', border: '1px solid #ddd', borderRadius: '8px', maxWidth: '400px', margin: '0 auto' }}>\n        <h3>Controlled Input Demo (Class Component)</h3>\n        <input\n          type=\"text\"\n          value={this.state.inputValue} // Controlled component\n          onChange={this.handleInputChange} // Bound handler\n          style={{ padding: '8px', width: 'calc(100% - 16px)', marginBottom: '10px' }}\n          placeholder=\"Type something here...\"\n        />\n        <p>Current Value: <strong>{this.state.inputValue}</strong></p>\n      </div>\n    );\n  }\n}\n",
+          "testCases": [
+            "Initial render: Input field should be empty, displayed value should be empty.",
+            "Typing in input: As you type, the displayed value should update character by character.",
+            "Check console: Ensure no `this` context errors (`TypeError: Cannot read properties of undefined (reading 'setState')`) are logged.",
+            "Clear input: Value should correctly become empty."
+          ],
+          "hints": [
+            "Remember that `this.setState()` is how you update state in a class component.",
+            "The `onChange` event object provides `event.target.value` to get the current input value.",
+            "The `bind(this)` method creates a new function where `this` is permanently set to the provided argument.",
+            "The constructor is executed only once when the component is created, making it an efficient place for binding."
+          ],
+          "tags": [
+            "React",
+            "class-components",
+            "event-handlers",
+            "binding",
+            "this-context",
+            "forms",
+            "state"
+          ],
+          "timeEstimate": 30,
+          "prerequisites": [
+            "react_class_components",
+            "javascript_this_context"
+          ],
+          "complexity": 5,
+          "interviewRelevance": 8,
+          "learningPath": "beginner",
+          "relatedConcepts": [
+            "controlled_components",
+            "uncontrolled_components"
+          ]
+        },
+        {
+          "id": "task_event_handler_multiple_bindings",
+          "title": "Compare Binding Methods in a Class Component",
+          "description": "\nExtend the previous task by demonstrating multiple ways to bind event handlers in a React class component. Create a component with two different buttons, each using a distinct method for binding its `onClick` handler, and observe their behaviors and performance implications.\n\n**Requirements:**\n1.  A single React class component (`BindingDemo`).\n2.  Maintain a `count` state variable initialized to 0.\n3.  Implement a `handleIncrement` method that increments the `count`.\n4.  Create two buttons:\n    *   **Button 1**: Uses the **constructor binding** method for its `onClick` handler. \n    *   **Button 2**: Uses the **arrow function as a class property** method for its `onClick` handler.\n5.  Include `console.log` statements in the `render` method and inside `handleIncrement` to track execution. Specifically, log `this` inside `handleIncrement` to confirm its context.\n6.  (Optional) Add a third button that uses **inline arrow function in render** (e.g., `onClick={() => this.handleIncrement()}`) and discuss its performance implications vs. the other two.\n",
+          "difficulty": "medium",
+          "startingCode": "import React from 'react';\n\nclass BindingDemo extends React.Component {\n  constructor(props) {\n    super(props);\n    this.state = {\n      count: 0\n    };\n    // TODO: Bind handleIncrement for Button 1 here\n  }\n\n  // Method for Button 1 (to be bound in constructor)\n  handleIncrementMethod() {\n    // TODO: Increment count\n    console.log('handleIncrementMethod: this is', this);\n  }\n\n  // Method for Button 2 (using class property arrow function)\n  handleIncrementArrow = () => {\n    // TODO: Increment count\n    console.log('handleIncrementArrow: this is', this);\n  };\n\n  render() {\n    console.log('BindingDemo: Render method called');\n    return (\n      <div style={{ padding: '20px' }}>\n        <h3>Binding Methods Comparison</h3>\n        <p>Count: {this.state.count}</p>\n        <div>\n          <button onClick={/* TODO: Use constructor-bound method */}>\n            Increment (Constructor Bind)\n          </button>\n          <button onClick={this.handleIncrementArrow}>\n            Increment (Class Property Arrow)\n          </button>\n          {/* Optional: Add a third button for inline binding */}\n        </div>\n      </div>\n    );\n  }\n}\n\n// Usage: <BindingDemo />",
+          "solutionCode": "import React from 'react';\n\nclass BindingDemo extends React.Component {\n  constructor(props) {\n    super(props);\n    this.state = {\n      count: 0\n    };\n    // Binding for Button 1: In the constructor\n    this.handleIncrementMethod = this.handleIncrementMethod.bind(this);\n  }\n\n  // Method for Button 1\n  handleIncrementMethod() {\n    console.log('handleIncrementMethod: this is', this); // Should log the component instance\n    this.setState(prevState => ({\n      count: prevState.count + 1\n    }));\n  }\n\n  // Method for Button 2: Using class property arrow function (lexical 'this')\n  handleIncrementArrow = () => {\n    console.log('handleIncrementArrow: this is', this); // Should log the component instance\n    this.setState(prevState => ({\n      count: prevState.count + 1\n    }));\n  };\n\n  render() {\n    console.log('BindingDemo: Render method called');\n    return (\n      <div style={{ padding: '20px', border: '1px solid #ccc', borderRadius: '8px', maxWidth: '600px', margin: '0 auto' }}>\n        <h3>Binding Methods Comparison</h3>\n        <p>Count: {this.state.count}</p>\n        <div style={{ display: 'flex', gap: '15px' }}>\n          <button onClick={this.handleIncrementMethod} style={{ padding: '10px 15px', background: '#4CAF50', color: 'white', border: 'none', borderRadius: '5px', cursor: 'pointer' }}>\n            Increment (Constructor Bind)\n          </button>\n          <button onClick={this.handleIncrementArrow} style={{ padding: '10px 15px', background: '#2196F3', color: 'white', border: 'none', borderRadius: '5px', cursor: 'pointer' }}>\n            Increment (Class Property Arrow)\n          </button>\n          {/* Optional: Inline arrow function in render - less performant */}\n          <button onClick={() => this.handleIncrementMethod()} style={{ padding: '10px 15px', background: '#ff9800', color: 'white', border: 'none', borderRadius: '5px', cursor: 'pointer' }}>\n            Increment (Inline Arrow in Render)\n          </button>\n        </div>\n      </div>\n    );\n  }\n}\n",
+          "testCases": [
+            "Initial render: Console should log 'BindingDemo: Render method called'.",
+            "Click 'Increment (Constructor Bind)': Count should increase, `handleIncrementMethod` should log `this` as the component instance, and 'BindingDemo: Render method called' should appear.",
+            "Click 'Increment (Class Property Arrow)': Count should increase, `handleIncrementArrow` should log `this` as the component instance, and 'BindingDemo: Render method called' should appear.",
+            "Rapid clicks: Observe that `handleIncrementMethod` and `handleIncrementArrow` are consistently bound.",
+            "Optional: Click 'Increment (Inline Arrow in Render)': Count should increase. Observe that `render` is called, and `this` is correctly bound. Discuss why this might be less performant (new function on every render)."
+          ],
+          "hints": [
+            "For constructor binding, you need `this.methodName = this.methodName.bind(this);`.",
+            "For class property arrow functions, simply define the method like `myMethod = () => { ... };`.",
+            "Remember to pass the *reference* to the bound method to `onClick`, not a function call.",
+            "Use `console.log(this)` inside each handler to confirm `this` refers to the component instance."
+          ],
+          "tags": [
+            "React",
+            "class-components",
+            "event-handlers",
+            "binding",
+            "this-context",
+            "performance",
+            "best-practices"
+          ],
+          "timeEstimate": 60,
+          "prerequisites": [
+            "react_class_components",
+            "javascript_this_context",
+            "javascript_arrow_functions"
+          ],
+          "complexity": 6,
+          "interviewRelevance": 8,
+          "learningPath": "intermediate",
+          "relatedConcepts": [
+            "function_binding",
+            "lexical_this"
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "d0fe0128-9b35-4729-9645-3ec65ea2b24d",
+    "startLine": 13900,
+    "endLine": 13999,
+    "processedDate": "2025-06-17T13:42:16.002Z",
+    "content": {
+      "logicalBlockInfo": {
+        "suggestedEndLine": -1
+      },
+      "theory": [
+        {
+          "id": "theory_arrow_functions_this_binding",
+          "title": "Understanding 'this' Binding with Arrow Functions in React Class Components",
+          "content": "In JavaScript classes, especially within React class components, the `this` keyword can be a source of confusion. By default, when a method is passed as a callback (e.g., an event handler like `onClick` or `onChange`), its `this` context is lost and defaults to `undefined` in strict mode. This leads to errors when trying to access `this.state` or `this.setState` inside such methods.\n\nTraditionally, developers would explicitly bind `this` to the component instance using `Function.prototype.bind()` in the constructor, or directly in the JSX, or by using a class property with a traditional function expression:\n\n```typescript\nclass MyComponent extends React.Component {\n  constructor(props) {\n    super(props);\n    this.handleClick = this.handleClick.bind(this); // Binding in constructor\n  }\n\n  handleClick() {\n    // this is now correctly bound\n    this.setState({ clicked: true });\n  }\n\n  render() {\n    return <button onClick={this.handleClick}>Click Me</button>;\n  }\n}\n\n// Or binding in JSX (less performant for frequent re-renders):\n// <button onClick={this.handleClick.bind(this)}>Click Me</button>\n```\n\nArrow functions provide a more concise and intuitive solution to this problem. When an arrow function is defined as a class property, it automatically binds `this` to the instance of the class where it's defined. This lexical `this` binding ensures that `this` always refers to the component instance, eliminating the need for explicit binding.\n\nThis syntax (`myMethod = () => {...}`) is part of the 'class properties' proposal (or 'public class fields') and is typically enabled by build tools like Babel, which is included in `create-react-app`.",
+          "examples": [
+            {
+              "id": "example_arrow_functions_this_binding_1",
+              "title": "Arrow Function for Event Handler Binding",
+              "code": "import React, { Component } from 'react';\n\nclass DataInput extends Component {\n  constructor(props) {\n    super(props);\n    this.state = { data: '' };\n  }\n\n  // Arrow function automatically binds 'this' to the component instance\n  onInputChange = (e) => {\n    // 'this' is preserved here, referring to the DataInput component\n    this.setState({ data: e.currentTarget.value });\n  };\n\n  render() {\n    return (\n      <div>\n        <input type=\"text\" value={this.state.data} onChange={this.onInputChange} />\n        <p>Current Data: {this.state.data}</p>\n      </div>\n    );\n  }\n}\n\n// Usage example:\n// <DataInput />",
+              "explanation": "This example demonstrates how an arrow function defined as a class property (`onInputChange = (e) => {...}`) automatically binds `this` to the `DataInput` component instance. When `onChange` is triggered, `e.currentTarget.value` correctly updates the component's state without needing `bind()` in the constructor. This makes the code cleaner and less error-prone for event handlers.",
+              "language": "typescript"
+            }
+          ],
+          "relatedQuestions": [],
+          "relatedTasks": [],
+          "tags": [
+            "React",
+            "JavaScript",
+            "this",
+            "Arrow Functions",
+            "Class Components",
+            "ES6"
+          ],
+          "technology": "React",
+          "prerequisites": [
+            "JavaScript_this_keyword",
+            "React_class_components",
+            "ES6_arrow_functions"
+          ],
+          "complexity": 5,
+          "interviewRelevance": 8,
+          "learningPath": "intermediate",
+          "requiredFor": [
+            "React_class_component_best_practices",
+            "React_event_handling"
+          ]
+        },
+        {
+          "id": "theory_runtime_type_checking_prop_types",
+          "title": "Runtime Type Checking with PropTypes in React Applications",
+          "content": "PropTypes is a JavaScript library (originally built into React, now external) that provides runtime type checking for React props. It helps in validating the data types of props passed to your components, catching bugs early by warning you in the console if a component receives props of an unexpected type.\n\nWhile not a substitute for static type checkers like TypeScript or Flow, PropTypes serves as a useful guardrail, especially in JavaScript-only projects, to ensure components receive valid data at runtime.\n\n### Key Concepts and Validators:\n*   **Basic Types**: `PropTypes.string`, `PropTypes.number`, `PropTypes.bool`, `PropTypes.func`, `PropTypes.array`, `PropTypes.object`, `PropTypes.symbol`, `PropTypes.node`, `PropTypes.element`, `PropTypes.elementType`.\n*   **Required Props**: Append `.isRequired` to any type validator to ensure a prop must be provided. If a required prop is missing, a warning will be logged.\n*   **Specific Instances**: `PropTypes.instanceOf(MyClass)`.\n*   **Enums (OneOf)**: `PropTypes.oneOf(['option1', 'option2'])` validates that a prop is one of a limited set of values.\n*   **Multiple Types (OneOfType)**: `PropTypes.oneOfType([PropTypes.string, PropTypes.number])` allows a prop to be one of several types.\n*   **Arrays of a Specific Type**: `PropTypes.arrayOf(PropTypes.string)` ensures an array contains only strings.\n*   **Objects with Specific Structure (Shape)**: `PropTypes.shape({ key1: PropTypes.string, key2: PropTypes.number })` validates that an object conforms to a specific shape.\n*   **Objects without Strict Structure (Exact)**: `PropTypes.exact({ key1: PropTypes.string, key2: PropTypes.number })` is similar to `shape` but warns if additional keys are present.\n*   **Custom Validators**: You can define your own validation logic by providing a function. This function receives `props`, `propName`, and `componentName` as arguments. It should return an `Error` object if validation fails, or `null`/`undefined` if successful.\n\n### Default Props:\n`defaultProps` is a static property on a component that allows you to define default values for props. These values are used if the parent component does not provide a value for a particular prop, or if the value is `undefined`. `defaultProps` are processed *before* `propTypes` validation, meaning if a default prop is applied, it will be validated by `propTypes`.",
+          "examples": [
+            {
+              "id": "example_prop_types_1",
+              "title": "UserProfile Component with PropTypes and Default Props",
+              "code": "import PropTypes from 'prop-types';\n\nfunction UserProfile({ name, age, isActive, hobbies, onUpdate, contactInfo, level }) {\n  return (\n    <div>\n      <h2>{name}</h2>\n      <p>Age: {age}</p>\n      <p>Status: {isActive ? 'Active' : 'Inactive'}</p>\n      <ul>\n        {hobbies.map(hobby => <li key={hobby}>{hobby}</li>)}\n      </ul>\n      {contactInfo && <p>Email: {contactInfo.email}</p>}\n      <p>Level: {level}</p>\n      <button onClick={onUpdate}>Update Profile</button>\n    </div>\n  );\n}\n\nUserProfile.propTypes = {\n  name: PropTypes.string.isRequired,\n  age: PropTypes.number,\n  isActive: PropTypes.bool.isRequired,\n  hobbies: PropTypes.arrayOf(PropTypes.string),\n  onUpdate: PropTypes.func.isRequired,\n  // Complex object shape validation\n  contactInfo: PropTypes.shape({\n    email: PropTypes.string.isRequired,\n    phone: PropTypes.string\n  }),\n  // Custom validator: ensures level is between 1-10\n  level: function(props, propName, componentName) {\n    const value = props[propName];\n    if (value === undefined) {\n      // Allow undefined if not required, or handle via defaultProps\n      return null; \n    }\n    if (typeof value !== 'number' || value < 1 || value > 10) {\n      return new Error(\n        `Invalid prop \\`${propName}\\` supplied to \\`${componentName}\\`. Level must be a number between 1-10.`\n      );\n    }\n    return null;\n  }\n};\n\n// Default prop values are applied before propTypes validation\nUserProfile.defaultProps = {\n  age: 25,\n  hobbies: [],\n  contactInfo: { email: 'user@example.com' },\n  level: 5 // Example default level\n};\n\n// Example Usage:\n// <UserProfile name=\"Alice\" isActive={true} onUpdate={() => console.log('Update!')} />\n// <UserProfile name=\"Bob\" isActive={false} hobbies={['Reading', 'Coding']} level={8} />\n// <UserProfile name=\"Charlie\" isActive={true} level={0} /> // Will log a PropTypes warning for 'level'",
+              "explanation": "This example demonstrates various PropTypes validators in action. `name`, `isActive`, and `onUpdate` are marked as `isRequired`. `hobbies` is an array of strings, `contactInfo` is an object with a specific shape (where `email` is required and `phone` is optional). A `custom validator` is implemented for `level` to ensure its value falls within a specific range. Finally, `defaultProps` are set for `age`, `hobbies`, and `contactInfo` to provide fallback values if these props are not explicitly passed to the `UserProfile` component.",
+              "language": "typescript"
+            }
+          ],
+          "relatedQuestions": [],
+          "relatedTasks": [],
+          "tags": [
+            "React",
+            "PropTypes",
+            "Type Checking",
+            "Runtime Validation",
+            "JavaScript",
+            "Front-end Development"
+          ],
+          "technology": "React",
+          "prerequisites": [
+            "React_components",
+            "JavaScript_functions_and_objects"
+          ],
+          "complexity": 6,
+          "interviewRelevance": 7,
+          "learningPath": "intermediate",
+          "requiredFor": [
+            "Robust_react_components",
+            "Component_reusability"
+          ]
+        },
+        {
+          "id": "theory_static_type_checking_flow",
+          "title": "Static Type Checking with Flow in React Applications",
+          "content": "Flow is a static type checker for JavaScript developed by Facebook. Unlike PropTypes, which performs checks at runtime, Flow analyzes your code *before* it runs (at build time) to find type errors. This allows developers to catch potential bugs and maintain code consistency during the development phase, providing immediate feedback in the IDE or build process.\n\nFlow uses annotations (type syntax) added to your JavaScript code to understand the expected types of variables, function parameters, return values, and React component props. It can also infer types in many cases, reducing the need for explicit annotations.\n\n### Key Concepts:\n*   **`// @flow` directive**: To enable Flow checking for a specific file, you must add `// @flow` at the top of the file.\n*   **Type Aliases**: You can define custom types using the `type` keyword, making your code more readable and reusable for complex type definitions (e.g., `type Props = {...}`).\n*   **Optional Properties**: In type definitions, a property can be marked as optional using the `?` suffix (e.g., `phone?: string`). This means the property may or may not be present.\n*   **Function Types**: Define the types of parameters and the return type for functions (e.g., `() => void` for a function that takes no arguments and returns nothing).\n*   **Annotating Component Props**: You can annotate the `props` parameter of a functional component with a type alias (e.g., `function UserProfile(props: Props)`).\n\n### Flow vs. PropTypes:\n*   **When they check**: Flow checks *statically* (before execution), PropTypes checks *dynamically* (at runtime).\n*   **Error Reporting**: Flow provides build-time errors/warnings (often in IDEs), PropTypes provides console warnings at runtime.\n*   **Use Cases**: Flow is for comprehensive type safety during development; PropTypes is a lighter-weight solution primarily for validating component props during execution.\n*   **Superseding**: In projects using static type checkers like TypeScript or Flow, PropTypes is often considered redundant for prop validation as the static checker already covers those checks more rigorously. However, PropTypes can still be useful for third-party library consumers or for providing more user-friendly runtime errors.",
+          "examples": [
+            {
+              "id": "example_flow_1",
+              "title": "UserProfile Component with Flow Types",
+              "code": "// @flow\nimport * as React from 'react';\n\ntype ContactInfo = {\n  email: string,\n  phone?: string,\n};\n\ntype Props = {\n  name: string,\n  age: number,\n  isActive: boolean,\n  hobbies: Array<string>,\n  onUpdate: () => void,\n  contactInfo?: ContactInfo,\n  level: number,\n};\n\nfunction UserProfile(props: Props) {\n  const { name, age, isActive, hobbies, onUpdate, contactInfo, level } = props;\n  return (\n    <div>\n      <h2>{name}</h2>\n      <p>Age: {age}</p>\n      <p>Status: {isActive ? 'Active' : 'Inactive'}</p>\n      <ul>\n        {hobbies.map(hobby => <li key={hobby}>{hobby}</li>)}\n      </ul>\n      {contactInfo && <p>Email: {contactInfo.email}</p>}\n      <p>Level: {level}</p>\n      <button onClick={onUpdate}>Update Profile</button>\n    </div>\n  );\n}\n\n// Example Usage (Flow will check these at build time):\n// <UserProfile name=\"Alice\" age={30} isActive={true} hobbies={['reading']} onUpdate={() => {}} level={7} />\n// <UserProfile name=\"Bob\" age={25} isActive={false} hobbies={[]} onUpdate={() => {}} contactInfo={{ email: 'bob@example.com' }} level={5} />\n// <UserProfile name=\"Charlie\" isActive={true} onUpdate={() => {}} level=\"ten\" /> // Flow error: Type 'string' is not assignable to 'number'\n",
+              "explanation": "This example demonstrates how to apply Flow for static type checking in a React functional component. The `// @flow` directive enables Flow for the file. A `type Props` alias is defined to specify the expected types for each prop, including `Array<string>` for hobbies, an optional `ContactInfo` object, and a function type `() => void` for `onUpdate`. The `UserProfile` component then uses this `Props` type to annotate its `props` parameter. Flow will analyze this code during development and report type mismatches, such as passing a string to a prop expecting a number.",
+              "language": "typescript"
+            }
+          ],
+          "relatedQuestions": [],
+          "relatedTasks": [],
+          "tags": [
+            "React",
+            "Flow",
+            "Static Type Checking",
+            "JavaScript",
+            "Type System",
+            "Front-end Development"
+          ],
+          "technology": "React",
+          "prerequisites": [
+            "JavaScript_types",
+            "React_functional_components"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 6,
+          "learningPath": "advanced",
+          "requiredFor": [
+            "Large_scale_react_applications",
+            "Code_maintainability"
+          ]
+        }
+      ],
+      "questions": [
+        {
+          "id": "question_arrow_functions_this_1",
+          "topic": "'this' Binding with Arrow Functions",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "What is the primary advantage of using an arrow function as a class property for an event handler in a React class component?",
+          "answer": "It automatically binds `this` to the component instance, eliminating the need for explicit binding in the constructor or JSX.",
+          "options": [],
+          "analysisPoints": [
+            "Lexical 'this' binding.",
+            "Avoids common 'this' issues in event handlers.",
+            "Cleaner syntax compared to `.bind()`."
+          ],
+          "keyConcepts": [
+            "this binding",
+            "arrow functions",
+            "React class components"
+          ],
+          "evaluationCriteria": [
+            "Understanding of core arrow function behavior in React context."
+          ],
+          "example": "",
+          "tags": [
+            "React",
+            "JavaScript",
+            "this",
+            "Arrow Functions"
+          ],
+          "prerequisites": [
+            "JavaScript_this_keyword"
+          ],
+          "complexity": 3,
+          "interviewFrequency": 8,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_arrow_functions_this_2",
+          "topic": "'this' Binding with Arrow Functions",
+          "level": "medium",
+          "type": "mcq",
+          "question": "Consider the following React class component:\n\n```typescript\nimport React, { Component } from 'react';\n\nclass MyForm extends Component {\n  constructor(props) {\n    super(props);\n    this.state = { value: '' };\n  }\n\n  // Method A\n  handleChangeA(event) {\n    this.setState({ value: event.target.value });\n  }\n\n  // Method B\n  handleChangeB = (event) => {\n    this.setState({ value: event.target.value });\n  }\n\n  render() {\n    return (\n      <div>\n        <input type=\"text\" onChange={this.handleChangeB} />\n        {/* What would happen if we used this.handleChangeA here directly? */}\n      </div>\n    );\n  }\n}\n```\n\nIf `onChange={this.handleChangeA}` were used directly without binding `handleChangeA` in the constructor or in JSX, what would be the result when typing into the input?",
+          "answer": "A TypeError would occur because `this` would be `undefined` within `handleChangeA`.",
+          "options": [
+            "The state would update correctly without issues.",
+            "A TypeError would occur because `this` would be `undefined` within `handleChangeA`.",
+            "The component would re-render infinitely.",
+            "The input value would update, but the state would remain unchanged."
+          ],
+          "analysisPoints": [
+            "Understanding of default 'this' context for class methods when passed as callbacks.",
+            "Knowledge of strict mode behavior where 'this' defaults to undefined.",
+            "Distinction between traditional methods and arrow function class properties regarding 'this' binding."
+          ],
+          "keyConcepts": [
+            "this binding",
+            "event handlers",
+            "class methods",
+            "TypeError"
+          ],
+          "evaluationCriteria": [
+            "Ability to predict runtime behavior of JavaScript 'this'.",
+            "Understanding of React event handling nuances."
+          ],
+          "example": "Explanation: When `this.handleChangeA` is passed directly as an `onChange` prop, it loses its `this` context. In modern JavaScript (which runs in strict mode), `this` inside `handleChangeA` would be `undefined`. Consequently, `this.setState` would attempt to call `undefined.setState`, resulting in a `TypeError`.",
+          "tags": [
+            "React",
+            "JavaScript",
+            "this",
+            "Event Handling",
+            "Error Handling"
+          ],
+          "prerequisites": [
+            "JavaScript_this_keyword",
+            "React_event_handling"
+          ],
+          "complexity": 6,
+          "interviewFrequency": 9,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_prop_types_1",
+          "topic": "PropTypes Basics",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "What is the primary purpose of PropTypes in a React application?",
+          "answer": "To perform runtime type checking for component props, helping to validate data types and catch bugs early by logging console warnings.",
+          "options": [],
+          "analysisPoints": [
+            "Runtime validation vs. static validation.",
+            "Debugging aid.",
+            "Console warnings."
+          ],
+          "keyConcepts": [
+            "PropTypes",
+            "Runtime Type Checking",
+            "Prop Validation"
+          ],
+          "evaluationCriteria": [
+            "Basic understanding of PropTypes functionality."
+          ],
+          "example": "",
+          "tags": [
+            "React",
+            "PropTypes",
+            "Type Checking"
+          ],
+          "prerequisites": [
+            "React_props"
+          ],
+          "complexity": 3,
+          "interviewFrequency": 7,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_prop_types_2",
+          "topic": "PropTypes Validators",
+          "level": "medium",
+          "type": "mcq",
+          "question": "Which of the following `PropTypes` validators should you use to ensure a prop named `user` is an object that *must* have a `name` property (string) and *may* have an `age` property (number)?",
+          "answer": "`PropTypes.shape({ name: PropTypes.string.isRequired, age: PropTypes.number })`",
+          "options": [
+            "`PropTypes.objectOf(PropTypes.string, PropTypes.number)`",
+            "`PropTypes.shape({ name: PropTypes.string.isRequired, age: PropTypes.number })`",
+            "`PropTypes.arrayOf(PropTypes.object)`",
+            "`PropTypes.instanceOf(Object)`"
+          ],
+          "analysisPoints": [
+            "Correct use of `PropTypes.shape` for object structure validation.",
+            "Understanding of `.isRequired` for nested properties.",
+            "Distinguishing `shape` from other object/array validators."
+          ],
+          "keyConcepts": [
+            "PropTypes.shape",
+            "PropTypes.string",
+            "PropTypes.number",
+            ".isRequired"
+          ],
+          "evaluationCriteria": [
+            "Ability to apply correct PropTypes validator for complex object structures.",
+            "Understanding of nested validation."
+          ],
+          "example": "Explanation: `PropTypes.shape` is used to validate that an object conforms to a specific shape by defining the types of its properties. `.isRequired` is used to mark `name` as mandatory within that shape. `age` is left without `.isRequired` making it optional. Other options like `objectOf` are for objects where all values are of a specific type, `arrayOf` is for arrays, and `instanceOf` checks against a class instance.",
+          "tags": [
+            "React",
+            "PropTypes",
+            "Object Validation"
+          ],
+          "prerequisites": [
+            "React_props"
+          ],
+          "complexity": 6,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_prop_types_3",
+          "topic": "PropTypes Custom Validator & Default Props",
+          "level": "hard",
+          "type": "open",
+          "question": "Explain the interaction between `PropTypes.isRequired` and `defaultProps`. If a prop is marked as `isRequired` but also has a default value specified in `defaultProps`, what happens if the parent component does not pass this prop?",
+          "answer": "When a prop is marked as `isRequired` and also has a default value in `defaultProps`, if the parent component does *not* pass that prop, the `defaultProps` value will be applied first. After `defaultProps` are applied, `PropTypes` validation runs. Since the prop will now have a value (from `defaultProps`), it will satisfy the `isRequired` check, and no warning will be issued. Essentially, `defaultProps` provide a fallback, preventing the `isRequired` warning when the prop is omitted by the parent.",
+          "options": [],
+          "analysisPoints": [
+            "Order of execution for `defaultProps` and `propTypes`.",
+            "How `defaultProps` can satisfy `isRequired` checks.",
+            "The purpose of each feature in isolation and combination."
+          ],
+          "keyConcepts": [
+            "PropTypes.isRequired",
+            "defaultProps",
+            "Prop Validation Order"
+          ],
+          "evaluationCriteria": [
+            "Deep understanding of React prop validation lifecycle.",
+            "Ability to explain interactions between different prop features."
+          ],
+          "example": "```typescript\nimport React from 'react';\nimport PropTypes from 'prop-types';\n\nfunction Greeting({ message }) {\n  return <p>{message}</p>;\n}\n\nGreeting.propTypes = {\n  message: PropTypes.string.isRequired,\n};\n\nGreeting.defaultProps = {\n  message: 'Hello, World!',\n};\n\n// Usage:\n// <Greeting /> // No warning, 'Hello, World!' is used.\n// <Greeting message=\"Hi!\" /> // 'Hi!' is used.\n// <Greeting message={undefined} /> // No warning, 'Hello, World!' is used.\n// <Greeting message={null} /> // Warning: 'message' is not a string, but isRequired is satisfied by non-null value\n```\nIn the example, if `<Greeting />` is rendered without a `message` prop, `defaultProps` assigns 'Hello, World!'. Then, PropTypes checks if `message` is present and a string. Since it's now 'Hello, World!', both checks pass, and no warning is displayed. If `message={null}` is passed, `defaultProps` does not apply (as `null` is a defined value), and PropTypes will warn that `null` is not a string.",
+          "tags": [
+            "React",
+            "PropTypes",
+            "defaultProps",
+            "Prop Validation"
+          ],
+          "prerequisites": [
+            "PropTypes",
+            "defaultProps"
+          ],
+          "complexity": 7,
+          "interviewFrequency": 7,
+          "learningPath": "advanced"
+        },
+        {
+          "id": "question_type_checking_comparison_1",
+          "topic": "Static vs. Runtime Type Checking",
+          "level": "medium",
+          "type": "mcq",
+          "question": "Which of the following statements *best* describes the primary difference between Flow (or TypeScript) and PropTypes?",
+          "answer": "Flow performs static type checking during development, while PropTypes performs runtime type checking in the browser.",
+          "options": [
+            "Flow is for JavaScript, while PropTypes is specifically for React.",
+            "Flow performs static type checking during development, while PropTypes performs runtime type checking in the browser.",
+            "Flow allows type inference, but PropTypes requires explicit type declarations.",
+            "PropTypes provides better error messages than Flow."
+          ],
+          "analysisPoints": [
+            "Understanding the core distinction: static vs. runtime.",
+            "Knowing when each tool performs its checks.",
+            "Recognizing their respective primary purposes."
+          ],
+          "keyConcepts": [
+            "Static Type Checking",
+            "Runtime Type Checking",
+            "Flow",
+            "PropTypes"
+          ],
+          "evaluationCriteria": [
+            "Ability to articulate the fundamental difference between type checking methodologies.",
+            "Knowledge of Flow and PropTypes roles."
+          ],
+          "example": "Explanation: The most crucial difference is *when* the type checks occur. Flow (and TypeScript) analyze code *before* it runs (statically), catching errors during development. PropTypes checks happen *while* the application is running (at runtime), primarily warning about incorrect prop types in the browser console. Both are for JavaScript and can be used with React, but their mechanisms and timing differ significantly.",
+          "tags": [
+            "React",
+            "Type Checking",
+            "Flow",
+            "PropTypes",
+            "Static Analysis"
+          ],
+          "prerequisites": [
+            "PropTypes",
+            "Flow_basics"
+          ],
+          "complexity": 6,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_flow_basics_1",
+          "topic": "Flow Syntax",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "How do you enable Flow type checking for a specific JavaScript file?",
+          "answer": "By adding the `// @flow` directive as the first line of the file.",
+          "options": [],
+          "analysisPoints": [
+            "Flow file directive."
+          ],
+          "keyConcepts": [
+            "Flow",
+            "Type Checking",
+            "Directives"
+          ],
+          "evaluationCriteria": [
+            "Basic knowledge of Flow setup."
+          ],
+          "example": "",
+          "tags": [
+            "Flow",
+            "Type Checking",
+            "Setup"
+          ],
+          "prerequisites": [],
+          "complexity": 2,
+          "interviewFrequency": 5,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_flow_basics_2",
+          "topic": "Flow Type Aliases and Optional Properties",
+          "level": "medium",
+          "type": "open",
+          "question": "Define a Flow type alias named `User` that includes `id` (number, required), `username` (string, required), and `email` (string, optional). Then, show how you would use this type to annotate the props of a functional React component called `UserCard`.",
+          "answer": "```typescript\n// @flow\nimport * as React from 'react';\n\ntype User = {\n  id: number,\n  username: string,\n  email?: string,\n};\n\ntype UserCardProps = {\n  user: User,\n};\n\nfunction UserCard(props: UserCardProps) {\n  const { user } = props;\n  return (\n    <div>\n      <h3>{user.username} (ID: {user.id})</h3>\n      {user.email && <p>Email: {user.email}</p>}\n    </div>\n  );\n}\n```",
+          "options": [],
+          "analysisPoints": [
+            "Correct syntax for `type` alias.",
+            "Understanding of optional properties (`?`).",
+            "Correct application of type to component props."
+          ],
+          "keyConcepts": [
+            "Flow type alias",
+            "Optional properties",
+            "React component props annotation"
+          ],
+          "evaluationCriteria": [
+            "Ability to define complex Flow types.",
+            "Correctly apply types to React components.",
+            "Understanding of Flow's type system features."
+          ],
+          "example": "",
+          "tags": [
+            "Flow",
+            "Type Checking",
+            "React",
+            "Type Aliases"
+          ],
+          "prerequisites": [
+            "Flow_basics",
+            "React_functional_components"
+          ],
+          "complexity": 6,
+          "interviewFrequency": 7,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_this_binding_advanced_3",
+          "topic": "'this' Context in Callbacks",
+          "level": "hard",
+          "type": "open",
+          "question": "Beyond `class-properties` arrow functions, discuss at least two other common methods to ensure `this` context is correctly bound to a React class component instance within an event handler, and briefly explain their pros and cons.",
+          "answer": "1.  **Binding in the Constructor**: This is a widely adopted practice.\n    *   **Method**: `this.handleClick = this.handleClick.bind(this);` inside the `constructor`.\n    *   **Pros**: Only binds once per component instance, making it performant. `this` context is explicitly clear.\n    *   **Cons**: Can become verbose if many event handlers need binding. Requires adding a `constructor` even if only for binding.\n\n2.  **Arrow Function in JSX**: Binding directly in the render method.\n    *   **Method**: `<button onClick={() => this.handleClick()} >Click Me</button>` or `<button onClick={this.handleClick.bind(this)}>Click Me</button>`.\n    *   **Pros**: Concise for single-use or very simple cases. No need to modify the constructor.\n    *   **Cons**: Creates a *new* function instance on every render. This can lead to performance issues (unnecessary re-renders of child components that receive the new function as a prop) and makes strict equality checks (`React.memo`, `PureComponent`) less effective. Generally discouraged for performance-critical scenarios or large lists.\n\n3.  **Directly defining method as Arrow Function (Class Property Syntax)**: (Already covered extensively, but good to include for completeness and comparison).\n    *   **Method**: `handleClick = () => { this.setState(...) };`\n    *   **Pros**: Most concise and readable. `this` is lexically bound automatically. Binds once per instance.\n    *   **Cons**: Requires Babel's class properties transform. Not part of standard ES class syntax (yet, it's a proposal).",
+          "options": [],
+          "analysisPoints": [
+            "Knowledge of various binding strategies.",
+            "Understanding performance implications.",
+            "Ability to critically evaluate trade-offs."
+          ],
+          "keyConcepts": [
+            "this binding",
+            "constructor binding",
+            "inline arrow function",
+            "performance",
+            "React re-renders"
+          ],
+          "evaluationCriteria": [
+            "Comprehensive knowledge of `this` binding techniques.",
+            "Ability to articulate pros and cons.",
+            "Understanding of performance considerations in React."
+          ],
+          "example": "",
+          "tags": [
+            "React",
+            "JavaScript",
+            "this",
+            "Performance",
+            "Best Practices"
+          ],
+          "prerequisites": [
+            "JavaScript_this_keyword",
+            "React_class_components"
+          ],
+          "complexity": 8,
+          "interviewFrequency": 9,
+          "learningPath": "advanced"
+        },
+        {
+          "id": "question_prop_types_code_4",
+          "topic": "PropTypes Validation",
+          "level": "medium",
+          "type": "code",
+          "question": "Implement a React functional component `ProductCard` that displays product information. It should accept the following props with PropTypes validation:\n\n*   `name`: string, required.\n*   `price`: number, required.\n*   `isInStock`: boolean, optional (defaults to `true`).\n*   `tags`: an array of strings, optional (defaults to an empty array).\n\nProvide the component definition and its `propTypes` and `defaultProps`.",
+          "answer": "```typescript\nimport React from 'react';\nimport PropTypes from 'prop-types';\n\nfunction ProductCard({ name, price, isInStock, tags }) {\n  return (\n    <div style={{ border: '1px solid #ccc', padding: '15px', margin: '10px' }}>\n      <h3>{name}</h3>\n      <p>Price: ${price.toFixed(2)}</p>\n      <p>Status: {isInStock ? 'In Stock' : 'Out of Stock'}</p>\n      {tags.length > 0 && (\n        <p>Tags: {tags.join(', ')}</p>\n      )}\n    </div>\n  );\n}\n\nProductCard.propTypes = {\n  name: PropTypes.string.isRequired,\n  price: PropTypes.number.isRequired,\n  isInStock: PropTypes.bool,\n  tags: PropTypes.arrayOf(PropTypes.string),\n};\n\nProductCard.defaultProps = {\n  isInStock: true,\n  tags: [],\n};\n\n// Example Usage:\n// <ProductCard name=\"Laptop\" price={1200.50} />\n// <ProductCard name=\"Mouse\" price={25} isInStock={false} tags={['gaming', 'wireless']} />\n```",
+          "options": [],
+          "analysisPoints": [
+            "Correct use of `PropTypes.string`, `PropTypes.number`, `PropTypes.bool`, `PropTypes.arrayOf(PropTypes.string)`.",
+            "Correct application of `.isRequired`.",
+            "Proper definition of `defaultProps` for optional values.",
+            "Functional component structure and prop destructuring."
+          ],
+          "keyConcepts": [
+            "PropTypes",
+            "defaultProps",
+            "Functional Components",
+            "Prop Validation"
+          ],
+          "evaluationCriteria": [
+            "Ability to define PropTypes for various data types.",
+            "Correctly implementing default props.",
+            "Adherence to React component best practices."
+          ],
+          "example": "",
+          "tags": [
+            "React",
+            "PropTypes",
+            "Coding Challenge",
+            "Component Design"
+          ],
+          "prerequisites": [
+            "React_functional_components",
+            "PropTypes_basics"
+          ],
+          "complexity": 6,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_flow_comparison_5",
+          "topic": "Flow vs. PropTypes Scenarios",
+          "level": "hard",
+          "type": "open",
+          "question": "In a large-scale React application where teams are adopting type checking, discuss a scenario where Flow would be significantly more beneficial than PropTypes, and conversely, a scenario where PropTypes might still offer value even if Flow is also used.",
+          "answer": "**Scenario where Flow is significantly more beneficial:**\n\n*   **Complex Application Logic & Inter-Module Communication**: In a large application with many interconnected modules, services, and data flows (e.g., Redux stores, API clients, utility functions), Flow's static analysis across the entire codebase is invaluable. It can ensure type consistency for data structures passed between different layers (e.g., from an API response parser to a Redux action creator, then to a reducer, and finally to a component's props). PropTypes only validates props at the component boundary; it cannot check the types of arguments passed to a utility function or the return type of a selector. Flow catches errors before runtime, providing faster feedback and preventing entire classes of bugs (e.g., `undefined` property access, incorrect argument types in deeply nested calls) that PropTypes simply cannot detect.\n\n**Scenario where PropTypes might still offer value even if Flow is also used:**\n\n*   **Public Component Libraries/SDKs**: If you are developing a React component library or SDK that will be consumed by external developers who might not be using Flow (or any static type checker), PropTypes can still provide valuable runtime warnings. While Flow ensures type safety within your library's development, PropTypes can act as a user-friendly guardrail for consumers. If a consumer passes an incorrectly typed prop, PropTypes will log a helpful console warning, guiding them to fix their usage without requiring them to set up or understand your library's internal type system. This enhances the developer experience for consumers of your library.",
+          "options": [],
+          "analysisPoints": [
+            "Understanding the scope of static vs. runtime checks.",
+            "Recognizing the limitations of PropTypes for deep logic.",
+            "Identifying practical scenarios for each tool's strength.",
+            "Considering developer experience for library consumers."
+          ],
+          "keyConcepts": [
+            "Static Type Checking",
+            "Runtime Type Checking",
+            "Flow",
+            "PropTypes",
+            "Large Applications",
+            "Component Libraries",
+            "Developer Experience"
+          ],
+          "evaluationCriteria": [
+            "Ability to analyze real-world scenarios.",
+            "Deep understanding of type checking tool strengths and weaknesses.",
+            "Critical thinking about development best practices."
+          ],
+          "example": "",
+          "tags": [
+            "Flow",
+            "PropTypes",
+            "Architecture",
+            "Best Practices",
+            "Type Checking",
+            "Advanced"
+          ],
+          "prerequisites": [
+            "Flow",
+            "PropTypes"
+          ],
+          "complexity": 8,
+          "interviewFrequency": 7,
+          "learningPath": "expert"
+        }
+      ],
+      "tasks": [
+        {
+          "id": "task_arrow_functions_this_binding_1",
+          "title": "Build a Controlled Input with Arrow Function Handler",
+          "description": "\nCreate a React class component named `TextReverser` that renders a text input and a paragraph displaying the reversed value of the input. The input should be a controlled component.\n\nRequirements:\n1.  Initialize the component's state with an empty string for the input value.\n2.  Use a class property arrow function for the `onChange` event handler of the input field.\n3.  The handler should update the component's state with the current input value.\n4.  The paragraph element should always display the *reversed* string from the state.\n5.  Ensure `this` context is correctly maintained without explicit binding in the constructor.\n",
+          "difficulty": "medium",
+          "startingCode": "import React, { Component } from 'react';\n\nclass TextReverser extends Component {\n  constructor(props) {\n    super(props);\n    this.state = {\n      inputValue: ''\n    };\n  }\n\n  // TODO: Implement the onChange handler as a class property arrow function\n  // onChangeHandler = (e) => { /* ... */ };\n\n  // TODO: Implement a helper function to reverse the string\n  // reverseString = (str) => { /* ... */ };\n\n  render() {\n    const { inputValue } = this.state;\n    // const reversedValue = this.reverseString(inputValue); // Use your helper here\n    const reversedValue = inputValue.split('').reverse().join('');\n\n    return (\n      <div>\n        <h2>Text Reverser</h2>\n        <input\n          type=\"text\"\n          value={inputValue}\n          // onChange={this.onChangeHandler} // Link your handler here\n        />\n        <p>Reversed Text: {reversedValue}</p>\n      </div>\n    );\n  }\n}\n\nexport default TextReverser;\n",
+          "solutionCode": "import React, { Component } from 'react';\n\nclass TextReverser extends Component {\n  constructor(props) {\n    super(props);\n    this.state = {\n      inputValue: ''\n    };\n  }\n\n  // Implemented as a class property arrow function to auto-bind 'this'\n  onChangeHandler = (e) => {\n    this.setState({\n      inputValue: e.target.value\n    });\n  };\n\n  // Helper function to reverse the string (optional, can be inline in render)\n  reverseString = (str) => {\n    return str.split('').reverse().join('');\n  };\n\n  render() {\n    const { inputValue } = this.state;\n    const reversedValue = this.reverseString(inputValue); // Using the helper\n\n    return (\n      <div>\n        <h2>Text Reverser</h2>\n        <input\n          type=\"text\"\n          value={inputValue}\n          onChange={this.onChangeHandler}\n          placeholder=\"Type something...\"\n        />\n        <p>Original Text: {inputValue}</p>\n        <p>Reversed Text: {reversedValue}</p>\n      </div>\n    );\n  }\n}\n\nexport default TextReverser;\n",
+          "testCases": [
+            "Typing 'hello' should display 'olleh'.",
+            "Typing an empty string '' should display an empty string.",
+            "Typing 'React' should display 'tcaeR'.",
+            "The input field should reflect the typed text correctly (controlled component behavior)."
+          ],
+          "hints": [
+            "Remember that arrow functions as class properties inherently handle `this` binding.",
+            "You'll need `e.target.value` to get the input's current value.",
+            "String reversal can be done efficiently with `split('').reverse().join('')`."
+          ],
+          "tags": [
+            "React",
+            "Class Components",
+            "State Management",
+            "Event Handling",
+            "Arrow Functions",
+            "Controlled Components"
+          ],
+          "timeEstimate": 30,
+          "prerequisites": [
+            "React_class_components",
+            "React_state",
+            "JavaScript_this_keyword",
+            "ES6_arrow_functions"
+          ],
+          "complexity": 5,
+          "interviewRelevance": 8,
+          "learningPath": "intermediate",
+          "relatedConcepts": [
+            "controlled_components",
+            "this_binding"
+          ]
+        },
+        {
+          "id": "task_prop_types_validation_1",
+          "title": "Implement User Card with Comprehensive PropTypes Validation",
+          "description": "\nCreate a React functional component named `UserCard` that displays detailed user information. The component should enforce strict prop validation using `prop-types` and provide sensible `defaultProps`.\n\nRequirements:\n1.  **Props Definition**:\n    *   `id`: `number`, required. (Unique user ID)\n    *   `name`: `string`, required. (User's full name)\n    *   `email`: `string`, required. (User's email address)\n    *   `age`: `number`, optional. Default to `30`.\n    *   `isActive`: `boolean`, optional. Default to `true`.\n    *   `roles`: `arrayOf(string)`, optional. Default to `['User']`.\n    *   `address`: `shape({ street: string, city: string, zip: string })`, optional. All sub-properties are required within the shape if `address` is provided.\n    *   `onDelete`: `func`, required. (Callback function for a delete button)\n    *   `statusMessage`: A custom prop `string` that must be either 'Online' or 'Offline'. If provided, it must be one of these values.\n\n2.  **Component Rendering**:\n    *   Display `name`, `email`, `age`, `isActive` status.\n    *   List `roles` (if any).\n    *   Display `address` details (if provided).\n    *   Include a 'Delete' button that calls `onDelete`.\n    *   Display `statusMessage`.\n\n3.  **PropType Configuration**:\n    *   Apply `isRequired` where appropriate.\n    *   Use `PropTypes.arrayOf`, `PropTypes.shape`, and `PropTypes.func`.\n    *   Implement a `PropTypes.oneOf` for `statusMessage`.\n    *   Implement `defaultProps` for `age`, `isActive`, and `roles`.\n\nYour solution should demonstrate a thorough understanding of `prop-types` capabilities.\n",
+          "difficulty": "hard",
+          "startingCode": "import React from 'react';\nimport PropTypes from 'prop-types';\n\nfunction UserCard(props) {\n  const { id, name, email, age, isActive, roles, address, onDelete, statusMessage } = props;\n\n  return (\n    <div style={{ border: '1px solid #eee', padding: '15px', margin: '10px', borderRadius: '5px' }}>\n      <h3>{name} (ID: {id})</h3>\n      <p>Email: {email}</p>\n      <p>Age: {age}</p>\n      <p>Status: {isActive ? 'Active' : 'Inactive'}</p>\n      {roles.length > 0 && (\n        <p>Roles: {roles.join(', ')}</p>\n      )}\n      {address && (\n        <p>\n          Address: {address.street}, {address.city}, {address.zip}\n        </p>\n      )}\n      {statusMessage && <p>Connection: {statusMessage}</p>}\n      <button onClick={onDelete}>Delete User</button>\n    </div>\n  );\n}\n\nUserCard.propTypes = {\n  // TODO: Define all propTypes here\n};\n\nUserCard.defaultProps = {\n  // TODO: Define all defaultProps here\n};\n\nexport default UserCard;\n",
+          "solutionCode": "import React from 'react';\nimport PropTypes from 'prop-types';\n\nfunction UserCard(props) {\n  const { id, name, email, age, isActive, roles, address, onDelete, statusMessage } = props;\n\n  return (\n    <div style={{ border: '1px solid #eee', padding: '15px', margin: '10px', borderRadius: '5px' }}>\n      <h3>{name} (ID: {id})</h3>\n      <p>Email: {email}</p>\n      <p>Age: {age}</p>\n      <p>Status: {isActive ? 'Active' : 'Inactive'}</p>\n      {roles.length > 0 && (\n        <p>Roles: {roles.join(', ')}</p>\n      )}\n      {address && (\n        <p>\n          Address: {address.street}, {address.city}, {address.zip}\n        </p>\n      )}\n      {statusMessage && <p>Connection: {statusMessage}</p>}\n      <button onClick={onDelete}>Delete User</button>\n    </div>\n  );\n}\n\nUserCard.propTypes = {\n  id: PropTypes.number.isRequired,\n  name: PropTypes.string.isRequired,\n  email: PropTypes.string.isRequired,\n  age: PropTypes.number,\n  isActive: PropTypes.bool,\n  roles: PropTypes.arrayOf(PropTypes.string),\n  address: PropTypes.shape({\n    street: PropTypes.string.isRequired,\n    city: PropTypes.string.isRequired,\n    zip: PropTypes.string.isRequired,\n  }),\n  onDelete: PropTypes.func.isRequired,\n  statusMessage: PropTypes.oneOf(['Online', 'Offline']),\n};\n\nUserCard.defaultProps = {\n  age: 30,\n  isActive: true,\n  roles: ['User'],\n};\n\nexport default UserCard;\n",
+          "testCases": [
+            "Render with all required props and default values: ` <UserCard id={1} name=\"Alice\" email=\"alice@example.com\" onDelete={() => console.log('Delete Alice')} />` (Should show default age, isActive, roles).",
+            "Render with all props explicitly provided: ` <UserCard id={2} name=\"Bob\" email=\"bob@example.com\" age={25} isActive={false} roles={['Admin', 'Editor']} address={{ street: '123 Main St', city: 'Anytown', zip: '12345' }} onDelete={() => {}} statusMessage=\"Online\" />`",
+            "Test `statusMessage` invalid value: ` <UserCard id={3} name=\"Charlie\" email=\"charlie@example.com\" onDelete={() => {}} statusMessage=\"Away\" />` (Should produce a PropTypes warning).",
+            "Test missing required prop: ` <UserCard id={4} email=\"missingname@example.com\" onDelete={() => {}} />` (Should produce a PropTypes warning for `name`).",
+            "Test invalid type for a prop: ` <UserCard id={5} name={123} email=\"invalid@example.com\" onDelete={() => {}} />` (Should produce a PropTypes warning for `name`)."
+          ],
+          "hints": [
+            "Remember that `defaultProps` are applied *before* `propTypes` validation.",
+            "For the `address` shape, each nested property (`street`, `city`, `zip`) still needs its own `isRequired` if it's mandatory within the shape.",
+            "`PropTypes.oneOf` is perfect for props that must be one of a limited set of literal values.",
+            "Don't forget to destructure `props` in the functional component for cleaner access."
+          ],
+          "tags": [
+            "React",
+            "PropTypes",
+            "Component Design",
+            "Validation",
+            "Best Practices"
+          ],
+          "timeEstimate": 45,
+          "prerequisites": [
+            "React_functional_components",
+            "PropTypes_basics",
+            "PropTypes_advanced_validators"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 9,
+          "learningPath": "intermediate",
+          "relatedConcepts": [
+            "prop_validation",
+            "default_props"
+          ]
+        },
+        {
+          "id": "task_flow_integration_1",
+          "title": "Convert a React Component to Use Flow Types",
+          "description": "\nTake the provided `PostDisplay` React functional component (currently without explicit types) and integrate Flow for static type checking. Define appropriate type aliases for its props and any nested objects.\n\nRequirements:\n1.  Enable Flow for the file.\n2.  Define a Flow `type` alias for `Comment` with `id: number` and `text: string`.\n3.  Define a Flow `type` alias for `PostProps` that includes:\n    *   `title: string` (required)\n    *   `content: string` (required)\n    *   `author: string` (required)\n    *   `likes: number` (optional, defaults to `0` if not passed)\n    *   `comments: Array<Comment>` (optional, defaults to an empty array)\n    *   `onLike: () => void` (required, a function that takes no arguments and returns nothing)\n4.  Apply `PostProps` to the `PostDisplay` component's parameters.\n5.  Ensure the component can still render correctly with both provided and default values.\n\nNOTE: While Flow *does not* have a direct equivalent to `defaultProps` in its type system, you should still define `likes` and `comments` as optional (`?`) in the type alias to reflect that they might not be passed, and then ensure your component handles their absence gracefully (e.g., providing fallback values or conditional rendering). For the purpose of this task, assume `defaultProps` will be handled separately in the React component as shown in the example.\n",
+          "difficulty": "medium",
+          "startingCode": "import React from 'react';\n// TODO: Add // @flow directive here\n\n// TODO: Define Comment type alias\n// type Comment = { /* ... */ };\n\n// TODO: Define PostProps type alias\n// type PostProps = { /* ... */ };\n\nfunction PostDisplay(props /* TODO: Add type annotation here */) {\n  const { title, content, author, likes, comments, onLike } = props;\n\n  // Handle default values for optional props within the component if needed\n  const actualLikes = likes === undefined ? 0 : likes;\n  const actualComments = comments === undefined ? [] : comments;\n\n  return (\n    <div style={{ border: '1px solid #ccc', padding: '20px', margin: '15px', borderRadius: '8px' }}>\n      <h2>{title}</h2>\n      <p><em>By {author}</em></p>\n      <p>{content}</p>\n      <p>Likes: {actualLikes}</p>\n      <button onClick={onLike}>Like Post</button>\n      <h4>Comments:</h4>\n      {actualComments.length > 0 ? (\n        <ul>\n          {actualComments.map(comment => (\n            <li key={comment.id}>{comment.text}</li>\n          ))}\n        </ul>\n      ) : (\n        <p>No comments yet.</p>\n      )}\n    </div>\n  );\n}\n\n// Optional: You can still use React's defaultProps for runtime defaults\n// PostDisplay.defaultProps = {\n//   likes: 0,\n//   comments: [],\n// };\n\nexport default PostDisplay;\n",
+          "solutionCode": "// @flow\nimport * as React from 'react';\n\ntype Comment = {\n  id: number,\n  text: string,\n};\n\ntype PostProps = {\n  title: string,\n  content: string,\n  author: string,\n  likes?: number,\n  comments?: Array<Comment>,\n  onLike: () => void,\n};\n\nfunction PostDisplay(props: PostProps) {\n  const { title, content, author, likes, comments, onLike } = props;\n\n  // Using optional chaining and nullish coalescing for graceful handling of optional props\n  const actualLikes = likes ?? 0; // If likes is undefined or null, use 0\n  const actualComments = comments ?? []; // If comments is undefined or null, use empty array\n\n  return (\n    <div style={{ border: '1px solid #ccc', padding: '20px', margin: '15px', borderRadius: '8px' }}>\n      <h2>{title}</h2>\n      <p><em>By {author}</em></p>\n      <p>{content}</p>\n      <p>Likes: {actualLikes}</p>\n      <button onClick={onLike}>Like Post</button>\n      <h4>Comments:</h4>\n      {actualComments.length > 0 ? (\n        <ul>\n          {actualComments.map(comment => (\n            <li key={comment.id}>{comment.text}</li>\n          ))}\n        </ul>\n      ) : (\n        <p>No comments yet.</p>\n      )}\n    </div>\n  );\n}\n\n// It's still common practice to define defaultProps for runtime behavior,\n// even with static type checkers. The type definition ensures consistency.\nPostDisplay.defaultProps = {\n  likes: 0,\n  comments: [],\n};\n\nexport default PostDisplay;\n",
+          "testCases": [
+            "Verify Flow is enabled: Removing `// @flow` should make Flow stop checking. Re-adding it should make it active.",
+            "Test basic rendering with all required props: ` <PostDisplay title=\"My First Post\" content=\"This is the content.\" author=\"John Doe\" onLike={() => console.log('Liked!')} />` (Should show 0 likes and 'No comments yet').",
+            "Test with optional props provided: ` <PostDisplay title=\"Another Post\" content=\"More content here.\" author=\"Jane Smith\" likes={15} comments={[{ id: 1, text: 'Great post!' }]} onLike={() => console.log('Liked!')} />` (Should show 15 likes and the comment).",
+            "Test incorrect type for a prop (e.g., `likes: 'five'`): Flow should report a type error.",
+            "Test missing required prop (e.g., `onLike`): Flow should report a type error.",
+            "Test passing a comment without an `id` or `text` (if `Comment` type is strictly enforced): Flow should report a type error."
+          ],
+          "hints": [
+            "Start with the `// @flow` directive at the very top.",
+            "Use the `type` keyword to define your aliases.",
+            "Remember the `?` suffix for optional properties in Flow types.",
+            "Function types in Flow follow the `(arg1: Type, arg2: Type) => ReturnType` syntax; for no arguments and no return, use `() => void`.",
+            "Apply the `PostProps` type directly to the `props` parameter: `function PostDisplay(props: PostProps)`."
+          ],
+          "tags": [
+            "React",
+            "Flow",
+            "Type Checking",
+            "Static Analysis",
+            "Component Design",
+            "Type Aliases"
+          ],
+          "timeEstimate": 45,
+          "prerequisites": [
+            "React_functional_components",
+            "Flow_basics",
+            "JavaScript_destructuring"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 6,
+          "learningPath": "advanced",
+          "relatedConcepts": [
+            "static_type_checking",
+            "type_definitions"
+          ]
+        }
+      ]
+    }
+  }
+]

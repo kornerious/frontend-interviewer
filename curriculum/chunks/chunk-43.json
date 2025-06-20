@@ -1,0 +1,2382 @@
+[
+  {
+    "id": "0b24fd70-cf6b-459f-ab09-8e7416e8fbbf",
+    "startLine": 8500,
+    "endLine": 8599,
+    "processedDate": "2025-06-17T10:43:08.544Z",
+    "content": {
+      "logicalBlockInfo": {
+        "suggestedEndLine": -1
+      },
+      "theory": [
+        {
+          "id": "theory_react_animations_overview",
+          "title": "Animations in React: A Comprehensive Overview",
+          "content": "Animations in React enhance user experience by providing visual feedback, guiding user attention, and making interfaces feel more dynamic and engaging. While React itself doesn't offer built-in animation utilities beyond basic CSS transitions, a rich ecosystem of third-party libraries has emerged to simplify complex animations.\n\nThese libraries typically abstract away the intricacies of CSS transitions, keyframe animations, or direct DOM manipulation, allowing developers to define animations declaratively within their React components. They often manage component lifecycle events, interpolate values, and apply styles based on state changes, making it easier to create smooth and performant animations.\n\n### Key Concepts in React Animations\n\n*   **Declarative API:** Most React animation libraries embrace a declarative approach, allowing you to describe *what* you want to animate rather than *how* to animate it. This aligns well with React's component-based paradigm.\n*   **State-Driven Animations:** Animations are often triggered by changes in component state or props, making them reactive and dynamic.\n*   **Performance:** Libraries often optimize for performance by using techniques like `requestAnimationFrame` for smooth rendering, avoiding unnecessary re-renders, and often leveraging CSS transforms and opacity for hardware acceleration.\n*   **Interpolation:** The process of calculating intermediate values between two points (e.g., start and end positions, colors, opacities) to create a smooth transition.\n*   **Physics-Based vs. Duration-Based:**\n    *   **Duration-Based:** Animations are defined with a fixed duration (e.g., `transition: all 0.3s ease-in-out;`). This is common with CSS transitions and libraries like `React Transition Group` (when combined with CSS).\n    *   **Physics-Based:** Animations are defined by physical properties like mass, tension, and friction. They feel more natural and responsive, adapting automatically to changes without explicit durations. `React Motion` and `React Spring` are prime examples.\n\n### Challenges in React Animations\n\n*   **Component Mounting/Unmounting:** Animating components as they enter or exit the DOM requires careful management of their lifecycle, which libraries like `React Transition Group` specialize in.\n*   **Interactivity:** Handling complex gestures (drag, hover, tap) and linking them to animations can be challenging without dedicated support.\n*   **Performance Optimization:** Ensuring animations run smoothly at 60 FPS, especially on less powerful devices, requires careful consideration of how styles are applied (preferring transforms and opacity).\n*   **Orchestration:** Coordinating multiple animations or creating sequences can become complex without proper tools.",
+          "examples": [],
+          "relatedQuestions": [
+            "question_react_animations_overview_1",
+            "question_react_animations_overview_2",
+            "question_react_animations_overview_3",
+            "question_react_animations_overview_4",
+            "question_react_animations_overview_5"
+          ],
+          "relatedTasks": [
+            "task_animation_library_comparison"
+          ],
+          "tags": [
+            "React",
+            "Animations",
+            "Frontend",
+            "UI/UX",
+            "Performance"
+          ],
+          "technology": "React",
+          "prerequisites": [
+            "react_basics",
+            "css_fundamentals"
+          ],
+          "complexity": 6,
+          "interviewRelevance": 8,
+          "learningPath": "intermediate",
+          "requiredFor": [
+            "complex_ui_development",
+            "performance_optimization"
+          ]
+        },
+        {
+          "id": "theory_react_transition_group",
+          "title": "React Transition Group (RTG)",
+          "content": "React Transition Group (RTG) is a set of low-level components designed to help manage component state for CSS transitions and animations as components enter or exit the DOM. It doesn't perform animations itself but provides hooks to execute code (like applying CSS classes) at specific points in a component's lifecycle (mounting, updating, unmounting).\n\nRTG is particularly useful for:\n\n*   Animating components when they are added or removed from the DOM.\n*   Creating entrance and exit transitions for elements.\n*   Orchestrating CSS animations by toggling classes at precise moments.\n\n### Key Components of React Transition Group\n\n1.  **`Transition`**: The fundamental component. It tracks the `in` prop (a boolean) to determine a component's current state and provides callbacks (`onEnter`, `onEntering`, `onEntered`, `onExit`, `onExiting`, `onExited`) at various stages of the transition.\n2.  **`CSSTransition`**: A wrapper around `Transition` that simplifies working with CSS. It automatically applies classes (e.g., `fade-enter`, `fade-enter-active`, `fade-exit`, `fade-exit-active`) based on the transition state, allowing you to define your CSS transitions/animations using these classes.\n    *   `classNames`: Prefix for CSS classes.\n    *   `timeout`: The duration of the transition in milliseconds. This must match the duration defined in your CSS to avoid abrupt cuts.\n    *   `in`: Boolean prop to trigger the transition.\n    *   `unmountOnExit`: (Optional) Removes the component from the DOM entirely after it exits.\n    *   `appear`: (Optional) Applies the 'enter' transition on the initial mount.\n3.  **`TransitionGroup`**: Manages a set of `Transition` or `CSSTransition` components. It's often used with lists to animate items as they are added, removed, or reordered.",
+          "examples": [
+            {
+              "id": "example_react_transition_group_1",
+              "title": "Basic CSSTransition Usage",
+              "code": "import React, { useState } from 'react';\nimport { CSSTransition } from 'react-transition-group';\n\n// Assuming you have this CSS in your project:\n// .my-node-enter {\n//   opacity: 0;\n// }\n// .my-node-enter-active {\n//   opacity: 1;\n//   transition: opacity 200ms ease-in;\n// }\n// .my-node-exit {\n//   opacity: 1;\n// }\n// .my-node-exit-active {\n//   opacity: 0;\n//   transition: opacity 200ms ease-out;\n// }\n\nfunction AnimatedComponent() {\n  const [inProp, setInProp] = useState(false);\n  return (\n    <div>\n      <CSSTransition in={inProp} timeout={200} classNames=\"my-node\" unmountOnExit>\n        <div style={{ padding: '20px', border: '1px solid black', backgroundColor: '#f0f0f0' }}>\n          Animated content\n        </div>\n      </CSSTransition>\n      <button onClick={() => setInProp(!inProp)} style={{ marginTop: '10px' }}>\n        Toggle Animation\n      </button>\n    </div>\n  );\n}",
+              "explanation": "This example demonstrates how `CSSTransition` works. When `inProp` changes, `CSSTransition` applies specific CSS classes (prefixed with `my-node`) to its child element at different stages of the transition (`-enter`, `-enter-active`, `-exit`, `-exit-active`). The `timeout` prop must match the CSS transition duration to ensure the classes are removed at the correct time. `unmountOnExit` ensures the element is removed from the DOM after it finishes exiting.",
+              "language": "typescript"
+            }
+          ],
+          "relatedQuestions": [
+            "question_react_transition_group_1",
+            "question_react_transition_group_2",
+            "question_react_transition_group_3"
+          ],
+          "relatedTasks": [
+            "task_rtg_fade_toggle"
+          ],
+          "tags": [
+            "React",
+            "Animations",
+            "Transitions",
+            "CSS",
+            "Lifecycle"
+          ],
+          "technology": "React",
+          "prerequisites": [
+            "react_basics",
+            "css_transitions"
+          ],
+          "complexity": 5,
+          "interviewRelevance": 7,
+          "learningPath": "intermediate",
+          "requiredFor": [
+            "component_lifecycle_animations",
+            "list_animations"
+          ]
+        },
+        {
+          "id": "theory_react_motion",
+          "title": "React Motion: Physics-Based Animations",
+          "content": "React Motion is a library for creating physics-based animations in React. Unlike traditional duration-based animations, React Motion uses a spring physics model, where you define properties like `stiffness` and `damping` for your animations instead of a fixed duration. This results in incredibly natural and fluid movements that adapt dynamically to interruptions or changes.\n\n### Key Concepts of React Motion\n\n*   **Physics-Based:** Animations are driven by a spring model. You define a target value and a spring configuration (stiffness, damping, precision), and React Motion interpolates the values, mimicking real-world physics.\n*   **No Duration:** You don't specify animation durations. The animation's duration is determined by the spring's properties and the distance it needs to travel. This makes animations feel more 'alive' and responsive.\n*   **`Motion` Component:** The primary component. It takes a `style` prop where values are wrapped in `spring()`. The child of `Motion` is a render prop function that receives the current animated values.\n*   **`spring()` Function:** Used to wrap the target values you want to animate. It accepts `value` (the target), and an optional `config` object (`stiffness`, `damping`, `precision`).\n*   **Responsive to Interaction:** Because animations are physics-based, they can respond fluidly to user interactions (e.g., dragging an element), creating a more intuitive experience.\n\n### Advantages of React Motion\n\n*   **Natural Feel:** Physics-based animations often feel more organic and less robotic than linear duration-based ones.\n*   **Interruption Handling:** Animations handle interruptions gracefully. If a target value changes mid-animation, the spring will smoothly transition to the new target without jumping or restarting abruptly.\n*   **Simplicity for Complex Motions:** For many types of animations (e.g., dragging, bouncing), React Motion can simplify the logic considerably compared to managing complex CSS keyframes or JavaScript interpolations.",
+          "examples": [
+            {
+              "id": "example_react_motion_1",
+              "title": "Basic Slider with React Motion",
+              "code": "import React, { useState } from 'react';\nimport { Motion, spring } from 'react-motion';\n\nfunction Slider() {\n  const [open, setOpen] = useState(false);\n  return (\n    <div style={{ overflow: 'hidden', border: '1px solid #ccc', padding: '10px' }}>\n      <button onClick={() => setOpen(!open)}>Toggle Slider</button>\n      <Motion style={{ x: spring(open ? 200 : 0, { stiffness: 120, damping: 14 }) }}>\n        {({ x }) => (\n          <div \n            style={{\n              width: '100px',\n              height: '50px',\n              backgroundColor: 'lightblue',\n              transform: `translateX(${x}px)`,\n              marginTop: '10px'\n            }}\n          >\n            Sliding content\n          </div>\n        )}\n      </Motion>\n    </div>\n  );\n}",
+              "explanation": "In this example, the `x` value for `translateX` is animated. We use `spring(open ? 200 : 0)` to define the target value (0 or 200px) and a `config` object for the spring's physical properties. The `Motion` component's child is a function that receives the interpolated `x` value, which is then applied to the `transform` style.",
+              "language": "typescript"
+            }
+          ],
+          "relatedQuestions": [
+            "question_react_motion_1",
+            "question_react_motion_2",
+            "question_react_motion_3"
+          ],
+          "relatedTasks": [
+            "task_react_motion_drag_and_drop"
+          ],
+          "tags": [
+            "React",
+            "Animations",
+            "Physics",
+            "Spring",
+            "Natural UI"
+          ],
+          "technology": "React",
+          "prerequisites": [
+            "react_basics",
+            "css_transforms"
+          ],
+          "complexity": 6,
+          "interviewRelevance": 7,
+          "learningPath": "intermediate",
+          "requiredFor": [
+            "interactive_animations",
+            "physics_based_ui"
+          ]
+        },
+        {
+          "id": "theory_framer_motion",
+          "title": "Framer Motion: Declarative Animations with Gestures",
+          "content": "Framer Motion is a production-ready, declarative animation library for React that makes it easy to create fluid animations and interactive experiences. It's built on top of the Framer animation engine and is known for its simple, expressive API, powerful features, and excellent performance.\n\nFramer Motion is highly versatile and supports:\n\n*   **Declarative Animations:** Define initial and target states directly on `motion` components.\n*   **Gestures:** Built-in support for `hover`, `tap`, `drag`, `scroll`, and `viewport` animations.\n*   **Orchestration:** Tools for sequencing and chaining animations.\n*   **Variants:** A powerful system for managing complex animation states and parent-child animation relationships.\n*   **3D and SVG Animations:** Capabilities for more advanced visual effects.\n\n### Key Concepts of Framer Motion\n\n*   **`motion` components:** Regular HTML and SVG elements (e.g., `div`, `span`, `svg`) prefixed with `motion.` (e.g., `motion.div`, `motion.span`). These components automatically get animation capabilities.\n*   **Props as Animation Controls:** Instead of separate animation functions, you define animation states using props like:\n    *   `initial`: The starting state of the animation.\n    *   `animate`: The target state. Framer Motion will animate from `initial` to `animate`.\n    *   `transition`: Defines the animation properties like `duration`, `ease`, `type` (e.g., `'spring'`, `'tween'`), `delay`, etc.\n    *   `whileHover`: Animation to apply when the component is hovered.\n    *   `whileTap`: Animation to apply when the component is tapped or clicked.\n    *   `whileDrag`, `drag`, `dragConstraints`: Props for drag gestures.\n*   **Variants:** A powerful way to define animation states and transitions in a reusable object, allowing for easy orchestration of complex animations, especially for children of `motion` components.\n\nFramer Motion aims to make animations feel like an intrinsic part of your UI, rather than an afterthought.",
+          "examples": [
+            {
+              "id": "example_framer_motion_1",
+              "title": "Basic Framer Motion with Hover and Tap",
+              "code": "import React from 'react';\nimport { motion } from 'framer-motion';\n\nfunction AnimatedBox() {\n  return (\n    <motion.div\n      initial={{ opacity: 0, scale: 0.8 }}\n      animate={{ opacity: 1, scale: 1, x: 100 }}\n      transition={{ duration: 0.5, type: \"spring\", stiffness: 100, damping: 10 }}\n      whileHover={{ scale: 1.1, backgroundColor: \"#ffcc00\" }}\n      whileTap={{ scale: 0.9, rotate: 15 }}\n      style={{\n        width: '100px',\n        height: '100px',\n        backgroundColor: 'blue',\n        borderRadius: '10px',\n        display: 'flex',\n        justifyContent: 'center',\n        alignItems: 'center',\n        color: 'white',\n        cursor: 'pointer'\n      }}\n    >\n      Hover or tap me!\n    </motion.div>\n  );\n}",
+              "explanation": "This example showcases Framer Motion's declarative API. The `motion.div` component automatically animates from `initial` to `animate` states upon mounting. The `transition` prop defines the animation's characteristics. `whileHover` and `whileTap` props define additional animations that trigger on user interaction, making the component interactive with minimal code.",
+              "language": "typescript"
+            }
+          ],
+          "relatedQuestions": [
+            "question_framer_motion_1",
+            "question_framer_motion_2",
+            "question_framer_motion_3",
+            "question_framer_motion_4"
+          ],
+          "relatedTasks": [
+            "task_framer_motion_draggable_card"
+          ],
+          "tags": [
+            "React",
+            "Animations",
+            "Gestures",
+            "Declarative UI",
+            "Framer"
+          ],
+          "technology": "React",
+          "prerequisites": [
+            "react_basics",
+            "css_transforms"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 9,
+          "learningPath": "intermediate",
+          "requiredFor": [
+            "interactive_ui",
+            "advanced_animations",
+            "motion_design"
+          ]
+        },
+        {
+          "id": "theory_react_spring",
+          "title": "React Spring: Performance-Oriented Physics Animations with Hooks",
+          "content": "React Spring is a modern, hook-based animation library for React that builds upon the concept of physics-based animations (like React Motion) but with a focus on performance, flexibility, and a more concise API using React Hooks. It aims to cover most UI animation needs, from simple transitions to complex gesture-driven interactions.\n\n### Key Concepts of React Spring\n\n*   **Hooks-Based API:** React Spring primarily uses custom hooks (e.g., `useSpring`, `useTransition`, `useTrail`, `useSprings`, `useChain`) to define and control animations, integrating seamlessly with modern React functional components.\n*   **Physics-Based by Default:** Like React Motion, it uses a spring physics model for natural, fluid animations. You define `mass`, `tension`, and `friction` to configure the spring.\n*   **`animated` Component:** React Spring provides `animated` components (e.g., `animated.div`, `animated.span`). These are optimized for animation performance as they bypass React's render cycle for direct DOM manipulation when animating numerical values, significantly reducing overhead.\n*   **Interpolation:** Provides powerful interpolation capabilities to map animated numerical values to complex CSS properties (e.g., colors, transforms, SVG paths) or even non-style properties.\n*   **Chain and Sequence Animations:** Offers specific hooks (`useChain`, `useTrail`, `useSprings`) for orchestrating multiple animations in sequence or animating lists of items efficiently.\n\n### Advantages of React Spring\n\n*   **Performance:** High performance due to its use of `requestAnimationFrame` and direct DOM manipulation via `animated` components, reducing React re-renders.\n*   **Flexibility:** Can animate virtually any number, string, or object property, including colors, SVG paths, and scroll positions.\n*   **Modern API:** Leverages React Hooks for a clean and intuitive API.\n*   **Versatility:** Suitable for a wide range of animations, from simple fades to complex physics-driven gestures and page transitions.",
+          "examples": [
+            {
+              "id": "example_react_spring_1",
+              "title": "Flipping Card with React Spring",
+              "code": "import React, { useState } from 'react';\nimport { useSpring, animated } from 'react-spring';\n\nfunction AnimatedCard() {\n  const [flipped, setFlipped] = useState(false);\n  const { transform, opacity } = useSpring({\n    opacity: flipped ? 1 : 0,\n    transform: `perspective(600px) rotateX(${flipped ? 180 : 0}deg)`,\n    config: { mass: 5, tension: 500, friction: 80 }\n  });\n  \n  return (\n    <div \n      onClick={() => setFlipped(!flipped)}\n      style={{\n        width: '200px',\n        height: '150px',\n        position: 'relative',\n        cursor: 'pointer',\n        perspective: '600px'\n      }}\n    >\n      <animated.div\n        style={{\n          opacity: opacity.to(o => 1 - o),\n          transform,\n          position: 'absolute',\n          width: '100%',\n          height: '100%',\n          backgroundColor: 'coral',\n          display: 'flex',\n          justifyContent: 'center',\n          alignItems: 'center',\n          borderRadius: '10px',\n          willChange: 'transform, opacity'\n        }}\n      >\n        Front of Card\n      </animated.div>\n      <animated.div\n        style={{\n          opacity,\n          transform: transform.to(t => `${t} rotateX(180deg)`),\n          position: 'absolute',\n          width: '100%',\n          height: '100%',\n          backgroundColor: 'darkblue',\n          color: 'white',\n          display: 'flex',\n          justifyContent: 'center',\n          alignItems: 'center',\n          borderRadius: '10px',\n          willChange: 'transform, opacity'\n        }}\n      >\n        Back of Card\n      </animated.div>\n    </div>\n  );\n}",
+              "explanation": "This example demonstrates a 3D card flip using `useSpring` and `animated.div`. Two `animated.div` elements represent the front and back of the card. The `transform` and `opacity` values are interpolated based on the `flipped` state using `useSpring`. The `to` method on `animated` values allows for mapping ranges, creating the visual effect of one side fading out as the other fades in and rotates into view. The `config` prop fine-tunes the spring's physics.",
+              "language": "typescript"
+            }
+          ],
+          "relatedQuestions": [
+            "question_react_spring_1",
+            "question_react_spring_2",
+            "question_react_spring_3"
+          ],
+          "relatedTasks": [
+            "task_react_spring_gallery_carousel"
+          ],
+          "tags": [
+            "React",
+            "Animations",
+            "Hooks",
+            "Physics",
+            "Performance",
+            "UI/UX"
+          ],
+          "technology": "React",
+          "prerequisites": [
+            "react_hooks",
+            "css_transforms",
+            "react_basics"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 8,
+          "learningPath": "intermediate",
+          "requiredFor": [
+            "interactive_ui",
+            "high_performance_animations",
+            "modern_react_dev"
+          ]
+        }
+      ],
+      "questions": [
+        {
+          "id": "question_react_animations_overview_1",
+          "topic": "React Animation Libraries Overview",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "What is the primary benefit of using a dedicated animation library in React instead of pure CSS?",
+          "answer": "Animation libraries simplify complex state management for transitions, handle component mounting/unmounting animations, provide declarative APIs, and often offer advanced features like physics-based animations or gesture support, which are harder to achieve with pure CSS alone.",
+          "options": [],
+          "analysisPoints": [
+            "Understanding the 'why' behind using libraries.",
+            "Distinguishing between simple CSS and complex library capabilities."
+          ],
+          "keyConcepts": [
+            "Declarative API",
+            "State Management",
+            "Physics-based Animation",
+            "Gesture Support"
+          ],
+          "evaluationCriteria": [
+            "Ability to articulate the value proposition of libraries.",
+            "Awareness of the limitations of pure CSS for complex animations."
+          ],
+          "example": "",
+          "tags": [
+            "React",
+            "Animations",
+            "Libraries",
+            "CSS"
+          ],
+          "prerequisites": [
+            "css_transitions",
+            "react_basics"
+          ],
+          "complexity": 3,
+          "interviewFrequency": 6,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_react_animations_overview_2",
+          "topic": "React Animation Library Comparison",
+          "level": "medium",
+          "type": "mcq",
+          "question": "Which of the following React animation libraries is primarily known for its physics-based approach and does *not* require defining animation durations explicitly?",
+          "answer": "React Motion",
+          "options": [
+            "React Transition Group",
+            "Framer Motion",
+            "React Motion",
+            "GSAP"
+          ],
+          "analysisPoints": [
+            "Differentiating between duration-based and physics-based animation paradigms.",
+            "Identifying the core philosophy of each library.",
+            "Recalling key features of major libraries."
+          ],
+          "keyConcepts": [
+            "Physics-based animation",
+            "Spring configuration",
+            "Duration vs. Stiffness/Damping"
+          ],
+          "evaluationCriteria": [
+            "Correctly identifying library characteristics.",
+            "Understanding the concept of physics-based animation."
+          ],
+          "example": "React Motion, along with React Spring, uses a spring physics model, allowing animations to feel natural and responsive without needing a fixed duration. Instead, you configure properties like stiffness and damping.",
+          "tags": [
+            "React",
+            "Animations",
+            "Physics",
+            "Library Comparison"
+          ],
+          "prerequisites": [
+            "react_animations_overview"
+          ],
+          "complexity": 6,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_react_animations_overview_3",
+          "topic": "Comparing Animation Paradigms",
+          "level": "medium",
+          "type": "open",
+          "question": "Explain the fundamental difference between 'duration-based' and 'physics-based' animation approaches in the context of React, and provide an example use case where each would be preferred.",
+          "answer": "",
+          "options": [],
+          "analysisPoints": [
+            "Defining duration-based animation (fixed time, curves).",
+            "Defining physics-based animation (spring model, natural feel, no fixed time).",
+            "Identifying suitable use cases for each (e.g., UI transitions vs. interactive drag).",
+            "Discussing the implications of interruptions for each approach."
+          ],
+          "keyConcepts": [
+            "Duration-based animation",
+            "Physics-based animation",
+            "Ease functions",
+            "Spring physics",
+            "User Experience"
+          ],
+          "evaluationCriteria": [
+            "Clarity and accuracy of definitions.",
+            "Relevance and appropriateness of examples.",
+            "Demonstrating understanding of UX implications."
+          ],
+          "example": "Duration-based animations, like those defined by CSS `transition` or `animation`, have a fixed time (e.g., 300ms) and often use easing curves (e.g., `ease-in-out`). They are predictable and good for standard UI transitions like a button hover effect or a sidebar opening. For example, a simple modal fade-in/fade-out.\n\nPhysics-based animations, such as those from React Motion or React Spring, simulate physical properties like mass, tension, and friction. They don't have a fixed duration; the animation plays out until it reaches a stable state based on its physical properties. This creates more natural, fluid movements that respond gracefully to interruptions. They are preferred for interactive elements like drag-and-drop interfaces, swipe gestures, or elements that need to 'bounce' or 'spring' into place.",
+          "tags": [
+            "Animations",
+            "Physics",
+            "Duration",
+            "React",
+            "UX"
+          ],
+          "prerequisites": [
+            "react_animations_overview"
+          ],
+          "complexity": 7,
+          "interviewFrequency": 7,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_react_animations_overview_4",
+          "topic": "Animation Library Selection Criteria",
+          "level": "hard",
+          "type": "open",
+          "question": "You are building a complex dashboard application in React that requires:\n1.  Smooth transitions for components entering and exiting the DOM (e.g., dynamic charts appearing/disappearing).\n2.  Interactive elements that can be dragged and resized with a natural, 'springy' feel.\n3.  Subtle hover and tap effects on various buttons and cards.\n\nWhich animation library (or combination of libraries) would you recommend for this project, and why? Justify your choices by highlighting the strengths of each library you select.",
+          "answer": "",
+          "options": [],
+          "analysisPoints": [
+            "Identifying the specific requirements for each animation type.",
+            "Mapping requirements to the strengths of different libraries (RTG for enter/exit, Framer Motion/React Spring for gestures/physics, Framer Motion for simple effects).",
+            "Discussing the feasibility of combining libraries or using a single library for all tasks.",
+            "Considering ease of use, performance, and API consistency."
+          ],
+          "keyConcepts": [
+            "React Transition Group",
+            "Framer Motion",
+            "React Spring",
+            "Physics-based animation",
+            "Declarative animation",
+            "Component Lifecycle"
+          ],
+          "evaluationCriteria": [
+            "Comprehensive understanding of library capabilities.",
+            "Ability to apply knowledge to a realistic scenario.",
+            "Logical justification of choices.",
+            "Consideration of potential trade-offs."
+          ],
+          "example": "For this complex dashboard, a combination of libraries would likely offer the best results:\n\n1.  **For components entering and exiting the DOM (dynamic charts):** `React Transition Group` (specifically `CSSTransition`) would be ideal. Its core strength lies in managing the lifecycle of components as they mount/unmount, allowing for precise control over CSS classes at each stage. This is perfect for fade-ins/outs or slide-ins/outs of charts when their data changes or they are toggled.\n\n2.  **For interactive drag-and-resize with a 'springy' feel:** `Framer Motion` or `React Spring` would be excellent choices. Both offer robust physics-based animation models. `Framer Motion` has a very intuitive and powerful declarative API for gestures like `drag` and `resize` (with `layout` prop for layout animations) built directly into its `motion` components, making implementation concise. `React Spring` also excels at physics-based animations and is highly performant due to its `animated` components, suitable for custom drag logic if needed. Given the need for a 'springy' feel and explicit gesture support, `Framer Motion` might have a slight edge for its direct `whileDrag` and `dragConstraints` props.\n\n3.  **For subtle hover and tap effects on buttons and cards:** `Framer Motion` would again be a strong candidate. Its `whileHover` and `whileTap` props make these effects trivial to implement directly on the components. This avoids boilerplate and keeps the animation logic colocated with the component definition. React Spring could also achieve this with `useSpring`, but Framer Motion's API is arguably more streamlined for these common interactive states.\n\n**Conclusion:** I would primarily recommend `Framer Motion` for its comprehensive declarative API covering gestures, physics-based motion, and simple interactive effects (hover/tap). For explicit mount/unmount animations, especially for lists or elements with distinct CSS transitions, `React Transition Group` could be used in conjunction with Framer Motion, as they solve slightly different problems.",
+          "tags": [
+            "React",
+            "Animations",
+            "Library Selection",
+            "Architecture",
+            "Decision Making",
+            "Framer Motion",
+            "React Transition Group",
+            "React Spring"
+          ],
+          "prerequisites": [
+            "react_animations_overview",
+            "theory_react_transition_group",
+            "theory_react_motion",
+            "theory_framer_motion",
+            "theory_react_spring"
+          ],
+          "complexity": 9,
+          "interviewFrequency": 9,
+          "learningPath": "advanced"
+        },
+        {
+          "id": "question_react_animations_overview_5",
+          "topic": "Animation Library Performance",
+          "level": "medium",
+          "type": "flashcard",
+          "question": "Which of the described animation libraries is explicitly mentioned for its performance focus, particularly through the use of 'animated' components that bypass React's render cycle for direct DOM manipulation?",
+          "answer": "React Spring",
+          "options": [],
+          "analysisPoints": [
+            "Recalling performance-related features of animation libraries.",
+            "Understanding how 'animated' components contribute to performance."
+          ],
+          "keyConcepts": [
+            "React Spring",
+            "Performance Optimization",
+            "Direct DOM manipulation",
+            "Animated components"
+          ],
+          "evaluationCriteria": [
+            "Correctly identifying the library and its performance mechanism."
+          ],
+          "example": "",
+          "tags": [
+            "React",
+            "Animations",
+            "Performance",
+            "React Spring"
+          ],
+          "prerequisites": [
+            "react_animations_overview",
+            "theory_react_spring"
+          ],
+          "complexity": 6,
+          "interviewFrequency": 7,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_react_transition_group_1",
+          "topic": "React Transition Group API",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "What is the primary prop used by `CSSTransition` to control whether a component is in its 'entering' or 'exiting' state?",
+          "answer": "`in` prop (a boolean)",
+          "options": [],
+          "analysisPoints": [
+            "Recalling basic RTG API usage.",
+            "Understanding the boolean control for transitions."
+          ],
+          "keyConcepts": [
+            "CSSTransition",
+            "`in` prop",
+            "Boolean state"
+          ],
+          "evaluationCriteria": [
+            "Correctly identifying the controlling prop."
+          ],
+          "example": "",
+          "tags": [
+            "React Transition Group",
+            "API",
+            "Basics"
+          ],
+          "prerequisites": [
+            "theory_react_transition_group"
+          ],
+          "complexity": 3,
+          "interviewFrequency": 6,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_react_transition_group_2",
+          "topic": "React Transition Group CSS Classes",
+          "level": "medium",
+          "type": "mcq",
+          "question": "Consider the following `CSSTransition` component:\n\n```typescript\nimport { CSSTransition } from 'react-transition-group';\n\nfunction MyComponent({ show }) {\n  return (\n    <CSSTransition\n      in={show}\n      timeout={500}\n      classNames=\"fade\"\n      unmountOnExit\n    >\n      <div>Hello Animation</div>\n    </CSSTransition>\n  );\n}\n```\n\nWhen `show` becomes `false` and the component starts to exit, which CSS class will `CSSTransition` apply to the `<div>` element *initially*?",
+          "answer": "`fade-exit`",
+          "options": [
+            "`fade-enter`",
+            "`fade-enter-active`",
+            "`fade-exit`",
+            "`fade-exit-active`"
+          ],
+          "analysisPoints": [
+            "Understanding the sequence of CSS classes applied by `CSSTransition` during an exit transition.",
+            "Differentiating between initial and active states for exit animations.",
+            "Relating `in` prop change to class application."
+          ],
+          "keyConcepts": [
+            "CSSTransition",
+            "CSS class lifecycle",
+            "Exit animation"
+          ],
+          "evaluationCriteria": [
+            "Accurate knowledge of RTG's class naming convention and transition stages.",
+            "Ability to trace the animation flow."
+          ],
+          "example": "When `show` changes from `true` to `false`, `CSSTransition` first applies `fade-exit` to the element. Immediately after, it applies `fade-exit-active` to trigger the actual transition defined in CSS. Once the `timeout` duration has passed, `fade-exit-active` is removed, and due to `unmountOnExit`, the component is removed from the DOM.",
+          "tags": [
+            "React Transition Group",
+            "CSS",
+            "Animation",
+            "Lifecycle"
+          ],
+          "prerequisites": [
+            "theory_react_transition_group"
+          ],
+          "complexity": 6,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_react_transition_group_3",
+          "topic": "RTG vs. Pure CSS Transitions",
+          "level": "medium",
+          "type": "open",
+          "question": "When would `React Transition Group` be a more suitable choice for animations compared to simply using CSS `transition` properties directly on a component? Provide a specific scenario.",
+          "answer": "",
+          "options": [],
+          "analysisPoints": [
+            "Identifying the primary problem RTG solves (component mounting/unmounting).",
+            "Contrasting RTG's state management with pure CSS.",
+            "Providing a clear, relevant scenario.",
+            "Discussing limitations of pure CSS for dynamic component lifecycles."
+          ],
+          "keyConcepts": [
+            "React Transition Group",
+            "CSS Transition",
+            "Component Lifecycle",
+            "Conditional Rendering",
+            "Unmounting Animations"
+          ],
+          "evaluationCriteria": [
+            "Clear articulation of RTG's advantage.",
+            "Specific and appropriate scenario.",
+            "Understanding of conditional rendering challenges."
+          ],
+          "example": "React Transition Group is particularly suitable when you need to animate components as they are *conditionally rendered* or *removed from the DOM*. Pure CSS `transition` properties work well for animating changes to an element's style properties when it's always present in the DOM (e.g., hover effects, active states, or toggling classes on a continuously rendered element).\n\n**Scenario:** Imagine you have a dynamically appearing/disappearing modal or alert message. If you simply use conditional rendering like `{showAlert && <Alert />}` with pure CSS transitions, when `showAlert` becomes `false`, the `<Alert />` component is immediately unmounted from the DOM. This means any `transition-out` styles applied via CSS won't have a chance to play because the element is gone before the transition can complete.\n\n`React Transition Group` (e.g., `CSSTransition`) solves this. It delays the unmounting of the component until its exit animation has completed, allowing the `fade-exit` and `fade-exit-active` classes to be applied and the animation to run its course before the component is finally removed from the DOM (especially with `unmountOnExit`). This ensures smooth entrance and exit animations for dynamic UI elements.",
+          "tags": [
+            "React Transition Group",
+            "CSS",
+            "Conditional Rendering",
+            "Animations",
+            "Modal"
+          ],
+          "prerequisites": [
+            "theory_react_transition_group"
+          ],
+          "complexity": 7,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_react_motion_1",
+          "topic": "React Motion Principles",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "What kind of animation model does React Motion primarily use?",
+          "answer": "Physics-based animation (spring model)",
+          "options": [],
+          "analysisPoints": [
+            "Recalling the core principle of React Motion."
+          ],
+          "keyConcepts": [
+            "Physics-based animation",
+            "Spring model",
+            "React Motion"
+          ],
+          "evaluationCriteria": [
+            "Correctly identifying the animation paradigm."
+          ],
+          "example": "",
+          "tags": [
+            "React Motion",
+            "Physics",
+            "Basics"
+          ],
+          "prerequisites": [
+            "theory_react_motion"
+          ],
+          "complexity": 3,
+          "interviewFrequency": 6,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_react_motion_2",
+          "topic": "React Motion vs. Duration",
+          "level": "medium",
+          "type": "mcq",
+          "question": "Which statement best describes how animation duration is handled in React Motion?",
+          "answer": "Duration is implicitly determined by the spring's physical properties (stiffness, damping) and the distance to travel.",
+          "options": [
+            "You explicitly set a `duration` prop in milliseconds.",
+            "Duration is always a fixed value, e.g., 500ms.",
+            "Duration is implicitly determined by the spring's physical properties (stiffness, damping) and the distance to travel.",
+            "Animations in React Motion are instantaneous."
+          ],
+          "analysisPoints": [
+            "Understanding the non-explicit nature of duration in physics-based animations.",
+            "Relating spring properties to animation timing.",
+            "Contrasting with duration-based animations."
+          ],
+          "keyConcepts": [
+            "React Motion",
+            "Physics-based animation",
+            "Stiffness",
+            "Damping",
+            "Duration"
+          ],
+          "evaluationCriteria": [
+            "Accurate understanding of physics-based timing.",
+            "Ability to differentiate from fixed-duration models."
+          ],
+          "example": "In React Motion, you define the `stiffness` (how fast the spring moves towards the target) and `damping` (how much the spring's motion is reduced) of the spring. The animation will then naturally play out until it reaches the target value, making its duration dynamic and based on these physical properties and the distance to animate.",
+          "tags": [
+            "React Motion",
+            "Physics",
+            "Duration",
+            "Concepts"
+          ],
+          "prerequisites": [
+            "theory_react_motion"
+          ],
+          "complexity": 6,
+          "interviewFrequency": 7,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_react_motion_3",
+          "topic": "React Motion Implementation",
+          "level": "medium",
+          "type": "code",
+          "question": "You want to animate a square's width from 50px to 200px using `React Motion` when a button is clicked. Complete the `Motion` component's `style` prop and its child render function to achieve this.\n\n```typescript\nimport React, { useState } from 'react';\nimport { Motion, spring } from 'react-motion';\n\nfunction ResizableSquare() {\n  const [isWide, setIsWide] = useState(false);\n  const targetWidth = isWide ? 200 : 50;\n\n  return (\n    <div>\n      <button onClick={() => setIsWide(!isWide)}>\n        Toggle Width\n      </button>\n      <Motion style={/* YOUR CODE HERE */}>\n        {/* YOUR CODE HERE */}\n      </Motion>\n    </div>\n  );\n}\n```",
+          "answer": "```typescript\nimport React, { useState } from 'react';\nimport { Motion, spring } from 'react-motion';\n\nfunction ResizableSquare() {\n  const [isWide, setIsWide] = useState(false);\n  const targetWidth = isWide ? 200 : 50;\n\n  return (\n    <div>\n      <button onClick={() => setIsWide(!isWide)}>\n        Toggle Width\n      </button>\n      <Motion style={{ width: spring(targetWidth) }}>\n        {({ width }) => (\n          <div \n            style={{\n              width: `${width}px`,\n              height: '100px',\n              backgroundColor: 'purple',\n              marginTop: '20px'\n            }}\n          >\n            Animated Square\n          </div>\n        )}\n      </Motion>\n    </div>\n  );\n}\n```",
+          "options": [],
+          "analysisPoints": [
+            "Correctly using the `spring()` function within the `style` prop.",
+            "Understanding the render prop pattern of `Motion` to access animated values.",
+            "Applying the animated value to a CSS property."
+          ],
+          "keyConcepts": [
+            "React Motion",
+            "Render Prop",
+            "`spring()` function",
+            "State management"
+          ],
+          "evaluationCriteria": [
+            "Syntactic correctness of `Motion` component usage.",
+            "Correct application of animated values to styles.",
+            "Demonstrates understanding of the library's API."
+          ],
+          "example": "",
+          "tags": [
+            "React Motion",
+            "Code Challenge",
+            "Animation",
+            "Implementation"
+          ],
+          "prerequisites": [
+            "theory_react_motion"
+          ],
+          "complexity": 6,
+          "interviewFrequency": 7,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_framer_motion_1",
+          "topic": "Framer Motion Basics",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "What is the convention for creating an animatable HTML element using Framer Motion?",
+          "answer": "Prefix the HTML tag with `motion.` (e.g., `motion.div`, `motion.span`).",
+          "options": [],
+          "analysisPoints": [
+            "Recalling the basic syntax for Framer Motion components."
+          ],
+          "keyConcepts": [
+            "Framer Motion",
+            "`motion` component",
+            "Syntax"
+          ],
+          "evaluationCriteria": [
+            "Correctly identifying the naming convention."
+          ],
+          "example": "",
+          "tags": [
+            "Framer Motion",
+            "Basics",
+            "Syntax"
+          ],
+          "prerequisites": [
+            "theory_framer_motion"
+          ],
+          "complexity": 3,
+          "interviewFrequency": 6,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_framer_motion_2",
+          "topic": "Framer Motion Props",
+          "level": "medium",
+          "type": "mcq",
+          "question": "You want to define an animation that occurs when a `motion.div` component is hovered over. Which Framer Motion prop would you use for this purpose?",
+          "answer": "`whileHover`",
+          "options": [
+            "`onHover`",
+            "`animateOnHover`",
+            "`whileHover`",
+            "`hoverEffect`"
+          ],
+          "analysisPoints": [
+            "Identifying the correct prop for handling hover gestures in Framer Motion.",
+            "Distinguishing between Framer Motion's declarative gesture props and generic event handlers."
+          ],
+          "keyConcepts": [
+            "Framer Motion",
+            "Gestures",
+            "`whileHover`",
+            "Declarative API"
+          ],
+          "evaluationCriteria": [
+            "Correctly identifying the specific Framer Motion prop.",
+            "Understanding its declarative nature."
+          ],
+          "example": "The `whileHover` prop in Framer Motion allows you to define a set of target styles (e.g., `scale: 1.1`, `backgroundColor: \"#ffcc00\"`) that will automatically animate when the user's mouse hovers over the `motion` component.",
+          "tags": [
+            "Framer Motion",
+            "Gestures",
+            "Hover",
+            "API"
+          ],
+          "prerequisites": [
+            "theory_framer_motion"
+          ],
+          "complexity": 5,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_framer_motion_3",
+          "topic": "Framer Motion Declarative Animations",
+          "level": "medium",
+          "type": "code",
+          "question": "Create a `motion.button` that:\n1.  Starts with an `opacity` of 0 and `y` position of 50px (initial).\n2.  Animates to `opacity` 1 and `y` position 0px on mount (animate).\n3.  Has a `duration` of 0.8 seconds and a 'spring' type transition.\n\n```typescript\nimport React from 'react';\nimport { motion } from 'framer-motion';\n\nfunction AnimatedButton() {\n  return (\n    <motion.button\n      // YOUR CODE HERE\n      style={{\n        padding: '10px 20px',\n        fontSize: '16px',\n        backgroundColor: 'teal',\n        color: 'white',\n        border: 'none',\n        borderRadius: '5px',\n        cursor: 'pointer'\n      }}\n    >\n      Click Me\n    </motion.button>\n  );\n}\n```",
+          "answer": "```typescript\nimport React from 'react';\nimport { motion } from 'framer-motion';\n\nfunction AnimatedButton() {\n  return (\n    <motion.button\n      initial={{ opacity: 0, y: 50 }}\n      animate={{ opacity: 1, y: 0 }}\n      transition={{ duration: 0.8, type: \"spring\" }}\n      style={{\n        padding: '10px 20px',\n        fontSize: '16px',\n        backgroundColor: 'teal',\n        color: 'white',\n        border: 'none',\n        borderRadius: '5px',\n        cursor: 'pointer'\n      }}\n    >\n      Click Me\n    </motion.button>\n  );\n}\n```",
+          "options": [],
+          "analysisPoints": [
+            "Correctly using `initial` and `animate` props.",
+            "Configuring transition properties like `duration` and `type`.",
+            "Applying animation directly as props on `motion` components."
+          ],
+          "keyConcepts": [
+            "Framer Motion",
+            "Declarative animation",
+            "`initial` prop",
+            "`animate` prop",
+            "`transition` prop"
+          ],
+          "evaluationCriteria": [
+            "Syntactic correctness of Framer Motion props.",
+            "Demonstrates understanding of declarative animation flow.",
+            "Proper application of transition configurations."
+          ],
+          "example": "",
+          "tags": [
+            "Framer Motion",
+            "Code Challenge",
+            "Animation",
+            "Implementation"
+          ],
+          "prerequisites": [
+            "theory_framer_motion"
+          ],
+          "complexity": 6,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_framer_motion_4",
+          "topic": "Framer Motion Gestures",
+          "level": "hard",
+          "type": "open",
+          "question": "Beyond simple `whileHover` and `whileTap`, Framer Motion offers advanced gesture support like `drag`. Describe how you would implement a draggable card that 'snaps' back to its original position when released, unless it has been dragged beyond a certain threshold. Which props and concepts of Framer Motion would be essential for this functionality?",
+          "answer": "",
+          "options": [],
+          "analysisPoints": [
+            "Understanding the `drag` prop for enabling dragging.",
+            "Using `dragConstraints` to limit movement.",
+            "Explaining `onDragEnd` or `onAnimationComplete` with state to determine 'snap back' behavior or a 'threshold'.",
+            "Considering `spring` animation type for the 'snap' effect.",
+            "Discussing how to reset position if no threshold is met."
+          ],
+          "keyConcepts": [
+            "Framer Motion",
+            "`drag` prop",
+            "`dragConstraints`",
+            "`onDragEnd`",
+            "Physics-based animation",
+            "State management"
+          ],
+          "evaluationCriteria": [
+            "Comprehensive explanation of drag implementation.",
+            "Correct identification of necessary props/callbacks.",
+            "Logical flow of condition-based snapping.",
+            "Demonstrates advanced Framer Motion usage."
+          ],
+          "example": "Implementing a draggable card that snaps back to its original position or moves off-screen based on a drag threshold in Framer Motion involves several key props:\n\n1.  **`drag`**: Set this boolean prop to `true` on the `motion.div` to make it draggable. You might specify `drag=\"x\"` or `drag=\"y\"` to constrain dragging to a single axis.\n\n2.  **`dragConstraints`**: This prop defines the boundaries for dragging. While often used to prevent elements from leaving a parent container, it can also be used in conjunction with `onDragEnd` for 'snapping'. For a card that snaps back, you might not set fixed `dragConstraints` but rather leverage the `onDragEnd` callback.\n\n3.  **`onDragEnd`**: This callback is crucial. It fires when the user releases the draggable element. Inside `onDragEnd`, you would get the current `pointerInfo` or the element's `offset` from its original position. You can then check if this offset (e.g., `x` or `y` value) exceeds your defined threshold.\n\n    *   **If threshold exceeded:** You'd update the component's state (e.g., `setIsDismissed(true)`) which would trigger a new `animate` state (e.g., `x: 1000` for off-screen) with a spring transition.\n    *   **If threshold not exceeded:** You would set the `animate` state back to its initial position (e.g., `x: 0, y: 0`), leveraging Framer Motion's default spring animation to make it snap back smoothly.\n\n4.  **`transition`**: Ensure that the `animate` property used for snapping back or dismissing has a `type: \"spring\"` in its `transition` object. This ensures the natural, physics-based 'snap' feel.\n\n**Example Structure:**\n\n```typescript\nimport React, { useState } from 'react';\nimport { motion, useAnimation } from 'framer-motion';\n\nfunction DraggableCard() {\n  const controls = useAnimation();\n  const [isDismissed, setIsDismissed] = useState(false);\n\n  const handleDragEnd = (event, info) => {\n    const dragThreshold = 150; // pixels\n    if (Math.abs(info.offset.x) > dragThreshold) {\n      setIsDismissed(true);\n      controls.start({\n        x: info.offset.x > 0 ? window.innerWidth : -window.innerWidth,\n        opacity: 0,\n        transition: { type: 'spring', stiffness: 100, damping: 20 }\n      });\n    } else {\n      controls.start({\n        x: 0, \n        y: 0,\n        transition: { type: 'spring', stiffness: 200, damping: 20 }\n      });\n    }\n  };\n\n  if (isDismissed) return null; // Or render a different state\n\n  return (\n    <motion.div\n      drag\n      onDragEnd={handleDragEnd}\n      animate={controls}\n      initial={{ x: 0, y: 0, opacity: 1 }}\n      style={{\n        width: '200px',\n        height: '150px',\n        backgroundColor: 'lightgray',\n        borderRadius: '10px',\n        cursor: 'grab',\n        position: 'absolute',\n        display: 'flex', justifyContent: 'center', alignItems: 'center'\n      }}\n    >\n      Drag Me!\n    </motion.div>\n  );\n}\n```",
+          "tags": [
+            "Framer Motion",
+            "Gestures",
+            "Drag",
+            "Physics",
+            "Advanced Animation",
+            "Code Example"
+          ],
+          "prerequisites": [
+            "theory_framer_motion"
+          ],
+          "complexity": 9,
+          "interviewFrequency": 9,
+          "learningPath": "advanced"
+        },
+        {
+          "id": "question_react_spring_1",
+          "topic": "React Spring Hooks API",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "What is the primary way to define and control animations in React Spring, aligning with modern React development?",
+          "answer": "Using custom hooks like `useSpring` and `useTransition`.",
+          "options": [],
+          "analysisPoints": [
+            "Recalling the hook-based nature of React Spring's API."
+          ],
+          "keyConcepts": [
+            "React Spring",
+            "Hooks API",
+            "`useSpring`",
+            "`useTransition`"
+          ],
+          "evaluationCriteria": [
+            "Correctly identifying the core API paradigm."
+          ],
+          "example": "",
+          "tags": [
+            "React Spring",
+            "Hooks",
+            "API",
+            "Basics"
+          ],
+          "prerequisites": [
+            "theory_react_spring",
+            "react_hooks"
+          ],
+          "complexity": 3,
+          "interviewFrequency": 6,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_react_spring_2",
+          "topic": "React Spring Performance",
+          "level": "medium",
+          "type": "mcq",
+          "question": "React Spring uses `animated` components (e.g., `animated.div`) to optimize performance. What is the main reason these components contribute to better animation performance?",
+          "answer": "They bypass React's render cycle for certain animation updates, directly manipulating the DOM for numerical values.",
+          "options": [
+            "They use CSS keyframe animations, which are always faster.",
+            "They perform all calculations on the server-side, reducing client load.",
+            "They bypass React's render cycle for certain animation updates, directly manipulating the DOM for numerical values.",
+            "They convert all animations to SVG for hardware acceleration."
+          ],
+          "analysisPoints": [
+            "Understanding the performance optimization mechanism of React Spring.",
+            "Knowing how `animated` components work internally.",
+            "Distinguishing from other animation techniques."
+          ],
+          "keyConcepts": [
+            "React Spring",
+            "Performance optimization",
+            "`animated` components",
+            "Direct DOM manipulation",
+            "RequestAnimationFrame"
+          ],
+          "evaluationCriteria": [
+            "Accurate explanation of `animated` component's role in performance.",
+            "Understanding the difference from typical React rendering."
+          ],
+          "example": "The `animated` components provided by React Spring (`animated.div`, `animated.span`, etc.) are wrappers that allow the animation engine to directly update styles (specifically numerical values like `transform`, `opacity`, `left`, `top`) using `requestAnimationFrame` without triggering a full React re-render. This significantly reduces overhead and allows animations to run at a consistent 60 FPS.",
+          "tags": [
+            "React Spring",
+            "Performance",
+            "Optimization",
+            "Animated Components"
+          ],
+          "prerequisites": [
+            "theory_react_spring"
+          ],
+          "complexity": 7,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_react_spring_3",
+          "topic": "React Spring Hook Usage",
+          "level": "medium",
+          "type": "code",
+          "question": "You want to create a simple fade-in/fade-out animation for a text element using `useSpring` and `animated.p` in React Spring. The text should appear when `isVisible` is `true` and disappear when `false`.\n\nComplete the `useSpring` hook and the `animated.p` component.\n\n```typescript\nimport React, { useState } from 'react';\nimport { useSpring, animated } from 'react-spring';\n\nfunction FadeText() {\n  const [isVisible, setIsVisible] = useState(false);\n\n  const props = useSpring({\n    // YOUR CODE HERE\n  });\n\n  return (\n    <div>\n      <button onClick={() => setIsVisible(!isVisible)}>\n        Toggle Text\n      </button>\n      <animated.p style={/* YOUR CODE HERE */}>\n        Hello, React Spring!\n      </animated.p>\n    </div>\n  );\n}\n```",
+          "answer": "```typescript\nimport React, { useState } from 'react';\nimport { useSpring, animated } from 'react-spring';\n\nfunction FadeText() {\n  const [isVisible, setIsVisible] = useState(false);\n\n  const props = useSpring({\n    opacity: isVisible ? 1 : 0,\n    transform: isVisible ? 'translateY(0px)' : 'translateY(-20px)',\n    // Using a more 'snappy' config for a quick fade/move\n    config: { mass: 1, tension: 200, friction: 20 }\n  });\n\n  return (\n    <div>\n      <button onClick={() => setIsVisible(!isVisible)}>\n        Toggle Text\n      </button>\n      <animated.p style={props}>\n        Hello, React Spring!\n      </animated.p>\n    </div>\n  );\n}\n```",
+          "options": [],
+          "analysisPoints": [
+            "Correctly defining target values within `useSpring` based on a boolean state.",
+            "Understanding how to apply the animated `props` object to an `animated` component's `style` prop.",
+            "Selecting appropriate CSS properties for a fade-in/out effect."
+          ],
+          "keyConcepts": [
+            "React Spring",
+            "`useSpring` hook",
+            "`animated` component",
+            "Opacity",
+            "Transform"
+          ],
+          "evaluationCriteria": [
+            "Syntactic correctness of `useSpring` and `animated` component usage.",
+            "Functional implementation of fade-in/fade-out.",
+            "Demonstrates understanding of hook-based animation."
+          ],
+          "example": "",
+          "tags": [
+            "React Spring",
+            "Code Challenge",
+            "Hooks",
+            "Animation",
+            "Implementation"
+          ],
+          "prerequisites": [
+            "theory_react_spring",
+            "react_hooks"
+          ],
+          "complexity": 6,
+          "interviewFrequency": 7,
+          "learningPath": "intermediate"
+        }
+      ],
+      "tasks": [
+        {
+          "id": "task_animation_library_comparison",
+          "title": "Implement a Toggleable Section with Different Animation Libraries",
+          "description": "\nYour task is to create a React component that shows or hides a content section when a button is clicked. You must implement this functionality twice, demonstrating two different animation libraries:\n\n1.  **React Transition Group (CSSTransition):** Implement a fade-in/fade-out effect for the section.\n    *   The section should start invisible (opacity 0) and fade in to full opacity.\n    *   When hidden, it should fade out and then be unmounted from the DOM.\n    *   Define the necessary CSS classes for the fade effect.\n2.  **Framer Motion:** Implement a similar fade-in/fade-out effect, combined with a slight vertical slide (e.g., from `y: 20` to `y: 0`).\n    *   The section should animate its `opacity` and `y` position.\n    *   Ensure it handles unmounting gracefully after the exit animation.\n\nYour solution should clearly separate the implementations for each library, perhaps into two distinct components or tabs if within a single file. Focus on clean code and correct usage of each library's API.\n",
+          "difficulty": "medium",
+          "startingCode": "import React, { useState } from 'react';\n// Import necessary components/hooks for RTG\n// import { CSSTransition } from 'react-transition-group';\n\n// Import necessary components/hooks for Framer Motion\n// import { motion, AnimatePresence } from 'framer-motion';\n\n// Add CSS for RTG (if using a single file, typically this would be in a separate CSS module)\n// const rtgCss = `\n//   .fade-enter {\n//     opacity: 0;\n//   }\n//   .fade-enter-active {\n//     opacity: 1;\n//     transition: opacity 300ms ease-in;\n//   }\n//   .fade-exit {\n//     opacity: 1;\n//   }\n//   .fade-exit-active {\n//     opacity: 0;\n//     transition: opacity 300ms ease-out;\n//   }\n// `;\n\n// You might need to inject CSS into the head for a single file example\n// const styleSheet = document.createElement(\"style\");\n// styleSheet.type = \"text/css\";\n// styleSheet.innerText = rtgCss;\n// document.head.appendChild(styleSheet);\n\nfunction ReactTransitionGroupSection() {\n  const [show, setShow] = useState(false);\n\n  return (\n    <div style={{ marginBottom: '40px', border: '1px dashed #ccc', padding: '20px' }}>\n      <h3>React Transition Group Example</h3>\n      <button onClick={() => setShow(!show)}>\n        Toggle Section (RTG)\n      </button>\n      {/* Implement RTG here */}\n    </div>\n  );\n}\n\nfunction FramerMotionSection() {\n  const [show, setShow] = useState(false);\n\n  return (\n    <div style={{ border: '1px dashed #ccc', padding: '20px' }}>\n      <h3>Framer Motion Example</h3>\n      <button onClick={() => setShow(!show)}>\n        Toggle Section (Framer Motion)\n      </button>\n      {/* Implement Framer Motion here */}\n    </div>\n  );\n}\n\nfunction App() {\n  return (\n    <div style={{ fontFamily: 'Arial, sans-serif', padding: '20px' }}>\n      <h2>Animation Library Comparison</h2>\n      <ReactTransitionGroupSection />\n      <FramerMotionSection />\n    </div>\n  );\n}\n\nexport default App;\n",
+          "solutionCode": "import React, { useState } from 'react';\nimport { CSSTransition } from 'react-transition-group';\nimport { motion, AnimatePresence } from 'framer-motion';\n\nconst rtgCss = `\n  .fade-section-enter {\n    opacity: 0;\n  }\n  .fade-section-enter-active {\n    opacity: 1;\n    transition: opacity 300ms ease-in;\n  }\n  .fade-section-exit {\n    opacity: 1;\n  }\n  .fade-section-exit-active {\n    opacity: 0;\n    transition: opacity 300ms ease-out;\n  }\n`;\n\n// In a real project, this CSS would be in a separate .css file and imported.\n// For this isolated example, we inject it.\nif (typeof document !== 'undefined' && !document.getElementById('rtg-styles')) {\n  const styleSheet = document.createElement(\"style\");\n  styleSheet.type = \"text/css\";\n  styleSheet.innerText = rtgCss;\n  styleSheet.id = 'rtg-styles';\n  document.head.appendChild(styleSheet);\n}\n\nfunction ReactTransitionGroupSection() {\n  const [show, setShow] = useState(false);\n\n  return (\n    <div style={{ marginBottom: '40px', border: '1px dashed #ccc', padding: '20px' }}>\n      <h3>React Transition Group Example</h3>\n      <button onClick={() => setShow(!show)}>\n        Toggle Section (RTG)\n      </button>\n      <CSSTransition\n        in={show}\n        timeout={300}\n        classNames=\"fade-section\"\n        unmountOnExit\n      >\n        <div style={{\n          marginTop: '20px',\n          padding: '15px',\n          backgroundColor: '#e0ffe0',\n          borderRadius: '5px',\n          border: '1px solid #a0cfa0'\n        }}>\n          <p>This content fades in and out using React Transition Group!</p>\n        </div>\n      </CSSTransition>\n    </div>\n  );\n}\n\nfunction FramerMotionSection() {\n  const [show, setShow] = useState(false);\n\n  const sectionVariants = {\n    hidden: { opacity: 0, y: 20 },\n    visible: { opacity: 1, y: 0 },\n    exit: { opacity: 0, y: -20 }\n  };\n\n  return (\n    <div style={{ border: '1px dashed #ccc', padding: '20px' }}>\n      <h3>Framer Motion Example</h3>\n      <button onClick={() => setShow(!show)}>\n        Toggle Section (Framer Motion)\n      </button>\n      <AnimatePresence>\n        {show && (\n          <motion.div\n            variants={sectionVariants}\n            initial=\"hidden\"\n            animate=\"visible\"\n            exit=\"exit\"\n            transition={{ duration: 0.3, type: \"tween\" }}\n            style={{\n              marginTop: '20px',\n              padding: '15px',\n              backgroundColor: '#e0f0ff',\n              borderRadius: '5px',\n              border: '1px solid #a0c0e0'\n            }}\n          >\n            <p>This content animates with Framer Motion!</p>\n          </motion.div>\n        )}\n      </AnimatePresence>\n    </div>\n  );\n}\n\nfunction App() {\n  return (\n    <div style={{ fontFamily: 'Arial, sans-serif', padding: '20px' }}>\n      <h2>Animation Library Comparison</h2>\n      <ReactTransitionGroupSection />\n      <FramerMotionSection />\n    </div>\n  );\n}\n\nexport default App;\n",
+          "testCases": [
+            "The RTG section should fade in smoothly when the button is clicked to show it.",
+            "The RTG section should fade out smoothly and then disappear from the DOM when the button is clicked to hide it.",
+            "The Framer Motion section should fade in and slide up smoothly when shown.",
+            "The Framer Motion section should fade out and slide down smoothly when hidden, then unmount.",
+            "Clicking buttons rapidly should not cause animation glitches for either section.",
+            "Both sections should correctly handle initial rendering state (hidden)."
+          ],
+          "hints": [
+            "For `CSSTransition`, remember to define matching `timeout` and CSS transition durations.",
+            "For `Framer Motion`, consider using `AnimatePresence` for exit animations and `variants` for managing animation states.",
+            "Pay attention to `unmountOnExit` for `CSSTransition` and the `exit` prop on `motion.div` within `AnimatePresence` for Framer Motion.",
+            "You can define CSS directly in a `<style>` tag within the component or append it to the document head for a single file solution, but in a real project, use a CSS file."
+          ],
+          "tags": [
+            "React",
+            "Animations",
+            "Library Comparison",
+            "React Transition Group",
+            "Framer Motion",
+            "UI/UX"
+          ],
+          "timeEstimate": 60,
+          "prerequisites": [
+            "react_basics",
+            "theory_react_transition_group",
+            "theory_framer_motion"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 9,
+          "learningPath": "intermediate",
+          "relatedConcepts": [
+            "component_lifecycle_animations",
+            "declarative_animation",
+            "css_transitions",
+            "framer_motion_variants",
+            "animatepresence"
+          ]
+        },
+        {
+          "id": "task_rtg_fade_toggle",
+          "title": "Implement a Fade Toggle with React Transition Group",
+          "description": "\nCreate a React component that displays a message. This message should:\n\n1.  Be initially hidden.\n2.  When a 'Show Message' button is clicked, it should fade in smoothly over 300ms.\n3.  When a 'Hide Message' button is clicked (or the same button toggles to 'Hide'), it should fade out smoothly over 300ms and then be completely removed from the DOM.\n\nUse `React Transition Group`'s `CSSTransition` component and define the necessary CSS classes to achieve the fade effect.\n",
+          "difficulty": "medium",
+          "startingCode": "import React, { useState } from 'react';\n// import { CSSTransition } from 'react-transition-group';\n\n// You will need to add CSS for .fade-enter, .fade-enter-active, .fade-exit, .fade-exit-active\n// For a quick test in a single file, you might embed it or use a global style.\n// For example:\n// const style = document.createElement('style');\n// style.innerHTML = `\n//   .fade-enter { opacity: 0; }\n//   .fade-enter-active { opacity: 1; transition: opacity 300ms ease-in; }\n//   .fade-exit { opacity: 1; }\n//   .fade-exit-active { opacity: 0; transition: opacity 300ms ease-out; }\n// `;\n// document.head.appendChild(style);\n\nfunction FadeMessage() {\n  const [showMessage, setShowMessage] = useState(false);\n\n  return (\n    <div>\n      <button onClick={() => setShowMessage(!showMessage)}>\n        {showMessage ? 'Hide Message' : 'Show Message'}\n      </button>\n\n      {/* Your CSSTransition component goes here */}\n\n    </div>\n  );\n}\n\nexport default FadeMessage;\n",
+          "solutionCode": "import React, { useState } from 'react';\nimport { CSSTransition } from 'react-transition-group';\n\n// In a real project, this CSS would be in a separate .css file and imported.\n// For this isolated example, we inject it.\nconst cssStyles = `\n  .message-fade-enter {\n    opacity: 0;\n  }\n  .message-fade-enter-active {\n    opacity: 1;\n    transition: opacity 300ms ease-in;\n  }\n  .message-fade-exit {\n    opacity: 1;\n  }\n  .message-fade-exit-active {\n    opacity: 0;\n    transition: opacity 300ms ease-out;\n  }\n`;\n\n// Inject CSS into the document head if not already present\nif (typeof document !== 'undefined' && !document.getElementById('fade-message-styles')) {\n  const styleSheet = document.createElement(\"style\");\n  styleSheet.type = \"text/css\";\n  styleSheet.innerText = cssStyles;\n  styleSheet.id = 'fade-message-styles';\n  document.head.appendChild(styleSheet);\n}\n\nfunction FadeMessage() {\n  const [showMessage, setShowMessage] = useState(false);\n\n  return (\n    <div style={{ padding: '20px' }}>\n      <h2>React Transition Group Fade Toggle</h2>\n      <button onClick={() => setShowMessage(!showMessage)}>\n        {showMessage ? 'Hide Message' : 'Show Message'}\n      </button>\n\n      <CSSTransition\n        in={showMessage}\n        timeout={300} // Must match CSS transition duration\n        classNames=\"message-fade\"\n        unmountOnExit // Essential for removing from DOM after exit animation\n      >\n        <div \n          style={{\n            marginTop: '20px',\n            padding: '15px',\n            backgroundColor: '#f0f0f0',\n            border: '1px solid #ccc',\n            borderRadius: '5px'\n          }}\n        >\n          <p>This is a secret message!</p>\n        </div>\n      </CSSTransition>\n    </div>\n  );\n}\n\nexport default FadeMessage;\n",
+          "testCases": [
+            "When 'Show Message' button is clicked, the message should appear with a smooth fade-in animation.",
+            "When 'Hide Message' button is clicked, the message should disappear with a smooth fade-out animation.",
+            "After the message fades out, it should be completely removed from the DOM (verify by inspecting elements).",
+            "Rapidly clicking the button should not cause visual glitches or abrupt jumps.",
+            "The message should not be visible on initial render (before clicking 'Show Message')."
+          ],
+          "hints": [
+            "Remember that `CSSTransition` requires the `timeout` prop to match the CSS transition duration.",
+            "`unmountOnExit` is crucial for truly removing the component after the exit animation.",
+            "Define the CSS classes with the correct suffixes (`-enter`, `-enter-active`, `-exit`, `-exit-active`) and transition properties."
+          ],
+          "tags": [
+            "React Transition Group",
+            "Animations",
+            "CSS Transitions",
+            "Conditional Rendering",
+            "UI/UX"
+          ],
+          "timeEstimate": 45,
+          "prerequisites": [
+            "react_basics",
+            "css_transitions",
+            "theory_react_transition_group"
+          ],
+          "complexity": 6,
+          "interviewRelevance": 7,
+          "learningPath": "intermediate",
+          "relatedConcepts": [
+            "component_lifecycle_animations",
+            "css_classes_dynamic",
+            "conditional_rendering"
+          ]
+        },
+        {
+          "id": "task_react_motion_drag_and_drop",
+          "title": "Implement a Draggable Item with React Motion",
+          "description": "\nYour task is to create a draggable square component using `React Motion`.\n\n1.  The square should be initially positioned at (0,0) relative to its container.\n2.  When dragged, it should follow the cursor with a smooth, 'springy' effect.\n3.  When released, it should animate back to its original (0,0) position using spring physics.\n\nFocus on demonstrating the core principles of `React Motion` for physics-based interaction.\n",
+          "difficulty": "hard",
+          "startingCode": "import React, { useState } from 'react';\n// import { Motion, spring } from 'react-motion';\n\nfunction DraggableSquare() {\n  const [position, setPosition] = useState({ x: 0, y: 0 });\n\n  // You'll need to manage drag state and update position based on mouse events\n  // and use React Motion for the animation back to (0,0).\n\n  const handleMouseDown = (e) => {\n    // Implement drag start logic\n  };\n\n  const handleMouseMove = (e) => {\n    // Implement drag move logic\n  };\n\n  const handleMouseUp = () => {\n    // Implement drag end logic (release)\n  };\n\n  return (\n    <div style={{ width: '400px', height: '300px', border: '2px solid #ccc', position: 'relative', overflow: 'hidden' }}>\n      <h3>React Motion Draggable Square</h3>\n      {/* Your Motion component and draggable element here */}\n    </div>\n  );\n}\n\nexport default DraggableSquare;\n",
+          "solutionCode": "import React, { useState, useRef, useCallback } from 'react';\nimport { Motion, spring } from 'react-motion';\n\nfunction DraggableSquare() {\n  const [isDragging, setIsDragging] = useState(false);\n  const [offset, setOffset] = useState({ x: 0, y: 0 }); // Offset from mouse down point\n  const initialMousePos = useRef({ x: 0, y: 0 });\n  const currentElemPos = useRef({ x: 0, y: 0 });\n\n  const handleMouseDown = useCallback((e) => {\n    setIsDragging(true);\n    initialMousePos.current = { x: e.clientX, y: e.clientY };\n    // Store current element position to calculate offset from it\n    currentElemPos.current = { x: offset.x, y: offset.y }; \n  }, [offset]);\n\n  const handleMouseMove = useCallback((e) => {\n    if (isDragging) {\n      const dx = e.clientX - initialMousePos.current.x;\n      const dy = e.clientY - initialMousePos.current.y;\n      setOffset({\n        x: currentElemPos.current.x + dx,\n        y: currentElemPos.current.y + dy,\n      });\n    }\n  }, [isDragging]);\n\n  const handleMouseUp = useCallback(() => {\n    setIsDragging(false);\n    // When released, reset offset to trigger spring back to 0,0\n    setOffset({ x: 0, y: 0 }); \n  }, []);\n\n  // Attach global event listeners for mouse up/move to handle dragging outside the element\n  React.useEffect(() => {\n    if (isDragging) {\n      document.addEventListener('mousemove', handleMouseMove);\n      document.addEventListener('mouseup', handleMouseUp);\n    } else {\n      document.removeEventListener('mousemove', handleMouseMove);\n      document.removeEventListener('mouseup', handleMouseUp);\n    }\n    return () => {\n      document.removeEventListener('mousemove', handleMouseMove);\n      document.removeEventListener('mouseup', handleMouseUp);\n    };\n  }, [isDragging, handleMouseMove, handleMouseUp]);\n\n  return (\n    <div style={{ width: '400px', height: '300px', border: '2px solid #ccc', position: 'relative', overflow: 'hidden', userSelect: 'none' }}>\n      <h3>React Motion Draggable Square</h3>\n      <Motion style={{ x: spring(offset.x), y: spring(offset.y) }}>\n        {({ x, y }) => (\n          <div\n            onMouseDown={handleMouseDown}\n            style={{\n              width: '80px',\n              height: '80px',\n              backgroundColor: 'blueviolet',\n              borderRadius: '8px',\n              position: 'absolute',\n              transform: `translate3d(${x}px, ${y}px, 0)`,\n              cursor: isDragging ? 'grabbing' : 'grab',\n              display: 'flex',\n              justifyContent: 'center',\n              alignItems: 'center',\n              color: 'white',\n              left: 'calc(50% - 40px)', // Center initially\n              top: 'calc(50% - 40px)', // Center initially\n            }}\n          >\n            Drag Me!\n          </div>\n        )}\n      </Motion>\n    </div>\n  );\n}\n\nexport default DraggableSquare;\n",
+          "testCases": [
+            "The square should be visible and centered initially.",
+            "Clicking and dragging the square should move it with the cursor.",
+            "Releasing the mouse should cause the square to smoothly spring back to its original center position.",
+            "Dragging quickly and releasing should still result in a smooth spring-back, not an abrupt jump.",
+            "Dragging outside the square (while holding mouse down on the square) should still move it.",
+            "Releasing the mouse outside the square should still trigger the spring-back."
+          ],
+          "hints": [
+            "You'll need to manage the square's position as state (`x`, `y` coordinates).",
+            "Use `onMouseDown`, `onMouseMove`, and `onMouseUp` events to track the drag. `onMouseMove` and `onMouseUp` should be attached to `document` when dragging starts to capture events even if the mouse leaves the element.",
+            "`React Motion`'s `Motion` component will take care of the 'spring back' animation when you update the target `x` and `y` values to `0` after the mouse is released.",
+            "Remember to use `spring()` around your target values in the `style` prop of `Motion`."
+          ],
+          "tags": [
+            "React Motion",
+            "Drag and Drop",
+            "Physics-based Animation",
+            "State Management",
+            "Event Handling",
+            "Interactive UI"
+          ],
+          "timeEstimate": 90,
+          "prerequisites": [
+            "react_basics",
+            "theory_react_motion",
+            "event_handling",
+            "react_hooks"
+          ],
+          "complexity": 8,
+          "interviewRelevance": 8,
+          "learningPath": "advanced",
+          "relatedConcepts": [
+            "user_interaction",
+            "physics_engine",
+            "render_props"
+          ]
+        },
+        {
+          "id": "task_framer_motion_draggable_card",
+          "title": "Create an Interactive Draggable Card with Framer Motion",
+          "description": "\nImplement a draggable card component using `Framer Motion` that includes:\n\n1.  **Drag functionality:** The card should be draggable horizontally.\n2.  **Drag constraints:** Limit the horizontal drag to a specific range (e.g., -100px to +100px from its center).\n3.  **Hover effect:** When the card is hovered, it should slightly scale up (e.g., to 1.05).\n4.  **Tap effect:** When the card is tapped/clicked, it should slightly rotate (e.g., by 5 degrees).\n5.  **Snap back:** After being dragged and released (within constraints), it should smoothly snap back to its initial center position.\n\nDemonstrate `Framer Motion`'s declarative API and built-in gesture support.\n",
+          "difficulty": "medium",
+          "startingCode": "import React from 'react';\n// import { motion } from 'framer-motion';\n\nfunction DraggableCard() {\n  return (\n    <div style={{ width: '100%', height: 'calc(100vh - 40px)', display: 'flex', justifyContent: 'center', alignItems: 'center', overflow: 'hidden' }}>\n      {/* Your motion.div component here */}\n    </div>\n  );\n}\n\nexport default DraggableCard;\n",
+          "solutionCode": "import React from 'react';\nimport { motion } from 'framer-motion';\n\nfunction DraggableCard() {\n  return (\n    <div style={{ width: '100%', height: 'calc(100vh - 40px)', display: 'flex', justifyContent: 'center', alignItems: 'center', overflow: 'hidden', background: '#f0f0f0' }}>\n      <motion.div\n        drag=\"x\" // Enable horizontal dragging\n        dragConstraints={{ left: -100, right: 100 }} // Limit drag range\n        dragElastic={0.2} // How 'elastic' the drag is at the constraints\n        whileHover={{ scale: 1.05 }} // Scale up on hover\n        whileTap={{ rotate: 5 }} // Rotate on tap\n        style={{\n          width: '250px',\n          height: '180px',\n          backgroundColor: '#007bff',\n          borderRadius: '15px',\n          boxShadow: '0px 10px 20px rgba(0,0,0,0.2)',\n          display: 'flex',\n          justifyContent: 'center',\n          alignItems: 'center',\n          color: 'white',\n          fontSize: '20px',\n          fontWeight: 'bold',\n          cursor: 'grab',\n          // When released, Framer Motion automatically springs back to 0 if not dragged past a threshold \n          // and no new 'animate' state is provided. dragConstraints handles the 'snap back' behavior.\n          // You can also use onDragEnd and controls.start({ x: 0 }) for explicit reset.\n        }}\n      >\n        Drag Me Horizontally\n      </motion.div>\n    </div>\n  );\n}\n\nexport default DraggableCard;\n",
+          "testCases": [
+            "The card should appear centered initially.",
+            "The card should be draggable only horizontally.",
+            "The card's horizontal movement should be constrained within -100px and +100px from its starting position.",
+            "When the mouse is released after dragging within the constraints, the card should smoothly spring back to its center position.",
+            "Hovering over the card should make it slightly scale up.",
+            "Clicking/tapping the card should make it slightly rotate.",
+            "Rapidly dragging and releasing, or hovering and tapping, should not cause animation glitches."
+          ],
+          "hints": [
+            "Use the `drag` prop to enable dragging and specify the axis (`drag=\"x\"`).",
+            "The `dragConstraints` prop is perfect for defining the draggable boundaries.",
+            "`whileHover` and `whileTap` props are designed exactly for the required interactive effects.",
+            "Framer Motion's default behavior for `drag` within `dragConstraints` is to automatically snap back to the origin if not dragged past a certain (usually small) threshold, or if `dragConstraints` are reached. For explicit snap-back, you could also use `onDragEnd` and `controls.start({ x: 0 })`."
+          ],
+          "tags": [
+            "Framer Motion",
+            "Drag and Drop",
+            "Gestures",
+            "Interactive UI",
+            "Animation"
+          ],
+          "timeEstimate": 60,
+          "prerequisites": [
+            "react_basics",
+            "theory_framer_motion"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 9,
+          "learningPath": "intermediate",
+          "relatedConcepts": [
+            "declarative_animation",
+            "user_interaction",
+            "physics_animation",
+            "motion_components"
+          ]
+        },
+        {
+          "id": "task_react_spring_gallery_carousel",
+          "title": "Build a Simple Image Gallery Carousel with React Spring",
+          "description": "\nCreate a simplified image gallery component where users can navigate between images with a smooth, spring-like transition. The gallery should:\n\n1.  Display one image at a time.\n2.  Have 'Next' and 'Previous' buttons.\n3.  When 'Next' or 'Previous' is clicked, the current image should slide out horizontally (e.g., to the left for 'Next', to the right for 'Previous') and the new image should slide in from the opposite side, both with a physics-based spring animation.\n4.  Handle looping back to the start/end of the image array.\n\nUse `React Spring`'s `useTransition` hook for managing the enter/exit animations of the images.\n",
+          "difficulty": "hard",
+          "startingCode": "import React, { useState } from 'react';\n// import { useTransition, animated } from 'react-spring';\n\nconst images = [\n  'https://via.placeholder.com/600x400/FF5733/FFFFFF?text=Image+1',\n  'https://via.placeholder.com/600x400/33FF57/FFFFFF?text=Image+2',\n  'https://via.placeholder.com/600x400/3357FF/FFFFFF?text=Image+3',\n  'https://via.placeholder.com/600x400/FF33CC/FFFFFF?text=Image+4',\n];\n\nfunction ImageCarousel() {\n  const [index, setIndex] = useState(0);\n\n  const handleNext = () => {\n    // Implement logic to go to next image, looping if necessary\n  };\n\n  const handlePrev = () => {\n    // Implement logic to go to previous image, looping if necessary\n  };\n\n  // Your useTransition hook and animated components here\n\n  return (\n    <div style={{ maxWidth: '600px', margin: '50px auto', textAlign: 'center' }}>\n      <h2>React Spring Image Carousel</h2>\n      <div style={{ position: 'relative', width: '600px', height: '400px', overflow: 'hidden', margin: '0 auto', border: '1px solid #ddd' }}>\n        {/* Animated image goes here */}\n      </div>\n      <div style={{ marginTop: '20px' }}>\n        <button onClick={handlePrev} style={{ marginRight: '10px' }}>Previous</button>\n        <button onClick={handleNext}>Next</button>\n      </div>\n    </div>\n  );\n}\n\nexport default ImageCarousel;\n",
+          "solutionCode": "import React, { useState, useCallback } from 'react';\nimport { useTransition, animated } from 'react-spring';\n\nconst images = [\n  'https://via.placeholder.com/600x400/FF5733/FFFFFF?text=Image+1',\n  'https://via.placeholder.com/600x400/33FF57/FFFFFF?text=Image+2',\n  'https://via.placeholder.com/600x400/3357FF/FFFFFF?text=Image+3',\n  'https://via.placeholder.com/600x400/FF33CC/FFFFFF?text=Image+4',\n];\n\nfunction ImageCarousel() {\n  const [index, setIndex] = useState(0);\n  const [direction, setDirection] = useState(1); // 1 for next, -1 for prev\n\n  const handleNext = useCallback(() => {\n    setDirection(1);\n    setIndex((state) => (state + 1) % images.length);\n  }, []);\n\n  const handlePrev = useCallback(() => {\n    setDirection(-1);\n    setIndex((state) => (state - 1 + images.length) % images.length);\n  }, []);\n\n  // useTransition takes a 'key' to identify unique items, the state of the item, and hooks for transitions\n  const transitions = useTransition(index, {\n    key: index, // The unique key for the item currently being animated\n    from: { opacity: 0, transform: `translate3d(${direction * 100}%,0,0)` },\n    enter: { opacity: 1, transform: 'translate3d(0%,0,0)' },\n    leave: { opacity: 0, transform: `translate3d(${-direction * 50}%,0,0)` }, // Current image slides off in opposite direction\n    config: { mass: 1, tension: 300, friction: 30 },\n  });\n\n  return (\n    <div style={{ maxWidth: '600px', margin: '50px auto', textAlign: 'center' }}>\n      <h2>React Spring Image Carousel</h2>\n      <div style={{ position: 'relative', width: '600px', height: '400px', overflow: 'hidden', margin: '0 auto', border: '1px solid #ddd' }}>\n        {transitions((style, i) => (\n          <animated.img\n            key={i}\n            src={images[i]}\n            alt={`Image ${i + 1}`}\n            style={{\n              ...style,\n              position: 'absolute',\n              width: '100%',\n              height: '100%',\n              objectFit: 'cover',\n              willChange: 'transform, opacity',\n            }}\n          />\n        ))}\n      </div>\n      <div style={{ marginTop: '20px' }}>\n        <button onClick={handlePrev} style={{ marginRight: '10px' }}>Previous</button>\n        <button onClick={handleNext}>Next</button>\n      </div>\n    </div>\n  );\n}\n\nexport default ImageCarousel;\n",
+          "testCases": [
+            "The first image should be displayed initially without animation.",
+            "Clicking 'Next' should smoothly slide the current image out and the next image in from the right.",
+            "Clicking 'Previous' should smoothly slide the current image out and the previous image in from the left.",
+            "Navigating from the last image to the first using 'Next' should loop correctly with animation.",
+            "Navigating from the first image to the last using 'Previous' should loop correctly with animation.",
+            "Rapidly clicking buttons should not break the animation or cause visual jumps."
+          ],
+          "hints": [
+            "`useTransition` is ideal for animating items as they enter, update, or leave the component tree. It takes an item (or array of items) and returns an array of `transitions`.",
+            "The `key` property in `useTransition`'s configuration is crucial for React Spring to track which item is which.",
+            "The `from`, `enter`, and `leave` properties in `useTransition` define the initial, target, and exit styles respectively.",
+            "You'll need to pass the `direction` of navigation to `useTransition`'s `from` and `leave` configs to control whether the images slide in/out from the left or right."
+          ],
+          "tags": [
+            "React Spring",
+            "Carousel",
+            "Gallery",
+            "useTransition",
+            "Hooks",
+            "Animation",
+            "UI/UX"
+          ],
+          "timeEstimate": 120,
+          "prerequisites": [
+            "react_hooks",
+            "theory_react_spring",
+            "css_transforms"
+          ],
+          "complexity": 9,
+          "interviewRelevance": 9,
+          "learningPath": "advanced",
+          "relatedConcepts": [
+            "list_animations",
+            "conditional_rendering",
+            "physics_based_ui",
+            "state_management_complex"
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "6221f1ec-688e-4529-a980-2295af964123",
+    "startLine": 8600,
+    "endLine": 8699,
+    "processedDate": "2025-06-17T10:44:56.713Z",
+    "content": {
+      "logicalBlockInfo": {
+        "suggestedEndLine": 20
+      },
+      "theory": [
+        {
+          "id": "theory_redux_core_concepts",
+          "title": "Redux Core Concepts",
+          "content": "Redux is a predictable state container for JavaScript applications. It helps you write applications that behave consistently across different environments (client, server, and native) and are easy to test. The core concepts of Redux define its architecture and how state is managed.\n\n## Key Concepts\n- **Action**: A plain JavaScript object that describes *what happened*. Actions are the only way to send data from your application to the Redux store. They must have a `type` property, which is typically a string constant, and can contain additional data (payload) relevant to the event.\n- **Reducer**: A pure function that specifies *how the application's state changes in response to actions*. Reducers take the current state and an action as arguments, and return a *new state*. They must not mutate the original state, perform side effects (like API calls or routing transitions), or call non-pure functions (like `Date.now()` or `Math.random()`).\n- **Store**: The object that *holds the entire application state*. There should only be one store in a Redux application. The store provides several methods:\n    - `getState()`: Returns the current state tree of your application.\n    - `dispatch(action)`: Dispatches an action. This is the only way to trigger a state change.\n    - `subscribe(listener)`: Registers a callback function that will be invoked any time the state changes. It returns an `unsubscribe` function to remove the listener.\n- **Dispatch**: The method used to *send actions to the store*. When an action is dispatched, Redux calls the root reducer with the current state tree and the given action. The reducer computes the new state tree, and the store saves it.\n- **Selectors**: Functions that *extract specific pieces of information from the store state*. They are often used in React components to read data from the Redux store, helping to optimize component re-renders by only selecting the necessary data.",
+          "examples": [
+            {
+              "id": "example_redux_core_1",
+              "title": "Basic Redux Store Creation and Interaction",
+              "code": "import { createStore } from 'redux';\n\n// A simple reducer function\nfunction counterReducer(state = { count: 0 }, action) {\n  switch (action.type) {\n    case 'INCREMENT':\n      return { count: state.count + 1 };\n    case 'DECREMENT':\n      return { count: state.count - 1 };\n    default:\n      return state;\n  }\n}\n\n// Create the Redux store\nconst store = createStore(counterReducer);\n\n// Log the initial state\nconsole.log('Initial state:', store.getState()); // Output: { count: 0 }\n\n// Define an action\nconst incrementAction = { type: 'INCREMENT' };\n\n// Dispatch the action to change state\nstore.dispatch(incrementAction);\n\n// Log the updated state\nconsole.log('State after increment:', store.getState()); // Output: { count: 1 }\n\n// Another action\nconst decrementAction = { type: 'DECREMENT' };\nstore.dispatch(decrementAction);\nconsole.log('State after decrement:', store.getState()); // Output: { count: 0 }\n",
+              "explanation": "This example demonstrates how to create a basic Redux store using a `counterReducer`. It shows how to get the initial state, define an action object, dispatch that action to the store, and observe the state changes. The reducer takes the current state and an action, returning a new state object based on the action type. This is the fundamental cycle of Redux state management.",
+              "language": "javascript"
+            },
+            {
+              "id": "example_redux_core_2",
+              "title": "Action Structure and Usage",
+              "code": "// Action creators (functions that create actions)\nconst addTodo = (text) => ({\n  type: 'ADD_TODO',\n  payload: {\n    id: Date.now(), // Unique ID for the todo\n    text,\n    completed: false\n  }\n});\n\nconst toggleTodo = (id) => ({\n  type: 'TOGGLE_TODO',\n  payload: { id }\n});\n\n// Example of actions in a reducer\nfunction todosReducer(state = [], action) {\n  switch (action.type) {\n    case 'ADD_TODO':\n      return [\n        ...state,\n        action.payload\n      ];\n    case 'TOGGLE_TODO':\n      return state.map(todo =>\n        todo.id === action.payload.id ? { ...todo, completed: !todo.completed } : todo\n      );\n    default:\n      return state;\n  }\n}\n\n// Using actions and reducer (conceptual)\n// let state = [];\n// state = todosReducer(state, addTodo('Learn Redux'));\n// console.log(state); // [{ id: ..., text: 'Learn Redux', completed: false }]\n// state = todosReducer(state, toggleTodo(state[0].id));\n// console.log(state); // [{ id: ..., text: 'Learn Redux', completed: true }]\n",
+              "explanation": "This example showcases how actions are structured with a `type` and an optional `payload`. It also demonstrates how 'action creators' can be used to generate these action objects programmatically, making dispatching actions easier and less error-prone. The reducer then uses the `type` to determine how to update the state and accesses the `payload` for relevant data.",
+              "language": "javascript"
+            }
+          ],
+          "relatedQuestions": [
+            "question_redux_core_1",
+            "question_redux_core_2",
+            "question_redux_core_3",
+            "question_redux_core_4",
+            "question_redux_core_5",
+            "question_redux_core_6",
+            "question_redux_core_7",
+            "question_redux_core_8",
+            "question_redux_core_9",
+            "question_redux_core_10",
+            "question_redux_core_11",
+            "question_redux_data_flow_2",
+            "question_redux_data_flow_3"
+          ],
+          "relatedTasks": [
+            "task_implement_simple_redux_counter",
+            "task_build_todo_redux_logic",
+            "task_implement_redux_store_methods"
+          ],
+          "tags": [
+            "Redux",
+            "State Management",
+            "Core Concepts",
+            "Action",
+            "Reducer",
+            "Store",
+            "Dispatch",
+            "Selector"
+          ],
+          "technology": "JavaScript",
+          "prerequisites": [
+            "JavaScript fundamentals",
+            "Functional programming concepts"
+          ],
+          "complexity": 6,
+          "interviewRelevance": 8,
+          "learningPath": "intermediate",
+          "requiredFor": [
+            "React-Redux applications",
+            "Complex state management"
+          ]
+        },
+        {
+          "id": "theory_redux_data_flow",
+          "title": "Redux Data Flow and Principles",
+          "content": "Redux enforces a strict unidirectional data flow, which makes the application's state changes predictable and easy to trace. Understanding this flow is crucial for debugging and maintaining Redux applications. It also adheres to three core principles that define its architecture.\n\n## Redux Data Flow\nRedux follows a strict unidirectional data flow pattern:\n1.  **User Interaction**: The user interacts with the UI (e.g., clicks a button, types into an input field).\n2.  **Action Dispatch**: An action is dispatched (sent to the store) describing what happened (e.g., `dispatch({ type: 'ADD_ITEM', payload: 'New Item' })`). This is the only way to initiate a state change.\n3.  **Reducer Processing**: The Redux store calls the root reducer function with the current state and the dispatched action. The reducer processes the action, calculates a new state based on the action's type and payload, and returns this new state. It's critical that reducers are pure functions, meaning they produce the same output for the same input and have no side effects.\n4.  **Store Update**: The Redux store updates its internal state with the new state returned by the reducer.\n5.  **UI Update**: Subscribers to the store (typically UI components) are notified of the state change. They then re-render themselves to reflect the new state, completing the cycle.\n\n![Redux Principles](images/redux_principles.jpeg)\n\n## Three Principles of Redux\nRedux is built upon three fundamental principles that ensure predictability and maintainability:\n1.  **Single Source of Truth**: The state of the entire application is stored in a single plain JavaScript object tree within a single Redux store. This centralized state makes it easier to debug, persist, and hydrate the application state.\n2.  **State is Read-Only**: The only way to change the state is to emit an action, an object describing what happened. You cannot directly modify the state object. This ensures that views and network callbacks never write directly to the state, preventing race conditions and making state changes explicit and traceable.\n3.  **Changes are Made with Pure Functions (Reducers)**: To specify how the state tree is transformed by actions, you write pure reducers. Reducers are functions that take the previous state and an action, and return the next state. They must not modify the original state object but rather return a new one if changes occur. This purity ensures that state transitions are predictable and testable.",
+          "examples": [
+            {
+              "id": "example_redux_data_flow_1",
+              "title": "Illustrating Unidirectional Flow with a Counter",
+              "code": "import { createStore } from 'redux';\n\n// 1. Reducer (Pure Function)\nconst counterReducer = (state = { value: 0 }, action) => {\n  switch (action.type) {\n    case 'INCREMENT':\n      return { value: state.value + 1 };\n    case 'DECREMENT':\n      return { value: state.value - 1 };\n    default:\n      return state;\n  }\n};\n\n// 2. Store Creation\nconst store = createStore(counterReducer);\n\n// 3. UI Component (conceptual: subscribes to store and dispatches actions)\n// In a React app, this would be a connected component.\nconst CounterComponent = () => {\n  const currentValue = store.getState().value; // Select state\n\n  const handleIncrement = () => {\n    // Dispatch action (User Interaction -> Action Dispatch)\n    store.dispatch({ type: 'INCREMENT' });\n  };\n\n  const handleDecrement = () => {\n    store.dispatch({ type: 'DECREMENT' });\n  };\n\n  // Simulate UI rendering and interaction\n  console.log(`UI displayed: ${currentValue}`);\n  return {\n    increment: handleIncrement,\n    decrement: handleDecrement\n  };\n};\n\n// 4. Subscribe to state changes (UI Update)\nconst unsubscribe = store.subscribe(() => {\n  const newState = store.getState().value;\n  console.log(`UI updated: New value is ${newState}`);\n  // In a real app, React would re-render here\n});\n\n// Simulate User Interaction\nconsole.log('Initial UI state:');\nconst ui = CounterComponent();\n\nconsole.log('\\nUser clicks increment:');\nui.increment(); // Triggers dispatch\n\nconsole.log('\\nUser clicks increment again:');\nui.increment();\n\nconsole.log('\\nUser clicks decrement:');\nui.decrement();\n\nunsubscribe();\nconsole.log('\\nUnsubscribed. Further dispatches will not log via this listener.');\nstore.dispatch({ type: 'INCREMENT' });\nconsole.log('State after unsubscribe and dispatch:', store.getState().value); // Still updates internally\n",
+              "explanation": "This example visually walks through the Redux data flow using a simple counter. It shows how user actions (simulated by calling `ui.increment()`) trigger `dispatch` calls. These dispatches go to the `store`, which passes them to the `reducer`. The `reducer` calculates and returns a new state. The `store` updates, and `subscribers` (simulating UI components) are notified to re-render, reflecting the new state. This completes the unidirectional flow.",
+              "language": "javascript"
+            },
+            {
+              "id": "example_redux_data_flow_2",
+              "title": "Demonstrating Pure Reducer",
+              "code": "// Pure Reducer (correct way)\nfunction pureReducer(state = { items: [] }, action) {\n  switch (action.type) {\n    case 'ADD_ITEM':\n      return { ...state, items: [...state.items, action.payload] }; // Returns new object and new array\n    case 'REMOVE_LAST_ITEM':\n      return { ...state, items: state.items.slice(0, -1) }; // Returns new object and new array\n    default:\n      return state;\n  }\n}\n\n// Impure Reducer (incorrect way - mutates state)\nfunction impureReducer(state = { items: [] }, action) {\n  switch (action.type) {\n    case 'ADD_ITEM_IMPURE':\n      state.items.push(action.payload); // Mutates the original array\n      return state; // Returns the mutated original state\n    case 'REMOVE_LAST_ITEM_IMPURE':\n      state.items.pop(); // Mutates the original array\n      return state;\n    default:\n      return state;\n  }\n}\n\n// Demonstration of purity\nconst initialState = { items: [] };\nconst action1 = { type: 'ADD_ITEM', payload: 'Item 1' };\nconst nextStatePure = pureReducer(initialState, action1);\nconsole.log('Pure Reducer:', nextStatePure); // { items: ['Item 1'] }\nconsole.log('Original state after pure reducer:', initialState); // { items: [] } (unmodified)\n\nconst action2 = { type: 'ADD_ITEM_IMPURE', payload: 'Item 2' };\nconst nextStateImpure = impureReducer(initialState, action2);\nconsole.log('Impure Reducer:', nextStateImpure); // { items: ['Item 2'] } (looks okay here)\nconsole.log('Original state after impure reducer:', initialState); // { items: ['Item 2'] } (MODIFIED! This is bad)\n",
+              "explanation": "This example explicitly shows the difference between a pure and an impure reducer. The `pureReducer` always returns a *new* state object and new arrays/objects for nested data structures, ensuring the original state is never mutated. The `impureReducer` directly modifies the `state.items` array, which violates the Redux principle that 'Changes are Made with Pure Functions'. This mutation can lead to unpredictable behavior, difficult-to-trace bugs, and issues with change detection in React.",
+              "language": "javascript"
+            }
+          ],
+          "relatedQuestions": [
+            "question_redux_data_flow_1",
+            "question_redux_data_flow_2",
+            "question_redux_data_flow_3",
+            "question_redux_data_flow_4",
+            "question_redux_data_flow_5",
+            "question_redux_data_flow_6",
+            "question_redux_data_flow_7",
+            "question_redux_data_flow_8",
+            "question_redux_data_flow_9",
+            "question_redux_core_6"
+          ],
+          "relatedTasks": [
+            "task_simulate_redux_flow",
+            "task_design_pure_reducers"
+          ],
+          "tags": [
+            "Redux",
+            "Data Flow",
+            "Principles",
+            "Unidirectional Flow",
+            "Pure Functions",
+            "Single Source of Truth",
+            "Immutability"
+          ],
+          "technology": "JavaScript",
+          "prerequisites": [
+            "Redux core concepts",
+            "Immutability in JavaScript"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 9,
+          "learningPath": "intermediate",
+          "requiredFor": [
+            "Building scalable Redux applications",
+            "Debugging Redux state changes"
+          ]
+        },
+        {
+          "id": "theory_redux_store_api",
+          "title": "Redux Store API and Interaction",
+          "content": "The Redux store is the central hub for your application's state. It provides a simple API to interact with the state in a predictable manner. Understanding these methods is key to using Redux effectively.\n\n## Store API Methods\n1.  **`getState()`**: This method returns the current state tree of your application. It provides a snapshot of the entire state at the moment it's called. It's typically used by UI components (often via selectors) to read the necessary data for rendering.\n    ```javascript\n    // Get current state\n    console.log(store.getState());\n    ```\n2.  **`dispatch(action)`**: This is the *only* way to trigger a state change in Redux. When `dispatch` is called with an action object, the store internally passes the current state and the action to the root reducer. The reducer calculates the next state, and the store updates itself. After the state update, all registered listeners are notified.\n    ```javascript\n    // Action examples\n    const addTodoAction = {\n      type: 'ADD_TODO',\n      payload: {\n        id: 1,\n        text: 'Learn Redux',\n        completed: false\n      }\n    };\n\n    // Dispatch the action\n    store.dispatch(addTodoAction);\n    ```\n3.  **`subscribe(listener)`**: This method allows you to register a callback function (`listener`) that will be called every time the state changes. This is useful for integrating Redux with UI frameworks (though `react-redux` handles this automatically) or for logging/debugging state changes. The `subscribe` method returns a function that, when called, unsubscribes the listener.\n    ```javascript\n    // Subscribe to changes\n    const unsubscribe = store.subscribe(() => \n      console.log('State updated:', store.getState())\n    );\n\n    // Later, unsubscribe from changes\n    unsubscribe();\n    ```\n4.  **`replaceReducer(nextReducer)`**: (Not explicitly mentioned in the snippet but part of the core API) This method is typically used for hot-reloading reducers during development or for code splitting in production. It replaces the current reducer with the `nextReducer` you provide.\n\n## Creating a Store\nThe `createStore` function from the `redux` library is used to create a Redux store. It takes a root reducer as its primary argument.\n```javascript\nimport { createStore } from 'redux';\nimport rootReducer from './reducers'; // Assuming you have a rootReducer defined elsewhere\n\nconst store = createStore(rootReducer);\n```\n\nThis single store then becomes the central repository for your application's entire state.",
+          "examples": [
+            {
+              "id": "example_redux_store_api_1",
+              "title": "Full Store Lifecycle Example",
+              "code": "import { createStore } from 'redux';\n\nconst initialState = { count: 0 };\n\nfunction counterReducer(state = initialState, action) {\n  switch (action.type) {\n    case 'INCREMENT':\n      return { count: state.count + 1 };\n    case 'DECREMENT':\n      return { count: state.count - 1 };\n    default:\n      return state;\n  }\n}\n\nconst store = createStore(counterReducer);\n\nconsole.log('Initial state:', store.getState().count);\n\nconst unsubscribe = store.subscribe(() => {\n  console.log('Listener fired! Current count:', store.getState().count);\n});\n\nstore.dispatch({ type: 'INCREMENT' }); // Listener fires\nstore.dispatch({ type: 'INCREMENT' }); // Listener fires\nstore.dispatch({ type: 'DECREMENT' }); // Listener fires\n\nunsubscribe(); // Listener removed\n\nstore.dispatch({ type: 'INCREMENT' }); // State updates, but listener won't log\nconsole.log('State after unsubscribe and dispatch:', store.getState().count);\n",
+              "explanation": "This example demonstrates the full lifecycle of interacting with a Redux store using its core API methods. It shows `createStore` to initialize, `getState()` to read state, `subscribe()` to set up a listener for state changes, `dispatch()` to trigger state updates, and the function returned by `subscribe()` to `unsubscribe` the listener, showing how state changes are no longer observed by that specific listener.",
+              "language": "javascript"
+            }
+          ],
+          "relatedQuestions": [
+            "question_redux_store_api_1",
+            "question_redux_store_api_2",
+            "question_redux_store_api_3",
+            "question_redux_store_api_4",
+            "question_redux_store_api_5",
+            "question_redux_store_api_6",
+            "question_redux_core_6"
+          ],
+          "relatedTasks": [
+            "task_implement_redux_store_methods",
+            "task_build_custom_store_utility"
+          ],
+          "tags": [
+            "Redux",
+            "Store API",
+            "getState",
+            "dispatch",
+            "subscribe",
+            "createStore"
+          ],
+          "technology": "JavaScript",
+          "prerequisites": [
+            "Redux core concepts"
+          ],
+          "complexity": 6,
+          "interviewRelevance": 8,
+          "learningPath": "intermediate",
+          "requiredFor": [
+            "Understanding Redux internals",
+            "Debugging Redux applications"
+          ]
+        }
+      ],
+      "questions": [
+        {
+          "id": "question_redux_core_1",
+          "topic": "Redux Core Concepts",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "What is the primary purpose of an 'Action' in Redux?",
+          "answer": "An Action is a plain JavaScript object that describes what happened in the application, serving as the sole way to send data to the Redux store.",
+          "options": [],
+          "analysisPoints": [
+            "Focus on the 'what happened' aspect.",
+            "Highlight its role as the data carrier to the store.",
+            "Emphasize it's a plain JavaScript object."
+          ],
+          "keyConcepts": [
+            "Action",
+            "Redux",
+            "State Management",
+            "Data Flow"
+          ],
+          "evaluationCriteria": [
+            "Ability to recall definitions",
+            "Understanding of basic Redux terminology"
+          ],
+          "example": "",
+          "tags": [
+            "Redux",
+            "Action",
+            "Flashcard",
+            "Core Concepts"
+          ],
+          "prerequisites": [
+            "Basic JavaScript objects"
+          ],
+          "complexity": 3,
+          "interviewFrequency": 7,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_redux_core_2",
+          "topic": "Redux Core Concepts",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "What is a 'Reducer' in Redux?",
+          "answer": "A Reducer is a pure function that takes the current state and an action as arguments, and returns a new state. It specifies how the application's state changes in response to actions.",
+          "options": [],
+          "analysisPoints": [
+            "Mention 'pure function'.",
+            "Explain input (current state, action) and output (new state).",
+            "Connect it to state changes."
+          ],
+          "keyConcepts": [
+            "Reducer",
+            "Redux",
+            "Pure Function",
+            "State Transformation"
+          ],
+          "evaluationCriteria": [
+            "Ability to recall definitions",
+            "Understanding of basic Redux terminology"
+          ],
+          "example": "",
+          "tags": [
+            "Redux",
+            "Reducer",
+            "Flashcard",
+            "Core Concepts"
+          ],
+          "prerequisites": [
+            "Functional programming basics"
+          ],
+          "complexity": 3,
+          "interviewFrequency": 7,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_redux_core_3",
+          "topic": "Redux Core Concepts",
+          "level": "medium",
+          "type": "mcq",
+          "question": "Which of the following best describes the role of the 'Store' in Redux?",
+          "answer": "The object that holds the entire application state and provides methods to access, update, and subscribe to state changes.",
+          "options": [
+            "A function that dispatches actions to change the state.",
+            "The object that holds the entire application state and provides methods to access, update, and subscribe to state changes.",
+            "A pure function that transforms the state based on actions.",
+            "A component that displays the current state to the user."
+          ],
+          "analysisPoints": [
+            "The store is the single source of truth for the state.",
+            "It provides specific API methods (`getState`, `dispatch`, `subscribe`).",
+            "Distinguish it from actions (dispatch), reducers (transform), and UI components (display)."
+          ],
+          "keyConcepts": [
+            "Store",
+            "Redux",
+            "State Container",
+            "API Methods"
+          ],
+          "evaluationCriteria": [
+            "Understanding of core Redux components",
+            "Ability to differentiate roles"
+          ],
+          "example": "The Redux store is central, providing a consistent way to interact with the application's state. It ensures that all parts of your application work with the same data.",
+          "tags": [
+            "Redux",
+            "Store",
+            "MCQ",
+            "Core Concepts"
+          ],
+          "prerequisites": [
+            "Redux core concepts"
+          ],
+          "complexity": 5,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_redux_core_4",
+          "topic": "Redux Core Concepts",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "What is the purpose of the `dispatch` method in Redux?",
+          "answer": "The `dispatch` method is used to send actions to the Redux store, which is the only way to trigger a state change.",
+          "options": [],
+          "analysisPoints": [
+            "Explain it as the mechanism for triggering state changes.",
+            "Connect it to sending actions to the store."
+          ],
+          "keyConcepts": [
+            "Dispatch",
+            "Action",
+            "Redux",
+            "State Change"
+          ],
+          "evaluationCriteria": [
+            "Recall of Redux API methods",
+            "Understanding of state modification process"
+          ],
+          "example": "",
+          "tags": [
+            "Redux",
+            "Dispatch",
+            "Flashcard",
+            "Core Concepts"
+          ],
+          "prerequisites": [
+            "Redux core concepts"
+          ],
+          "complexity": 3,
+          "interviewFrequency": 6,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_redux_core_5",
+          "topic": "Redux Core Concepts",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "What are 'Selectors' in the context of Redux?",
+          "answer": "Selectors are functions that extract specific pieces of information from the Redux store state, often used to read data from the store in UI components.",
+          "options": [],
+          "analysisPoints": [
+            "Focus on extracting specific data.",
+            "Mention their use in UI components.",
+            "Hint at potential performance benefits (memoization)."
+          ],
+          "keyConcepts": [
+            "Selector",
+            "Redux",
+            "State Extraction",
+            "Performance"
+          ],
+          "evaluationCriteria": [
+            "Recall of Redux helper concepts",
+            "Understanding of data retrieval"
+          ],
+          "example": "",
+          "tags": [
+            "Redux",
+            "Selector",
+            "Flashcard",
+            "Core Concepts"
+          ],
+          "prerequisites": [
+            "Redux core concepts"
+          ],
+          "complexity": 4,
+          "interviewFrequency": 6,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_redux_core_6",
+          "topic": "Redux Core Concepts",
+          "level": "medium",
+          "type": "open",
+          "question": "Explain the characteristics of a pure function, and why it's crucial for Redux 'Reducers' to be pure.",
+          "answer": "A pure function has two main characteristics:\n1.  **Determinism**: Given the same inputs, it will always return the same output.\n2.  **No Side Effects**: It does not cause any observable side effects (e.g., modifying global state, performing I/O operations like network requests or DOM manipulation, console logging) outside of its local scope.\n\nIt's crucial for Redux reducers to be pure because:\n1.  **Predictability**: Purity ensures that state changes are predictable. Given an initial state and a series of actions, the final state will always be the same, making debugging easier.\n2.  **Testability**: Pure functions are easy to test in isolation. You can simply pass inputs and assert outputs without worrying about setting up complex environments or mocking side effects.\n3.  **Immutability**: Reducers must not mutate the original state object. Instead, they should return a new state object. Purity naturally encourages this by preventing direct modification of inputs, which is essential for Redux's change detection mechanism and for features like time-travel debugging.\n4.  **Concurrency Safety**: In a multi-threaded or asynchronous environment (though JavaScript is single-threaded, async operations can create similar issues), pure functions prevent race conditions because they don't modify shared state.\n5.  **Performance Optimization**: Libraries like React-Redux rely on shallow equality checks to determine if components need to re-render. If reducers mutate state instead of returning new state objects, these checks would fail to detect changes, leading to components not updating or re-rendering unnecessarily.",
+          "options": [],
+          "analysisPoints": [
+            "Definition of pure function (determinism, no side effects).",
+            "Link purity directly to Redux principles (predictability, immutability).",
+            "Discuss benefits: testability, debugging, time-travel debugging, performance.",
+            "Emphasize prevention of mutation and side effects."
+          ],
+          "keyConcepts": [
+            "Pure Function",
+            "Reducer",
+            "Immutability",
+            "Predictability",
+            "Testability",
+            "Side Effects",
+            "Redux Principles"
+          ],
+          "evaluationCriteria": [
+            "Accurate definition of pure functions.",
+            "Clear explanation of why purity is critical for reducers.",
+            "Demonstration of understanding of Redux principles.",
+            "Ability to articulate benefits like testability and immutability."
+          ],
+          "example": "```javascript\n// Pure reducer example\nfunction addTodoPure(state = [], action) {\n  if (action.type === 'ADD_TODO') {\n    return [...state, action.payload]; // Returns a new array\n  }\n  return state;\n}\n\n// Impure reducer example (AVOID THIS!)\nfunction addTodoImpure(state = [], action) {\n  if (action.type === 'ADD_TODO') {\n    state.push(action.payload); // Mutates the original array\n    return state;\n  }\n  return state;\n}\n```",
+          "tags": [
+            "Redux",
+            "Reducer",
+            "Pure Functions",
+            "Immutability",
+            "Interview Question",
+            "Core Concepts"
+          ],
+          "prerequisites": [
+            "Functional programming",
+            "Redux core concepts"
+          ],
+          "complexity": 7,
+          "interviewFrequency": 9,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_redux_core_7",
+          "topic": "Redux Core Concepts",
+          "level": "hard",
+          "type": "code",
+          "question": "Implement a Redux `createStore` function from scratch, including `getState`, `dispatch`, and `subscribe` methods, ensuring it adheres to Redux principles. Do not use the actual `redux` library.",
+          "answer": "```javascript\nfunction createStore(reducer) {\n  let state;\n  let listeners = [];\n\n  // Initialize state by dispatching a dummy action\n  // This makes sure reducer runs once to set initial state\n  function dispatch(action) {\n    state = reducer(state, action);\n    listeners.forEach(listener => listener());\n    return action; // Conventionally, dispatch returns the action\n  }\n\n  function getState() {\n    return state;\n  }\n\n  function subscribe(listener) {\n    listeners.push(listener);\n    const unsubscribe = () => {\n      listeners = listeners.filter(l => l !== listener);\n    };\n    return unsubscribe;\n  }\n\n  // Initialize the state by dispatching an internal action\n  dispatch({ type: '@@redux/INIT' });\n\n  return {\n    dispatch,\n    getState,\n    subscribe\n  };\n}\n\n// Example Usage:\n// A simple reducer\nconst counterReducer = (state = { count: 0 }, action) => {\n  switch (action.type) {\n    case 'INCREMENT':\n      return { count: state.count + 1 };\n    case 'DECREMENT':\n      return { count: state.count - 1 };\n    default:\n      return state;\n  }\n};\n\nconst store = createStore(counterReducer);\n\nconsole.log('Initial State:', store.getState()); // { count: 0 }\n\nconst unsubscribe = store.subscribe(() => {\n  console.log('State changed:', store.getState());\n});\n\nstore.dispatch({ type: 'INCREMENT' }); // State changed: { count: 1 }\nstore.dispatch({ type: 'INCREMENT' }); // State changed: { count: 2 }\n\nunsubscribe();\n\nstore.dispatch({ type: 'DECREMENT' }); // No console.log from listener\nconsole.log('Final State after unsubscribe:', store.getState()); // { count: 1 }\n\n```",
+          "options": [],
+          "analysisPoints": [
+            "Correct implementation of `getState`, `dispatch`, `subscribe`.",
+            "Ensuring `dispatch` calls the reducer and updates state.",
+            "Ensuring `dispatch` notifies all listeners.",
+            "Correct `subscribe` and `unsubscribe` mechanism.",
+            "Handling initial state setup (dispatching an init action).",
+            "Understanding of closure for state and listeners."
+          ],
+          "keyConcepts": [
+            "createStore",
+            "getState",
+            "dispatch",
+            "subscribe",
+            "Redux Internals",
+            "Closures",
+            "State Management"
+          ],
+          "evaluationCriteria": [
+            "Ability to implement core Redux functionality from first principles.",
+            "Correct handling of state updates and listener notifications.",
+            "Proper use of closures.",
+            "Adherence to pure reducer pattern (implied by `reducer` argument)."
+          ],
+          "example": "",
+          "tags": [
+            "Redux",
+            "Coding Challenge",
+            "createStore",
+            "Advanced",
+            "Internals"
+          ],
+          "prerequisites": [
+            "Closures",
+            "Functional programming",
+            "Redux core concepts"
+          ],
+          "complexity": 8,
+          "interviewFrequency": 7,
+          "learningPath": "advanced"
+        },
+        {
+          "id": "question_redux_core_8",
+          "topic": "Redux Core Concepts",
+          "level": "medium",
+          "type": "mcq",
+          "question": "An action must always have which property?",
+          "answer": "`type`",
+          "options": [
+            "`payload`",
+            "`id`",
+            "`type`",
+            "`status`"
+          ],
+          "analysisPoints": [
+            "The `type` property is mandatory for all Redux actions.",
+            "It's used by reducers to determine how to process the action.",
+            "Other properties like `payload` are optional and provide additional data."
+          ],
+          "keyConcepts": [
+            "Action",
+            "Redux",
+            "Type Property"
+          ],
+          "evaluationCriteria": [
+            "Knowledge of action structure",
+            "Understanding of Redux conventions"
+          ],
+          "example": "```javascript\n// Valid action\nconst validAction = { type: 'USER_LOGIN', payload: { username: 'test' } };\n\n// Invalid action (missing type)\n// const invalidAction = { payload: { data: 'some data' } };\n```",
+          "tags": [
+            "Redux",
+            "Action",
+            "MCQ",
+            "Core Concepts"
+          ],
+          "prerequisites": [
+            "Redux core concepts"
+          ],
+          "complexity": 4,
+          "interviewFrequency": 7,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_redux_core_9",
+          "topic": "Redux Core Concepts",
+          "level": "medium",
+          "type": "open",
+          "question": "What is the difference between `store.getState()` and `store.subscribe()` in Redux, and when would you use each?",
+          "answer": "`store.getState()` is a method that returns the *current snapshot* of the entire state tree held by the Redux store at the moment it is called. It is used when you need to read the current state synchronously.\n\n`store.subscribe(listener)` is a method that registers a `listener` callback function. This `listener` function will be invoked *every time the state changes* in the Redux store. It is used to react to state changes, typically for updating the UI or performing side effects that depend on state updates. The `subscribe` method also returns an `unsubscribe` function which can be called to remove the listener.\n\n**When to use each:**\n*   **`store.getState()`**: Use this when you need to access the current state value. For example, in a React component's `mapStateToProps` (when using `react-redux`), or directly in a non-React environment if you need to perform an action based on the current state. It's for *reading* the state at a specific point in time.\n*   **`store.subscribe()`**: Use this when you need to perform an action *whenever the state changes*. This is the underlying mechanism by which UI libraries like React-Redux re-render components in response to state updates. You might also use it for logging state changes, syncing state with local storage, or triggering side effects (though for complex side effects, Redux middleware is preferred). It's for *reacting* to state changes.",
+          "options": [],
+          "analysisPoints": [
+            "Define `getState()` as synchronous state retrieval.",
+            "Define `subscribe()` as a mechanism for reacting to future state changes.",
+            "Provide clear use cases for both.",
+            "Mention the `unsubscribe` return value for `subscribe`."
+          ],
+          "keyConcepts": [
+            "Store",
+            "getState",
+            "subscribe",
+            "Redux API",
+            "State Access",
+            "State Change Reaction"
+          ],
+          "evaluationCriteria": [
+            "Clear distinction between the two methods' purposes.",
+            "Accurate use case examples.",
+            "Understanding of synchronous vs. asynchronous state interaction."
+          ],
+          "example": "```javascript\nimport { createStore } from 'redux';\n\nconst reducer = (state = { value: 0 }, action) => {\n  if (action.type === 'INC') return { value: state.value + 1 };\n  return state;\n};\nconst store = createStore(reducer);\n\n// Using getState()\nconsole.log('Current value (getState):', store.getState().value); // 0\n\n// Using subscribe()\nconst unsubscribe = store.subscribe(() => {\n  console.log('State changed! New value:', store.getState().value);\n});\n\nstore.dispatch({ type: 'INC' }); // Logs: State changed! New value: 1\nstore.dispatch({ type: 'INC' }); // Logs: State changed! New value: 2\n\nunsubscribe();\nstore.dispatch({ type: 'INC' }); // No log, listener removed\n```",
+          "tags": [
+            "Redux",
+            "Store API",
+            "getState",
+            "subscribe",
+            "Open-ended"
+          ],
+          "prerequisites": [
+            "Redux core concepts"
+          ],
+          "complexity": 6,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_redux_core_10",
+          "topic": "Redux Core Concepts",
+          "level": "medium",
+          "type": "mcq",
+          "question": "Given the following reducer and initial state, what will `store.getState().todos` be after `store.dispatch({ type: 'ADD_TODO', payload: { id: 1, text: 'Buy Milk', completed: false } })` is called twice?",
+          "answer": "[{ id: 1, text: 'Buy Milk', completed: false }, { id: 1, text: 'Buy Milk', completed: false }]",
+          "options": [
+            "[{ id: 1, text: 'Buy Milk', completed: false }]",
+            "[]",
+            "[{ id: 1, text: 'Buy Milk', completed: false }, { id: 1, text: 'Buy Milk', completed: false }]",
+            "undefined"
+          ],
+          "analysisPoints": [
+            "The reducer correctly adds the payload to the `todos` array.",
+            "Each dispatch call independently processes the action.",
+            "The payload object is the same, so two identical objects will be added.",
+            "Reducers return a new array with the existing todos plus the new one, maintaining immutability.",
+            "The `id` being the same across dispatches is a detail that shows the action itself is fixed."
+          ],
+          "keyConcepts": [
+            "Reducer",
+            "Action",
+            "State Immutability",
+            "Dispatch"
+          ],
+          "evaluationCriteria": [
+            "Ability to trace state changes through reducer logic.",
+            "Understanding of array spread syntax and immutability.",
+            "Correctly applying dispatch logic iteratively."
+          ],
+          "example": "```javascript\nimport { createStore } from 'redux';\n\nconst initialState = { todos: [] };\n\nconst todosReducer = (state = initialState, action) => {\n  switch (action.type) {\n    case 'ADD_TODO':\n      return { ...state, todos: [...state.todos, action.payload] };\n    default:\n      return state;\n  }\n};\n\nconst store = createStore(todosReducer);\n\nstore.dispatch({ type: 'ADD_TODO', payload: { id: 1, text: 'Buy Milk', completed: false } });\nstore.dispatch({ type: 'ADD_TODO', payload: { id: 1, text: 'Buy Milk', completed: false } });\n\nconsole.log(store.getState().todos);\n// Expected output: [{ id: 1, text: 'Buy Milk', completed: false }, { id: 1, text: 'Buy Milk', completed: false }]\n```",
+          "tags": [
+            "Redux",
+            "Reducer",
+            "Action",
+            "MCQ",
+            "State Trace",
+            "Immutability"
+          ],
+          "prerequisites": [
+            "Redux core concepts",
+            "JavaScript array methods"
+          ],
+          "complexity": 6,
+          "interviewFrequency": 7,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_redux_core_11",
+          "topic": "Redux Core Concepts",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "Can you directly modify the state object in a Redux store?",
+          "answer": "No. The state in a Redux store is read-only. The only way to change it is by dispatching an action, which is then processed by a pure reducer to return a *new* state object.",
+          "options": [],
+          "analysisPoints": [
+            "Emphasize 'read-only' and 'no direct modification'.",
+            "Reiterate the action-reducer cycle as the only valid way to change state.",
+            "Mention the return of a *new* state object."
+          ],
+          "keyConcepts": [
+            "State Immutability",
+            "Redux Principles",
+            "Action",
+            "Reducer"
+          ],
+          "evaluationCriteria": [
+            "Understanding of core Redux principles",
+            "Knowledge of immutable state"
+          ],
+          "example": "",
+          "tags": [
+            "Redux",
+            "Immutability",
+            "Flashcard",
+            "Principles"
+          ],
+          "prerequisites": [
+            "Redux core concepts"
+          ],
+          "complexity": 3,
+          "interviewFrequency": 8,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_redux_data_flow_1",
+          "topic": "Redux Data Flow",
+          "level": "medium",
+          "type": "open",
+          "question": "Describe the unidirectional data flow in Redux, outlining each step from user interaction to UI update.",
+          "answer": "The unidirectional data flow in Redux ensures predictability and traceability of state changes. It consists of the following steps:\n\n1.  **User Interaction**: The cycle begins when a user interacts with the application's UI (e.g., clicking a button, typing in a text field, submitting a form).\n2.  **Action Dispatch**: In response to the user interaction, an action is created and `dispatch`ed to the Redux store. An action is a plain JavaScript object describing 'what happened' (e.g., `{ type: 'ADD_TODO', payload: 'Buy groceries' }`). This is the *only* way to initiate a state change.\n3.  **Reducer Processing**: The Redux store receives the dispatched action. It then calls the application's root reducer (or combination of reducers) with the current state and the dispatched action. The reducer, being a pure function, calculates and returns a *new* state object based on the action's `type` and `payload`. It never mutates the original state.\n4.  **Store Update**: The Redux store saves the new state tree returned by the reducer. This new state becomes the current single source of truth for the application.\n5.  **UI Update**: Any components that have subscribed to the store (or are 'connected' via a library like React-Redux) are notified of the state change. If the relevant slice of state that a component depends on has changed, the component will re-render to reflect the new data. This completes the cycle, showing the updated state to the user.",
+          "options": [],
+          "analysisPoints": [
+            "Accurate description of each step.",
+            "Emphasis on 'unidirectional' and 'predictability'.",
+            "Role of each component (Action, Reducer, Store, Dispatch, UI).",
+            "Crucial aspects like 'pure function' for reducers and 'immutability' of state."
+          ],
+          "keyConcepts": [
+            "Redux Data Flow",
+            "Unidirectional",
+            "Action",
+            "Reducer",
+            "Store",
+            "Dispatch",
+            "UI Update",
+            "Predictability"
+          ],
+          "evaluationCriteria": [
+            "Completeness of steps.",
+            "Clarity and accuracy of explanation for each step.",
+            "Understanding of the entire cycle's purpose.",
+            "Inclusion of key Redux principles within the flow."
+          ],
+          "example": "```diagram\nUser Interaction -> Action Dispatched -> Reducer Processes -> Store Updated -> UI Re-rendered\n```\nThis diagram visually represents the linear progression of data.",
+          "tags": [
+            "Redux",
+            "Data Flow",
+            "Open-ended",
+            "Architecture"
+          ],
+          "prerequisites": [
+            "Redux core concepts"
+          ],
+          "complexity": 7,
+          "interviewFrequency": 9,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_redux_data_flow_2",
+          "topic": "Redux Data Flow",
+          "level": "medium",
+          "type": "mcq",
+          "question": "Which of the following correctly orders the steps in the Redux unidirectional data flow?",
+          "answer": "User Interaction → Action Dispatch → Reducer Processing → Store Update → UI Update",
+          "options": [
+            "User Interaction → Store Update → Action Dispatch → Reducer Processing → UI Update",
+            "Action Dispatch → User Interaction → Reducer Processing → Store Update → UI Update",
+            "User Interaction → Action Dispatch → Reducer Processing → Store Update → UI Update",
+            "Reducer Processing → Action Dispatch → User Interaction → Store Update → UI Update"
+          ],
+          "analysisPoints": [
+            "The flow always starts with user interaction leading to an action.",
+            "The action is dispatched to the store.",
+            "The reducer handles the action to create new state.",
+            "The store saves the new state.",
+            "The UI updates based on the new state."
+          ],
+          "keyConcepts": [
+            "Redux Data Flow",
+            "Order of Operations",
+            "Unidirectional"
+          ],
+          "evaluationCriteria": [
+            "Knowledge of Redux architecture",
+            "Ability to sequence events"
+          ],
+          "example": "Understanding this sequence is fundamental for debugging and predicting state changes in a Redux application.",
+          "tags": [
+            "Redux",
+            "Data Flow",
+            "MCQ",
+            "Core Concepts"
+          ],
+          "prerequisites": [
+            "Redux core concepts"
+          ],
+          "complexity": 5,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_redux_data_flow_3",
+          "topic": "Redux Data Flow",
+          "level": "medium",
+          "type": "open",
+          "question": "Redux advocates for a 'Single Source of Truth'. What does this principle mean, and what are its benefits?",
+          "answer": "The 'Single Source of Truth' principle in Redux means that the entire state of your application is stored in a single, plain JavaScript object tree within a single Redux store. Instead of having state spread across multiple components or isolated data stores, all application-wide state resides in one centralized location.\n\n**Benefits:**\n1.  **Predictability**: Having a single state tree makes it much easier to understand how changes in one part of the application affect others. The state is consistent across the entire application at any given time.\n2.  **Easier Debugging**: When issues arise, you only need to inspect one state object to understand the current state of the entire application. Tools like Redux DevTools can replay actions and revert state, which is incredibly powerful for debugging.\n3.  **Simplified State Management**: It removes the complexity of managing state synchronization between multiple disconnected parts of an application.\n4.  **Server-Side Rendering (SSR)**: It simplifies server-side rendering, as the entire application state can be serialized from the server and then hydrated on the client, ensuring a consistent UI.\n5.  **State Persistence and Hydration**: Easier to save the entire application state to local storage or a database, and then load it back when the application restarts.\n6.  **Undo/Redo Functionality (Time-Travel Debugging)**: Because state changes are deterministic and stored in a single tree, it's straightforward to implement features like undo/redo or time-travel debugging by simply replaying actions against the centralized state.",
+          "options": [],
+          "analysisPoints": [
+            "Definition: entire state in one object/store.",
+            "Benefits: predictability, debugging, simplification, SSR, persistence, time-travel.",
+            "Contrast with decentralized state management."
+          ],
+          "keyConcepts": [
+            "Single Source of Truth",
+            "Redux Principles",
+            "Centralized State",
+            "Debugging",
+            "Predictability"
+          ],
+          "evaluationCriteria": [
+            "Accurate definition of the principle.",
+            "Comprehensive explanation of its benefits.",
+            "Understanding of architectural implications."
+          ],
+          "example": "Imagine a complex e-commerce application. Without a single source of truth, user cart data might be in one component's state, user authentication in another, and product filters in yet another. Coordinating updates and ensuring consistency across these separate states becomes incredibly difficult. With Redux, all this information resides in one central store, making it easier to manage.",
+          "tags": [
+            "Redux",
+            "Principles",
+            "Single Source of Truth",
+            "Open-ended",
+            "Architecture"
+          ],
+          "prerequisites": [
+            "Redux core concepts"
+          ],
+          "complexity": 7,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_redux_data_flow_4",
+          "topic": "Redux Data Flow",
+          "level": "medium",
+          "type": "mcq",
+          "question": "According to Redux principles, what is the *only* way to change the application's state?",
+          "answer": "By emitting an action.",
+          "options": [
+            "By directly modifying the store object.",
+            "By calling a reducer function directly from a component.",
+            "By emitting an action.",
+            "By using `setState` in a connected React component."
+          ],
+          "analysisPoints": [
+            "This tests the 'State is Read-Only' principle.",
+            "Direct modification is forbidden.",
+            "Reducers are called by the store after dispatch, not directly by components.",
+            "Using `setState` in React components manages *component local state*, not Redux global state."
+          ],
+          "keyConcepts": [
+            "State is Read-Only",
+            "Redux Principles",
+            "Action",
+            "Dispatch"
+          ],
+          "evaluationCriteria": [
+            "Understanding of core Redux principles",
+            "Distinguishing correct state mutation paths"
+          ],
+          "example": "This principle ensures all state changes are explicit and traceable. If components could directly modify state, it would lead to unpredictable behavior and make debugging extremely challenging.",
+          "tags": [
+            "Redux",
+            "Principles",
+            "State Mutation",
+            "MCQ"
+          ],
+          "prerequisites": [
+            "Redux core concepts"
+          ],
+          "complexity": 5,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_redux_data_flow_5",
+          "topic": "Redux Data Flow",
+          "level": "medium",
+          "type": "open",
+          "question": "The third principle of Redux states 'Changes are Made with Pure Functions'. How does this principle relate to immutability in reducers?",
+          "answer": "The principle 'Changes are Made with Pure Functions' directly mandates immutability in Redux reducers. A pure function, by definition, must not cause any side effects, and modifying its inputs (the current state) is considered a side effect.\n\nTherefore, when a reducer receives the current state, it must not directly mutate that state object. Instead, if a change is needed, the reducer must return a *new* state object with the necessary modifications. For nested data, this often involves creating shallow copies of objects and arrays at each level of the state tree that needs to be updated.\n\n**Relation to Immutability:**\n*   **Prevents Side Effects**: By returning a new state object, reducers ensure they are free of side effects, upholding their 'pure' nature.\n*   **Enables Change Detection**: Redux (and libraries like React-Redux) rely on reference equality to detect if the state has changed. If you mutate the original state object instead of returning a new one, the reference remains the same, and Redux might not detect the change, leading to UI components not re-rendering.\n*   **Time-Travel Debugging**: Immutability is fundamental for Redux DevTools' ability to 'time-travel' (jump back and forth between states). If state objects were mutated, there would be no clean way to preserve previous versions of the state.\n*   **Predictability**: Immutable updates lead to predictable state transitions, as each action results in a distinct, new state object, making it easier to reason about the application's behavior.",
+          "options": [],
+          "analysisPoints": [
+            "Define pure function and side effects.",
+            "Explain why mutating state is a side effect.",
+            "Connect to returning *new* state objects.",
+            "Discuss benefits of immutability: change detection, time-travel, predictability."
+          ],
+          "keyConcepts": [
+            "Pure Functions",
+            "Immutability",
+            "Reducer",
+            "Redux Principles",
+            "Side Effects",
+            "State Mutation"
+          ],
+          "evaluationCriteria": [
+            "Clear explanation of the link between purity and immutability.",
+            "Understanding of how mutation breaks purity.",
+            "Articulation of the practical benefits and consequences of immutability."
+          ],
+          "example": "```javascript\n// Correct (Immutable) way to add a todo\nfunction addTodoImmutable(state, action) {\n  return { ...state, todos: [...state.todos, action.payload] };\n}\n\n// Incorrect (Mutable) way to add a todo\nfunction addTodoMutable(state, action) {\n  state.todos.push(action.payload); // Direct mutation\n  return state;\n}\n```",
+          "tags": [
+            "Redux",
+            "Principles",
+            "Pure Functions",
+            "Immutability",
+            "Open-ended"
+          ],
+          "prerequisites": [
+            "Functional programming",
+            "JavaScript object/array immutability"
+          ],
+          "complexity": 7,
+          "interviewFrequency": 9,
+          "learningPath": "advanced"
+        },
+        {
+          "id": "question_redux_data_flow_6",
+          "topic": "Redux Data Flow",
+          "level": "hard",
+          "type": "code",
+          "question": "Write a reducer function for a shopping cart that can perform two actions: `ADD_ITEM` (adds a new item object with `id`, `name`, `price`, `quantity`) and `REMOVE_ITEM` (removes an item by `id`). Ensure the reducer is pure and handles immutability correctly. The initial state should be an empty array of items.",
+          "answer": "```javascript\nconst shoppingCartReducer = (state = [], action) => {\n  switch (action.type) {\n    case 'ADD_ITEM':\n      // Check if item already exists to update quantity, or add new item\n      const existingItemIndex = state.findIndex(item => item.id === action.payload.id);\n      if (existingItemIndex !== -1) {\n        return state.map((item, index) => \n          index === existingItemIndex\n            ? { ...item, quantity: item.quantity + action.payload.quantity }\n            : item\n        );\n      } else {\n        return [...state, action.payload]; // Add new item\n      }\n    case 'REMOVE_ITEM':\n      // Filter out the item with the specified ID\n      return state.filter(item => item.id !== action.payload.id);\n    default:\n      return state;\n  }\n};\n\n// Example Usage:\nlet cartState = shoppingCartReducer(undefined, { type: '@@INIT' });\nconsole.log('Initial Cart:', cartState); // []\n\ncartState = shoppingCartReducer(cartState, {\n  type: 'ADD_ITEM',\n  payload: { id: 'milk', name: 'Milk', price: 2.50, quantity: 1 }\n});\nconsole.log('After adding Milk:', cartState);\n// Expected: [{ id: 'milk', name: 'Milk', price: 2.50, quantity: 1 }]\n\ncartState = shoppingCartReducer(cartState, {\n  type: 'ADD_ITEM',\n  payload: { id: 'bread', name: 'Bread', price: 3.00, quantity: 2 }\n});\nconsole.log('After adding Bread:', cartState);\n// Expected: [{...Milk}, { id: 'bread', name: 'Bread', price: 3.00, quantity: 2 }]\n\ncartState = shoppingCartReducer(cartState, {\n  type: 'ADD_ITEM',\n  payload: { id: 'milk', name: 'Milk', price: 2.50, quantity: 1 }\n});\nconsole.log('After adding Milk again (quantity update):', cartState);\n// Expected: [{ id: 'milk', name: 'Milk', price: 2.50, quantity: 2 }, {...Bread}]\n\ncartState = shoppingCartReducer(cartState, {\n  type: 'REMOVE_ITEM',\n  payload: { id: 'bread' }\n});\nconsole.log('After removing Bread:', cartState);\n// Expected: [{ id: 'milk', name: 'Milk', price: 2.50, quantity: 2 }]\n\ncartState = shoppingCartReducer(cartState, {\n  type: 'REMOVE_ITEM',\n  payload: { id: 'nonexistent' }\n});\nconsole.log('After removing nonexistent item:', cartState);\n// Expected: [{ id: 'milk', name: 'Milk', price: 2.50, quantity: 2 }] (no change)\n```",
+          "options": [],
+          "analysisPoints": [
+            "Initial state handling for reducer (`state = []`).",
+            "Correct use of `switch` statement for action types.",
+            "Immutability for `ADD_ITEM`: uses `...state` and `[]` spread for new array reference.",
+            "Handling existing items in `ADD_ITEM` by updating quantity (mapping over the array to return new item objects).",
+            "Immutability for `REMOVE_ITEM`: uses `filter` to return a new array reference.",
+            "Default case returns `state` without modification.",
+            "Edge case: removing a non-existent item."
+          ],
+          "keyConcepts": [
+            "Reducer",
+            "Immutability",
+            "Pure Functions",
+            "Array Methods",
+            "Shopping Cart Logic",
+            "State Management"
+          ],
+          "evaluationCriteria": [
+            "Correct implementation of `ADD_ITEM` and `REMOVE_ITEM` logic.",
+            "Strict adherence to immutability (no direct state mutation).",
+            "Handling of default state and unknown actions.",
+            "Ability to handle item quantity updates for existing items."
+          ],
+          "example": "",
+          "tags": [
+            "Redux",
+            "Reducer",
+            "Coding Challenge",
+            "Immutability",
+            "Shopping Cart",
+            "Hard"
+          ],
+          "prerequisites": [
+            "JavaScript array methods (map, filter, findIndex)",
+            "Spread syntax",
+            "Redux core concepts"
+          ],
+          "complexity": 8,
+          "interviewFrequency": 7,
+          "learningPath": "advanced"
+        },
+        {
+          "id": "question_redux_data_flow_7",
+          "topic": "Redux Data Flow",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "What happens if a Redux reducer directly modifies the `state` object instead of returning a new one?",
+          "answer": "It violates the Redux principle of 'Changes are Made with Pure Functions' and immutability. This can lead to unpredictable behavior, components not re-rendering correctly, and issues with debugging tools like Redux DevTools.",
+          "options": [],
+          "analysisPoints": [
+            "Directly links to breaking Redux principles.",
+            "Consequences: unpredictable behavior, re-rendering issues, debugging problems.",
+            "Highlights the importance of immutability for change detection."
+          ],
+          "keyConcepts": [
+            "Reducer Purity",
+            "Immutability",
+            "Side Effects",
+            "Debugging",
+            "Redux Principles"
+          ],
+          "evaluationCriteria": [
+            "Understanding of consequences of violating Redux principles"
+          ],
+          "example": "",
+          "tags": [
+            "Redux",
+            "Reducer",
+            "Immutability",
+            "Flashcard",
+            "Principles"
+          ],
+          "prerequisites": [
+            "Redux core concepts"
+          ],
+          "complexity": 4,
+          "interviewFrequency": 7,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_redux_data_flow_8",
+          "topic": "Redux Data Flow",
+          "level": "medium",
+          "type": "open",
+          "question": "When does the `listener` function registered with `store.subscribe()` get called, and what is its main use case?",
+          "answer": "The `listener` function registered with `store.subscribe()` gets called *every time the Redux store's state changes*. This means after a `dispatch` call has completed and the reducer has returned a new state, Redux iterates through all registered listeners and invokes them.\n\nIts main use case is to react to state changes. While `react-redux` handles UI updates automatically by subscribing components, direct usage of `store.subscribe()` can be useful for:\n1.  **Logging**: To log state changes for debugging purposes.\n2.  **Persisting State**: To save the current state to local storage or a database whenever it updates.\n3.  **Side Effects (simple)**: For simple, immediate side effects that don't require complex middleware (though middleware is generally preferred for side effects like API calls).\n4.  **Integrating with Non-React UI**: If you are using Redux with a different UI library or a vanilla JavaScript application, `subscribe` is how you would trigger UI updates.",
+          "options": [],
+          "analysisPoints": [
+            "Explain the trigger: state change after dispatch and reducer.",
+            "List various use cases beyond just UI updates.",
+            "Mention the role of `react-redux` in abstracting this.",
+            "Contrast with middleware for complex side effects."
+          ],
+          "keyConcepts": [
+            "Store API",
+            "subscribe",
+            "Listener",
+            "State Change",
+            "Side Effects"
+          ],
+          "evaluationCriteria": [
+            "Accurate timing of listener invocation.",
+            "Comprehensive list of use cases.",
+            "Understanding of its role in the Redux ecosystem."
+          ],
+          "example": "```javascript\n// In a non-React app, you might manually update the DOM:\nstore.subscribe(() => {\n  const todos = store.getState().todos;\n  // Update a <ul> element in the DOM with the new todos\n  document.getElementById('todo-list').innerHTML = todos.map(todo => `<li>${todo.text}</li>`).join('');\n});\n```",
+          "tags": [
+            "Redux",
+            "Store API",
+            "subscribe",
+            "Open-ended"
+          ],
+          "prerequisites": [
+            "Redux core concepts"
+          ],
+          "complexity": 6,
+          "interviewFrequency": 7,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_redux_data_flow_9",
+          "topic": "Redux Data Flow",
+          "level": "medium",
+          "type": "code",
+          "question": "Given the following Redux store and a component's method, identify and fix the issue preventing the UI from updating when the state changes. Explain your fix.\n\n```javascript\nimport { createStore } from 'redux';\n\nconst counterReducer = (state = { count: 0 }, action) => {\n  if (action.type === 'INCREMENT') {\n    // Issue: Direct mutation\n    state.count++; \n  }\n  return state;\n};\n\nconst store = createStore(counterReducer);\n\n// Imagine this is part of a React component's render or effects\nfunction displayCounter() {\n  const counterElement = document.getElementById('counter');\n  if (counterElement) {\n    counterElement.textContent = `Count: ${store.getState().count}`;\n  }\n}\n\n// Initial display\ndisplayCounter();\n\n// Simulate user action\nstore.dispatch({ type: 'INCREMENT' });\n\n// What's wrong and how to fix it to make displayCounter update?\n```",
+          "answer": "The issue lies in the `counterReducer`:\n\n```javascript\nconst counterReducer = (state = { count: 0 }, action) => {\n  if (action.type === 'INCREMENT') {\n    // FIX: Instead of mutating, return a new state object\n    return { ...state, count: state.count + 1 }; \n  }\n  return state;\n};\n\n// The other issue is that displayCounter is only called once initially.\n// It needs to be called whenever the state changes.\n// FIX: Subscribe displayCounter to store changes\n\nimport { createStore } from 'redux';\n\nconst counterReducer = (state = { count: 0 }, action) => {\n  if (action.type === 'INCREMENT') {\n    return { ...state, count: state.count + 1 }; // Correct: Returns new state object\n  }\n  return state;\n};\n\nconst store = createStore(counterReducer);\n\nfunction displayCounter() {\n  const counterElement = document.getElementById('counter');\n  if (counterElement) {\n    counterElement.textContent = `Count: ${store.getState().count}`;\n    console.log(`UI Updated: Count is ${store.getState().count}`); // Added for clarity\n  }\n}\n\n// 1. Initial display (assuming there's an element with id 'counter' in HTML)\n// document.body.innerHTML = '<div id=\"counter\"></div>'; // For standalone test\ndisplayCounter();\n\n// 2. Subscribe displayCounter to state changes\nstore.subscribe(displayCounter);\n\n// Simulate user actions\nconsole.log('Dispatching INCREMENT...');\nstore.dispatch({ type: 'INCREMENT' });\nconsole.log('Dispatching INCREMENT again...');\nstore.dispatch({ type: 'INCREMENT' });\n\n// In a real React application, a connected component would handle the subscription and re-render automatically.\n```\n\n**Explanation of Fixes:**\n1.  **Reducer Immutability (`state.count++` to `return { ...state, count: state.count + 1 }`)**: The original `counterReducer` directly mutated the `state.count` property (`state.count++`). In Redux, reducers must be pure functions and should never mutate the original state. Instead, they should return a *new* state object with the updated values. By returning `{ ...state, count: state.count + 1 }`, we create a new object and new value for `count`, ensuring immutability. This is crucial for Redux's internal change detection (which relies on reference equality) and for features like time-travel debugging.\n2.  **Subscribing to Store Changes (`store.subscribe(displayCounter)`)**: The `displayCounter` function was only called once initially. For the UI to update when the Redux state changes, a mechanism is needed to re-run the `displayCounter` function whenever a state update occurs. This is achieved by using `store.subscribe(displayCounter)`. The `listener` function (`displayCounter` in this case) passed to `subscribe` will be invoked automatically by the Redux store after every successful `dispatch` that results in a state change. This closes the Redux data flow loop, ensuring the UI reflects the latest state.",
+          "options": [],
+          "analysisPoints": [
+            "Identification of mutation issue in reducer.",
+            "Correction of reducer to ensure immutability.",
+            "Identification of missing subscription for UI update.",
+            "Correction by adding `store.subscribe()`.",
+            "Clear explanation of why each fix is necessary (immutability, change detection, data flow)."
+          ],
+          "keyConcepts": [
+            "Reducer Purity",
+            "Immutability",
+            "store.subscribe",
+            "Redux Data Flow",
+            "Debugging"
+          ],
+          "evaluationCriteria": [
+            "Ability to debug Redux related issues.",
+            "Deep understanding of immutability and its importance.",
+            "Knowledge of how `subscribe` enables UI updates.",
+            "Correct application of Redux principles."
+          ],
+          "example": "",
+          "tags": [
+            "Redux",
+            "Coding Challenge",
+            "Debugging",
+            "Immutability",
+            "Data Flow",
+            "Hard"
+          ],
+          "prerequisites": [
+            "Redux core concepts",
+            "JavaScript immutability"
+          ],
+          "complexity": 8,
+          "interviewFrequency": 8,
+          "learningPath": "advanced"
+        }
+      ],
+      "tasks": [
+        {
+          "id": "task_implement_simple_redux_counter",
+          "title": "Implement a Basic Redux Counter",
+          "description": "\nImplement a basic Redux counter application logic. Your task is to:\n\n1.  Define a simple Redux `reducer` function that handles two action types: `'INCREMENT'` and `'DECREMENT'`. The state should be an object `{ count: number }`, starting at `0`.\n2.  Define two `action` objects: one for incrementing and one for decrementing.\n3.  Create a Redux `store` using your reducer.\n4.  Demonstrate the data flow by:\n    *   Logging the initial state.\n    *   Dispatching the `'INCREMENT'` action.\n    *   Logging the state after incrementing.\n    *   Dispatching the `'DECREMENT'` action.\n    *   Logging the state after decrementing.\n\nEnsure your reducer is a pure function and handles state immutability correctly.\n",
+          "difficulty": "medium",
+          "startingCode": "import { createStore } from 'redux';\n\n// TODO: 1. Define the reducer\n// const counterReducer = (state, action) => { /* ... */ };\n\n// TODO: 2. Define action objects\n// const incrementAction = { /* ... */ };\n// const decrementAction = { /* ... */ };\n\n// TODO: 3. Create the store\n// const store = createStore(counterReducer);\n\n// TODO: 4. Demonstrate data flow\n// console.log('Initial state:', store.getState());\n// store.dispatch(incrementAction);\n// console.log('State after increment:', store.getState());\n// store.dispatch(decrementAction);\n// console.log('State after decrement:', store.getState());\n",
+          "solutionCode": "import { createStore } from 'redux';\n\n// 1. Define the reducer\nconst counterReducer = (state = { count: 0 }, action) => {\n  switch (action.type) {\n    case 'INCREMENT':\n      return { ...state, count: state.count + 1 };\n    case 'DECREMENT':\n      return { ...state, count: state.count - 1 };\n    default:\n      return state;\n  }\n};\n\n// 2. Define action objects\nconst incrementAction = { type: 'INCREMENT' };\nconst decrementAction = { type: 'DECREMENT' };\n\n// 3. Create the store\nconst store = createStore(counterReducer);\n\n// 4. Demonstrate data flow\nconsole.log('Initial state:', store.getState());\nstore.dispatch(incrementAction);\nconsole.log('State after increment:', store.getState());\nstore.dispatch(incrementAction);\nconsole.log('State after second increment:', store.getState());\nstore.dispatch(decrementAction);\nconsole.log('State after decrement:', store.getState());\nstore.dispatch({ type: 'UNKNOWN_ACTION' });\nconsole.log('State after unknown action:', store.getState());\n",
+          "testCases": [
+            "Initial state should be { count: 0 }.",
+            "Dispatching 'INCREMENT' once should change state to { count: 1 }.",
+            "Dispatching 'INCREMENT' twice should change state to { count: 2 }.",
+            "Dispatching 'DECREMENT' after an increment should revert count.",
+            "Dispatching an unknown action type should not change the state."
+          ],
+          "hints": [
+            "Remember to set a default value for the `state` parameter in your reducer.",
+            "Use the object spread syntax (`{ ...state, ...changes }`) to ensure immutability when returning a new state.",
+            "Each action needs at least a `type` property."
+          ],
+          "tags": [
+            "Redux",
+            "Counter",
+            "Reducer",
+            "Action",
+            "Store",
+            "Core Concepts"
+          ],
+          "timeEstimate": 30,
+          "prerequisites": [
+            "Redux core concepts",
+            "JavaScript spread syntax"
+          ],
+          "complexity": 5,
+          "interviewRelevance": 7,
+          "learningPath": "beginner",
+          "relatedConcepts": [
+            "Redux Core Concepts",
+            "Redux Data Flow"
+          ]
+        },
+        {
+          "id": "task_build_todo_redux_logic",
+          "title": "Build To-Do List Redux Logic",
+          "description": "\nDesign and implement the core Redux logic for a simple To-Do list application. Your solution should include:\n\n1.  **Actions**: Define action creators for:\n    *   `ADD_TODO`: Adds a new to-do item. It should take a `text` string and assign a unique `id` (e.g., using `Date.now()`) and `completed: false`.\n    *   `TOGGLE_TODO`: Toggles the `completed` status of a to-do item. It should take the `id` of the to-do item.\n    *   `DELETE_TODO`: Removes a to-do item. It should take the `id` of the to-do item.\n2.  **Reducer**: Create a `todosReducer` that manages an array of to-do objects. Ensure the reducer is pure and handles immutability correctly for all action types.\n3.  **Store**: Create a Redux store using your `todosReducer`.\n4.  **Demonstration**: Simulate the application flow by:\n    *   Adding two to-do items.\n    *   Toggling one to-do item to 'completed'.\n    *   Deleting one of the to-do items.\n    *   Logging the state after each step.\n",
+          "difficulty": "medium",
+          "startingCode": "import { createStore } from 'redux';\n\n// TODO: 1. Define action creators\n// const addTodo = (text) => ({ /* ... */ });\n// const toggleTodo = (id) => ({ /* ... */ });\n// const deleteTodo = (id) => ({ /* ... */ });\n\n// TODO: 2. Create the todosReducer\n// const todosReducer = (state = [], action) => { /* ... */ };\n\n// TODO: 3. Create the store\n// const store = createStore(todosReducer);\n\n// TODO: 4. Demonstrate the flow\n// console.log('Initial state:', store.getState());\n// store.dispatch(addTodo('Learn Redux'));\n// console.log('After adding first todo:', store.getState());\n// ...and so on\n",
+          "solutionCode": "import { createStore } from 'redux';\n\n// 1. Define action creators\nconst addTodo = (text) => ({\n  type: 'ADD_TODO',\n  payload: {\n    id: Date.now(), // Unique ID\n    text,\n    completed: false\n  }\n});\n\nconst toggleTodo = (id) => ({\n  type: 'TOGGLE_TODO',\n  payload: { id }\n});\n\nconst deleteTodo = (id) => ({\n  type: 'DELETE_TODO',\n  payload: { id }\n});\n\n// 2. Create the todosReducer\nconst todosReducer = (state = [], action) => {\n  switch (action.type) {\n    case 'ADD_TODO':\n      return [\n        ...state,\n        action.payload\n      ];\n    case 'TOGGLE_TODO':\n      return state.map(todo =>\n        todo.id === action.payload.id ? { ...todo, completed: !todo.completed } : todo\n      );\n    case 'DELETE_TODO':\n      return state.filter(todo => todo.id !== action.payload.id);\n    default:\n      return state;\n  }\n};\n\n// 3. Create the store\nconst store = createStore(todosReducer);\n\n// 4. Demonstrate the flow\nconsole.log('Initial state:', store.getState()); // []\n\nconst todo1Action = addTodo('Learn Redux');\nstore.dispatch(todo1Action);\nconsole.log('After adding first todo:', store.getState());\n\nconst todo2Action = addTodo('Build a Redux App');\nstore.dispatch(todo2Action);\nconsole.log('After adding second todo:', store.getState());\n\nstore.dispatch(toggleTodo(todo1Action.payload.id));\nconsole.log('After toggling first todo:', store.getState());\n\nstore.dispatch(deleteTodo(todo2Action.payload.id));\nconsole.log('After deleting second todo:', store.getState());\n\n// Edge case: toggle a non-existent todo\nstore.dispatch(toggleTodo(999));\nconsole.log('After toggling non-existent todo (no change):', store.getState());\n\n// Edge case: delete a non-existent todo\nstore.dispatch(deleteTodo(888));\nconsole.log('After deleting non-existent todo (no change):', store.getState());\n",
+          "testCases": [
+            "Initial state should be an empty array.",
+            "After `ADD_TODO`, the state array should contain the new todo object with correct properties (`id`, `text`, `completed: false`).",
+            "After `TOGGLE_TODO`, the `completed` status of the specific todo should flip (e.g., false to true). Other todos should remain unchanged.",
+            "After `DELETE_TODO`, the specific todo should be removed from the array. Other todos should remain unchanged.",
+            "Dispatching actions for non-existent IDs (e.g., `TOGGLE_TODO(999)`, `DELETE_TODO(888)`) should not mutate the state."
+          ],
+          "hints": [
+            "Remember to assign a default state for your reducer's first argument.",
+            "For `ADD_TODO`, use array spread (`...state`) to return a new array.",
+            "For `TOGGLE_TODO`, use `map()` to create a new array and conditionally update the specific todo object using object spread (`{ ...todo, completed: !todo.completed }`).",
+            "For `DELETE_TODO`, use `filter()` to create a new array without the deleted item.",
+            "Ensure your `id` generation for `ADD_TODO` produces unique values."
+          ],
+          "tags": [
+            "Redux",
+            "To-Do App",
+            "Actions",
+            "Reducer",
+            "Immutability",
+            "State Management"
+          ],
+          "timeEstimate": 45,
+          "prerequisites": [
+            "Redux core concepts",
+            "JavaScript array methods (map, filter)",
+            "Object and array immutability"
+          ],
+          "complexity": 6,
+          "interviewRelevance": 8,
+          "learningPath": "intermediate",
+          "relatedConcepts": [
+            "Redux Core Concepts",
+            "Redux Data Flow",
+            "Pure Functions",
+            "Immutability"
+          ]
+        },
+        {
+          "id": "task_implement_redux_store_methods",
+          "title": "Implement Redux Store Methods in Practice",
+          "description": "\nDemonstrate the practical usage of `store.getState()`, `store.dispatch()`, and `store.subscribe()` in a vanilla JavaScript context, without using any UI framework. Your task is to:\n\n1.  Set up a basic Redux store with a simple counter reducer.\n2.  Log the initial state using `getState()`.\n3.  Register a `listener` function using `subscribe()` that logs the new state whenever it changes.\n4.  Dispatch several actions (`INCREMENT`, `DECREMENT`) and observe the listener being called.\n5.  Implement an `unsubscribe` mechanism and demonstrate that the listener no longer fires after unsubscribing.\n\nThis task focuses on understanding how to interact directly with the Redux store's API.\n",
+          "difficulty": "medium",
+          "startingCode": "import { createStore } from 'redux';\n\n// Reducer for a simple counter\nconst counterReducer = (state = { value: 0 }, action) => {\n  switch (action.type) {\n    case 'INCREMENT':\n      return { ...state, value: state.value + 1 };\n    case 'DECREMENT':\n      return { ...state, value: state.value - 1 };\n    default:\n      return state;\n  }\n};\n\n// TODO: Create the store\n// const store = createStore(counterReducer);\n\n// TODO: Log initial state\n// console.log('Initial state:', ...);\n\n// TODO: Register a listener and store the unsubscribe function\n// const unsubscribe = store.subscribe(() => { /* ... */ });\n\n// TODO: Dispatch actions and observe logs\n// store.dispatch({ type: 'INCREMENT' });\n// store.dispatch({ type: 'INCREMENT' });\n\n// TODO: Unsubscribe and dispatch more actions to confirm\n// unsubscribe();\n// store.dispatch({ type: 'DECREMENT' });\n// console.log('Final state after unsubscribe and dispatch:', ...);\n",
+          "solutionCode": "import { createStore } from 'redux';\n\nconst counterReducer = (state = { value: 0 }, action) => {\n  switch (action.type) {\n    case 'INCREMENT':\n      return { ...state, value: state.value + 1 };\n    case 'DECREMENT':\n      return { ...state, value: state.value - 1 };\n    default:\n      return state;\n  }\n};\n\nconst store = createStore(counterReducer);\n\nconsole.log('--- Initial State ---');\nconsole.log('Initial count:', store.getState().value);\n\nconsole.log('\\n--- Subscribing Listener ---');\nconst unsubscribe = store.subscribe(() => {\n  console.log('Listener notified! Current count:', store.getState().value);\n});\n\nconsole.log('\\n--- Dispatching Actions ---');\nstore.dispatch({ type: 'INCREMENT' }); // Listener logs\nstore.dispatch({ type: 'INCREMENT' }); // Listener logs\nstore.dispatch({ type: 'DECREMENT' }); // Listener logs\n\nconsole.log('\\n--- Unsubscribing Listener ---');\nunsubscribe();\nconsole.log('Listener unsubscribed.');\n\nconsole.log('\\n--- Dispatching After Unsubscribe ---');\nstore.dispatch({ type: 'INCREMENT' }); // State changes, but listener should NOT log\nconsole.log('Final state after unsubscribe and dispatch:', store.getState().value);\n\nstore.dispatch({ type: 'DECREMENT' });\nconsole.log('State after another dispatch:', store.getState().value);\n",
+          "testCases": [
+            "Initial state should be correctly logged.",
+            "The listener function should log the state after each `INCREMENT` and `DECREMENT` dispatch before unsubscribe.",
+            "After `unsubscribe()` is called, subsequent `dispatch` calls should update the store state internally but should *not* trigger the previously registered listener.",
+            "The final state after all operations (including post-unsubscribe dispatches) should be correct."
+          ],
+          "hints": [
+            "Remember that `subscribe()` returns a function that you need to call to `unsubscribe`.",
+            "Use `console.log` statements strategically to observe the flow and verify when the listener is active.",
+            "Make sure your reducer correctly returns a new state object for immutability."
+          ],
+          "tags": [
+            "Redux",
+            "Store API",
+            "getState",
+            "dispatch",
+            "subscribe",
+            "Vanilla JS"
+          ],
+          "timeEstimate": 35,
+          "prerequisites": [
+            "Redux core concepts",
+            "JavaScript functions and callbacks"
+          ],
+          "complexity": 6,
+          "interviewRelevance": 8,
+          "learningPath": "intermediate",
+          "relatedConcepts": [
+            "Redux Store API",
+            "Redux Data Flow"
+          ]
+        },
+        {
+          "id": "task_simulate_redux_flow",
+          "title": "Simulate Redux Unidirectional Data Flow for User Authentication",
+          "description": "\nSimulate the Redux unidirectional data flow for a basic user authentication feature. You'll set up actions, a reducer, and a store to manage a user's `isLoggedIn` status.\n\n1.  **Define Initial State**: The global state should be an object `state = { user: { isLoggedIn: false, username: null } }`.\n2.  **Action Creators**: Create action creators for:\n    *   `LOGIN_SUCCESS`: Takes a `username` string as payload. Sets `isLoggedIn` to `true` and `username` to the provided value.\n    *   `LOGOUT`: No payload. Sets `isLoggedIn` to `false` and `username` to `null`.\n3.  **Reducer**: Implement a `userReducer` that handles these actions immutably.\n4.  **Store**: Create a Redux store with your `userReducer`.\n5.  **Simulate Flow**: Write a sequence of dispatches to demonstrate:\n    *   Initial state.\n    *   A user logging in.\n    *   A user logging out.\n    *   Log the state at each significant step.\n",
+          "difficulty": "medium",
+          "startingCode": "import { createStore } from 'redux';\n\n// TODO: 1. Define initial state and action creators\n// const initialState = { /* ... */ };\n// const loginSuccess = (username) => ({ /* ... */ });\n// const logout = () => ({ /* ... */ });\n\n// TODO: 2. Implement userReducer\n// const userReducer = (state = initialState, action) => { /* ... */ };\n\n// TODO: 3. Create the store\n// const store = createStore(userReducer);\n\n// TODO: 4. Simulate flow and log states\n// console.log('Initial state:', store.getState());\n// store.dispatch(loginSuccess('testuser'));\n// console.log('After login:', store.getState());\n// ...\n",
+          "solutionCode": "import { createStore } from 'redux';\n\n// 1. Define initial state and action creators\nconst initialState = {\n  user: {\n    isLoggedIn: false,\n    username: null\n  }\n};\n\nconst loginSuccess = (username) => ({\n  type: 'LOGIN_SUCCESS',\n  payload: { username }\n});\n\nconst logout = () => ({\n  type: 'LOGOUT'\n});\n\n// 2. Implement userReducer\nconst userReducer = (state = initialState, action) => {\n  switch (action.type) {\n    case 'LOGIN_SUCCESS':\n      return {\n        ...state,\n        user: { isLoggedIn: true, username: action.payload.username }\n      };\n    case 'LOGOUT':\n      return {\n        ...state,\n        user: { isLoggedIn: false, username: null }\n      };\n    default:\n      return state;\n  }\n};\n\n// 3. Create the store\nconst store = createStore(userReducer);\n\n// 4. Simulate flow and log states\nconsole.log('--- Initial State ---');\nconsole.log(store.getState());\n\nconsole.log('\\n--- User Login ---');\nstore.dispatch(loginSuccess('john.doe'));\nconsole.log(store.getState());\n\nconsole.log('\\n--- User Logout ---');\nstore.dispatch(logout());\nconsole.log(store.getState());\n\nconsole.log('\\n--- Another Login Attempt ---');\nstore.dispatch(loginSuccess('jane.smith'));\nconsole.log(store.getState());\n\nconsole.log('\\n--- Dispatching unknown action ---');\nstore.dispatch({ type: 'SOME_OTHER_ACTION' });\nconsole.log(store.getState()); // Should remain unchanged\n",
+          "testCases": [
+            "Initial state should correctly show `isLoggedIn: false` and `username: null`.",
+            "After `LOGIN_SUCCESS`, `isLoggedIn` should be `true` and `username` should match the payload.",
+            "After `LOGOUT`, `isLoggedIn` should be `false` and `username` should be `null`.",
+            "The reducer must return a *new* state object, not mutate the original.",
+            "Dispatching an unknown action type should not alter the state."
+          ],
+          "hints": [
+            "Remember to spread the existing `state` and the `user` object to ensure nested immutability.",
+            "The `payload` for `LOGIN_SUCCESS` will contain the `username`.",
+            "The `LOGOUT` action doesn't need a payload, but still needs a `type`."
+          ],
+          "tags": [
+            "Redux",
+            "Data Flow",
+            "Authentication",
+            "Reducer",
+            "Action",
+            "Immutability"
+          ],
+          "timeEstimate": 40,
+          "prerequisites": [
+            "Redux core concepts",
+            "JavaScript object immutability"
+          ],
+          "complexity": 6,
+          "interviewRelevance": 7,
+          "learningPath": "intermediate",
+          "relatedConcepts": [
+            "Redux Data Flow and Principles",
+            "Redux Core Concepts"
+          ]
+        },
+        {
+          "id": "task_design_pure_reducers",
+          "title": "Design Pure Reducers for a Nested State Structure",
+          "description": "\nRefine your understanding of pure functions and immutability by designing reducers for a more complex, nested state structure. Consider a state managing user preferences, which includes `theme` (string) and `notifications` (object with `email` and `sms` booleans).\n\n1.  **Initial State**: `{ preferences: { theme: 'light', notifications: { email: true, sms: false } } }`.\n2.  **Action Creators**: Define action creators for:\n    *   `SET_THEME`: Takes a `themeName` (string) as payload.\n    *   `TOGGLE_NOTIFICATION`: Takes a `type` ('email' or 'sms') as payload.\n3.  **Reducer**: Create a `preferencesReducer` that manages this state. This reducer must be pure and ensure immutability, especially when updating nested properties.\n4.  **Demonstration**: Simulate changes and log the state:\n    *   Set theme to 'dark'.\n    *   Toggle email notifications.\n    *   Toggle SMS notifications.\n    *   Log the state after each step.\n",
+          "difficulty": "hard",
+          "startingCode": "import { createStore } from 'redux';\n\n// TODO: 1. Define initial state and action creators\n// const initialState = { /* ... */ };\n// const setTheme = (themeName) => ({ /* ... */ });\n// const toggleNotification = (type) => ({ /* ... */ });\n\n// TODO: 2. Implement preferencesReducer\n// const preferencesReducer = (state = initialState, action) => { /* ... */ };\n\n// TODO: 3. Create the store and simulate flow\n// const store = createStore(preferencesReducer);\n// console.log('Initial:', store.getState());\n// ...\n",
+          "solutionCode": "import { createStore } from 'redux';\n\n// 1. Define initial state and action creators\nconst initialState = {\n  preferences: {\n    theme: 'light',\n    notifications: {\n      email: true,\n      sms: false\n    }\n  }\n};\n\nconst setTheme = (themeName) => ({\n  type: 'SET_THEME',\n  payload: { theme: themeName }\n});\n\nconst toggleNotification = (type) => ({\n  type: 'TOGGLE_NOTIFICATION',\n  payload: { type }\n});\n\n// 2. Implement preferencesReducer\nconst preferencesReducer = (state = initialState, action) => {\n  switch (action.type) {\n    case 'SET_THEME':\n      return {\n        ...state, // Copy top-level state object\n        preferences: { // Copy preferences object\n          ...state.preferences,\n          theme: action.payload.theme // Update theme\n        }\n      };\n    case 'TOGGLE_NOTIFICATION':\n      return {\n        ...state,\n        preferences: {\n          ...state.preferences,\n          notifications: { // Copy notifications object\n            ...state.preferences.notifications,\n            [action.payload.type]: !state.preferences.notifications[action.payload.type] // Toggle specific notification\n          }\n        }\n      };\n    default:\n      return state;\n  }\n};\n\n// 3. Create the store and simulate flow\nconst store = createStore(preferencesReducer);\n\nconsole.log('--- Initial State ---');\nconsole.log(JSON.stringify(store.getState(), null, 2));\n\nconsole.log('\\n--- Set Theme to Dark ---');\nstore.dispatch(setTheme('dark'));\nconsole.log(JSON.stringify(store.getState(), null, 2));\n\nconsole.log('\\n--- Toggle Email Notification ---');\nstore.dispatch(toggleNotification('email'));\nconsole.log(JSON.stringify(store.getState(), null, 2));\n\nconsole.log('\\n--- Toggle SMS Notification ---');\nstore.dispatch(toggleNotification('sms'));\nconsole.log(JSON.stringify(store.getState(), null, 2));\n\nconsole.log('\\n--- Toggle Email Notification Again ---');\nstore.dispatch(toggleNotification('email'));\nconsole.log(JSON.stringify(store.getState(), null, 2));\n\n// Edge case: dispatch unknown action\nstore.dispatch({ type: 'UNKNOWN_ACTION' });\nconsole.log('\\n--- After unknown action (no change) ---');\nconsole.log(JSON.stringify(store.getState(), null, 2));\n",
+          "testCases": [
+            "Initial state should be exactly as defined.",
+            "After `SET_THEME`, only the `theme` property should change, and all other properties (including nested ones like `notifications`) should remain the same (reference equality for unchanged parts).",
+            "After `TOGGLE_NOTIFICATION('email')`, only `preferences.notifications.email` should flip its boolean value. Other properties should be unchanged.",
+            "After `TOGGLE_NOTIFICATION('sms')`, only `preferences.notifications.sms` should flip its boolean value. Other properties should be unchanged.",
+            "The reducer must strictly adhere to immutability, creating new objects for any modified levels of the state tree (e.g., new `preferences` object, new `notifications` object).",
+            "Dispatching an unknown action should return the current state unchanged."
+          ],
+          "hints": [
+            "When updating nested objects, remember to spread (`...`) all levels of the object tree that are affected to ensure immutability. For example, `return { ...state, key: { ...state.key, nestedKey: newValue } }`.",
+            "Use computed property names (`[action.payload.type]`) for dynamically toggling notifications.",
+            "Always return the original `state` if no action matches or no change is needed."
+          ],
+          "tags": [
+            "Redux",
+            "Reducer",
+            "Immutability",
+            "Nested State",
+            "Pure Functions",
+            "Advanced"
+          ],
+          "timeEstimate": 60,
+          "prerequisites": [
+            "Redux core concepts",
+            "Advanced JavaScript object manipulation (spread, computed properties)",
+            "Deep understanding of immutability"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 9,
+          "learningPath": "advanced",
+          "relatedConcepts": [
+            "Redux Data Flow and Principles",
+            "Pure Functions",
+            "Single Source of Truth",
+            "Immutability"
+          ]
+        }
+      ]
+    }
+  }
+]

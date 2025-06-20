@@ -1,0 +1,1611 @@
+[
+  {
+    "id": "afa36072-8a29-4ac1-a18c-d3345bf9e4f1",
+    "startLine": 900,
+    "endLine": 999,
+    "processedDate": "2025-06-17T07:26:59.168Z",
+    "content": {
+      "logicalBlockInfo": {
+        "suggestedEndLine": -1
+      },
+      "theory": [
+        {
+          "id": "theory_prototype_inheritance_es5",
+          "title": "Prototype-Based Inheritance (ES5)",
+          "content": "In JavaScript, before ES6 classes, inheritance was primarily achieved through prototypes. Every JavaScript object has a prototype, which is another object that it inherits properties and methods from. When you try to access a property or method on an object, if it's not found directly on the object, JavaScript will look up its prototype chain until it finds the property or reaches the end of the chain (null).\n\n## Key Concepts\n-   **Prototype Chain:** The mechanism by which JavaScript objects inherit features from one another. Each object has a `[[Prototype]]` (exposed as `__proto__` in some environments, but typically accessed via `Object.getPrototypeOf()`) link to another object, forming a chain.\n-   **`prototype` Property:** Functions in JavaScript have a special `prototype` property, which is an object. When you use a function as a constructor with the `new` keyword, the `[[Prototype]]` of the newly created instance points to the constructor function's `prototype` object.\n-   **`Object.create()`:** This method creates a new object, using an existing object as the prototype of the newly created object. It's the preferred way to set up prototype chains explicitly, as it avoids issues with direct assignment of `new Parent()` to `Child.prototype`.\n-   **`constructor` Property:** Every object created via a constructor function automatically gets a `constructor` property that points back to the constructor function. When manually setting `Child.prototype = Object.create(Parent.prototype)`, the `constructor` property of `Child.prototype` gets reset to `Parent`'s constructor. It's crucial to explicitly set `Child.prototype.constructor = Child;` to maintain correct constructor references, especially for `instanceof` checks or creating new instances from the prototype.\n-   **Method Overriding:** A child object (or prototype) can define a method with the same name as a method in its parent's prototype. When this happens, the child's method will be called, effectively 'overriding' the parent's method for instances of the child type.",
+          "examples": [
+            {
+              "id": "example_prototype_inheritance_es5_1",
+              "title": "Basic Prototype Inheritance (ES5)",
+              "code": "function Person(firstName) {\n  this.firstName = firstName;\n}\n\nPerson.prototype.sayHello = function() {\n  console.log(\"Hello, I'm \" + this.firstName);\n};\n\nfunction Student(firstName, subject) {\n  Person.call(this, firstName); // Call parent constructor for inherited properties\n  this.subject = subject;\n}\n\n// Inherit methods from Person.prototype\nStudent.prototype = Object.create(Person.prototype);\nStudent.prototype.constructor = Student; // Correct the constructor reference\n\n// Override a method\nStudent.prototype.sayHello = function() {\n  console.log(\"Hello, I'm \" + this.firstName + \". I'm studying \" + this.subject + \".\");\n};\n\nvar person = new Person(\"Alice\");\nperson.sayHello(); // \"Hello, I'm Alice\"\n\nvar student = new Student(\"John\", \"Computer Science\");\nstudent.sayHello(); // \"Hello, I'm John. I'm studying Computer Science.\"\n\nconsole.log(student instanceof Student); // true\nconsole.log(student instanceof Person);  // true\nconsole.log(student.constructor === Student); // true",
+              "explanation": "This example demonstrates how to set up classical inheritance using JavaScript's prototype chain. `Person.call(this, firstName)` ensures that `firstName` is initialized by the `Person` constructor on the `Student` instance. `Object.create(Person.prototype)` links `Student.prototype` to `Person.prototype`, establishing the inheritance chain for methods. `Student.prototype.constructor = Student` is crucial to maintain the correct constructor reference. The `sayHello` method in `Student.prototype` overrides the one from `Person.prototype` for `Student` instances.",
+              "language": "javascript"
+            }
+          ],
+          "relatedQuestions": [
+            "question_inheritance_es5_1",
+            "question_inheritance_es5_2"
+          ],
+          "relatedTasks": [
+            "task_es5_prototype_inheritance",
+            "task_es6_class_conversion"
+          ],
+          "tags": [
+            "JavaScript",
+            "Inheritance",
+            "Prototypes",
+            "ES5",
+            "Object.create",
+            "Constructor",
+            "OOP"
+          ],
+          "technology": "JavaScript",
+          "prerequisites": [
+            "JavaScript_Objects",
+            "Functions_as_Constructors",
+            "This_Keyword"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 8,
+          "learningPath": "intermediate",
+          "requiredFor": [
+            "ES6_Classes",
+            "Design_Patterns",
+            "React_Class_Components"
+          ]
+        },
+        {
+          "id": "theory_es6_class_syntax",
+          "title": "ES6 Class Syntax for Inheritance",
+          "content": "ES6 introduced the `class` keyword, which provides a more familiar and syntactically cleaner way to work with objects and inheritance in JavaScript. While it looks like traditional class-based inheritance found in languages like Java or C++, it's important to understand that ES6 classes are primarily syntactic sugar over JavaScript's existing prototype-based inheritance model. They do not introduce a new object model.\n\n## Key Concepts\n-   **`class` Keyword:** Defines a class. Class declarations are not hoisted, unlike function declarations.\n-   **`constructor` Method:** A special method for creating and initializing an object created with a class. There can only be one special method with the name 'constructor' in a class.\n-   **`extends` Keyword:** Used in class declarations or class expressions to create a class that is a child of another class. It sets up the prototype chain automatically.\n-   **`super` Keyword:** Used to call the constructor of the parent class (e.g., `super(args)`) or to access properties/methods of the parent object (e.g., `super.method()`). In a derived class constructor, `super()` must be called before `this` can be used. This ensures the parent class's constructor initializes the instance.\n-   **Method Overriding:** Similar to prototype-based inheritance, a method defined in a child class with the same name as a method in its parent class will override the parent's method for instances of the child class. You can call the parent's method using `super.methodName()` from within the child's overridden method.",
+          "examples": [
+            {
+              "id": "example_es6_class_syntax_1",
+              "title": "Inheritance with ES6 Classes",
+              "code": "class Person {\n  constructor(firstName) {\n    this.firstName = firstName;\n  }\n  \n  sayHello() {\n    console.log(\"Hello, I'm \" + this.firstName);\n  }\n}\n\nclass Student extends Person {\n  constructor(firstName, subject) {\n    super(firstName); // Call parent constructor; essential before 'this' is used\n    this.subject = subject;\n  }\n  \n  sayHello() {\n    console.log(\"Hello, I'm \" + this.firstName + \". I'm studying \" + this.subject + \".\");\n  }\n}\n\nconst person = new Person(\"Alice\");\nperson.sayHello(); // \"Hello, I'm Alice\"\n\nconst student = new Student(\"John\", \"Computer Science\");\nstudent.sayHello(); // \"Hello, I'm John. I'm studying Computer Science.\"\n\nconsole.log(student instanceof Student); // true\nconsole.log(student instanceof Person);  // true",
+              "explanation": "This example shows the same inheritance hierarchy as the ES5 version, but using the ES6 class syntax. The `extends` keyword handles the prototype chain setup, and `super(firstName)` in the `Student` constructor correctly calls the `Person` constructor, initializing `this.firstName`. The `sayHello` method in `Student` demonstrates method overriding, providing a specialized greeting.",
+              "language": "javascript"
+            }
+          ],
+          "relatedQuestions": [
+            "question_es6_classes_1",
+            "question_es6_classes_2",
+            "question_es6_classes_3"
+          ],
+          "relatedTasks": [
+            "task_es6_class_conversion"
+          ],
+          "tags": [
+            "JavaScript",
+            "Inheritance",
+            "ES6 Classes",
+            "Syntactic Sugar",
+            "extends",
+            "super",
+            "OOP"
+          ],
+          "technology": "JavaScript",
+          "prerequisites": [
+            "Prototype_Based_Inheritance_ES5",
+            "JavaScript_Functions",
+            "Object_Oriented_Programming_Concepts"
+          ],
+          "complexity": 6,
+          "interviewRelevance": 9,
+          "learningPath": "intermediate",
+          "requiredFor": [
+            "React_Components",
+            "TypeScript_Classes",
+            "Modern_JavaScript_Development"
+          ]
+        },
+        {
+          "id": "theory_functional_inheritance_and_encapsulation",
+          "title": "Functional Inheritance and Encapsulation",
+          "content": "Functional inheritance is a pattern where an object is created by a factory function, and properties and methods are added directly to the new object (or an existing object) using closures to manage private state. This approach focuses on composition over classical inheritance and is often praised for its flexibility and natural way of handling private data.\n\n## Key Concepts\n-   **Factory Functions:** Functions that create and return new objects. Unlike constructor functions, they don't require the `new` keyword.\n-   **Composition:** Instead of inheriting an entire class, functional inheritance often involves composing objects by combining functionalities from different functions.\n-   **Closure for Private State:** A core aspect of functional inheritance is the use of closures to create private variables. Variables declared within the factory function's scope (but not attached to `this`) are accessible only by the methods defined within that same scope, effectively creating private data that cannot be accessed or modified from outside.\n-   **`Function.prototype.call()` or `Function.prototype.apply()`:** These methods are often used to 'inherit' methods or properties from another function's context by invoking it with the current object as its `this` context. This allows the 'parent' function to set up properties on the 'child' object.\n\n## Encapsulation in JavaScript\nEncapsulation is one of the fundamental principles of Object-Oriented Programming (OOP). It refers to the bundling of data (attributes) and methods (functions) that operate on the data into a single unit (an object), and restricting direct access to some of an object's components. This restriction prevents external code from directly manipulating an object's internal state, promoting data integrity and modularity.\n\n### How JavaScript Achieves Encapsulation:\n1.  **Closures (Functional Inheritance/Module Pattern):** As seen in functional inheritance, variables declared within a function's scope but not exposed externally act as private members. Methods defined within that same scope can access these private variables.\n    ```javascript\n    function createCounter() {\n      let count = 0; // Private variable\n      return {\n        increment: () => count++,\n        getCount: () => count\n      };\n    }\n    const counter = createCounter();\n    // console.log(counter.count); // undefined - 'count' is private\n    console.log(counter.getCount()); // 0\n    counter.increment();\n    console.log(counter.getCount()); // 1\n    ```\n2.  **WeakMap (ES6):** Can be used to associate private data with objects, where the data is stored in the WeakMap and keyed by the object instance. This isn't true private state in the sense of being inaccessible, but it's a common pattern for 'private' instance data.\n    ```javascript\n    const _privateData = new WeakMap();\n    class MyClass {\n      constructor(value) {\n        _privateData.set(this, { value: value });\n      }\n      getValue() {\n        return _privateData.get(this).value;\n      }\n    }\n    const instance = new MyClass(10);\n    // console.log(_privateData.get(instance).value); // Accessible, but by convention considered 'private'\n    ```\n3.  **Private Class Fields (ES2019+):** JavaScript now has a standard way to define truly private class fields using a `#` prefix. These fields are only accessible from inside the class itself.\n    ```javascript\n    class MyClassWithPrivateField {\n      #privateValue; // Truly private field\n      constructor(value) {\n        this.#privateValue = value;\n      }\n      getPrivateValue() {\n        return this.#privateValue;\n      }\n      setPrivateValue(newValue) {\n        this.#privateValue = newValue;\n      }\n    }\n    const instance = new MyClassWithPrivateField(20);\n    console.log(instance.getPrivateValue()); // 20\n    // console.log(instance.#privateValue); // Syntax Error: Private field '#privateValue' must be declared in an enclosing class\n    ```\n\nFunctional inheritance with closures is a powerful and flexible way to achieve encapsulation, especially for creating reusable modules and components without the strictures of class hierarchies.",
+          "examples": [
+            {
+              "id": "example_functional_inheritance_1",
+              "title": "Coffee Machine Example (Functional Inheritance)",
+              "code": "function Machine() {\n  let enabled = false; // Private variable via closure\n  \n  this.enable = function() {\n    enabled = true;\n  };\n  \n  this.disable = function() {\n    enabled = false;\n  };\n  \n  this.isEnabled = function() {\n    return enabled;\n  };\n}\n\nfunction CoffeeMachine(power) {\n  // Inherit methods from Machine by calling its constructor\n  // This copies public methods/properties defined on 'this' from Machine to CoffeeMachine instance\n  Machine.call(this);\n  \n  let waterAmount = 0; // Private variable via closure specific to CoffeeMachine\n  \n  this.setWaterAmount = function(amount) {\n    if (amount < 0) {\n        console.error(\"Water amount cannot be negative\");\n        return;\n    }\n    waterAmount = amount;\n  };\n  \n  this.getWaterAmount = function() {\n    return waterAmount;\n  };\n  \n  this.brew = function() {\n    if (this.isEnabled()) {\n      console.log(`Making coffee with ${waterAmount}ml of water using ${power}W power`);\n    } else {\n      console.log(\"Coffee machine is off\");\n    }\n  };\n}\n\nconst coffeeMachine = new CoffeeMachine(1000);\nconsole.log(\"Is enabled initially?\", coffeeMachine.isEnabled()); // false\ncoffeeMachine.enable();\nconsole.log(\"Is enabled after enable()?\", coffeeMachine.isEnabled()); // true\ncoffeeMachine.setWaterAmount(200);\nconsole.log(\"Current water amount:\", coffeeMachine.getWaterAmount()); // 200\ncoffeeMachine.brew(); // \"Making coffee with 200ml of water using 1000W power\"\ncoffeeMachine.disable();\ncoffeeMachine.brew(); // \"Coffee machine is off\"\n\n// Try to access private variables (will fail or return undefined)\nconsole.log(coffeeMachine.enabled);    // undefined\nconsole.log(coffeeMachine.waterAmount); // undefined",
+              "explanation": "This example illustrates functional inheritance. `Machine.call(this)` executes the `Machine` constructor function with `this` bound to the `coffeeMachine` instance, adding `enable`, `disable`, and `isEnabled` methods directly to it. `enabled` and `waterAmount` are private variables because they are declared with `let` inside their respective function scopes and are only accessible via the public methods defined in those scopes. This setup effectively demonstrates encapsulation, where internal state is protected.",
+              "language": "javascript"
+            }
+          ],
+          "relatedQuestions": [
+            "question_functional_encapsulation_1",
+            "question_encapsulation_flashcard_1"
+          ],
+          "relatedTasks": [
+            "task_functional_logger_with_privacy"
+          ],
+          "tags": [
+            "JavaScript",
+            "Inheritance",
+            "Functional Programming",
+            "Encapsulation",
+            "Closures",
+            "Factory Functions",
+            "ES6+",
+            "Private Fields",
+            "OOP",
+            "Design Patterns"
+          ],
+          "technology": "JavaScript",
+          "prerequisites": [
+            "JavaScript_Functions",
+            "Scope_and_Closures",
+            "This_Keyword",
+            "Object_Literals",
+            "Function_Call_Apply"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 8,
+          "learningPath": "advanced",
+          "requiredFor": [
+            "Module_Design",
+            "Advanced_Design_Patterns",
+            "State_Management",
+            "Composition_over_Inheritance"
+          ]
+        }
+      ],
+      "questions": [
+        {
+          "id": "question_inheritance_es5_1",
+          "topic": "Prototype-Based Inheritance (ES5)",
+          "level": "medium",
+          "type": "mcq",
+          "question": "Given the following ES5 prototype-based inheritance setup:\n\n```javascript\nfunction Animal(name) {\n  this.name = name;\n}\nAnimal.prototype.speak = function() {\n  return this.name + ' makes a sound.';\n};\n\nfunction Dog(name, breed) {\n  Animal.call(this, name);\n  this.breed = breed;\n}\nDog.prototype = Object.create(Animal.prototype);\n// Missing line here\nDog.prototype.bark = function() {\n  return this.name + ' the ' + this.breed + ' barks!';\n};\n\nconst myDog = new Dog('Buddy', 'Golden Retriever');\nconsole.log(myDog.constructor === Animal);\n```\n\nWhich line should be inserted at `// Missing line here` to ensure `myDog.constructor === Dog` evaluates to `true`?",
+          "answer": "Dog.prototype.constructor = Dog;",
+          "options": [
+            "Dog.prototype = Dog;",
+            "Dog.constructor = Dog;",
+            "Dog.prototype.constructor = Dog;",
+            "Object.setPrototypeOf(Dog.prototype, Dog);"
+          ],
+          "analysisPoints": [
+            "Understanding of the `constructor` property in prototype chains.",
+            "Knowing that `Object.create()` resets the `constructor` property of the new object.",
+            "Correctly identifying how to restore the `constructor` reference for instances of the derived class."
+          ],
+          "keyConcepts": [
+            "Prototype Chain",
+            "Constructor Property",
+            "Object.create()",
+            "ES5 Inheritance"
+          ],
+          "evaluationCriteria": [
+            "Ability to debug and fix prototype inheritance issues.",
+            "Knowledge of `constructor` property's behavior."
+          ],
+          "example": "The `Object.create(Animal.prototype)` line correctly sets up the prototype chain so that `Dog.prototype` inherits from `Animal.prototype`. However, it also reassigns the `constructor` property of `Dog.prototype` to point to `Animal`. To ensure that instances of `Dog` correctly report `Dog` as their constructor, we must explicitly set `Dog.prototype.constructor = Dog;`. This is vital for `instanceof` checks and other reflection mechanisms.",
+          "tags": [
+            "JavaScript",
+            "ES5",
+            "Inheritance",
+            "Prototypes",
+            "Constructor",
+            "MCQ"
+          ],
+          "prerequisites": [
+            "theory_prototype_inheritance_es5"
+          ],
+          "complexity": 6,
+          "interviewFrequency": 7,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_es6_classes_1",
+          "topic": "ES6 Class Syntax",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "What is the primary purpose of the `super()` call within a derived class's constructor in ES6?",
+          "answer": "To call the constructor of the parent class and initialize the `this` context for the derived class. It must be called before `this` can be accessed in the derived class constructor.",
+          "analysisPoints": [
+            "Understanding the role of `super()` in ES6 class inheritance.",
+            "Knowing the timing constraint (before `this` access)."
+          ],
+          "keyConcepts": [
+            "ES6 Classes",
+            "extends",
+            "super()"
+          ],
+          "evaluationCriteria": [
+            "Basic understanding of ES6 class mechanics."
+          ],
+          "example": "In ES6 classes, when a class `B` `extends` class `A`, the constructor of `B` must call `super()` to properly set up the instance. If `super()` is not called, `this` will not be initialized, leading to a `ReferenceError` when `this` is accessed.",
+          "tags": [
+            "JavaScript",
+            "ES6 Classes",
+            "super",
+            "Flashcard",
+            "Inheritance"
+          ],
+          "prerequisites": [
+            "theory_es6_class_syntax"
+          ],
+          "complexity": 4,
+          "interviewFrequency": 8,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_functional_encapsulation_1",
+          "topic": "Functional Inheritance and Encapsulation",
+          "level": "medium",
+          "type": "open",
+          "question": "Explain how the 'functional inheritance' pattern, as demonstrated by the `Machine` and `CoffeeMachine` example, achieves encapsulation. How are private variables maintained, and what are the advantages and disadvantages of this approach compared to ES6 private class fields?",
+          "answer": "In the `Machine` and `CoffeeMachine` example, encapsulation is achieved through closures. Variables like `enabled` within `Machine` and `waterAmount` within `CoffeeMachine` are declared using `let` (or `var`) inside their respective function scopes. They are not attached to `this`, making them inaccessible directly from outside the function. The methods (e.g., `enable`, `isEnabled`, `setWaterAmount`, `getWaterAmount`) are defined within the same function scope and thus form a closure over these private variables, allowing them to read and modify the private state. External code can only interact with these variables through the public methods.\n\n**Advantages of Functional Encapsulation (Closures):**\n-   **True Privacy (pre-ES2019):** Before private class fields, closures were the most robust way to achieve true private data in JavaScript, as variables are completely inaccessible from the outside.\n-   **Flexibility & Composition:** Easily combine functionalities from multiple factory functions (e.g., `Object.assign` or simply calling multiple functions on `this`).\n-   **Simpler Syntax (for some):** No `new` keyword, no prototype chain to explicitly manage.\n\n**Disadvantages of Functional Encapsulation (Closures):**\n-   **Method Duplication:** Each instance gets its own copy of the public methods. This can lead to higher memory consumption if many instances are created, compared to prototype-based methods which are shared.\n-   **No `instanceof` equivalent:** Without a `prototype` chain, `instanceof` doesn't work out-of-the-box (though custom checks can be added).\n\n**Comparison with ES6 Private Class Fields (`#`):**\n-   **Syntax:** Private class fields offer a dedicated, clearer syntax (`#fieldName`) directly within the class definition.\n-   **True Privacy:** Both provide true privacy, but private class fields are a language-level feature specifically designed for this purpose within the class context.\n-   **Performance/Memory:** Methods defined in ES6 classes are usually on the prototype, so they are shared across instances, generally leading to better memory efficiency for methods than functional inheritance where methods might be duplicated per instance (unless carefully structured).\n-   **Context:** Private class fields are tied to the class syntax, whereas closures offer a more general pattern applicable anywhere functions create scope.",
+          "options": [],
+          "analysisPoints": [
+            "Ability to explain closures as a mechanism for private variables.",
+            "Understanding how `Machine.call(this)` contributes to inheritance in this context.",
+            "Comparing functional encapsulation (closures) with ES6 private class fields.",
+            "Discussing pros (flexibility, composition, immediate privacy) and cons (memory usage for methods per instance, less 'class-like' syntax) of functional inheritance."
+          ],
+          "keyConcepts": [
+            "Functional Inheritance",
+            "Encapsulation",
+            "Closures",
+            "Private Variables",
+            "ES6 Private Class Fields",
+            "Function.prototype.call",
+            "Composition vs Inheritance"
+          ],
+          "evaluationCriteria": [
+            "Depth of understanding of JavaScript's scoping and closure mechanisms.",
+            "Ability to compare and contrast different encapsulation patterns.",
+            "Articulates advantages and disadvantages clearly."
+          ],
+          "example": null,
+          "tags": [
+            "JavaScript",
+            "Encapsulation",
+            "Functional Inheritance",
+            "Closures",
+            "Private Fields",
+            "OOP",
+            "Open-Ended"
+          ],
+          "prerequisites": [
+            "theory_functional_inheritance_and_encapsulation",
+            "Scope_and_Closures"
+          ],
+          "complexity": 8,
+          "interviewFrequency": 8,
+          "learningPath": "advanced"
+        },
+        {
+          "id": "question_es6_classes_2",
+          "topic": "ES6 Class Syntax",
+          "level": "medium",
+          "type": "code",
+          "question": "Refactor the following ES5 prototype-based code into ES6 class syntax. Ensure the `greet` method from `Employee` calls the `greet` method of `Person` and then adds its own specialization.\n\n```javascript\nfunction Person(name) {\n  this.name = name;\n}\n\nPerson.prototype.greet = function() {\n  return 'Hello, my name is ' + this.name + '.';\n};\n\nfunction Employee(name, title) {\n  Person.call(this, name);\n  this.title = title;\n}\n\nEmployee.prototype = Object.create(Person.prototype);\nEmployee.prototype.constructor = Employee;\n\nEmployee.prototype.greet = function() {\n  // How to call parent's greet here and add 'I am a <title>.'?\n  return Person.prototype.greet.call(this) + ' I am a ' + this.title + '.';\n};\n\nconst employee = new Employee('Alice', 'Software Engineer');\nconsole.log(employee.greet());\n```",
+          "answer": "```javascript\nclass Person {\n  constructor(name) {\n    this.name = name;\n  }\n\n  greet() {\n    return 'Hello, my name is ' + this.name + '.';\n  }\n}\n\nclass Employee extends Person {\n  constructor(name, title) {\n    super(name);\n    this.title = title;\n  }\n\n  greet() {\n    return super.greet() + ' I am a ' + this.title + '.';\n  }\n}\n\nconst employee = new Employee('Alice', 'Software Engineer');\nconsole.log(employee.greet());\n```",
+          "options": [],
+          "analysisPoints": [
+            "Correctly using `class`, `extends`, `constructor`, and `super()` for inheritance.",
+            "Understanding how to call parent methods using `super.methodName()` in ES6.",
+            "Translating prototype-based constructor calls (`.call(this)`) to `super()`."
+          ],
+          "keyConcepts": [
+            "ES6 Classes",
+            "extends",
+            "super",
+            "Method Overriding",
+            "Refactoring"
+          ],
+          "evaluationCriteria": [
+            "Ability to refactor code between different inheritance styles.",
+            "Correct usage of `super` for both constructor and method calls.",
+            "Syntactic correctness of ES6 classes."
+          ],
+          "example": "The key to this refactoring is using `super(name)` in the `Employee` constructor to call the `Person` constructor, and `super.greet()` in the `Employee`'s `greet` method to invoke the parent's `greet` logic, which is much cleaner than `Person.prototype.greet.call(this)`.",
+          "tags": [
+            "JavaScript",
+            "ES6 Classes",
+            "Refactoring",
+            "Inheritance",
+            "Code Challenge",
+            "OOP"
+          ],
+          "prerequisites": [
+            "theory_prototype_inheritance_es5",
+            "theory_es6_class_syntax"
+          ],
+          "complexity": 7,
+          "interviewFrequency": 9,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_inheritance_es5_2",
+          "topic": "Prototype-Based Inheritance (ES5)",
+          "level": "hard",
+          "type": "code",
+          "question": "Consider the following JavaScript code.\n\n```javascript\nfunction A() {\n  this.x = 1;\n}\nA.prototype.getX = function() {\n  return this.x;\n};\n\nfunction B() {\n  this.y = 2;\n}\nB.prototype = new A();\nB.prototype.constructor = B;\nB.prototype.getY = function() {\n  return this.y;\n};\n\nconst objB = new B();\nconst objA = new A();\n\nconsole.log(objB.getX());\nconsole.log(objA.getX());\nconsole.log(objB.y);\nconsole.log(objA.y);\nconsole.log(objB instanceof A);\nconsole.log(objB.hasOwnProperty('x'));\n```\n\nWhat will be the output of the `console.log` statements? Explain why `objB.hasOwnProperty('x')` returns the value it does.",
+          "answer": "```\n1\n1\n2\nundefined\ntrue\nfalse\n```\n\n`objB.hasOwnProperty('x')` returns `false` because when `B.prototype = new A();` is executed, an instance of `A` is created, and `this.x = 1;` is set on *that instance* (`A`'s instance). `objB` (an instance of `B`) inherits `x` from `B.prototype` (which is an `A` instance), but `x` is not directly on `objB` itself. `hasOwnProperty` only checks properties directly on the object, not inherited ones.",
+          "options": [],
+          "analysisPoints": [
+            "Deep understanding of how `new A()` works when assigned to a prototype.",
+            "Distinguishing between own properties and inherited properties.",
+            "Understanding the `hasOwnProperty` method.",
+            "Tracing property lookups along the prototype chain.",
+            "Identifying common pitfalls in ES5 prototype inheritance."
+          ],
+          "keyConcepts": [
+            "Prototype Chain",
+            "Constructor Function",
+            "hasOwnProperty",
+            "Inherited Properties",
+            "ES5 Inheritance"
+          ],
+          "evaluationCriteria": [
+            "Detailed knowledge of JavaScript's prototype inheritance mechanism.",
+            "Ability to predict subtle behaviors related to property lookup and `hasOwnProperty`.",
+            "Capacity for in-depth explanation of technical concepts."
+          ],
+          "example": "This question highlights a common pitfall when using `new Parent()` for prototype inheritance in ES5, where instance properties of the parent (like `x`) end up on the prototype itself rather than being properly initialized on each child instance. The preferred method, `Object.create(Animal.prototype)`, avoids this by creating an empty object whose `[[Prototype]]` points to `Animal.prototype`, ensuring `Animal.call(this, name)` correctly initializes `x` on each `Dog` instance.",
+          "tags": [
+            "JavaScript",
+            "ES5",
+            "Inheritance",
+            "Prototypes",
+            "hasOwnProperty",
+            "Code Analysis",
+            "Hard",
+            "Debugging"
+          ],
+          "prerequisites": [
+            "theory_prototype_inheritance_es5"
+          ],
+          "complexity": 8,
+          "interviewFrequency": 7,
+          "learningPath": "advanced"
+        },
+        {
+          "id": "question_encapsulation_flashcard_1",
+          "topic": "Encapsulation",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "What is the primary benefit of encapsulation in object-oriented programming?",
+          "answer": "Encapsulation bundles data and methods together and restricts direct access to an object's internal state, promoting data integrity, modularity, and easier maintenance by preventing external code from breaking internal invariants.",
+          "analysisPoints": [
+            "Definition of encapsulation.",
+            "Understanding its benefits (data integrity, modularity, maintenance)."
+          ],
+          "keyConcepts": [
+            "Encapsulation",
+            "OOP Principles",
+            "Information Hiding"
+          ],
+          "evaluationCriteria": [
+            "Basic understanding of OOP principles."
+          ],
+          "example": "Encapsulation hides the complex internal workings of an object, exposing only a public interface. This allows developers to change the internal implementation without affecting external code that relies on the object's public methods.",
+          "tags": [
+            "OOP",
+            "Encapsulation",
+            "Flashcard",
+            "Principles"
+          ],
+          "prerequisites": [],
+          "complexity": 3,
+          "interviewFrequency": 6,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_es6_classes_3",
+          "topic": "ES6 Class Syntax",
+          "level": "medium",
+          "type": "mcq",
+          "question": "Which statement about ES6 classes in JavaScript is FALSE?\n\nA. ES6 classes are syntactic sugar over JavaScript's existing prototype-based inheritance.\nB. The `constructor` method is optional in an ES6 class. If omitted, a default empty constructor is provided.\nC. A class declared with `class MyClass { ... }` is hoisted to the top of its scope like `function MyFunction() { ... }`.\nD. The `super()` keyword must be called in a derived class's `constructor` before `this` can be accessed.",
+          "answer": "C. A class declared with `class MyClass { ... }` is hoisted to the top of its scope like `function MyFunction() { ... }`.",
+          "options": [
+            "A. ES6 classes are syntactic sugar over JavaScript's existing prototype-based inheritance.",
+            "B. The `constructor` method is optional in an ES6 class. If omitted, a default empty constructor is provided.",
+            "C. A class declared with `class MyClass { ... }` is hoisted to the top of its scope like `function MyFunction() { ... }`.",
+            "D. The `super()` keyword must be called in a derived class's `constructor` before `this` can be accessed."
+          ],
+          "analysisPoints": [
+            "Understanding that ES6 classes are syntactic sugar.",
+            "Knowing the behavior of default constructors.",
+            "Correctly identifying that class declarations are not hoisted (temporal dead zone).",
+            "Confirming the `super()` call requirement."
+          ],
+          "keyConcepts": [
+            "ES6 Classes",
+            "Hoisting",
+            "Syntactic Sugar",
+            "Constructor",
+            "super()",
+            "Temporal Dead Zone"
+          ],
+          "evaluationCriteria": [
+            "Comprehensive knowledge of ES6 class features and quirks.",
+            "Distinguishing between class and function hoisting behavior."
+          ],
+          "example": "Unlike `function` declarations, `class` declarations are not hoisted. They behave more like `let` or `const` declarations, existing in a 'temporal dead zone' until their declaration is encountered during execution. Attempting to access a class before its declaration will result in a `ReferenceError`.",
+          "tags": [
+            "JavaScript",
+            "ES6 Classes",
+            "Hoisting",
+            "MCQ",
+            "Inheritance"
+          ],
+          "prerequisites": [
+            "theory_es6_class_syntax",
+            "JavaScript_Hoisting"
+          ],
+          "complexity": 7,
+          "interviewFrequency": 9,
+          "learningPath": "intermediate"
+        }
+      ],
+      "tasks": [
+        {
+          "id": "task_es5_prototype_inheritance",
+          "title": "Build a Shape Hierarchy using ES5 Prototypes",
+          "description": "\nImplement a simple inheritance hierarchy for geometric shapes using ES5 prototype-based inheritance.\n\n1.  **`Shape` Constructor:**\n    *   Takes `color` as an argument.\n    *   Has a method `getArea()` that returns `0` (default for a generic shape).\n    *   Has a method `describe()` that returns `\"This is a <color> shape.\" `.\n\n2.  **`Circle` Constructor:**\n    *   Inherits from `Shape`.\n    *   Takes `color` and `radius` as arguments.\n    *   Overrides `getArea()` to return the area of a circle (`π * radius * radius`).\n    *   Overrides `describe()` to return `\"This is a <color> circle with radius <radius>.\" `.\n\n3.  **`Rectangle` Constructor:**\n    *   Inherits from `Shape`.\n    *   Takes `color`, `width`, and `height` as arguments.\n    *   Overrides `getArea()` to return the area of a rectangle (`width * height`).\n    *   Overrides `describe()` to return `\"This is a <color> rectangle with width <width> and height <height>.\" `.\n\nEnsure proper prototype chain setup and `constructor` property assignment for all derived types.\n",
+          "difficulty": "medium",
+          "startingCode": "function Shape(color) {\n  // TODO: Implement Shape constructor\n}\n\nShape.prototype.getArea = function() {\n  // TODO: Implement getArea for Shape\n};\n\nShape.prototype.describe = function() {\n  // TODO: Implement describe for Shape\n};\n\nfunction Circle(color, radius) {\n  // TODO: Implement Circle constructor and inheritance\n}\n\n// TODO: Implement Circle.prototype methods (getArea, describe)\n\nfunction Rectangle(color, width, height) {\n  // TODO: Implement Rectangle constructor and inheritance\n}\n\n// TODO: Implement Rectangle.prototype methods (getArea, describe)\n\n// You can use Math.PI for circle area\n",
+          "solutionCode": "function Shape(color) {\n  this.color = color;\n}\n\nShape.prototype.getArea = function() {\n  return 0; // Default for a generic shape\n};\n\nShape.prototype.describe = function() {\n  return `This is a ${this.color} shape.`;\n};\n\nfunction Circle(color, radius) {\n  Shape.call(this, color);\n  this.radius = radius;\n}\n\nCircle.prototype = Object.create(Shape.prototype);\nCircle.prototype.constructor = Circle;\n\nCircle.prototype.getArea = function() {\n  return Math.PI * this.radius * this.radius;\n};\n\nCircle.prototype.describe = function() {\n  return `This is a ${this.color} circle with radius ${this.radius}.`;\n};\n\nfunction Rectangle(color, width, height) {\n  Shape.call(this, color);\n  this.width = width;\n  this.height = height;\n}\n\nRectangle.prototype = Object.create(Shape.prototype);\nRectangle.prototype.constructor = Rectangle;\n\nRectangle.prototype.getArea = function() {\n  return this.width * this.height;\n};\n\nRectangle.prototype.describe = function() {\n  return `This is a ${this.color} rectangle with width ${this.width} and height ${this.height}.`;\n};\n",
+          "testCases": [
+            "const genericShape = new Shape('green');\nconsole.log(genericShape.getArea());\nconsole.log(genericShape.describe());\nconsole.log(genericShape instanceof Shape);\n",
+            "const myCircle = new Circle('red', 5);\nconsole.log(myCircle.getArea());\nconsole.log(myCircle.describe());\nconsole.log(myCircle instanceof Circle);\nconsole.log(myCircle instanceof Shape);\nconsole.log(myCircle.constructor === Circle);\n",
+            "const myRectangle = new Rectangle('blue', 4, 6);\nconsole.log(myRectangle.getArea());\nconsole.log(myRectangle.describe());\nconsole.log(myRectangle instanceof Rectangle);\nconsole.log(myRectangle instanceof Shape);\nconsole.log(myRectangle.constructor === Rectangle);\n"
+          ],
+          "hints": [
+            "Remember to use `Parent.call(this, ...)` in the child constructor to initialize inherited properties.",
+            "Use `Object.create(Parent.prototype)` for setting up the prototype chain.",
+            "Don't forget to correct the `constructor` property on the child's prototype.",
+            "For `getArea` in `Circle`, use `Math.PI`."
+          ],
+          "tags": [
+            "JavaScript",
+            "ES5",
+            "Inheritance",
+            "Prototypes",
+            "OOP",
+            "Geometry"
+          ],
+          "timeEstimate": 45,
+          "prerequisites": [
+            "theory_prototype_inheritance_es5"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 7,
+          "learningPath": "intermediate",
+          "relatedConcepts": [
+            "Polymorphism",
+            "Method_Overriding",
+            "Constructor_Function"
+          ]
+        },
+        {
+          "id": "task_es6_class_conversion",
+          "title": "Convert Library System to ES6 Classes",
+          "description": "\nConvert the following ES5 prototype-based library system into ES6 class syntax. Ensure all inheritance, method overriding, and constructor calls are correctly translated.\n\n**Original ES5 Code:**\n```javascript\nfunction LibraryItem(id, title) {\n  this.id = id;\n  this.title = title;\n  this.isBorrowed = false;\n}\n\nLibraryItem.prototype.borrow = function() {\n  if (!this.isBorrowed) {\n    this.isBorrowed = true;\n    return `Item ${this.title} (ID: ${this.id}) borrowed.`;\n  }\n  return `Item ${this.title} (ID: ${this.id}) is already borrowed.`;\n};\n\nLibraryItem.prototype.returnItem = function() {\n  if (this.isBorrowed) {\n    this.isBorrowed = false;\n    return `Item ${this.title} (ID: ${this.id}) returned.`;\n  }\n  return `Item ${this.title} (ID: ${this.id}) is not borrowed.`;\n};\n\nfunction Book(id, title, author, isbn) {\n  LibraryItem.call(this, id, title);\n  this.author = author;\n  this.isbn = isbn;\n}\nBook.prototype = Object.create(LibraryItem.prototype);\nBook.prototype.constructor = Book;\n\nBook.prototype.getInfo = function() {\n  return `${this.title} by ${this.author}, ISBN: ${this.isbn}.`;\n};\n\nfunction DVD(id, title, director, duration) {\n  LibraryItem.call(this, id, title);\n  this.director = director;\n  this.duration = duration;\n}\nDVD.prototype = Object.create(LibraryItem.prototype);\nDVD.prototype.constructor = DVD;\n\nDVD.prototype.getInfo = function() {\n  return `${this.title} directed by ${this.director}, Duration: ${this.duration} minutes.`;\n};\n\n// Example Usage (for testing):\n// const book1 = new Book('B001', 'The Hobbit', 'J.R.R. Tolkien', '978-0-345-33968-3');\n// console.log(book1.getInfo());\n// console.log(book1.borrow());\n// console.log(book1.borrow());\n// console.log(book1.returnItem());\n// console.log(book1.returnItem());\n\n// const dvd1 = new DVD('D001', 'Inception', 'Christopher Nolan', 148);\n// console.log(dvd1.getInfo());\n// console.log(dvd1.borrow());\n```\n\n**Requirements:**\n1.  Translate `LibraryItem`, `Book`, and `DVD` into ES6 classes.\n2.  Maintain the inheritance chain: `Book` and `DVD` should extend `LibraryItem`.\n3.  Ensure `borrow()`, `returnItem()`, and `getInfo()` methods function identically.\n4.  Confirm `constructor` calls (`super()`) are correctly implemented.\n",
+          "difficulty": "medium",
+          "startingCode": "// Your ES6 class implementation goes here\n\nclass LibraryItem {\n  // TODO: Implement constructor and methods\n}\n\nclass Book extends LibraryItem {\n  // TODO: Implement constructor and methods\n}\n\nclass DVD extends LibraryItem {\n  // TODO: Implement constructor and methods\n}\n\n",
+          "solutionCode": "class LibraryItem {\n  constructor(id, title) {\n    this.id = id;\n    this.title = title;\n    this.isBorrowed = false;\n  }\n\n  borrow() {\n    if (!this.isBorrowed) {\n      this.isBorrowed = true;\n      return `Item ${this.title} (ID: ${this.id}) borrowed.`;\n    }\n    return `Item ${this.title} (ID: ${this.id}) is already borrowed.`;\n  }\n\n  returnItem() {\n    if (this.isBorrowed) {\n      this.isBorrowed = false;\n      return `Item ${this.title} (ID: ${this.id}) returned.`;\n    }\n    return `Item ${this.title} (ID: ${this.id}) is not borrowed.`;\n  }\n}\n\nclass Book extends LibraryItem {\n  constructor(id, title, author, isbn) {\n    super(id, title);\n    this.author = author;\n    this.isbn = isbn;\n  }\n\n  getInfo() {\n    return `${this.title} by ${this.author}, ISBN: ${this.isbn}.`;\n  }\n}\n\nclass DVD extends LibraryItem {\n  constructor(id, title, director, duration) {\n    super(id, title);\n    this.director = director;\n    this.duration = duration;\n  }\n\n  getInfo() {\n    return `${this.title} directed by ${this.director}, Duration: ${this.duration} minutes.`;\n  }\n}\n",
+          "testCases": [
+            "const book1 = new Book('B001', 'The Hobbit', 'J.R.R. Tolkien', '978-0-345-33968-3');\nconsole.log(book1.getInfo());\nconsole.log(book1.borrow());\nconsole.log(book1.borrow());\nconsole.log(book1.returnItem());\nconsole.log(book1.returnItem());\nconsole.log(book1 instanceof Book);\nconsole.log(book1 instanceof LibraryItem);\n",
+            "const dvd1 = new DVD('D001', 'Inception', 'Christopher Nolan', 148);\nconsole.log(dvd1.getInfo());\nconsole.log(dvd1.borrow());\nconsole.log(dvd1 instanceof DVD);\nconsole.log(dvd1 instanceof LibraryItem);\n"
+          ],
+          "hints": [
+            "Remember that `extends` handles the prototype chain automatically.",
+            "In derived class constructors, `super()` must be called first to initialize the parent's properties.",
+            "Methods defined directly in an ES6 class are automatically added to the class's prototype, similar to `MyClass.prototype.method = function() { ... }` in ES5."
+          ],
+          "tags": [
+            "JavaScript",
+            "ES6 Classes",
+            "Inheritance",
+            "Refactoring",
+            "OOP",
+            "Library"
+          ],
+          "timeEstimate": 60,
+          "prerequisites": [
+            "theory_es6_class_syntax",
+            "theory_prototype_inheritance_es5"
+          ],
+          "complexity": 6,
+          "interviewRelevance": 9,
+          "learningPath": "intermediate",
+          "relatedConcepts": [
+            "Polymorphism",
+            "Class_Hierarchy",
+            "Syntactic_Sugar"
+          ]
+        },
+        {
+          "id": "task_functional_logger_with_privacy",
+          "title": "Implement a Functional Logger with Private State",
+          "description": "\nCreate a logging utility using functional inheritance and closures to ensure private state.\n\n1.  **`createLogger` Factory Function:**\n    *   Takes an initial `logLevel` (e.g., 'INFO', 'WARN', 'ERROR') as a string. Default to 'INFO'.\n    *   Manages a private array `_logs` to store all messages, and a private `currentLevel`.\n    *   Returns an object with the following public methods:\n        *   `log(message, level)`: Adds a message to `_logs` if its `level` is greater than or equal to `currentLevel`. If `level` is omitted, default to 'INFO'.\n        *   `setLogLevel(newLevel)`: Updates `currentLevel`.\n        *   `getLogs()`: Returns a copy of the private `_logs` array.\n        *   `clearLogs()`: Clears the private `_logs` array.\n\n2.  **`createTimedLogger` Factory Function:**\n    *   Takes an initial `logLevel` as an argument.\n    *   Functionally inherits from `createLogger`.\n    *   Overrides the `log` method to automatically prepend a timestamp (`new Date().toISOString()`) to the message before logging it to the `_logs` array.\n\n**Logging Levels (for comparison):**\n*   'ERROR': 3\n*   'WARN': 2\n*   'INFO': 1\n*   'DEBUG': 0\n\nMessages with a lower level value than `currentLevel` should not be logged. For example, if `currentLevel` is 'INFO' (1), 'DEBUG' (0) messages should not be logged.\n",
+          "difficulty": "hard",
+          "startingCode": "const LOG_LEVELS = {\n  'DEBUG': 0,\n  'INFO': 1,\n  'WARN': 2,\n  'ERROR': 3\n};\n\nfunction createLogger(initialLevel = 'INFO') {\n  // TODO: Implement private state (_logs, currentLevel) and public methods\n  let _logs = [];\n  let currentLevel = LOG_LEVELS[initialLevel.toUpperCase()];\n\n  return {\n    log: function(message, level = 'INFO') {\n      // TODO: Implement logging logic with level comparison\n    },\n    setLogLevel: function(newLevel) {\n      // TODO: Implement level setter\n    },\n    getLogs: function() {\n      // TODO: Implement getLogs\n    },\n    clearLogs: function() {\n      // TODO: Implement clearLogs\n    }\n  };\n}\n\nfunction createTimedLogger(initialLevel = 'INFO') {\n  // TODO: Implement functional inheritance from createLogger and override log\n}\n",
+          "solutionCode": "const LOG_LEVELS = {\n  'DEBUG': 0,\n  'INFO': 1,\n  'WARN': 2,\n  'ERROR': 3\n};\n\nfunction createLogger(initialLevel = 'INFO') {\n  let _logs = [];\n  let currentLevel = LOG_LEVELS[initialLevel.toUpperCase()] || LOG_LEVELS['INFO'];\n\n  return {\n    log: function(message, level = 'INFO') {\n      const messageLevel = LOG_LEVELS[level.toUpperCase()];\n      if (messageLevel !== undefined && messageLevel >= currentLevel) {\n        _logs.push(`[${level.toUpperCase()}] ${message}`);\n      }\n    },\n    setLogLevel: function(newLevel) {\n      const levelValue = LOG_LEVELS[newLevel.toUpperCase()];\n      if (levelValue !== undefined) {\n        currentLevel = levelValue;\n      } else {\n        console.warn(`Invalid log level: ${newLevel}`);\n      }\n    },\n    getLogs: function() {\n      return [..._logs]; // Return a copy to prevent external modification of private array\n    },\n    clearLogs: function() {\n      _logs = [];\n    }\n  };\n}\n\nfunction createTimedLogger(initialLevel = 'INFO') {\n  const logger = createLogger(initialLevel);\n\n  // Override the log method\n  const originalLog = logger.log;\n  logger.log = function(message, level = 'INFO') {\n    const timestamp = new Date().toISOString();\n    originalLog.call(this, `(${timestamp}) ${message}`, level);\n  };\n\n  return logger;\n}\n",
+          "testCases": [
+            "// Test Basic Logger\nconst myLogger = createLogger('INFO');\nmyLogger.log('This is an info message.');\nmyLogger.log('This is a debug message.', 'DEBUG');\nmyLogger.log('This is an error message.', 'ERROR');\nconsole.log(myLogger.getLogs().length);\nconsole.log(myLogger.getLogs()[0].includes('[INFO]'));\n\nmyLogger.setLogLevel('DEBUG');\nmyLogger.log('Another debug message.', 'DEBUG');\nconsole.log(myLogger.getLogs().length);\n\nmyLogger.clearLogs();\nconsole.log(myLogger.getLogs().length);\n",
+            "// Test Timed Logger\nconst timedLogger = createTimedLogger('WARN');\ntimedLogger.log('Warning: Something happened.', 'WARN');\ntimedLogger.log('Error: Critical failure.', 'ERROR');\ntimedLogger.log('Info: App started.', 'INFO');\n\nconst timedLogs = timedLogger.getLogs();\nconsole.log(timedLogs.length);\nconsole.log(timedLogs[0].includes('(' + new Date().getFullYear()));\nconsole.log(timedLogs[0].includes('[WARN] Warning: Something happened.'));\n"
+          ],
+          "hints": [
+            "For `createLogger`, declare `_logs` and `currentLevel` with `let` inside the factory function to make them private via closure.",
+            "Ensure `getLogs()` returns a *copy* of the `_logs` array (e.g., `[..._logs]`) to prevent external direct modification.",
+            "For `createTimedLogger`, call `createLogger` to get the base logger object. Then, override its `log` method.",
+            "Inside the overridden `log` method in `createTimedLogger`, use `originalLog.call(this, ...)` to invoke the parent's `log` method with the correct `this` context and the new timestamped message."
+          ],
+          "tags": [
+            "JavaScript",
+            "Functional Programming",
+            "Encapsulation",
+            "Closures",
+            "Factory Functions",
+            "OOP",
+            "Design Patterns",
+            "Composition"
+          ],
+          "timeEstimate": 90,
+          "prerequisites": [
+            "theory_functional_inheritance_and_encapsulation",
+            "Scope_and_Closures",
+            "Function_Call_Apply"
+          ],
+          "complexity": 8,
+          "interviewRelevance": 8,
+          "learningPath": "advanced",
+          "relatedConcepts": [
+            "Composition_over_Inheritance",
+            "Module_Pattern",
+            "Private_State",
+            "Factory_Pattern"
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "b0abeb96-1032-4163-b37e-7ce0a9262e1f",
+    "startLine": 1000,
+    "endLine": 1099,
+    "processedDate": "2025-06-17T07:28:50.930Z",
+    "content": {
+      "logicalBlockInfo": {
+        "suggestedEndLine": -1
+      },
+      "theory": [
+        {
+          "id": "theory_private_members_js",
+          "title": "Private Members in JavaScript: Closures vs. Symbols",
+          "content": "In JavaScript, achieving true data privacy for object properties has historically been a challenge due to its dynamic nature and lack of built-in private modifiers until recent ES versions (with `#` private class fields). However, two common patterns for creating 'private' or encapsulated members are using closures and ES6 Symbols.\n\n## 1. Using Closures for Private Members\nClosures provide a robust way to create truly private variables and functions. When an inner function retains access to its outer (enclosing) function's scope even after the outer function has finished executing, it forms a closure. This allows variables declared within the outer function to be accessible only by the inner function(s), effectively making them private to the returned object's methods.\n\n### How it works:\n1.  A constructor function (or a factory function) declares variables using `let` or `const` within its scope.\n2.  It then returns an object containing public methods.\n3.  These public methods, being defined within the same scope, 'close over' the private variables, allowing them to read and modify them.\n4.  The private variables are not directly accessible from outside the returned object, ensuring encapsulation.\n\n**Advantages:**\n*   **True Privacy:** Variables are genuinely inaccessible from outside.\n*   **Simple for functional patterns:** Aligns well with factory functions.\n\n**Disadvantages:**\n*   **Memory Overhead:** Each instance created via this pattern will have its own set of private variables and method copies, potentially consuming more memory.\n*   **Method Duplication:** Methods are recreated for every instance, not shared via the prototype chain.\n\n## 2. Using ES6 Symbols for \"Pseudo-Private\" Members\nES6 introduced `Symbol` as a new primitive data type. Symbols are unique and immutable values that can be used as object property keys. While not truly private (as they can be discovered using `Object.getOwnPropertySymbols()` or `Reflect.ownKeys()`), they provide a way to create properties that are not easily discoverable or enumerable, making them suitable for internal use within a class without polluting the public interface.\n\n### How it works:\n1.  A `Symbol` is created and assigned to a `const` variable outside the class definition.\n2.  This `Symbol` is then used as a property key within the class constructor (`this[_symbolKey] = value;`) and accessed by class methods.\n3.  Since Symbols are not enumerable by `for...in` loops or `Object.keys()`, the property appears \"hidden\" from casual inspection.\n\n**Advantages:**\n*   **Prevents Name Collisions:** Symbols are unique, preventing accidental overwrites of properties.\n*   **Less Memory Overhead (compared to closures for classes):** Methods can be defined on the prototype, shared across instances.\n*   **Semantically clear:** Indicates an intended internal property.\n\n**Disadvantages:**\n*   **Not Truly Private:** `Object.getOwnPropertySymbols()` can reveal these properties.\n*   **Requires Convention:** Developers still need to know about the Symbol to access the property, often leading to using `_` prefix for clarity.\n\n```javascript\n// Using closures for private members\nfunction Counter() {\n  // Private variable\n  let count = 0;\n  \n  // Public interface\n  return {\n    increment: function() {\n      count++;\n    },\n    decrement: function() {\n      count--;\n    },\n    getCount: function() {\n      return count;\n    }\n  };\n}\n\n// Using ES6 classes with symbols\nconst _count = Symbol('count'); // Declare Symbol outside the class\n\nclass CounterClass {\n  constructor() {\n    this[_count] = 0; // Use Symbol as a property key\n  }\n  \n  increment() {\n    this[_count]++;\n  }\n  \n  decrement() {\n    this[_count]--;\n  }\n  \n  getCount() {\n    return this[_count];\n  }\n}\n```",
+          "examples": [
+            {
+              "id": "example_private_members_closure_1",
+              "title": "Closure-based Counter Example",
+              "code": "function Counter() {\n  let count = 0; // Private variable\n  \n  return {\n    increment: function() {\n      count++;\n    },\n    decrement: function() {\n      count--;\n    },\n    getCount: function() {\n      return count;\n    }\n  };\n}\n\nconst counter = Counter();\ncounter.increment();\ncounter.increment();\nconsole.log(counter.getCount()); // Output: 2\nconsole.log(counter.count); // Output: undefined (count is private)",
+              "explanation": "This example demonstrates how the `count` variable is truly private to the `Counter` instance. It can only be accessed or modified via the `increment`, `decrement`, and `getCount` methods returned by the `Counter` function. Direct access `counter.count` results in `undefined`.",
+              "language": "javascript"
+            },
+            {
+              "id": "example_private_members_symbol_1",
+              "title": "Symbol-based Counter Example",
+              "code": "const _count = Symbol('count'); // Unique symbol for internal use\n\nclass CounterClass {\n  constructor() {\n    this[_count] = 0; // Property key is a Symbol\n  }\n  \n  increment() {\n    this[_count]++;\n  }\n  \n  decrement() {\n    this[_count]--;\n  }\n  \n  getCount() {\n    return this[_count];\n  }\n}\n\nconst counterSym = new CounterClass();\ncounterSym.increment();\ncounterSym.increment();\nconsole.log(counterSym.getCount()); // Output: 2\n\n// Attempting to access directly will not work (unless you have the Symbol)\nconsole.log(counterSym._count); // Output: undefined (if _count is not a string literal)\n\n// How it's discoverable (demonstrating it's not truly private)\nconsole.log(Object.getOwnPropertySymbols(counterSym)); // Output: [Symbol(count)]\nconsole.log(counterSym[Object.getOwnPropertySymbols(counterSym)[0]]); // Output: 2",
+              "explanation": "This example shows how `_count` (a Symbol) is used as a property key within `CounterClass`. While it's not directly accessible via dot notation (`.count`), it's also not truly private as `Object.getOwnPropertySymbols()` can reveal and allow access to it. It effectively hides the property from typical enumeration methods like `Object.keys()` or `for...in` loops.",
+              "language": "javascript"
+            }
+          ],
+          "relatedQuestions": [
+            "question_private_members_1",
+            "question_private_members_2",
+            "question_private_members_3",
+            "question_private_members_4",
+            "question_private_members_5",
+            "question_private_members_6",
+            "question_private_members_7"
+          ],
+          "relatedTasks": [
+            "task_private_members_1",
+            "task_private_members_2"
+          ],
+          "tags": [
+            "JavaScript",
+            "OOP",
+            "Encapsulation",
+            "Closures",
+            "Symbols",
+            "ES6"
+          ],
+          "technology": "JavaScript",
+          "prerequisites": [
+            "javascript_functions",
+            "javascript_objects",
+            "es6_classes",
+            "javascript_scope"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 9,
+          "learningPath": "intermediate",
+          "requiredFor": [
+            "design_patterns",
+            "complex_class_design"
+          ]
+        },
+        {
+          "id": "theory_polymorphism_js",
+          "title": "Polymorphism in JavaScript",
+          "content": "Polymorphism, one of the fundamental principles of Object-Oriented Programming (OOP), means \"many forms.\" In the context of JavaScript, it refers to the ability of different objects to respond to the same method call in their own specific ways. This allows for a common interface to be used across a hierarchy of related objects, leading to more flexible and extensible code.\n\n### Key Concepts of Polymorphism:\n1.  **Method Overriding:** This is the most common form of polymorphism in JavaScript. A subclass (derived class) provides a specific implementation of a method that is already defined in its superclass (base class). When that method is called on an object, the specific implementation of the object's class is executed.\n2.  **Common Interface:** Polymorphism allows you to treat objects of different classes uniformly through a common interface. For example, if multiple animal classes all have a `speak()` method, you can iterate over a collection of different animal types and call `speak()` on each, without needing to know the specific type of animal at runtime.\n\n### Benefits of Polymorphism:\n*   **Code Reusability:** Common logic can be defined in a base class and overridden where necessary.\n*   **Flexibility and Extensibility:** New classes can be added to the hierarchy without modifying existing code that uses the common interface.\n*   **Maintainability:** Code becomes easier to manage and understand because behavior is encapsulated within each class.\n*   **Decoupling:** Code that interacts with polymorphic objects is decoupled from the specific implementations of those objects.\n\nIn JavaScript, polymorphism is often demonstrated using ES6 classes and inheritance, where a child class extends a parent class and overrides one or more of its methods.\n\n```javascript\n// Polymorphism Examples\n\nclass Animal {\n  speak() {\n    return \"Animal makes a sound\";\n  }\n}\n\nclass Dog extends Animal {\n  speak() {\n    return \"Dog barks\";\n  }\n}\n\nclass Cat extends Animal {\n  speak() {\n    return \"Cat meows\";\n  }\n}\n\nconst animals = [new Animal(), new Dog(), new Cat()];\n\nanimals.forEach(animal => {\n  console.log(animal.speak());\n});\n// Output:\n// \"Animal makes a sound\"\n// \"Dog barks\"\n// \"Cat meows\"\n```",
+          "examples": [
+            {
+              "id": "example_polymorphism_1",
+              "title": "Polymorphic `speak()` Method",
+              "code": "class Animal {\n  speak() {\n    return \"Animal makes a sound\";\n  }\n}\n\nclass Dog extends Animal {\n  speak() {\n    return \"Dog barks\";\n  }\n}\n\nclass Cat extends Animal {\n  speak() {\n    return \"Cat meows\";\n  }\n}\n\nconst genericAnimal = new Animal();\nconst myDog = new Dog();\nconst myCat = new Cat();\n\nconsole.log(genericAnimal.speak()); // Output: \"Animal makes a sound\"\nconsole.log(myDog.speak());       // Output: \"Dog barks\"\nconsole.log(myCat.speak());       // Output: \"Cat meows\"\n\n// Demonstrating the common interface\nconst pets = [myDog, myCat];\npets.forEach(pet => {\n  console.log(`A pet says: ${pet.speak()}`);\n});\n// Output:\n// A pet says: Dog barks\n// A pet says: Cat meows",
+              "explanation": "This example clearly illustrates polymorphism. Each `Animal` subclass (`Dog`, `Cat`) overrides the `speak()` method from the base `Animal` class. When `speak()` is called on an instance, the specific implementation for that object's class is executed, even when iterating through a collection of mixed animal types using a common interface.",
+              "language": "javascript"
+            }
+          ],
+          "relatedQuestions": [
+            "question_polymorphism_1",
+            "question_polymorphism_2",
+            "question_polymorphism_3",
+            "question_polymorphism_4",
+            "question_polymorphism_5"
+          ],
+          "relatedTasks": [
+            "task_polymorphism_1"
+          ],
+          "tags": [
+            "JavaScript",
+            "OOP",
+            "Polymorphism",
+            "Inheritance",
+            "Classes",
+            "Method Overriding"
+          ],
+          "technology": "JavaScript",
+          "prerequisites": [
+            "es6_classes",
+            "javascript_inheritance"
+          ],
+          "complexity": 6,
+          "interviewRelevance": 8,
+          "learningPath": "intermediate",
+          "requiredFor": [
+            "design_patterns",
+            "framework_architecture"
+          ]
+        },
+        {
+          "id": "theory_composition_vs_inheritance",
+          "title": "Object Composition vs. Inheritance for Code Reuse",
+          "content": "In Object-Oriented Programming (OOP) and JavaScript, inheritance and composition are two primary techniques for achieving code reuse and organizing object behavior. While both aim to reduce duplication, they represent different philosophies for structuring relationships between objects.\n\n## 1. Inheritance (Is-A Relationship)\nInheritance is a mechanism where a new class (subclass or child class) derives properties and methods from an existing class (superclass or parent class). It establishes an \"is-a\" relationship: a Dog *is a* type of Animal.\n\n**Characteristics:**\n*   **Hierarchical:** Creates a tree-like structure of classes.\n*   **Tight Coupling:** Subclasses are tightly coupled to their superclasses. Changes in the superclass can break subclasses.\n*   **\"Fragile Base Class\" Problem:** Modifications to the base class can inadvertently alter the behavior of derived classes in unexpected ways.\n*   **\"Diamond Problem\":** In languages supporting multiple inheritance, a class inheriting from two classes that share a common ancestor can lead to ambiguity regarding method resolution (though JavaScript's single inheritance avoids this directly).\n\n**When to use:**\n*   When there is a clear \"is-a\" hierarchy.\n*   When you need to define a base behavior that can be specialized by subclasses.\n\n## 2. Object Composition (Has-A Relationship)\nComposition is a design principle where complex objects are built by combining simpler, more focused objects or functions. Instead of inheriting behavior, an object *has* other objects (or functions) and delegates responsibilities to them. It establishes a \"has-a\" relationship: a `Robot` *has a* `motor` and *has a* `sensor`.\n\n**Characteristics:**\n*   **Flexible:** Objects can be composed with different behaviors at runtime.\n*   **Loose Coupling:** Components are independent and can be reused in various contexts without affecting each other.\n*   **No \"Diamond Problem\":** Avoids the complexities of multiple inheritance.\n*   **Functional Mixins:** A common pattern in JavaScript to achieve composition by combining functions that add specific behaviors to an object. These functions are often referred to as \"mixins\" (though not true mixins in the classical sense, they achieve similar goals).\n\n**Functional Mixins Explained:**\nFunctional mixins are functions that take an object (or a state) as an argument, add new properties or methods to it, and then return the modified object. They promote a pattern where behavior is encapsulated in small, reusable functions that can be composed together.\n\n**When to use:**\n*   When objects need to exhibit multiple, orthogonal behaviors (e.g., an object can `eat` AND `sleep`).\n*   When you want to avoid deep, rigid class hierarchies.\n*   When you want to easily combine behaviors without complex inheritance chains.\n*   To achieve greater flexibility and reusability of smaller, single-responsibility units.\n\n**\"Favor Composition over Inheritance\" Principle:**\nThis widely recommended design principle suggests that you should try to use composition to achieve code reuse whenever possible, as it often leads to more flexible, less tightly coupled, and easier-to-maintain systems than deep inheritance hierarchies.\n\n```javascript\n// Functional mixins for composition\nconst canEat = (state) => ({\n  eat: food => {\n    console.log(`${state.name} is eating ${food}`);\n    state.energy += 10; // Modifies shared state\n  }\n});\n\nconst canSleep = (state) => ({\n  sleep: hours => {\n    console.log(`${state.name} is sleeping for ${hours} hours`);\n    state.energy += hours * 5; // Modifies shared state\n  }\n});\n```",
+          "examples": [
+            {
+              "id": "example_composition_mixins_1",
+              "title": "Composing an Entity with Functional Mixins",
+              "code": "const canEat = (state) => ({\n  eat: food => {\n    console.log(`${state.name} is eating ${food}`);\n    state.energy += 10;\n  }\n});\n\nconst canSleep = (state) => ({\n  sleep: hours => {\n    console.log(`${state.name} is sleeping for ${hours} hours`);\n    state.energy += hours * 5;\n  }\n});\n\n// A factory function to create a character\nfunction createCharacter(name) {\n  let state = {\n    name,\n    energy: 100\n  };\n\n  // Combine behaviors using Object.assign\n  return Object.assign(\n    state,\n    canEat(state),\n    canSleep(state)\n  );\n}\n\nconst hero = createCharacter('Hero');\nconsole.log(`${hero.name}'s initial energy: ${hero.energy}`); // Output: Hero's initial energy: 100\nhero.eat('apple'); // Output: Hero is eating apple\nhero.sleep(8);     // Output: Hero is sleeping for 8 hours\nconsole.log(`${hero.name}'s final energy: ${hero.energy}`);   // Output: Hero's final energy: 150",
+              "explanation": "This example demonstrates how `canEat` and `canSleep` are functional mixins. They take a `state` object and return an object containing behavior functions that operate on that `state`. The `createCharacter` factory function then uses `Object.assign` to compose these behaviors onto a single `hero` object. This allows `hero` to 'have' the ability to eat and sleep without inheriting from a common base class, promoting flexible and modular design.",
+              "language": "javascript"
+            },
+            {
+              "id": "example_composition_inheritance_comparison",
+              "title": "Inheritance vs. Composition: A Structural Comparison",
+              "code": "// Inheritance Example: \"Is-A\" relationship\nclass Vehicle {\n  drive() { console.log('Driving'); }\n}\n\nclass Car extends Vehicle {\n  openDoor() { console.log('Door opened'); }\n}\n\nconst myCar = new Car();\nmyCar.drive();\nmyCar.openDoor();\n\n// Composition Example: \"Has-A\" relationship\nconst Driver = (entity) => ({ \n  drive: () => console.log(`${entity.name} is driving`) \n});\n\nconst DoorOpener = (entity) => ({ \n  openDoor: () => console.log(`${entity.name}'s door opened`) \n});\n\nfunction createVehicle(name) {\n  const state = { name };\n  return Object.assign(state, Driver(state), DoorOpener(state));\n}\n\nconst myCustomCar = createVehicle('CustomCar');\nmyCustomCar.drive();\nmyCustomCar.openDoor();",
+              "explanation": "This example starkly contrasts inheritance and composition. The `Car` *is a* `Vehicle` via inheritance. The `CustomCar` *has a* `Driver` behavior and *has a* `DoorOpener` behavior via composition using functional mixins. The composition approach offers more flexibility, as `DoorOpener` could be reused with a `House` object, which doesn't make sense in an `is-a` `Vehicle` hierarchy.",
+              "language": "javascript"
+            }
+          ],
+          "relatedQuestions": [
+            "question_composition_vs_inheritance_1",
+            "question_composition_vs_inheritance_2",
+            "question_composition_vs_inheritance_3",
+            "question_composition_vs_inheritance_4",
+            "question_composition_vs_inheritance_5",
+            "question_composition_vs_inheritance_6"
+          ],
+          "relatedTasks": [
+            "task_composition_inheritance_1"
+          ],
+          "tags": [
+            "JavaScript",
+            "OOP",
+            "Composition",
+            "Inheritance",
+            "Code Reuse",
+            "Design Patterns",
+            "Functional Programming",
+            "Mixins"
+          ],
+          "technology": "JavaScript",
+          "prerequisites": [
+            "javascript_objects",
+            "es6_classes",
+            "javascript_functions"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 9,
+          "learningPath": "intermediate",
+          "requiredFor": [
+            "architecture_design",
+            "design_patterns",
+            "library_development"
+          ]
+        }
+      ],
+      "questions": [
+        {
+          "id": "question_private_members_1",
+          "topic": "Private Members with Closures",
+          "level": "easy",
+          "type": "mcq",
+          "question": "Given the `Counter` function using closures, how can the `count` variable be directly accessed from outside the `Counter` instance?",
+          "answer": "It cannot be directly accessed, only through its public methods.",
+          "options": [
+            "By `counter.count`",
+            "By `counter._count`",
+            "It cannot be directly accessed, only through its public methods.",
+            "By `Object.getOwnPropertyNames(counter)[0]`"
+          ],
+          "analysisPoints": [
+            "Tests understanding of closure's role in creating private scope.",
+            "Differentiates between public interface and encapsulated variables.",
+            "Highlights the true privacy provided by closures."
+          ],
+          "keyConcepts": [
+            "Closures",
+            "Encapsulation",
+            "Private Variables"
+          ],
+          "evaluationCriteria": [
+            "Ability to identify truly private members.",
+            "Understanding of scope in JavaScript."
+          ],
+          "example": "```javascript\nfunction Counter() {\n  let count = 0; // Private variable\n  return {\n    increment: function() { count++; },\n    getCount: function() { return count; }\n  };\n}\nconst counter = Counter();\n// console.log(counter.count); // This will be undefined\n```\nThe `count` variable is scoped to the `Counter` function and only accessible via the `increment` and `getCount` methods, demonstrating true privacy.",
+          "tags": [
+            "JavaScript",
+            "Closures",
+            "Encapsulation"
+          ],
+          "prerequisites": [
+            "javascript_scope"
+          ],
+          "complexity": 3,
+          "interviewFrequency": 7,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_private_members_2",
+          "topic": "Private Members with Symbols",
+          "level": "medium",
+          "type": "mcq",
+          "question": "Consider the `CounterClass` using an ES6 Symbol for `_count`. Which statement correctly describes the privacy of `_count`?",
+          "answer": "`_count` is not truly private but is non-enumerable, making it harder to access directly.",
+          "options": [
+            "`_count` is truly private and inaccessible from outside the class.",
+            "`_count` can be accessed directly using `counterInstance._count`.",
+            "`_count` is not truly private but is non-enumerable, making it harder to access directly.",
+            "`_count` is only accessible if explicitly exposed via a getter method."
+          ],
+          "analysisPoints": [
+            "Evaluates knowledge of Symbol behavior as property keys.",
+            "Distinguishes between true privacy (closures) and pseudo-privacy (Symbols).",
+            "Understands Symbol's enumerability characteristics."
+          ],
+          "keyConcepts": [
+            "Symbols",
+            "Encapsulation",
+            "Non-enumerable Properties"
+          ],
+          "evaluationCriteria": [
+            "Accuracy in describing Symbol behavior.",
+            "Understanding of different levels of 'privacy' in JavaScript."
+          ],
+          "example": "```javascript\nconst _count = Symbol('count');\nclass CounterClass {\n  constructor() { this[_count] = 0; }\n  getCount() { return this[_count]; }\n}\nconst c = new CounterClass();\n// Object.getOwnPropertySymbols(c) will return [_count]\n// c[_count] will access the value.\n```\nWhile `_count` is not easily discoverable by `Object.keys()` or `for...in` loops, `Object.getOwnPropertySymbols()` can reveal it, demonstrating it's not truly private but rather hidden from common enumeration.",
+          "tags": [
+            "JavaScript",
+            "Symbols",
+            "ES6",
+            "Encapsulation"
+          ],
+          "prerequisites": [
+            "es6_classes",
+            "javascript_objects"
+          ],
+          "complexity": 5,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_private_members_3",
+          "topic": "Comparison of Privacy Mechanisms",
+          "level": "hard",
+          "type": "open",
+          "question": "Compare and contrast using closures versus ES6 Symbols for creating 'private' members in JavaScript. Discuss their advantages, disadvantages, and typical use cases. Which approach provides true data privacy?",
+          "answer": "N/A",
+          "options": [],
+          "analysisPoints": [
+            "Ability to articulate the core differences between closure-based and Symbol-based privacy.",
+            "Comprehensive understanding of the pros and cons of each method.",
+            "Correct identification of which method offers true privacy and why.",
+            "Knowledge of suitable contexts for each approach."
+          ],
+          "keyConcepts": [
+            "Closures",
+            "Symbols",
+            "Encapsulation",
+            "Privacy",
+            "Design Patterns"
+          ],
+          "evaluationCriteria": [
+            "Depth of comparative analysis.",
+            "Clarity and accuracy of technical explanations.",
+            "Insight into practical application scenarios.",
+            "Correctness of conceptual understanding (e.g., 'true privacy')."
+          ],
+          "example": "This question requires a detailed explanation covering:\n*   **Closures:** How they create a lexical scope for private variables, making them inaccessible from outside. Advantages (true privacy, simple for factory functions) and disadvantages (memory per instance, method duplication).\n*   **Symbols:** How they create unique, non-enumerable property keys. Advantages (prevents name collision, shared prototype methods) and disadvantages (not truly private, discoverable via `getOwnPropertySymbols`).\n*   **Use Cases:** Closures often for factory functions or when true privacy is paramount. Symbols for internal properties of classes where complete privacy isn't strictly necessary, but hiding from general enumeration is desired.\n*   **True Privacy:** Closures provide true data privacy.",
+          "tags": [
+            "JavaScript",
+            "Closures",
+            "Symbols",
+            "Encapsulation",
+            "OOP",
+            "Comparison"
+          ],
+          "prerequisites": [
+            "theory_private_members_js"
+          ],
+          "complexity": 8,
+          "interviewFrequency": 9,
+          "learningPath": "advanced"
+        },
+        {
+          "id": "question_private_members_4",
+          "topic": "Private Class Fields (ES2019+)",
+          "level": "medium",
+          "type": "flashcard",
+          "question": "What is the modern, official way to declare truly private class fields in JavaScript (ES2019+)?",
+          "answer": "Using the `#` prefix for class fields (e.g., `#myPrivateField`).",
+          "options": [],
+          "analysisPoints": [
+            "Tests knowledge of modern JavaScript syntax for private class members.",
+            "Quick recall of the `#` syntax."
+          ],
+          "keyConcepts": [
+            "Private Class Fields",
+            "ES2019",
+            "Encapsulation"
+          ],
+          "evaluationCriteria": [
+            "Recall of specific syntax.",
+            "Awareness of current language features."
+          ],
+          "example": null,
+          "tags": [
+            "JavaScript",
+            "ES2019",
+            "Private Class Fields",
+            "Flashcard"
+          ],
+          "prerequisites": [
+            "es6_classes"
+          ],
+          "complexity": 4,
+          "interviewFrequency": 7,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_private_members_5",
+          "topic": "Symbol Usage with `Object.keys()`",
+          "level": "easy",
+          "type": "mcq",
+          "question": "If an object has properties defined using ES6 Symbols as keys, what will `Object.keys()` return when called on that object?",
+          "answer": "An array of string-keyed property names, excluding Symbol-keyed properties.",
+          "options": [
+            "An array containing all property names, including Symbol-keyed ones.",
+            "An array of string-keyed property names, excluding Symbol-keyed properties.",
+            "An empty array, as Symbols are non-enumerable.",
+            "An error, as Symbols cannot be enumerated."
+          ],
+          "analysisPoints": [
+            "Confirms understanding of Symbol enumerability.",
+            "Distinguishes `Object.keys()` from `Object.getOwnPropertySymbols()`."
+          ],
+          "keyConcepts": [
+            "Symbols",
+            "Object.keys",
+            "Enumerability"
+          ],
+          "evaluationCriteria": [
+            "Correctness regarding `Object.keys()` behavior.",
+            "Understanding of Symbol's non-enumerable nature by default."
+          ],
+          "example": "```javascript\nconst sym1 = Symbol('foo');\nconst sym2 = Symbol('bar');\nconst obj = {\n  [sym1]: 'value1',\n  'name': 'John',\n  [sym2]: 'value2',\n  'age': 30\n};\n\nconsole.log(Object.keys(obj)); // Output: ['name', 'age']\n```\n`Object.keys()` only returns string-keyed enumerable properties. Symbol-keyed properties are not included.",
+          "tags": [
+            "JavaScript",
+            "Symbols",
+            "ES6",
+            "Objects"
+          ],
+          "prerequisites": [
+            "javascript_objects",
+            "symbols"
+          ],
+          "complexity": 4,
+          "interviewFrequency": 6,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_private_members_6",
+          "topic": "Closure Scope",
+          "level": "medium",
+          "type": "open",
+          "question": "Explain the concept of a closure in JavaScript and how it enables the creation of private variables, using a simple counter example.",
+          "answer": "N/A",
+          "options": [],
+          "analysisPoints": [
+            "Clear definition of closure.",
+            "Accurate explanation of lexical scoping.",
+            "Ability to trace variable access within the closure.",
+            "Correctly link closures to encapsulation and private data."
+          ],
+          "keyConcepts": [
+            "Closures",
+            "Lexical Scope",
+            "Encapsulation",
+            "Private Variables"
+          ],
+          "evaluationCriteria": [
+            "Clarity and precision of the explanation.",
+            "Effectiveness of the example in demonstrating the concept.",
+            "Understanding of how the outer function's scope is preserved."
+          ],
+          "example": "```javascript\nfunction createWallet(initialBalance) {\n  let balance = initialBalance; // This is the private variable\n\n  return {\n    deposit: function(amount) {\n      balance += amount;\n      console.log(`Deposited ${amount}. New balance: ${balance}`);\n    },\n    withdraw: function(amount) {\n      if (amount <= balance) {\n        balance -= amount;\n        console.log(`Withdrew ${amount}. New balance: ${balance}`);\n      } else {\n        console.log('Insufficient funds.');\n      }\n    },\n    getBalance: function() {\n      return balance;\n    }\n  };\n}\n\nconst myWallet = createWallet(100);\nmyWallet.deposit(50); // Accessible\nmyWallet.withdraw(30); // Accessible\n// console.log(myWallet.balance); // Undefined - 'balance' is private\n```\n**Explanation:** A closure is formed when `deposit`, `withdraw`, and `getBalance` functions are returned from `createWallet`. These inner functions 'close over' the `balance` variable from `createWallet`'s scope. Even after `createWallet` finishes executing, these inner functions retain access to `balance`, making it effectively private and only modifiable/readable through the returned public methods.",
+          "tags": [
+            "JavaScript",
+            "Closures",
+            "Scope",
+            "Encapsulation"
+          ],
+          "prerequisites": [
+            "javascript_functions",
+            "javascript_scope"
+          ],
+          "complexity": 7,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_private_members_7",
+          "topic": "Advantages of Private Members",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "What is the primary benefit of having private members in an object or class?",
+          "answer": "Encapsulation, which protects internal state from external, unauthorized modification and promotes a clear public interface.",
+          "options": [],
+          "analysisPoints": [
+            "Tests recall of the purpose of encapsulation.",
+            "Connects privacy to good software design principles."
+          ],
+          "keyConcepts": [
+            "Encapsulation",
+            "Private Members",
+            "Data Hiding"
+          ],
+          "evaluationCriteria": [
+            "Concise and accurate definition of the benefit.",
+            "Understanding of core OOP principles."
+          ],
+          "example": null,
+          "tags": [
+            "OOP",
+            "Encapsulation",
+            "Best Practices",
+            "Flashcard"
+          ],
+          "prerequisites": [],
+          "complexity": 3,
+          "interviewFrequency": 6,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_polymorphism_1",
+          "topic": "Definition of Polymorphism",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "What does 'Polymorphism' literally mean in the context of OOP?",
+          "answer": "\"Many forms.\"",
+          "options": [],
+          "analysisPoints": [
+            "Basic recall of the term's origin.",
+            "Foundation for understanding the concept."
+          ],
+          "keyConcepts": [
+            "Polymorphism",
+            "OOP"
+          ],
+          "evaluationCriteria": [
+            "Direct and correct answer.",
+            "Understanding of fundamental OOP terms."
+          ],
+          "example": null,
+          "tags": [
+            "OOP",
+            "Polymorphism",
+            "Flashcard"
+          ],
+          "prerequisites": [
+            "oop_basics"
+          ],
+          "complexity": 2,
+          "interviewFrequency": 5,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_polymorphism_2",
+          "topic": "Polymorphism in Practice",
+          "level": "medium",
+          "type": "mcq",
+          "question": "Given the `Animal`, `Dog`, and `Cat` classes provided, which of the following best demonstrates polymorphism?",
+          "answer": "Iterating over an array containing instances of `Animal`, `Dog`, and `Cat`, and calling `speak()` on each.",
+          "options": [
+            "Defining `speak()` in `Animal` and then inheriting it in `Dog` and `Cat`.",
+            "Iterating over an array containing instances of `Animal`, `Dog`, and `Cat`, and calling `speak()` on each.",
+            "Creating a new `Animal` instance and calling `speak()` on it.",
+            "Ensuring `Dog` and `Cat` have unique methods distinct from `Animal`."
+          ],
+          "analysisPoints": [
+            "Identifies the practical application of polymorphism (common interface).",
+            "Distinguishes between inheritance and the polymorphic use of inherited/overridden methods.",
+            "Recognizes the uniform handling of diverse objects."
+          ],
+          "keyConcepts": [
+            "Polymorphism",
+            "Method Overriding",
+            "Common Interface",
+            "Inheritance"
+          ],
+          "evaluationCriteria": [
+            "Correctly identifies the core polymorphic behavior.",
+            "Understanding of how a common interface facilitates polymorphism."
+          ],
+          "example": "```javascript\nclass Animal { speak() { return 'sound'; } }\nclass Dog extends Animal { speak() { return 'bark'; } }\nclass Cat extends Animal { speak() { return 'meow'; } }\n\nconst animals = [new Animal(), new Dog(), new Cat()];\nanimals.forEach(animal => {\n  console.log(animal.speak()); // This line demonstrates polymorphism\n});\n```\nThe key is that even though `animal` could be an `Animal`, `Dog`, or `Cat` instance, the same `speak()` method call works differently for each, thanks to method overriding and the common `speak` interface.",
+          "tags": [
+            "JavaScript",
+            "Polymorphism",
+            "OOP",
+            "Classes"
+          ],
+          "prerequisites": [
+            "theory_polymorphism_js"
+          ],
+          "complexity": 6,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_polymorphism_3",
+          "topic": "Benefits of Polymorphism",
+          "level": "medium",
+          "type": "open",
+          "question": "Discuss two significant benefits of using polymorphism in object-oriented programming. Provide a simple JavaScript example to illustrate one of these benefits.",
+          "answer": "N/A",
+          "options": [],
+          "analysisPoints": [
+            "Ability to articulate key advantages of polymorphism.",
+            "Provision of a relevant and clear example.",
+            "Demonstrates understanding of how benefits are realized in code."
+          ],
+          "keyConcepts": [
+            "Polymorphism",
+            "Code Reusability",
+            "Extensibility",
+            "Maintainability"
+          ],
+          "evaluationCriteria": [
+            "Clarity and correctness of stated benefits.",
+            "Quality and relevance of the example.",
+            "Logical connection between concept and example."
+          ],
+          "example": "```javascript\n// Benefit 1: Flexibility and Extensibility\nclass Shape {\n  getArea() { throw new Error('Method must be implemented by subclasses'); }\n}\n\nclass Circle extends Shape {\n  constructor(radius) { super(); this.radius = radius; }\n  getArea() { return Math.PI * this.radius * this.radius; }\n}\n\nclass Rectangle extends Shape {\n  constructor(width, height) { super(); this.width = width; this.height = height; }\n  getArea() { return this.width * this.height; }\n}\n\nfunction calculateTotalArea(shapes) {\n  let total = 0;\n  for (const shape of shapes) {\n    total += shape.getArea(); // Polymorphic call\n  }\n  return total;\n}\n\nconst shapes = [new Circle(5), new Rectangle(4, 6)];\nconsole.log(calculateTotalArea(shapes)); // Calculates total area correctly\n\n// A new shape can be added without changing calculateTotalArea\nclass Triangle extends Shape {\n  constructor(base, height) { super(); this.base = base; this.height = height; }\n  getArea() { return 0.5 * this.base * this.height; }\n}\nshapes.push(new Triangle(3, 8));\nconsole.log(calculateTotalArea(shapes)); // Still works, demonstrating extensibility\n```\n**Benefits:**\n1.  **Flexibility and Extensibility:** Polymorphism allows new classes that adhere to a common interface (e.g., `Shape` with `getArea()`) to be added to a system without modifying existing code that processes those objects. The `calculateTotalArea` function doesn't need to know about `Circle`, `Rectangle`, or `Triangle` specifically; it just relies on the `getArea()` method.\n2.  **Code Reusability:** Common functionality can be defined at a higher level (e.g., `Animal.speak()`), and subclasses only need to override specific behaviors, avoiding redundant code.",
+          "tags": [
+            "JavaScript",
+            "Polymorphism",
+            "OOP",
+            "Benefits",
+            "Extensibility"
+          ],
+          "prerequisites": [
+            "theory_polymorphism_js"
+          ],
+          "complexity": 7,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_polymorphism_4",
+          "topic": "Method Overriding in JS",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "What is the term for when a subclass provides its own specific implementation of a method that is already defined in its superclass?",
+          "answer": "Method Overriding.",
+          "options": [],
+          "analysisPoints": [
+            "Tests recall of key OOP terminology.",
+            "Directly related to how polymorphism is achieved in class-based systems."
+          ],
+          "keyConcepts": [
+            "Method Overriding",
+            "Polymorphism",
+            "Inheritance"
+          ],
+          "evaluationCriteria": [
+            "Correctness of the term.",
+            "Understanding of fundamental OOP concepts."
+          ],
+          "example": null,
+          "tags": [
+            "OOP",
+            "Method Overriding",
+            "Flashcard"
+          ],
+          "prerequisites": [
+            "es6_classes",
+            "javascript_inheritance"
+          ],
+          "complexity": 3,
+          "interviewFrequency": 6,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_polymorphism_5",
+          "topic": "Polymorphism vs. Overloading",
+          "level": "hard",
+          "type": "open",
+          "question": "Distinguish between method overriding (a form of polymorphism) and method overloading. Can JavaScript natively support method overloading in the traditional sense? Explain.",
+          "answer": "N/A",
+          "options": [],
+          "analysisPoints": [
+            "Clear distinction between overriding and overloading.",
+            "Correct assessment of JavaScript's native support for overloading.",
+            "Explanation of JavaScript's behavior when multiple functions/methods have the same name."
+          ],
+          "keyConcepts": [
+            "Polymorphism",
+            "Method Overriding",
+            "Method Overloading",
+            "JavaScript Functions"
+          ],
+          "evaluationCriteria": [
+            "Accuracy in defining both concepts.",
+            "Correctly identifying JavaScript's limitations/behavior.",
+            "Depth of explanation for JavaScript's function handling."
+          ],
+          "example": "```javascript\n// Method Overriding (Polymorphism)\nclass Parent { greet() { console.log('Hello from Parent'); } }\nclass Child extends Parent { greet() { console.log('Hello from Child'); } } // Overrides\nnew Child().greet(); // Outputs: Hello from Child\n\n// JavaScript's 'last function wins' for method overloading\nclass Calculator {\n  add(a, b) {\n    console.log(`Adding two numbers: ${a + b}`);\n  }\n  add(a, b, c) { // This will overwrite the previous add method\n    console.log(`Adding three numbers: ${a + b + c}`);\n  }\n}\nconst calc = new Calculator();\ncalc.add(1, 2, 3); // Outputs: Adding three numbers: 6\n// calc.add(1, 2); // This would result in NaN or unexpected behavior because the 2-arg version is gone.\n\n// How JavaScript typically handles 'overloading' using default parameters or rest parameters\nclass SmartCalculator {\n  add(a, b, c = 0) { // Using default parameter\n    console.log(`Sum: ${a + b + c}`);\n  }\n  // Or using rest parameters for flexible arguments\n  sum(...numbers) {\n    return numbers.reduce((acc, num) => acc + num, 0);\n  }\n}\nconst sc = new SmartCalculator();\nsc.add(1, 2);    // Sum: 3\nsc.add(1, 2, 3); // Sum: 6\nconsole.log(sc.sum(1, 2, 3, 4)); // 10\n```\n**Method Overriding:** A subclass provides a specialized implementation for a method already defined in its superclass. It's about changing behavior for the *same method signature* in a descendant class. This is a core aspect of polymorphism.\n\n**Method Overloading:** This is about having multiple methods with the *same name* but *different parameter lists* (different number or types of arguments) within the *same class*. The correct method is chosen at compile time based on the arguments provided.\n\n**JavaScript's Native Support:** JavaScript does *not* natively support method overloading in the traditional sense (based on signature). If you define multiple functions or methods with the same name, the last definition will overwrite any previous ones. You cannot have two `add` methods in the same class (or scope) that differ only by their parameter count or types. Developers typically achieve similar functionality by:\n1.  Using default parameters (`function(a, b, c = 0)`).\n2.  Using rest parameters (`function(...args)`).\n3.  Checking the number or types of arguments inside a single function (`if (arguments.length === 2)` or `typeof arg === 'string'`).",
+          "tags": [
+            "JavaScript",
+            "Polymorphism",
+            "Method Overriding",
+            "Method Overloading",
+            "Functions",
+            "OOP"
+          ],
+          "prerequisites": [
+            "theory_polymorphism_js"
+          ],
+          "complexity": 9,
+          "interviewFrequency": 7,
+          "learningPath": "advanced"
+        },
+        {
+          "id": "question_composition_vs_inheritance_1",
+          "topic": "Composition vs. Inheritance",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "What is the common relationship descriptor for Inheritance and Composition?",
+          "answer": "Inheritance: \"Is-A\" relationship; Composition: \"Has-A\" relationship.",
+          "options": [],
+          "analysisPoints": [
+            "Basic recall of core design principle terms.",
+            "Fundamental distinction between the two approaches."
+          ],
+          "keyConcepts": [
+            "Inheritance",
+            "Composition",
+            "Is-A",
+            "Has-A"
+          ],
+          "evaluationCriteria": [
+            "Correctness and conciseness of the definitions.",
+            "Understanding of the core philosophical difference."
+          ],
+          "example": null,
+          "tags": [
+            "OOP",
+            "Design Patterns",
+            "Inheritance",
+            "Composition",
+            "Flashcard"
+          ],
+          "prerequisites": [
+            "oop_basics"
+          ],
+          "complexity": 3,
+          "interviewFrequency": 7,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_composition_vs_inheritance_2",
+          "topic": "Favor Composition",
+          "level": "medium",
+          "type": "open",
+          "question": "Explain the phrase \"Favor Composition over Inheritance\" in object-oriented design. What are some problems inheritance can introduce that composition helps avoid?",
+          "answer": "N/A",
+          "options": [],
+          "analysisPoints": [
+            "Clear explanation of the design principle.",
+            "Identification of common pitfalls of inheritance (e.g., fragile base class, tight coupling).",
+            "Description of how composition mitigates these issues (e.g., flexibility, loose coupling, reusability of small units)."
+          ],
+          "keyConcepts": [
+            "Composition",
+            "Inheritance",
+            "Design Principles",
+            "Fragile Base Class",
+            "Tight Coupling",
+            "Code Reuse"
+          ],
+          "evaluationCriteria": [
+            "Depth of explanation for the principle.",
+            "Accuracy in identifying inheritance problems.",
+            "Clarity on how composition provides solutions."
+          ],
+          "example": "```javascript\n// Problem with Inheritance: Fragile Base Class / Tight Coupling\nclass Bird {\n  fly() { console.log('I can fly'); }\n  layEggs() { console.log('Laying eggs'); }\n}\nclass Penguin extends Bird {\n  // Problem: Penguin inherits fly() but cannot fly.\n  // This breaks the Liskov Substitution Principle if not handled carefully.\n  fly() { console.log('Penguins cannot fly!'); } // Overrides, but original intent is flawed\n}\n\n// Solution with Composition: Behaviors are injected\nconst canFly = () => ({ fly: () => console.log('I can fly') });\nconst canLayEggs = () => ({ layEggs: () => console.log('Laying eggs') });\n\nfunction createBird() {\n  return { /* basic bird state */ };\n}\n\nfunction createFlyingBird() {\n  return Object.assign(createBird(), canFly(), canLayEggs());\n}\n\nfunction createPenguin() {\n  return Object.assign(createBird(), canLayEggs()); // Penguin just has layEggs, not fly\n}\n\nconst regularBird = createFlyingBird();\nregularBird.fly(); // I can fly\n\nconst penguin = createPenguin();\n// penguin.fly(); // This method doesn't exist on penguin, correctly representing its abilities\n```\n**Explanation:** \"Favor Composition over Inheritance\" is a design guideline suggesting that you achieve code reuse by composing smaller, independent objects or functions (`has-a` relationships) rather than relying heavily on inheritance hierarchies (`is-a` relationships). \n\n**Problems with Inheritance that Composition avoids:**\n1.  **Fragile Base Class Problem:** Changes to a base class can unexpectedly break or alter the behavior of its subclasses, even if the subclasses didn't directly use the changed part. Composition, by using independent components, makes objects less susceptible to changes in other components.\n2.  **Tight Coupling:** Inheritance creates a strong, compile-time coupling between parent and child classes. This makes systems less flexible and harder to refactor. Composition promotes looser coupling, as objects interact via well-defined interfaces without deep knowledge of each other's internal structures.\n3.  **The \"Diamond Problem\" (in languages with multiple inheritance):** While JS doesn't have multiple class inheritance, the problem illustrates the ambiguity of inheriting same-named methods from multiple parent branches. Composition easily handles multiple behaviors by just combining different mixins/components.\n4.  **Inflexibility:** Once an object inherits from a class, its behavior is fixed. Composition allows behaviors to be added or swapped dynamically at runtime.",
+          "tags": [
+            "OOP",
+            "Composition",
+            "Inheritance",
+            "Design Patterns",
+            "Best Practices",
+            "Code Reuse"
+          ],
+          "prerequisites": [
+            "theory_composition_vs_inheritance"
+          ],
+          "complexity": 8,
+          "interviewFrequency": 9,
+          "learningPath": "advanced"
+        },
+        {
+          "id": "question_composition_vs_inheritance_3",
+          "topic": "Functional Mixins",
+          "level": "medium",
+          "type": "mcq",
+          "question": "What is the primary role of functional mixins in the context of object composition in JavaScript?",
+          "answer": "To add specific behaviors or capabilities to an object by combining functions.",
+          "options": [
+            "To enforce strict type checking for composed objects.",
+            "To create private methods that are not accessible externally.",
+            "To replace the need for classes entirely in object-oriented design.",
+            "To add specific behaviors or capabilities to an object by combining functions."
+          ],
+          "analysisPoints": [
+            "Identifies the purpose of functional mixins.",
+            "Understands how mixins facilitate composition.",
+            "Distinguishes mixins from other JS concepts (e.g., type checking, strict privacy)."
+          ],
+          "keyConcepts": [
+            "Functional Mixins",
+            "Composition",
+            "Code Reuse",
+            "Behavioral Delegation"
+          ],
+          "evaluationCriteria": [
+            "Correctly identifies the function of mixins.",
+            "Understanding how mixins contribute to composition."
+          ],
+          "example": "```javascript\nconst canWalk = (state) => ({ walk: () => console.log(`${state.name} is walking`) });\nconst canRun = (state) => ({ run: () => console.log(`${state.name} is running`) });\n\nfunction createPerson(name) {\n  const state = { name };\n  return Object.assign(state, canWalk(state), canRun(state));\n}\n\nconst person = createPerson('Alice');\nperson.walk();\nperson.run();\n```\nFunctional mixins like `canWalk` and `canRun` are functions that take an object (`state`) and return an object with new methods. These new methods are then merged onto the original object, effectively 'mixing in' new behaviors. This is a powerful way to compose objects with various functionalities.",
+          "tags": [
+            "JavaScript",
+            "Composition",
+            "Functional Programming",
+            "Mixins"
+          ],
+          "prerequisites": [
+            "javascript_functions",
+            "javascript_objects"
+          ],
+          "complexity": 6,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_composition_vs_inheritance_4",
+          "topic": "Composition and Shared State",
+          "level": "hard",
+          "type": "code",
+          "question": "Consider the `canEat` and `canSleep` functional mixins. Modify the `createCharacter` function to *also* include a `canAttack` mixin that depends on a `strength` property, and demonstrate its use. Ensure the `strength` property is part of the shared state.\n\n```javascript\nconst canEat = (state) => ({\n  eat: food => {\n    console.log(`${state.name} is eating ${food}`);\n    state.energy += 10;\n  }\n});\n\nconst canSleep = (state) => ({\n  sleep: hours => {\n    console.log(`${state.name} is sleeping for ${hours} hours`);\n    state.energy += hours * 5;\n  }\n});\n\n// Your code goes here\nfunction createCharacter(name, initialEnergy, initialStrength) {\n  // ... implement this ...\n}\n\n// Example usage (should work after your implementation):\n// const warrior = createCharacter('Warrior', 100, 20);\n// warrior.attack('goblin');\n// warrior.eat('steak');\n// console.log(warrior.energy);\n```",
+          "answer": "```javascript\nconst canEat = (state) => ({\n  eat: food => {\n    console.log(`${state.name} is eating ${food}`);\n    state.energy += 10;\n  }\n});\n\nconst canSleep = (state) => ({\n  sleep: hours => {\n    console.log(`${state.name} is sleeping for ${hours} hours`);\n    state.energy += hours * 5;\n  }\n});\n\nconst canAttack = (state) => ({\n  attack: target => {\n    console.log(`${state.name} attacks ${target} with ${state.strength} strength!`);\n    // Maybe reduce energy or strength after attack, demonstrating state change\n    state.energy -= 5;\n  }\n});\n\nfunction createCharacter(name, initialEnergy, initialStrength) {\n  let state = {\n    name,\n    energy: initialEnergy,\n    strength: initialStrength\n  };\n\n  return Object.assign(\n    state,\n    canEat(state),\n    canSleep(state),\n    canAttack(state) // Add the new mixin\n  );\n}\n\nconst warrior = createCharacter('Warrior', 100, 20);\nconsole.log(`${warrior.name} initial energy: ${warrior.energy}`);\nwarrior.attack('goblin');\nwarrior.eat('steak');\nwarrior.sleep(2);\nconsole.log(`${warrior.name} final energy: ${warrior.energy}`);\n\nconst mage = createCharacter('Mage', 80, 5);\nmage.eat('berry');\nmage.attack('skeleton');\n```",
+          "options": [],
+          "analysisPoints": [
+            "Ability to define a new functional mixin.",
+            "Correctly integrating a new mixin into an existing composition pattern.",
+            "Ensuring shared state (`strength`) is passed and utilized by the new mixin.",
+            "Demonstrates understanding of `Object.assign` for composition."
+          ],
+          "keyConcepts": [
+            "Composition",
+            "Functional Mixins",
+            "Shared State",
+            "Object.assign"
+          ],
+          "evaluationCriteria": [
+            "Correct implementation of the `canAttack` mixin.",
+            "Successful integration into `createCharacter`.",
+            "Demonstration of the composed object's functionality.",
+            "Proper handling and utilization of shared state."
+          ],
+          "example": null,
+          "tags": [
+            "JavaScript",
+            "Composition",
+            "Functional Programming",
+            "Code Challenge",
+            "OOP"
+          ],
+          "prerequisites": [
+            "theory_composition_vs_inheritance"
+          ],
+          "complexity": 7,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_composition_vs_inheritance_5",
+          "topic": "When to Use Inheritance",
+          "level": "medium",
+          "type": "flashcard",
+          "question": "When is inheritance generally a suitable design choice in OOP?",
+          "answer": "When there is a clear \"is-a\" hierarchical relationship between objects and a desire for a common base behavior that can be specialized.",
+          "options": [],
+          "analysisPoints": [
+            "Tests understanding of the appropriate context for inheritance.",
+            "Distinguishes inheritance from composition's use cases."
+          ],
+          "keyConcepts": [
+            "Inheritance",
+            "Is-A Relationship",
+            "Design Patterns"
+          ],
+          "evaluationCriteria": [
+            "Correct identification of suitable scenarios.",
+            "Concise summary of inheritance's purpose."
+          ],
+          "example": null,
+          "tags": [
+            "OOP",
+            "Inheritance",
+            "Design Patterns",
+            "Flashcard"
+          ],
+          "prerequisites": [],
+          "complexity": 5,
+          "interviewFrequency": 7,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_composition_vs_inheritance_6",
+          "topic": "Composition Advantages",
+          "level": "medium",
+          "type": "mcq",
+          "question": "Which of the following is a primary advantage of using object composition over inheritance for code reuse?",
+          "answer": "It promotes loose coupling and greater flexibility in combining behaviors.",
+          "options": [
+            "It inherently provides true data privacy for all properties.",
+            "It ensures that methods are always shared on the prototype chain, saving memory.",
+            "It eliminates the need for any form of object-oriented programming.",
+            "It promotes loose coupling and greater flexibility in combining behaviors."
+          ],
+          "analysisPoints": [
+            "Tests understanding of key benefits of composition.",
+            "Distinguishes advantages from incorrect statements or unrelated concepts.",
+            "Focuses on loose coupling and flexibility."
+          ],
+          "keyConcepts": [
+            "Composition",
+            "Loose Coupling",
+            "Flexibility",
+            "Code Reuse"
+          ],
+          "evaluationCriteria": [
+            "Correct identification of a core advantage of composition.",
+            "Understanding of design principles."
+          ],
+          "example": "Composition allows you to mix and match behaviors (like `canEat` and `canSleep`) without creating deep, rigid hierarchies. An object can `has-a` eating ability and `has-a` sleeping ability, which can be shared independently with other objects. This leads to more modular and flexible designs compared to a strict `is-a` inheritance chain.",
+          "tags": [
+            "OOP",
+            "Composition",
+            "Benefits",
+            "Design Patterns"
+          ],
+          "prerequisites": [
+            "theory_composition_vs_inheritance"
+          ],
+          "complexity": 6,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        }
+      ],
+      "tasks": [
+        {
+          "id": "task_private_members_1",
+          "title": "Implement a Secure User Account with Closures",
+          "description": "\nImplement a `UserAccount` factory function that uses closures to manage a user's `balance` and `transactionHistory` privately. The account should expose public methods for `deposit`, `withdraw`, and `getStatement`.\n\n**Requirements:**\n1.  The `UserAccount` function should return an object with `deposit`, `withdraw`, and `getStatement` methods.\n2.  `balance` and `transactionHistory` (an array of strings) must be private to the account instance, accessible only through the public methods.\n3.  `deposit(amount)`: Adds `amount` to `balance` and records a transaction string like \"Deposit: +$XX.XX\". `amount` must be positive.\n4.  `withdraw(amount)`: Subtracts `amount` from `balance` if sufficient funds exist. Records a transaction string like \"Withdraw: -$XX.XX\". `amount` must be positive and not exceed `balance`. If insufficient funds, record \"Withdrawal failed: Insufficient funds.\"\n5.  `getStatement()`: Returns a copy of the `transactionHistory` array. The original `transactionHistory` array should not be exposed directly.\n6.  Initialize `balance` to `0` and `transactionHistory` to an empty array.\n",
+          "difficulty": "medium",
+          "startingCode": "function UserAccount() {\n  // Private variables here\n  let balance = 0;\n  let transactionHistory = [];\n\n  // Helper for formatting transactions (optional but good practice)\n  const formatTransaction = (type, amount, success) => {\n    if (success) {\n      return `${type}: ${type === 'Deposit' ? '+' : '-'}$${amount.toFixed(2)}`;\n    } else {\n      return `Withdrawal failed: Insufficient funds. Attempted: $${amount.toFixed(2)}`;\n    }\n  };\n\n  return {\n    deposit: function(amount) {\n      // TODO: Implement deposit logic\n    },\n    withdraw: function(amount) {\n      // TODO: Implement withdraw logic\n    },\n    getStatement: function() {\n      // TODO: Implement getStatement logic\n    }\n  };\n}\n\n// Example Usage:\n// const account = UserAccount();\n// account.deposit(100);\n// account.withdraw(30);\n// account.withdraw(80); // Should fail\n// console.log(account.getStatement());\n// console.log(account.balance); // Should be undefined",
+          "solutionCode": "function UserAccount() {\n  let balance = 0;\n  let transactionHistory = [];\n\n  const formatTransaction = (type, amount, success) => {\n    if (success) {\n      return `${type}: ${type === 'Deposit' ? '+' : '-'}$${amount.toFixed(2)}`;\n    } else {\n      return `Withdrawal failed: Insufficient funds. Attempted: $${amount.toFixed(2)}`;\n    }\n  };\n\n  return {\n    deposit: function(amount) {\n      if (amount <= 0) {\n        console.log('Deposit amount must be positive.');\n        return;\n      }\n      balance += amount;\n      transactionHistory.push(formatTransaction('Deposit', amount, true));\n      console.log(`Deposited $${amount.toFixed(2)}. New balance: $${balance.toFixed(2)}`);\n    },\n    withdraw: function(amount) {\n      if (amount <= 0) {\n        console.log('Withdrawal amount must be positive.');\n        return;\n      }\n      if (amount <= balance) {\n        balance -= amount;\n        transactionHistory.push(formatTransaction('Withdraw', amount, true));\n        console.log(`Withdrew $${amount.toFixed(2)}. New balance: $${balance.toFixed(2)}`);\n      } else {\n        transactionHistory.push(formatTransaction('Withdraw', amount, false));\n        console.log('Insufficient funds. Withdrawal failed.');\n      }\n    },\n    getStatement: function() {\n      // Return a copy to prevent external modification of the private array\n      return [...transactionHistory]; \n    },\n    // For testing purposes, though balance is conceptually private\n    _getCurrentBalance: function() {\n      return balance;\n    }\n  };\n}\n",
+          "testCases": [
+            "Initialize: `account = UserAccount(); account._getCurrentBalance()` should be 0.",
+            "Deposit: `account.deposit(100); account._getCurrentBalance()` should be 100. `account.getStatement()` should contain \"Deposit: +$100.00\".",
+            "Withdraw Success: `account.deposit(50); account.withdraw(20); account._getCurrentBalance()` should be 30. `account.getStatement()` should contain \"Withdraw: -$20.00\".",
+            "Withdraw Failure (Insufficient Funds): `account.withdraw(100);` (when balance is 30) should not change balance. `account.getStatement()` should contain \"Withdrawal failed: Insufficient funds. Attempted: $100.00\".",
+            "Negative/Zero Amounts: `account.deposit(-10);` or `account.withdraw(0);` should not change state and log error.",
+            "Statement Immutability: `const statement = account.getStatement(); statement.pop();` should not affect `account.getStatement()` on subsequent calls."
+          ],
+          "hints": [
+            "Remember that variables declared with `let` or `const` inside a function are part of its lexical scope.",
+            "To prevent external modification of the `transactionHistory` array, ensure `getStatement` returns a shallow copy (e.g., using `...` spread operator or `.slice()`).",
+            "Validate input `amount` to be positive for both deposit and withdrawal."
+          ],
+          "tags": [
+            "JavaScript",
+            "Closures",
+            "Encapsulation",
+            "State Management",
+            "OOP"
+          ],
+          "timeEstimate": 45,
+          "prerequisites": [
+            "javascript_functions",
+            "javascript_scope"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 9,
+          "learningPath": "intermediate",
+          "relatedConcepts": [
+            "private_members_js",
+            "closure_scope",
+            "factory_functions"
+          ]
+        },
+        {
+          "id": "task_private_members_2",
+          "title": "Build a Stopwatch Class with Pseudo-Private State",
+          "description": "\nCreate an `ES6 Class` called `Stopwatch` that uses an ES6 Symbol to manage its internal `_startTime` and `_running` state. The class should provide methods to `start`, `stop`, `reset`, and `getElapsedTime`.\n\n**Requirements:**\n1.  The `Stopwatch` class must use two distinct `Symbol`s for its `_startTime` and `_running` internal properties. These symbols should be declared outside the class for best practice (or within a module scope if using modules).\n2.  `constructor()`: Initializes `_startTime` to `null` and `_running` to `false` using the Symbol-keyed properties.\n3.  `start()`: Sets `_startTime` to the current time (`Date.now()`) and `_running` to `true`. If already running, log a message and do nothing.\n4.  `stop()`: Sets `_running` to `false`. If not running, log a message and do nothing.\n5.  `reset()`: Resets `_startTime` to `null` and `_running` to `false`.\n6.  `getElapsedTime()`: Returns the elapsed time in milliseconds. If the stopwatch is running, it calculates time from `_startTime` to `Date.now()`. If stopped, it calculates time from `_startTime` to when it was last stopped (you'll need an additional Symbol for `_stopTime`). If not started, returns 0. *Self-correction: To calculate time correctly when stopped, you'll need a `_stopTime` Symbol too.* Let's simplify: `getElapsedTime` returns the total time from start to current or last stop. When `start()` is called, it should *add* to existing `_elapsedTime` if it was previously stopped, not just reset `_startTime`. This implies `_elapsedTime` should also be a Symbol-keyed property.\n\n**Revised `getElapsedTime` Logic:**\n*   `_startTime`: Timestamp when stopwatch started/resumed.\n*   `_totalTime`: Accumulates elapsed time across multiple start/stop cycles.\n*   `start()`: If not running, set `_startTime = Date.now()`, `_running = true`.\n*   `stop()`: If running, `_totalTime += Date.now() - _startTime`, `_running = false`, `_startTime = null`.\n*   `reset()`: `_totalTime = 0`, `_startTime = null`, `_running = false`.\n*   `getElapsedTime()`: Returns `_totalTime + (this[_running] ? Date.now() - this[_startTime] : 0)`.\n",
+          "difficulty": "hard",
+          "startingCode": "const _startTime = Symbol('startTime');\nconst _running = Symbol('running');\nconst _totalTime = Symbol('totalTime');\n\nclass Stopwatch {\n  constructor() {\n    this[_startTime] = null;\n    this[_running] = false;\n    this[_totalTime] = 0;\n  }\n\n  start() {\n    // TODO: Implement start logic\n  }\n\n  stop() {\n    // TODO: Implement stop logic\n  }\n\n  reset() {\n    // TODO: Implement reset logic\n  }\n\n  getElapsedTime() {\n    // TODO: Implement getElapsedTime logic\n  }\n}\n\n// Example Usage:\n// const sw = new Stopwatch();\n// sw.start();\n// setTimeout(() => {\n//   console.log('Elapsed after 1s:', sw.getElapsedTime()); // Approx 1000\n//   sw.stop();\n//   console.log('Elapsed after stop:', sw.getElapsedTime()); // Approx 1000\n//   sw.start(); // Resume\n//   setTimeout(() => {\n//     console.log('Elapsed after resume and 0.5s:', sw.getElapsedTime()); // Approx 1500\n//     sw.reset();\n//     console.log('Elapsed after reset:', sw.getElapsedTime()); // 0\n// }, 500);",
+          "solutionCode": "const _startTime = Symbol('startTime');\nconst _running = Symbol('running');\nconst _totalTime = Symbol('totalTime');\n\nclass Stopwatch {\n  constructor() {\n    this[_startTime] = null;\n    this[_running] = false;\n    this[_totalTime] = 0; // Accumulates total elapsed time\n  }\n\n  start() {\n    if (this[_running]) {\n      console.log('Stopwatch is already running.');\n      return;\n    }\n    this[_startTime] = Date.now();\n    this[_running] = true;\n    console.log('Stopwatch started.');\n  }\n\n  stop() {\n    if (!this[_running]) {\n      console.log('Stopwatch is not running.');\n      return;\n    }\n    this[_totalTime] += Date.now() - this[_startTime];\n    this[_running] = false;\n    this[_startTime] = null; // Clear start time after stopping\n    console.log('Stopwatch stopped.');\n  }\n\n  reset() {\n    this[_totalTime] = 0;\n    this[_startTime] = null;\n    this[_running] = false;\n    console.log('Stopwatch reset.');\n  }\n\n  getElapsedTime() {\n    let currentElapsedTime = this[_totalTime];\n    if (this[_running]) {\n      currentElapsedTime += Date.now() - this[_startTime];\n    }\n    return currentElapsedTime;\n  }\n}\n",
+          "testCases": [
+            "Initial State: `sw = new Stopwatch(); sw.getElapsedTime()` should be 0. `Object.getOwnPropertySymbols(sw)` should contain the three Symbols.",
+            "Start/Stop Basic: `sw.start(); setTimeout(() => { sw.stop(); console.assert(sw.getElapsedTime() >= 990 && sw.getElapsedTime() <= 1010, 'Expected approx 1000ms'); }, 1000);`",
+            "Stopwatch Already Running: `sw.start(); sw.start();` should log 'already running' and not reset time.",
+            "Stopwatch Not Running: `sw = new Stopwatch(); sw.stop();` should log 'not running'.",
+            "Reset Functionality: `sw.start(); setTimeout(() => { sw.stop(); sw.reset(); console.assert(sw.getElapsedTime() === 0, 'Expected 0 after reset'); }, 500);`",
+            "Resume Functionality: `sw.start(); setTimeout(() => { sw.stop(); setTimeout(() => { sw.start(); setTimeout(() => { console.assert(sw.getElapsedTime() >= 1490 && sw.getElapsedTime() <= 1510, 'Expected approx 1500ms after resume'); }, 500); }, 500); }, 1000);`",
+            "Accessing Symbol properties directly: `sw[Symbol('startTime')]` should return undefined or incorrect value if a new Symbol is created, demonstrating pseudo-privacy. Only `Object.getOwnPropertySymbols(sw)[0]` can access the real value."
+          ],
+          "hints": [
+            "Carefully manage the `_totalTime` property to accumulate elapsed time across multiple start/stop cycles.",
+            "`Date.now()` is useful for getting current timestamps in milliseconds.",
+            "Remember that `this[_symbol]` is the correct way to access Symbol-keyed properties within the class.",
+            "Consider edge cases like calling `start()` when already running or `stop()` when not running."
+          ],
+          "tags": [
+            "JavaScript",
+            "ES6 Classes",
+            "Symbols",
+            "Encapsulation",
+            "State Management",
+            "OOP"
+          ],
+          "timeEstimate": 60,
+          "prerequisites": [
+            "es6_classes",
+            "symbols",
+            "javascript_dates"
+          ],
+          "complexity": 8,
+          "interviewRelevance": 9,
+          "learningPath": "advanced",
+          "relatedConcepts": [
+            "private_members_js",
+            "object_state"
+          ]
+        },
+        {
+          "id": "task_polymorphism_1",
+          "title": "Create a Polymorphic Notification System",
+          "description": "\nDesign and implement a notification system using ES6 classes and polymorphism. You will create a base `Notifier` class and several specific notification types that inherit from it, demonstrating method overriding.\n\n**Requirements:**\n1.  **`Notifier` Base Class:**\n    *   A `constructor(message)` that initializes `this.message`.\n    *   A `send()` method that logs a generic message indicating it's a base notification and the message. (e.g., \"Generic Notification: [message]\").\n    *   An `abstract` method `getDeliveryMethod()` that throws an error, indicating it must be implemented by subclasses.\n\n2.  **`EmailNotifier` Class:**\n    *   Extends `Notifier`.\n    *   `constructor(message, recipientEmail)`: Calls parent constructor and initializes `this.recipientEmail`.\n    *   Overrides `send()` to log an email-specific message (e.g., \"Emailing to [recipientEmail]: [message]\").\n    *   Implements `getDeliveryMethod()` to return \"Email\".\n\n3.  **`SMSNotifier` Class:**\n    *   Extends `Notifier`.\n    *   `constructor(message, phoneNumber)`: Calls parent constructor and initializes `this.phoneNumber`.\n    *   Overrides `send()` to log an SMS-specific message (e.g., \"Sending SMS to [phoneNumber]: [message]\").\n    *   Implements `getDeliveryMethod()` to return \"SMS\".\n\n4.  **`PushNotifier` Class:**\n    *   Extends `Notifier`.\n    *   `constructor(message, userId)`: Calls parent constructor and initializes `this.userId`.\n    *   Overrides `send()` to log a push notification message (e.g., \"Pushing to user [userId]: [message]\").\n    *   Implements `getDeliveryMethod()` to return \"Push Notification\".\n\n5.  **Polymorphic Usage:** Create an array of different `Notifier` instances and iterate through them, calling `send()` on each to demonstrate polymorphism. Also, log their `getDeliveryMethod()` to show different implementations.\n",
+          "difficulty": "medium",
+          "startingCode": "class Notifier {\n  constructor(message) {\n    this.message = message;\n  }\n\n  send() {\n    console.log(`Generic Notification: ${this.message}`);\n  }\n\n  getDeliveryMethod() {\n    throw new Error('getDeliveryMethod() must be implemented by subclasses.');\n  }\n}\n\nclass EmailNotifier extends Notifier {\n  // TODO: Implement EmailNotifier\n}\n\nclass SMSNotifier extends Notifier {\n  // TODO: Implement SMSNotifier\n}\n\nclass PushNotifier extends Notifier {\n  // TODO: Implement PushNotifier\n}\n\n// TODO: Create an array of notifiers and demonstrate polymorphic behavior\n// const notifiers = [new EmailNotifier(...), new SMSNotifier(...), ...];\n// notifiers.forEach(notifier => {\n//   notifier.send();\n//   console.log(`Delivery method: ${notifier.getDeliveryMethod()}`);\n// });",
+          "solutionCode": "class Notifier {\n  constructor(message) {\n    this.message = message;\n  }\n\n  send() {\n    console.log(`Generic Notification: ${this.message}`);\n  }\n\n  getDeliveryMethod() {\n    throw new Error('getDeliveryMethod() must be implemented by subclasses.');\n  }\n}\n\nclass EmailNotifier extends Notifier {\n  constructor(message, recipientEmail) {\n    super(message);\n    this.recipientEmail = recipientEmail;\n  }\n\n  send() {\n    console.log(`Emailing to ${this.recipientEmail}: ${this.message}`);\n  }\n\n  getDeliveryMethod() {\n    return \"Email\";\n  }\n}\n\nclass SMSNotifier extends Notifier {\n  constructor(message, phoneNumber) {\n    super(message);\n    this.phoneNumber = phoneNumber;\n  }\n\n  send() {\n    console.log(`Sending SMS to ${this.phoneNumber}: ${this.message}`);\n  }\n\n  getDeliveryMethod() {\n    return \"SMS\";\n  }\n}\n\nclass PushNotifier extends Notifier {\n  constructor(message, userId) {\n    super(message);\n    this.userId = userId;\n  }\n\n  send() {\n    console.log(`Pushing to user ${this.userId}: ${this.message}`);\n  }\n\n  getDeliveryMethod() {\n    return \"Push Notification\";\n  }\n}\n\n// Demonstrate polymorphic behavior\nconst notifiers = [\n  new EmailNotifier('Your order has shipped!', 'user@example.com'),\n  new SMSNotifier('New message from support.', '+1234567890'),\n  new PushNotifier('Special offer for you!', 'user123'),\n  new Notifier('General announcement.')\n];\n\nconsole.log('--- Sending Notifications ---');\nnotifiers.forEach(notifier => {\n  notifier.send();\n  console.log(`Delivery method: ${notifier.getDeliveryMethod()}`);\n  console.log('---');\n});\n\n// Test base class abstract method\ntry {\n  new Notifier('Test').getDeliveryMethod();\n} catch (error) {\n  console.log(`Caught expected error: ${error.message}`);\n}",
+          "testCases": [
+            "Base Notifier `send()`: `new Notifier('Hello').send()` should log \"Generic Notification: Hello\".",
+            "Base Notifier `getDeliveryMethod()`: `new Notifier('Test').getDeliveryMethod()` should throw an error.",
+            "EmailNotifier: `new EmailNotifier('Order', 'a@b.com').send()` should log specific email message. `getDeliveryMethod()` should return \"Email\".",
+            "SMSNotifier: `new SMSNotifier('Alert', '123').send()` should log specific SMS message. `getDeliveryMethod()` should return \"SMS\".",
+            "PushNotifier: `new PushNotifier('Update', 'abc').send()` should log specific push message. `getDeliveryMethod()` should return \"Push Notification\".",
+            "Polymorphic Loop: An array `[email, sms, push]` should successfully call `send()` on each, outputting their specific messages.",
+            "Mixed Array: Including `new Notifier()` in the polymorphic loop should still correctly call its generic `send()` and trigger the `getDeliveryMethod()` error if not handled."
+          ],
+          "hints": [
+            "Remember to use `super()` in subclass constructors to call the parent class's constructor.",
+            "The `send()` method in subclasses must `override` the parent's method.",
+            "The `getDeliveryMethod()` method serves as an 'abstract' method, ensuring subclasses implement it.",
+            "When calling `send()` in a loop over different notifier types, JavaScript's runtime polymorphism will ensure the correct overridden method is executed."
+          ],
+          "tags": [
+            "JavaScript",
+            "OOP",
+            "Polymorphism",
+            "Inheritance",
+            "Classes",
+            "Method Overriding"
+          ],
+          "timeEstimate": 60,
+          "prerequisites": [
+            "es6_classes",
+            "javascript_inheritance"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 8,
+          "learningPath": "intermediate",
+          "relatedConcepts": [
+            "theory_polymorphism_js",
+            "method_overriding"
+          ]
+        },
+        {
+          "id": "task_composition_inheritance_1",
+          "title": "Build a Game Character with Composable Behaviors",
+          "description": "\nRefactor a simple game character implementation to favor object composition using functional mixins instead of a deep inheritance hierarchy. The character should have basic properties (name, health) and compose various abilities like `Attacker`, `Healer`, and `Mover`.\n\n**Requirements:**\n1.  **Base Character Creator:** A factory function `createCharacter(name, health)` that initializes a basic character state.\n2.  **`Attacker` Mixin:** A functional mixin `canAttack(state)` that adds an `attack(target)` method. This method should log `\"${state.name} attacks ${target}!\"` and decrease `state.health` by a fixed amount (e.g., 5) for the attacker, representing a self-penalty or exhaustion.\n3.  **`Healer` Mixin:** A functional mixin `canHeal(state)` that adds a `heal(target)` method. This method should log `\"${state.name} heals ${target}!\"` and increase `state.health` by a fixed amount (e.g., 10) for the healer.\n4.  **`Mover` Mixin:** A functional mixin `canMove(state)` that adds a `move(direction)` method. This method should log `\"${state.name} moves ${direction}.\"`.\n5.  **Compose Characters:**\n    *   Create a `Warrior` type: `name`, `health`, and capabilities of `Attacker` and `Mover`.\n    *   Create a `Cleric` type: `name`, `health`, and capabilities of `Healer` and `Mover`.\n    *   Create a `Paladin` type: `name`, `health`, and capabilities of `Attacker`, `Healer`, and `Mover`.\n6.  Demonstrate the capabilities of each composed character type.\n",
+          "difficulty": "medium",
+          "startingCode": "function createCharacter(name, health) {\n  return {\n    name,\n    health,\n  };\n}\n\n// TODO: Implement functional mixins: canAttack, canHeal, canMove\nconst canAttack = (state) => ({ /* ... */ });\nconst canHeal = (state) => ({ /* ... */ });\nconst canMove = (state) => ({ /* ... */ });\n\n// TODO: Create factory functions for Warrior, Cleric, Paladin using composition\n// function createWarrior(name, health) { /* ... */ }\n// function createCleric(name, health) { /* ... */ }\n// function createPaladin(name, health) { /* ... */ }\n\n// Example Usage:\n// const warrior = createWarrior('Arthur', 100);\n// warrior.attack('goblin');\n// warrior.move('north');\n// console.log(`${warrior.name}'s health: ${warrior.health}`);\n",
+          "solutionCode": "function createCharacter(name, health) {\n  return {\n    name,\n    health,\n  };\n}\n\nconst canAttack = (state) => ({\n  attack: (target) => {\n    console.log(`${state.name} attacks ${target}!`);\n    state.health -= 5; // Self-penalty for attacking\n    console.log(`${state.name}'s health is now ${state.health}.`);\n  },\n});\n\nconst canHeal = (state) => ({\n  heal: (target) => {\n    console.log(`${state.name} heals ${target}!`);\n    state.health += 10; // Gain health from healing or for self\n    console.log(`${state.name}'s health is now ${state.health}.`);\n  },\n});\n\nconst canMove = (state) => ({\n  move: (direction) => {\n    console.log(`${state.name} moves ${direction}.`);\n  },\n});\n\nfunction createWarrior(name, health) {\n  const character = createCharacter(name, health);\n  return Object.assign(\n    character,\n    canAttack(character),\n    canMove(character)\n  );\n}\n\nfunction createCleric(name, health) {\n  const character = createCharacter(name, health);\n  return Object.assign(\n    character,\n    canHeal(character),\n    canMove(character)\n  );\n}\n\nfunction createPaladin(name, health) {\n  const character = createCharacter(name, health);\n  return Object.assign(\n    character,\n    canAttack(character),\n    canHeal(character),\n    canMove(character)\n  );\n}\n\n// Demonstrate Composed Characters\nconsole.log('--- Warrior Actions ---');\nconst warrior = createWarrior('Arthur', 100);\nconsole.log(`${warrior.name} initial health: ${warrior.health}`);\nwarrior.attack('goblin');\nwarrior.move('north');\nconsole.log(`${warrior.name} final health: ${warrior.health}`);\n\nconsole.log('\\n--- Cleric Actions ---');\nconst cleric = createCleric('Elara', 80);\nconsole.log(`${cleric.name} initial health: ${cleric.health}`);\ncleric.heal('herself');\ncleric.move('south');\nconsole.log(`${cleric.name} final health: ${cleric.health}`);\n\nconsole.log('\\n--- Paladin Actions ---');\nconst paladin = createPaladin('Sir Galahad', 120);\nconsole.log(`${paladin.name} initial health: ${paladin.health}`);\npaladin.attack('dragon');\npaladin.heal('Sir Galahad');\npaladin.move('east');\nconsole.log(`${paladin.name} final health: ${paladin.health}`);\n\n// Demonstrating flexibility: A non-moving character\nfunction createStaticDefender(name, health) {\n  const character = createCharacter(name, health);\n  return Object.assign(\n    character,\n    canAttack(character)\n  );\n}\nconst tower = createStaticDefender('Defense Tower', 200);\ntower.attack('siege engine');\n// tower.move('west'); // This would correctly throw an error or be undefined method",
+          "testCases": [
+            "Warrior Capabilities: `warrior.attack()`, `warrior.move()` should work. `warrior.heal()` should be undefined.",
+            "Cleric Capabilities: `cleric.heal()`, `cleric.move()` should work. `cleric.attack()` should be undefined.",
+            "Paladin Capabilities: `paladin.attack()`, `paladin.heal()`, `paladin.move()` should all work.",
+            "Health Modification: `attack` should decrease health, `heal` should increase health.",
+            "Initial State: All characters should start with correct `name` and `health`.",
+            "Flexibility: Can easily create new types by combining mixins (e.g., a character that only attacks, but doesn't move or heal)."
+          ],
+          "hints": [
+            "Each functional mixin (`canAttack`, `canHeal`, `canMove`) should take a `state` object as an argument and return an object with the new methods. The methods should operate on the passed `state` object.",
+            "Use `Object.assign()` or the spread syntax (`{ ...obj1, ...obj2 }`) to combine the base character state with the behaviors returned by the mixins.",
+            "Ensure the `state` object is mutable and passed by reference to the mixins so they can modify `health`."
+          ],
+          "tags": [
+            "JavaScript",
+            "Composition",
+            "Functional Programming",
+            "Design Patterns",
+            "Code Reuse",
+            "Factory Functions"
+          ],
+          "timeEstimate": 75,
+          "prerequisites": [
+            "javascript_objects",
+            "javascript_functions"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 9,
+          "learningPath": "intermediate",
+          "relatedConcepts": [
+            "theory_composition_vs_inheritance",
+            "functional_mixins"
+          ]
+        }
+      ]
+    }
+  }
+]

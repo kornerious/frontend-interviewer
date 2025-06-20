@@ -1,0 +1,1363 @@
+[
+  {
+    "id": "85e0dc8a-aba1-40ae-889e-2f05bc3dfc88",
+    "startLine": 16400,
+    "endLine": 16499,
+    "processedDate": "2025-06-17T15:25:20.131Z",
+    "content": {
+      "logicalBlockInfo": {
+        "suggestedEndLine": -1
+      },
+      "theory": [
+        {
+          "id": "theory_form_field_component",
+          "title": "The `FormField` Component: Rendering Diverse Input Types",
+          "content": "The `FormField` component is a foundational building block for dynamic forms, responsible for rendering different HTML input elements based on a given configuration. It acts as a switch, conditionally rendering `select`, `checkbox`, or other input types. Its primary role is to encapsulate the logic for associating a form field with its label, current value, and change handler, while also applying common HTML attributes like `id`, `name`, `required`, and specific attributes for each input type.\n\n## Key Concepts\n- **Props-driven Rendering**: The component receives a `field` object (containing `id`, `type`, `name`, `label`, `required`, `options`, `hint`), `value`, and an `onChange` callback.\n- **Conditional Rendering**: It uses a `switch` statement (or equivalent `if/else if`) on `field.type` to render the appropriate HTML element (`<select>`, `<input type='checkbox'>`).\n- **Value Handling**: It correctly binds the `value` prop to the HTML element's `value` or `checked` attribute. For `select` elements, `value || ''` ensures that an empty string is used if `value` is `null` or `undefined`, allowing the 'Select an option' placeholder to be active. For `checkbox` elements, `value || false` ensures the `checked` attribute is a boolean.\n- **Event Handling**: The `onChange` prop is a callback that is triggered when the input's value changes. For `select` and `text` inputs, `e.target.value` is passed. For `checkbox` inputs, `e.target.checked` is passed, reflecting the boolean state of the checkbox.\n- **Accessibility**: Utilizes `id` and `name` attributes for proper form submission and accessibility (`htmlFor` on a `label` element links to the `id` of its associated input).\n- **Extensibility**: The `default` case in the `switch` statement handles unsupported field types, making the component extensible for future input types.",
+          "examples": [
+            {
+              "id": "example_form_field_select",
+              "title": "Rendering a Select Field",
+              "code": "interface FormFieldConfig {\n  id: string;\n  name: string;\n  label: string;\n  type: 'select' | 'checkbox' | 'text' | 'number';\n  required?: boolean;\n  options?: { value: string; label: string }[];\n  hint?: string;\n}\n\ninterface FormFieldProps {\n  field: FormFieldConfig;\n  value: any;\n  onChange: (fieldId: string, value: any) => void;\n}\n\nconst FormField = ({ field, value, onChange }: FormFieldProps) => {\n  switch (field.type) {\n    case 'select':\n      return (\n        <select\n          id={field.id}\n          name={field.name}\n          value={value || ''}\n          onChange={e => onChange(field.id, e.target.value)}\n          required={field.required}\n        >\n          <option value=\"\">Select an option</option>\n          {field.options && field.options.map(option => (\n            <option key={option.value} value={option.value}>\n              {option.label}\n            </option>\n          ))}\n        </select>\n      );\n    default:\n      return <div>Unsupported field type: {field.type}</div>;\n  }\n};\n\n// Usage example:\n// <FormField\n//   field={{\n//     id: 'city', name: 'city', label: 'City', type: 'select', required: true,\n//     options: [{ value: 'ny', label: 'New York' }, { value: 'la', label: 'Los Angeles' }]\n//   }}\n//   value={selectedCity}\n//   onChange={handleFormChange}\n// />",
+              "explanation": "This example demonstrates how the `FormField` component renders a `<select>` element. It handles the `value` prop (defaulting to empty string for initial state or no selection), iterates over `field.options` to create `option` elements, and correctly captures the selected value using `e.target.value` when `onChange` is triggered.",
+              "language": "typescript"
+            },
+            {
+              "id": "example_form_field_checkbox",
+              "title": "Rendering a Checkbox Field",
+              "code": "interface FormFieldConfig {\n  id: string;\n  name: string;\n  label: string;\n  type: 'select' | 'checkbox' | 'text' | 'number';\n  required?: boolean;\n  options?: { value: string; label: string }[];\n  hint?: string;\n}\n\ninterface FormFieldProps {\n  field: FormFieldConfig;\n  value: any;\n  onChange: (fieldId: string, value: any) => void;\n}\n\nconst FormField = ({ field, value, onChange }: FormFieldProps) => {\n  switch (field.type) {\n    case 'checkbox':\n      return (\n        <input\n          type=\"checkbox\"\n          id={field.id}\n          name={field.name}\n          checked={value || false}\n          onChange={e => onChange(field.id, e.target.checked)}\n          required={field.required}\n        />\n      );\n    default:\n      return <div>Unsupported field type: {field.type}</div>;\n  }\n};\n\n// Usage example:\n// <FormField\n//   field={{ id: 'agree', name: 'agree', label: 'Agree to terms', type: 'checkbox' }}\n//   value={isAgreed}\n//   onChange={handleFormChange}\n// />",
+              "explanation": "This example shows the implementation for a `checkbox` input. Notice how `checked={value || false}` is used to ensure the `checked` attribute always receives a boolean. The `onChange` event specifically uses `e.target.checked` to get the boolean state of the checkbox.",
+              "language": "typescript"
+            }
+          ],
+          "relatedQuestions": [
+            "question_form_field_mcq_1",
+            "question_form_field_open_1",
+            "question_form_field_flashcard_1"
+          ],
+          "relatedTasks": [
+            "task_form_field_extension"
+          ],
+          "tags": [
+            "React",
+            "Components",
+            "Forms",
+            "Dynamic Forms",
+            "JSX",
+            "Conditional Rendering"
+          ],
+          "technology": "React",
+          "prerequisites": [
+            "react_functional_components",
+            "react_props",
+            "javascript_events",
+            "html_form_elements"
+          ],
+          "complexity": 5,
+          "interviewRelevance": 7,
+          "learningPath": "intermediate",
+          "requiredFor": [
+            "form_group_component",
+            "dynamic_form_component"
+          ]
+        },
+        {
+          "id": "theory_form_group_component",
+          "title": "The `FormGroup` Component: Organizing Form Sections",
+          "content": "The `FormGroup` component is responsible for structuring a dynamic form into logical, collapsible sections. It supports both simple groups containing fields and complex nested groups, allowing for hierarchical form layouts. This component enhances user experience by segmenting large forms into manageable parts and improving navigation.\n\n## Key Concepts\n- **Hierarchical Structure**: A `FormGroup` can contain an array of `fields` or an array of `groups` (which are themselves `FormGroupConfig` objects). This enables arbitrary nesting of form sections.\n- **Collapsible Sections**: It uses React's `useState` hook to manage an `expanded` boolean state, determining whether the group's content (fields or nested groups) should be visible. Clicking the header toggles this state.\n- **Props Passing**: It receives `group` (containing its configuration), `values` (the current form data), and `onChange` (the central handler for field changes).\n- **Recursive Rendering**: When `group.groups` is present, it recursively renders `FormGroup` components for each nested group, passing down the `values` and `onChange` props. This is a common pattern for rendering tree-like structures in React.\n- **Rendering Fields**: When `group.fields` is present, it iterates over these field configurations and renders a `FormField` component for each, providing its specific `field` configuration, the relevant `value` from the overall `values` object, and the `onChange` callback.\n- **User Feedback**: The header visually indicates the expanded state using '▼' (down arrow) for expanded and '▶' (right arrow) for collapsed.",
+          "examples": [
+            {
+              "id": "example_form_group_nested",
+              "title": "FormGroup with Nested Groups",
+              "code": "import React, { useState } from 'react';\n\ninterface FormFieldConfig {\n  id: string;\n  name: string;\n  label: string;\n  type: 'select' | 'checkbox' | 'text' | 'number';\n  required?: boolean;\n  options?: { value: string; label: string }[];\n  hint?: string;\n}\n\ninterface FormGroupConfig {\n  id: string;\n  label: string;\n  groups?: FormGroupConfig[];\n  fields?: FormFieldConfig[];\n}\n\ninterface FormGroupProps {\n  group: FormGroupConfig;\n  values: { [key: string]: any };\n  onChange: (fieldId: string, value: any) => void;\n}\n\n// Assume FormField component is defined elsewhere\nconst FormField = ({ field, value, onChange }: any) => {\n  // Simplified for example\n  return <input type=\"text\" id={field.id} value={value || ''} onChange={e => onChange(field.id, e.target.value)} placeholder={field.label} />;\n};\n\nconst FormGroup = ({ group, values, onChange }: FormGroupProps) => {\n  const [expanded, setExpanded] = useState(true);\n\n  if (group.groups) {\n    return (\n      <div className=\"form-group nested-group-container\">\n        <h3 onClick={() => setExpanded(!expanded)} className=\"group-header\">\n          {group.label} {expanded ? '▼' : '▶'}\n        </h3>\n        {expanded && (\n          <div className=\"nested-groups\">\n            {group.groups.map(nestedGroup => (\n              <FormGroup\n                key={nestedGroup.id}\n                group={nestedGroup}\n                values={values}\n                onChange={onChange}\n              />\n            ))}\n          </div>\n        )}\n      </div>\n    );\n  }\n  \n  return null; // For brevity, full implementation in next example\n};\n\n// Example usage with a schema (full schema definition would be in DynamicForm)\n// const schema = {\n//   id: 'main-group', label: 'Main Form',\n//   groups: [\n//     {\n//       id: 'personal-info', label: 'Personal Information',\n//       fields: [\n//         { id: 'firstName', name: 'firstName', label: 'First Name', type: 'text' }\n//       ]\n//     },\n//     {\n//       id: 'address-info', label: 'Address Information',\n//       groups: [\n//         {\n//           id: 'billing-address', label: 'Billing Address',\n//           fields: [\n//             { id: 'street', name: 'street', label: 'Street', type: 'text' }\n//           ]\n//         }\n//       ]\n//     }\n//   ]\n// };",
+              "explanation": "This example highlights the recursive nature of `FormGroup` when handling `group.groups`. It renders a header that toggles the `expanded` state, and if expanded, maps over `nestedGroup` configurations, rendering another `FormGroup` for each. This pattern allows for infinitely deep nesting of form sections.",
+              "language": "typescript"
+            },
+            {
+              "id": "example_form_group_fields",
+              "title": "FormGroup with Fields",
+              "code": "import React, { useState } from 'react';\n\ninterface FormFieldConfig {\n  id: string;\n  name: string;\n  label: string;\n  type: 'select' | 'checkbox' | 'text' | 'number';\n  required?: boolean;\n  options?: { value: string; label: string }[];\n  hint?: string;\n}\n\ninterface FormGroupConfig {\n  id: string;\n  label: string;\n  groups?: FormGroupConfig[];\n  fields?: FormFieldConfig[];\n}\n\ninterface FormGroupProps {\n  group: FormGroupConfig;\n  values: { [key: string]: any };\n  onChange: (fieldId: string, value: any) => void;\n}\n\n// Assume FormField component is defined elsewhere\nconst FormField = ({ field, value, onChange }: any) => {\n  // Simplified for example to show a text input\n  let inputElement;\n  switch (field.type) {\n    case 'text':\n      inputElement = (\n        <input\n          type=\"text\"\n          id={field.id}\n          name={field.name}\n          value={value || ''}\n          onChange={e => onChange(field.id, e.target.value)}\n          required={field.required}\n        />\n      );\n      break;\n    case 'checkbox':\n      inputElement = (\n        <input\n          type=\"checkbox\"\n          id={field.id}\n          name={field.name}\n          checked={value || false}\n          onChange={e => onChange(field.id, e.target.checked)}\n          required={field.required}\n        />\n      );\n      break;\n    case 'select':\n      inputElement = (\n        <select\n          id={field.id}\n          name={field.name}\n          value={value || ''}\n          onChange={e => onChange(field.id, e.target.value)}\n          required={field.required}\n        >\n          <option value=\"\">Select an option</option>\n          {field.options && field.options.map(option => (\n            <option key={option.value} value={option.value}>\n              {option.label}\n            </option>\n          ))}\n        </select>\n      );\n      break;\n    default:\n      inputElement = <div>Unsupported field type: {field.type}</div>;\n  }\n\n  return inputElement;\n};\n\n\nconst FormGroup = ({ group, values, onChange }: FormGroupProps) => {\n  const [expanded, setExpanded] = useState(true);\n  \n  if (group.groups) {\n    return (\n      <div className=\"form-group nested-group-container\">\n        <h3 onClick={() => setExpanded(!expanded)} className=\"group-header\">\n          {group.label} {expanded ? '▼' : '▶'}\n        </h3>\n        {expanded && (\n          <div className=\"nested-groups\">\n            {group.groups.map(nestedGroup => (\n              <FormGroup\n                key={nestedGroup.id}\n                group={nestedGroup}\n                values={values}\n                onChange={onChange}\n              />\n            ))}\n          </div>\n        )}\n      </div>\n    );\n  }\n  \n  // Regular form group with fields\n  return (\n    <div className=\"form-group\">\n      <h3 onClick={() => setExpanded(!expanded)} className=\"group-header\">\n        {group.label} {expanded ? '▼' : '▶'}\n      </h3>\n      \n      {expanded && (\n        <div className=\"fields\">\n          {group.fields && group.fields.map(field => (\n            <div key={field.id} className=\"form-field\">\n              <label htmlFor={field.id}>{field.label}</label>\n              <FormField\n                field={field}\n                value={values[field.id]}\n                onChange={onChange}\n              />\n              {field.hint && <span className=\"hint\">{field.hint}</span>}\n            </div>\n          ))}\n        </div>\n      )}\n    </div>\n  );\n};\n\n// Example usage within a DynamicForm (see next theory block)",
+              "explanation": "This example shows a `FormGroup` that contains individual `FormField` components. It maps over `group.fields`, rendering a `label` and a `FormField` for each. The `values[field.id]` retrieves the correct value for the `FormField` from the central `values` object, and the shared `onChange` handler ensures updates propagate to the `DynamicForm`.",
+              "language": "typescript"
+            }
+          ],
+          "relatedQuestions": [
+            "question_form_group_mcq_1",
+            "question_form_group_open_1",
+            "question_form_group_flashcard_1"
+          ],
+          "relatedTasks": [
+            "task_dynamic_form_full"
+          ],
+          "tags": [
+            "React",
+            "Components",
+            "Forms",
+            "Dynamic Forms",
+            "State Management",
+            "Recursion",
+            "UI/UX"
+          ],
+          "technology": "React",
+          "prerequisites": [
+            "react_functional_components",
+            "react_props",
+            "react_state",
+            "javascript_array_methods"
+          ],
+          "complexity": 6,
+          "interviewRelevance": 8,
+          "learningPath": "intermediate",
+          "requiredFor": [
+            "dynamic_form_component"
+          ]
+        },
+        {
+          "id": "theory_dynamic_form_component",
+          "title": "The `DynamicForm` Component: Orchestrating Form Behavior",
+          "content": "The `DynamicForm` component serves as the top-level container and orchestrator for the entire dynamic form system. It manages the form's overall state, processes user input through a centralized change handler, and coordinates the rendering of `FormGroup` (and thus `FormField`) components based on a provided schema. It is also responsible for handling form submission.\n\n## Key Concepts\n- **Centralized State Management**: It uses `useState` to maintain `formValues`, an object that holds the current values for all fields in the form. This central state is crucial for collecting all input data upon submission and for pre-populating fields.\n- **`formSchema`**: This is a critical prop that defines the entire structure of the form – its groups, nested groups, and fields, including their types, labels, and validation rules. The `DynamicForm` component interprets this schema to render the form dynamically.\n- **`handleFieldChange`**: This is a single, robust callback function passed down to all `FormField` instances (via `FormGroup`). When any field's value changes, `handleFieldChange` is invoked with the `fieldId` and its new `value`, ensuring that the `formValues` state is immutably updated. This prevents direct state manipulation within child components, adhering to React's unidirectional data flow.\n- **Form Submission (`handleSubmit`)**: Although the provided snippet is incomplete, a `handleSubmit` function is essential. It prevents the default browser form submission, typically performs final validation on `formValues`, and then invokes an `onSubmit` prop with the collected `formValues` to allow the parent component or application logic to process the form data.\n- **Uncontrolled vs. Controlled Components (Hybrid Approach)**: While `FormField` and `FormGroup` are technically 'controlled' by `DynamicForm`'s state, the overall pattern of defining form structure via a schema and dynamically rendering components can be seen as a more flexible 'uncontrolled' approach at the schema level, while individual inputs remain controlled.",
+          "examples": [
+            {
+              "id": "example_dynamic_form_handle_change",
+              "title": "Handling Field Changes in `DynamicForm`",
+              "code": "import React, { useState } from 'react';\n\ninterface FormFieldConfig {\n  id: string; type: string; name: string; label: string; required?: boolean;\n  options?: { value: string; label: string }[]; hint?: string;\n}\n\ninterface FormGroupConfig {\n  id: string; label: string; groups?: FormGroupConfig[]; fields?: FormFieldConfig[];\n}\n\ninterface FormSchema {\n  id: string;\n  label: string;\n  groups: FormGroupConfig[];\n}\n\n// Assume FormGroup component is defined as in previous theory block\nconst FormGroup = ({ group, values, onChange }: any) => {\n  // Simplified placeholder for example\n  return (\n    <div className=\"form-group\">\n      <h3>{group.label}</h3>\n      {group.fields && group.fields.map((field: FormFieldConfig) => (\n        <div key={field.id}>\n          <label htmlFor={field.id}>{field.label}</label>\n          <input \n            type=\"text\" \n            id={field.id} \n            value={values[field.id] || ''} \n            onChange={e => onChange(field.id, e.target.value)} \n          />\n        </div>\n      ))}\n    </div>\n  );\n};\n\ninterface DynamicFormProps {\n  formSchema: FormSchema;\n  onSubmit: (values: { [key: string]: any }) => void;\n}\n\nconst DynamicForm = ({ formSchema, onSubmit }: DynamicFormProps) => {\n  const [formValues, setFormValues] = useState<{ [key: string]: any }>({});\n  \n  const handleFieldChange = (fieldId: string, value: any) => {\n    setFormValues(prevValues => ({\n      ...prevValues,\n      [fieldId]: value\n    }));\n  };\n  \n  const handleSubmit = (event: React.FormEvent) => {\n    event.preventDefault();\n    console.log('Form values:', formValues);\n    onSubmit(formValues);\n  };\n\n  return (\n    <form onSubmit={handleSubmit} className=\"dynamic-form-container\">\n      <h2>{formSchema.label}</h2>\n      {formSchema.groups.map(group => (\n        <FormGroup\n          key={group.id}\n          group={group}\n          values={formValues}\n          onChange={handleFieldChange}\n        />\n      ))}\n      <button type=\"submit\">Submit Form</button>\n    </form>\n  );\n};\n\n// Example Usage (in a parent component):\n// const myFormSchema: FormSchema = {\n//   id: 'userProfileForm',\n//   label: 'User Profile',\n//   groups: [\n//     {\n//       id: 'contactInfo', label: 'Contact Information',\n//       fields: [\n//         { id: 'email', name: 'email', label: 'Email', type: 'text', required: true },\n//         { id: 'phone', name: 'phone', label: 'Phone', type: 'text' }\n//       ]\n//     }\n//   ]\n// };\n\n// const App = () => {\n//   const handleFormSubmit = (values: { [key: string]: any }) => {\n//     alert('Form submitted! Check console for values.');\n//     console.log('Submitted values:', values);\n//   };\n//   return (\n//     <DynamicForm formSchema={myFormSchema} onSubmit={handleFormSubmit} />\n//   );\n// };",
+              "explanation": "This example shows the core `DynamicForm` component. It initializes `formValues` using `useState`. The `handleFieldChange` function is crucial: it receives the `fieldId` and `value` from any nested `FormField` and updates the central `formValues` state immutably. The `handleSubmit` function prevents default submission and calls the `onSubmit` prop with the current `formValues`.",
+              "language": "typescript"
+            }
+          ],
+          "relatedQuestions": [
+            "question_dynamic_form_open_1",
+            "question_dynamic_form_mcq_1",
+            "question_dynamic_form_flashcard_1"
+          ],
+          "relatedTasks": [
+            "task_dynamic_form_full",
+            "task_dynamic_form_validation"
+          ],
+          "tags": [
+            "React",
+            "Forms",
+            "State Management",
+            "Controlled Components",
+            "Schema-driven UI",
+            "Dynamic UI"
+          ],
+          "technology": "React",
+          "prerequisites": [
+            "react_hooks",
+            "react_component_lifecycle",
+            "javascript_object_spread"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 9,
+          "learningPath": "advanced",
+          "requiredFor": [
+            "advanced_react_patterns",
+            "form_validation_strategies"
+          ]
+        }
+      ],
+      "questions": [
+        {
+          "id": "question_form_field_mcq_1",
+          "topic": "`FormField` Component Value Handling",
+          "level": "medium",
+          "type": "mcq",
+          "question": "Consider the `FormField` component's handling of `value` and `onChange` for a `checkbox` type:\n\n```typescript\nconst FormField = ({ field, value, onChange }) => {\n  switch (field.type) {\n    case 'checkbox':\n      return (\n        <input\n          type=\"checkbox\"\n          id={field.id}\n          name={field.name}\n          checked={value || false}\n          onChange={e => onChange(field.id, e.target.checked)}\n          required={field.required}\n        />\n      );\n    default:\n      return null;\n  }\n};\n```\n\nIf the `value` prop passed to `FormField` for a checkbox is `undefined`, what will be the `checked` state of the rendered `input` element?",
+          "answer": "false",
+          "options": [
+            "true",
+            "false",
+            "undefined",
+            "An error will be thrown because `checked` expects a boolean."
+          ],
+          "analysisPoints": [
+            "Understanding of logical OR operator (`||`) in JavaScript.",
+            "Knowledge of how `checked` attribute works for HTML checkboxes.",
+            "Understanding of React's controlled component pattern for checkboxes."
+          ],
+          "keyConcepts": [
+            "Controlled Components",
+            "Checkbox Input",
+            "JavaScript Logical OR",
+            "React Props"
+          ],
+          "evaluationCriteria": [
+            "Ability to trace data flow through props.",
+            "Understanding of type coercion in JavaScript expressions.",
+            "Familiarity with HTML input element attributes."
+          ],
+          "example": "The expression `value || false` evaluates `value` first. If `value` is a 'falsy' value (like `undefined`, `null`, `0`, `''`), the expression falls back to `false`. Therefore, if `value` is `undefined`, `checked` becomes `false`.",
+          "tags": [
+            "React",
+            "Forms",
+            "Checkbox",
+            "JavaScript",
+            "Controlled Components"
+          ],
+          "prerequisites": [
+            "javascript_truthy_falsy",
+            "react_props"
+          ],
+          "complexity": 6,
+          "interviewFrequency": 7,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_form_field_open_1",
+          "topic": "Extending `FormField` Component",
+          "level": "medium",
+          "type": "open",
+          "question": "The `FormField` component currently handles `select` and `checkbox` types. Describe how you would extend this component to support `text` and `number` input types. Provide a conceptual code snippet for one of these new types.",
+          "answer": "To extend the `FormField` component for `text` and `number` input types, you would add new `case` statements within the `switch` block for `'text'` and `'number'`. For each case, you would render an `<input>` element with the appropriate `type` attribute. The `value` prop would be bound to the `value` attribute of the input, and the `onChange` event would capture `e.target.value`.\n\n**Conceptual Code Snippet for 'text' type:**\n\n```typescript\nconst FormField = ({ field, value, onChange }) => {\n  switch (field.type) {\n    // ... existing cases for 'select', 'checkbox'\n    case 'text':\n      return (\n        <input\n          type=\"text\"\n          id={field.id}\n          name={field.name}\n          value={value || ''} // Handle undefined/null initial values\n          onChange={e => onChange(field.id, e.target.value)}\n          required={field.required}\n        />\n      );\n    case 'number':\n      return (\n        <input\n          type=\"number\"\n          id={field.id}\n          name={field.name}\n          value={value || ''} // Can be empty string for initial state, will coerce to number on change\n          onChange={e => onChange(field.id, parseFloat(e.target.value) || 0)} // Parse to number, handle NaN\n          required={field.required}\n        />\n      );\n    default:\n      return <div>Unsupported field type: {field.type}</div>;\n  }\n};\n```\n\nFor `text` input, the `value` prop directly maps to `e.target.value`. For `number` input, it's good practice to parse `e.target.value` to a number using `parseFloat` or `Number()` to ensure the stored value is numeric, and handle cases where the input might not be a valid number (e.g., `parseFloat(e.target.value) || 0`).",
+          "analysisPoints": [
+            "Demonstrates understanding of conditional rendering in React.",
+            "Shows how to bind value and onChange for various input types.",
+            "Highlights attention to detail for type handling (e.g., parsing numbers).",
+            "Understanding of `id` and `name` attributes for form fields."
+          ],
+          "keyConcepts": [
+            "Conditional Rendering",
+            "Controlled Components",
+            "HTML Input Types",
+            "Event Handling"
+          ],
+          "evaluationCriteria": [
+            "Correct use of `switch` or `if/else if`.",
+            "Accurate binding of `value` and `onChange`.",
+            "Consideration for input type specifics (e.g., `e.target.checked` vs `e.target.value`, number parsing)."
+          ],
+          "example": "",
+          "tags": [
+            "React",
+            "Forms",
+            "Extensibility",
+            "Components",
+            "TypeScript"
+          ],
+          "prerequisites": [
+            "react_props",
+            "javascript_control_flow",
+            "html_form_elements"
+          ],
+          "complexity": 7,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_form_field_flashcard_1",
+          "topic": "`FormField` Key Prop Usage",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "In the `FormField` component, when rendering `option` elements for a `select` input using `map`, what is the purpose of the `key` prop, and why is `option.value` typically a good choice for it?",
+          "answer": "The `key` prop helps React efficiently identify and re-render list items. It allows React to track which items have changed, been added, or been removed, preventing unnecessary re-renders of the entire list and ensuring correct state preservation. `option.value` is a good choice for the `key` because it is typically unique and stable for each option, satisfying React's requirement for keys to be unique among siblings and persistent across re-renders.",
+          "analysisPoints": [
+            "Recall the purpose of React `key` prop.",
+            "Understand criteria for a good `key`.",
+            "Relate `key` to list rendering optimization."
+          ],
+          "keyConcepts": [
+            "React Lists and Keys",
+            "Performance Optimization",
+            "Virtual DOM"
+          ],
+          "evaluationCriteria": [
+            "Correctly identifies purpose of `key`.",
+            "Explains why `option.value` is suitable.",
+            "Briefly mentions benefits (efficiency)."
+          ],
+          "example": "",
+          "tags": [
+            "React",
+            "Lists",
+            "Keys",
+            "Performance"
+          ],
+          "prerequisites": [
+            "react_lists"
+          ],
+          "complexity": 5,
+          "interviewFrequency": 9,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_form_group_mcq_1",
+          "topic": "`FormGroup` Component Recursion",
+          "level": "medium",
+          "type": "mcq",
+          "question": "The `FormGroup` component is designed to handle nested form structures. Given the following snippet:\n\n```typescript\nconst FormGroup = ({ group, values, onChange }) => {\n  const [expanded, setExpanded] = useState(true);\n  \n  if (group.groups) {\n    return (\n      <div className=\"form-group\">\n        <h3 onClick={() => setExpanded(!expanded)} className=\"group-header\">\n          {group.label} {expanded ? '▼' : '▶'}\n        </h3>\n        {expanded && (\n          <div className=\"nested-groups\">\n            {group.groups.map(nestedGroup => (\n              <FormGroup\n                key={nestedGroup.id}\n                group={nestedGroup}\n                values={values}\n                onChange={onChange}\n              />\n            ))}\n          </div>\n        )}\n      </div>\n    );\n  }\n  \n  // ... (rest of component for fields)\n};\n```\n\nWhat is the primary mechanism that allows `FormGroup` to render arbitrarily deep nested structures?",
+          "answer": "Recursive component rendering",
+          "options": [
+            "Props drilling",
+            "Context API",
+            "Redux store",
+            "Recursive component rendering"
+          ],
+          "analysisPoints": [
+            "Identifying the pattern of a component rendering itself.",
+            "Distinguishing between state management patterns and rendering patterns.",
+            "Understanding how hierarchical data structures are rendered in React."
+          ],
+          "keyConcepts": [
+            "React Components",
+            "Recursion",
+            "Props",
+            "Hierarchical Data"
+          ],
+          "evaluationCriteria": [
+            "Correctly identifies the core rendering pattern.",
+            "Differentiates between rendering and state management concepts."
+          ],
+          "example": "The `FormGroup` component checks `if (group.groups)` and if true, it iterates over `group.groups.map(...)` and renders another `FormGroup` component for each `nestedGroup`. This self-referential rendering is the definition of recursion in components, enabling it to handle any depth of nesting defined in the `formSchema`.",
+          "tags": [
+            "React",
+            "Components",
+            "Recursion",
+            "Dynamic Forms",
+            "Architecture"
+          ],
+          "prerequisites": [
+            "react_functional_components",
+            "javascript_recursion"
+          ],
+          "complexity": 6,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_form_group_open_1",
+          "topic": "`FormGroup` Collapsible Behavior",
+          "level": "easy",
+          "type": "open",
+          "question": "Explain how the `FormGroup` component implements its collapsible behavior using the `useState` hook. What are the benefits of making form sections collapsible?",
+          "answer": "The `FormGroup` component implements collapsible behavior using the `useState` hook to manage an `expanded` boolean state, initialized to `true` (`const [expanded, setExpanded] = useState(true);`).\n\n1.  **State Management**: The `expanded` state determines whether the content of the form group (either nested groups or fields) is visible.\n2.  **Toggle Mechanism**: An `onClick` handler is attached to the `group-header` (`<h3 onClick={() => setExpanded(!expanded)} ...>`). When the header is clicked, `setExpanded(!expanded)` is called, which flips the boolean value of `expanded`.\n3.  **Conditional Rendering**: The group's content (`<div className=\"nested-groups\">` or `<div className=\"fields\">`) is conditionally rendered using a short-circuit `&&` operator: `{expanded && (...) }`. This means the content is only rendered when `expanded` is `true`.\n4.  **Visual Indicator**: The header also updates a visual indicator (`{expanded ? '▼' : '▶'}`) to show whether the section is currently open or closed.\n\n**Benefits of collapsible form sections:**\n*   **Improved User Experience (UX)**: Prevents information overload by hiding less relevant sections, especially in long or complex forms.\n*   **Better Navigation**: Users can quickly scan and jump to relevant sections without scrolling through a lot of fields.\n*   **Reduced Cognitive Load**: Breaks down a large task into smaller, more manageable parts.\n*   **Performance (potential)**: In some cases, if the hidden content is complex, not rendering it until expanded can offer minor performance benefits, though React's efficient reconciliation usually handles this well.",
+          "analysisPoints": [
+            "Understanding of `useState` for UI toggles.",
+            "Correct use of conditional rendering.",
+            "Identification of `onClick` handler.",
+            "Ability to articulate UX benefits."
+          ],
+          "keyConcepts": [
+            "React State",
+            "useState Hook",
+            "Conditional Rendering",
+            "User Experience (UX)"
+          ],
+          "evaluationCriteria": [
+            "Clear explanation of state, event handling, and rendering.",
+            "Comprehensive list of UX benefits.",
+            "Correct identification of `useState`."
+          ],
+          "example": "",
+          "tags": [
+            "React",
+            "State",
+            "Hooks",
+            "UI/UX",
+            "Forms"
+          ],
+          "prerequisites": [
+            "react_hooks",
+            "javascript_boolean_logic"
+          ],
+          "complexity": 5,
+          "interviewFrequency": 7,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_form_group_flashcard_1",
+          "topic": "`FormGroup` Props",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "What are the three main props passed to the `FormGroup` component, and what is the purpose of each?",
+          "answer": "1.  `group`: An object defining the configuration for the current group, including its `id`, `label`, and arrays for `fields` (form fields within this group) or `groups` (nested form groups).\n2.  `values`: An object containing the current state of all form fields across the entire dynamic form. This is passed down to allow `FormField` components to display their current values.\n3.  `onChange`: A callback function (`(fieldId: string, value: any) => void`) that is invoked when any individual form field's value changes. This function is responsible for updating the central form state in the `DynamicForm` component.",
+          "analysisPoints": [
+            "Recall component props and their roles.",
+            "Understand data flow in React (props drilling).",
+            "Identify inputs for form rendering and state updates."
+          ],
+          "keyConcepts": [
+            "React Props",
+            "Data Flow",
+            "Form State"
+          ],
+          "evaluationCriteria": [
+            "Correctly lists and describes each prop's purpose.",
+            "Demonstrates understanding of component communication."
+          ],
+          "example": "",
+          "tags": [
+            "React",
+            "Props",
+            "Forms",
+            "Data Flow"
+          ],
+          "prerequisites": [
+            "react_props"
+          ],
+          "complexity": 5,
+          "interviewFrequency": 8,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_dynamic_form_open_1",
+          "topic": "Centralized State Management in `DynamicForm`",
+          "level": "hard",
+          "type": "open",
+          "question": "The `DynamicForm` component uses `useState` to manage `formValues` centrally. Explain the advantages of this centralized state management approach over having each `FormField` manage its own state. Discuss potential challenges or considerations with this approach, especially for very large forms.",
+          "answer": "### Advantages of Centralized State Management (`formValues` in `DynamicForm`):\n\n1.  **Single Source of Truth**: All form data resides in one place (`formValues`), making it easy to access the complete form state at any time (e.g., for submission, validation, or pre-population).\n2.  **Simplified Submission**: When the form is submitted, the `handleSubmit` function simply needs to read the `formValues` object, which already contains all the latest data from every field, regardless of nesting or type.\n3.  **Easier Validation**: Validation logic can be applied to the entire `formValues` object at once, or specific parts, from a single location, rather than having to collect state from numerous child components.\n4.  **Cross-Field Dependencies**: It facilitates implementing complex logic where one field's value depends on another (e.g., conditional rendering, calculation), as all values are readily available in the shared `formValues` object.\n5.  **Debugging**: Easier to debug state changes as they all flow through a single `handleFieldChange` function and update a single state object.\n6.  **Immutable Updates**: The `setFormValues(prevValues => ({ ...prevValues, [fieldId]: value }))` pattern ensures immutable updates, which is a React best practice, improving predictability and avoiding common bugs.\n\n### Challenges/Considerations for Very Large Forms:\n\n1.  **Performance (Re-renders)**: When `formValues` is updated, the entire `DynamicForm` component and all its children (`FormGroup`s and `FormField`s) might re-render, even if only one field's value changed. For forms with hundreds or thousands of fields, this could become a performance bottleneck.\n    *   **Mitigation**: Use `React.memo` for `FormField` and `FormGroup` components to prevent unnecessary re-renders if their props haven't changed. This is critical for performance in large forms.\n2.  **Prop Drilling**: The `formValues` and `onChange` props need to be passed down through multiple levels of `FormGroup` and `FormField` components. While manageable for a few levels, it can make the code harder to read and maintain as the nesting deepens.\n    *   **Mitigation**: Consider using React Context API or a dedicated state management library (like Zustand, Redux) for very deep and complex forms to avoid excessive prop drilling.\n3.  **Initial Load Time**: Populating `formValues` with initial data for a very large form might involve processing a substantial schema, potentially impacting initial rendering speed.\n4.  **Memory Usage**: Holding the entire form state in a single object might consume more memory than necessary for extremely large, sparsely filled forms, though this is rarely a practical issue for typical web forms.",
+          "analysisPoints": [
+            "Compares centralized vs. localized state management for forms.",
+            "Lists comprehensive advantages.",
+            "Identifies and explains potential performance issues (re-renders, prop drilling).",
+            "Suggests concrete mitigation strategies (React.memo, Context/Redux).",
+            "Demonstrates architectural thinking."
+          ],
+          "keyConcepts": [
+            "React State Management",
+            "Controlled Components",
+            "Performance Optimization",
+            "Prop Drilling",
+            "React.memo",
+            "Context API"
+          ],
+          "evaluationCriteria": [
+            "Depth of understanding of state management trade-offs.",
+            "Ability to identify and propose solutions for scalability issues.",
+            "Clarity and organization of explanation."
+          ],
+          "example": "",
+          "tags": [
+            "React",
+            "State Management",
+            "Performance",
+            "Architecture",
+            "Forms",
+            "Hooks"
+          ],
+          "prerequisites": [
+            "react_hooks",
+            "react_performance_optimization",
+            "react_context_api"
+          ],
+          "complexity": 9,
+          "interviewFrequency": 9,
+          "learningPath": "advanced"
+        },
+        {
+          "id": "question_dynamic_form_mcq_1",
+          "topic": "`DynamicForm` `handleFieldChange` Logic",
+          "level": "medium",
+          "type": "mcq",
+          "question": "The `handleFieldChange` function in `DynamicForm` is defined as:\n\n```typescript\nconst handleFieldChange = (fieldId, value) => {\n  setFormValues(prevValues => ({\n    ...prevValues,\n    [fieldId]: value\n  }));\n};\n```\n\nWhich of the following best describes the key principle demonstrated by this implementation of `handleFieldChange`?",
+          "answer": "Immutability and functional state updates",
+          "options": [
+            "Direct state mutation for performance",
+            "Deep cloning of nested objects",
+            "Immutability and functional state updates",
+            "Synchronous state batching"
+          ],
+          "analysisPoints": [
+            "Understanding of `setFormValues(prevValues => ...)` pattern.",
+            "Knowledge of spread syntax (`...`) for object copying.",
+            "Recognition of immutable update patterns in React.",
+            "Distinguishing between different state management concepts."
+          ],
+          "keyConcepts": [
+            "React State Updates",
+            "Immutability",
+            "Functional Updates",
+            "Spread Syntax"
+          ],
+          "evaluationCriteria": [
+            "Correctly identifies the core concept.",
+            "Shows understanding of `useState`'s functional update form.",
+            "Recognizes the importance of immutability in React."
+          ],
+          "example": "The use of `setFormValues(prevValues => ({ ...prevValues, [fieldId]: value }))` demonstrates two key principles:\n1.  **Immutability**: Instead of directly modifying `prevValues`, it creates a *new* object (`{ ...prevValues, [fieldId]: value }`) by spreading the old values and then overriding or adding the specific `fieldId` with its new `value`. This is crucial in React for efficient change detection and preventing unexpected side effects.\n2.  **Functional State Updates**: Passing a function to `setFormValues` ensures that `prevValues` always refers to the *latest* state, even if multiple updates are batched by React. This prevents stale closures and ensures reliable updates.",
+          "tags": [
+            "React",
+            "State Management",
+            "Immutability",
+            "Hooks",
+            "JavaScript"
+          ],
+          "prerequisites": [
+            "react_hooks",
+            "javascript_spread_syntax"
+          ],
+          "complexity": 7,
+          "interviewFrequency": 9,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_dynamic_form_flashcard_1",
+          "topic": "`formSchema` Purpose",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "What is the primary role of the `formSchema` prop in the `DynamicForm` component?",
+          "answer": "The `formSchema` prop is a JavaScript object that serves as the blueprint or configuration for the entire dynamic form. It defines the structure of the form, including its groups, nested groups, and individual fields (their IDs, labels, types, validation rules, options, etc.), enabling the `DynamicForm` to render a form dynamically without hardcoding its structure.",
+          "analysisPoints": [
+            "Understand schema-driven UI.",
+            "Identify how dynamic forms get their structure.",
+            "Recall the configuration aspect."
+          ],
+          "keyConcepts": [
+            "Schema-driven UI",
+            "Dynamic Forms",
+            "Configuration"
+          ],
+          "evaluationCriteria": [
+            "Clearly defines `formSchema`'s role.",
+            "Mentions key elements it defines (structure, fields, types)."
+          ],
+          "example": "",
+          "tags": [
+            "React",
+            "Forms",
+            "Schema-driven UI",
+            "Configuration"
+          ],
+          "prerequisites": [
+            "javascript_objects"
+          ],
+          "complexity": 5,
+          "interviewFrequency": 7,
+          "learningPath": "beginner"
+        }
+      ],
+      "tasks": [
+        {
+          "id": "task_form_field_extension",
+          "title": "Extend `FormField` with New Input Types",
+          "description": "\nExtend the existing `FormField` component to support `text` and `textarea` input types. Ensure correct handling of `value`, `onChange`, and `required` attributes for these new types.\n\n### Requirements:\n1.  Add a `case 'text'` to the `switch` statement for rendering a standard `<input type=\"text\">`.\n2.  Add a `case 'textarea'` for rendering a `<textarea>` element. Both `text` and `textarea` should bind their `value` and capture `e.target.value`.\n3.  Ensure the `id`, `name`, and `required` attributes are correctly passed to these new input types.\n4.  The default case for unsupported types should remain.\n",
+          "difficulty": "medium",
+          "startingCode": "import React from 'react';\n\ninterface FormFieldConfig {\n  id: string;\n  name: string;\n  label: string;\n  type: 'select' | 'checkbox' | 'text' | 'number' | 'textarea';\n  required?: boolean;\n  options?: { value: string; label: string }[];\n  hint?: string;\n}\n\ninterface FormFieldProps {\n  field: FormFieldConfig;\n  value: any;\n  onChange: (fieldId: string, value: any) => void;\n}\n\nconst FormField = ({ field, value, onChange }: FormFieldProps) => {\n  switch (field.type) {\n    case 'select':\n      return (\n        <select\n          id={field.id}\n          name={field.name}\n          value={value || ''}\n          onChange={e => onChange(field.id, e.target.value)}\n          required={field.required}\n        >\n          <option value=\"\">Select an option</option>\n          {field.options && field.options.map(option => (\n            <option key={option.value} value={option.value}>\n              {option.label}\n            </option>\n          ))}\n        </select>\n      );\n    case 'checkbox':\n      return (\n        <input\n          type=\"checkbox\"\n          id={field.id}\n          name={field.name}\n          checked={value || false}\n          onChange={e => onChange(field.id, e.target.checked)}\n          required={field.required}\n        />\n      );\n    // TODO: Add cases for 'text' and 'textarea'\n    default:\n      return <div>Unsupported field type: {field.type}</div>;\n  }\n};\n\nexport default FormField;\n\n// Example Usage (for testing):\n/*\nfunction App() {\n  const [values, setValues] = React.useState({});\n\n  const handleChange = (id, val) => {\n    setValues(prev => ({ ...prev, [id]: val }));\n  };\n\n  return (\n    <div>\n      <h2>FormField Tests</h2>\n      <div style={{ marginBottom: '20px' }}>\n        <label htmlFor=\"username\">Username:</label>\n        <FormField\n          field={{ id: 'username', name: 'username', label: 'Username', type: 'text', required: true }}\n          value={values.username}\n          onChange={handleChange}\n        />\n        <p>Current: {values.username || 'empty'}</p>\n      </div>\n      <div style={{ marginBottom: '20px' }}>\n        <label htmlFor=\"description\">Description:</label>\n        <FormField\n          field={{ id: 'description', name: 'description', label: 'Description', type: 'textarea' }}\n          value={values.description}\n          onChange={handleChange}\n        />\n        <p>Current: {values.description || 'empty'}</p>\n      </div>\n      <div style={{ marginBottom: '20px' }}>\n        <label htmlFor=\"agreeTerms\">Agree:</label>\n        <FormField\n          field={{ id: 'agreeTerms', name: 'agreeTerms', label: 'Agree Terms', type: 'checkbox' }}\n          value={values.agreeTerms}\n          onChange={handleChange}\n        />\n        <p>Current: {values.agreeTerms?.toString() || 'false'}</p>\n      </div>\n    </div>\n  );\n}\n*/\n",
+          "solutionCode": "import React from 'react';\n\ninterface FormFieldConfig {\n  id: string;\n  name: string;\n  label: string;\n  type: 'select' | 'checkbox' | 'text' | 'number' | 'textarea';\n  required?: boolean;\n  options?: { value: string; label: string }[];\n  hint?: string;\n}\n\ninterface FormFieldProps {\n  field: FormFieldConfig;\n  value: any;\n  onChange: (fieldId: string, value: any) => void;\n}\n\nconst FormField = ({ field, value, onChange }: FormFieldProps) => {\n  switch (field.type) {\n    case 'select':\n      return (\n        <select\n          id={field.id}\n          name={field.name}\n          value={value || ''}\n          onChange={e => onChange(field.id, e.target.value)}\n          required={field.required}\n        >\n          <option value=\"\">Select an option</option>\n          {field.options && field.options.map(option => (\n            <option key={option.value} value={option.value}>\n              {option.label}\n            </option>\n          ))}\n        </select>\n      );\n    case 'checkbox':\n      return (\n        <input\n          type=\"checkbox\"\n          id={field.id}\n          name={field.name}\n          checked={value || false}\n          onChange={e => onChange(field.id, e.target.checked)}\n          required={field.required}\n        />\n      );\n    case 'text':\n      return (\n        <input\n          type=\"text\"\n          id={field.id}\n          name={field.name}\n          value={value || ''}\n          onChange={e => onChange(field.id, e.target.value)}\n          required={field.required}\n        />\n      );\n    case 'textarea':\n      return (\n        <textarea\n          id={field.id}\n          name={field.name}\n          value={value || ''}\n          onChange={e => onChange(field.id, e.target.value)}\n          required={field.required}\n          rows={4} // Example attribute for textarea\n        />\n      );\n    default:\n      return <div>Unsupported field type: {field.type}</div>;\n  }\n};\n\nexport default FormField;\n",
+          "testCases": [
+            "Test `type='text'` field: Inputting 'Hello World' should update the value correctly. Empty input should default to empty string.",
+            "Test `type='textarea'` field: Inputting multi-line text should update the value correctly. Empty input should default to empty string.",
+            "Test `required` attribute: Verify that `required` prop is correctly applied for `text` and `textarea` fields.",
+            "Test unsupported type: Passing a `field.type` like 'date' should render 'Unsupported field type: date'."
+          ],
+          "hints": [
+            "Remember that both `<input type=\"text\">` and `<textarea>` capture their value from `e.target.value`.",
+            "Consider how you've handled initial `value` for `select` inputs; a similar approach might be useful for text/textarea.",
+            "Ensure `id`, `name`, and `required` attributes are consistently applied."
+          ],
+          "tags": [
+            "React",
+            "Forms",
+            "Components",
+            "Extensibility",
+            "TypeScript"
+          ],
+          "timeEstimate": 30,
+          "prerequisites": [
+            "react_functional_components",
+            "javascript_control_flow"
+          ],
+          "complexity": 6,
+          "interviewRelevance": 7,
+          "learningPath": "intermediate",
+          "relatedConcepts": [
+            "form_field_component",
+            "conditional_rendering",
+            "controlled_components"
+          ]
+        },
+        {
+          "id": "task_dynamic_form_validation",
+          "title": "Implement Basic Form Validation in `DynamicForm`",
+          "description": "\nEnhance the `DynamicForm` component by adding basic client-side validation logic. The goal is to prevent form submission if any `required` field is empty. The validation should be triggered on form submission.\n\n### Requirements:\n1.  In the `handleSubmit` function of `DynamicForm`, before calling `onSubmit`, iterate through the `formSchema` to identify all `required` fields.\n2.  For each `required` field, check if its corresponding value in `formValues` is empty or 'falsy' (e.g., `''`, `null`, `undefined`, `false` for checkbox).\n3.  If any required field is empty, prevent the form from submitting. Instead, set a state variable `errors` to indicate which fields are invalid (e.g., `{ [fieldId]: 'Field is required' }`).\n4.  Pass these `errors` down through `FormGroup` to `FormField` so that an error message or styling can be displayed next to the invalid field.\n5.  If all required fields are filled, proceed with calling `onSubmit(formValues)`.\n\n**Note**: You'll need to define how `errors` are passed down and rendered in `FormGroup` and `FormField` as well.\n",
+          "difficulty": "hard",
+          "startingCode": "import React, { useState } from 'react';\n\ninterface FormFieldConfig {\n  id: string;\n  name: string;\n  label: string;\n  type: 'select' | 'checkbox' | 'text' | 'number' | 'textarea';\n  required?: boolean;\n  options?: { value: string; label: string }[];\n  hint?: string;\n}\n\ninterface FormGroupConfig {\n  id: string;\n  label: string;\n  groups?: FormGroupConfig[];\n  fields?: FormFieldConfig[];\n}\n\ninterface FormSchema {\n  id: string;\n  label: string;\n  groups: FormGroupConfig[];\n}\n\n// --- FormField Component (as completed in previous task) ---\nconst FormField = ({ field, value, onChange, error }: any) => {\n  switch (field.type) {\n    case 'select':\n      return (\n        <select\n          id={field.id}\n          name={field.name}\n          value={value || ''}\n          onChange={e => onChange(field.id, e.target.value)}\n          required={field.required}\n          style={{ borderColor: error ? 'red' : '' }}\n        >\n          <option value=\"\">Select an option</option>\n          {field.options && field.options.map(option => (\n            <option key={option.value} value={option.value}>\n              {option.label}\n            </option>\n          ))}\n        </select>\n      );\n    case 'checkbox':\n      return (\n        <input\n          type=\"checkbox\"\n          id={field.id}\n          name={field.name}\n          checked={value || false}\n          onChange={e => onChange(field.id, e.target.checked)}\n          required={field.required}\n          style={{ outline: error ? '2px solid red' : '' }}\n        />\n      );\n    case 'text':\n      return (\n        <input\n          type=\"text\"\n          id={field.id}\n          name={field.name}\n          value={value || ''}\n          onChange={e => onChange(field.id, e.target.value)}\n          required={field.required}\n          style={{ borderColor: error ? 'red' : '' }}\n        />\n      );\n    case 'textarea':\n      return (\n        <textarea\n          id={field.id}\n          name={field.name}\n          value={value || ''}\n          onChange={e => onChange(field.id, e.target.value)}\n          required={field.required}\n          rows={4}\n          style={{ borderColor: error ? 'red' : '' }}\n        />\n      );\n    default:\n      return <div>Unsupported field type: {field.type}</div>;\n  }\n};\n\n// --- FormGroup Component ---\nconst FormGroup = ({ group, values, onChange, errors }: any) => {\n  const [expanded, setExpanded] = useState(true);\n  \n  if (group.groups) {\n    return (\n      <div className=\"form-group nested-group-container\">\n        <h3 onClick={() => setExpanded(!expanded)} className=\"group-header\">\n          {group.label} {expanded ? '▼' : '▶'}\n        </h3>\n        {expanded && (\n          <div className=\"nested-groups\">\n            {group.groups.map((nestedGroup: FormGroupConfig) => (\n              <FormGroup\n                key={nestedGroup.id}\n                group={nestedGroup}\n                values={values}\n                onChange={onChange}\n                errors={errors}\n              />\n            ))}\n          </div>\n        )}\n      </div>\n    );\n  }\n  \n  return (\n    <div className=\"form-group\">\n      <h3 onClick={() => setExpanded(!expanded)} className=\"group-header\">\n        {group.label} {expanded ? '▼' : '▶'}\n      </h3>\n      \n      {expanded && (\n        <div className=\"fields\">\n          {group.fields && group.fields.map((field: FormFieldConfig) => (\n            <div key={field.id} className=\"form-field\">\n              <label htmlFor={field.id}>{field.label}</label>\n              <FormField\n                field={field}\n                value={values[field.id]}\n                onChange={onChange}\n                error={errors[field.id]} // Pass error prop down\n              />\n              {field.hint && <span className=\"hint\">{field.hint}</span>}\n              {errors[field.id] && <span style={{ color: 'red' }}>{errors[field.id]}</span>} {/* Display error message */}\n            </div>\n          ))}\n        </div>\n      )}\n    </div>\n  );\n};\n\n// --- Main DynamicForm Component ---\ninterface DynamicFormProps {\n  formSchema: FormSchema;\n  onSubmit: (values: { [key: string]: any }) => void;\n}\n\nconst DynamicForm = ({ formSchema, onSubmit }: DynamicFormProps) => {\n  const [formValues, setFormValues] = useState<{ [key: string]: any }>({});\n  const [errors, setErrors] = useState<{ [key: string]: string }>({}); // State for validation errors\n\n  const handleFieldChange = (fieldId: string, value: any) => {\n    setFormValues(prevValues => ({\n      ...prevValues,\n      [fieldId]: value\n    }));\n    // Clear error for this field as soon as it's modified\n    setErrors(prevErrors => {\n      const newErrors = { ...prevErrors };\n      delete newErrors[fieldId];\n      return newErrors;\n    });\n  };\n\n  const collectRequiredFields = (schema: FormSchema | FormGroupConfig): FormFieldConfig[] => {\n    let requiredFields: FormFieldConfig[] = [];\n    if ((schema as FormGroupConfig).fields) {\n      requiredFields = requiredFields.concat((schema as FormGroupConfig).fields!.filter(f => f.required));\n    }\n    if ((schema as FormGroupConfig).groups) {\n      (schema as FormGroupConfig).groups!.forEach(group => {\n        requiredFields = requiredFields.concat(collectRequiredFields(group));\n      });\n    }\n    return requiredFields;\n  };\n\n  const handleSubmit = (event: React.FormEvent) => {\n    event.preventDefault();\n\n    const newErrors: { [key: string]: string } = {};\n    const allRequiredFields = collectRequiredFields(formSchema);\n\n    // TODO: Implement validation logic here\n    // Iterate through allRequiredFields and check if formValues[field.id] is valid\n    // If invalid, add to newErrors object (e.g., newErrors[field.id] = 'This field is required')\n    // If newErrors is not empty, setErrors(newErrors) and return (prevent submission)\n    // Otherwise, setErrors({}) and call onSubmit(formValues)\n\n    if (Object.keys(newErrors).length > 0) {\n      setErrors(newErrors);\n    } else {\n      setErrors({});\n      onSubmit(formValues);\n    }\n  };\n\n  return (\n    <form onSubmit={handleSubmit} className=\"dynamic-form-container\">\n      <h2>{formSchema.label}</h2>\n      {formSchema.groups.map(group => (\n        <FormGroup\n          key={group.id}\n          group={group}\n          values={formValues}\n          onChange={handleFieldChange}\n          errors={errors}\n        />\n      ))}\n      <button type=\"submit\">Submit Form</button>\n    </form>\n  );\n};\n\nexport default DynamicForm;\n\n// Example Usage (in a parent component):\n/*\nconst myFormSchema: FormSchema = {\n  id: 'userRegistration',\n  label: 'User Registration',\n  groups: [\n    {\n      id: 'credentials', label: 'Account Details',\n      fields: [\n        { id: 'username', name: 'username', label: 'Username', type: 'text', required: true },\n        { id: 'password', name: 'password', label: 'Password', type: 'text', required: true }\n      ]\n    },\n    {\n      id: 'personal', label: 'Personal Information',\n      fields: [\n        { id: 'fullName', name: 'fullName', label: 'Full Name', type: 'text' },\n        { id: 'email', name: 'email', label: 'Email', type: 'text', required: true }\n      ]\n    },\n    {\n      id: 'agreements', label: 'Agreements',\n      fields: [\n        { id: 'terms', name: 'terms', label: 'Agree to Terms', type: 'checkbox', required: true }\n      ]\n    }\n  ]\n};\n\nfunction App() {\n  const handleSubmit = (values) => {\n    console.log('Form Submitted!', values);\n    alert('Form Submitted! Check console.');\n  };\n\n  return <DynamicForm formSchema={myFormSchema} onSubmit={handleSubmit} />;\n}\n*/\n",
+          "solutionCode": "import React, { useState } from 'react';\n\ninterface FormFieldConfig {\n  id: string;\n  name: string;\n  label: string;\n  type: 'select' | 'checkbox' | 'text' | 'number' | 'textarea';\n  required?: boolean;\n  options?: { value: string; label: string }[];\n  hint?: string;\n}\n\ninterface FormGroupConfig {\n  id: string;\n  label: string;\n  groups?: FormGroupConfig[];\n  fields?: FormFieldConfig[];\n}\n\ninterface FormSchema {\n  id: string;\n  label: string;\n  groups: FormGroupConfig[];\n}\n\nconst FormField = ({ field, value, onChange, error }: any) => {\n  switch (field.type) {\n    case 'select':\n      return (\n        <select\n          id={field.id}\n          name={field.name}\n          value={value || ''}\n          onChange={e => onChange(field.id, e.target.value)}\n          required={field.required}\n          style={{ borderColor: error ? 'red' : '' }}\n        >\n          <option value=\"\">Select an option</option>\n          {field.options && field.options.map(option => (\n            <option key={option.value} value={option.value}>\n              {option.label}\n            </option>\n          ))}\n        </select>\n      );\n    case 'checkbox':\n      return (\n        <input\n          type=\"checkbox\"\n          id={field.id}\n          name={field.name}\n          checked={value || false}\n          onChange={e => onChange(field.id, e.target.checked)}\n          required={field.required}\n          style={{ outline: error ? '2px solid red' : '' }}\n        />\n      );\n    case 'text':\n      return (\n        <input\n          type=\"text\"\n          id={field.id}\n          name={field.name}\n          value={value || ''}\n          onChange={e => onChange(field.id, e.target.value)}\n          required={field.required}\n          style={{ borderColor: error ? 'red' : '' }}\n        />\n      );\n    case 'textarea':\n      return (\n        <textarea\n          id={field.id}\n          name={field.name}\n          value={value || ''}\n          onChange={e => onChange(field.id, e.target.value)}\n          required={field.required}\n          rows={4}\n          style={{ borderColor: error ? 'red' : '' }}\n        />\n      );\n    default:\n      return <div>Unsupported field type: {field.type}</div>;\n  }\n};\n\nconst FormGroup = ({ group, values, onChange, errors }: any) => {\n  const [expanded, setExpanded] = useState(true);\n  \n  if (group.groups) {\n    return (\n      <div className=\"form-group nested-group-container\">\n        <h3 onClick={() => setExpanded(!expanded)} className=\"group-header\">\n          {group.label} {expanded ? '▼' : '▶'}\n        </h3>\n        {expanded && (\n          <div className=\"nested-groups\">\n            {group.groups.map((nestedGroup: FormGroupConfig) => (\n              <FormGroup\n                key={nestedGroup.id}\n                group={nestedGroup}\n                values={values}\n                onChange={onChange}\n                errors={errors}\n              />\n            ))}\n          </div>\n        )}\n      </div>\n    );\n  }\n  \n  return (\n    <div className=\"form-group\">\n      <h3 onClick={() => setExpanded(!expanded)} className=\"group-header\">\n        {group.label} {expanded ? '▼' : '▶'}\n      </h3>\n      \n      {expanded && (\n        <div className=\"fields\">\n          {group.fields && group.fields.map((field: FormFieldConfig) => (\n            <div key={field.id} className=\"form-field\">\n              <label htmlFor={field.id}>{field.label}</label>\n              <FormField\n                field={field}\n                value={values[field.id]}\n                onChange={onChange}\n                error={errors[field.id]} // Pass error prop down\n              />\n              {field.hint && <span className=\"hint\">{field.hint}</span>}\n              {errors[field.id] && <span style={{ color: 'red' }}>{errors[field.id]}</span>} {/* Display error message */}\n            </div>\n          ))}\n        </div>\n      )}\n    </div>\n  );\n};\n\ninterface DynamicFormProps {\n  formSchema: FormSchema;\n  onSubmit: (values: { [key: string]: any }) => void;\n}\n\nconst DynamicForm = ({ formSchema, onSubmit }: DynamicFormProps) => {\n  const [formValues, setFormValues] = useState<{ [key: string]: any }>({});\n  const [errors, setErrors] = useState<{ [key: string]: string }>({});\n\n  const handleFieldChange = (fieldId: string, value: any) => {\n    setFormValues(prevValues => ({\n      ...prevValues,\n      [fieldId]: value\n    }));\n    // Clear error for this field as soon as it's modified\n    setErrors(prevErrors => {\n      const newErrors = { ...prevErrors };\n      delete newErrors[fieldId];\n      return newErrors;\n    });\n  };\n\n  const collectRequiredFields = (schema: FormSchema | FormGroupConfig): FormFieldConfig[] => {\n    let requiredFields: FormFieldConfig[] = [];\n    if ((schema as FormGroupConfig).fields) {\n      requiredFields = requiredFields.concat((schema as FormGroupConfig).fields!.filter(f => f.required));\n    }\n    if ((schema as FormGroupConfig).groups) {\n      (schema as FormGroupConfig).groups!.forEach(group => {\n        requiredFields = requiredFields.concat(collectRequiredFields(group));\n      });\n    }\n    return requiredFields;\n  };\n\n  const handleSubmit = (event: React.FormEvent) => {\n    event.preventDefault();\n\n    const newErrors: { [key: string]: string } = {};\n    const allRequiredFields = collectRequiredFields(formSchema);\n\n    allRequiredFields.forEach(field => {\n      const value = formValues[field.id];\n      let isValid = true;\n      if (field.type === 'checkbox') {\n        isValid = value === true; // Checkbox must be explicitly true if required\n      } else {\n        isValid = !!value; // Check for any truthy value for other types\n      }\n\n      if (!isValid) {\n        newErrors[field.id] = `${field.label} is required`;\n      }\n    });\n\n    if (Object.keys(newErrors).length > 0) {\n      setErrors(newErrors);\n    } else {\n      setErrors({});\n      onSubmit(formValues);\n    }\n  };\n\n  return (\n    <form onSubmit={handleSubmit} className=\"dynamic-form-container\">\n      <h2>{formSchema.label}</h2>\n      {formSchema.groups.map(group => (\n        <FormGroup\n          key={group.id}\n          group={group}\n          values={formValues}\n          onChange={handleFieldChange}\n          errors={errors}\n        />\n      ))}\n      <button type=\"submit\">Submit Form</button>\n    </form>\n  );\n};\n\nexport default DynamicForm;\n",
+          "testCases": [
+            "Test Case 1: Submit an empty form with required fields. Expect `onSubmit` not to be called, and appropriate error messages to display next to all required fields.",
+            "Test Case 2: Fill in all required fields and submit. Expect `onSubmit` to be called with the correct `formValues` object, and no error messages displayed.",
+            "Test Case 3: Fill in some required fields, leave others empty, then fill the empty ones. Expect errors to disappear from fields as they are filled.",
+            "Test Case 4: Test a required checkbox. If unchecked, it should show an error. If checked, the error should clear.",
+            "Test Case 5: Test a required select input. If 'Select an option' is chosen (empty string value), it should show an error. If a valid option is chosen, the error should clear."
+          ],
+          "hints": [
+            "You'll need a new state variable in `DynamicForm` to store validation errors, likely an object where keys are `fieldId`s and values are error messages.",
+            "The `collectRequiredFields` helper function will be useful to get all fields marked as `required` from the schema, including those in nested groups.",
+            "Remember to clear an error for a field as soon as its `onChange` handler is triggered.",
+            "Consider how 'empty' is defined for different input types (e.g., `''` for text, `false` for checkbox, `''` for select's default option)."
+          ],
+          "tags": [
+            "React",
+            "Forms",
+            "Validation",
+            "State Management",
+            "Error Handling",
+            "Recursion"
+          ],
+          "timeEstimate": 60,
+          "prerequisites": [
+            "dynamic_form_component",
+            "form_field_component",
+            "form_group_component",
+            "javascript_array_methods",
+            "react_hooks"
+          ],
+          "complexity": 8,
+          "interviewRelevance": 9,
+          "learningPath": "advanced",
+          "relatedConcepts": [
+            "form_validation_strategies",
+            "error_display_patterns",
+            "recursive_data_processing"
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "819633ea-131d-4d83-a01b-9f4da3f7dabd",
+    "startLine": 16500,
+    "endLine": 16599,
+    "processedDate": "2025-06-17T15:26:54.030Z",
+    "content": {
+      "logicalBlockInfo": {
+        "suggestedEndLine": -1
+      },
+      "theory": [
+        {
+          "id": "theory_react_dynamic_form",
+          "title": "React Dynamic Form Implementation",
+          "content": "This theory block describes the implementation of a dynamic form in React, a common requirement in frontend development. A dynamic form is a component that renders its structure (fields, groups, etc.) based on a provided schema, allowing for flexible and configurable form generation without hardcoding each form.\n\n## Key Concepts\n*   **Controlled Components**: In React, form elements like `<input>`, `<textarea>`, and `<select>` maintain their own state. When using controlled components, React state becomes the 'single source of truth' for the input elements. You set the value of an input element from state and update the state via an `onChange` event handler.\n*   **Props for Configuration**: The `DynamicForm` component receives a `formSchema` prop, which is an object defining the structure and content of the form. This includes the form's title, description, and an array of `groups`, each containing its own fields. An `onSubmit` callback prop is also provided for handling form submission.\n*   **State Management with `useState`**: The `useState` hook is used to manage the current values of the form fields. `formValues` holds an object where keys are field IDs and values are the corresponding user inputs. `setFormValues` updates this state.\n*   **Event Handling**: \n    *   `handleSubmit`: This function is triggered when the form is submitted. It prevents the default browser form submission behavior (`e.preventDefault()`) and then calls the `onSubmit` prop with the current `formValues`.\n    *   `handleFieldChange`: This function is passed down to individual form fields (likely within the `FormGroup` component). It updates the `formValues` state whenever an input field's value changes, ensuring the form remains a controlled component.\n*   **Conditional Rendering**: The form description (`formSchema.description`) is rendered only if it exists, using a simple conditional `&&` operator.\n*   **List Rendering (`.map()`)**: The `formSchema.groups` array is iterated over using the `map` method to render multiple `FormGroup` components. Each `FormGroup` receives its specific `group` data, the current `formValues`, and the `handleFieldChange` callback. A unique `key` prop is essential for efficient list rendering in React.\n*   **Component Composition**: The `DynamicForm` leverages component composition by delegating the rendering of individual form groups to a separate `FormGroup` component (which is not provided in the snippet but implied).\n*   **Form Submission Button**: A standard `<button type=\"submit\">` is used, with its text customizable via `formSchema.submitText` or defaulting to 'Submit'.",
+          "examples": [
+            {
+              "id": "example_dynamic_form_1",
+              "title": "Basic DynamicForm Structure",
+              "code": "import React, { useState } from 'react';\n\nconst FormGroup = ({ group, values, onChange }) => {\n  // This would typically render individual input fields based on group.fields\n  return (\n    <fieldset>\n      <legend>{group.title}</legend>\n      {/* Placeholder for actual input fields */}\n      <p>Group: {group.title}</p>\n      {/* Example of an input inside a FormGroup */}\n      {group.fields && group.fields.map(field => (\n        <div key={field.id}>\n          <label htmlFor={field.id}>{field.label}:</label>\n          <input\n            id={field.id}\n            type={field.type || 'text'}\n            value={values[field.id] || ''}\n            onChange={e => onChange(field.id, e.target.value)}\n          />\n        </div>\n      ))}\n    </fieldset>\n  );\n};\n\nconst DynamicForm = ({ formSchema, onSubmit }) => {\n  const [formValues, setFormValues] = useState({});\n\n  const handleFieldChange = (fieldId, value) => {\n    setFormValues(prevValues => ({\n      ...prevValues,\n      [fieldId]: value,\n    }));\n  };\n\n  const handleSubmit = (e) => {\n    e.preventDefault();\n    console.log('Form submitted with values:', formValues);\n    onSubmit(formValues);\n  };\n  \n  return (\n    <form onSubmit={handleSubmit} className=\"dynamic-form\">\n      <h2>{formSchema.title}</h2>\n      {formSchema.description && (\n        <p className=\"form-description\">{formSchema.description}</p>\n      )}\n      \n      {formSchema.groups.map(group => (\n        <FormGroup\n          key={group.id}\n          group={group}\n          values={formValues}\n          onChange={handleFieldChange}\n        />\n      ))}\n      \n      <div className=\"form-actions\">\n        <button type=\"submit\" className=\"submit-button\">\n          {formSchema.submitText || 'Submit'}\n        </button>\n      </div>\n    </form>\n  );\n};\n\nexport default DynamicForm;",
+              "explanation": "This example shows the `DynamicForm` component using `useState` for `formValues` and `handleFieldChange` to update them. It also includes a basic `FormGroup` component that would typically render actual input fields based on a `group.fields` array. This illustrates how data flows from the parent `DynamicForm` down to `FormGroup` and back up via the `onChange` callback.",
+              "language": "typescript"
+            }
+          ],
+          "relatedQuestions": [
+            "question_dynamic_form_controlled_component",
+            "question_dynamic_form_state_management_mcq",
+            "question_dynamic_form_key_prop",
+            "question_dynamic_form_prevent_default_flashcard",
+            "question_dynamic_form_schema_evolution"
+          ],
+          "relatedTasks": [
+            "task_implement_formgroup",
+            "task_dynamic_form_validation",
+            "task_dynamic_form_conditional_rendering"
+          ],
+          "tags": [
+            "React",
+            "Forms",
+            "State Management",
+            "Controlled Components",
+            "Component Composition",
+            "Frontend Development"
+          ],
+          "technology": "React",
+          "prerequisites": [
+            "react_basics",
+            "javascript_es6",
+            "dom_events"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 9,
+          "learningPath": "intermediate",
+          "requiredFor": [
+            "advanced_react_forms",
+            "form_libraries_integration",
+            "custom_form_builders"
+          ]
+        },
+        {
+          "id": "theory_javascript_spreadsheet",
+          "title": "Vanilla JavaScript Spreadsheet Implementation",
+          "content": "This theory block outlines the basic principles for building a simple spreadsheet application using vanilla JavaScript and DOM manipulation. The goal is to create an interactive grid of cells where users can input data, and the grid can dynamically grow by adding rows and columns.\n\n## Key Concepts\n*   **Class-Based Structure**: The spreadsheet is encapsulated within a `Spreadsheet` class, which manages the application's state (number of rows/columns, cell data) and behavior (rendering, adding rows/columns, handling cell changes).\n*   **Constructor Initialization**: The `constructor` sets up the initial dimensions (`rows`, `cols`) and initializes a 2D array (`this.data`) to store cell values. `Array(rows).fill().map(() => Array(cols).fill(''))` is a common pattern to create a 2D array where each inner array is a new instance, preventing unintended shared references.\n*   **DOM Manipulation for Rendering**: The `render()` method is responsible for creating the HTML table structure representing the spreadsheet.\n    *   `document.createElement()`: Used to create table elements like `<table>`, `<thead>`, `<tbody>`, `<tr>`, `<th>`, `<td>`, `<span>`, `<input>`. \n    *   `appendChild()`: Used to build the DOM tree by attaching child elements to their parents.\n    *   `textContent`: Used to set the visible text for elements like headers (e.g., 'A', 'B', '1', '2').\n    *   `className`: Used to assign CSS classes for styling.\n*   **Column and Row Headers**: \n    *   Column headers (A, B, C...) are generated using `String.fromCharCode(65 + col)`, where 65 is the ASCII code for 'A'.\n    *   Row headers (1, 2, 3...) are simply `row + 1`.\n*   **Interactive Input Cells**: Each data cell (`<td>`) contains an `<input>` element. \n    *   `input.value`: Binds the input's displayed value to the corresponding data in `this.data`.\n    *   `input.dataset`: Custom data attributes (`data-row`, `data-col`) are used to store the row and column index directly on the input element. This makes it easy to retrieve the cell's coordinates when handling events.\n*   **Event Listeners**: \n    *   `'click'` listener on the '+' button: Triggers the `addColumn()` method, modifying the spreadsheet's dimensions and potentially re-rendering.\n    *   `'change'` listener on input cells: Updates the `this.data` array with the new value entered by the user. The `dataset` properties (`e.target.dataset.row`, `e.target.dataset.col`) are crucial for identifying which cell changed.\n*   **Dynamic Column Addition**: The `addColumn()` method (and implicitly `addRow()`) would involve increasing the `this.cols` (or `this.rows`) property, expanding the `this.data` array for the new cells, and then updating the DOM (either by full re-render or by appending new elements).\n*   **Re-rendering Strategy**: For simplicity, a full re-render (clearing the container and calling `render()` again) can be used when structural changes occur (like adding rows/columns). For cell value changes, direct DOM updates are more efficient.",
+          "examples": [
+            {
+              "id": "example_spreadsheet_class_basic",
+              "title": "Basic Spreadsheet Class Structure",
+              "code": "class Spreadsheet {\n  constructor(rows = 5, cols = 5) {\n    this.rows = rows;\n    this.cols = cols;\n    this.data = Array(rows).fill().map(() => Array(cols).fill(''));\n    this.container = null; // Reference to the DOM element where spreadsheet will be rendered\n  }\n  \n  render(containerElement) {\n    this.container = containerElement;\n    this.container.innerHTML = ''; // Clear previous content\n\n    const table = document.createElement('table');\n    table.className = 'spreadsheet';\n    \n    // Create table header (column letters)\n    const thead = document.createElement('thead');\n    const headerRow = document.createElement('tr');\n    \n    // Empty cell for row numbers column\n    headerRow.appendChild(document.createElement('th'));\n    \n    // Column headers (A, B, C, etc.)\n    for (let col = 0; col < this.cols; col++) {\n      const th = document.createElement('th');\n      th.textContent = String.fromCharCode(65 + col); // A, B, C, ...\n      headerRow.appendChild(th);\n    }\n    \n    // Add \"+\" button for adding columns\n    const addColHeader = document.createElement('th');\n    const addColButton = document.createElement('button');\n    addColButton.textContent = '+';\n    addColButton.addEventListener('click', () => this.addColumn());\n    addColHeader.appendChild(addColButton);\n    headerRow.appendChild(addColHeader);\n    thead.appendChild(headerRow);\n    table.appendChild(thead);\n    \n    // Create table body with data\n    const tbody = document.createElement('tbody');\n    \n    for (let row = 0; row < this.rows; row++) {\n      const tr = document.createElement('tr');\n      \n      // Row number\n      const rowHeader = document.createElement('th');\n      rowHeader.textContent = row + 1;\n      tr.appendChild(rowHeader);\n      \n      // Row cells\n      for (let col = 0; col < this.cols; col++) {\n        const td = document.createElement('td');\n        const input = document.createElement('input');\n        input.value = this.data[row][col];\n        input.dataset.row = row;\n        input.dataset.col = col;\n        \n        input.addEventListener('change', (e) => {\n          const { row, col } = e.target.dataset;\n          this.data[parseInt(row)][parseInt(col)] = e.target.value;\n          console.log(`Data updated at [${row},${col}]: ${e.target.value}`);\n        });\n        \n        td.appendChild(input);\n        tr.appendChild(td);\n      }\n\n      // Add \"+\" button for adding rows (optional, usually at the bottom)\n      // For this example, we'll put it at the end of each row for simplicity\n      // Or better, a single button at the bottom of the last row header\n      \n      tbody.appendChild(tr);\n    }\n\n    // Add a row for the 'add row' button if not already in existing rows\n    const addRowTR = document.createElement('tr');\n    const addRowTH = document.createElement('th');\n    const addRowButton = document.createElement('button');\n    addRowButton.textContent = '+';\n    addRowButton.addEventListener('click', () => this.addRow());\n    addRowTH.appendChild(addRowButton);\n    addRowTR.appendChild(addRowTH);\n    // Fill the rest of the row with empty cells or colspan\n    const emptyTd = document.createElement('td');\n    emptyTd.colSpan = this.cols + 1; // +1 for the addColHeader\n    addRowTR.appendChild(emptyTd);\n    tbody.appendChild(addRowTR);\n\n    table.appendChild(tbody);\n    this.container.appendChild(table);\n  }\n\n  addColumn() {\n    this.cols++;\n    for(let i = 0; i < this.rows; i++) {\n      this.data[i].push(''); // Add a new empty cell to each row\n    }\n    console.log('Column added. New dimensions:', this.rows, 'x', this.cols);\n    this.render(this.container); // Re-render the spreadsheet\n  }\n\n  addRow() {\n    this.rows++;\n    this.data.push(Array(this.cols).fill('')); // Add a new empty row\n    console.log('Row added. New dimensions:', this.rows, 'x', this.cols);\n    this.render(this.container); // Re-render the spreadsheet\n  }\n}\n\n// Usage example (requires a div with id='spreadsheet-container' in HTML)\n// const spreadsheet = new Spreadsheet(3, 3);\n// document.addEventListener('DOMContentLoaded', () => {\n//   const container = document.getElementById('spreadsheet-container');\n//   if (container) {\n//     spreadsheet.render(container);\n//   }\n// });",
+              "explanation": "This example provides a more complete `Spreadsheet` class, building upon the snippet. It includes the `constructor`, a `render` method that dynamically creates the entire table structure, and basic `addColumn` and `addRow` methods. It demonstrates how to initialize the 2D data array, populate table headers, create input cells with `dataset` attributes, and handle `change` events to update the internal data. The `render` method is called after `addColumn` or `addRow` to reflect structural changes.",
+              "language": "javascript"
+            }
+          ],
+          "relatedQuestions": [
+            "question_spreadsheet_initialization",
+            "question_spreadsheet_dom_manipulation_mcq",
+            "question_spreadsheet_data_attribute",
+            "question_spreadsheet_add_row_flashcard",
+            "question_spreadsheet_formula_parsing_open",
+            "question_spreadsheet_compare_frameworks"
+          ],
+          "relatedTasks": [
+            "task_spreadsheet_complete_crud",
+            "task_spreadsheet_formula_evaluation",
+            "task_spreadsheet_undo_redo"
+          ],
+          "tags": [
+            "JavaScript",
+            "DOM Manipulation",
+            "Classes",
+            "Data Structures",
+            "Event Handling",
+            "Web Development"
+          ],
+          "technology": "JavaScript",
+          "prerequisites": [
+            "javascript_basics",
+            "dom_api",
+            "arrays_methods"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 8,
+          "learningPath": "intermediate",
+          "requiredFor": [
+            "data_grid_libraries",
+            "custom_ui_components",
+            "performance_optimization_dom"
+          ]
+        }
+      ],
+      "questions": [
+        {
+          "id": "question_dynamic_form_controlled_component",
+          "topic": "React Dynamic Form: Controlled Components",
+          "level": "medium",
+          "type": "open",
+          "question": "The `DynamicForm` component, by its nature, relies on controlled components. Explain what a controlled component is in React and how the provided `DynamicForm` snippet exemplifies this concept. Describe the flow of data when a user types into an input field within this dynamic form.",
+          "answer": "A controlled component in React is an input form element whose value is controlled by React state. Instead of the DOM element managing its own state, React state becomes the 'single source of truth'. The input's `value` prop is set by state, and any changes to the input trigger an `onChange` event handler which updates that state. This allows React to control the input's behavior and value.\n\nIn the `DynamicForm` snippet:\n1.  **State Initialization**: `const [formValues, setFormValues] = useState({});` initializes the form's data in the `formValues` state.\n2.  **Passing Data Down**: `formValues` is passed as a prop to `FormGroup` (and subsequently to individual input fields).\n3.  **Input `value` Prop**: Each `<input>` element (within `FormGroup`) would have its `value` prop bound to `values[field.id]`. For example, `<input value={values['firstName']} />`.\n4.  **`onChange` Event Handler**: When a user types into an input, an `onChange` event fires. This event calls `handleFieldChange`, which is passed down from `DynamicForm`. `handleFieldChange` receives the `fieldId` and the new `value`.\n5.  **State Update**: `setFormValues` is called with a new object that includes the updated field value. `setFormValues(prevValues => ({ ...prevValues, [fieldId]: value }));`\n6.  **Re-render**: React detects the state change, re-renders the `DynamicForm` and its children, including the specific input field whose value is now updated in the state, causing the input to display the new value.\n\nThis continuous loop (state -> input value -> user input -> onChange -> state update -> re-render) ensures that the input's value is always consistent with the React state, making it a controlled component.",
+          "options": [],
+          "analysisPoints": [
+            "Understanding of controlled vs. uncontrolled components.",
+            "Ability to trace data flow in React components.",
+            "Knowledge of `useState` hook.",
+            "Understanding of `onChange` event and `e.target.value`."
+          ],
+          "keyConcepts": [
+            "Controlled Components",
+            "React State Management",
+            "useState Hook",
+            "Data Flow in React",
+            "Event Handling"
+          ],
+          "evaluationCriteria": [
+            "Clarity and accuracy of explanation of controlled components.",
+            "Correctness of data flow description.",
+            "Identification of relevant code snippets/mechanisms.",
+            "Completeness of the explanation."
+          ],
+          "example": "```javascript\n// Simplified representation of a controlled input within FormGroup\nfunction MyInputField({ id, value, onChange }) {\n  return (\n    <input \n      id={id} \n      type=\"text\" \n      value={value || ''} \n      onChange={(e) => onChange(id, e.target.value)}\n    />\n  );\n}\n\n// How it's used in DynamicForm's render cycle:\n// <MyInputField \n//   id=\"someField\"\n//   value={formValues[\"someField\"]}\n//   onChange={handleFieldChange}\n// />\n```\nThis example shows the core interaction: `value` comes from state, `onChange` updates state.",
+          "tags": [
+            "React",
+            "Forms",
+            "Controlled Components",
+            "State Management"
+          ],
+          "prerequisites": [
+            "react_basics",
+            "useState_hook"
+          ],
+          "complexity": 7,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_dynamic_form_state_management_mcq",
+          "topic": "React Dynamic Form: State Management",
+          "level": "easy",
+          "type": "mcq",
+          "question": "In the `DynamicForm` component, which React Hook is primarily used for managing the `formValues` state?",
+          "answer": "useState",
+          "options": [
+            "useState",
+            "useEffect",
+            "useContext",
+            "useReducer"
+          ],
+          "analysisPoints": [
+            "Tests basic knowledge of React Hooks.",
+            "Identifies the correct hook for component-level state.",
+            "Distinguishes between state management hooks."
+          ],
+          "keyConcepts": [
+            "React Hooks",
+            "useState"
+          ],
+          "evaluationCriteria": [
+            "Correct identification of `useState`."
+          ],
+          "example": "The line `const [formValues, setFormValues] = useState({});` in the `DynamicForm` snippet clearly indicates the use of the `useState` hook for managing the component's internal state for form data. `useEffect` is for side effects, `useContext` for global state, and `useReducer` for more complex state logic.",
+          "tags": [
+            "React",
+            "Hooks",
+            "State Management",
+            "MCQ"
+          ],
+          "prerequisites": [
+            "react_basics"
+          ],
+          "complexity": 3,
+          "interviewFrequency": 7,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_dynamic_form_key_prop",
+          "topic": "React Dynamic Form: List Rendering",
+          "level": "medium",
+          "type": "flashcard",
+          "question": "In the `DynamicForm` component, why is the `key={group.id}` prop crucial when mapping over `formSchema.groups` to render `FormGroup` components?",
+          "answer": "The `key` prop provides React with a way to identify which items in a list have changed, been added, or been removed. Keys should be stable, unique, and immutable. When rendering lists of components, using a unique `key` helps React efficiently update the UI, correctly associate state and props with the right component instances, and prevent potential bugs and performance issues, especially when list items are reordered or removed.",
+          "options": [],
+          "analysisPoints": [
+            "Understanding of React's list reconciliation.",
+            "Importance of unique keys.",
+            "Consequences of missing or incorrect keys."
+          ],
+          "keyConcepts": [
+            "React List Rendering",
+            "Key Prop",
+            "Reconciliation"
+          ],
+          "evaluationCriteria": [
+            "Correct explanation of `key` prop's purpose.",
+            "Mention of uniqueness and stability."
+          ],
+          "example": "```javascript\n// Correct usage:\n{formSchema.groups.map(group => (\n  <FormGroup\n    key={group.id} // Ensures React can efficiently track each FormGroup\n    group={group}\n    values={formValues}\n    onChange={handleFieldChange}\n  />\n))}\n\n// Incorrect (avoid using index as key if list order can change or items are added/removed):\n// {formSchema.groups.map((group, index) => (\n//   <FormGroup key={index} ... />\n// ))}\n```",
+          "tags": [
+            "React",
+            "List Rendering",
+            "Keys",
+            "Performance",
+            "Flashcard"
+          ],
+          "prerequisites": [
+            "react_basics"
+          ],
+          "complexity": 5,
+          "interviewFrequency": 7,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_dynamic_form_prevent_default_flashcard",
+          "topic": "React Dynamic Form: Event Handling",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "What is the purpose of `e.preventDefault()` inside the `handleSubmit` function in the `DynamicForm` component?",
+          "answer": "`e.preventDefault()` prevents the browser's default action for the event. In the context of a form `submit` event, it stops the browser from performing a full page reload or navigating to a new URL, which is the default behavior for HTML forms. This allows the React application to handle the form submission purely client-side without interrupting the Single Page Application (SPA) experience.",
+          "options": [],
+          "analysisPoints": [
+            "Knowledge of DOM event default actions.",
+            "Understanding of SPA principles."
+          ],
+          "keyConcepts": [
+            "Event Handling",
+            "e.preventDefault()",
+            "Form Submission",
+            "Single Page Application"
+          ],
+          "evaluationCriteria": [
+            "Correctly identifies the effect of `preventDefault()` on form submission."
+          ],
+          "example": "```javascript\nconst handleSubmit = (e) => {\n  e.preventDefault(); // This line is crucial!\n  // Without it, the page would reload, losing React's state.\n  console.log('Form submitted:', formValues);\n  onSubmit(formValues);\n};\n```",
+          "tags": [
+            "React",
+            "Events",
+            "Forms",
+            "JavaScript",
+            "Flashcard"
+          ],
+          "prerequisites": [
+            "dom_events"
+          ],
+          "complexity": 3,
+          "interviewFrequency": 8,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_dynamic_form_schema_evolution",
+          "topic": "React Dynamic Form: Advanced Scenarios",
+          "level": "hard",
+          "type": "open",
+          "question": "Consider a scenario where the `formSchema` for the `DynamicForm` can change dynamically at runtime (e.g., loaded from an API, or changes based on user selections). How would you ensure that `formValues` state correctly resets or updates to reflect the new schema? What potential issues might arise and how would you mitigate them?",
+          "answer": "When `formSchema` changes dynamically, `formValues` needs to be synchronized. \n\n**Synchronization Strategies:**\n1.  **Full Reset**: If the new schema is completely different, the simplest approach is to reset `formValues` to an empty object or initial values derived from the new `formSchema`. This can be done using `useEffect` with `formSchema` as a dependency:\n    ```javascript\n    useEffect(() => {\n      // Optionally derive initial values from new schema, e.g., default values\n      const initialValues = {};\n      formSchema.groups.forEach(group => {\n        group.fields.forEach(field => {\n          initialValues[field.id] = field.defaultValue || '';\n        });\n      });\n      setFormValues(initialValues);\n    }, [formSchema]); // Re-run when formSchema changes\n    ```\n2.  **Partial Update/Merge**: If schemas often overlap (e.g., adding/removing a few fields), you might merge existing `formValues` with defaults from the new schema, preserving user input for unchanged fields.\n    ```javascript\n    useEffect(() => {\n      const newDefaults = {};\n      formSchema.groups.forEach(group => {\n        group.fields.forEach(field => {\n          newDefaults[field.id] = field.defaultValue || '';\n        });\n      });\n      // Merge existing values, prioritize new schema defaults for new fields\n      setFormValues(prevValues => ({\n        ...newDefaults,\n        ...prevValues,\n        // Overwrite prevValues with defaults if field no longer exists in new schema\n        // or if specific reset logic is needed.\n        // A more robust merge would iterate over prevValues and check if fieldId exists in new schema.\n      }));\n    }, [formSchema]);\n    ```\n\n**Potential Issues and Mitigation:**\n1.  **Stale `formValues`**: If `formValues` is not reset/updated, it might contain data for fields that no longer exist in the new schema or be missing data for new mandatory fields. \n    *   **Mitigation**: Implement `useEffect` as described above to derive and set initial values from the new `formSchema`.\n2.  **User Data Loss**: A full reset clears all user input, which might be undesirable if part of the form remains the same. \n    *   **Mitigation**: Use a partial update/merge strategy, carefully merging `prevValues` with `newDefaults`, ensuring existing relevant data is preserved while new defaults are applied for new fields.\n3.  **Performance on Frequent Schema Changes**: Re-rendering the entire form and possibly re-initializing state on every schema change could be costly. \n    *   **Mitigation**: Memoize `DynamicForm` if `formSchema` changes frequently but `onSubmit` is stable. Optimize `FormGroup` components to only re-render when their specific props change. Use `useMemo` for derived values if calculations are expensive.\n4.  **Schema Validation Inconsistencies**: If validation rules are tied to the schema, they must update correctly with the new schema, potentially invalidating previously valid inputs.\n    *   **Mitigation**: Ensure validation logic is dynamically loaded/applied based on the current `formSchema`. Provide clear user feedback if inputs become invalid.\n5.  **User Experience (UX)**: Abrupt changes can disorient users. \n    *   **Mitigation**: Provide visual cues (e.g., loading spinners) during schema transitions. Consider animated transitions for form elements. If a significant part of the form changes, a confirmation dialog might be necessary before discarding unsaved changes.",
+          "options": [],
+          "analysisPoints": [
+            "Understanding of `useEffect` for syncing state with props.",
+            "Ability to identify potential pitfalls in dynamic data scenarios.",
+            "Problem-solving for data persistence and UX.",
+            "Consideration of performance and validation."
+          ],
+          "keyConcepts": [
+            "React Lifecycle",
+            "useEffect Hook",
+            "Dynamic Forms",
+            "State Synchronization",
+            "User Experience",
+            "Performance Optimization"
+          ],
+          "evaluationCriteria": [
+            "Proposes valid state synchronization methods.",
+            "Identifies relevant issues (data loss, staleness, UX).",
+            "Provides actionable mitigation strategies.",
+            "Demonstrates advanced React knowledge."
+          ],
+          "example": "See the `useEffect` code snippets in the answer for examples of state synchronization.",
+          "tags": [
+            "React",
+            "Forms",
+            "State Management",
+            "Dynamic Forms",
+            "useEffect",
+            "Advanced"
+          ],
+          "prerequisites": [
+            "react_lifecycle",
+            "useEffect_hook",
+            "react_state_management"
+          ],
+          "complexity": 9,
+          "interviewFrequency": 6,
+          "learningPath": "advanced"
+        },
+        {
+          "id": "question_spreadsheet_initialization",
+          "topic": "JavaScript Spreadsheet: Initialization",
+          "level": "medium",
+          "type": "mcq",
+          "question": "Given the `Spreadsheet` class constructor:\n```javascript\nclass Spreadsheet {\n  constructor(rows = 5, cols = 5) {\n    this.rows = rows;\n    this.cols = cols;\n    this.data = Array(rows).fill().map(() => Array(cols).fill(''));\n  }\n  // ... rest of the class\n}\n```\nWhat is the purpose of `Array(rows).fill().map(() => Array(cols).fill(''))`?",
+          "answer": "To create a 2D array where each inner array is a new, distinct array, preventing unintended shared references.",
+          "options": [
+            "To create a 2D array with all cells initialized to an empty string, ensuring each row is a unique array.",
+            "To create a 2D array and fill it with references to the same empty array, saving memory.",
+            "To efficiently deep clone a pre-existing 2D array of spreadsheet data.",
+            "To simply create an array of `rows` length, with each element being an array of `cols` length filled with empty strings."
+          ],
+          "analysisPoints": [
+            "Tests understanding of JavaScript array methods (`fill`, `map`).",
+            "Highlights the common pitfall of `Array.fill()` with objects/arrays.",
+            "Explains the necessity of `map` to create unique inner arrays."
+          ],
+          "keyConcepts": [
+            "JavaScript Arrays",
+            "2D Arrays",
+            "Array.prototype.fill()",
+            "Array.prototype.map()",
+            "Reference vs. Value"
+          ],
+          "evaluationCriteria": [
+            "Correctly identifies the unique array creation.",
+            "Shows awareness of the `fill()` method's behavior with non-primitive values."
+          ],
+          "example": "```javascript\n// Scenario 1: Incorrect way, all inner arrays are references to the same array\nconst bad2DArray = Array(3).fill(Array(3).fill(''));\nbad2DArray[0][0] = 'hello';\nconsole.log(bad2DArray[1][0]); // Outputs 'hello' because all rows are the same array instance\n\n// Scenario 2: Correct way, each inner array is a new instance\nconst good2DArray = Array(3).fill().map(() => Array(3).fill(''));\ngood2DArray[0][0] = 'hello';\nconsole.log(good2DArray[1][0]); // Outputs '' because each row is a distinct array instance\n```\nThe `map` function with a callback that returns a new `Array(cols).fill('')` ensures that for each 'row' in the outer array, a *new* inner array is created, preventing modifications to one row from affecting others.",
+          "tags": [
+            "JavaScript",
+            "Arrays",
+            "Data Structures",
+            "MCQ"
+          ],
+          "prerequisites": [
+            "javascript_arrays"
+          ],
+          "complexity": 6,
+          "interviewFrequency": 7,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_spreadsheet_dom_manipulation_mcq",
+          "topic": "JavaScript Spreadsheet: DOM Manipulation",
+          "level": "easy",
+          "type": "mcq",
+          "question": "Which of the following DOM manipulation methods is used to create new HTML elements in the `Spreadsheet` class's `render()` method?",
+          "answer": "document.createElement()",
+          "options": [
+            "document.getElementById()",
+            "element.innerHTML = ''",
+            "document.createElement()",
+            "element.setAttribute()"
+          ],
+          "analysisPoints": [
+            "Tests basic knowledge of DOM API.",
+            "Distinguishes between methods for selecting, modifying, and creating elements."
+          ],
+          "keyConcepts": [
+            "DOM API",
+            "document.createElement"
+          ],
+          "evaluationCriteria": [
+            "Correct identification of `document.createElement()`."
+          ],
+          "example": "```javascript\n// From the Spreadsheet class:\nconst table = document.createElement('table');\nconst thead = document.createElement('thead');\n// ...and so on for tr, th, td, input, button.\n```\n`document.getElementById()` selects an element, `element.innerHTML = ''` clears content, and `element.setAttribute()` modifies attributes of an existing element.",
+          "tags": [
+            "JavaScript",
+            "DOM",
+            "MCQ"
+          ],
+          "prerequisites": [
+            "dom_api"
+          ],
+          "complexity": 3,
+          "interviewFrequency": 8,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_spreadsheet_data_attribute",
+          "topic": "JavaScript Spreadsheet: Custom Data Attributes",
+          "level": "medium",
+          "type": "open",
+          "question": "In the `Spreadsheet` class, each input element has `input.dataset.row = row;` and `input.dataset.col = col;`. Explain the purpose and benefit of using `dataset` attributes in this context.",
+          "answer": "The `dataset` property (or `data-*` attributes in HTML) allows developers to store custom data directly on HTML elements. In the `Spreadsheet` context:\n\n**Purpose:**\n*   **Storing Metadata**: `data-row` and `data-col` are used to store the specific row and column index of a cell directly on its corresponding `<input>` element. This creates a direct link between the DOM element and its logical position in the spreadsheet's data model (`this.data`).\n\n**Benefits:**\n*   **Event Handling Convenience**: When an `input` element's `change` event fires, `e.target` refers to the input element itself. By using `e.target.dataset.row` and `e.target.dataset.col`, the event handler can easily and directly retrieve the exact cell's coordinates without needing to traverse the DOM, infer position from parent elements, or rely on global variables.\n*   **Separation of Concerns**: It keeps the data associated with the element close to the element itself, rather than needing to pass it around through complex function arguments or closures.\n*   **Readability and Maintainability**: It makes the code clearer by explicitly showing which data pertains to which element.\n*   **No Global Variables/Complex Lookups**: Avoids the need for complex lookups or maintaining large maps to link DOM elements back to their logical data, simplifying the event handling logic.",
+          "options": [],
+          "analysisPoints": [
+            "Understanding of `data-*` attributes.",
+            "Practical application in event delegation.",
+            "Comparison to alternative methods (e.g., closures, DOM traversal)."
+          ],
+          "keyConcepts": [
+            "HTML Data Attributes",
+            "DOM API",
+            "Event Handling",
+            "e.target",
+            "Metadata"
+          ],
+          "evaluationCriteria": [
+            "Clear explanation of `dataset` purpose.",
+            "Elaboration on benefits, especially for event handling.",
+            "Demonstrates practical understanding."
+          ],
+          "example": "```javascript\n// Setting the dataset attributes\ninput.dataset.row = row; // Becomes data-row='N' in HTML\ninput.dataset.col = col; // Becomes data-col='M' in HTML\n\n// Retrieving them in an event listener\ninput.addEventListener('change', (e) => {\n  const { row, col } = e.target.dataset; // Destructures data-row and data-col\n  this.data[parseInt(row)][parseInt(col)] = e.target.value;\n});\n```",
+          "tags": [
+            "JavaScript",
+            "DOM",
+            "HTML",
+            "Event Handling",
+            "Data Attributes"
+          ],
+          "prerequisites": [
+            "dom_api",
+            "javascript_events"
+          ],
+          "complexity": 6,
+          "interviewFrequency": 7,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_spreadsheet_add_row_flashcard",
+          "topic": "JavaScript Spreadsheet: Dynamic Content",
+          "level": "medium",
+          "type": "flashcard",
+          "question": "How would you modify the `Spreadsheet` class to include an `addRow()` method that adds a new row to the spreadsheet, similar to `addColumn()`?",
+          "answer": "The `addRow()` method would:\n1.  Increment `this.rows`.\n2.  Add a new empty array (representing the new row) to `this.data`. This new array should be filled with `this.cols` number of empty strings: `this.data.push(Array(this.cols).fill(''));`\n3.  Re-render the entire spreadsheet, or efficiently append the new row's DOM elements to the `<tbody>` if performance is critical.",
+          "options": [],
+          "analysisPoints": [
+            "Understanding of array manipulation for 2D data.",
+            "Knowledge of how to update the DOM after data changes.",
+            "Ability to extend existing class functionality."
+          ],
+          "keyConcepts": [
+            "JavaScript Classes",
+            "2D Arrays",
+            "DOM Manipulation",
+            "Dynamic UI"
+          ],
+          "evaluationCriteria": [
+            "Correct logic for data array modification.",
+            "Proper strategy for DOM update (re-render or append)."
+          ],
+          "example": "```javascript\n// Inside Spreadsheet class\naddRow() {\n  this.rows++;\n  this.data.push(Array(this.cols).fill('')); // Add a new empty row to data\n  console.log('Row added. New dimensions:', this.rows, 'x', this.cols);\n  this.render(this.container); // Assuming render clears and rebuilds, or a more targeted update is implemented\n}\n```",
+          "tags": [
+            "JavaScript",
+            "Classes",
+            "DOM",
+            "Arrays",
+            "Flashcard"
+          ],
+          "prerequisites": [
+            "javascript_arrays",
+            "dom_api"
+          ],
+          "complexity": 5,
+          "interviewFrequency": 6,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_spreadsheet_formula_parsing_open",
+          "topic": "JavaScript Spreadsheet: Formulas",
+          "level": "hard",
+          "type": "open",
+          "question": "Beyond simple data entry, a key feature of spreadsheets is formula evaluation (e.g., `=A1+B1`). Describe how you would approach implementing a basic formula evaluation system for the `Spreadsheet` class. What challenges would you anticipate, and how might you address them?",
+          "answer": "Implementing formula evaluation would involve several steps:\n\n**Approach:**\n1.  **Formula Recognition**: When a cell's value is changed, check if it starts with an `=` sign. If it does, treat it as a formula; otherwise, treat it as plain text.\n2.  **Parsing**: For formulas (e.g., `=A1+B1`), parse the string to identify cell references (A1, B1) and arithmetic operations (+, -, *, /).\n    *   **Cell Reference Conversion**: Convert cell references like `A1` into their numerical `[row, col]` indices. `A1` would be `[0, 0]`, `B1` would be `[0, 1]`, `A2` would be `[1, 0]`, etc.\n3.  **Evaluation**: Replace cell references with their current values from `this.data` and then evaluate the resulting arithmetic expression.\n    *   **Recursive Evaluation**: If a cell `C1` contains `=A1+B1` and `A1` contains `=D1+E1`, the evaluation needs to be recursive. A dependency graph could be useful.\n    *   **Handling Non-Numeric Values**: If a referenced cell contains non-numeric data, it should be treated as 0 or result in an error.\n4.  **Display**: The input element should display the *result* of the formula, while the actual formula string is stored in `this.data`.\n5.  **Re-calculation on Dependency Change**: This is crucial. If `A1` or `B1` changes, `C1` (which depends on them) must be re-evaluated. This requires tracking dependencies.\n\n**Challenges and Mitigation:**\n1.  **Circular References**: `A1 = B1 + 1` and `B1 = A1 + 1` creates an infinite loop. \n    *   **Mitigation**: Implement a dependency graph (DAG) and detect cycles during parsing or before evaluation. If a cycle is detected, mark cells as `ERROR: Circular Reference`.\n2.  **Order of Operations (Precedence)**: `1 + 2 * 3` should be 7, not 9. \n    *   **Mitigation**: Use a well-known algorithm like Shunting-yard or an expression parser library. For simple cases, `eval()` can be used (but is insecure and generally discouraged), or build a simple operator precedence parser.\n3.  **Error Handling**: Division by zero, invalid cell references (e.g., `=Z999` if `Z999` doesn't exist), non-numeric operands. \n    *   **Mitigation**: Implement robust error checks and display appropriate error messages (e.g., `#DIV/0!`, `#REF!`, `#VALUE!`) in the cell.\n4.  **Performance**: Re-calculating all dependent cells, especially in a large spreadsheet with complex formulas, can be slow. \n    *   **Mitigation**: Implement memoization for cell values. Only re-calculate cells whose direct or indirect dependencies have changed. A dirty flag system or a reactive system could be used.\n5.  **Function Support**: Extending to functions like `SUM(A1:A5)`, `AVERAGE()`, `IF()`. \n    *   **Mitigation**: Requires a more sophisticated parser and evaluator capable of recognizing function names and argument lists.\n6.  **User Experience**: Displaying results, editing formulas, feedback on errors. \n    *   **Mitigation**: Toggle between displaying formula and result on cell focus/blur. Provide tooltips for errors.",
+          "options": [],
+          "analysisPoints": [
+            "Understanding of parsing and evaluation concepts.",
+            "Ability to identify complex algorithm challenges (circular refs, precedence).",
+            "Knowledge of data structures for dependency tracking (DAG).",
+            "Consideration of error handling and performance."
+          ],
+          "keyConcepts": [
+            "Formula Parsing",
+            "Abstract Syntax Tree (AST)",
+            "Dependency Graph (DAG)",
+            "Circular References",
+            "Order of Operations",
+            "Error Handling",
+            "Performance Optimization"
+          ],
+          "evaluationCriteria": [
+            "Comprehensive outline of the formula evaluation process.",
+            "Identification of core challenges like circular references and order of operations.",
+            "Proposes relevant mitigation strategies for challenges.",
+            "Demonstrates deep understanding of algorithm design."
+          ],
+          "example": "```javascript\n// A simplified formula evaluation (highly insecure and basic for illustrative purposes only)\nfunction evaluateFormula(formulaString, data, cellToCoord) {\n  // Example: formulaString = '=A1+B2'\n  let expression = formulaString.substring(1); // Remove '=' prefix\n\n  // Replace cell references with their values\n  expression = expression.replace(/([A-Z]+)(\\d+)/g, (match, colStr, rowStr) => {\n    const col = colStr.charCodeAt(0) - 65;\n    const row = parseInt(rowStr) - 1;\n    if (data[row] && typeof data[row][col] !== 'undefined') {\n      const val = data[row][col];\n      // If dependent cell is also a formula, we'd need to evaluate it first recursively\n      return !isNaN(parseFloat(val)) ? parseFloat(val) : 0; // Or handle errors\n    }\n    return '0'; // Handle invalid reference\n  });\n\n  try {\n    // DANGER: Using eval() is generally unsafe for untrusted input.\n    // A real implementation would use a proper expression parser.\n    return eval(expression);\n  } catch (e) {\n    return '#ERROR!';\n  }\n}\n\n// Example usage within a change listener (conceptual)\n// input.addEventListener('change', (e) => {\n//   const { row, col } = e.target.dataset;\n//   const value = e.target.value;\n//   this.data[parseInt(row)][parseInt(col)] = value;\n\n//   if (value.startsWith('=')) {\n//     const result = evaluateFormula(value, this.data, this.cellToCoordMap);\n//     e.target.value = result; // Display result\n//   }\n//   // Trigger re-calculation for dependent cells\n//   this.recalculateDependents(parseInt(row), parseInt(col));\n// });\n```",
+          "tags": [
+            "JavaScript",
+            "Algorithms",
+            "Data Structures",
+            "Spreadsheet",
+            "Formulas",
+            "Advanced"
+          ],
+          "prerequisites": [
+            "javascript_basics",
+            "data_structures",
+            "algorithms_basics"
+          ],
+          "complexity": 9,
+          "interviewFrequency": 5,
+          "learningPath": "advanced"
+        },
+        {
+          "id": "question_spreadsheet_compare_frameworks",
+          "topic": "JavaScript Spreadsheet: Architecture Comparison",
+          "level": "hard",
+          "type": "open",
+          "question": "The provided `Spreadsheet` implementation uses vanilla JavaScript and direct DOM manipulation. Discuss the advantages and disadvantages of this approach compared to building a similar spreadsheet application using a modern JavaScript framework/library like React or Vue. When would you choose one over the other?",
+          "answer": "**Vanilla JavaScript (Direct DOM Manipulation)**\n\n**Advantages:**\n*   **Lightweight**: No framework overhead, smaller bundle size, potentially faster initial load times.\n*   **Full Control**: Complete control over the DOM and rendering logic, allowing for highly optimized or niche interactions.\n*   **No Dependencies**: Fewer external dependencies, reducing security risks and maintenance burden.\n*   **Better Understanding of Fundamentals**: Forces a deeper understanding of how the browser and JavaScript interact with the DOM.\n\n**Disadvantages:**\n*   **Complexity for Large Applications**: Manual DOM manipulation becomes unwieldy and error-prone as the application grows (e.g., managing element updates, state synchronization, event listeners).\n*   **Developer Experience**: More verbose code, less declarative, harder to maintain, and higher boilerplate.\n*   **Performance Optimization**: Requires manual optimization (e.g., avoiding unnecessary re-renders, using document fragments) which can be difficult to implement correctly.\n*   **Lack of Built-in Features**: No out-of-the-box state management, routing, component lifecycle management, etc.\n\n**Modern JavaScript Frameworks (e.g., React, Vue)**\n\n**Advantages:**\n*   **Declarative Programming**: Write what the UI *should* look like for a given state, and the framework handles the DOM updates (e.g., Virtual DOM).\n*   **Component-Based Architecture**: Promotes modularity, reusability, and easier maintenance of UI elements.\n*   **Efficient Updates**: Frameworks like React use a Virtual DOM and reconciliation algorithms for optimized updates, abstracting away manual DOM manipulation complexities.\n*   **Improved Developer Experience**: Rich ecosystems, built-in state management tools, routing solutions, and community support make development faster and more efficient.\n*   **Scalability**: Better suited for large, complex applications with many interactive components.\n\n**Disadvantages:**\n*   **Overhead**: Larger bundle sizes and a learning curve for the framework's paradigms.\n*   **Less Control**: Abstracts away direct DOM access, which can be limiting for very specific, low-level optimizations.\n*   **Dependency Management**: Reliance on a framework and its ecosystem can introduce versioning conflicts or larger dependency trees.\n\n**When to Choose Which:**\n*   **Choose Vanilla JS when:**\n    *   The application is very small, simple, and has limited interactivity (e.g., a single-purpose widget).\n    *   Performance is *extremely* critical, and you can hand-optimize DOM updates better than a framework (a rare scenario).\n    *   You need absolute minimal bundle size and no external dependencies.\n    *   The goal is to learn or demonstrate fundamental web development concepts without abstractions.\n*   **Choose a Framework (React/Vue) when:**\n    *   The application is moderately to highly complex, with many interactive components, dynamic data, and state.\n    *   You are working in a team where consistency and maintainability are crucial.\n    *   Rapid development and scalability are priorities.\n    *   You need access to a rich ecosystem of libraries, tools, and community support (e.g., for state management, routing, UI components).\n    *   The long-term maintainability and extensibility of the codebase are important.",
+          "options": [],
+          "analysisPoints": [
+            "Ability to articulate the core differences between direct DOM manipulation and framework-based approaches.",
+            "Comprehensive understanding of advantages and disadvantages for both.",
+            "Sound judgment on when to apply each technology.",
+            "Knowledge of underlying mechanisms (e.g., Virtual DOM)."
+          ],
+          "keyConcepts": [
+            "Vanilla JavaScript",
+            "DOM Manipulation",
+            "React",
+            "Vue.js",
+            "Frontend Frameworks",
+            "Declarative vs. Imperative",
+            "Component-Based Architecture",
+            "Virtual DOM",
+            "Performance",
+            "Developer Experience"
+          ],
+          "evaluationCriteria": [
+            "Balanced and detailed comparison of both approaches.",
+            "Provides clear use-cases for each choice.",
+            "Demonstrates understanding of framework benefits (e.g., Virtual DOM).",
+            "Articulates trade-offs effectively."
+          ],
+          "example": "N/A",
+          "tags": [
+            "JavaScript",
+            "React",
+            "DOM",
+            "Architecture",
+            "Frameworks",
+            "Comparison",
+            "Open-Ended"
+          ],
+          "prerequisites": [
+            "javascript_basics",
+            "dom_api",
+            "react_basics"
+          ],
+          "complexity": 9,
+          "interviewFrequency": 6,
+          "learningPath": "advanced"
+        }
+      ],
+      "tasks": [
+        {
+          "id": "task_implement_formgroup",
+          "title": "Implement the FormGroup Component for DynamicForm",
+          "description": "\nImplement the `FormGroup` React component which is used by the `DynamicForm`. This component should:\n\n1.  Receive `group` (an object containing `id`, `title`, and `fields` array), `values` (current form values), and `onChange` (a callback) as props.\n2.  Render a `<fieldset>` element with a `<legend>` displaying the `group.title`.\n3.  Iterate over `group.fields` and render an appropriate input for each field.\n4.  Each field should be a controlled component: its `value` prop should come from `values[field.id]`, and its `onChange` event should call the `onChange` prop received from `DynamicForm`, passing `field.id` and `e.target.value`.\n5.  Support at least `text`, `number`, and `checkbox` input types. For `checkbox`, ensure `checked` attribute is used instead of `value` and handle its boolean state correctly.\n6.  Include a `label` for each input, linked via `htmlFor`.\n7.  Handle cases where `field.type` might be missing (default to 'text').\n",
+          "difficulty": "medium",
+          "startingCode": "import React from 'react';\n\nconst FormGroup = ({ group, values, onChange }) => {\n  return (\n    <fieldset>\n      <legend>{group.title}</legend>\n      {/* TODO: Iterate over group.fields and render inputs */}\n      {/* Example for a text input: */}\n      {/* <div>\n            <label htmlFor=\"fieldName\">Field Label:</label>\n            <input\n              id=\"fieldName\"\n              type=\"text\"\n              value={values[\"fieldName\"] || ''}\n              onChange={(e) => onChange(\"fieldName\", e.target.value)}\n            />\n          </div> */}\n    </fieldset>\n  );\n};\n\nexport default FormGroup;\n\n// Example formSchema structure:\n// const formSchema = {\n//   title: 'User Profile',\n//   groups: [\n//     {\n//       id: 'personal',\n//       title: 'Personal Information',\n//       fields: [\n//         { id: 'firstName', label: 'First Name', type: 'text' },\n//         { id: 'age', label: 'Age', type: 'number' },\n//         { id: 'newsletter', label: 'Subscribe to Newsletter', type: 'checkbox' }\n//       ]\n//     }\n//   ]\n// };\n",
+          "solutionCode": "import React from 'react';\n\nconst FormGroup = ({ group, values, onChange }) => {\n  return (\n    <fieldset>\n      <legend>{group.title}</legend>\n      {group.fields.map(field => (\n        <div key={field.id} className=\"form-field\">\n          <label htmlFor={field.id}>{field.label}:</label>\n          {field.type === 'checkbox' ? (\n            <input\n              id={field.id}\n              type=\"checkbox\"\n              checked={!!values[field.id]} // Ensure boolean value\n              onChange={(e) => onChange(field.id, e.target.checked)} // Use e.target.checked for checkboxes\n            />\n          ) : (\n            <input\n              id={field.id}\n              type={field.type || 'text'}\n              value={values[field.id] || ''}\n              onChange={(e) => onChange(field.id, e.target.value)}\n            />\n          )}\n        </div>\n      ))}\n    </fieldset>\n  );\n};\n\nexport default FormGroup;\n",
+          "testCases": [
+            "Should render a fieldset with correct legend.",
+            "Should render a text input with correct label, value, and onChange handler.",
+            "Should render a number input with correct label, value, and onChange handler.",
+            "Should render a checkbox input with correct label, checked state, and onChange handler (using `e.target.checked`).",
+            "Should handle missing `field.type` by defaulting to 'text'.",
+            "Should correctly pass `field.id` and value/checked to the `onChange` callback."
+          ],
+          "hints": [
+            "Use conditional rendering for different input types (e.g., `field.type === 'checkbox' ? ... : ...`).",
+            "Remember that for checkboxes, you typically use the `checked` attribute and `e.target.checked` for the value.",
+            "Ensure `key` prop is used when mapping over `group.fields`."
+          ],
+          "tags": [
+            "React",
+            "Components",
+            "Forms",
+            "Controlled Components",
+            "JSX"
+          ],
+          "timeEstimate": 45,
+          "prerequisites": [
+            "react_functional_components",
+            "react_props",
+            "controlled_components"
+          ],
+          "complexity": 6,
+          "interviewRelevance": 8,
+          "learningPath": "intermediate",
+          "relatedConcepts": [
+            "theory_react_dynamic_form"
+          ]
+        },
+        {
+          "id": "task_dynamic_form_validation",
+          "title": "Enhance DynamicForm with Client-Side Validation",
+          "description": "\nEnhance the `DynamicForm` component to include client-side validation based on the `formSchema`. Each field in the schema can now have an optional `validation` object with rules.\n\n**Requirements:**\n1.  **Schema Extension**: Modify `formSchema` to include a `validation` object for each field, e.g.:\n    ```javascript\n    // Example field schema with validation\n    { \n      id: 'email', \n      label: 'Email', \n      type: 'text', \n      validation: { \n        required: true, \n        pattern: /^[\\w-.]+@([\\w-]+\\.)+[\\w-]{2,4}$/, \n        minLength: 5 \n      }\n    }\n    ```\n2.  **Validation Logic**: Implement a `validateForm` function in `DynamicForm` that iterates through all fields based on the `formSchema` and applies validation rules.\n3.  **State for Errors**: Manage validation errors in the `DynamicForm`'s state (e.g., `formErrors`). `formErrors` should be an object mapping `fieldId` to an error message string (or `null` if valid).\n4.  **Display Errors**: Pass error messages down to `FormGroup` (and subsequently to individual inputs) so they can be displayed next to their respective fields.\n5.  **Submission Control**: Prevent form submission if there are any validation errors.\n6.  **Real-time Validation**: Implement validation on blur for individual fields, and validate all fields on form submission.\n\n",
+          "difficulty": "hard",
+          "startingCode": "import React, { useState } from 'react';\n// Assume FormGroup is implemented correctly and accepts 'error' prop\n// import FormGroup from './FormGroup';\n\nconst FormGroup = ({ group, values, onChange, errors }) => {\n  // Placeholder for task; assume it renders error below input\n  return (\n    <fieldset>\n      <legend>{group.title}</legend>\n      {group.fields.map(field => (\n        <div key={field.id}>\n          <label htmlFor={field.id}>{field.label}:</label>\n          <input\n            id={field.id}\n            type={field.type || 'text'}\n            value={values[field.id] || ''}\n            onChange={(e) => onChange(field.id, e.target.value)}\n            // TODO: Add onBlur event for real-time validation\n          />\n          {errors[field.id] && <span className=\"error-message\">{errors[field.id]}</span>}\n        </div>\n      ))}\n    </fieldset>\n  );\n};\n\nconst DynamicForm = ({ formSchema, onSubmit }) => {\n  const [formValues, setFormValues] = useState({});\n  const [formErrors, setFormErrors] = useState({}); // TODO: Manage validation errors here\n\n  const handleFieldChange = (fieldId, value) => {\n    setFormValues(prevValues => ({\n      ...prevValues,\n      [fieldId]: value,\n    }));\n    // TODO: Trigger real-time validation here (e.g., onBlur, or debounced onChange)\n  };\n\n  const validateField = (field, value) => {\n    // TODO: Implement field-specific validation based on field.validation\n    // Return an error message string or null if valid\n    return null;\n  };\n\n  const validateForm = () => {\n    let newErrors = {};\n    let isValid = true;\n\n    formSchema.groups.forEach(group => {\n      group.fields.forEach(field => {\n        const value = formValues[field.id];\n        const error = validateField(field, value); // Call the field validation logic\n        if (error) {\n          newErrors[field.id] = error;\n          isValid = false;\n        }\n      });\n    });\n    setFormErrors(newErrors);\n    return isValid;\n  };\n\n  const handleSubmit = (e) => {\n    e.preventDefault();\n    const isValid = validateForm();\n    if (isValid) {\n      console.log('Form submitted with values:', formValues);\n      onSubmit(formValues);\n    } else {\n      console.log('Form has validation errors:', formErrors);\n    }\n  };\n  \n  return (\n    <form onSubmit={handleSubmit} className=\"dynamic-form\">\n      <h2>{formSchema.title}</h2>\n      {formSchema.description && (\n        <p className=\"form-description\">{formSchema.description}</p>\n      )}\n      \n      {formSchema.groups.map(group => (\n        <FormGroup\n          key={group.id}\n          group={group}\n          values={formValues}\n          onChange={handleFieldChange}\n          errors={formErrors} // Pass errors down\n        />\n      ))}\n      \n      <div className=\"form-actions\">\n        <button type=\"submit\" className=\"submit-button\">\n          {formSchema.submitText || 'Submit'}\n        </button>\n      </div>\n    </form>\n  );\n};\n\nexport default DynamicForm;\n",
+          "solutionCode": "import React, { useState, useCallback } from 'react';\n\nconst FormGroup = ({ group, values, onChange, onBlur, errors }) => {\n  return (\n    <fieldset>\n      <legend>{group.title}</legend>\n      {group.fields.map(field => (\n        <div key={field.id} className=\"form-field\">\n          <label htmlFor={field.id}>{field.label}:</label>\n          {field.type === 'checkbox' ? (\n            <input\n              id={field.id}\n              type=\"checkbox\"\n              checked={!!values[field.id]}\n              onChange={(e) => onChange(field.id, e.target.checked)}\n              onBlur={() => onBlur(field.id, values[field.id], field.validation)}\n            />\n          ) : (\n            <input\n              id={field.id}\n              type={field.type || 'text'}\n              value={values[field.id] || ''}\n              onChange={(e) => onChange(field.id, e.target.value)}\n              onBlur={() => onBlur(field.id, values[field.id], field.validation)}\n            />\n          )}\n          {errors[field.id] && <span className=\"error-message\" style={{ color: 'red', fontSize: '0.8em' }}>{errors[field.id]}</span>}\n        </div>\n      ))}\n    </fieldset>\n  );\n};\n\nconst DynamicForm = ({ formSchema, onSubmit }) => {\n  const [formValues, setFormValues] = useState({});\n  const [formErrors, setFormErrors] = useState({});\n\n  // Helper function to find a field by its ID in the schema\n  const findFieldInSchema = useCallback((fieldId) => {\n    for (const group of formSchema.groups) {\n      const field = group.fields.find(f => f.id === fieldId);\n      if (field) return field;\n    }\n    return null;\n  }, [formSchema]);\n\n  const validateField = useCallback((fieldId, value, validationRules) => {\n    if (!validationRules) return null; // No validation rules defined\n    \n    if (validationRules.required && (value === null || value === '' || (typeof value === 'boolean' && !value))) {\n      return `${findFieldInSchema(fieldId)?.label || fieldId} is required.`;\n    }\n    if (validationRules.minLength && typeof value === 'string' && value.length < validationRules.minLength) {\n      return `${findFieldInSchema(fieldId)?.label || fieldId} must be at least ${validationRules.minLength} characters.`;\n    }\n    if (validationRules.pattern && typeof value === 'string' && !validationRules.pattern.test(value)) {\n      return `Invalid ${findFieldInSchema(fieldId)?.label || fieldId} format.`;\n    }\n    // Add more validation rules as needed (e.g., maxLength, min, max, custom functions)\n    return null; // Valid\n  }, [findFieldInSchema]);\n\n  const handleFieldChange = (fieldId, value) => {\n    setFormValues(prevValues => ({\n      ...prevValues,\n      [fieldId]: value,\n    }));\n    // Clear error for this field immediately on change, then re-validate on blur\n    setFormErrors(prevErrors => ({ ...prevErrors, [fieldId]: null }));\n  };\n\n  const handleFieldBlur = (fieldId, value, validationRules) => {\n    const error = validateField(fieldId, value, validationRules);\n    setFormErrors(prevErrors => ({ ...prevErrors, [fieldId]: error }));\n  };\n\n  const validateForm = () => {\n    let newErrors = {};\n    let isValid = true;\n\n    formSchema.groups.forEach(group => {\n      group.fields.forEach(field => {\n        const value = formValues[field.id];\n        const error = validateField(field.id, value, field.validation);\n        if (error) {\n          newErrors[field.id] = error;\n          isValid = false;\n        }\n      });\n    });\n    setFormErrors(newErrors);\n    return isValid;\n  };\n\n  const handleSubmit = (e) => {\n    e.preventDefault();\n    const isValid = validateForm();\n    if (isValid) {\n      console.log('Form submitted with values:', formValues);\n      onSubmit(formValues);\n    } else {\n      console.log('Form has validation errors:', formErrors);\n    }\n  };\n  \n  return (\n    <form onSubmit={handleSubmit} className=\"dynamic-form\">\n      <h2>{formSchema.title}</h2>\n      {formSchema.description && (\n        <p className=\"form-description\">{formSchema.description}</p>\n      )}\n      \n      {formSchema.groups.map(group => (\n        <FormGroup\n          key={group.id}\n          group={group}\n          values={formValues}\n          onChange={handleFieldChange}\n          onBlur={handleFieldBlur} // Pass onBlur handler\n          errors={formErrors}\n        />\n      ))}\n      \n      <div className=\"form-actions\">\n        <button type=\"submit\" className=\"submit-button\">\n          {formSchema.submitText || 'Submit'}\n        </button>\n      </div>\n    </form>\n  );\n};\n\nexport default DynamicForm;\n",
+          "testCases": [
+            "Form submission should be prevented if a required field is empty.",
+            "Form submission should be prevented if a field does not match its `pattern`.",
+            "Form submission should be prevented if a text field is shorter than `minLength`.",
+            "Error messages should appear next to invalid fields on form submission.",
+            "Error message for a field should disappear when it becomes valid after user input.",
+            "Error messages should appear for individual fields on blur if invalid.",
+            "Checkbox required validation: Should show error if unchecked and required, clear if checked.",
+            "Form should submit successfully if all fields are valid."
+          ],
+          "hints": [
+            "Create a helper function `validateField(fieldId, value, rules)` that returns an error string or null.",
+            "Use `onBlur` event on input fields to trigger individual field validation.",
+            "The `validateForm` function should be called on `handleSubmit` to check all fields.",
+            "The `formErrors` state should be an object where keys are field IDs and values are error messages.",
+            "For checkboxes, remember `e.target.checked` and that `required` validation means `true` for a checked box."
+          ],
+          "tags": [
+            "React",
+            "Forms",
+            "Validation",
+            "State Management",
+            "Error Handling"
+          ],
+          "timeEstimate": 90,
+          "prerequisites": [
+            "theory_react_dynamic_form",
+            "controlled_components",
+            "javascript_regex"
+          ],
+          "complexity": 8,
+          "interviewRelevance": 9,
+          "learningPath": "advanced",
+          "relatedConcepts": [
+            "theory_react_dynamic_form"
+          ]
+        },
+        {
+          "id": "task_spreadsheet_complete_crud",
+          "title": "Complete Spreadsheet CRUD Functionality",
+          "description": "\nComplete the `Spreadsheet` class by implementing the remaining CRUD (Create, Read, Update, Delete) functionalities, specifically focusing on dynamic row/column manipulation.\n\n**Requirements:**\n1.  **`addRow()` Method**: Implement a method that adds a new row at the bottom of the spreadsheet. It should update `this.rows`, add a new array to `this.data` filled with empty strings, and re-render the spreadsheet.\n2.  **`removeRow(rowIndex)` Method**: Implement a method that removes a specific row by its `rowIndex` (0-indexed). It should update `this.rows`, remove the corresponding row from `this.data`, and re-render.\n3.  **`removeColumn(colIndex)` Method**: Implement a method that removes a specific column by its `colIndex` (0-indexed). It should update `this.cols`, remove the corresponding column from each row in `this.data`, and re-render.\n4.  **UI for Remove Operations**: Add buttons or other UI elements (e.g., beside row numbers and column letters) to trigger `removeRow` and `removeColumn`.\n5.  **Robustness**: Handle edge cases like attempting to remove the last row/column or an invalid index gracefully (e.g., prevent removal, or show an alert).\n\n",
+          "difficulty": "medium",
+          "startingCode": "class Spreadsheet {\n  constructor(rows = 5, cols = 5) {\n    this.rows = rows;\n    this.cols = cols;\n    this.data = Array(rows).fill().map(() => Array(cols).fill(''));\n    this.container = null; \n  }\n  \n  render(containerElement) {\n    this.container = containerElement;\n    this.container.innerHTML = '';\n\n    const table = document.createElement('table');\n    table.className = 'spreadsheet';\n    \n    // Header creation (as provided in theory/example)\n    const thead = document.createElement('thead');\n    const headerRow = document.createElement('tr');\n    headerRow.appendChild(document.createElement('th')); // Empty corner for row numbers\n    \n    for (let col = 0; col < this.cols; col++) {\n      const th = document.createElement('th');\n      th.textContent = String.fromCharCode(65 + col);\n      // TODO: Add remove column button here or similar UI\n      const removeColButton = document.createElement('button');\n      removeColButton.textContent = 'x';\n      removeColButton.className = 'remove-col-button';\n      removeColButton.addEventListener('click', () => this.removeColumn(col));\n      th.appendChild(removeColButton);\n      headerRow.appendChild(th);\n    }\n    const addColHeader = document.createElement('th');\n    const addColButton = document.createElement('button');\n    addColButton.textContent = '+';\n    addColButton.addEventListener('click', () => this.addColumn());\n    addColHeader.appendChild(addColButton);\n    headerRow.appendChild(addColHeader);\n    thead.appendChild(headerRow);\n    table.appendChild(thead);\n    \n    // Body creation (as provided in theory/example)\n    const tbody = document.createElement('tbody');\n    for (let row = 0; row < this.rows; row++) {\n      const tr = document.createElement('tr');\n      const rowHeader = document.createElement('th');\n      rowHeader.textContent = row + 1;\n      // TODO: Add remove row button here or similar UI\n      const removeRowButton = document.createElement('button');\n      removeRowButton.textContent = 'x';\n      removeRowButton.className = 'remove-row-button';\n      removeRowButton.addEventListener('click', () => this.removeRow(row));\n      rowHeader.appendChild(removeRowButton);\n      tr.appendChild(rowHeader);\n      \n      for (let col = 0; col < this.cols; col++) {\n        const td = document.createElement('td');\n        const input = document.createElement('input');\n        input.value = this.data[row][col];\n        input.dataset.row = row;\n        input.dataset.col = col;\n        input.addEventListener('change', (e) => {\n          this.data[parseInt(e.target.dataset.row)][parseInt(e.target.dataset.col)] = e.target.value;\n        });\n        td.appendChild(input);\n        tr.appendChild(td);\n      }\n      tbody.appendChild(tr);\n    }\n\n    // Add row button at the bottom\n    const addRowTR = document.createElement('tr');\n    const addRowTH = document.createElement('th');\n    const addRowButton = document.createElement('button');\n    addRowButton.textContent = '+';\n    addRowButton.addEventListener('click', () => this.addRow());\n    addRowTH.appendChild(addRowButton);\n    addRowTR.appendChild(addRowTH);\n    const emptyTd = document.createElement('td');\n    emptyTd.colSpan = this.cols + 1;\n    addRowTR.appendChild(emptyTd);\n    tbody.appendChild(addRowTR);\n\n    table.appendChild(tbody);\n    this.container.appendChild(table);\n  }\n\n  addColumn() {\n    if (this.cols >= 26) { // Limit columns to A-Z for simplicity\n      alert('Cannot add more columns (max Z reached)');\n      return;\n    }\n    this.cols++;\n    for(let i = 0; i < this.rows; i++) {\n      this.data[i].push('');\n    }\n    this.render(this.container);\n  }\n\n  addRow() {\n    // TODO: Implement addRow logic\n    if (this.rows >= 100) { // Arbitrary limit\n      alert('Cannot add more rows (max 100 reached)');\n      return;\n    }\n    this.rows++;\n    this.data.push(Array(this.cols).fill(''));\n    this.render(this.container);\n  }\n\n  removeRow(rowIndex) {\n    // TODO: Implement removeRow logic\n    if (this.rows <= 1) {\n      alert('Cannot remove the last row.');\n      return;\n    }\n    if (rowIndex < 0 || rowIndex >= this.rows) {\n      alert('Invalid row index.');\n      return;\n    }\n    this.data.splice(rowIndex, 1);\n    this.rows--;\n    this.render(this.container);\n  }\n\n  removeColumn(colIndex) {\n    // TODO: Implement removeColumn logic\n    if (this.cols <= 1) {\n      alert('Cannot remove the last column.');\n      return;\n    }\n    if (colIndex < 0 || colIndex >= this.cols) {\n      alert('Invalid column index.');\n      return;\n    }\n    for (let i = 0; i < this.rows; i++) {\n      this.data[i].splice(colIndex, 1);\n    }\n    this.cols--;\n    this.render(this.container);\n  }\n}\n\n// To run this: \n// <div id=\"spreadsheet-container\"></div>\n// document.addEventListener('DOMContentLoaded', () => {\n//   const spreadsheet = new Spreadsheet(3, 3);\n//   const container = document.getElementById('spreadsheet-container');\n//   if (container) {\n//     spreadsheet.render(container);\n//   }\n// });",
+          "solutionCode": "class Spreadsheet {\n  constructor(rows = 5, cols = 5) {\n    this.rows = rows;\n    this.cols = cols;\n    this.data = Array(rows).fill().map(() => Array(cols).fill(''));\n    this.container = null; \n  }\n  \n  render(containerElement) {\n    this.container = containerElement;\n    this.container.innerHTML = '';\n\n    const table = document.createElement('table');\n    table.className = 'spreadsheet';\n    \n    // Header creation \n    const thead = document.createElement('thead');\n    const headerRow = document.createElement('tr');\n    const cornerTh = document.createElement('th');\n    cornerTh.className = 'corner-th';\n    headerRow.appendChild(cornerTh); // Empty corner for row numbers\n    \n    for (let col = 0; col < this.cols; col++) {\n      const th = document.createElement('th');\n      th.className = 'column-header';\n      th.textContent = String.fromCharCode(65 + col);\n      \n      const removeColButton = document.createElement('button');\n      removeColButton.textContent = 'x';\n      removeColButton.className = 'remove-col-button';\n      removeColButton.title = `Remove Column ${String.fromCharCode(65 + col)}`;\n      removeColButton.addEventListener('click', (e) => {\n        e.stopPropagation(); // Prevent potential parent click events\n        this.removeColumn(col);\n      });\n      th.appendChild(removeColButton);\n      headerRow.appendChild(th);\n    }\n    const addColHeader = document.createElement('th');\n    const addColButton = document.createElement('button');\n    addColButton.textContent = '+';\n    addColButton.className = 'add-col-button';\n    addColButton.title = 'Add New Column';\n    addColButton.addEventListener('click', () => this.addColumn());\n    addColHeader.appendChild(addColButton);\n    headerRow.appendChild(addColHeader);\n    thead.appendChild(headerRow);\n    table.appendChild(thead);\n    \n    // Body creation\n    const tbody = document.createElement('tbody');\n    for (let row = 0; row < this.rows; row++) {\n      const tr = document.createElement('tr');\n      const rowHeader = document.createElement('th');\n      rowHeader.className = 'row-header';\n      rowHeader.textContent = row + 1;\n      \n      const removeRowButton = document.createElement('button');\n      removeRowButton.textContent = 'x';\n      removeRowButton.className = 'remove-row-button';\n      removeRowButton.title = `Remove Row ${row + 1}`;\n      removeRowButton.addEventListener('click', (e) => {\n        e.stopPropagation();\n        this.removeRow(row);\n      });\n      rowHeader.appendChild(removeRowButton);\n      tr.appendChild(rowHeader);\n      \n      for (let col = 0; col < this.cols; col++) {\n        const td = document.createElement('td');\n        const input = document.createElement('input');\n        input.value = this.data[row][col];\n        input.dataset.row = row;\n        input.dataset.col = col;\n        input.addEventListener('change', (e) => {\n          this.data[parseInt(e.target.dataset.row)][parseInt(e.target.dataset.col)] = e.target.value;\n        });\n        td.appendChild(input);\n        tr.appendChild(td);\n      }\n      tbody.appendChild(tr);\n    }\n\n    // Add row button at the bottom of the row headers\n    const addRowTR = document.createElement('tr');\n    const addRowTH = document.createElement('th');\n    addRowTH.className = 'add-row-th';\n    const addRowButton = document.createElement('button');\n    addRowButton.textContent = '+';\n    addRowButton.className = 'add-row-button';\n    addRowButton.title = 'Add New Row';\n    addRowButton.addEventListener('click', () => this.addRow());\n    addRowTH.appendChild(addRowButton);\n    addRowTR.appendChild(addRowTH);\n    // Fill the rest of the row with empty cells or colspan\n    const emptyTd = document.createElement('td');\n    emptyTd.colSpan = this.cols; // Only for data cells, not including the new column add button cell\n    addRowTR.appendChild(emptyTd);\n    tbody.appendChild(addRowTR);\n\n    table.appendChild(tbody);\n    this.container.appendChild(table);\n  }\n\n  addColumn() {\n    if (this.cols >= 26) { // Practical limit for single letter columns A-Z\n      alert('Cannot add more columns (max Z reached for simple naming).');\n      return;\n    }\n    this.cols++;\n    for(let i = 0; i < this.rows; i++) {\n      this.data[i].push('');\n    }\n    this.render(this.container);\n  }\n\n  addRow() {\n    if (this.rows >= 100) { // Arbitrary limit to prevent excessive rows\n      alert('Cannot add more rows (maximum 100 rows).');\n      return;\n    }\n    this.rows++;\n    this.data.push(Array(this.cols).fill(''));\n    this.render(this.container);\n  }\n\n  removeRow(rowIndex) {\n    if (this.rows <= 1) {\n      alert('Cannot remove the last row.');\n      return;\n    }\n    if (rowIndex < 0 || rowIndex >= this.rows) {\n      alert('Invalid row index.');\n      return;\n    }\n    if (confirm(`Are you sure you want to remove row ${rowIndex + 1}?`)) {\n      this.data.splice(rowIndex, 1);\n      this.rows--;\n      this.render(this.container);\n    }\n  }\n\n  removeColumn(colIndex) {\n    if (this.cols <= 1) {\n      alert('Cannot remove the last column.');\n      return;\n    }\n    if (colIndex < 0 || colIndex >= this.cols) {\n      alert('Invalid column index.');\n      return;\n    }\n    if (confirm(`Are you sure you want to remove column ${String.fromCharCode(65 + colIndex)}?`)) {\n      for (let i = 0; i < this.rows; i++) {\n        this.data[i].splice(colIndex, 1);\n      }\n      this.cols--;\n      this.render(this.container);\n    }\n  }\n}\n\n// Add some basic CSS for better visualization\n// const style = document.createElement('style');\n// style.textContent = `\n//   .spreadsheet { border-collapse: collapse; font-family: sans-serif; }\n//   .spreadsheet th, .spreadsheet td { border: 1px solid #ccc; padding: 5px; text-align: center; }\n//   .spreadsheet th { background-color: #f0f0f0; position: relative; }\n//   .spreadsheet td { min-width: 50px; }\n//   .spreadsheet input { width: 100%; box-sizing: border-box; border: none; padding: 3px; text-align: center; }\n//   .remove-row-button, .remove-col-button { \n//     position: absolute; right: 2px; top: 2px; \n//     background: red; color: white; border: none; border-radius: 50%; width: 18px; height: 18px; \n//     font-size: 0.7em; cursor: pointer; display: none;\n//   }\n//   .row-header:hover .remove-row-button, .column-header:hover .remove-col-button { display: block; }\n//   .add-row-button, .add-col-button { \n//     background: green; color: white; border: none; border-radius: 50%; width: 22px; height: 22px; \n//     font-size: 1em; cursor: pointer; margin: 2px;\n//   }\n// `;\n// document.head.appendChild(style);",
+          "testCases": [
+            "Calling `addRow()` should increase `this.rows` and add an empty row to `this.data` and re-render.",
+            "Calling `removeRow(0)` on a 3x3 spreadsheet should result in a 2x3 spreadsheet, with the correct data shifted up.",
+            "Calling `removeColumn(0)` on a 3x3 spreadsheet should result in a 3x2 spreadsheet, with the correct data shifted left.",
+            "Attempting to remove the last remaining row should display an alert and not remove the row.",
+            "Attempting to remove the last remaining column should display an alert and not remove the column.",
+            "Clicking the '+' button in the header should add a column.",
+            "Clicking the '+' button in the row header area should add a row.",
+            "Clicking 'x' on a row header should remove that row (with confirmation).",
+            "Clicking 'x' on a column header should remove that column (with confirmation)."
+          ],
+          "hints": [
+            "For `removeRow`, `Array.prototype.splice()` is useful for modifying the `this.data` array.",
+            "For `removeColumn`, you'll need to iterate over each row and use `splice()` on the inner array.",
+            "Remember to update `this.rows` and `this.cols` after additions/removals.",
+            "Always call `this.render(this.container)` after structural changes to update the DOM.",
+            "Consider adding `confirm()` dialogs for delete operations to prevent accidental deletion."
+          ],
+          "tags": [
+            "JavaScript",
+            "DOM Manipulation",
+            "Arrays",
+            "CRUD",
+            "Classes"
+          ],
+          "timeEstimate": 60,
+          "prerequisites": [
+            "theory_javascript_spreadsheet",
+            "javascript_array_methods",
+            "dom_events"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 7,
+          "learningPath": "intermediate",
+          "relatedConcepts": [
+            "theory_javascript_spreadsheet"
+          ]
+        },
+        {
+          "id": "task_spreadsheet_formula_evaluation",
+          "title": "Implement Basic Spreadsheet Formula Evaluation",
+          "description": "\nExtend the `Spreadsheet` class to support basic arithmetic formula evaluation.\n\n**Requirements:**\n1.  **Formula Recognition**: Any cell input starting with an `=` sign should be treated as a formula.\n2.  **Cell Reference Parsing**: Parse cell references like `A1`, `B2`, `C3` within the formula. Convert them to their numerical `[row, col]` indices.\n3.  **Basic Arithmetic**: Support `+`, `-`, `*`, `/` operators. You can assume standard order of operations for a simple implementation or explicitly enforce left-to-right.\n4.  **Evaluation**: Replace cell references with their current numeric values and evaluate the expression. Display the *result* in the cell, but store the *formula string* in `this.data`.\n5.  **Re-calculation**: When a cell's value changes, any other cell containing a formula that *depends* on the changed cell must be automatically re-calculated and updated. This requires identifying dependencies.\n6.  **Error Handling**: Display `#REF!` for invalid cell references (e.g., `A999` if it's out of bounds) and `#ERROR!` for other calculation errors (e.g., division by zero, non-numeric operands).\n\n**Note**: For simplicity, you can initially use `eval()` for expression evaluation (though be aware of its security implications in real-world scenarios). A more robust solution would involve a custom parser/evaluator.\n",
+          "difficulty": "hard",
+          "startingCode": "class Spreadsheet {\n  constructor(rows = 5, cols = 5) {\n    this.rows = rows;\n    this.cols = cols;\n    this.data = Array(rows).fill().map(() => Array(cols).fill(''));\n    this.container = null;\n    this.formulas = {}; // Stores formulas: { '0_0': '=A1+B1', ... }\n    this.dependencies = {}; // Stores dependencies: { '0_0': ['0_1', '0_2'], ... }\n    // 0_0 means cell at [0,0]\n  }\n  \n  render(containerElement) {\n    this.container = containerElement;\n    this.container.innerHTML = '';\n    const table = document.createElement('table');\n    table.className = 'spreadsheet';\n    \n    const thead = document.createElement('thead');\n    const headerRow = document.createElement('tr');\n    headerRow.appendChild(document.createElement('th'));\n    for (let col = 0; col < this.cols; col++) {\n      const th = document.createElement('th');\n      th.textContent = String.fromCharCode(65 + col);\n      headerRow.appendChild(th);\n    }\n    thead.appendChild(headerRow);\n    table.appendChild(thead);\n    \n    const tbody = document.createElement('tbody');\n    for (let row = 0; row < this.rows; row++) {\n      const tr = document.createElement('tr');\n      const rowHeader = document.createElement('th');\n      rowHeader.textContent = row + 1;\n      tr.appendChild(rowHeader);\n      \n      for (let col = 0; col < this.cols; col++) {\n        const td = document.createElement('td');\n        const input = document.createElement('input');\n        const cellId = `${row}_${col}`;\n\n        // Display formula result or raw value\n        input.value = this.formulas[cellId] ? this.evaluateCell(row, col) : this.data[row][col];\n        \n        input.dataset.row = row;\n        input.dataset.col = col;\n        \n        input.addEventListener('change', (e) => {\n          const r = parseInt(e.target.dataset.row);\n          const c = parseInt(e.target.dataset.col);\n          const val = e.target.value;\n\n          if (val.startsWith('=')) {\n            this.formulas[cellId] = val;\n            this.data[r][c] = val; // Store formula in data as well\n          } else {\n            delete this.formulas[cellId];\n            this.data[r][c] = val; // Store raw value\n          }\n          this.recalculateAll(); // A simple approach, optimize later\n        });\n        \n        // Show formula when focused, result when blurred\n        input.addEventListener('focus', (e) => {\n            e.target.value = this.formulas[cellId] || this.data[row][col];\n        });\n        input.addEventListener('blur', (e) => {\n            e.target.value = this.formulas[cellId] ? this.evaluateCell(row, col) : this.data[row][col];\n        });\n\n        td.appendChild(input);\n        tr.appendChild(td);\n      }\n      tbody.appendChild(tr);\n    }\n    table.appendChild(tbody);\n    this.container.appendChild(table);\n  }\n\n  // Helper to convert 'A1' to [0,0]\n  getCellCoords(cellRef) {\n    const colStr = cellRef.match(/[A-Z]+/)[0];\n    const rowStr = cellRef.match(/\\d+/)[0];\n    const col = colStr.charCodeAt(0) - 65;\n    const row = parseInt(rowStr) - 1;\n    if (row < 0 || row >= this.rows || col < 0 || col >= this.cols) {\n      return null; // Invalid reference\n    }\n    return [row, col];\n  }\n\n  // Recursive function to get a cell's value (evaluating if it's a formula)\n  getCellValue(row, col, visited = new Set()) {\n    const cellId = `${row}_${col}`;\n    if (visited.has(cellId)) {\n        // Circular dependency detected\n        return '#CIRCULAR!'; // Or throw an error\n    }\n    visited.add(cellId);\n\n    if (this.formulas[cellId]) {\n        return this.evaluateFormulaExpression(this.formulas[cellId], visited);\n    } else {\n        const value = this.data[row][col];\n        return !isNaN(parseFloat(value)) && isFinite(value) ? parseFloat(value) : value;\n    }\n  }\n\n  evaluateFormulaExpression(formulaString, visited) {\n    let expression = formulaString.substring(1); // Remove '=' prefix\n    const cellRefs = expression.match(/[A-Z]+\\d+/g) || [];\n    let evaluatedExpression = expression;\n\n    cellRefs.forEach(cellRef => {\n      const coords = this.getCellCoords(cellRef);\n      if (!coords) {\n        evaluatedExpression = '#REF!'; // Invalid cell reference\n        return; \n      }\n      const [r, c] = coords;\n      const cellValue = this.getCellValue(r, c, new Set(visited)); // Pass a new set for recursive call\n      if (typeof cellValue === 'string' && cellValue.startsWith('#')) {\n        evaluatedExpression = cellValue; // Propagate errors\n        return;\n      }\n      evaluatedExpression = evaluatedExpression.replace(new RegExp(cellRef, 'g'), `(${cellValue})`);\n    });\n    \n    if (evaluatedExpression.startsWith('#')) return evaluatedExpression; // Propagate #REF! or #CIRCULAR!\n\n    try {\n      const result = eval(evaluatedExpression); // DANGER: For interview only. Use proper parser normally.\n      return isFinite(result) ? result : '#ERROR!'; // Handle NaN, Infinity\n    } catch (e) {\n      return '#ERROR!';\n    }\n  }\n\n  evaluateCell(row, col) {\n    const cellId = `${row}_${col}`;\n    if (this.formulas[cellId]) {\n        return this.evaluateFormulaExpression(this.formulas[cellId], new Set());\n    } else {\n        return this.data[row][col];\n    }\n  }\n\n  recalculateAll() {\n    // A simple, inefficient recalculation. Re-render will cause all cells to re-evaluate.\n    this.render(this.container);\n  }\n\n  addColumn() { /* ... unchanged ... */ }\n  addRow() { /* ... unchanged ... */ }\n  removeRow(rowIndex) { /* ... unchanged ... */ }\n  removeColumn(colIndex) { /* ... unchanged ... */ }\n}\n\n// Usage example:\n// const spreadsheet = new Spreadsheet(5, 5);\n// document.addEventListener('DOMContentLoaded', () => {\n//   const container = document.getElementById('spreadsheet-container');\n//   if (container) {\n//     spreadsheet.render(container);\n//     // You can set initial formulas programmatically for testing:\n//     // spreadsheet.data[0][0] = '10';\n//     // spreadsheet.data[0][1] = '20';\n//     // spreadsheet.formulas['0_2'] = '=A1+B1'; // C1 = A1 + B1\n//     // spreadsheet.recalculateAll(); // Trigger initial eval\n//   }\n// });\n",
+          "testCases": [
+            "Entering `=10+20` in a cell should display `30`.",
+            "Entering `=A1+B1` where A1=`5` and B1=`10` should display `15`.",
+            "Changing A1 from `5` to `7` should automatically update a cell with `=A1+B1` to `17`.",
+            "Entering `=A1/0` should display `#ERROR!` or similar.",
+            "Entering `=Z999` (an out-of-bounds cell) should display `#REF!`.",
+            "Entering `=A1+B1` then changing B1 to non-numeric `hello` should display `#ERROR!` or similar.",
+            "Cells containing formulas should display the result, but show the formula when focused for editing.",
+            "Basic circular reference (e.g., A1=`=B1`, B1=`=A1`) should be handled (e.g., `#CIRCULAR!`)."
+          ],
+          "hints": [
+            "Store formulas in a separate structure (e.g., `this.formulas = { 'row_col': 'formula_string' }`) and actual values in `this.data`.",
+            "The `getCellValue` function should be recursive: if a cell is a formula, it should call `evaluateFormulaExpression` for that cell.",
+            "Use regular expressions to find cell references (`[A-Z]+\\d+`) in the formula string.",
+            "When a cell changes, you'll need a mechanism to find and re-evaluate all cells that depend on it. A simple `recalculateAll()` (re-rendering everything) is a starting point, but a more advanced solution would track explicit dependencies.",
+            "For circular references, pass a `visited` set to recursive calls to detect loops.",
+            "Be mindful of parsing numbers for calculations: use `parseFloat()` and check `isNaN()`."
+          ],
+          "tags": [
+            "JavaScript",
+            "Algorithms",
+            "Data Structures",
+            "Formulas",
+            "Evaluation",
+            "Hard"
+          ],
+          "timeEstimate": 120,
+          "prerequisites": [
+            "theory_javascript_spreadsheet",
+            "javascript_classes",
+            "javascript_regex",
+            "recursion"
+          ],
+          "complexity": 9,
+          "interviewRelevance": 8,
+          "learningPath": "advanced",
+          "relatedConcepts": [
+            "theory_javascript_spreadsheet"
+          ]
+        }
+      ]
+    }
+  }
+]

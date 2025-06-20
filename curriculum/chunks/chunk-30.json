@@ -1,0 +1,1800 @@
+[
+  {
+    "id": "b60bd1fa-5e7f-4763-a19e-7da6e5ce6011",
+    "startLine": 5400,
+    "endLine": 5499,
+    "processedDate": "2025-06-17T09:38:12.195Z",
+    "content": {
+      "logicalBlockInfo": {
+        "suggestedEndLine": -1
+      },
+      "theory": [
+        {
+          "id": "theory_react_hooks_testing",
+          "title": "Testing React Custom Hooks with react-hooks-testing-library",
+          "content": "Testing custom React Hooks requires a specific approach different from testing regular React components. `react-hooks-testing-library` is a dedicated library that provides utilities to test hooks in isolation, mimicking their lifecycle within a React component environment without needing to render a full component.\n\n## Key Concepts\n\n### `renderHook`\nThis utility is the primary way to test a hook. It renders a test component internally that calls your hook, allowing you to access its return value and interact with it. It simulates the component lifecycle necessary for hooks to function correctly.\n\n### `result.current`\nThe `renderHook` function returns an object that includes a `result` property. `result.current` holds the latest value returned by your hook. This is the primary way to assert the state or functions exposed by your hook after an action or a re-render.\n\n### `act`\n`act` is a utility from `react-test-renderer` (or `react-dom/test-utils`). When testing React components or hooks, any updates that trigger re-renders or state changes (like calling a state setter, or a function returned by a hook that updates its internal state) should be wrapped in `act()`. This ensures that all React updates are flushed and applied to the DOM (or virtual DOM in tests) before you make assertions. Using `act` prevents warnings about unhandled updates and makes your tests behave closer to how React works in a browser, leading to more reliable test results.\n\n## Lifecycle for Testing Hooks\n1.  **Render the hook:** Use `renderHook(() => yourHook(initialProps))`. This effectively mounts an internal test component and calls your hook.\n2.  **Interact:** Use `act(() => result.current.someFunction())` to simulate user interactions or trigger state updates within the hook. For asynchronous updates, `await act(async () => { ... })` might be necessary, often combined with `waitForNextUpdate`.\n3.  **Assert:** Use `expect(result.current.value).toBe(expectedValue)` to check the hook's state or return values after interactions.\n\n### Example Hook: `useCounter`\nA `useCounter` hook typically manages a numerical state, providing functions to increment and decrement it.",
+          "examples": [
+            {
+              "id": "example_use_counter_hook",
+              "title": "Basic `useCounter` Hook Implementation",
+              "code": "import { useState, useCallback } from 'react';\n\n/**\n * A custom hook to manage a numerical counter state.\n * @param {number} initialValue The initial value of the counter.\n * @returns {{count: number, increment: () => void, decrement: () => void, reset: () => void}}\n */\nfunction useCounter(initialValue = 0) {\n  const [count, setCount] = useState(initialValue);\n\n  const increment = useCallback(() => {\n    setCount(prevCount => prevCount + 1);\n  }, []);\n\n  const decrement = useCallback(() => {\n    setCount(prevCount => prevCount - 1);\n  }, []);\n\n  const reset = useCallback(() => {\n    setCount(initialValue);\n  }, [initialValue]);\n\n  return { count, increment, decrement, reset };\n}",
+              "explanation": "This code defines a simple `useCounter` custom hook. It uses React's `useState` to manage the `count` state and `useCallback` to memoize the `increment`, `decrement`, and `reset` functions. Memoizing these functions is a good practice for performance when they are passed down to child components, as it prevents their re-creation on every re-render of the component consuming the hook, thus avoiding unnecessary re-renders of the children.",
+              "language": "typescript"
+            },
+            {
+              "id": "example_use_counter_testing",
+              "title": "Testing `useCounter` with `react-hooks-testing-library`",
+              "code": "import { renderHook, act } from '@testing-library/react-hooks';\nimport { useCounter } from './useCounter'; // Assuming useCounter is in useCounter.js\n\ntest('should increment counter', () => {\n  const { result } = renderHook(() => useCounter(0));\n\n  act(() => {\n    result.current.increment();\n  });\n\n  expect(result.current.count).toBe(1);\n});\n\ntest('should decrement counter', () => {\n  const { result } = renderHook(() => useCounter(10));\n\n  act(() => {\n    result.current.decrement();\n  });\n\n  expect(result.current.count).toBe(9);\n});\n\ntest('should reset counter to initial value', () => {\n  const { result } = renderHook(() => useCounter(5));\n  act(() => {\n    result.current.increment();\n    result.current.increment();\n  });\n  expect(result.current.count).toBe(7);\n\n  act(() => {\n    result.current.reset();\n  });\n  expect(result.current.count).toBe(5);\n});",
+              "explanation": "These tests demonstrate how to use `renderHook` to mount the `useCounter` hook in a test environment. The `act` wrapper is crucial for any operations that update the hook's state (like `increment` or `decrement`) to ensure React updates are processed and the component's state is stable before assertions are made. `result.current` is then used to access the current value of `count` for direct assertions.",
+              "language": "typescript"
+            }
+          ],
+          "relatedQuestions": [
+            "question_use_counter_mcq_act_purpose",
+            "question_use_counter_open_renderhook",
+            "question_use_counter_flashcard_result_current",
+            "question_use_counter_code_usetoggle_test",
+            "question_use_counter_difficulty_test"
+          ],
+          "relatedTasks": [
+            "task_implement_use_toggle_hook"
+          ],
+          "tags": [
+            "React Hooks",
+            "Testing",
+            "react-hooks-testing-library",
+            "Unit Testing",
+            "JavaScript"
+          ],
+          "technology": "React, Jest, Testing Library",
+          "prerequisites": [
+            "react_functional_components",
+            "react_hooks_useState_useCallback",
+            "jest_basics"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 8,
+          "learningPath": "intermediate",
+          "requiredFor": [
+            "custom_hook_development",
+            "advanced_react_testing"
+          ]
+        },
+        {
+          "id": "theory_react_pure_component",
+          "title": "React.PureComponent for Performance Optimization",
+          "content": "`React.PureComponent` is a base class that extends `React.Component` but includes a shallow prop and state comparison in its `shouldComponentUpdate` lifecycle method. This automatic optimization helps prevent unnecessary re-renders of components, leading to potential performance improvements in React applications.\n\n## How it Works\n\nNormally, when a parent component re-renders, all its child components also re-render by default, regardless of whether their props or state have actually changed. This can be inefficient if a child component is complex or renders frequently but its output doesn't depend on every parent re-render.\n\n`React.PureComponent` addresses this by implementing a default `shouldComponentUpdate` method that performs a shallow comparison of the component's `props` and `state` with their `nextProps` and `nextState`.\n\n```typescript\nshouldComponentUpdate(nextProps, nextState) {\n  return !shallowEqual(nextProps, this.props) || !shallowEqual(nextState, this.state);\n}\n```\n\n`shallowEqual` checks if the properties of two objects (props or state) are strictly equal (`===`) at the first level of depth. If the shallow comparison finds no changes in either props or state, `shouldComponentUpdate` returns `false`, effectively skipping the `render` method and its subsequent reconciliation, thus saving CPU cycles.\n\n## `shallowEqual` Explained\n\n`shallowEqual` is a utility function used internally by `PureComponent` (and also by `React.memo`'s default behavior) that compares two objects at the first level of depth. It returns `true` if:\n*   Both objects are `null` or `undefined`.\n*   Both objects are the same reference.\n*   They have the same number of keys.\n*   Each key in the first object has a corresponding key in the second object.\n*   The values associated with each key are strictly (`===`) equal.\n\n**Limitations of `shallowEqual`:**\n*   **Deeply Nested Objects/Arrays:** `shallowEqual` only checks the references of nested objects or arrays, not their contents. If a prop is an object or an array and its contents change but its reference remains the same, `PureComponent` will *not* re-render, leading to stale UI. For example, if you pass `props.data = { value: 1 }` and later update `props.data.value = 2` without changing the `data` object's reference (i.e., `props.data` still points to the same object in memory), `PureComponent` will not detect the change.\n*   **Functions:** Functions defined inline in the `render` method of a parent component will create a new function instance on every parent re-render. Passing such a function as a prop to a `PureComponent` will cause the `PureComponent` to re-render unnecessarily because `shallowEqual` will detect a new function reference. This can be mitigated by binding methods in the constructor or using arrow functions as class properties for class components, or `useCallback` for functional components.\n\n## When to Use `PureComponent`\n\nUse `PureComponent` when:\n1.  Your component's render output is determined *solely* by its `props` and `state`.\n2.  The `props` and `state` are simple JavaScript primitives (strings, numbers, booleans) or simple objects/arrays that are guaranteed to have new references when their content changes (i.e., you are using immutable data structures or methods that return new objects/arrays).\n3.  You don't need to implement a custom `shouldComponentUpdate()` method with more complex comparison logic.\n\n## When to Avoid `PureComponent`\n\nAvoid `PureComponent` if:\n1.  Your component relies on context, or `children` that are not pure (e.g., if `children` are frequently re-rendered or contain dynamic content not controlled by props/state).\n2.  Your `props` or `state` contain deeply nested data structures that are mutated without creating new references. In such cases, `PureComponent` might miss updates, leading to incorrect UI.\n3.  You need custom comparison logic that goes beyond shallow comparison. In such cases, use `React.Component` and implement `shouldComponentUpdate` manually, or use `React.memo` with a custom comparison function for functional components.\n\nFor functional components, the equivalent of `PureComponent` is `React.memo`. `React.memo` is a higher-order component that works similarly by memoizing component rendering based on prop comparison, and it can also accept a custom comparison function as its second argument for more control.",
+          "examples": [
+            {
+              "id": "example_pure_vs_regular_counter",
+              "title": "PureComponent vs. Regular Component Re-renders",
+              "code": "import React from 'react';\n\nclass PureCounter extends React.PureComponent {\n  constructor(props) {\n    super(props);\n    this.state = { count: 0 };\n  }\n  \n  increment = () => {\n    this.setState({ count: this.state.count + 1 });\n  }\n  \n  render() {\n    console.log('PureCounter render called'); // This won't log on parent re-renders unless props/state change\n    return (\n      <div>\n        <h2>Count: {this.state.count}</h2>\n        <button onClick={this.increment}>Increment</button>\n      </div>\n    );\n  }\n}\n\n// Regular component will re-render on every parent update\nclass RegularCounter extends React.Component {\n  constructor(props) {\n    super(props);\n    this.state = { count: 0 };\n  }\n  \n  increment = () => {\n    this.setState({ count: this.state.count + 1 });\n  }\n  \n  render() {\n    console.log('RegularCounter render called'); // This will log on every parent re-render\n    return (\n      <div>\n        <h2>Count: {this.state.count}</h2>\n        <button onClick={this.increment}>Increment</button>\n      </div>\n    );\n  }\n}\n\nclass ParentComponent extends React.Component {\n  constructor(props) {\n    super(props);\n    this.state = { parentValue: 0 };\n  }\n\n  componentDidMount() {\n    this.interval = setInterval(() => {\n      this.setState(prevState => ({ parentValue: prevState.parentValue + 1 }));\n    }, 1000);\n  }\n\n  componentWillUnmount() {\n    clearInterval(this.interval);\n  }\n\n  render() {\n    console.log('ParentComponent render called');\n    return (\n      <div style={{ padding: '20px', border: '1px solid #ccc' }}>\n        <h1>Parent Value: {this.state.parentValue}</h1>\n        <p>PureCounter below will only re-render if its own state changes.</p>\n        <PureCounter />\n        <hr/>\n        <p>RegularCounter below will re-render every second with the parent.</p>\n        <RegularCounter />\n      </div>\n    );\n  }\n}",
+              "explanation": "This example vividly shows the difference in rendering behavior. The `ParentComponent` updates its `parentValue` every second, causing itself to re-render. The `RegularCounter` child, being a `React.Component`, also re-renders every time its parent does, even though its own `props` (it receives none in this simplified example, but imagine it receiving static props) and its `state` (initially) haven't changed. The `PureCounter` child, being a `React.PureComponent`, only re-renders when its *own* state changes (e.g., when you click its Increment button), ignoring parent re-renders when its props and state are shallowly equal.",
+              "language": "typescript"
+            },
+            {
+              "id": "example_pure_component_immutable_data",
+              "title": "PureComponent with Immutable Data Patterns",
+              "code": "import React from 'react';\n\nclass DataDisplay extends React.PureComponent {\n  render() {\n    console.log('DataDisplay PureComponent render called');\n    const { data } = this.props;\n    return (\n      <div>\n        <p>Data ID: {data.id}</p>\n        <p>Data Value: {data.value}</p>\n      </div>\n    );\n  }\n}\n\nclass ParentWithImmutableData extends React.Component {\n  constructor(props) {\n    super(props);\n    this.state = { \n      tick: 0,\n      item: { id: 1, value: 'initial' }\n    };\n  }\n\n  componentDidMount() {\n    this.interval = setInterval(() => {\n      this.setState(prevState => ({\n        tick: prevState.tick + 1,\n        // Correct way to update nested data for PureComponent:\n        // Always create a new object reference if content changes.\n        item: prevState.tick % 2 === 0 \n              ? { ...prevState.item, value: `updated-${prevState.tick}` } // New object reference\n              : prevState.item // Same object reference if value not changing\n      }));\n    }, 1000);\n  }\n\n  componentWillUnmount() {\n    clearInterval(this.interval);\n  }\n\n  render() {\n    console.log('ParentWithImmutableData render called');\n    return (\n      <div style={{ padding: '20px', border: '1px solid #ccc', marginTop: '20px' }}>\n        <h3>Parent Tick: {this.state.tick}</h3>\n        <DataDisplay data={this.state.item} />\n      </div>\n    );\n  }\n}",
+              "explanation": "This example demonstrates how to use `PureComponent` effectively with objects as props by adhering to immutability principles. The `ParentWithImmutableData` component updates its `tick` state every second. It also conditionally updates the `item` object. Crucially, when `item.value` is modified, a *new* `item` object is created using the spread syntax (`{ ...prevState.item, value: ... }`). This ensures that `shallowEqual` in `DataDisplay` (a `PureComponent`) detects a change in the `data` prop's reference only when its content actually changes, thus preventing unnecessary renders of `DataDisplay` when `item` reference is unchanged.",
+              "language": "typescript"
+            }
+          ],
+          "relatedQuestions": [
+            "question_pure_component_mcq_shallow_comparison",
+            "question_pure_component_open_when_not_to_use",
+            "question_pure_component_flashcard_benefit",
+            "question_pure_component_code_refactor_example",
+            "question_pure_component_mcq_deep_comparison"
+          ],
+          "relatedTasks": [
+            "task_pure_component_performance_demo"
+          ],
+          "tags": [
+            "React",
+            "Performance Optimization",
+            "PureComponent",
+            "shouldComponentUpdate",
+            "Shallow Comparison",
+            "Class Components"
+          ],
+          "technology": "React",
+          "prerequisites": [
+            "react_class_components",
+            "react_lifecycle_methods",
+            "javascript_object_comparison"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 9,
+          "learningPath": "intermediate",
+          "requiredFor": [
+            "react_performance_tuning",
+            "understanding_re_render_mechanism"
+          ]
+        },
+        {
+          "id": "theory_styled_components",
+          "title": "Styled Components: CSS-in-JS for React",
+          "content": "Styled Components is a popular library that allows developers to write actual CSS code within JavaScript, tying styles directly to React components. This approach is known as 'CSS-in-JS' and offers several benefits for managing styles in modern web applications.\n\n## Key Concepts\n\n### Component-Scoped Styling\nStyled Components leverage tagged template literals to create React components that have styles attached to them. Each styled component generates a unique class name (e.g., `sc-bZQynM gTjMgi`), ensuring that styles are automatically scoped to that component and do not conflict with other styles on the page. This eliminates the need for methodologies like BEM or CSS Modules for scope management.\n\n### Dynamic Styling with Props\nOne of the powerful features of Styled Components is the ability to pass props to your styled components. You can then use these props within your CSS to dynamically change styles based on component state or properties. This is achieved by using a function inside the template literal that receives the component's props as an argument.\n\n### Advantages\n*   **Automatic Critical CSS:** Only the styles needed for the currently rendered components are injected into the page, improving load times and reducing the initial CSS payload.\n*   **No Class Name Collisions:** Unique, hashed class names are generated automatically, so you never have to worry about style conflicts, even with third-party libraries.\n*   **Easier Deletion of CSS:** Styles are tightly coupled with their components. When you delete a component, its styles are also deleted, preventing 'dead CSS' build-up over time.\n*   **Dynamic Styling:** Seamlessly adjust styles based on props, component state, or theme variables directly within the CSS. This makes components highly adaptable and reusable.\n*   **Better Developer Experience:** Keep logic and styling related to a component in one place, enhancing readability and maintainability.\n*   **Theming:** Built-in support for theming through a `<ThemeProvider>` component, allowing you to define global styles, colors, and variables that can be accessed by all styled components.\n\n## Basic Usage\nTo create a styled component, import `styled` from `styled-components` and then use `styled.<HTML_tag_name>` (e.g., `styled.h1`, `styled.button`) followed by a tagged template literal containing your CSS. You can also style existing React components using `styled(Component)`.",
+          "examples": [
+            {
+              "id": "example_styled_components_basic",
+              "title": "Basic Styled Components Usage",
+              "code": "import styled from 'styled-components';\nimport React from 'react';\n\n// Create a Title component that renders an <h1> with some styles\nconst Title = styled.h1`\n  font-size: 1.5em;\n  text-align: center;\n  color: palevioletred;\n`;\n\n// Create a Wrapper component that renders a <section> with styling\nconst Wrapper = styled.section`\n  padding: 4em;\n  background: papayawhip;\n`;\n\n// How to use them in a React component\nfunction App() {\n  return (\n    <Wrapper>\n      <Title>Hello, Styled Components!</Title>\n      <p>This paragraph is outside the styled components but within the app.</p>\n    </Wrapper>\n  );\n}",
+              "explanation": "This example shows the fundamental way to define and use styled components. `Title` and `Wrapper` are regular React components that, when rendered, produce HTML elements (`<h1>` and `<section>` respectively) with the specified CSS rules applied. The CSS is written directly within backticks (template literals), allowing for familiar CSS syntax.",
+              "language": "typescript"
+            },
+            {
+              "id": "example_styled_components_props",
+              "title": "Dynamic Styling with Props",
+              "code": "import styled from 'styled-components';\nimport React from 'react';\n\nconst Button = styled.button`\n  background: ${props => props.primary ? 'palevioletred' : 'white'};\n  color: ${props => props.primary ? 'white' : 'palevioletred'};\n\n  font-size: 1em;\n  margin: 1em;\n  padding: 0.25em 1em;\n  border: 2px solid palevioletred;\n  border-radius: 3px;\n  cursor: pointer;\n\n  &:hover {\n    box-shadow: 0 0 5px palevioletred;\n    opacity: 0.9;\n  }\n`;\n\nfunction MyButtons() {\n  return (\n    <div style={{ display: 'flex', justifyContent: 'center' }}>\n      <Button>Normal Button</Button>\n      <Button primary>Primary Button</Button>\n    </div>\n  );\n}",
+              "explanation": "Here, the `Button` component's `background` and `color` properties are determined by a `primary` prop. Inside the template literal, you can use a JavaScript function (an arrow function in this case) that receives the component's props as an argument. This allows for powerful dynamic styling based on component logic or external data, making the component reusable with different visual appearances.",
+              "language": "typescript"
+            }
+          ],
+          "relatedQuestions": [
+            "question_styled_components_mcq_css_syntax",
+            "question_styled_components_open_advantages",
+            "question_styled_components_flashcard_props",
+            "question_styled_components_code_dynamic_button",
+            "question_styled_components_mcq_scoping"
+          ],
+          "relatedTasks": [
+            "task_styled_components_ui_elements"
+          ],
+          "tags": [
+            "React",
+            "Styling",
+            "CSS-in-JS",
+            "Styled Components",
+            "Frontend Development"
+          ],
+          "technology": "React, Styled Components",
+          "prerequisites": [
+            "html_css_basics",
+            "react_components_basics",
+            "javascript_template_literals"
+          ],
+          "complexity": 6,
+          "interviewRelevance": 8,
+          "learningPath": "intermediate",
+          "requiredFor": [
+            "modern_react_styling",
+            "component_design_patterns"
+          ]
+        }
+      ],
+      "questions": [
+        {
+          "id": "question_use_counter_mcq_act_purpose",
+          "topic": "React Hooks Testing",
+          "level": "medium",
+          "type": "mcq",
+          "question": "In `react-hooks-testing-library` tests, why is it important to wrap state updates or function calls that modify hook state within an `act(() => { ... })` block?",
+          "answer": "To ensure that React updates are flushed and applied before assertions are made, mimicking browser behavior.",
+          "options": [
+            "To make the test run faster by batching updates.",
+            "To explicitly tell Jest to wait for asynchronous operations.",
+            "To ensure that React updates are flushed and applied before assertions are made, mimicking browser behavior.",
+            "To prevent infinite re-renders during testing."
+          ],
+          "analysisPoints": [
+            "`act` is crucial for testing React's asynchronous rendering behavior, ensuring that all side effects from state updates are processed.",
+            "It flushes all updates inside the callback, ensuring the DOM (or virtual DOM) is in a consistent state before subsequent assertions.",
+            "Failing to use `act` can lead to misleading test results, flaky tests, or warnings about unhandled updates because React's updates might not have completed when assertions run."
+          ],
+          "keyConcepts": [
+            "React `act`",
+            "React Hook Testing Library",
+            "Asynchronous Testing",
+            "React Rendering Lifecycle",
+            "Test Reliability"
+          ],
+          "evaluationCriteria": [
+            "Understanding of React's update cycle and scheduling.",
+            "Knowledge of `act`'s role in testing and its necessity for reliable tests.",
+            "Ability to debug common testing pitfalls related to asynchronous updates."
+          ],
+          "example": "```typescript\nimport { renderHook, act } from '@testing-library/react-hooks';\nimport { useCounter } from './useCounter';\n\ntest('should increment counter correctly', () => {\n  const { result } = renderHook(() => useCounter(0));\n  \n  // This ensures all state updates from increment() are processed by React\n  // before the expect statement checks result.current.count.\n  act(() => {\n    result.current.increment();\n  });\n  \n  expect(result.current.count).toBe(1);\n});\n```",
+          "tags": [
+            "React Hooks",
+            "Testing",
+            "act",
+            "react-hooks-testing-library",
+            "Unit Testing"
+          ],
+          "prerequisites": [
+            "react_hooks_basics",
+            "jest_basics"
+          ],
+          "complexity": 6,
+          "interviewFrequency": 7,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_use_counter_open_renderhook",
+          "topic": "React Hooks Testing",
+          "level": "medium",
+          "type": "open",
+          "question": "Explain the primary purpose and usage of the `renderHook` utility from `react-hooks-testing-library`. How does it differ from the `render` utility from `@testing-library/react`?",
+          "answer": "",
+          "options": [],
+          "analysisPoints": [
+            "`renderHook` is specifically designed for testing custom hooks in isolation. Its primary purpose is to provide a minimalist React environment where a hook can be called and its return values can be observed and manipulated, without rendering an actual DOM element.",
+            "It returns an object containing `result`, `rerender`, and `unmount` utilities, allowing tests to interact with the hook's lifecycle.",
+            "The `result.current` property provides direct access to the values returned by the hook, enabling assertions on state or functions.",
+            "In contrast, `render` from `@testing-library/react` is for testing React components by rendering them into a simulated DOM environment. It focuses on user interactions (e.g., clicking buttons, typing into inputs) and asserting on the visible output and accessibility, rather than direct access to component internals."
+          ],
+          "keyConcepts": [
+            "renderHook",
+            "render (Testing Library)",
+            "React Hook Testing Library",
+            "Testing React Components vs. Hooks",
+            "Isolation in Testing",
+            "Simulated DOM"
+          ],
+          "evaluationCriteria": [
+            "Ability to articulate the specialized role of `renderHook` for custom hooks.",
+            "Understanding the fundamental distinction between testing hooks in isolation and testing components through their rendered UI.",
+            "Knowledge of different testing library utilities and their appropriate use cases."
+          ],
+          "example": "```typescript\nimport { renderHook } from '@testing-library/react-hooks';\nimport { useSomeHook } from './useSomeHook';\n\n// Usage of renderHook: Focus on the hook's return values\nconst { result, rerender, unmount } = renderHook(() => useSomeHook());\n\n// Comparison with render from @testing-library/react:\n// import { render, screen } from '@testing-library/react';\n// import { MyComponent } from './MyComponent';\n// render(<MyComponent />); // Renders to virtual DOM\n// screen.getByText('Some Text'); // Interacts with the rendered output\n```",
+          "tags": [
+            "React Hooks",
+            "Testing",
+            "react-hooks-testing-library",
+            "Unit Testing",
+            "Testing Library"
+          ],
+          "prerequisites": [
+            "react_hooks",
+            "testing_library_basics"
+          ],
+          "complexity": 7,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_use_counter_flashcard_result_current",
+          "topic": "React Hooks Testing",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "In `react-hooks-testing-library`, what does `result.current` provide access to after calling `renderHook` and subsequent `act` updates?",
+          "answer": "The latest value returned by the custom hook.",
+          "options": [],
+          "analysisPoints": [
+            "`result.current` is the primary interface for inspecting the state and functions exposed by your hook during testing.",
+            "It always reflects the most up-to-date return value after any React updates have been processed (especially after `act` calls)."
+          ],
+          "keyConcepts": [
+            "result.current",
+            "React Hook Testing Library",
+            "Hook State"
+          ],
+          "evaluationCriteria": [
+            "Basic recall of `react-hooks-testing-library` API for accessing hook output."
+          ],
+          "example": "",
+          "tags": [
+            "React Hooks",
+            "Testing",
+            "react-hooks-testing-library",
+            "Flashcard"
+          ],
+          "prerequisites": [
+            "react_hooks"
+          ],
+          "complexity": 4,
+          "interviewFrequency": 6,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_use_counter_code_usetoggle_test",
+          "topic": "React Hooks Testing",
+          "level": "medium",
+          "type": "code",
+          "question": "Implement a `useToggle` custom hook that takes an optional initial value (default `false`) and returns a boolean state and a `toggle` function. Then, write a unit test for this hook using `react-hooks-testing-library` to ensure it toggles the value correctly and respects the initial state.",
+          "answer": "",
+          "options": [],
+          "analysisPoints": [
+            "Correctly implementing `useState` and `useCallback` within the hook demonstrates fundamental hook knowledge and best practices for stability.",
+            "Properly using `renderHook` to mount the hook in isolation is key for accurate testing.",
+            "Using `act` to trigger the `toggle` function ensures that React's internal updates are flushed, making tests reliable and preventing warnings.",
+            "Asserting against `result.current` for both initial and toggled states validates the hook's functionality."
+          ],
+          "keyConcepts": [
+            "Custom Hooks",
+            "useState",
+            "useCallback",
+            "react-hooks-testing-library",
+            "Unit Testing",
+            "act",
+            "Test-Driven Development"
+          ],
+          "evaluationCriteria": [
+            "Ability to create and test custom hooks adhering to React's best practices.",
+            "Understanding of testing asynchronous React updates with `act`.",
+            "Code quality, readability, and correct API usage."
+          ],
+          "example": "```typescript\n// useToggle.js\nimport { useState, useCallback } from 'react';\n\nexport function useToggle(initialValue = false) {\n  const [value, setValue] = useState(initialValue);\n\n  const toggle = useCallback(() => {\n    setValue(prevValue => !prevValue);\n  }, []);\n\n  return [value, toggle];\n}\n\n// useToggle.test.js\nimport { renderHook, act } from '@testing-library/react-hooks';\nimport { useToggle } from './useToggle';\n\ntest('should toggle value from false to true and back', () => {\n  const { result } = renderHook(() => useToggle());\n  expect(result.current[0]).toBe(false);\n\n  act(() => {\n    result.current[1](); // Call the toggle function\n  });\n  expect(result.current[0]).toBe(true);\n\n  act(() => {\n    result.current[1]();\n  });\n  expect(result.current[0]).toBe(false);\n});\n\ntest('should respect initial value', () => {\n  const { result } = renderHook(() => useToggle(true));\n  expect(result.current[0]).toBe(true);\n\n  act(() => {\n    result.current[1]();\n  });\n  expect(result.current[0]).toBe(false);\n});\n```",
+          "tags": [
+            "React Hooks",
+            "Testing",
+            "Code Challenge",
+            "useState",
+            "useCallback",
+            "Jest"
+          ],
+          "prerequisites": [
+            "react_hooks",
+            "jest",
+            "testing_library"
+          ],
+          "complexity": 7,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_use_counter_difficulty_test",
+          "topic": "React Hooks Testing",
+          "level": "hard",
+          "type": "open",
+          "question": "You are testing a custom hook `useFetchData` that fetches data asynchronously. Explain how you would simulate different API responses (success, error, loading) and how `react-hooks-testing-library` and Jest mocks would be used together to achieve this. Consider potential race conditions if multiple fetches are triggered rapidly.",
+          "answer": "",
+          "options": [],
+          "analysisPoints": [
+            "**Mocking API Calls:** Explain how to use Jest's mocking capabilities (`jest.spyOn(global, 'fetch')` or `jest.mock('axios')`) to control network responses. Detail `mockResolvedValueOnce` for successful data and `mockRejectedValueOnce` for errors.",
+            "**Handling Asynchronicity:** Describe the use of `await act(async () => { ... })` and `waitForNextUpdate()` (or `waitFor`) from `react-hooks-testing-library` to wait for asynchronous state changes and re-renders that result from API calls.",
+            "**Simulating Loading States:** Explain how to assert the `loading` state immediately after the hook is rendered and before the API call resolves/rejects, and then again after the asynchronous operation completes.",
+            "**Simulating Race Conditions:** Discuss how `jest.useFakeTimers()` and `jest.advanceTimersByTime()` can simulate network delays, allowing you to test scenarios where multiple fetch requests might be initiated before previous ones complete. This highlights the need for cleanup functions in `useEffect` or debouncing/throttling mechanisms within the hook itself."
+          ],
+          "keyConcepts": [
+            "Asynchronous Testing",
+            "Jest Mocks",
+            "react-hooks-testing-library",
+            "Race Conditions",
+            "Network Requests",
+            "jest.useFakeTimers",
+            "useEffect Cleanup"
+          ],
+          "evaluationCriteria": [
+            "Advanced understanding of asynchronous testing patterns in React.",
+            "Proficiency in Jest mocking capabilities for network requests.",
+            "Ability to design robust tests for complex, side-effect-laden hooks.",
+            "Awareness of common pitfalls like race conditions and strategies to mitigate them in both hook implementation and testing."
+          ],
+          "example": "```typescript\n// Example pseudo-code for testing useFetchData hook:\nimport { renderHook, act, waitFor } from '@testing-library/react-hooks';\n\n// Assume useFetchData is implemented like:\n// function useFetchData(url) {\n//   const [data, setData] = useState(null);\n//   const [loading, setLoading] = useState(false);\n//   const [error, setError] = useState(null);\n//   useEffect(() => {\n//     let isMounted = true;\n//     const fetchData = async () => {\n//       setLoading(true);\n//       try {\n//         const response = await fetch(url);\n//         const json = await response.json();\n//         if (isMounted) setData(json);\n//       } catch (e) {\n//         if (isMounted) setError(e);\n//       } finally {\n//         if (isMounted) setLoading(false);\n//       }\n//     };\n//     fetchData();\n//     return () => { isMounted = false; }; // Cleanup for race conditions\n//   }, [url]);\n//   return { data, loading, error };\n// }\n\n// Mock the global fetch function\nglobal.fetch = jest.fn();\n\ntest('should fetch data successfully and update states', async () => {\n  // Arrange: Mock a successful API response\n  fetch.mockResolvedValueOnce({\n    ok: true,\n    json: () => Promise.resolve({ id: 1, name: 'Test Data' }),\n  });\n\n  // Act: Render the hook\n  const { result, waitForNextUpdate } = renderHook(() => useFetchData('/api/data'));\n\n  // Assert: Initial loading state\n  expect(result.current.loading).toBe(true);\n  expect(result.current.data).toBeNull();\n  expect(result.current.error).toBeNull();\n\n  // Act: Wait for the asynchronous update to complete\n  await act(async () => {\n    await waitForNextUpdate(); // Wait until the next render cycle occurs due to state change\n  });\n\n  // Assert: Final state after successful fetch\n  expect(result.current.loading).toBe(false);\n  expect(result.current.data).toEqual({ id: 1, name: 'Test Data' });\n  expect(result.current.error).toBeNull();\n});\n\ntest('should handle fetch errors and update states', async () => {\n  // Arrange: Mock an API error response\n  const errorMessage = 'Network error occurred!';\n  fetch.mockRejectedValueOnce(new Error(errorMessage));\n\n  // Act: Render the hook\n  const { result, waitForNextUpdate } = renderHook(() => useFetchData('/api/data'));\n\n  // Assert: Initial loading state (same as success case)\n  expect(result.current.loading).toBe(true);\n\n  // Act: Wait for the asynchronous update to complete\n  await act(async () => {\n    await waitForNextUpdate();\n  });\n\n  // Assert: Final state after error\n  expect(result.current.loading).toBe(false);\n  expect(result.current.data).toBeNull();\n  expect(result.current.error).toBeInstanceOf(Error);\n  expect(result.current.error.message).toBe(errorMessage);\n});\n```",
+          "tags": [
+            "React Hooks",
+            "Testing",
+            "Asynchronous",
+            "Jest",
+            "Mocks",
+            "Hard",
+            "API Integration"
+          ],
+          "prerequisites": [
+            "async_await",
+            "jest_mocking",
+            "react_hooks_advanced",
+            "useEffect"
+          ],
+          "complexity": 8,
+          "interviewFrequency": 9,
+          "learningPath": "advanced"
+        },
+        {
+          "id": "question_pure_component_mcq_shallow_comparison",
+          "topic": "React.PureComponent",
+          "level": "easy",
+          "type": "mcq",
+          "question": "Which of the following best describes how `React.PureComponent` optimizes re-renders?",
+          "answer": "It automatically implements `shouldComponentUpdate` with a shallow comparison of props and state.",
+          "options": [
+            "It performs a deep comparison of props and state to decide on re-renders.",
+            "It memoizes the entire component tree to avoid re-renders.",
+            "It automatically implements `shouldComponentUpdate` with a shallow comparison of props and state.",
+            "It prevents all re-renders unless `forceUpdate` is explicitly called."
+          ],
+          "analysisPoints": [
+            "The core mechanism of `PureComponent` is its default implementation of `shouldComponentUpdate`.",
+            "The comparison is *shallow*, meaning it only checks for reference equality of properties, not deep content changes.",
+            "This optimization avoids unnecessary work (re-rendering) when props and state haven't changed at the top level.",
+            "It does not prevent *all* re-renders; it's a conditional re-render based on its internal comparison logic."
+          ],
+          "keyConcepts": [
+            "React.PureComponent",
+            "shouldComponentUpdate",
+            "Shallow Comparison",
+            "Performance Optimization",
+            "Re-rendering"
+          ],
+          "evaluationCriteria": [
+            "Understanding of `PureComponent`'s internal mechanism for optimization.",
+            "Ability to distinguish between shallow and deep comparison.",
+            "Knowledge of how `PureComponent` contributes to React performance."
+          ],
+          "example": "```typescript\n// PureComponent's internal shouldComponentUpdate logic:\nclass MyPureComponent extends React.PureComponent {\n  shouldComponentUpdate(nextProps, nextState) {\n    // This is the logic PureComponent implements automatically\n    return !shallowEqual(nextProps, this.props) || !shallowEqual(nextState, this.state);\n  }\n  render() { /* ... */ }\n}\n```",
+          "tags": [
+            "React",
+            "PureComponent",
+            "Performance",
+            "Shallow Comparison",
+            "Optimization"
+          ],
+          "prerequisites": [
+            "react_class_components"
+          ],
+          "complexity": 5,
+          "interviewFrequency": 7,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_pure_component_open_when_not_to_use",
+          "topic": "React.PureComponent",
+          "level": "medium",
+          "type": "open",
+          "question": "Describe scenarios where using `React.PureComponent` might lead to unexpected behavior or issues, rather than performance improvements. What alternative strategies or patterns would you consider in such cases?",
+          "answer": "",
+          "options": [],
+          "analysisPoints": [
+            "**Deeply Nested Objects/Arrays:** If props or state contain objects or arrays that are mutated internally (i.e., their contents change, but their reference remains the same), `PureComponent`'s shallow comparison will not detect the change. This leads to the component *not* re-rendering, resulting in stale or incorrect UI. This is the most common pitfall.",
+            "**Functions as Props:** When a parent component defines a function inline within its `render` method and passes it as a prop to a `PureComponent` child, a new function instance is created on every parent re-render. `PureComponent` will detect this new function reference (even if its logic is identical) and unnecessarily re-render its child.",
+            "**Context API:** Components that consume React Context (especially legacy context or if `shouldComponentUpdate` is not designed to account for it) might re-render even if their own props and state are shallowly equal, as `PureComponent`'s default logic does not inherently check for context changes.",
+            "**Alternatives/Mitigations:**\n    *   **Immutability:** Always update nested data by creating new objects/arrays (e.g., using spread syntax `{ ...old, key: newValue }` or immutable-helper libraries like Immer). This ensures new references are generated when content changes, allowing `PureComponent` to detect updates.\n    *   **Memoizing Functions:** For functions passed as props, ensure their reference is stable. For class components, bind methods in the constructor (`this.method = this.method.bind(this)`). For functional components, use `useCallback` (`const memoizedFn = useCallback(() => { ... }, [dependencies])`).\n    *   **Custom `shouldComponentUpdate`:** For complex cases requiring deep comparisons or specific logic, use `React.Component` and implement `shouldComponentUpdate` manually with custom comparison logic.\n    *   **`React.memo` with Custom Comparison:** For functional components, `React.memo` (the functional equivalent of `PureComponent`) can accept a second argument, `arePropsEqual`, which is a custom comparison function for more granular control over re-renders."
+          ],
+          "keyConcepts": [
+            "PureComponent Limitations",
+            "Shallow Comparison",
+            "Immutability",
+            "Functions as Props",
+            "Context API",
+            "shouldComponentUpdate",
+            "React.memo",
+            "useCallback"
+          ],
+          "evaluationCriteria": [
+            "Identification and clear explanation of `PureComponent`'s pitfalls due to shallow comparison.",
+            "Understanding of how these issues manifest (e.g., stale UI, unnecessary re-renders).",
+            "Knowledge of best practices for state management and functional components to avoid these issues.",
+            "Ability to suggest appropriate alternative solutions or patterns."
+          ],
+          "example": "```typescript\n// Problematic scenario for PureComponent due to mutable nested object:\nclass Parent extends React.Component {\n  state = { data: { count: 0 } };\n  componentDidMount() {\n    setInterval(() => {\n      // Problem: Mutates the existing object and then sets state with the SAME REFERENCE\n      this.state.data.count++; \n      this.setState({ data: this.state.data }); // PureChild WILL NOT re-render reliably\n    }, 1000);\n  }\n  render() {\n    return <PureChild data={this.state.data} />;\n  }\n}\nclass PureChild extends React.PureComponent {\n  render() {\n    console.log('PureChild re-rendered'); // Might not log when expected\n    return <p>Count: {this.props.data.count}</p>;\n  }\n}\n\n// Mitigation for the above issue (using immutability):\nclass ParentFixed extends React.Component {\n  state = { data: { count: 0 } };\n  componentDidMount() {\n    setInterval(() => {\n      // Solution: Create a NEW object reference when data changes\n      this.setState(prevState => ({\n        data: { ...prevState.data, count: prevState.data.count + 1 }\n      }));\n    }, 1000);\n  }\n  render() {\n    return <PureChild data={this.state.data} />;\n  }\n}\n```",
+          "tags": [
+            "React",
+            "PureComponent",
+            "Performance",
+            "Pitfalls",
+            "Immutability",
+            "Optimization"
+          ],
+          "prerequisites": [
+            "react_lifecycle_methods",
+            "javascript_objects_references",
+            "react_state_management"
+          ],
+          "complexity": 7,
+          "interviewFrequency": 8,
+          "learningPath": "advanced"
+        },
+        {
+          "id": "question_pure_component_flashcard_benefit",
+          "topic": "React.PureComponent",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "What is the primary benefit of using `React.PureComponent` in a class component?",
+          "answer": "It provides a performance boost by preventing unnecessary re-renders of the component when its props and state have not shallowly changed.",
+          "options": [],
+          "analysisPoints": [
+            "The main advantage is reducing the number of `render` calls, thus saving CPU cycles and improving application responsiveness.",
+            "It's a form of memoization for class components."
+          ],
+          "keyConcepts": [
+            "PureComponent",
+            "Performance Optimization",
+            "Re-renders",
+            "shouldComponentUpdate"
+          ],
+          "evaluationCriteria": [
+            "Basic understanding of `PureComponent`'s purpose and its direct impact on performance."
+          ],
+          "example": "",
+          "tags": [
+            "React",
+            "PureComponent",
+            "Performance",
+            "Flashcard",
+            "Optimization"
+          ],
+          "prerequisites": [
+            "react_basics"
+          ],
+          "complexity": 4,
+          "interviewFrequency": 6,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_pure_component_code_refactor_example",
+          "topic": "React.PureComponent",
+          "level": "medium",
+          "type": "code",
+          "question": "Consider a `UserProfile` component that receives `user` (an object) and `onEdit` (a function) as props. The `user` object might have nested properties (e.g., `user.address.city`). The `onEdit` function is passed down from a parent. Refactor the `UserProfile` from `React.Component` to `React.PureComponent` and identify any potential issues that might arise if `user` is mutated or `onEdit` is an inline function in the parent. Suggest and implement how to mitigate these issues.",
+          "answer": "",
+          "options": [],
+          "analysisPoints": [
+            "Demonstrates the syntactic change from `React.Component` to `React.PureComponent`.",
+            "Highlights the `console.log` in `render` to observe re-renders, which helps in debugging performance.",
+            "Explains that if `user.address.city` is changed without creating a new `user` object reference, `PureComponent` will *not* re-render (stale UI).",
+            "Explains that if `onEdit` is defined inline in the parent's `render` method, it will create a new function reference every time, causing `PureComponent` to unnecessarily re-render.",
+            "Proposes and implements solutions:\n    *   For `user` object: enforce immutability by always creating a new object reference when updating (`this.setState(prev => ({ user: { ...prev.user, name: 'new' } }))` or deep cloning if necessary). For nested objects, all ancestors in the path to the mutated property must also be new objects.\n    *   For `onEdit` function: memoize the function. For class components, this means binding `this` in the constructor (`this.method = this.method.bind(this)`). For functional parents, it implies using `useCallback`."
+          ],
+          "keyConcepts": [
+            "PureComponent",
+            "Immutability",
+            "Function References",
+            "Performance Optimization",
+            "shouldComponentUpdate",
+            "useCallback",
+            "Class Component Optimization"
+          ],
+          "evaluationCriteria": [
+            "Ability to apply `PureComponent` correctly.",
+            "Identifying and explaining common `PureComponent` pitfalls (mutable nested data, unstable function references).",
+            "Proposing and implementing effective, idiomatic React solutions for these pitfalls (immutability, memoization).",
+            "Understanding the underlying reasons for `PureComponent`'s behavior."
+          ],
+          "example": "```typescript\nimport React from 'react';\n\n// --- Initial UserProfile component (React.Component) ---\nclass UserProfileRegular extends React.Component {\n  render() {\n    console.log('UserProfileRegular (React.Component) re-rendered');\n    const { user, onEdit } = this.props;\n    return (\n      <div style={{ border: '1px solid #aaa', padding: '10px', margin: '10px' }}>\n        <h3>Regular User Profile</h3>\n        <p>Name: {user.name}</p>\n        <p>City: {user.address.city}</p>\n        <button onClick={onEdit}>Edit Profile</button>\n      </div>\n    );\n  }\n}\n\n// --- Refactored UserProfile component (React.PureComponent) ---\nclass UserProfilePure extends React.PureComponent {\n  render() {\n    console.log('UserProfilePure (React.PureComponent) re-rendered');\n    const { user, onEdit } = this.props;\n    return (\n      <div style={{ border: '1px solid #228B22', padding: '10px', margin: '10px' }}>\n        <h3>Pure User Profile</h3>\n        <p>Name: {user.name}</p>\n        <p>City: {user.address.city}</p>\n        <button onClick={onEdit}>Edit Profile</button>\n      </div>\n    );\n  }\n}\n\n// --- Parent Component demonstrating issues and solutions ---\nclass AppParent extends React.Component {\n  state = {\n    count: 0,\n    user: { \n      id: 1, \n      name: 'John Doe', \n      address: { street: '123 Main St', city: 'Anytown' }\n    }\n  };\n\n  // Mitigation for functions as props: Bind in constructor for class components\n  constructor(props) {\n    super(props);\n    this.handleEdit = this.handleEdit.bind(this);\n    // If a functional parent, use useCallback: \n    // const handleEdit = useCallback(() => { console.log('Editing...'); }, []);\n  }\n\n  handleEdit() {\n    console.log('Editing user profile...');\n  }\n\n  componentDidMount() {\n    this.interval = setInterval(() => {\n      this.setState(prevState => {\n        const newCount = prevState.count + 1;\n        let newUser = prevState.user;\n\n        // Simulate changing user data every 3 seconds\n        if (newCount % 3 === 0) {\n          // Problematic: Mutating nested property without creating new reference\n          // prevState.user.address.city = 'Othertown ' + newCount; \n          // newUser = prevState.user; \n\n          // Mitigation: Ensure immutability for user object and nested address\n          newUser = {\n            ...prevState.user,\n            address: { ...prevState.user.address, city: `City ${newCount}` }\n          };\n        }\n        \n        return { count: newCount, user: newUser };\n      });\n    }, 1000);\n  }\n\n  componentWillUnmount() {\n    clearInterval(this.interval);\n  }\n\n  render() {\n    console.log('AppParent re-rendered. Count:', this.state.count);\n    return (\n      <div style={{ padding: '20px', border: '2px dashed blue' }}>\n        <h1>Parent Component (updates every second)</h1>\n        <p>Parent Current Count: {this.state.count}</p>\n        <hr/>\n        <UserProfileRegular user={this.state.user} onEdit={this.handleEdit} />\n        <hr/>\n        <UserProfilePure user={this.state.user} onEdit={this.handleEdit} />\n        <p>Check console logs for 're-rendered' messages.</p>\n      </div>\n    );\n  }\n}\n\nexport default AppParent;\n```",
+          "tags": [
+            "React",
+            "PureComponent",
+            "Code Challenge",
+            "Performance",
+            "Immutability",
+            "Functions as Props",
+            "Optimization"
+          ],
+          "prerequisites": [
+            "react_class_components",
+            "javascript_closures_scope",
+            "react_state_management"
+          ],
+          "complexity": 7,
+          "interviewFrequency": 9,
+          "learningPath": "advanced"
+        },
+        {
+          "id": "question_pure_component_mcq_deep_comparison",
+          "topic": "React.PureComponent",
+          "level": "hard",
+          "type": "mcq",
+          "question": "You have a `React.PureComponent` that receives a `data` prop, which is an array of objects: `[{ id: 1, value: 'A' }, { id: 2, value: 'B' }]`. If you modify the `value` of an object within this array (e.g., `data[0].value = 'C'`) directly (mutating the original object) without creating a new array or a new object reference for `data[0]`, will the `PureComponent` re-render?",
+          "answer": "No, because `PureComponent` performs a shallow comparison and the array reference itself has not changed.",
+          "options": [
+            "Yes, because `PureComponent` detects changes in nested array elements.",
+            "No, because `PureComponent` performs a shallow comparison and the array reference itself has not changed.",
+            "Only if `React.memo` is used in conjunction with `PureComponent`.",
+            "It depends on whether `shouldComponentUpdate` is explicitly overridden."
+          ],
+          "analysisPoints": [
+            "This question tests a critical understanding of the 'shallow' aspect of `PureComponent`'s comparison.",
+            "Mutating a nested property of an object or array without creating a new reference for the parent object/array is a common trap for `PureComponent`.",
+            "Because the `data` array's reference remains the same (`this.props.data === nextProps.data`), `shallowEqual` will return `true` for the props, causing `PureComponent` to skip the re-render.",
+            "For the component to re-render, a new array and new object references for the changed items within it must be created (e.g., `newData = oldData.map(item => item.id === 1 ? { ...item, value: 'C' } : item)`).",
+            "Explicitly overriding `shouldComponentUpdate` or using `React.memo` with a custom comparison function (`arePropsEqual`) would be necessary if you *must* work with mutable deep data and require updates."
+          ],
+          "keyConcepts": [
+            "PureComponent",
+            "Shallow Comparison",
+            "Immutability",
+            "Nested Data",
+            "Object References",
+            "shouldComponentUpdate"
+          ],
+          "evaluationCriteria": [
+            "Deep understanding of `shallowEqual`'s limitations and its implications for `PureComponent`.",
+            "Ability to anticipate `PureComponent` behavior with mutable nested data structures.",
+            "Knowledge of how to correctly update complex data structures for optimized React components."
+          ],
+          "example": "```typescript\n// Parent component demonstrating mutable data sent to PureComponent\nclass ParentDataMutator extends React.Component {\n  state = { data: [{ id: 1, value: 'A' }, { id: 2, value: 'B' }] };\n\n  componentDidMount() {\n    this.interval = setInterval(() => {\n      // THIS IS PROBLEMATIC FOR PURECOMPONENT:\n      // Mutating the existing object inside the array, array reference remains the same\n      this.state.data[0].value = `Updated: ${Math.random().toFixed(2)}`;\n      this.setState({ data: this.state.data }); // array reference unchanged\n    }, 1000);\n  }\n\n  componentWillUnmount() {\n    clearInterval(this.interval);\n  }\n\n  render() {\n    console.log('ParentDataMutator render');\n    return <PureChildDisplay data={this.state.data} />;\n  }\n}\n\nclass PureChildDisplay extends React.PureComponent {\n  render() {\n    console.log('PureChildDisplay render called'); // This might NOT be called even if data[0].value changes\n    return (\n      <div style={{ border: '1px solid purple', padding: '10px', margin: '10px' }}>\n        <h3>Pure Child Display (Check Console)</h3>\n        {this.props.data.map(item => (\n          <p key={item.id}>{item.id}: {item.value}</p>\n        ))}\n      </div>\n    );\n  }\n}\n\nexport default ParentDataMutator;\n```",
+          "tags": [
+            "React",
+            "PureComponent",
+            "Performance",
+            "Shallow Comparison",
+            "Immutability",
+            "Hard",
+            "Data Structures"
+          ],
+          "prerequisites": [
+            "javascript_object_references",
+            "react_state_management"
+          ],
+          "complexity": 8,
+          "interviewFrequency": 8,
+          "learningPath": "advanced"
+        },
+        {
+          "id": "question_styled_components_mcq_css_syntax",
+          "topic": "Styled Components",
+          "level": "easy",
+          "type": "mcq",
+          "question": "What primary JavaScript syntax construct is used to write CSS rules directly within a Styled Components definition?",
+          "answer": "Tagged template literals (backticks ```` ` ````)",
+          "options": [
+            "JSX curly braces `{ }` with CSS-in-JS objects.",
+            "Regular CSS files imported as modules.",
+            "Tagged template literals (backticks ```` ` ````)",
+            "JSON objects passed as props to the `style` attribute."
+          ],
+          "analysisPoints": [
+            "Styled Components leverage a specific ES6 JavaScript feature: tagged template literals.",
+            "This allows for actual CSS syntax within JavaScript string literals, making the styling feel native CSS-like.",
+            "Other options describe different styling approaches (e.g., inline styles, CSS modules, plain JS objects), but not the core syntax of Styled Components."
+          ],
+          "keyConcepts": [
+            "Styled Components",
+            "CSS-in-JS",
+            "Template Literals",
+            "JavaScript Syntax"
+          ],
+          "evaluationCriteria": [
+            "Basic knowledge of Styled Components' core syntax and how CSS is embedded.",
+            "Understanding of fundamental JavaScript features used by the library."
+          ],
+          "example": "```typescript\nimport styled from 'styled-components';\n\nconst MyComponent = styled.div`\n  color: blue; /* CSS rules go inside these backticks */\n  font-size: 16px;\n  padding: 10px;\n`;\n\nfunction App() {\n  return <MyComponent>Hello, Styled!</MyComponent>;\n}\n```",
+          "tags": [
+            "Styled Components",
+            "CSS-in-JS",
+            "Syntax",
+            "Beginner"
+          ],
+          "prerequisites": [
+            "javascript_template_literals"
+          ],
+          "complexity": 3,
+          "interviewFrequency": 6,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_styled_components_open_advantages",
+          "topic": "Styled Components",
+          "level": "medium",
+          "type": "open",
+          "question": "Discuss at least three significant advantages of using Styled Components (or a similar CSS-in-JS library like Emotion) over traditional CSS methodologies (e.g., global CSS files, BEM, or CSS Modules) in a large-scale React application. Provide a brief explanation for each advantage.",
+          "answer": "",
+          "options": [],
+          "analysisPoints": [
+            "**Automatic Critical CSS & Performance:** Styled Components automatically extracts only the CSS required for the components rendered on the initial screen and injects it. This reduces the initial CSS bundle size, leading to faster page load times and better perceived performance compared to loading monolithic CSS files where much of the CSS might be unused on a given page.",
+            "**No Class Name Collisions & Scoped Styles:** Styled Components generate unique, hashed class names for each styled component. This completely eliminates the problem of class name collisions, which can plague large codebases using global CSS. Developers no longer need to rely on strict naming conventions like BEM or manual scoping mechanisms, simplifying development and preventing unexpected style overrides.",
+            "**Easier Deletion of CSS & Maintainability:** Styles are co-located directly with the React components they style. This means that when a component is deleted, its associated styles are automatically removed from the codebase. This prevents 'dead CSS' (CSS that is no longer used but remains in the codebase) from accumulating, which improves long-term maintainability and reduces technical debt. It also makes refactoring easier as style dependencies are clear.",
+            "**Dynamic Styling with JavaScript:** Styled Components allow direct access to component props and the theme object within the CSS definitions. This enables powerful dynamic styling based on component state, user interactions, or global theme variables, making components highly adaptable and reusable without resorting to complex JavaScript logic to toggle many class names.",
+            "**Theming Capabilities:** Libraries like Styled Components often come with built-in `ThemeProvider` support, making it straightforward to implement global themes (e.g., light/dark mode, brand colors) that can be easily accessed and applied across all styled components.",
+            "**Improved Developer Experience:** By keeping styling and component logic in the same JavaScript file, developers can reason about components more easily, leading to better organization and reduced context switching."
+          ],
+          "keyConcepts": [
+            "CSS-in-JS",
+            "Styled Components Advantages",
+            "Scoped Styles",
+            "Automatic Critical CSS",
+            "Maintainability",
+            "Performance Optimization",
+            "Dynamic Styling",
+            "Theming"
+          ],
+          "evaluationCriteria": [
+            "Ability to articulate multiple distinct advantages of CSS-in-JS.",
+            "Clear and concise explanations for each advantage.",
+            "Demonstration of understanding how these benefits address challenges in large-scale applications.",
+            "Comparison with traditional styling methods (implies understanding of their limitations)."
+          ],
+          "example": "",
+          "tags": [
+            "Styled Components",
+            "CSS-in-JS",
+            "Advantages",
+            "Architecture",
+            "Scaling",
+            "Frontend Development"
+          ],
+          "prerequisites": [
+            "css_basics",
+            "react_styling_methods"
+          ],
+          "complexity": 7,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_styled_components_flashcard_props",
+          "topic": "Styled Components",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "How can you pass and use dynamic props within a Styled Components style definition to conditionally change styles?",
+          "answer": "By using a JavaScript function (e.g., an arrow function) inside the template literal that receives the component's props as an argument.",
+          "options": [],
+          "analysisPoints": [
+            "This mechanism is fundamental to Styled Components' power for creating highly dynamic and reusable UI components.",
+            "The function receives the entire `props` object, allowing access to any prop passed to the component."
+          ],
+          "keyConcepts": [
+            "Styled Components",
+            "Dynamic Styling",
+            "Props",
+            "Tagged Template Literals",
+            "Conditional Styling"
+          ],
+          "evaluationCriteria": [
+            "Recall of the primary method for making styles dynamic in Styled Components."
+          ],
+          "example": "```typescript\nimport styled from 'styled-components';\n\nconst DynamicDiv = styled.div`\n  background-color: ${props => props.isActive ? 'blue' : 'gray'};\n  color: white;\n  padding: 10px;\n`;\n\n// Usage:\n// <DynamicDiv isActive={true}>Active</DynamicDiv>\n// <DynamicDiv isActive={false}>Inactive</DynamicDiv>\n```",
+          "tags": [
+            "Styled Components",
+            "Props",
+            "Flashcard",
+            "Dynamic Styling"
+          ],
+          "prerequisites": [
+            "react_props",
+            "javascript_arrow_functions"
+          ],
+          "complexity": 4,
+          "interviewFrequency": 6,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_styled_components_code_dynamic_button",
+          "topic": "Styled Components",
+          "level": "medium",
+          "type": "code",
+          "question": "Create a `Button` styled component that changes its `background-color` to `darkblue` and `color` to `white` when a `variant` prop is set to `'primary'`, otherwise it should have a `lightgray` background and `black` text. Additionally, apply a default `padding` of `10px 20px`, `border-radius` of `5px`, and `border: none`. Ensure it has a subtle `box-shadow` on hover. Finally, demonstrate its usage by rendering both a 'default' and a 'primary' button.",
+          "answer": "",
+          "options": [],
+          "analysisPoints": [
+            "Correctly define a styled component using `styled.button`.",
+            "Effectively utilize prop-based styling within the template literal to implement conditional `background-color` and `color`.",
+            "Apply basic CSS properties like `padding`, `border-radius`, and `border`.",
+            "Demonstrate the use of CSS pseudo-classes (`&:hover`) for interactive styling.",
+            "Properly render both primary and default buttons in a React component to show functionality."
+          ],
+          "keyConcepts": [
+            "Styled Components",
+            "Dynamic Styling",
+            "Props",
+            "CSS Properties",
+            "Pseudo-classes",
+            "Component Reusability"
+          ],
+          "evaluationCriteria": [
+            "Ability to create and apply styled components with dynamic properties.",
+            "Proficiency in embedding conditional logic within CSS using props.",
+            "Correct application of common CSS rules and pseudo-classes.",
+            "Clean and functional demonstration of the styled component."
+          ],
+          "example": "```typescript\nimport styled from 'styled-components';\nimport React from 'react';\n\nconst Button = styled.button`\n  padding: 10px 20px;\n  border-radius: 5px;\n  border: none;\n  cursor: pointer;\n  font-weight: bold;\n  transition: all 0.2s ease-in-out; /* Smooth transition for hover */\n  \n  background-color: ${props => props.variant === 'primary' ? 'darkblue' : 'lightgray'};\n  color: ${props => props.variant === 'primary' ? 'white' : 'black'};\n\n  &:hover {\n    opacity: 0.9;\n    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);\n  }\n`;\n\nfunction App() {\n  return (\n    <div style={{ padding: '20px', display: 'flex', gap: '10px' }}>\n      <Button>Default Button</Button>\n      <Button variant=\"primary\">Primary Button</Button>\n    </div>\n  );\n}\n\nexport default App;\n```",
+          "tags": [
+            "Styled Components",
+            "Code Challenge",
+            "Dynamic Styling",
+            "CSS",
+            "Frontend"
+          ],
+          "prerequisites": [
+            "react_basics",
+            "css_basics"
+          ],
+          "complexity": 6,
+          "interviewFrequency": 7,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_styled_components_mcq_scoping",
+          "topic": "Styled Components",
+          "level": "medium",
+          "type": "mcq",
+          "question": "Which of the following statements most accurately describes how Styled Components ensure style isolation and prevent class name conflicts in a large application?",
+          "answer": "It generates unique, hashed class names for each styled component at runtime, automatically scoping the applied CSS rules.",
+          "options": [
+            "It uses the browser's Shadow DOM to encapsulate styles entirely.",
+            "It relies on global CSS cascades and enforces a strict BEM naming convention on developers.",
+            "It wraps components in an `iframe` to isolate their styles from the main document.",
+            "It generates unique, hashed class names for each styled component at runtime, automatically scoping the applied CSS rules."
+          ],
+          "analysisPoints": [
+            "The core mechanism of Styled Components for isolation is the automatic generation of unique, dynamic class names (e.g., `sc-1f7c1d7-0 jwWzQo`). These class names are injected into the HTML and CSS, effectively scoping the styles to their respective components.",
+            "This approach removes the burden of manual naming conventions (like BEM) or relying on developer discipline to avoid conflicts.",
+            "It does *not* use Shadow DOM (which is a different web component standard for true encapsulation) or iframes (which are heavy and create separate browsing contexts).",
+            "It directly solves the problem of global CSS conflicts by making styles locally relevant to the component that defines them."
+          ],
+          "keyConcepts": [
+            "Styled Components",
+            "Style Isolation",
+            "CSS Scoping",
+            "Class Name Collisions",
+            "CSS-in-JS Architecture",
+            "Runtime Generation"
+          ],
+          "evaluationCriteria": [
+            "Understanding of Styled Components' core architectural feature for style management and conflict prevention.",
+            "Ability to differentiate its approach from other styling methodologies.",
+            "Knowledge of how it enhances maintainability and scalability in large projects."
+          ],
+          "example": "```css\n/* Example of CSS generated by Styled Components for a Title component */\n.sc-bZQynM.gTjMgi {\n  font-size: 1.5em;\n  text-align: center;\n  color: palevioletred;\n}\n\n/* The generated HTML would look something like */\n<h1 class=\"sc-bZQynM gTjMgi\">Hello, Styled Components!</h1>\n```\nHere, `sc-bZQynM` and `gTjMgi` are unique, auto-generated class names ensuring the `h1` component's styles don't bleed out or conflict with any other `h1` or similar styles on the page.",
+          "tags": [
+            "Styled Components",
+            "CSS-in-JS",
+            "Scoping",
+            "Architecture",
+            "Intermediate"
+          ],
+          "prerequisites": [
+            "css_specificity",
+            "react_styling_methods"
+          ],
+          "complexity": 6,
+          "interviewFrequency": 7,
+          "learningPath": "intermediate"
+        }
+      ],
+      "tasks": [
+        {
+          "id": "task_implement_use_toggle_hook",
+          "title": "Implement and Test a `useToggle` Hook",
+          "description": "\nCreate a custom React Hook called `useToggle`. This hook should manage a boolean state, similar to `useState`, but specifically designed for toggling.\n\n**Requirements:**\n1.  The hook should accept an optional `initialValue` (default to `false`).\n2.  It should return an array containing the current boolean `value` and a `toggle` function.\n3.  The `toggle` function, when called, should invert the current boolean `value`.\n4.  Ensure the `toggle` function is stable across re-renders (i.e., use `useCallback`).\n\n**Testing Requirements:**\n1.  Write unit tests for `useToggle` using `react-hooks-testing-library`.\n2.  Test that the hook correctly initializes with the default `false` value.\n3.  Test that the hook correctly initializes with a provided `initialValue` (e.g., `true`).\n4.  Test that the `toggle` function correctly switches the boolean state from `false` to `true` and back multiple times.\n5.  Ensure all state-modifying actions in tests are wrapped with `act` to reflect React's update cycle.\n",
+          "difficulty": "medium",
+          "startingCode": "import { useState, useCallback } from 'react';\nimport { renderHook, act } from '@testing-library/react-hooks';\n\n// --- Implement useToggle hook here ---\n/**\n * A custom hook to manage a boolean toggle state.\n * @param {boolean} initialValue The initial boolean value (defaults to false).\n * @returns {[boolean, () => void]}\n */\nfunction useToggle(initialValue) {\n  // TODO: Implement the hook logic using useState and useCallback\n  return [false, () => {}]; // Placeholder\n}\n\n// --- Write tests for useToggle hook here ---\n// Example Test Structure:\n/*\ntest('should initialize with default false', () => {\n  const { result } = renderHook(() => useToggle());\n  expect(result.current[0]).toBe(false);\n});\n\ntest('should initialize with provided initial value', () => {\n  // ...\n});\n\ntest('should toggle value correctly multiple times', () => {\n  // ...\n});\n*/\n",
+          "solutionCode": "import { useState, useCallback } from 'react';\nimport { renderHook, act } from '@testing-library/react-hooks';\n\n/**\n * A custom hook to manage a boolean toggle state.\n * @param {boolean} initialValue The initial boolean value (defaults to false).\n * @returns {[boolean, () => void]}\n */\nfunction useToggle(initialValue = false) {\n  const [value, setValue] = useState(initialValue);\n\n  const toggle = useCallback(() => {\n    setValue(prevValue => !prevValue);\n  }, []);\n\n  return [value, toggle];\n}\n\ntest('should initialize with default false', () => {\n  const { result } = renderHook(() => useToggle());\n  expect(result.current[0]).toBe(false);\n});\n\ntest('should initialize with provided initial value', () => {\n  const { result } = renderHook(() => useToggle(true));\n  expect(result.current[0]).toBe(true);\n});\n\ntest('should toggle value correctly from false to true and back', () => {\n  const { result } = renderHook(() => useToggle());\n  expect(result.current[0]).toBe(false);\n\n  act(() => {\n    result.current[1](); // Call toggle function\n  });\n  expect(result.current[0]).toBe(true);\n\n  act(() => {\n    result.current[1](); // Call toggle again\n  });\n  expect(result.current[0]).toBe(false);\n});\n\ntest('should toggle value correctly from true to false and back', () => {\n  const { result } = renderHook(() => useToggle(true));\n  expect(result.current[0]).toBe(true);\n\n  act(() => {\n    result.current[1](); // Call toggle function\n  });\n  expect(result.current[0]).toBe(false);\n\n  act(() => {\n    result.current[1](); // Call toggle again\n  });\n  expect(result.current[0]).toBe(true);\n});\n\ntest('should handle multiple rapid toggles correctly', () => {\n  const { result } = renderHook(() => useToggle(false));\n  expect(result.current[0]).toBe(false);\n\n  act(() => {\n    result.current[1](); // false -> true\n    result.current[1](); // true -> false\n    result.current[1](); // false -> true\n  });\n  expect(result.current[0]).toBe(true);\n});\n",
+          "testCases": [
+            "Test `useToggle()` initializes to `false`.",
+            "Test `useToggle(true)` initializes to `true`.",
+            "Test `toggle()` switches `false` to `true`.",
+            "Test `toggle()` switches `true` to `false`.",
+            "Test multiple sequential `toggle()` calls result in correct final state (e.g., `false -> true -> false -> true`)."
+          ],
+          "hints": [
+            "Remember to use `useState` for managing the boolean state.",
+            "Wrap the `toggle` function with `useCallback` to prevent it from being recreated on every re-render of the component that consumes the hook. This is a good practice for performance and stability.",
+            "The `act()` wrapper is crucial around any code that causes state updates within your hook to ensure React's updates are processed before you assert on `result.current`."
+          ],
+          "tags": [
+            "React Hooks",
+            "Testing",
+            "Custom Hook",
+            "Unit Testing",
+            "Jest",
+            "useCallback",
+            "useState"
+          ],
+          "timeEstimate": 45,
+          "prerequisites": [
+            "react_useState",
+            "react_useCallback",
+            "react_hooks_testing_library_basics",
+            "jest_basics"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 8,
+          "learningPath": "intermediate",
+          "relatedConcepts": [
+            "useState",
+            "useCallback",
+            "act",
+            "renderHook",
+            "test_driven_development"
+          ]
+        },
+        {
+          "id": "task_pure_component_performance_demo",
+          "title": "Demonstrate PureComponent Performance Benefits",
+          "description": "\nCreate a React application that clearly demonstrates the performance difference in re-rendering behavior between `React.Component` and `React.PureComponent`. The goal is to show how `PureComponent` prevents unnecessary re-renders when its props and state have not shallowly changed, even if its parent re-renders frequently.\n\n**Requirements:**\n1.  **`ParentComponent`:**\n    *   Create a class component named `ParentComponent`.\n    *   It should maintain an internal state (e.g., a simple counter `timer`).\n    *   Update this `timer` state every second using `setInterval` in `componentDidMount` and clear it in `componentWillUnmount`. This will cause the `ParentComponent` to re-render frequently.\n    *   Include a `console.log('ParentComponent Rendered')` in its `render` method.\n2.  **`RegularChild`:**\n    *   Create a class component named `RegularChild` that extends `React.Component`.\n    *   It should render a simple message (e.g., 'Regular Child Rendered').\n    *   Include a `console.log('RegularChild Rendered')` in its `render` method.\n    *   Crucially, `RegularChild` should receive *no props* (or only static, unchanging props) from `ParentComponent`.\n3.  **`PureChild`:**\n    *   Create a class component named `PureChild` that extends `React.PureComponent`.\n    *   It should render a simple message (e.g., 'Pure Child Rendered').\n    *   Include a `console.log('PureChild Rendered')` in its `render` method.\n    *   Like `RegularChild`, `PureChild` should receive *no props* (or only static, unchanging props) from `ParentComponent`.\n4.  **Integration:** Render both `RegularChild` and `PureChild` components within the `ParentComponent`'s render method.\n5.  **Observation:** Run the application and observe the console output. Explain the difference in `render` call frequency for `RegularChild` vs. `PureChild`.\n",
+          "difficulty": "medium",
+          "startingCode": "import React from 'react';\n\nclass ParentComponent extends React.Component {\n  state = { timer: 0 };\n  intervalId = null;\n\n  componentDidMount() {\n    // TODO: Implement setInterval to update timer state every second\n  }\n\n  componentWillUnmount() {\n    // TODO: Clear interval to prevent memory leaks\n  }\n\n  render() {\n    console.log('ParentComponent Rendered');\n    return (\n      <div style={{ padding: '20px', border: '1px solid #ccc' }}>\n        <h1>Parent Timer: {this.state.timer}</h1>\n        <p>Observe the console logs to see which components re-render.</p>\n        <hr/>\n        {/* TODO: Render RegularChild and PureChild here, ensuring they receive no dynamic props */}\n        {/* <RegularChild /> */}\n        {/* <PureChild /> */}\n      </div>\n    );\n  }\n}\n\nclass RegularChild extends React.Component {\n  render() {\n    console.log('RegularChild Rendered');\n    return <p style={{ color: 'red' }}>I am a regular child.</p>;\n  }\n}\n\nclass PureChild extends React.PureComponent {\n  render() {\n    console.log('PureChild Rendered');\n    return <p style={{ color: 'green' }}>I am a pure child.</p>;\n  }\n}\n\nexport default ParentComponent;\n",
+          "solutionCode": "import React from 'react';\n\nclass ParentComponent extends React.Component {\n  state = { timer: 0 };\n  intervalId = null;\n\n  componentDidMount() {\n    this.intervalId = setInterval(() => {\n      this.setState(prevState => ({ timer: prevState.timer + 1 }));\n    }, 1000);\n  }\n\n  componentWillUnmount() {\n    if (this.intervalId) {\n      clearInterval(this.intervalId);\n    }\n  }\n\n  render() {\n    console.log('ParentComponent Rendered. Timer:', this.state.timer);\n    return (\n      <div style={{ padding: '20px', border: '2px solid blue', margin: '20px' }}>\n        <h1>Parent Component (Updates Every Second)</h1>\n        <p>Parent Timer Value: {this.state.timer}</p>\n        <p>Observe the console logs for 'Rendered' messages from children.</p>\n        <hr/>\n        <RegularChild />\n        <hr/>\n        <PureChild />\n      </div>\n    );\n  }\n}\n\nclass RegularChild extends React.Component {\n  render() {\n    console.log('RegularChild Rendered');\n    return <p style={{ color: 'red', border: '1px dashed red', padding: '5px' }}>\n      I am a RegularChild. I re-render every time my parent does.\n    </p>;\n  }\n}\n\nclass PureChild extends React.PureComponent {\n  render() {\n    console.log('PureChild Rendered');\n    return <p style={{ color: 'green', border: '1px dashed green', padding: '5px' }}>\n      I am a PureChild. I only re-render if my own state or props shallowly change.\n    </p>;\n  }\n}\n\nexport default ParentComponent;\n",
+          "testCases": [
+            "Verify `ParentComponent`'s `render` method logs to the console every second, confirming its re-rendering.",
+            "Verify `RegularChild`'s `render` method logs to the console every time `ParentComponent` re-renders, demonstrating its default behavior.",
+            "Verify `PureChild`'s `render` method logs only on its initial mount, but *not* on subsequent `ParentComponent` re-renders (unless its own state changes or new props are passed), illustrating the `PureComponent` optimization.",
+            "Confirm that the text content of both child components remains consistent, as their own states are not being updated and they receive no new props."
+          ],
+          "hints": [
+            "Place `console.log` statements at the beginning of each component's `render` method. This is the most direct way to observe when a component re-renders.",
+            "Ensure no props are passed to `RegularChild` and `PureChild` that change their reference, as this would cause `PureChild` to re-render.",
+            "Remember to use `setInterval` in `componentDidMount` for the `ParentComponent` to trigger periodic updates, and `clearInterval` in `componentWillUnmount` for cleanup."
+          ],
+          "tags": [
+            "React",
+            "Performance",
+            "PureComponent",
+            "Class Components",
+            "Lifecycle Methods",
+            "Optimization"
+          ],
+          "timeEstimate": 60,
+          "prerequisites": [
+            "react_class_components",
+            "react_lifecycle_methods",
+            "javascript_timers"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 9,
+          "learningPath": "intermediate",
+          "relatedConcepts": [
+            "shouldComponentUpdate",
+            "memoization",
+            "re-rendering",
+            "reconciliation"
+          ]
+        },
+        {
+          "id": "task_styled_components_ui_elements",
+          "title": "Build a Themed Button and Input using Styled Components",
+          "description": "\nCreate a small React application that utilizes Styled Components to implement a custom `Button` and an `Input` field. These components should demonstrate both basic static styling and dynamic styling based on props and user interaction.\n\n**Requirements:**\n1.  **`Button` Component (Styled Component):**\n    *   **Default Styles:** `background-color: #007bff` (a shade of blue), `color: white`, `padding: 10px 15px`, `border-radius: 5px`, `border: none`, `cursor: pointer`.\n    *   **Variant Prop:** Accept a `variant` prop. If `variant` is `'secondary'`, the background should be `gray` and text `white`. Otherwise (default/primary), use the default blue.\n    *   **Hover Effect:** Add a subtle `box-shadow` (e.g., `0px 2px 5px rgba(0, 0, 0, 0.2)`) and slight `opacity` change on hover.\n2.  **`Input` Component (Styled Component):**\n    *   **Default Styles:** `border: 1px solid #ccc`, `padding: 8px`, `border-radius: 4px`.\n    *   **Focus Effect:** When the input is focused, the `border-color` should change to `darkblue` and remove the default outline.\n    *   **`fullWidth` Prop:** Accept a `fullWidth` prop (boolean). If `true`, the `width` should be `100%`. Ensure padding and border are included in the width calculation (`box-sizing: border-box`).\n3.  **`App` Component (Functional React Component):**\n    *   Import and render instances of both your `Button` and `Input` components.\n    *   Showcase the different variants/props for each:\n        *   A default `Button`.\n        *   A `Button` with `variant=\"primary\"`.\n        *   A `Button` with `variant=\"secondary\"`.\n        *   A regular `Input`.\n        *   A `Input` with `fullWidth` prop set to `true`.\n",
+          "difficulty": "medium",
+          "startingCode": "import React from 'react';\nimport styled from 'styled-components';\n\n// TODO: Define Button styled component here\nconst Button = styled.button`\n  /* Add default styles */\n  /* Implement variant prop logic */\n  /* Add hover effect */\n`;\n\n// TODO: Define Input styled component here\nconst Input = styled.input`\n  /* Add default styles */\n  /* Implement focus effect */\n  /* Implement fullWidth prop logic */\n`;\n\nfunction App() {\n  return (\n    <div style={{ padding: '20px', maxWidth: '600px', margin: '0 auto', fontFamily: 'Arial, sans-serif' }}>\n      <h1>Styled UI Components</h1>\n\n      <h2>Buttons</h2>\n      <div style={{ display: 'flex', gap: '10px', marginBottom: '20px' }}>\n        {/* TODO: Render different button variants */}\n        {/* <Button>Default Button</Button> */}\n        {/* <Button variant=\"primary\">Primary Button</Button> */}\n        {/* <Button variant=\"secondary\">Secondary Button</Button> */}\n      </div>\n\n      <h2>Inputs</h2>\n      <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>\n        {/* TODO: Render different input types */}\n        {/* <Input type=\"text\" placeholder=\"Enter text...\" /> */}\n        {/* <Input type=\"text\" placeholder=\"Full width input...\" fullWidth /> */}\n      </div>\n    </div>\n  );\n}\n\nexport default App;\n",
+          "solutionCode": "import React from 'react';\nimport styled from 'styled-components';\n\nconst Button = styled.button`\n  background-color: ${props => {\n    switch (props.variant) {\n      case 'primary': return '#007bff';\n      case 'secondary': return 'gray';\n      default: return '#007bff'; // Default to primary if no variant or unknown variant\n    }\n  }};\n  color: white;\n  padding: 10px 15px;\n  border-radius: 5px;\n  border: none;\n  cursor: pointer;\n  font-size: 1em;\n  transition: all 0.2s ease-in-out; /* Smooth transition for hover */\n\n  &:hover {\n    opacity: 0.9;\n    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);\n  }\n`;\n\nconst Input = styled.input`\n  border: 1px solid #ccc;\n  padding: 8px;\n  border-radius: 4px;\n  font-size: 1em;\n  transition: border-color 0.2s ease-in-out;\n\n  ${props => props.fullWidth && `\n    width: 100%;\n    box-sizing: border-box; /* Include padding and border in the element's total width */\n  `}\n\n  &:focus {\n    border-color: darkblue;\n    outline: none; /* Remove default browser outline */\n    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25); /* Subtle focus ring */\n  }\n`;\n\nfunction App() {\n  return (\n    <div style={{ padding: '20px', maxWidth: '600px', margin: '0 auto', fontFamily: 'Arial, sans-serif' }}>\n      <h1>Styled UI Components</h1>\n\n      <h2>Buttons</h2>\n      <div style={{ display: 'flex', gap: '10px', marginBottom: '20px', flexWrap: 'wrap' }}>\n        <Button>Default Button</Button>\n        <Button variant=\"primary\">Primary Button</Button>\n        <Button variant=\"secondary\">Secondary Button</Button>\n        <Button onClick={() => alert('Button Clicked!')}>Click Me!</Button>\n      </div>\n\n      <h2>Inputs</h2>\n      <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>\n        <Input type=\"text\" placeholder=\"Enter regular text...\" />\n        <Input type=\"email\" placeholder=\"Enter email address...\" />\n        <Input type=\"text\" placeholder=\"Enter full width text...\" fullWidth />\n      </div>\n    </div>\n  );\n}\n\nexport default App;\n",
+          "testCases": [
+            "Verify `Button` component renders with default blue background and white text.",
+            "Verify `Button` with `variant=\"secondary\"` renders with a gray background.",
+            "Verify `Button` displays a `box-shadow` and slight `opacity` change when hovered over.",
+            "Verify `Input` component renders with a `1px solid #ccc` border.",
+            "Verify `Input`'s border color changes to `darkblue` when it receives focus.",
+            "Verify `Input` with `fullWidth` prop has `width: 100%` and `box-sizing: border-box` applied (inspect element in browser dev tools)."
+          ],
+          "hints": [
+            "For `Button` variants, use a conditional (ternary operator or `switch` statement) inside the template literal, checking `props.variant`.",
+            "For hover/focus effects, use CSS pseudo-classes like `&:hover` and `&:focus` within your styled component's template literal.",
+            "For the `Input`'s `fullWidth` prop, you can use a template literal interpolation (`${props => props.fullWidth && 'width: 100%;'}`) or a block of CSS string interpolation (`` ${props => props.fullWidth && `width: 100%; box-sizing: border-box;`} ``) for multi-line conditional styles."
+          ],
+          "tags": [
+            "Styled Components",
+            "UI Development",
+            "Dynamic Styling",
+            "CSS-in-JS",
+            "Frontend",
+            "Component Design"
+          ],
+          "timeEstimate": 60,
+          "prerequisites": [
+            "react_basics",
+            "css_basics",
+            "javascript_template_literals",
+            "javascript_props"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 8,
+          "learningPath": "intermediate",
+          "relatedConcepts": [
+            "styled_components_props",
+            "css_pseudo_classes",
+            "component_composition",
+            "theming_basics"
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "51703075-3e77-4075-b54c-616e396df6bb",
+    "startLine": 5500,
+    "endLine": 5599,
+    "processedDate": "2025-06-17T09:41:10.279Z",
+    "content": {
+      "logicalBlockInfo": {
+        "suggestedEndLine": -1
+      },
+      "theory": [
+        {
+          "id": "theory_styled_components",
+          "title": "Styled Components: CSS-in-JS for React",
+          "content": "Styled Components is a popular CSS-in-JS library that allows you to write actual CSS code to style your React components. It leverages tagged template literals to embed CSS directly into your JavaScript, providing a more component-oriented approach to styling.\n\n## Key Concepts\n- **CSS-in-JS**: Write CSS directly within your JavaScript files, collocated with your component logic.\n- **Tagged Template Literals**: Styled Components use JavaScript's tagged template literals (`styled.div` `` `background: blue;` ``) to define styles. This allows for powerful features like prop-based styling and easy interpolation.\n- **Component-Based Styling**: Each styled component is a true React component with styles attached. This promotes modularity and reusability.\n- **Automatic Vendor Prefixing**: Styled Components automatically handles vendor prefixes for CSS properties.\n- **Unique Class Names**: It automatically generates unique class names for your styles, eliminating class name collisions and making debugging easier.\n\n## Core Usage\nTo create a styled component, you import `styled` from `'styled-components'` and then call it with an HTML tag or another React component as a method, followed by a template literal containing your CSS rules.\n\n```jsx\nimport styled from 'styled-components';\n\n// Create a styled div\nconst Wrapper = styled.div`\n  padding: 4em;\n  background: papayawhip;\n`;\n\n// Create a styled h1\nconst Title = styled.h1`\n  font-size: 1.5em;\n  text-align: center;\n  color: palevioletred;\n`;\n\n// Use it like any other React component\nfunction App() {\n  return (\n    <Wrapper>\n      <Title>{'Lets start first styled component!'}</Title>\n    </Wrapper>\n  );\n}\n```\n\n## Advantages of Styled Components\n- **Component Libraries**: Facilitates building reusable component libraries with consistent styling.\n- **Dynamic Styles**: Easily implement styles that change based on component props or state.\n- **Avoid CSS Class Name Collisions**: Unique class names are generated automatically, preventing global styling conflicts.\n- **Removes Component-Style Mapping**: Styles are directly tied to components, simplifying maintenance and understanding.",
+          "examples": [
+            {
+              "id": "example_styled_components_basic_1",
+              "title": "Basic Styled Component Structure",
+              "code": "import styled from 'styled-components';\n\nconst Wrapper = styled.div`\n  padding: 4em;\n  background: papayawhip;\n`;\n\nconst Title = styled.h1`\n  font-size: 1.5em;\n  text-align: center;\n  color: palevioletred;\n`;\n\nfunction App() {\n  return (\n    <Wrapper>\n      <Title>{'Lets start first styled component!'}</Title>\n    </Wrapper>\n  );\n}",
+              "explanation": "This example demonstrates the fundamental way to define and use styled components. `Wrapper` and `Title` are created using `styled.<element>`` `CSS rules` syntax and then used as regular React components in the `App` function.",
+              "language": "typescript"
+            },
+            {
+              "id": "example_styled_components_props_2",
+              "title": "Dynamic Styles with Props",
+              "code": "import styled from 'styled-components';\n\nconst Button = styled.button`\n  background: ${props => props.primary ? 'palevioletred' : 'white'};\n  color: ${props => props.primary ? 'white' : 'palevioletred'};\n  font-size: 1em;\n  margin: 1em;\n  padding: 0.25em 1em;\n  border: 2px solid palevioletred;\n  border-radius: 3px;\n`;\n\nfunction MyComponent() {\n  return (\n    <>\n      <Button>Normal Button</Button>\n      <Button primary>Primary Button</Button>\n    </>\n  );\n}",
+              "explanation": "This example shows how to make styles dynamic using props. The `background` and `color` of the `Button` component change based on whether the `primary` prop is `true`. Inside the template literal, you can access props as a function argument.",
+              "language": "typescript"
+            },
+            {
+              "id": "example_styled_components_extend_3",
+              "title": "Extending Styles of Another Component",
+              "code": "import styled from 'styled-components';\n\nconst Button = styled.button`\n  background: white;\n  color: palevioletred;\n  border: 2px solid palevioletred;\n  border-radius: 3px;\n`;\n\nconst TomatoButton = styled(Button)`\n  color: tomato;\n  border-color: tomato;\n  /* Additional styles specific to TomatoButton */\n  box-shadow: 0 0 5px rgba(255, 99, 71, 0.5);\n`;\n\nfunction MyOtherComponent() {\n  return (\n    <>\n      <Button>Original Button</Button>\n      <TomatoButton>Tomato Button</TomatoButton>\n    </>\n  );\n}",
+              "explanation": "This demonstrates style inheritance. `TomatoButton` reuses all styles from the `Button` component and then overrides or adds new styles. This is achieved by passing the `Button` component itself to `styled()`.",
+              "language": "typescript"
+            }
+          ],
+          "relatedQuestions": [
+            "question_styled_components_mcq_1",
+            "question_styled_components_mcq_2",
+            "question_styled_components_open_1",
+            "question_styled_components_code_1",
+            "question_styled_components_flashcard_1",
+            "question_styled_components_mcq_3",
+            "question_styled_components_open_2",
+            "question_styled_components_flashcard_2"
+          ],
+          "relatedTasks": [
+            "task_styled_components_dynamic_button",
+            "task_styled_components_responsive_card"
+          ],
+          "tags": [
+            "React",
+            "CSS-in-JS",
+            "Styling",
+            "Frontend",
+            "Styled Components"
+          ],
+          "technology": "React, TypeScript",
+          "prerequisites": [
+            "React Basics",
+            "JavaScript ES6 Template Literals",
+            "CSS Fundamentals"
+          ],
+          "complexity": 6,
+          "interviewRelevance": 8,
+          "learningPath": "intermediate",
+          "requiredFor": [
+            "Component Library Development",
+            "Theming in React"
+          ]
+        },
+        {
+          "id": "theory_custom_hooks",
+          "title": "React Custom Hooks: Reusable Logic",
+          "content": "Custom Hooks are a powerful feature in React that allow you to extract reusable stateful logic from your components. They are JavaScript functions whose names start with the word `use` and can call other built-in React Hooks (like `useState`, `useEffect`, `useContext`, etc.). Custom Hooks enable you to share logic without sharing UI, adhering to the principle of separation of concerns.\n\n## Purpose of Custom Hooks\n- **Logic Reusability**: Extract complex logic (e.g., form handling, data fetching, state management for specific features) into a single function that can be used across multiple components.\n- **Improved Readability**: Components become cleaner and more focused on rendering, as logic is encapsulated elsewhere.\n- **Testability**: Logic encapsulated in a custom hook is often easier to test independently.\n- **Separation of Concerns**: Helps to separate UI logic from business logic.\n\n## Building Custom Hooks\nA custom hook is essentially a function that leverages one or more standard React Hooks to provide some piece of reusable functionality. It must always start with the `use` prefix, which is a convention that allows React to enforce rules of Hooks (e.g., calling Hooks only at the top level of a component or custom hook).\n\n```typescript\nimport { useState, useEffect } from 'react';\n\n// Custom hook for managing form input\nfunction useInput(initialValue: string) {\n  const [value, setValue] = useState(initialValue);\n  \n  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {\n    setValue(e.target.value);\n  };\n  \n  const reset = () => {\n    setValue(initialValue);\n  };\n  \n  return [value, handleChange, reset] as const; // 'as const' provides tuple inference\n}\n\n// Usage in a component\nfunction LoginForm() {\n  const [username, handleUsernameChange, resetUsername] = useInput('');\n  const [password, handlePasswordChange, resetPassword] = useInput('');\n  \n  const handleSubmit = (e: React.FormEvent) => {\n    e.preventDefault();\n    console.log('Submitted:', username, password);\n    resetUsername();\n    resetPassword();\n  };\n  \n  return (\n    <form onSubmit={handleSubmit}>\n      <div>\n        <label>Username:</label>\n        <input type=\"text\" value={username} onChange={handleUsernameChange} />\n      </div>\n      <div>\n        <label>Password:</label>\n        <input type=\"password\" value={password} onChange={handlePasswordChange} />\n      </div>\n      <button type=\"submit\">Login</button>\n      <button type=\"button\" onClick={() => { resetUsername(); resetPassword(); }}>Reset</button>\n    </form>\n  );\n}\n```\n\nIn the `useInput` example, it encapsulates the state (`value`), a change handler (`handleChange`), and a reset function (`reset`) for an input field. This allows any component to use `useInput` to easily manage its input fields without duplicating the `useState` and `handleChange` logic.",
+          "examples": [
+            {
+              "id": "example_custom_hooks_use_input_1",
+              "title": "Basic useInput Custom Hook",
+              "code": "import { useState } from 'react';\n\nfunction useInput(initialValue: string) {\n  const [value, setValue] = useState(initialValue);\n  \n  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {\n    setValue(e.target.value);\n  };\n  \n  const reset = () => {\n    setValue(initialValue);\n  };\n  \n  return [value, handleChange, reset] as const;\n}",
+              "explanation": "This is the definition of the `useInput` custom hook. It takes an `initialValue`, uses `useState` internally to manage the input's state, and returns the current `value`, a `handleChange` function for input events, and a `reset` function to restore the initial state. The `as const` ensures TypeScript infers a tuple type.",
+              "language": "typescript"
+            },
+            {
+              "id": "example_custom_hooks_login_form_2",
+              "title": "LoginForm Component Using useInput",
+              "code": "import React, { useState } from 'react';\n\n// Assume useInput is defined as above\nfunction useInput(initialValue: string) {\n    const [value, setValue] = useState(initialValue);\n    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => setValue(e.target.value);\n    const reset = () => setValue(initialValue);\n    return [value, handleChange, reset] as const;\n}\n\nfunction LoginForm() {\n  const [username, handleUsernameChange, resetUsername] = useInput('');\n  const [password, handlePasswordChange, resetPassword] = useInput('');\n  \n  const handleSubmit = (e: React.FormEvent) => {\n    e.preventDefault();\n    console.log('Submitted:', { username, password });\n    resetUsername();\n    resetPassword();\n  };\n  \n  return (\n    <form onSubmit={handleSubmit}>\n      <div>\n        <label>Username:</label>\n        <input type=\"text\" value={username} onChange={handleUsernameChange} />\n      </div>\n      <div>\n        <label>Password:</label>\n        <input type=\"password\" value={password} onChange={handlePasswordChange} />\n      </div>\n      <button type=\"submit\">Login</button>\n      <button type=\"button\" onClick={() => { resetUsername(); resetPassword(); }}>Reset</button>\n    </form>\n  );\n}",
+              "explanation": "This component demonstrates how `useInput` simplifies form handling. Instead of multiple `useState` calls and `onChange` handlers, each input uses `useInput` for its state management. The `handleSubmit` function logs the values and then resets the inputs using the returned `reset` functions.",
+              "language": "typescript"
+            }
+          ],
+          "relatedQuestions": [
+            "question_custom_hooks_mcq_1",
+            "question_custom_hooks_open_1",
+            "question_custom_hooks_code_1",
+            "question_custom_hooks_flashcard_1",
+            "question_custom_hooks_mcq_2",
+            "question_custom_hooks_mcq_3"
+          ],
+          "relatedTasks": [
+            "task_custom_hooks_use_local_storage",
+            "task_custom_hooks_use_debounce"
+          ],
+          "tags": [
+            "React",
+            "Hooks",
+            "Custom Hooks",
+            "State Management",
+            "Logic Reusability",
+            "Frontend"
+          ],
+          "technology": "React, TypeScript",
+          "prerequisites": [
+            "React Hooks (useState, useEffect)",
+            "JavaScript Functions"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 9,
+          "learningPath": "intermediate",
+          "requiredFor": [
+            "Advanced React Development",
+            "Building Reusable Utilities"
+          ]
+        }
+      ],
+      "questions": [
+        {
+          "id": "question_styled_components_mcq_1",
+          "topic": "Styled Components Basics",
+          "level": "easy",
+          "type": "mcq",
+          "question": "Which of the following best describes Styled Components?",
+          "answer": "A CSS-in-JS library for styling React components.",
+          "options": [
+            "A JavaScript framework for building user interfaces.",
+            "A CSS preprocessor like Sass or Less.",
+            "A CSS-in-JS library for styling React components.",
+            "A state management library for React applications."
+          ],
+          "analysisPoints": [
+            "Identifies Styled Components as a styling solution.",
+            "Distinguishes it from frameworks, preprocessors, or state management libraries.",
+            "Highlights its primary use case in React."
+          ],
+          "keyConcepts": [
+            "Styled Components",
+            "CSS-in-JS",
+            "React Component Styling"
+          ],
+          "evaluationCriteria": [
+            "Basic understanding of Styled Components' purpose."
+          ],
+          "example": "Styled Components allows embedding actual CSS within JavaScript using tagged template literals, like `const MyDiv = styled.div`` `color: blue;` ``.",
+          "tags": [
+            "Styled Components",
+            "CSS-in-JS",
+            "Basics"
+          ],
+          "prerequisites": [
+            "React Basics"
+          ],
+          "complexity": 3,
+          "interviewFrequency": 7,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_styled_components_mcq_2",
+          "topic": "Dynamic Styling with Props",
+          "level": "medium",
+          "type": "mcq",
+          "question": "Consider the following Styled Components code:\n\n```jsx\nimport styled from 'styled-components';\n\nconst StyledDiv = styled.div`\n  background-color: ${props => props.isActive ? 'blue' : 'gray'};\n  padding: 10px;\n`;\n\nfunction App() {\n  return (\n    <>\n      <StyledDiv isActive={true}>Active State</StyledDiv>\n      <StyledDiv isActive={false}>Inactive State</StyledDiv>\n    </>\n  );\n}\n```\n\nWhat will be the background color of the `StyledDiv` with the text \"Inactive State\"?",
+          "answer": "gray",
+          "options": [
+            "blue",
+            "gray",
+            "transparent",
+            "An error will occur"
+          ],
+          "analysisPoints": [
+            "Tests understanding of prop access within styled component CSS.",
+            "Evaluates the conditional rendering of styles based on prop values.",
+            "Confirms knowledge of template literal interpolation in Styled Components."
+          ],
+          "keyConcepts": [
+            "Styled Components Props",
+            "Dynamic Styling",
+            "Tagged Template Literals"
+          ],
+          "evaluationCriteria": [
+            "Ability to interpret Styled Components syntax.",
+            "Understanding of conditional styling."
+          ],
+          "example": "The `isActive` prop is passed to the `StyledDiv` component. Inside the styled component's template literal, `props.isActive` is accessed. For the \"Inactive State\" div, `isActive` is `false`, so the expression `props.isActive ? 'blue' : 'gray'` evaluates to `'gray'`.",
+          "tags": [
+            "Styled Components",
+            "Props",
+            "Dynamic Styling",
+            "Conditional Styling"
+          ],
+          "prerequisites": [
+            "Styled Components Basics",
+            "JavaScript Ternary Operator"
+          ],
+          "complexity": 5,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_styled_components_open_1",
+          "topic": "Benefits of Styled Components",
+          "level": "medium",
+          "type": "open",
+          "question": "Discuss at least three significant benefits of using Styled Components in a React application compared to traditional CSS approaches (e.g., BEM, global stylesheets).",
+          "answer": "",
+          "options": [],
+          "analysisPoints": [
+            "Ability to articulate the advantages of CSS-in-JS.",
+            "Understanding of how Styled Components addresses common CSS challenges.",
+            "Mention of specific benefits like avoiding class name collisions, dynamic styling, and component-style co-location.",
+            "Comparison with traditional CSS methodologies."
+          ],
+          "keyConcepts": [
+            "Styled Components Benefits",
+            "CSS-in-JS vs Traditional CSS",
+            "Class Name Collisions",
+            "Dynamic Styling",
+            "Component-Level Styling"
+          ],
+          "evaluationCriteria": [
+            "Depth of understanding of Styled Components' value proposition.",
+            "Clarity and comprehensiveness of the explanation.",
+            "Ability to compare and contrast different styling methodologies."
+          ],
+          "example": "Possible benefits include: \n1.  **Elimination of Class Name Collisions**: Styled Components automatically generates unique class names, solving the problem of global CSS conflicts and the need for complex naming conventions like BEM.\n2.  **Dynamic Styling Based on Props**: Styles can be dynamically changed based on component props or state, making it very powerful for building interactive UIs without complex JavaScript manipulations of CSS classes.\n3.  **Co-location of Styles and Logic**: Styles are defined directly within the component file, making it easier to understand, maintain, and refactor components as all related code (markup, logic, styles) is in one place.\n4.  **Easier Theming**: Context API can be easily integrated to manage application-wide themes.",
+          "tags": [
+            "Styled Components",
+            "Benefits",
+            "CSS Architecture",
+            "Interview Question"
+          ],
+          "prerequisites": [
+            "Styled Components",
+            "CSS Fundamentals"
+          ],
+          "complexity": 7,
+          "interviewFrequency": 9,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_styled_components_code_1",
+          "topic": "Extending Styled Components",
+          "level": "medium",
+          "type": "code",
+          "question": "Using Styled Components, create a base `Button` component and then extend it to create a `WarningButton` that changes the background to `orange` and text color to `white`, while retaining all other styles from the base `Button`.",
+          "answer": "",
+          "options": [],
+          "analysisPoints": [
+            "Correctly uses `styled(Component)` syntax for extending styles.",
+            "Applies new styles that override/add to the base styles.",
+            "Demonstrates understanding of reusability in Styled Components.",
+            "Valid React component usage."
+          ],
+          "keyConcepts": [
+            "Styled Components Extension",
+            "Style Inheritance",
+            "Component Reusability"
+          ],
+          "evaluationCriteria": [
+            "Correct implementation of style extension.",
+            "Syntactical correctness.",
+            "Clarity and conciseness of code."
+          ],
+          "example": "```jsx\nimport styled from 'styled-components';\n\nconst Button = styled.button`\n  background: palevioletred;\n  color: white;\n  font-size: 1em;\n  margin: 1em;\n  padding: 0.25em 1em;\n  border: 2px solid palevioletred;\n  border-radius: 3px;\n  cursor: pointer;\n`;\n\nconst WarningButton = styled(Button)`\n  background: orange;\n  color: white;\n  border-color: orange;\n`;\n\nfunction App() {\n  return (\n    <>\n      <Button>Regular Action</Button>\n      <WarningButton>Warning Action</WarningButton>\n    </>\n  );\n}\n```",
+          "tags": [
+            "Styled Components",
+            "Code Challenge",
+            "Extension",
+            "Reusability"
+          ],
+          "prerequisites": [
+            "Styled Components Basics"
+          ],
+          "complexity": 6,
+          "interviewFrequency": 7,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_styled_components_flashcard_1",
+          "topic": "Styled Components Tagged Template Literals",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "What JavaScript feature does Styled Components heavily rely on for defining styles?",
+          "answer": "Tagged Template Literals",
+          "options": [],
+          "analysisPoints": [],
+          "keyConcepts": [
+            "Tagged Template Literals",
+            "Styled Components Syntax"
+          ],
+          "evaluationCriteria": [],
+          "example": "Example: `styled.div`` `color: blue;` ``. The backticks (` `` `) define a template literal, and `styled.div` acts as the 'tag' function.",
+          "tags": [
+            "Styled Components",
+            "Flashcard",
+            "JavaScript",
+            "Syntax"
+          ],
+          "prerequisites": [
+            "JavaScript ES6"
+          ],
+          "complexity": 2,
+          "interviewFrequency": 6,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_styled_components_mcq_3",
+          "topic": "Styled Components and Performance",
+          "level": "medium",
+          "type": "mcq",
+          "question": "Which statement about Styled Components and performance is generally TRUE?",
+          "answer": "Styled Components generate unique class names at runtime, which helps prevent style collisions.",
+          "options": [
+            "Styled Components always result in larger bundle sizes than traditional CSS.",
+            "Styled Components offer server-side rendering (SSR) support out of the box for better initial load performance.",
+            "Styled Components require manual management of CSS class names to avoid collisions.",
+            "Styled Components generate unique class names at runtime, which helps prevent style collisions."
+          ],
+          "analysisPoints": [
+            "Tests knowledge of how Styled Components handle class names.",
+            "Addresses common misconceptions about bundle size and performance.",
+            "Checks understanding of SSR capabilities."
+          ],
+          "keyConcepts": [
+            "Styled Components Performance",
+            "Class Name Generation",
+            "SSR",
+            "Bundle Size"
+          ],
+          "evaluationCriteria": [
+            "Accurate understanding of Styled Components' underlying mechanisms.",
+            "Ability to discern true from false statements regarding its performance characteristics."
+          ],
+          "example": "Styled Components automatically generate unique class names for each styled component instance (e.g., `sc-bdfBwQ gBszFh`). This avoids the issues of global CSS and manual class name management, ensuring styles are isolated and conflict-free. While bundle size can be a consideration, it's often outweighed by developer experience and maintainability benefits, and SSR support is indeed available.",
+          "tags": [
+            "Styled Components",
+            "Performance",
+            "Interview Question"
+          ],
+          "prerequisites": [
+            "Styled Components Basics",
+            "Web Performance Basics"
+          ],
+          "complexity": 6,
+          "interviewFrequency": 7,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_styled_components_open_2",
+          "topic": "Styled Components Theming",
+          "level": "hard",
+          "type": "open",
+          "question": "How can you implement a global theme (e.g., dark/light mode, brand colors) across multiple Styled Components using the `ThemeProvider`? Provide a conceptual example.",
+          "answer": "",
+          "options": [],
+          "analysisPoints": [
+            "Mentions `ThemeProvider` and its role.",
+            "Explains how to define and pass a theme object.",
+            "Describes how styled components access theme properties via props.",
+            "Demonstrates understanding of context in React for global state."
+          ],
+          "keyConcepts": [
+            "Styled Components Theming",
+            "ThemeProvider",
+            "React Context",
+            "Global Styles"
+          ],
+          "evaluationCriteria": [
+            "Comprehensive explanation of the theming mechanism.",
+            "Clear conceptual example.",
+            "Understanding of the `ThemeProvider` and prop access."
+          ],
+          "example": "```jsx\nimport styled, { ThemeProvider } from 'styled-components';\n\n// 1. Define your themes\nconst lightTheme = {\n  primary: 'palevioletred',\n  secondary: 'white',\n  text: 'black',\n};\n\nconst darkTheme = {\n  primary: 'darkblue',\n  secondary: 'darkgray',\n  text: 'white',\n};\n\n// 2. Create styled components that use theme props\nconst Container = styled.div`\n  background: ${props => props.theme.secondary};\n  color: ${props => props.theme.text};\n  padding: 20px;\n  text-align: center;\n`;\n\nconst Button = styled.button`\n  background: ${props => props.theme.primary};\n  color: white;\n  padding: 10px 20px;\n  border: none;\n  border-radius: 5px;\n  cursor: pointer;\n`;\n\n// 3. Wrap your application or components with ThemeProvider\nfunction App() {\n  const [currentTheme, setCurrentTheme] = useState(lightTheme);\n\n  const toggleTheme = () => {\n    setCurrentTheme(prev => prev === lightTheme ? darkTheme : lightTheme);\n  };\n\n  return (\n    <ThemeProvider theme={currentTheme}>\n      <Container>\n        <h1>Current Theme: {currentTheme === lightTheme ? 'Light' : 'Dark'}</h1>\n        <Button onClick={toggleTheme}>Toggle Theme</Button>\n      </Container>\n    </ThemeProvider>\n  );\n}\n```\n\n`ThemeProvider` provides the `theme` object to all styled components within its tree via React Context. Styled components can then access these theme properties through their `props.theme` object, allowing for centralized theme management and dynamic theme switching.",
+          "tags": [
+            "Styled Components",
+            "Theming",
+            "ThemeProvider",
+            "React Context"
+          ],
+          "prerequisites": [
+            "Styled Components Basics",
+            "React Context API"
+          ],
+          "complexity": 8,
+          "interviewFrequency": 8,
+          "learningPath": "advanced"
+        },
+        {
+          "id": "question_styled_components_flashcard_2",
+          "topic": "Styled Components `styled()` function",
+          "level": "medium",
+          "type": "flashcard",
+          "question": "How do you extend the styles of an existing Styled Component to create a new one, as shown in the provided example?",
+          "answer": "By passing the existing Styled Component as an argument to the `styled()` function, e.g., `const NewComponent = styled(ExistingComponent)`.",
+          "options": [],
+          "analysisPoints": [],
+          "keyConcepts": [
+            "Styled Components Extension",
+            "Style Inheritance"
+          ],
+          "evaluationCriteria": [],
+          "example": "```jsx\nconst Button = styled.button` /* ... */ `;\nconst TomatoButton = styled(Button)`\n  color: tomato;\n  border-color: tomato;\n`;\n```",
+          "tags": [
+            "Styled Components",
+            "Flashcard",
+            "Extension",
+            "Inheritance"
+          ],
+          "prerequisites": [
+            "Styled Components Basics"
+          ],
+          "complexity": 4,
+          "interviewFrequency": 7,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_custom_hooks_mcq_1",
+          "topic": "Custom Hooks Purpose",
+          "level": "easy",
+          "type": "mcq",
+          "question": "What is the primary purpose of a React Custom Hook?",
+          "answer": "To extract and reuse stateful logic across multiple components.",
+          "options": [
+            "To manage global application state like Redux.",
+            "To perform side effects outside of component rendering.",
+            "To replace traditional component lifecycle methods.",
+            "To extract and reuse stateful logic across multiple components."
+          ],
+          "analysisPoints": [
+            "Correctly identifies the core functionality of custom hooks.",
+            "Distinguishes custom hooks from state management, direct side effects (though they enable them), or full lifecycle replacement."
+          ],
+          "keyConcepts": [
+            "Custom Hooks",
+            "Logic Reusability",
+            "Stateful Logic"
+          ],
+          "evaluationCriteria": [
+            "Basic understanding of custom hooks' role."
+          ],
+          "example": "A `useInput` hook encapsulates `useState` and `handleChange` logic, allowing multiple input fields to reuse this behavior without duplicating code.",
+          "tags": [
+            "React Hooks",
+            "Custom Hooks",
+            "Basics"
+          ],
+          "prerequisites": [
+            "React Hooks (useState)"
+          ],
+          "complexity": 3,
+          "interviewFrequency": 8,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_custom_hooks_open_1",
+          "topic": "Custom Hooks Benefits and Convention",
+          "level": "medium",
+          "type": "open",
+          "question": "Explain the advantages of using custom hooks in React development. What is the crucial naming convention for custom hooks and why is it important?",
+          "answer": "",
+          "options": [],
+          "analysisPoints": [
+            "Articulates benefits like reusability, separation of concerns, and readability.",
+            "States the `use` prefix naming convention.",
+            "Explains that the `use` prefix enables React to apply 'Rules of Hooks' and recognize them as hooks."
+          ],
+          "keyConcepts": [
+            "Custom Hooks Benefits",
+            "Naming Conventions",
+            "Rules of Hooks",
+            "Logic Reusability"
+          ],
+          "evaluationCriteria": [
+            "Comprehensive understanding of custom hooks' advantages.",
+            "Knowledge of the naming convention and its underlying reason.",
+            "Clarity and precision in explanation."
+          ],
+          "example": "Advantages include:\n1.  **Reusability**: Encapsulate complex logic (e.g., form validation, data fetching) into a single function that can be easily shared and reused across different components without prop drilling or render props.\n2.  **Separation of Concerns**: Helps to separate UI logic from business logic, making components cleaner and more focused on rendering.\n3.  **Readability and Maintainability**: Components become less cluttered, and the logic is easier to understand and test in isolation.\n\nThe crucial naming convention is that a custom hook **must start with the prefix `use`** (e.g., `useInput`, `useFetchData`). This convention is vital because it allows React's linter plugin to identify them as hooks and enforce the 'Rules of Hooks', such as calling hooks only at the top level of a function component or another custom hook, and not from regular JavaScript functions, loops, or conditional statements. This ensures the predictable behavior of hooks.",
+          "tags": [
+            "React Hooks",
+            "Custom Hooks",
+            "Benefits",
+            "Rules of Hooks",
+            "Interview Question"
+          ],
+          "prerequisites": [
+            "React Hooks (useState, useEffect)"
+          ],
+          "complexity": 7,
+          "interviewFrequency": 9,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_custom_hooks_code_1",
+          "topic": "Implementing a Custom Hook",
+          "level": "medium",
+          "type": "code",
+          "question": "Implement a custom hook named `useToggle` that manages a boolean state. It should return the current boolean value and a function to toggle it. Demonstrate its usage in a simple functional component.",
+          "answer": "",
+          "options": [],
+          "analysisPoints": [
+            "Correctly uses `useState` inside the custom hook.",
+            "Returns the state and a setter/toggle function.",
+            "Adheres to the `use` naming convention.",
+            "Demonstrates proper usage within a component.",
+            "Code is clean and functional."
+          ],
+          "keyConcepts": [
+            "Custom Hooks Implementation",
+            "useState",
+            "Boolean State Management",
+            "Hook Design"
+          ],
+          "evaluationCriteria": [
+            "Correct and efficient implementation.",
+            "Adherence to React Hook best practices.",
+            "Clear demonstration of usage."
+          ],
+          "example": "```typescript\nimport React, { useState } from 'react';\n\n// Custom hook: useToggle\nfunction useToggle(initialValue: boolean = false) {\n  const [value, setValue] = useState(initialValue);\n  \n  const toggle = () => {\n    setValue(currentValue => !currentValue);\n  };\n  \n  return [value, toggle] as const;\n}\n\n// Component using useToggle\nfunction LightSwitch() {\n  const [isOn, toggle] = useToggle(false);\n  \n  return (\n    <div>\n      <p>The light is: {isOn ? 'ON' : 'OFF'}</p>\n      <button onClick={toggle}>Toggle Light</button>\n    </div>\n  );\n}\n\n// Example App usage\nfunction App() {\n    return <LightSwitch />;\n}\n```",
+          "tags": [
+            "React Hooks",
+            "Custom Hooks",
+            "Code Challenge",
+            "useState"
+          ],
+          "prerequisites": [
+            "React Hooks (useState)"
+          ],
+          "complexity": 6,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_custom_hooks_flashcard_1",
+          "topic": "Custom Hooks Naming Convention",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "What prefix must all custom React Hooks start with?",
+          "answer": "`use`",
+          "options": [],
+          "analysisPoints": [],
+          "keyConcepts": [
+            "Custom Hooks",
+            "Naming Convention",
+            "Rules of Hooks"
+          ],
+          "evaluationCriteria": [],
+          "example": "Examples: `useInput`, `useFetch`, `useLocalStorage`.",
+          "tags": [
+            "React Hooks",
+            "Flashcard",
+            "Naming Convention"
+          ],
+          "prerequisites": [
+            "React Hooks Basics"
+          ],
+          "complexity": 2,
+          "interviewFrequency": 9,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_custom_hooks_mcq_2",
+          "topic": "Custom Hooks vs. Higher-Order Components (HOCs)",
+          "level": "hard",
+          "type": "mcq",
+          "question": "Which of the following is a key advantage of Custom Hooks over Higher-Order Components (HOCs) for code reuse in React?",
+          "answer": "Custom Hooks avoid wrapper hell and provide better composition for non-visual logic.",
+          "options": [
+            "HOCs are simpler to implement for sharing stateful logic.",
+            "Custom Hooks always lead to smaller bundle sizes.",
+            "Custom Hooks avoid wrapper hell and provide better composition for non-visual logic.",
+            "HOCs allow direct manipulation of the rendered JSX tree, which hooks do not."
+          ],
+          "analysisPoints": [
+            "Highlights a primary benefit of hooks over HOCs (wrapper hell).",
+            "Focuses on logic reuse rather than visual rendering.",
+            "Correctly identifies that HOCs often introduce extra nested components."
+          ],
+          "keyConcepts": [
+            "Custom Hooks",
+            "Higher-Order Components (HOCs)",
+            "Code Reusability",
+            "Composition",
+            "Wrapper Hell"
+          ],
+          "evaluationCriteria": [
+            "Deep understanding of different React code reuse patterns.",
+            "Ability to compare and contrast HOCs and Hooks effectively.",
+            "Recognition of common HOC drawbacks."
+          ],
+          "example": "HOCs wrap components, leading to deeply nested component trees in React DevTools ('wrapper hell'). Custom Hooks, on the other hand, abstract away logic *inside* functional components, resulting in a flatter component tree and more straightforward composition of different functionalities without introducing additional layers of components.",
+          "tags": [
+            "React Hooks",
+            "HOCs",
+            "Comparison",
+            "Advanced"
+          ],
+          "prerequisites": [
+            "React Hooks",
+            "Higher-Order Components"
+          ],
+          "complexity": 8,
+          "interviewFrequency": 7,
+          "learningPath": "advanced"
+        },
+        {
+          "id": "question_custom_hooks_mcq_3",
+          "topic": "Rules of Hooks",
+          "level": "medium",
+          "type": "mcq",
+          "question": "Which of the following statements about React's 'Rules of Hooks' is TRUE?",
+          "answer": "Hooks must be called at the top level of a React function component or another custom Hook.",
+          "options": [
+            "Hooks can be called inside loops, conditions, or nested functions.",
+            "Hooks can only be used with class components.",
+            "Hooks must be called at the top level of a React function component or another custom Hook.",
+            "Hooks do not require any specific naming convention."
+          ],
+          "analysisPoints": [
+            "Tests knowledge of where hooks can be called.",
+            "Reinforces that hooks are for functional components.",
+            "Checks understanding of the naming convention requirement."
+          ],
+          "keyConcepts": [
+            "Rules of Hooks",
+            "Conditional Hooks",
+            "Functional Components",
+            "Custom Hooks"
+          ],
+          "evaluationCriteria": [
+            "Accurate understanding of fundamental Hook rules.",
+            "Ability to identify incorrect usage patterns."
+          ],
+          "example": "The 'Rules of Hooks' state that Hooks must only be called at the top level of your React function components or custom Hooks. You cannot call Hooks inside loops, conditions, or nested functions. This ensures that Hooks are called in the same order each time a component renders, which is crucial for React to correctly associate state with calls to `useState` and effects with `useEffect`.",
+          "tags": [
+            "React Hooks",
+            "Rules of Hooks",
+            "Fundamentals"
+          ],
+          "prerequisites": [
+            "React Hooks Basics"
+          ],
+          "complexity": 6,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        }
+      ],
+      "tasks": [
+        {
+          "id": "task_styled_components_dynamic_button",
+          "title": "Create a Themed & Dynamic Button Component with Styled Components",
+          "description": "\nImplement a `Button` component using Styled Components that supports two main features:\n\n1.  **Theming**: It should accept a `variant` prop (`'primary'`, `'secondary'`, `'danger'`) and apply different background and text colors based on the variant.\n2.  **Size**: It should accept a `size` prop (`'small'`, `'medium'`, `'large'`) and adjust padding and font size accordingly.\n\n### Requirements:\n-   Use `styled-components` for all styling.\n-   Define default styles for the button.\n-   Implement conditional styling based on the `variant` prop (`primary`: blue, white text; `secondary`: gray, black text; `danger`: red, white text).\n-   Implement size adjustments based on the `size` prop (`small`: 0.5em padding, 0.8em font; `medium`: 1em padding, 1em font; `large`: 1.5em padding, 1.2em font).\n-   Provide a default variant (e.g., 'primary') and size (e.g., 'medium') if not specified.\n-   The button should have a `border-radius`, `cursor: pointer`, and `margin`.\n",
+          "difficulty": "medium",
+          "startingCode": "import React from 'react';\nimport styled from 'styled-components';\n\nconst Button = styled.button`\n  /* Add default styles here */\n  border: none;\n  border-radius: 5px;\n  cursor: pointer;\n  margin: 0.5em;\n\n  /* Implement variant-based styling here */\n  /* Example: background-color: ${props => props.variant === 'primary' ? 'blue' : 'grey'}; */\n\n  /* Implement size-based styling here */\n  /* Example: padding: ${props => props.size === 'small' ? '0.5em 1em' : '1em 2em'}; */\n`;\n\nfunction App() {\n  return (\n    <div>\n      <Button variant=\"primary\" size=\"medium\">Primary Button</Button>\n      <Button variant=\"secondary\" size=\"small\">Secondary Small</Button>\n      <Button variant=\"danger\" size=\"large\">Danger Large</Button>\n      <Button>Default Button</Button> {/* Should use default variant/size */}\n    </div>\n  );\n}\n\n// export default App; // For testing if needed\n",
+          "solutionCode": "import React from 'react';\nimport styled from 'styled-components';\n\nconst Button = styled.button`\n  background-color: #f0f0f0; /* Default background */\n  color: #333; /* Default text color */\n  border: none;\n  border-radius: 5px;\n  cursor: pointer;\n  margin: 0.5em;\n  transition: all 0.3s ease;\n\n  /* Default size */\n  padding: 1em 2em;\n  font-size: 1em;\n\n  ${props => {\n    switch (props.variant) {\n      case 'primary':\n        return `\n          background-color: #007bff;\n          color: white;\n          &:hover { background-color: #0056b3; }\n        `;\n      case 'secondary':\n        return `\n          background-color: #6c757d;\n          color: white;\n          &:hover { background-color: #5a6268; }\n        `;\n      case 'danger':\n        return `\n          background-color: #dc3545;\n          color: white;\n          &:hover { background-color: #c82333; }\n        `;\n      default:\n        return `\n          background-color: #f0f0f0;\n          color: #333;\n          &:hover { background-color: #e2e6ea; }\n        `;\n    }\n  }}\n\n  ${props => {\n    switch (props.size) {\n      case 'small':\n        return `\n          padding: 0.5em 1em;\n          font-size: 0.8em;\n        `;\n      case 'medium':\n        return `\n          padding: 1em 2em;\n          font-size: 1em;\n        `;\n      case 'large':\n        return `\n          padding: 1.5em 3em;\n          font-size: 1.2em;\n        `;\n      default:\n        return `\n          padding: 1em 2em;\n          font-size: 1em;\n        `;\n    }\n  }}\n`;\n\nfunction App() {\n  return (\n    <div>\n      <Button variant=\"primary\" size=\"medium\">Primary Button</Button>\n      <Button variant=\"secondary\" size=\"small\">Secondary Small</Button>\n      <Button variant=\"danger\" size=\"large\">Danger Large</Button>\n      <Button>Default Button</Button> {/* Uses default variant/size */}\n      <Button variant=\"primary\">Primary Default Size</Button>\n      <Button size=\"large\">Default Variant Large</Button>\n    </div>\n  );\n}\n\n// export default App;\n",
+          "testCases": [
+            "Button with `variant=\"primary\"` should have blue background.",
+            "Button with `variant=\"danger\"` should have red background.",
+            "Button with `size=\"small\"` should have smaller padding/font size.",
+            "Button with `size=\"large\"` should have larger padding/font size.",
+            "Button without `variant` or `size` props should apply default styles.",
+            "Button should combine variant and size styles correctly (e.g., `primary` `small`)."
+          ],
+          "hints": [
+            "You can use template literal functions to access props within your CSS. `background-color: ${props => props.myProp ? 'value1' : 'value2'};`",
+            "Consider using a `switch` statement or a lookup object within the template literal function for managing multiple variant/size options.",
+            "Remember to set default values for props if they are not provided, either through JavaScript defaults or within your styled component logic."
+          ],
+          "tags": [
+            "Styled Components",
+            "Dynamic Styling",
+            "Props",
+            "Theming",
+            "Frontend"
+          ],
+          "timeEstimate": 45,
+          "prerequisites": [
+            "Styled Components Basics",
+            "JavaScript ES6 Template Literals"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 8,
+          "learningPath": "intermediate",
+          "relatedConcepts": [
+            "theory_styled_components"
+          ]
+        },
+        {
+          "id": "task_styled_components_responsive_card",
+          "title": "Implement a Responsive Card Component with Styled Components",
+          "description": "\nCreate a responsive `Card` component using Styled Components. The card should display a title and some content.\n\n### Requirements:\n-   **Base Styles**: A basic card with `background-color`, `padding`, `border-radius`, and `box-shadow`.\n-   **Responsiveness**: The card's width should be `90%` of its parent on small screens (max-width: 768px) and `300px` fixed width on larger screens.\n-   **Centering**: The card should be horizontally centered on the page.\n-   **Internal Layout**: Use flexbox or grid for arranging title and content within the card.\n",
+          "difficulty": "medium",
+          "startingCode": "import React from 'react';\nimport styled from 'styled-components';\n\nconst Card = styled.div`\n  /* Add base styles here */\n  background-color: #fff;\n  padding: 20px;\n  border-radius: 8px;\n  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);\n\n  /* Implement responsiveness here */\n  /* @media (max-width: 768px) { ... } */\n`;\n\nconst CardTitle = styled.h2`\n  /* Add title styles */\n`;\n\nconst CardContent = styled.p`\n  /* Add content styles */\n`;\n\nfunction App() {\n  return (\n    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh', backgroundColor: '#f0f2f5' }}>\n      <Card>\n        <CardTitle>Welcome to My Card</CardTitle>\n        <CardContent>This is some content inside a responsive card. It should adapt its width based on screen size.</CardContent>\n      </Card>\n    </div>\n  );\n}\n\n// export default App; // For testing if needed\n",
+          "solutionCode": "import React from 'react';\nimport styled from 'styled-components';\n\nconst Card = styled.div`\n  background-color: #fff;\n  padding: 20px;\n  border-radius: 8px;\n  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);\n  margin: 20px auto; /* Centering with margin auto for block elements */\n  \n  /* Default for larger screens */\n  width: 300px;\n\n  /* Responsive styles for smaller screens */\n  @media (max-width: 768px) {\n    width: 90%;\n  }\n`;\n\nconst CardTitle = styled.h2`\n  color: #333;\n  margin-top: 0;\n  margin-bottom: 10px;\n  font-size: 1.5em;\n`;\n\nconst CardContent = styled.p`\n  color: #666;\n  line-height: 1.6;\n`;\n\nfunction App() {\n  return (\n    <div style={{ minHeight: '100vh', backgroundColor: '#f0f2f5', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>\n      <Card>\n        <CardTitle>Welcome to My Responsive Card</CardTitle>\n        <CardContent>This is some content inside a responsive card. It should adapt its width based on screen size. On smaller screens, it will take 90% width, and on larger screens, it will be fixed at 300px. This demonstrates media queries with Styled Components.</CardContent>\n      </Card>\n    </div>\n  );\n}\n\n// export default App;\n",
+          "testCases": [
+            "Card should have specified `background-color`, `padding`, `border-radius`, and `box-shadow`.",
+            "On screens larger than 768px, the card's width should be exactly `300px`.",
+            "On screens 768px or smaller, the card's width should be `90%`.",
+            "The card should be horizontally centered on the page.",
+            "Title and content should render correctly within the card."
+          ],
+          "hints": [
+            "Use CSS `media` queries directly inside your styled component's template literal for responsiveness.",
+            "For horizontal centering of a block element, `margin: 0 auto;` is a common technique.",
+            "Styled Components supports all standard CSS properties and features, including flexbox, grid, and media queries."
+          ],
+          "tags": [
+            "Styled Components",
+            "Responsiveness",
+            "Media Queries",
+            "Layout",
+            "Frontend"
+          ],
+          "timeEstimate": 60,
+          "prerequisites": [
+            "Styled Components Basics",
+            "CSS Media Queries",
+            "CSS Box Model"
+          ],
+          "complexity": 6,
+          "interviewRelevance": 7,
+          "learningPath": "intermediate",
+          "relatedConcepts": [
+            "theory_styled_components"
+          ]
+        },
+        {
+          "id": "task_custom_hooks_use_local_storage",
+          "title": "Implement a `useLocalStorage` Custom Hook",
+          "description": "\nCreate a custom React Hook named `useLocalStorage` that allows components to persist state in the browser's `localStorage`. This hook should behave similarly to `useState` but with automatic storage and retrieval.\n\n### Requirements:\n1.  **Signature**: The hook should accept a `key` (string) and an `initialValue` (any type) as arguments.\n2.  **State Management**: It should return the current `value` and a `setValue` function, just like `useState`.\n3.  **Persistence**: The `value` should be loaded from `localStorage` on initial render. If no value is found, the `initialValue` should be used.\n4.  **Update `localStorage`**: Whenever the `value` changes (via `setValue`), it should automatically update the corresponding entry in `localStorage`.\n5.  **Error Handling**: Gracefully handle cases where `localStorage` might not be available (e.g., in some browser environments or if it's restricted).\n6.  **Serialization**: Ensure values are correctly serialized to JSON before saving and parsed from JSON when loading.\n\n**Note**: Due to `localStorage` being a browser API, this hook is typically meant for client-side environments.\n",
+          "difficulty": "hard",
+          "startingCode": "import React, { useState, useEffect } from 'react';\n\nfunction useLocalStorage(key, initialValue) {\n  // TODO: Implement the logic for useLocalStorage\n  // 1. Get stored value from localStorage on initial render\n  // 2. If no value, use initialValue\n  // 3. Update localStorage whenever value changes\n  // 4. Handle JSON serialization/deserialization\n  // 5. Handle potential localStorage errors\n\n  return [initialValue, () => {}]; // Placeholder\n}\n\n// --- Example Usage (for testing) ---\nfunction Counter() {\n  const [count, setCount] = useLocalStorage('my-counter', 0);\n\n  return (\n    <div>\n      <p>Count: {count}</p>\n      <button onClick={() => setCount(prevCount => prevCount + 1)}>Increment</button>\n      <button onClick={() => setCount(0)}>Reset</button>\n    </div>\n  );\n}\n\nfunction UserSettings() {\n  const [name, setName] = useLocalStorage('user-name', 'Guest');\n  const [email, setEmail] = useLocalStorage('user-email', '');\n\n  return (\n    <div>\n      <label>\n        Name:\n        <input type=\"text\" value={name} onChange={(e) => setName(e.target.value)} />\n      </label>\n      <br />\n      <label>\n        Email:\n        <input type=\"email\" value={email} onChange={(e) => setEmail(e.target.value)} />\n      </label>\n      <p>Hello, {name}!</p>\n    </div>\n  );\n}\n\n// function App() {\n//   return (\n//     <div>\n//       <Counter />\n//       <hr />\n//       <UserSettings />\n//     </div>\n//   );\n// }\n\n// export default App;\n",
+          "solutionCode": "import React, { useState, useEffect } from 'react';\n\nfunction useLocalStorage<T>(key: string, initialValue: T): [T, React.Dispatch<React.SetStateAction<T>>] {\n  // Function to get the stored value from localStorage\n  const getStoredValue = (): T => {\n    if (typeof window === 'undefined') { // Check for server-side rendering environment\n      return initialValue;\n    }\n    try {\n      const item = window.localStorage.getItem(key);\n      return item ? JSON.parse(item) : initialValue;\n    } catch (error) {\n      console.error(`Error reading from localStorage key \"${key}\":`, error);\n      return initialValue;\n    }\n  };\n\n  const [value, setValue] = useState<T>(getStoredValue);\n\n  useEffect(() => {\n    if (typeof window !== 'undefined') {\n      try {\n        window.localStorage.setItem(key, JSON.stringify(value));\n      } catch (error) {\n        console.error(`Error writing to localStorage key \"${key}\":`, error);\n      }\n    }\n  }, [key, value]);\n\n  return [value, setValue];\n}\n\n// --- Example Usage (for testing) ---\nfunction Counter() {\n  const [count, setCount] = useLocalStorage('my-counter', 0);\n\n  return (\n    <div>\n      <h3>Counter with LocalStorage</h3>\n      <p>Count: {count}</p>\n      <button onClick={() => setCount(prevCount => prevCount + 1)}>Increment</button>\n      <button onClick={() => setCount(0)}>Reset</button>\n    </div>\n  );\n}\n\nfunction UserSettings() {\n  const [name, setName] = useLocalStorage('user-name', 'Guest');\n  const [email, setEmail] = useLocalStorage('user-email', '');\n  const [isDarkMode, setIsDarkMode] = useLocalStorage('dark-mode', false);\n\n  return (\n    <div>\n      <h3>User Settings with LocalStorage</h3>\n      <label>\n        Name:\n        <input type=\"text\" value={name} onChange={(e) => setName(e.target.value)} />\n      </label>\n      <br />\n      <label>\n        Email:\n        <input type=\"email\" value={email} onChange={(e) => setEmail(e.target.value)} />\n      </label>\n      <br/>\n      <label>\n        Dark Mode:\n        <input type=\"checkbox\" checked={isDarkMode} onChange={(e) => setIsDarkMode(e.target.checked)} />\n      </label>\n      <p>Hello, {name}! Your email is {email}. Dark mode is {isDarkMode ? 'enabled' : 'disabled'}.</p>\n    </div>\n  );\n}\n\nfunction App() {\n  return (\n    <div style={{ padding: '20px', fontFamily: 'Arial, sans-serif' }}>\n      <Counter />\n      <hr style={{ margin: '30px 0' }}/>\n      <UserSettings />\n    </div>\n  );\n}\n\n// export default App;\n",
+          "testCases": [
+            "Initial load: If 'my-counter' is not in localStorage, `count` should be 0. If it is, `count` should load that value.",
+            "Incrementing `count`: Clicking Increment should update `count` and persist the new value in localStorage.",
+            "Resetting `count`: Clicking Reset should set `count` to 0 and persist it.",
+            "String/Text fields: `user-name` and `user-email` should load/save correctly when input changes.",
+            "Boolean fields: `dark-mode` should load/save correctly when checkbox is toggled.",
+            "Multiple instances: Ensure multiple `useLocalStorage` calls with different keys work independently.",
+            "JSON serialization: Test with objects/arrays as initial values (e.g., `useLocalStorage('my-array', [1, 2, 3])`).",
+            "Error handling: Simulate `localStorage` unavailability (e.g., in a non-browser environment) to ensure it defaults to `initialValue` without crashing (though hard to test in browser).",
+            "Type safety: Ensure TypeScript types (`<T>`) are handled correctly."
+          ],
+          "hints": [
+            "You'll need `useState` to hold the current value and `useEffect` to handle the side effect of reading from/writing to `localStorage`.",
+            "The `initialValue` for `useState` can be a function that computes the initial state, which is useful for lazy initialization that involves `localStorage` access.",
+            "Remember that `localStorage` only stores strings. You'll need `JSON.stringify()` before saving and `JSON.parse()` after retrieving.",
+            "Wrap `localStorage` operations in `try...catch` blocks as access can sometimes be denied or cause errors (e.g., storage full). Also, check `typeof window !== 'undefined'` for SSR compatibility."
+          ],
+          "tags": [
+            "React Hooks",
+            "Custom Hooks",
+            "LocalStorage",
+            "State Persistence",
+            "Side Effects",
+            "Data Management",
+            "Interview Challenge"
+          ],
+          "timeEstimate": 90,
+          "prerequisites": [
+            "React Hooks (useState, useEffect)",
+            "JavaScript localStorage API",
+            "JSON Serialization"
+          ],
+          "complexity": 8,
+          "interviewRelevance": 9,
+          "learningPath": "advanced",
+          "relatedConcepts": [
+            "theory_custom_hooks"
+          ]
+        },
+        {
+          "id": "task_custom_hooks_use_debounce",
+          "title": "Implement a `useDebounce` Custom Hook",
+          "description": "\nCreate a custom React Hook named `useDebounce` that debounces a value. This is useful for delaying expensive operations (like API calls or heavy computations) until a user has stopped typing or interacting for a certain period.\n\n### Requirements:\n1.  **Signature**: The hook should accept a `value` (any type) and a `delay` (number in milliseconds) as arguments.\n2.  **Debounced Value**: It should return the `debouncedValue`.\n3.  **Delay Logic**: The `debouncedValue` should only update after the `value` has not changed for the specified `delay` period.\n4.  **Cleanup**: Ensure that any pending timeouts are cleared when the component unmounts or when the `value` or `delay` dependencies change, to prevent memory leaks or incorrect behavior.\n\n### Scenario:\nImagine you have a search input. You don't want to make an API call on every keystroke, but only after the user pauses typing for a short duration.\n",
+          "difficulty": "medium",
+          "startingCode": "import React, { useState, useEffect } from 'react';\n\nfunction useDebounce(value, delay) {\n  // TODO: Implement debounce logic here\n  // You'll need useState for the debounced value\n  // and useEffect for setting/clearing timeouts\n\n  return value; // Placeholder\n}\n\n// --- Example Usage (for testing) ---\nfunction SearchInput() {\n  const [searchTerm, setSearchTerm] = useState('');\n  const debouncedSearchTerm = useDebounce(searchTerm, 500); // Debounce by 500ms\n\n  useEffect(() => {\n    // This effect should only run AFTER the debounce delay\n    if (debouncedSearchTerm) {\n      console.log('Performing search for:', debouncedSearchTerm);\n      // In a real app, this would be an API call\n    }\n  }, [debouncedSearchTerm]);\n\n  return (\n    <div>\n      <input\n        type=\"text\"\n        placeholder=\"Search...\"\n        value={searchTerm}\n        onChange={(e) => setSearchTerm(e.target.value)}\n      />\n      <p>Current input: {searchTerm}</p>\n      <p>Debounced search: {debouncedSearchTerm}</p>\n    </div>\n  );\n}\n\n// function App() {\n//   return <SearchInput />;\n// }\n\n// export default App;\n",
+          "solutionCode": "import React, { useState, useEffect } from 'react';\n\nfunction useDebounce<T>(value: T, delay: number): T {\n  const [debouncedValue, setDebouncedValue] = useState<T>(value);\n\n  useEffect(() => {\n    // Set a timeout to update the debounced value after the specified delay\n    const handler = setTimeout(() => {\n      setDebouncedValue(value);\n    }, delay);\n\n    // Clean up the timeout if value or delay changes, or if the component unmounts\n    return () => {\n      clearTimeout(handler);\n    };\n  }, [value, delay]); // Only re-run if value or delay changes\n\n  return debouncedValue;\n}\n\n// --- Example Usage (for testing) ---\nfunction SearchInput() {\n  const [searchTerm, setSearchTerm] = useState('');\n  const debouncedSearchTerm = useDebounce(searchTerm, 500); // Debounce by 500ms\n  const [apiCallCount, setApiCallCount] = useState(0);\n\n  useEffect(() => {\n    // This effect should only run AFTER the debounce delay\n    if (debouncedSearchTerm) {\n      console.log('Performing API search for:', debouncedSearchTerm);\n      setApiCallCount(prev => prev + 1);\n      // Simulate an API call\n      // fetch(`/api/search?q=${debouncedSearchTerm}`).then(res => res.json());\n    } else if (searchTerm === '') {\n      console.log('Search term cleared.');\n      setApiCallCount(0);\n    }\n  }, [debouncedSearchTerm]);\n\n  return (\n    <div style={{ fontFamily: 'Arial, sans-serif', padding: '20px' }}>\n      <h2>Search with Debounce Hook</h2>\n      <input\n        type=\"text\"\n        placeholder=\"Type to search...\"\n        value={searchTerm}\n        onChange={(e) => setSearchTerm(e.target.value)}\n        style={{ padding: '10px', fontSize: '1em', width: '300px', marginBottom: '10px' }}\n      />\n      <p>Current input: <strong>{searchTerm}</strong></p>\n      <p>Debounced search term (updates after 500ms pause): <strong>{debouncedSearchTerm}</strong></p>\n      <p>Simulated API calls made: <strong>{apiCallCount}</strong></p>\n      <p style={{ color: '#888', fontSize: '0.9em' }}>Type quickly, then pause to see the debounced term update.</p>\n    </div>\n  );\n}\n\n// function App() {\n//   return <SearchInput />;\n// }\n\n// export default App;\n",
+          "testCases": [
+            "Initial render: `debouncedValue` should be equal to `value`.",
+            "Typing quickly: If `value` changes rapidly (e.g., 'a', 'ab', 'abc'), `debouncedValue` should not update immediately.",
+            "Pause after typing: If user types 'abc' and then stops for `delay` ms, `debouncedValue` should update to 'abc'.",
+            "Clearing input: If `searchTerm` is cleared, `debouncedSearchTerm` should eventually clear after the delay.",
+            "Unmount: Ensure `clearTimeout` is called on unmount (check console for `SetState` warnings if not handled).",
+            "Delay change: If `delay` itself changes, the debouncing logic should re-initialize correctly."
+          ],
+          "hints": [
+            "Use `useState` for `debouncedValue` and `useEffect` for the debouncing logic.",
+            "Inside `useEffect`, set a timeout to update `debouncedValue`.",
+            "The `useEffect` cleanup function (`return () => {}`) is crucial here to clear the previous timeout whenever `value` or `delay` changes, or the component unmounts."
+          ],
+          "tags": [
+            "React Hooks",
+            "Custom Hooks",
+            "Debounce",
+            "Performance Optimization",
+            "useEffect",
+            "Interview Challenge"
+          ],
+          "timeEstimate": 75,
+          "prerequisites": [
+            "React Hooks (useState, useEffect)",
+            "JavaScript `setTimeout` and `clearTimeout`"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 9,
+          "learningPath": "advanced",
+          "relatedConcepts": [
+            "theory_custom_hooks"
+          ]
+        }
+      ]
+    }
+  }
+]

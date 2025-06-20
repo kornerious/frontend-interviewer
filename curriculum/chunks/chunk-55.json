@@ -1,0 +1,1362 @@
+[
+  {
+    "id": "6500d195-cf03-478b-8850-3e7d7d7e4ac4",
+    "startLine": 11100,
+    "endLine": 11199,
+    "processedDate": "2025-06-17T12:01:06.138Z",
+    "content": {
+      "logicalBlockInfo": {
+        "suggestedEndLine": -1
+      },
+      "theory": [
+        {
+          "id": "theory_dom_events",
+          "title": "DOM Events and Event Handling",
+          "content": "## Introduction to DOM Events\nDOM (Document Object Model) events are signals sent by the browser to notify your code that something has happened on the web page. These events can be triggered by user interactions (like clicks, key presses, mouse movements), browser actions (like page loading, resizing), or even programmatically.\n\nEvents are a fundamental part of interactive web development, allowing JavaScript to react to user actions and update the UI dynamically.\n\n## Attaching Event Listeners\nThe most common way to handle events is using the `addEventListener()` method. This method allows you to register a function (the event handler) to be called whenever a specified event is delivered to the target.\n\n### Syntax:\n```typescript\ntarget.addEventListener(type, listener, [options]);\n```\n- `type`: A string representing the event type (e.g., 'click', 'mouseover', 'submit').\n- `listener`: The function to be called when the event occurs.\n- `options` (optional): An object that specifies characteristics about the event listener, such as:\n    - `capture`: A boolean indicating that events of this type will be dispatched to the registered `listener` before being dispatched to any `EventTarget` beneath it in the DOM tree. (Default: `false`, meaning bubbling phase).\n    - `once`: A boolean indicating that the `listener` should be invoked at most once after being added. If `true`, the `listener` would be automatically removed when invoked.\n    - `passive`: A boolean indicating that the `listener` will never call `preventDefault()`. If a listener calls `preventDefault()`, the user agent will still ignore it, but it will generate a console warning.\n\n### The Event Object\nWhen an event occurs, the browser creates an `Event` object and passes it as the first argument to the event handler function. This object contains important information about the event, such as:\n- `event.target`: The actual element on which the event occurred (the innermost element).\n- `event.currentTarget`: The element to which the event listener was attached.\n- `event.type`: The type of event (e.g., 'click').\n- `event.clientX`, `event.clientY`: Coordinates of the mouse pointer (for mouse events).\n- `event.key`, `event.keyCode`: Information about the key pressed (for keyboard events).\n\n## Event Bubbling and Capturing\nWhen an event is triggered on an element, it doesn't just stay on that element. It propagates through the DOM tree in two phases:\n1.  **Capturing Phase:** The event starts from the `window` object and travels down to the `event.target` (the actual element that triggered the event).\n2.  **Bubbling Phase:** The event then travels back up from the `event.target` to the `window` object.\n\nMost event listeners are registered for the bubbling phase by default. You can specify `capture: true` in the `addEventListener` options to listen during the capturing phase.\n\n## Event Delegation\nEvent delegation is a technique where you attach a single event listener to a parent element, rather than attaching individual listeners to multiple child elements. This technique relies on event bubbling.\n\n### Benefits of Event Delegation:\n-   **Performance:** Fewer event listeners mean less memory consumption and better performance, especially for lists with many items.\n-   **Dynamic Content:** It automatically handles events for elements that are added to the DOM dynamically *after* the initial page load, without needing to re-attach listeners.\n-   **Cleaner Code:** Reduces the amount of repetitive code.\n\n### How it works:\nThe event listener on the parent listens for events bubbling up from its children. Inside the handler, you can then check `event.target` to determine which specific child element triggered the event and react accordingly.\n\n## Custom Events\nBesides built-in browser events, you can create and dispatch your own custom events. This is useful for building loosely coupled components or for communicating between different parts of your application without direct dependencies.\n\n### `CustomEvent` Constructor:\n```typescript\nconst customEvent = new CustomEvent(type, [options]);\n```\n- `type`: A string representing the event type (e.g., 'myComponentReady').\n- `options` (optional): An object with properties:\n    - `detail`: A property that allows you to pass any custom data along with the event. This data can be accessed via `event.detail` in the event listener.\n    - `bubbles`: A boolean indicating whether the event should bubble up the DOM tree (default: `false`).\n    - `cancelable`: A boolean indicating whether the event is cancelable (default: `false`).\n\n### `dispatchEvent()` Method:\nAfter creating a custom event, you dispatch it on a specific DOM element using `element.dispatchEvent(eventObject)`.\nAny element on the DOM tree (or `document`, `window`) can dispatch an event, and any element can listen for it.",
+          "examples": [
+            {
+              "id": "example_dom_events_1",
+              "title": "Basic Event Listener",
+              "code": "// index.html\n// <button id=\"myButton\">Click Me</button>\n\n// script.js\nconst myButton = document.getElementById('myButton');\n\nfunction handleClick(event) {\n  console.log('Button clicked!', event.target.textContent);\n  console.log('Event type:', event.type);\n}\n\nmyButton.addEventListener('click', handleClick);\n\n// Event listener with options (once)\nconst onceButton = document.getElementById('onceButton');\nif (onceButton) {\n  onceButton.addEventListener('click', () => {\n    console.log('This message will only show once.');\n  }, { once: true });\n}",
+              "explanation": "This example demonstrates attaching a simple 'click' event listener to a button. When the button is clicked, the `handleClick` function is executed, logging information about the event target and type. The second part shows how to use the `once` option to make an event listener fire only a single time.",
+              "language": "typescript"
+            },
+            {
+              "id": "example_dom_events_2",
+              "title": "Event Delegation",
+              "code": "// index.html\n// <ul id=\"itemList\">\n//   <li>Item 1</li>\n//   <li>Item 2</li>\n//   <li>Item 3</li>\n// </ul>\n// <button id=\"addItemBtn\">Add New Item</button>\n\n// script.js\nconst itemList = document.getElementById('itemList');\nconst addItemBtn = document.getElementById('addItemBtn');\nlet itemCounter = 3;\n\n// Use event delegation on the parent <ul>\nitemList.addEventListener('click', function(event) {\n  // Check if the clicked element is an <li>\n  if (event.target.tagName === 'LI') {\n    console.log('Clicked on item:', event.target.textContent);\n    event.target.style.backgroundColor = 'yellow';\n  }\n});\n\n// Add new items dynamically\naddItemBtn.addEventListener('click', function() {\n  itemCounter++;\n  const newItem = document.createElement('li');\n  newItem.textContent = `Item ${itemCounter}`;\n  itemList.appendChild(newItem);\n  console.log(`Added new item: Item ${itemCounter}`);\n});",
+              "explanation": "This example illustrates event delegation. Instead of attaching a listener to each `<li>` element, a single listener is attached to the parent `<ul>`. When any `<li>` is clicked, the event bubbles up to the `<ul>`. The handler then checks `event.target.tagName` to confirm it was an `<li>` and processes the click. This pattern correctly handles dynamically added `<li>` elements.",
+              "language": "typescript"
+            },
+            {
+              "id": "example_dom_events_3",
+              "title": "Custom Events",
+              "code": "// index.html\n// <div id=\"myComponent\">My Component</div>\n\n// script.js\nconst myComponent = document.getElementById('myComponent');\n\n// 1. Define a custom event\nconst componentReadyEvent = new CustomEvent('componentReady', {\n  detail: {\n    timestamp: new Date().toISOString(),\n    message: 'Component initialization complete!'\n  },\n  bubbles: true, // Allow the event to bubble up\n  cancelable: false\n});\n\n// 2. Attach a listener for the custom event\nmyComponent.addEventListener('componentReady', function(event) {\n  console.log('Custom event received on component:', event.type);\n  console.log('Detail data:', event.detail);\n});\n\n// A parent element can also listen due to bubbling\ndocument.body.addEventListener('componentReady', function(event) {\n  console.log('Custom event bubbled up to body:', event.type);\n  console.log('Detail data:', event.detail);\n});\n\n// 3. Dispatch the custom event after some logic (e.g., component setup)\nsetTimeout(() => {\n  console.log('Dispatching custom event...');\n  myComponent.dispatchEvent(componentReadyEvent);\n}, 1000);",
+              "explanation": "This example shows how to create and dispatch a custom event. A `CustomEvent` named 'componentReady' is created with `detail` data and set to `bubble`. An event listener is attached to `myComponent` to catch this event. After a delay, the event is dispatched on `myComponent`. Because `bubbles: true` is set, a listener on `document.body` also receives the event, demonstrating event propagation for custom events.",
+              "language": "typescript"
+            }
+          ],
+          "relatedQuestions": [
+            "question_dom_events_1",
+            "question_dom_events_2",
+            "question_dom_events_3",
+            "question_dom_events_4",
+            "question_dom_events_5",
+            "question_dom_events_10"
+          ],
+          "relatedTasks": [
+            "task_dom_events_1"
+          ],
+          "tags": [
+            "DOM",
+            "Events",
+            "Event Handling",
+            "Event Delegation",
+            "Custom Events",
+            "JavaScript"
+          ],
+          "technology": "JavaScript",
+          "prerequisites": [
+            "html_basics",
+            "css_basics",
+            "javascript_syntax",
+            "dom_basics"
+          ],
+          "complexity": 6,
+          "interviewRelevance": 9,
+          "learningPath": "intermediate",
+          "requiredFor": [
+            "single_page_applications",
+            "component_architecture",
+            "interactive_ui"
+          ]
+        },
+        {
+          "id": "theory_event_methods",
+          "title": "Event Methods: stopPropagation() vs preventDefault()",
+          "content": "## Introduction to Event Object Methods\nThe `Event` object passed to an event listener provides several useful methods to control event behavior, most notably `stopPropagation()` and `preventDefault()`.\n\n## `event.stopPropagation()`\nThis method stops the event from bubbling up the DOM tree (or propagating further during the capturing phase, if called during capturing). If `stopPropagation()` is called, parent elements (or child elements in capturing phase) will not receive the event, even if they have listeners attached for that event type.\n\n### Use Cases:\n-   Preventing a click on a nested element from triggering a click handler on its parent.\n-   Stopping a modal dialog's click event from closing the dialog if the click originated inside it.\n\n## `event.preventDefault()`\nThis method prevents the default action that the user agent (browser) would normally perform when an event occurs. This does NOT stop the event from bubbling or capturing; it only cancels the default browser behavior.\n\n### Common Default Actions:\n-   Clicking a link (`<a>`) navigates to a new URL.\n-   Submitting a form (`<form>`) reloads the page.\n-   Pressing a spacebar on a focused element scrolls the page.\n-   Right-clicking opens the context menu.\n-   Dragging an image opens it in a new tab.\n\n### Use Cases:\n-   Preventing form submission to handle it with AJAX.\n-   Stopping a link from navigating to a new page to implement client-side routing.\n-   Disabling right-click context menus.\n\n## Key Differences and Combined Usage\nIt's crucial to understand that `stopPropagation()` and `preventDefault()` address entirely different aspects of event handling:\n\n| Feature           | `event.stopPropagation()`                                | `event.preventDefault()`                                 |\n| :---------------- | :------------------------------------------------------- | :------------------------------------------------------- |\n| **Effect**        | Stops event propagation (bubbling/capturing).            | Prevents the browser's default action for the event.     |\n| **Propagation**   | Stops event from reaching parent/child listeners.        | Allows event to continue propagating normally.           |\n| **Default Action**| Does not prevent default browser actions.                | Prevents default browser actions.                        |\n| **Independence**  | Can be used independently.                               | Can be used independently.                               |\n\n### Using Both Together\nYou can, and often will, use both methods together when you want to both prevent a default browser action *and* stop the event from propagating further. For example, in a custom form submission handler, you might want to prevent the default form submission (reload) and also stop the event from bubbling up to a global document click listener that might interfere.\n\n```typescript\nelement.addEventListener('click', function(event) {\n  event.stopPropagation(); // Stop bubbling\n  event.preventDefault();  // Prevent default action (if any)\n  // Your custom logic\n});\n```",
+          "examples": [
+            {
+              "id": "example_event_methods_1",
+              "title": "Using stopPropagation()",
+              "code": "// index.html\n// <div id=\"outer\" style=\"padding: 20px; background: lightblue;\">\n//   Outer Div\n//   <button id=\"innerButton\" style=\"margin: 10px;\">Inner Button</button>\n// </div>\n\n// script.js\nconst outerDiv = document.getElementById('outer');\nconst innerButton = document.getElementById('innerButton');\n\nouterDiv.addEventListener('click', function() {\n  console.log('Outer div clicked!');\n});\n\ninnerButton.addEventListener('click', function(event) {\n  console.log('Inner button clicked!');\n  event.stopPropagation(); // Prevents the click from bubbling up to outerDiv\n});",
+              "explanation": "In this example, clicking the 'Inner Button' will trigger its own listener, which then calls `event.stopPropagation()`. As a result, the click event will not bubble up to the `outerDiv`, and the 'Outer div clicked!' message will not appear in the console. If `stopPropagation()` were removed, both messages would appear.",
+              "language": "typescript"
+            },
+            {
+              "id": "example_event_methods_2",
+              "title": "Using preventDefault()",
+              "code": "// index.html\n// <form id=\"myForm\">\n//   <input type=\"text\" name=\"username\">\n//   <button type=\"submit\">Submit</button>\n// </form>\n// <a id=\"myLink\" href=\"https://www.example.com\">Visit Example</a>\n\n// script.js\nconst myForm = document.getElementById('myForm');\nconst myLink = document.getElementById('myLink');\n\nmyForm.addEventListener('submit', function(event) {\n  event.preventDefault(); // Prevents the default form submission (page reload)\n  console.log('Form submission prevented. Handling with JavaScript...');\n  // You would typically send an AJAX request here\n});\n\nmyLink.addEventListener('click', function(event) {\n  event.preventDefault(); // Prevents default link navigation\n  console.log('Link navigation prevented. Implementing client-side routing...');\n  // You would typically handle routing here (e.g., using React Router, Vue Router)\n});",
+              "explanation": "This example demonstrates `preventDefault()`. For the form, `event.preventDefault()` stops the browser from reloading the page upon submission, allowing JavaScript to handle the submission (e.g., via AJAX). For the link, `event.preventDefault()` stops the browser from navigating to the URL specified in the `href` attribute, allowing for client-side routing logic.",
+              "language": "typescript"
+            },
+            {
+              "id": "example_event_methods_3",
+              "title": "Using Both stopPropagation() and preventDefault()",
+              "code": "// index.html\n// <div id=\"container\" style=\"padding: 20px; background: lightcoral;\">\n//   Container\n//   <a id=\"cancelLink\" href=\"#\" style=\"margin: 10px; display: block;\">Click to Cancel Action</a>\n// </div>\n\n// script.js\nconst container = document.getElementById('container');\nconst cancelLink = document.getElementById('cancelLink');\n\ncontainer.addEventListener('click', function() {\n  console.log('Container clicked!');\n});\n\ncancelLink.addEventListener('click', function(event) {\n  event.stopPropagation(); // Stop click from bubbling to container\n  event.preventDefault();  // Stop default link behavior (e.g., jumping to #)\n  console.log('Link action canceled and bubbling stopped.');\n  // Perform some specific action for this link only\n});",
+              "explanation": "Here, clicking the 'Click to Cancel Action' link will trigger its listener. It calls both `stopPropagation()` to prevent the event from reaching the `container` div's click listener and `preventDefault()` to prevent the default browser behavior associated with clicking an anchor tag (which in this case would be scrolling to the top or to an element with id '#').",
+              "language": "typescript"
+            }
+          ],
+          "relatedQuestions": [
+            "question_event_methods_1",
+            "question_event_methods_2",
+            "question_event_methods_3",
+            "question_event_methods_4",
+            "question_event_methods_5"
+          ],
+          "relatedTasks": [
+            "task_event_methods_1"
+          ],
+          "tags": [
+            "DOM",
+            "Events",
+            "Event Handling",
+            "stopPropagation",
+            "preventDefault",
+            "JavaScript"
+          ],
+          "technology": "JavaScript",
+          "prerequisites": [
+            "theory_dom_events"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 10,
+          "learningPath": "intermediate",
+          "requiredFor": [
+            "interactive_ui",
+            "custom_controls",
+            "form_validation",
+            "router_implementation"
+          ]
+        },
+        {
+          "id": "theory_dom_traversal",
+          "title": "DOM Traversal and Manipulation",
+          "content": "## Introduction to DOM Traversal\nDOM traversal refers to the process of navigating through the Document Object Model (DOM) tree to select, access, and manipulate elements relative to a starting point. Understanding how to traverse the DOM is essential for dynamic web applications, allowing you to find specific elements, modify their content, or change their structure based on user interactions or data.\n\n## Selecting Elements\nBefore traversing, you often need a starting element. Modern JavaScript provides several powerful methods to select elements:\n\n1.  **`document.getElementById(id)`**:\n    -   Returns a reference to the element by its ID. IDs must be unique within a document.\n    -   Returns `null` if no element with the specified ID is found.\n    -   **Performance:** Generally the fastest method for direct element access.\n\n2.  **`document.querySelector(selector)`**:\n    -   Returns the *first* element within the document (or a specific element, if called on an element) that matches the specified CSS selector(s).\n    -   Returns `null` if no matches are found.\n    -   Can select by ID (`#id`), class (`.class`), tag name (`tag`), attribute (`[attr]`), or complex combinations.\n\n3.  **`document.querySelectorAll(selector)`**:\n    -   Returns a static `NodeList` containing all elements within the document (or a specific element) that match the specified CSS selector(s).\n    -   Returns an empty `NodeList` if no matches are found.\n    -   The returned `NodeList` is *static*, meaning it won't update if elements are added or removed from the DOM after it's created. To iterate, you can use `forEach` or convert to an array (`Array.from()`).\n\n## Navigating Relationships\nOnce you have an element, you can navigate to its related elements using various properties:\n\n1.  **Parent Elements:**\n    -   `element.parentNode`: Returns the direct parent `Node` (which could be an `Element`, `Document`, or `DocumentFragment`).\n    -   `element.parentElement`: Returns the direct parent `Element`. Returns `null` if the parent is not an `Element` (e.g., if the parent is the `document` itself).\n    *Use `parentElement` when you specifically need another HTML element.*\n\n2.  **Child Elements:**\n    -   `element.children`: Returns a live `HTMLCollection` of all child *elements* (excluding text nodes, comments, etc.). This collection is *live*, meaning it automatically updates if children are added or removed.\n    -   `element.childNodes`: Returns a live `NodeList` of all child *nodes*, including text nodes, comment nodes, and element nodes.\n    -   `element.firstChild`: Returns the first child `Node`.\n    -   `element.firstElementChild`: Returns the first child *Element*.\n    -   `element.lastChild`: Returns the last child `Node`.\n    -   `element.lastElementChild`: Returns the last child *Element*.\n\n3.  **Sibling Elements:**\n    -   `element.nextSibling`: Returns the next sibling `Node`.\n    -   `element.nextElementSibling`: Returns the next sibling *Element*.\n    -   `element.previousSibling`: Returns the previous sibling `Node`.\n    -   `element.previousElementSibling`: Returns the previous sibling *Element*.\n\n### `NodeList` vs `HTMLCollection`\n-   **`NodeList`**: A collection of nodes (can contain elements, text nodes, comments). Returned by `querySelectorAll`, `childNodes`. Can be static or live. `NodeList.prototype.forEach` is available.\n-   **`HTMLCollection`**: A collection of only HTML elements. Returned by `children`, `getElementsByClassName`, `getElementsByTagName`. Always live. Doesn't have `forEach` directly (you can use `Array.from()` or a `for...of` loop).\n\n### Iterating over Collections\n```typescript\n// For NodeList (e.g., from querySelectorAll)\nconst elements = document.querySelectorAll('.my-class');\nelements.forEach(el => console.log(el.textContent));\n\n// For HTMLCollection (e.g., from children)\nconst parent = document.getElementById('parent');\nfor (const child of parent.children) {\n  console.log(child.tagName);\n}\n\n// Or convert to array for any collection:\nArray.from(parent.children).forEach(el => console.log(el.id));\n```",
+          "examples": [
+            {
+              "id": "example_dom_traversal_1",
+              "title": "Element Selection",
+              "code": "// index.html\n// <div id=\"app\">\n//   <p class=\"text-item\">First paragraph</p>\n//   <span class=\"text-item\">First span</span>\n//   <p class=\"text-item highlighted\">Second paragraph</p>\n// </div>\n\n// script.js\n// Get by ID\nconst appDiv = document.getElementById('app');\nconsole.log('App div:', appDiv);\n\n// Query selector (first matching element)\nconst firstParagraph = document.querySelector('p');\nconsole.log('First paragraph:', firstParagraph.textContent);\n\nconst highlightedItem = document.querySelector('.highlighted');\nconsole.log('Highlighted item:', highlightedItem.textContent);\n\n// Query selector all (all matching elements)\nconst allTextItems = document.querySelectorAll('.text-item');\nconsole.log('All text items (NodeList):', allTextItems);\n\nallTextItems.forEach(item => {\n  console.log('Item content:', item.textContent);\n});",
+              "explanation": "This example demonstrates how to select elements using `getElementById`, `querySelector`, and `querySelectorAll`. `getElementById` is direct. `querySelector` gets the first match. `querySelectorAll` returns a `NodeList` of all matches, which can be iterated using `forEach`.",
+              "language": "typescript"
+            },
+            {
+              "id": "example_dom_traversal_2",
+              "title": "Navigating Relationships",
+              "code": "// index.html\n// <div id=\"grandparent\">\n//   <div id=\"parent1\">\n//     <span id=\"child1\">Child 1</span>\n//     <p id=\"child2\">Child 2</p>\n//   </div>\n//   <div id=\"parent2\">\n//     <div id=\"child3\">Child 3</div>\n//   </div>\n// </div>\n\n// script.js\nconst child1 = document.getElementById('child1');\n\n// Parent element\nconst parent1 = child1.parentElement;\nconsole.log('Parent of child1:', parent1.id);\n\nconst grandparent = parent1.parentElement;\nconsole.log('Grandparent of child1:', grandparent.id);\n\n// Children elements\nconsole.log('Children of parent1 (HTMLCollection):', parent1.children);\nArray.from(parent1.children).forEach(child => {\n  console.log('Parent1 child:', child.id);\n});\n\n// Siblings\nconst nextSiblingOfChild1 = child1.nextElementSibling;\nconsole.log('Next sibling of child1:', nextSiblingOfChild1.id);\n\nconst previousSiblingOfChild2 = nextSiblingOfChild1.previousElementSibling;\nconsole.log('Previous sibling of child2:', previousSiblingOfChild2.id);\n\n// First/Last element child\nconsole.log('First child element of parent1:', parent1.firstElementChild.id);\nconsole.log('Last child element of parent1:', parent1.lastElementChild.id);",
+              "explanation": "This example showcases various DOM traversal properties. It starts with 'child1' and demonstrates how to get its parent (`parentElement`), its siblings (`nextElementSibling`, `previousElementSibling`), and how to get all children of a parent element (`children`) and iterate over them. It also highlights `firstElementChild` and `lastElementChild` for direct access to element children.",
+              "language": "typescript"
+            }
+          ],
+          "relatedQuestions": [
+            "question_dom_traversal_1",
+            "question_dom_traversal_2",
+            "question_dom_traversal_3",
+            "question_dom_traversal_4",
+            "question_dom_traversal_5"
+          ],
+          "relatedTasks": [
+            "task_dom_traversal_1"
+          ],
+          "tags": [
+            "DOM",
+            "Traversal",
+            "Manipulation",
+            "getElementById",
+            "querySelector",
+            "querySelectorAll",
+            "NodeList",
+            "HTMLCollection",
+            "JavaScript"
+          ],
+          "technology": "JavaScript",
+          "prerequisites": [
+            "dom_basics",
+            "html_structure"
+          ],
+          "complexity": 6,
+          "interviewRelevance": 8,
+          "learningPath": "intermediate",
+          "requiredFor": [
+            "dynamic_ui_updates",
+            "component_interaction",
+            "legacy_code_maintenance"
+          ]
+        },
+        {
+          "id": "theory_ajax_fetch_api",
+          "title": "AJAX and Fetch API for Asynchronous Data Fetching",
+          "content": "## Introduction to Asynchronous JavaScript and XML (AJAX)\nAJAX (Asynchronous JavaScript and XML) is a set of web development techniques that allows a web page to communicate with a server asynchronously without requiring a full page reload. This enables dynamic and interactive web applications where data can be fetched or sent in the background, updating parts of the page without interrupting the user's experience. Although 'XML' is in the name, JSON is now the most common data format used.\n\nHistorically, the `XMLHttpRequest` (XHR) object was the primary way to perform AJAX requests. More recently, the `Fetch API` has emerged as a modern, promise-based alternative.\n\n## XMLHttpRequest (XHR)\n`XMLHttpRequest` is a built-in browser object that provides a way to interact with servers. It's an older API, primarily callback-based, which can lead to 'callback hell' for complex sequences of requests.\n\n### Key Concepts:\n-   **Lifecycle:** An XHR request goes through several `readyState` values:\n    -   `0 (UNSENT)`: Client has been created. `open()` not called yet.\n    -   `1 (OPENED)`: `open()` has been called.\n    -   `2 (HEADERS_RECEIVED)`: `send()` has been called, and headers and status are available.\n    -   `3 (LOADING)`: Downloading; `responseText` holds partial data.\n    -   `4 (DONE)`: The operation is complete.\n-   **`onreadystatechange`:** An event handler that is called whenever the `readyState` attribute changes. You typically check `readyState === 4` for completion.\n-   **`status`:** The HTTP status code of the response (e.g., `200` for success, `404` for not found, `500` for server error).\n-   **`responseText` / `response`:** The response data from the server, typically a string. For JSON, you need to parse it using `JSON.parse()`.\n\n### Basic Steps:\n1.  Create an `XMLHttpRequest` instance: `const xhr = new XMLHttpRequest();`\n2.  Open a request: `xhr.open(method, url, [async, user, password]);` (`async` is typically `true`)\n3.  Set up event handlers (e.g., `onreadystatechange`, `onload`, `onerror`)\n4.  Send the request: `xhr.send([body]);`\n\n## Fetch API\nThe `Fetch API` provides a modern, promise-based interface for making network requests. It's simpler and cleaner than `XMLHttpRequest`, especially for chaining requests and handling errors.\n\n### Key Concepts:\n-   **Promise-based:** `fetch()` returns a `Promise` that resolves to a `Response` object. This makes chaining operations (like parsing JSON) and error handling much more straightforward using `.then()` and `.catch()`.\n-   **`Response` object:** The `Response` object represents the response to a request. It has properties like `ok` (boolean, true if status is 200-299), `status`, `statusText`, and methods for parsing the body (e.g., `json()`, `text()`, `blob()`).\n-   **Error Handling:** `fetch()` only rejects the promise for network errors (e.g., no internet connection). HTTP error statuses (like 404 or 500) do *not* cause the promise to reject. You must explicitly check `response.ok` or `response.status` to handle these.\n\n### Basic Steps:\n1.  Call `fetch(url, [options])`: Returns a Promise.\n2.  Handle the `Response` object: Check `response.ok`, then call a parsing method (e.g., `response.json()`, which also returns a Promise).\n3.  Handle the parsed data.\n4.  Catch any network errors.\n\n### `fetch` Options (Common):\n-   `method`: 'GET', 'POST', 'PUT', 'DELETE', etc. (default 'GET')\n-   `headers`: An object of HTTP headers.\n-   `body`: The request body for POST/PUT requests (e.g., `JSON.stringify(data)`).\n-   `mode`: 'cors', 'no-cors', 'same-origin' (default 'cors')\n-   `credentials`: 'omit', 'same-origin', 'include' (for cookies/auth headers)\n-   `signal`: An `AbortSignal` for canceling requests.\n\n## AbortController\nThe `AbortController` interface allows you to abort one or more DOM requests as and when desired. This is particularly useful for long-running requests or when a user navigates away from a page before a request completes, preventing unnecessary network activity and potential memory leaks.\n\n### How it works:\n1.  Create an `AbortController` instance: `const controller = new AbortController();`\n2.  Get its `signal` property: `const signal = controller.signal;`\n3.  Pass this `signal` as an option to the `fetch()` request:\n    `fetch(url, { signal });`\n4.  To abort the request, call `controller.abort();`.\n\nWhen a request is aborted, the `fetch` promise will reject with an `AbortError`. You should catch this error to distinguish it from other network errors.",
+          "examples": [
+            {
+              "id": "example_ajax_fetch_api_1",
+              "title": "Basic XMLHttpRequest (GET)",
+              "code": "const xhr = new XMLHttpRequest();\n\nxhr.open('GET', 'https://jsonplaceholder.typicode.com/posts/1', true); // true for asynchronous\n\nxhr.onreadystatechange = function() {\n  if (xhr.readyState === 4) { // Request is complete\n    if (xhr.status >= 200 && xhr.status < 300) { // Success status codes\n      try {\n        const response = JSON.parse(xhr.responseText);\n        console.log('XHR Success:', response);\n      } catch (e) {\n        console.error('XHR JSON Parse Error:', e);\n      }\n    } else {\n      console.error('XHR Error:', xhr.status, xhr.statusText);\n    }\n  }\n};\n\nxhr.onerror = function() {\n  console.error('XHR Network Error: The request could not be made.');\n};\n\nxhr.send();\nconsole.log('XHR request sent...');",
+              "explanation": "This example demonstrates a basic GET request using `XMLHttpRequest`. It sets up an `onreadystatechange` handler to monitor the request's progress. When `readyState` is 4 (DONE), it checks the `status` code to determine success or failure. For successful responses, `responseText` is parsed as JSON. An `onerror` handler is also included for network-level issues.",
+              "language": "typescript"
+            },
+            {
+              "id": "example_ajax_fetch_api_2",
+              "title": "Basic Fetch API (GET) with Error Handling",
+              "code": "fetch('https://jsonplaceholder.typicode.com/posts/1')\n  .then(response => {\n    // Check if the response was successful (HTTP status 200-299)\n    if (!response.ok) {\n      // Throw an error to be caught by the .catch() block\n      throw new Error(`HTTP error! status: ${response.status}`);\n    }\n    return response.json(); // Parse the response body as JSON\n  })\n  .then(data => {\n    console.log('Fetch Success:', data);\n  })\n  .catch(error => {\n    // Catches network errors or errors thrown in the .then() block\n    console.error('Fetch Error:', error);\n  });\n\nconsole.log('Fetch request initiated...');",
+              "explanation": "This example shows a basic GET request using the `Fetch API`. It's promise-based, making the flow more readable. The first `.then()` block checks `response.ok` for HTTP success (200-299). If not `ok`, it throws an error. Otherwise, `response.json()` is called to parse the body, which returns another promise. The second `.then()` handles the parsed data. The `.catch()` block handles both network errors and explicit errors thrown.",
+              "language": "typescript"
+            },
+            {
+              "id": "example_ajax_fetch_api_3",
+              "title": "Fetch API (POST) with Headers and Body",
+              "code": "async function createPost() {\n  const postData = {\n    title: 'foo',\n    body: 'bar',\n    userId: 1,\n  };\n\n  try {\n    const response = await fetch('https://jsonplaceholder.typicode.com/posts', {\n      method: 'POST',\n      headers: {\n        'Content-Type': 'application/json',\n      },\n      body: JSON.stringify(postData),\n    });\n\n    if (!response.ok) {\n      throw new Error(`HTTP error! status: ${response.status}`);\n    }\n\n    const data = await response.json();\n    console.log('POST Success:', data);\n  } catch (error) {\n    console.error('POST Error:', error);\n  }\n}\n\ncreatePost();",
+              "explanation": "This example demonstrates a POST request using `Fetch API` with `async/await` syntax for cleaner asynchronous code. It sets the `method` to 'POST', defines `headers` for content type, and sends `JSON.stringify`ed data in the `body`. Error handling is similar to GET, checking `response.ok`.",
+              "language": "typescript"
+            },
+            {
+              "id": "example_ajax_fetch_api_4",
+              "title": "Canceling a Fetch Request with AbortController",
+              "code": "const controller = new AbortController();\nconst signal = controller.signal;\n\nasync function fetchDataWithCancellation() {\n  try {\n    console.log('Fetching data...');\n    const response = await fetch('https://jsonplaceholder.typicode.com/posts/1', { signal });\n\n    if (!response.ok) {\n      throw new Error(`HTTP error! status: ${response.status}`);\n    }\n\n    const data = await response.json();\n    console.log('Data fetched successfully:', data);\n  } catch (error) {\n    if (error.name === 'AbortError') {\n      console.warn('Fetch aborted:', error.message);\n    } else {\n      console.error('Fetch Error:', error);\n    }\n  }\n}\n\n// Start the fetch request\nfetchDataWithCancellation();\n\n// Abort the request after 50ms (or some condition)\nsetTimeout(() => {\n  controller.abort();\n  console.log('Attempted to abort fetch request.');\n}, 50);",
+              "explanation": "This example shows how to use `AbortController` to cancel a `fetch` request. An `AbortController` and its `signal` are created. The `signal` is passed to the `fetch` options. A `setTimeout` is used to simulate a condition where the request needs to be canceled by calling `controller.abort()`. When aborted, the `fetch` promise rejects with an `AbortError`, which is specifically caught and logged.",
+              "language": "typescript"
+            }
+          ],
+          "relatedQuestions": [
+            "question_ajax_fetch_api_1",
+            "question_ajax_fetch_api_2",
+            "question_ajax_fetch_api_3",
+            "question_ajax_fetch_api_4",
+            "question_ajax_fetch_api_5",
+            "question_ajax_fetch_api_6",
+            "question_ajax_fetch_api_7"
+          ],
+          "relatedTasks": [
+            "task_ajax_fetch_api_1"
+          ],
+          "tags": [
+            "AJAX",
+            "Fetch API",
+            "XMLHttpRequest",
+            "Asynchronous",
+            "Promises",
+            "HTTP",
+            "AbortController",
+            "Network"
+          ],
+          "technology": "JavaScript",
+          "prerequisites": [
+            "javascript_async",
+            "javascript_promises",
+            "http_basics"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 10,
+          "learningPath": "intermediate",
+          "requiredFor": [
+            "data_fetching",
+            "spa_development",
+            "realtime_applications",
+            "api_integration"
+          ]
+        }
+      ],
+      "questions": [
+        {
+          "id": "question_dom_events_1",
+          "topic": "DOM Events - Basic Handling",
+          "level": "easy",
+          "type": "mcq",
+          "question": "Which of the following methods is commonly used to attach an event listener to a DOM element in JavaScript?",
+          "answer": "addEventListener()",
+          "options": [
+            "attachEvent()",
+            "addEventListener()",
+            "onEvent()",
+            "handleEvent()"
+          ],
+          "analysisPoints": [
+            "Understanding of modern DOM event handling methods.",
+            "Distinguishing between standard and deprecated/non-standard methods.",
+            "Knowledge of `addEventListener`'s widespread usage and flexibility."
+          ],
+          "keyConcepts": [
+            "DOM Events",
+            "Event Listener",
+            "addEventListener"
+          ],
+          "evaluationCriteria": [
+            "Correct identification of the primary method for event attachment.",
+            "Awareness of common DOM APIs."
+          ],
+          "example": "```typescript\nconst button = document.getElementById('myButton');\nbutton.addEventListener('click', function() {\n  console.log('Button clicked!');\n});\n```\n`addEventListener()` is the standard and recommended way to attach event listeners in modern JavaScript. It allows multiple event handlers for the same event type on the same element and offers more control via its `options` parameter (e.g., `capture`, `once`, `passive`). `attachEvent()` was an older, IE-specific method.",
+          "tags": [
+            "DOM",
+            "Events",
+            "JavaScript",
+            "Fundamentals"
+          ],
+          "prerequisites": [
+            "dom_basics",
+            "javascript_syntax"
+          ],
+          "complexity": 3,
+          "interviewFrequency": 8,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_dom_events_2",
+          "topic": "DOM Events - Event Object Properties",
+          "level": "medium",
+          "type": "mcq",
+          "question": "Consider the following HTML and JavaScript:\n\nHTML:\n```html\n<div id=\"outer\">\n  <button id=\"inner\">Click Me</button>\n</div>\n```\n\nJavaScript:\n```javascript\ndocument.getElementById('outer').addEventListener('click', function(event) {\n  console.log('Event Target:', event.target.id);\n  console.log('Event CurrentTarget:', event.currentTarget.id);\n});\n```\n\nIf the 'Click Me' button (`#inner`) is clicked, what will be logged to the console?",
+          "answer": "Event Target: inner\nEvent CurrentTarget: outer",
+          "options": [
+            "Event Target: outer\nEvent CurrentTarget: outer",
+            "Event Target: inner\nEvent CurrentTarget: inner",
+            "Event Target: inner\nEvent CurrentTarget: outer",
+            "Event Target: outer\nEvent CurrentTarget: inner"
+          ],
+          "analysisPoints": [
+            "Understanding of `event.target` vs `event.currentTarget`.",
+            "Knowledge of event bubbling mechanism.",
+            "Ability to trace event propagation."
+          ],
+          "keyConcepts": [
+            "DOM Events",
+            "Event Bubbling",
+            "event.target",
+            "event.currentTarget",
+            "Event Delegation"
+          ],
+          "evaluationCriteria": [
+            "Correctly identifies the element where the event originated.",
+            "Correctly identifies the element to which the listener is attached.",
+            "Demonstrates understanding of event object properties."
+          ],
+          "example": "```typescript\ndocument.getElementById('outer').addEventListener('click', function(event) {\n  console.log('Event Target:', event.target.id); // 'inner' - the button that was actually clicked\n  console.log('Event CurrentTarget:', event.currentTarget.id); // 'outer' - the element where the listener is attached\n});\n```\n`event.target` always refers to the element that originally dispatched the event (the innermost element). `event.currentTarget` refers to the element on which the event listener was attached and which is currently handling the event.",
+          "tags": [
+            "DOM",
+            "Events",
+            "JavaScript",
+            "Event Object"
+          ],
+          "prerequisites": [
+            "theory_dom_events"
+          ],
+          "complexity": 6,
+          "interviewFrequency": 9,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_dom_events_3",
+          "topic": "DOM Events - Event Delegation",
+          "level": "medium",
+          "type": "code",
+          "question": "Implement an event delegation mechanism for a list of items. When any list item is clicked, its text content should be logged to the console. The list items can be added dynamically after the initial page load.\n\n**HTML Structure:**\n```html\n<ul id=\"myList\">\n  <li>Item 1</li>\n  <li>Item 2</li>\n</ul>\n<button id=\"addItem\">Add New Item</button>\n```",
+          "answer": "```javascript\nconst myList = document.getElementById('myList');\nconst addItemButton = document.getElementById('addItem');\nlet itemCounter = 2;\n\n// Implement event delegation on the parent <ul>\nmyList.addEventListener('click', function(event) {\n  // Check if the clicked element (event.target) is an LI element\n  // Use closest() for more robust matching if LIs might contain other elements\n  const clickedLi = event.target.closest('li');\n  if (clickedLi && clickedLi.parentElement === myList) { // Ensure it's a direct child of myList\n    console.log('Clicked item:', clickedLi.textContent);\n    clickedLi.style.backgroundColor = 'lightgreen'; // Optional: highlight clicked item\n  }\n});\n\n// Function to add new items dynamically\naddItemButton.addEventListener('click', function() {\n  itemCounter++;\n  const newItem = document.createElement('li');\n  newItem.textContent = `Item ${itemCounter}`;\n  myList.appendChild(newItem);\n  console.log(`Added: Item ${itemCounter}`);\n});\n```",
+          "options": [],
+          "analysisPoints": [
+            "Correct application of event delegation.",
+            "Using `event.target` to identify the specific child element.",
+            "Handling dynamically added elements without re-attaching listeners.",
+            "Robustness using `closest()` for targeting."
+          ],
+          "keyConcepts": [
+            "Event Delegation",
+            "Event Bubbling",
+            "event.target",
+            "Dynamic Content",
+            "DOM Manipulation"
+          ],
+          "evaluationCriteria": [
+            "Solution efficiently handles events for multiple items.",
+            "Demonstrates understanding of `event.target` in the context of delegation.",
+            "Code is scalable for dynamically added content."
+          ],
+          "example": "",
+          "tags": [
+            "DOM",
+            "Events",
+            "Event Delegation",
+            "Code Challenge",
+            "JavaScript"
+          ],
+          "prerequisites": [
+            "theory_dom_events",
+            "dom_manipulation"
+          ],
+          "complexity": 7,
+          "interviewFrequency": 9,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_dom_events_4",
+          "topic": "DOM Events - Custom Events",
+          "level": "hard",
+          "type": "open",
+          "question": "Explain what Custom Events are in the context of DOM manipulation and when you might use them in a frontend application. Provide a conceptual example of a scenario where custom events would be beneficial for communication between loosely coupled components.",
+          "answer": "Custom Events allow developers to create and dispatch their own named events on DOM elements, just like native browser events (e.g., 'click', 'submit'). They are instantiated using the `CustomEvent` constructor, which takes an event type string and an optional `options` object. The `options` object typically includes a `detail` property to pass custom data, and `bubbles` and `cancelable` booleans to control event propagation and cancellability.\n\n**When to use Custom Events:**\nCustom events are particularly useful for building **loosely coupled components** or modules in a frontend application. Instead of components directly calling methods on each other (creating tight dependencies), they can communicate by dispatching and listening for custom events. This promotes a more modular, scalable, and maintainable architecture.\n\n**Specific Use Cases:**\n1.  **Component Communication:** A child component can notify its parent (or any ancestor) about an internal state change or action without knowing the parent's specific methods.\n2.  **Module Interoperability:** Different parts of an application that are unaware of each other can communicate by broadcasting and reacting to specific events.\n3.  **Global Notifications:** Dispatching a custom event on `document` or `window` can serve as a global notification system for application-wide events.\n4.  **Plugin/Extension Architecture:** Plugins can dispatch custom events to signal their readiness or specific actions, allowing the core application to react without direct integration.\n\n**Conceptual Example: User Authentication Flow**\nImagine an application with two main, independent components:\n*   **`AuthForm` Component:** Handles user login/registration. It's unaware of the rest of the application's UI.\n*   **`Dashboard` Component:** Displays user-specific content. It needs to know when a user logs in to update its state and display relevant information.\n\n**Without Custom Events (tight coupling):**\n`AuthForm` would need a direct reference to `Dashboard` (or a global state manager) and explicitly call `dashboard.updateUser(userData)` or `store.dispatch(loginAction)`. This couples `AuthForm` to `Dashboard`'s interface or a specific state management solution.\n\n**With Custom Events (loose coupling):**\n1.  The `AuthForm` component, upon successful login, dispatches a custom event, say `userLoggedIn`, on a common ancestor element (e.g., `document.body` or its own root element), passing the user data in the `detail` property:\n    ```javascript\n    // Inside AuthForm component on successful login\n    const userData = { id: 1, name: 'Alice' };\n    const loginEvent = new CustomEvent('userLoggedIn', {\n      detail: { user: userData },\n      bubbles: true // Allow event to bubble up\n    });\n    document.body.dispatchEvent(loginEvent);\n    ```\n2.  The `Dashboard` component, or any other component interested in login status, simply listens for this event:\n    ```javascript\n    // Inside Dashboard component (or its initializer)\n    document.body.addEventListener('userLoggedIn', function(event) {\n      const loggedInUser = event.detail.user;\n      console.log('Dashboard received userLoggedIn event for:', loggedInUser.name);\n      // Update Dashboard UI based on loggedInUser data\n    });\n    ```\nThis way, `AuthForm` doesn't need to know about `Dashboard`'s existence or methods. It just broadcasts an event. Any component interested in that event can listen for it, promoting modularity and reusability.",
+          "options": [],
+          "analysisPoints": [
+            "Clear definition of custom events and their mechanism.",
+            "Identification of key use cases, especially loose coupling.",
+            "Ability to provide a practical, conceptual example.",
+            "Comparison of approaches (tight vs. loose coupling)."
+          ],
+          "keyConcepts": [
+            "CustomEvent",
+            "dispatchEvent",
+            "event.detail",
+            "Loose Coupling",
+            "Component Communication",
+            "Event-Driven Architecture"
+          ],
+          "evaluationCriteria": [
+            "Depth of explanation for custom events.",
+            "Relevance and clarity of the use case example.",
+            "Demonstration of architectural thinking (loose coupling)."
+          ],
+          "example": "",
+          "tags": [
+            "DOM",
+            "Events",
+            "Custom Events",
+            "Architecture",
+            "JavaScript",
+            "Open-ended"
+          ],
+          "prerequisites": [
+            "theory_dom_events",
+            "javascript_objects"
+          ],
+          "complexity": 9,
+          "interviewFrequency": 7,
+          "learningPath": "advanced"
+        },
+        {
+          "id": "question_dom_events_5",
+          "topic": "DOM Events - Event Options",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "What does the `once: true` option do when passed to `addEventListener`?",
+          "answer": "It makes the event listener invoke the handler at most one time, after which it is automatically removed.",
+          "options": [],
+          "analysisPoints": [
+            "Recall the specific functionality of `once` option."
+          ],
+          "keyConcepts": [
+            "addEventListener options",
+            "Event Listener removal"
+          ],
+          "evaluationCriteria": [
+            "Quick and accurate recall of `once` functionality."
+          ],
+          "example": "```typescript\nconst btn = document.getElementById('myButton');\nbtn.addEventListener('click', function() {\n  console.log('This will only run once!');\n}, { once: true });\n```",
+          "tags": [
+            "DOM",
+            "Events",
+            "Flashcard",
+            "JavaScript"
+          ],
+          "prerequisites": [
+            "theory_dom_events"
+          ],
+          "complexity": 3,
+          "interviewFrequency": 6,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_event_methods_1",
+          "topic": "Event Methods - stopPropagation() vs preventDefault()",
+          "level": "medium",
+          "type": "mcq",
+          "question": "Which of the following statements accurately describes the effect of `event.stopPropagation()`?",
+          "answer": "It prevents the event from bubbling up (or capturing down) the DOM tree to parent (or child) elements.",
+          "options": [
+            "It stops the default browser action associated with the event.",
+            "It prevents the event from bubbling up (or capturing down) the DOM tree to parent (or child) elements.",
+            "It removes all other event listeners of the same type on the element.",
+            "It pauses the execution of the event handler until a condition is met."
+          ],
+          "analysisPoints": [
+            "Clear distinction between `stopPropagation` and `preventDefault`.",
+            "Understanding of event propagation.",
+            "Exclusion of unrelated or incorrect options."
+          ],
+          "keyConcepts": [
+            "stopPropagation",
+            "Event Bubbling",
+            "Event Propagation",
+            "preventDefault"
+          ],
+          "evaluationCriteria": [
+            "Correct understanding of `stopPropagation`'s primary function.",
+            "Ability to differentiate it from `preventDefault`."
+          ],
+          "example": "```typescript\nconst parent = document.getElementById('parent');\nconst child = document.getElementById('child');\n\nparent.addEventListener('click', () => console.log('Parent clicked!'));\nchild.addEventListener('click', (event) => {\n  console.log('Child clicked!');\n  event.stopPropagation(); // Parent will NOT log 'Parent clicked!'\n});\n```\n`event.stopPropagation()` is used to control the flow of an event through the DOM tree. It ensures that once the event reaches a certain point and `stopPropagation()` is called, it will not propagate further up (or down during capture phase) the hierarchy. It does not affect the default browser action.",
+          "tags": [
+            "DOM",
+            "Events",
+            "stopPropagation",
+            "JavaScript"
+          ],
+          "prerequisites": [
+            "theory_event_methods",
+            "theory_dom_events"
+          ],
+          "complexity": 5,
+          "interviewFrequency": 10,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_event_methods_2",
+          "topic": "Event Methods - stopPropagation() vs preventDefault()",
+          "level": "medium",
+          "type": "open",
+          "question": "Describe a real-world scenario where you would use `event.preventDefault()` without `event.stopPropagation()`, and another scenario where you would use both `event.preventDefault()` and `event.stopPropagation()` together.",
+          "answer": "**Scenario 1: `event.preventDefault()` without `event.stopPropagation()`**\n\n**Scenario:** Implementing client-side routing with an `<a>` tag that prevents a full page reload but allows the click event to bubble up to a global analytics listener.\n\n**Explanation:**\nImagine a single-page application (SPA) where you use `<a>` tags for navigation, but instead of triggering a full page reload, you want to handle the navigation using a JavaScript router (e.g., React Router, Vue Router). In this case, you would attach a click listener to the `<a>` tag and call `event.preventDefault()` to stop the browser's default action of navigating to the `href` URL.\n\nHowever, you might also have a `document`-level click listener that captures all clicks for analytics purposes (e.g., to track which links are clicked, regardless of whether they lead to an actual page reload or client-side route change). In this scenario, you *want* the event to bubble up to that global listener so that the analytics script can still record the click. Therefore, you would *not* call `event.stopPropagation()`.\n\n```javascript\n// In your routing module\nconst navLink = document.getElementById('myNavLink');\nnavLink.addEventListener('click', function(event) {\n  event.preventDefault(); // Stop default navigation\n  console.log('Client-side route change to:', navLink.getAttribute('href'));\n  // Your routing logic here\n});\n\n// In your analytics module (listening on document)\ndocument.addEventListener('click', function(event) {\n  // This listener will still fire even if preventDefault() was called on a link\n  console.log('Analytics: Click detected on:', event.target.tagName, event.target.id || event.target.className);\n  // Send click data to analytics service\n});\n```\n\n**Scenario 2: `event.preventDefault()` and `event.stopPropagation()` together**\n\n**Scenario:** Creating a custom context menu (right-click menu) inside a specific area of your application, where you want to prevent the default browser context menu *and* ensure no other parent listeners are accidentally triggered.\n\n**Explanation:**\nLet's say you have a `div` element that, when right-clicked, should display a custom context menu specific to your application, instead of the browser's default context menu. You'd attach a `contextmenu` event listener to this `div`.\n\n1.  You would call `event.preventDefault()` to stop the browser from showing its default context menu.\n2.  You would also call `event.stopPropagation()` because if you have other `contextmenu` listeners on parent elements (e.g., `document.body` or `document`) that might be trying to implement their own custom context menus or perform other actions for right-clicks, you want to ensure that this specific custom context menu is the only one that appears and that no other unwanted parent listeners interfere. Stopping propagation ensures the event doesn't trigger unrelated logic higher up the DOM tree.\n\n```javascript\n// HTML:\n// <div id=\"container\" style=\"width: 200px; height: 100px; border: 1px solid black;\">Right-click me for custom menu</div>\n\nconst container = document.getElementById('container');\n\ncontainer.addEventListener('contextmenu', function(event) {\n  event.preventDefault();  // Stop default browser context menu\n  event.stopPropagation(); // Stop event from bubbling to parent contextmenu listeners\n\n  console.log('Displaying custom context menu!');\n  // Logic to display your custom menu at event.clientX, event.clientY\n});\n\n// A global listener that should NOT be triggered for the custom menu area\ndocument.addEventListener('contextmenu', function(event) {\n  console.log('Global context menu listener triggered (should NOT happen for #container)');\n});\n```",
+          "options": [],
+          "analysisPoints": [
+            "Ability to articulate nuanced differences between the methods.",
+            "Provision of clear, distinct, and realistic use cases.",
+            "Demonstration of understanding of event flow and desired control.",
+            "Code snippets illustrating the concepts."
+          ],
+          "keyConcepts": [
+            "preventDefault",
+            "stopPropagation",
+            "Event Bubbling",
+            "Default Browser Actions",
+            "Client-Side Routing",
+            "Context Menu"
+          ],
+          "evaluationCriteria": [
+            "Clarity and accuracy of the scenarios.",
+            "Correct application and justification for each method's use.",
+            "Depth of understanding of event mechanics."
+          ],
+          "example": "",
+          "tags": [
+            "DOM",
+            "Events",
+            "preventDefault",
+            "stopPropagation",
+            "Open-ended",
+            "Advanced"
+          ],
+          "prerequisites": [
+            "theory_event_methods"
+          ],
+          "complexity": 9,
+          "interviewFrequency": 8,
+          "learningPath": "advanced"
+        },
+        {
+          "id": "question_event_methods_3",
+          "topic": "Event Methods - stopPropagation()",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "What is the primary effect of calling `event.stopPropagation()` within an event listener?",
+          "answer": "It prevents the event from continuing its propagation (bubbling up or capturing down) through the DOM tree.",
+          "options": [],
+          "analysisPoints": [
+            "Recall the core function of `stopPropagation`."
+          ],
+          "keyConcepts": [
+            "stopPropagation",
+            "Event Propagation",
+            "Event Bubbling"
+          ],
+          "evaluationCriteria": [
+            "Quick and accurate recall."
+          ],
+          "example": "```typescript\nconst child = document.getElementById('child');\nchild.addEventListener('click', (e) => {\n  console.log('Child clicked');\n  e.stopPropagation(); // Prevents parent listeners from firing for this click\n});\n```",
+          "tags": [
+            "DOM",
+            "Events",
+            "Flashcard",
+            "stopPropagation"
+          ],
+          "prerequisites": [
+            "theory_event_methods"
+          ],
+          "complexity": 3,
+          "interviewFrequency": 7,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_event_methods_4",
+          "topic": "Event Methods - preventDefault()",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "What is the primary effect of calling `event.preventDefault()` within an event listener?",
+          "answer": "It stops the browser's default action associated with that event.",
+          "options": [],
+          "analysisPoints": [
+            "Recall the core function of `preventDefault`."
+          ],
+          "keyConcepts": [
+            "preventDefault",
+            "Default Browser Actions"
+          ],
+          "evaluationCriteria": [
+            "Quick and accurate recall."
+          ],
+          "example": "```typescript\nconst link = document.getElementById('myLink');\nlink.addEventListener('click', (e) => {\n  e.preventDefault(); // Prevents the browser from navigating to the link's href\n  console.log('Link click handled by JS, no navigation.');\n});\n```",
+          "tags": [
+            "DOM",
+            "Events",
+            "Flashcard",
+            "preventDefault"
+          ],
+          "prerequisites": [
+            "theory_event_methods"
+          ],
+          "complexity": 3,
+          "interviewFrequency": 7,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_event_methods_5",
+          "topic": "Event Methods - Combining Methods",
+          "level": "hard",
+          "type": "code",
+          "question": "Create an HTML structure with a `<div>` containing a `<a>` tag. Implement JavaScript such that:\n1.  Clicking the `<a>` tag prevents its default navigation behavior.\n2.  Clicking the `<a>` tag also stops the click event from bubbling up to its parent `<div>`.\n3.  Clicking the `<div>` (but not the `<a>` tag) should log 'Div clicked!' to the console.",
+          "answer": "```html\n<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n    <meta charset=\"UTF-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <title>Event Methods Demo</title>\n    <style>\n        #parentDiv {\n            padding: 50px;\n            border: 2px solid blue;\n            background-color: lightblue;\n            margin: 20px;\n        }\n        #myLink {\n            display: inline-block;\n            padding: 10px;\n            background-color: lightgreen;\n            border: 1px solid green;\n            cursor: pointer;\n        }\n    </style>\n</head>\n<body>\n    <div id=\"parentDiv\">\n        Parent Div\n        <a id=\"myLink\" href=\"https://www.example.com\">Click Link (won't navigate)</a>\n    </div>\n\n    <script>\n        const parentDiv = document.getElementById('parentDiv');\n        const myLink = document.getElementById('myLink');\n\n        // Listener for the link: stops default and propagation\n        myLink.addEventListener('click', function(event) {\n            event.preventDefault();  // Prevents default navigation\n            event.stopPropagation(); // Stops bubbling to parentDiv\n            console.log('Link clicked! Default prevented and propagation stopped.');\n        });\n\n        // Listener for the parent div\n        parentDiv.addEventListener('click', function() {\n            console.log('Div clicked!');\n        });\n\n        // Test other clicks on body to ensure no unwanted side effects\n        document.body.addEventListener('click', () => {\n            console.log('Body clicked!');\n        });\n\n    </script>\n</body>\n</html>\n```",
+          "options": [],
+          "analysisPoints": [
+            "Correctly implements `preventDefault()` for link navigation.",
+            "Correctly implements `stopPropagation()` to prevent bubbling to parent.",
+            "Verifies that the parent listener only fires when the parent itself (or other non-link children) is clicked.",
+            "Demonstrates a clear understanding of combining event methods."
+          ],
+          "keyConcepts": [
+            "preventDefault",
+            "stopPropagation",
+            "Event Bubbling",
+            "Event Handling"
+          ],
+          "evaluationCriteria": [
+            "Code fulfills all requirements.",
+            "Demonstrates precise control over event behavior.",
+            "Solution is robust and clearly illustrates the concepts."
+          ],
+          "example": "",
+          "tags": [
+            "DOM",
+            "Events",
+            "Code Challenge",
+            "preventDefault",
+            "stopPropagation"
+          ],
+          "prerequisites": [
+            "theory_event_methods"
+          ],
+          "complexity": 8,
+          "interviewFrequency": 9,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_dom_traversal_1",
+          "topic": "DOM Traversal - Element Selection",
+          "level": "easy",
+          "type": "mcq",
+          "question": "Which DOM method would you use to select the *first* element that matches a specific CSS selector (e.g., a class or tag name)?",
+          "answer": "document.querySelector()",
+          "options": [
+            "document.getElementById()",
+            "document.querySelectorAll()",
+            "document.querySelector()",
+            "document.getElementsByClassName()"
+          ],
+          "analysisPoints": [
+            "Understanding the specific purpose of `querySelector`.",
+            "Distinguishing it from methods that return collections or require an ID."
+          ],
+          "keyConcepts": [
+            "DOM Traversal",
+            "querySelector",
+            "CSS Selectors"
+          ],
+          "evaluationCriteria": [
+            "Correct identification of the method for single element selection via CSS selector."
+          ],
+          "example": "```typescript\n// HTML: <div class=\"container\"><p class=\"text\">Hello</p><p class=\"text\">World</p></div>\nconst firstParagraph = document.querySelector('.text');\nconsole.log(firstParagraph.textContent); // Outputs: Hello\n```\n`document.querySelector()` returns the first element that matches the specified CSS selector. `document.querySelectorAll()` returns a `NodeList` of *all* matching elements. `document.getElementById()` requires an ID. `document.getElementsByClassName()` returns an `HTMLCollection`.",
+          "tags": [
+            "DOM",
+            "Traversal",
+            "querySelector",
+            "JavaScript"
+          ],
+          "prerequisites": [
+            "dom_basics"
+          ],
+          "complexity": 3,
+          "interviewFrequency": 7,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_dom_traversal_2",
+          "topic": "DOM Traversal - NodeList vs HTMLCollection",
+          "level": "medium",
+          "type": "mcq",
+          "question": "Which of the following statements about `NodeList` and `HTMLCollection` is TRUE?",
+          "answer": "`NodeList` can be static or live, while `HTMLCollection` is always live.",
+          "options": [
+            "`NodeList` always contains only element nodes, while `HTMLCollection` can contain any node type.",
+            "`NodeList` is always live, while `HTMLCollection` is always static.",
+            "`NodeList` can be static or live, while `HTMLCollection` is always live.",
+            "Neither `NodeList` nor `HTMLCollection` support iteration with `forEach` directly."
+          ],
+          "analysisPoints": [
+            "Key differences between `NodeList` and `HTMLCollection`.",
+            "Understanding of 'live' vs 'static' collections.",
+            "Knowledge of iteration methods for each collection type."
+          ],
+          "keyConcepts": [
+            "NodeList",
+            "HTMLCollection",
+            "Live Collections",
+            "Static Collections",
+            "DOM Traversal"
+          ],
+          "evaluationCriteria": [
+            "Accurate comparison of collection types.",
+            "Correct understanding of their 'live'/'static' nature.",
+            "Knowledge of their content types."
+          ],
+          "example": "```typescript\n// Example of static NodeList from querySelectorAll\nconst staticList = document.querySelectorAll('p');\n// If new <p> tags are added later, staticList will NOT reflect them.\n\n// Example of live HTMLCollection from children\nconst parent = document.getElementById('myDiv');\nconst liveCollection = parent.children;\n// If children are added/removed from parent, liveCollection WILL reflect them.\n\n// NodeList.forEach is supported:\nstaticList.forEach(p => console.log(p.textContent));\n\n// HTMLCollection does NOT have forEach directly (requires Array.from or for...of)\n// Array.from(liveCollection).forEach(child => console.log(child.tagName));\n```\n`document.querySelectorAll()` returns a static `NodeList`. If elements matching the selector are added/removed from the DOM after the `NodeList` is created, it will not update. `document.getElementById().children` returns a live `HTMLCollection`, which *does* update dynamically. `NodeList` can contain any node type (text, comment, element), while `HTMLCollection` contains only elements. `NodeList` has a `forEach` method, `HTMLCollection` does not, but both are iterable with `for...of` loops.",
+          "tags": [
+            "DOM",
+            "Traversal",
+            "NodeList",
+            "HTMLCollection",
+            "JavaScript"
+          ],
+          "prerequisites": [
+            "theory_dom_traversal"
+          ],
+          "complexity": 7,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_dom_traversal_3",
+          "topic": "DOM Traversal - Parent and Sibling Elements",
+          "level": "medium",
+          "type": "code",
+          "question": "Given an HTML element with the ID `targetElement`:\n\n```html\n<div id=\"grandparent\">\n  <p>Some text</p>\n  <div id=\"parent\">\n    <span>Sibling 1</span>\n    <strong id=\"targetElement\">Hello</strong>\n    <em>Sibling 2</em>\n  </div>\n  <!-- Comment Node -->\n</div>\n```\n\nWrite JavaScript code to:\n1.  Get the `parentElement` of `targetElement`.\n2.  Get the `nextElementSibling` of `targetElement`.\n3.  Get the `previousElementSibling` of `targetElement`.\n4.  Log the `id` or `tagName` of each found element. Explain why `nextSibling` might return different results than `nextElementSibling`.",
+          "answer": "```javascript\nconst targetElement = document.getElementById('targetElement');\n\n// 1. Get the parentElement\nconst parentEl = targetElement.parentElement;\nconsole.log('Parent Element ID:', parentEl ? parentEl.id : 'None'); // Expected: parent\n\n// 2. Get the nextElementSibling\nconst nextElSibling = targetElement.nextElementSibling;\nconsole.log('Next Element Sibling Tag:', nextElSibling ? nextElSibling.tagName : 'None'); // Expected: EM\n\n// 3. Get the previousElementSibling\nconst prevElSibling = targetElement.previousElementSibling;\nconsole.log('Previous Element Sibling Tag:', prevElSibling ? prevElSibling.tagName : 'None'); // Expected: SPAN\n\n/*\nExplanation for nextSibling vs nextElementSibling:\n\n- `element.nextElementSibling` returns the next sibling that is an *element* node.\n- `element.nextSibling` returns the next sibling *node*, which could be an element, a text node (like whitespace between tags), or a comment node.\n\nIn the provided HTML, there is typically whitespace (a text node) between the `</strong>` tag (targetElement) and the `<em>` tag (Sibling 2). Therefore:\n\n`targetElement.nextElementSibling` will correctly return the `<em>` element.\n`targetElement.nextSibling` would likely return a #text node (representing the whitespace/newline) if formatted with typical indentation in HTML. To get the <em> element using `nextSibling`, you'd need to call `nextSibling` multiple times or filter the childNodes.\n\nThis is why `*ElementSibling` properties are generally preferred when you only care about HTML elements and want to ignore whitespace or comment nodes.\n*/\n\n// Example of nextSibling behavior for demonstration:\nconst nextNode = targetElement.nextSibling;\nconsole.log('Next Sibling Node Type and Value:', nextNode ? `${nextNode.nodeType} - ${nextNode.nodeValue.trim()}` : 'None'); // Likely #text node if whitespace exists\n```",
+          "options": [],
+          "analysisPoints": [
+            "Correct use of `parentElement`, `nextElementSibling`, `previousElementSibling`.",
+            "Understanding of the distinction between `*Node` and `*Element` properties.",
+            "Clear explanation of whitespace/text nodes impacting `*Sibling` properties.",
+            "Ability to debug and reason about DOM structure."
+          ],
+          "keyConcepts": [
+            "DOM Traversal",
+            "parentElement",
+            "nextElementSibling",
+            "previousElementSibling",
+            "nextSibling",
+            "Node vs Element"
+          ],
+          "evaluationCriteria": [
+            "Code correctly identifies elements.",
+            "Explanation is accurate and insightful regarding Node vs. Element properties.",
+            "Demonstrates practical knowledge of DOM structure."
+          ],
+          "example": "",
+          "tags": [
+            "DOM",
+            "Traversal",
+            "Code Challenge",
+            "JavaScript"
+          ],
+          "prerequisites": [
+            "theory_dom_traversal"
+          ],
+          "complexity": 7,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_dom_traversal_4",
+          "topic": "DOM Traversal - Efficiency",
+          "level": "hard",
+          "type": "open",
+          "question": "Compare the performance and practical use cases of `document.getElementById()`, `document.querySelector()`, and `document.querySelectorAll()`. When might you prefer one over the others, and are there any considerations for very large DOM trees?",
+          "answer": "**`document.getElementById(id)`**\n*   **Performance:** Generally the fastest method. It's highly optimized by browsers because IDs are meant to be unique and can be directly hashed for quick lookup.\n*   **Use Cases:** When you need to access a single, specific element with a known, unique ID. This is ideal for core layout elements, unique interactive components, or as a starting point for further traversal.\n*   **Considerations for Large DOM:** Remains very fast regardless of DOM size due to direct lookup. However, relying too heavily on unique IDs for every element can lead to verbose HTML and less reusable CSS/JS.\n\n**`document.querySelector(selector)`**\n*   **Performance:** Slower than `getElementById()` because it has to parse a CSS selector string and potentially traverse the DOM to find the first match. Its performance depends on the complexity of the selector and the size of the DOM.\n*   **Use Cases:** When you need the first element matching a CSS selector. This is highly flexible, allowing selection by class, tag, attribute, or complex combinations. Useful for specific components or dynamic selections where an ID isn't available or practical.\n*   **Considerations for Large DOM:** For complex selectors or very deep DOM trees, repeated calls to `querySelector()` can impact performance. Caching the result or traversing from a closer parent element can mitigate this.\n\n**`document.querySelectorAll(selector)`**\n*   **Performance:** Generally the slowest of the three. It has to traverse the *entire* relevant sub-tree (or document) to find *all* matching elements and then build a `NodeList` (which is static, meaning changes to the DOM won't affect it). Performance is heavily impacted by selector complexity and the number of matching elements.\n*   **Use Cases:** When you need a collection of elements that share a common characteristic (e.g., all elements of a certain class, all `<li>` tags within a `<ul>`). Useful for bulk operations, iterating over dynamic lists, or applying styles/event listeners to multiple elements.\n*   **Considerations for Large DOM:** For very large numbers of matching elements or highly complex selectors, `querySelectorAll()` can be very expensive. If elements are frequently added/removed, remember that the `NodeList` is static, so you might need to re-query. For very large collections, consider optimizing iteration or using event delegation on a parent instead of attaching individual listeners to each element in the collection.\n\n**Summary of Preference:**\n*   **`getElementById`**: Always prefer if you have a unique ID. Fastest and most direct.\n*   **`querySelector`**: Good for selecting a single element based on flexible CSS selectors when an ID isn't feasible or for more specific targeting (e.g., `div > p.intro`).\n*   **`querySelectorAll`**: Best for getting a collection of elements. Be mindful of performance for very large sets or frequent re-querying, and remember its static nature.\n\nIn scenarios with very large DOM trees or highly dynamic content, combining `getElementById` (to get a fast starting point) with `querySelector`/`querySelectorAll` on that specific sub-tree, or utilizing **event delegation** extensively, are crucial optimization strategies.",
+          "options": [],
+          "analysisPoints": [
+            "Detailed comparison of performance characteristics for each method.",
+            "Clear articulation of practical use cases for each.",
+            "Discussion of performance implications for large DOMs.",
+            "Inclusion of best practices/optimizations (caching, event delegation)."
+          ],
+          "keyConcepts": [
+            "DOM Traversal",
+            "getElementById",
+            "querySelector",
+            "querySelectorAll",
+            "Performance Optimization",
+            "Live vs Static Collections",
+            "Event Delegation"
+          ],
+          "evaluationCriteria": [
+            "Thoroughness of the comparison.",
+            "Accuracy of performance insights.",
+            "Practical relevance of use cases and considerations.",
+            "Demonstration of advanced understanding of DOM APIs."
+          ],
+          "example": "",
+          "tags": [
+            "DOM",
+            "Traversal",
+            "Performance",
+            "Optimization",
+            "Open-ended",
+            "Advanced"
+          ],
+          "prerequisites": [
+            "theory_dom_traversal"
+          ],
+          "complexity": 9,
+          "interviewFrequency": 7,
+          "learningPath": "advanced"
+        },
+        {
+          "id": "question_dom_traversal_5",
+          "topic": "DOM Traversal - Node Type Distinction",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "What is the difference between `element.childNodes` and `element.children`?",
+          "answer": "`element.childNodes` returns a `NodeList` of all child nodes (elements, text, comments, etc.), while `element.children` returns an `HTMLCollection` of only child *element* nodes.",
+          "options": [],
+          "analysisPoints": [
+            "Recall the difference in content type for the two properties."
+          ],
+          "keyConcepts": [
+            "childNodes",
+            "children",
+            "NodeList",
+            "HTMLCollection",
+            "DOM Traversal"
+          ],
+          "evaluationCriteria": [
+            "Quick and accurate recall of content differences."
+          ],
+          "example": "```html\n<div>\n  <!-- Comment -->\n  Text Node\n  <span>Element Node</span>\n</div>\n```\n`div.childNodes` would include the comment node, text node (for 'Text Node' and whitespace), and the `<span>` element. `div.children` would only include the `<span>` element.",
+          "tags": [
+            "DOM",
+            "Traversal",
+            "Flashcard",
+            "JavaScript"
+          ],
+          "prerequisites": [
+            "theory_dom_traversal"
+          ],
+          "complexity": 4,
+          "interviewFrequency": 7,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_ajax_fetch_api_1",
+          "topic": "Fetch API - Basic Usage",
+          "level": "easy",
+          "type": "mcq",
+          "question": "Which of the following is the correct way to initiate a GET request using the Fetch API and handle its successful JSON response?",
+          "answer": "fetch('url').then(response => response.json()).then(data => console.log(data))",
+          "options": [
+            "fetch('url').success(data => console.log(data))",
+            "fetch('url').json(data => console.log(data))",
+            "fetch('url').then(response => response.json()).then(data => console.log(data))",
+            "fetch('url').done(data => console.log(data))"
+          ],
+          "analysisPoints": [
+            "Understanding Fetch's promise-based nature.",
+            "Correctly chaining `.then()` calls.",
+            "Knowing that `response.json()` returns a promise itself."
+          ],
+          "keyConcepts": [
+            "Fetch API",
+            "Promises",
+            "Response Object",
+            "JSON Parsing"
+          ],
+          "evaluationCriteria": [
+            "Correct syntax for basic Fetch request.",
+            "Understanding of `response.json()`'s behavior."
+          ],
+          "example": "```typescript\nfetch('https://jsonplaceholder.typicode.com/todos/1')\n  .then(response => response.json()) // First .then() to parse JSON, returns a promise\n  .then(data => console.log(data))   // Second .then() to handle the parsed data\n  .catch(error => console.error('Error fetching data:', error)); // Handle network errors\n```\nThe `fetch` function returns a Promise that resolves to a `Response` object. The `Response` object's `json()` method also returns a Promise that resolves with the parsed JSON data. Therefore, two `.then()` calls are typically needed for JSON responses: one for the `Response` object itself, and one for the parsed data.",
+          "tags": [
+            "Fetch API",
+            "AJAX",
+            "Promises",
+            "JavaScript"
+          ],
+          "prerequisites": [
+            "javascript_promises"
+          ],
+          "complexity": 4,
+          "interviewFrequency": 9,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_ajax_fetch_api_2",
+          "topic": "Fetch API - Error Handling",
+          "level": "medium",
+          "type": "mcq",
+          "question": "Consider the following Fetch API call:\n\n```javascript\nfetch('https://api.example.com/non-existent-resource')\n  .then(response => {\n    if (!response.ok) {\n      throw new Error(`HTTP error! status: ${response.status}`);\n    }\n    return response.json();\n  })\n  .then(data => console.log('Success:', data))\n  .catch(error => console.error('Caught error:', error.message));\n```\n\nIf the URL `https://api.example.com/non-existent-resource` returns a 404 Not Found HTTP status, what will be logged to the console?",
+          "answer": "Caught error: HTTP error! status: 404",
+          "options": [
+            "Success: (with an empty object)",
+            "Caught error: Network error",
+            "Caught error: HTTP error! status: 404",
+            "The code will execute the second `.then()` block, but `data` will be undefined."
+          ],
+          "analysisPoints": [
+            "Understanding Fetch's error handling for HTTP status codes.",
+            "Correctly interpreting the `response.ok` property.",
+            "Knowledge of how `throw new Error` interacts with `.catch()`."
+          ],
+          "keyConcepts": [
+            "Fetch API",
+            "Error Handling",
+            "Promises",
+            "response.ok",
+            "HTTP Status Codes"
+          ],
+          "evaluationCriteria": [
+            "Accurate prediction of Fetch's error flow.",
+            "Demonstrates knowledge that `fetch` doesn't reject on HTTP errors by default."
+          ],
+          "example": "```typescript\nfetch('https://httpstat.us/404') // This URL always returns 404\n  .then(response => {\n    console.log('Response received, status:', response.status);\n    if (!response.ok) {\n      // response.ok is false for 404, so this block executes\n      throw new Error(`HTTP error! status: ${response.status}`);\n    }\n    return response.json();\n  })\n  .then(data => console.log('Success:', data))\n  .catch(error => {\n    // The error thrown in the first .then() is caught here\n    console.error('Caught error:', error.message); // Outputs: Caught error: HTTP error! status: 404\n  });\n```\nFetch promises only reject on network errors (e.g., DNS lookup failure, no internet connection). For HTTP error statuses like 404 or 500, the promise *resolves* with a `Response` object where `response.ok` is `false`. It's crucial to explicitly check `response.ok` and throw an error yourself to propagate HTTP errors to the `.catch()` block.",
+          "tags": [
+            "Fetch API",
+            "AJAX",
+            "Error Handling",
+            "Promises"
+          ],
+          "prerequisites": [
+            "javascript_promises",
+            "http_basics"
+          ],
+          "complexity": 7,
+          "interviewFrequency": 10,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_ajax_fetch_api_3",
+          "topic": "XMLHttpRequest - Ready States",
+          "level": "medium",
+          "type": "mcq",
+          "question": "In `XMLHttpRequest`, what does `xhr.readyState === 4` signify in the `onreadystatechange` handler?",
+          "answer": "The request has completed, and the response is available.",
+          "options": [
+            "The request has been opened.",
+            "Headers have been received.",
+            "The response is currently being downloaded.",
+            "The request has completed, and the response is available."
+          ],
+          "analysisPoints": [
+            "Understanding XHR `readyState` values.",
+            "Knowing the final state of an XHR request.",
+            "Distinguishing between partial and complete responses."
+          ],
+          "keyConcepts": [
+            "XMLHttpRequest",
+            "readyState",
+            "AJAX",
+            "HTTP Request Lifecycle"
+          ],
+          "evaluationCriteria": [
+            "Correct identification of the `readyState` 4 meaning.",
+            "Knowledge of XHR lifecycle."
+          ],
+          "example": "```typescript\nconst xhr = new XMLHttpRequest();\nxhr.open('GET', 'some-url', true);\nxhr.onreadystatechange = function() {\n  // readyState 0: UNSENT\n  // readyState 1: OPENED\n  // readyState 2: HEADERS_RECEIVED\n  // readyState 3: LOADING\n  if (xhr.readyState === 4) { // DONE\n    if (xhr.status === 200) {\n      console.log('Request successful! Response:', xhr.responseText);\n    } else {\n      console.error('Request failed. Status:', xhr.status);\n    }\n  }\n};\nxhr.send();\n```\n`xhr.readyState === 4` indicates that the `XMLHttpRequest` operation is complete. At this point, the `xhr.status` and `xhr.responseText` (or `xhr.response`) properties will contain the full HTTP response from the server, whether it was successful or an error.",
+          "tags": [
+            "XMLHttpRequest",
+            "AJAX",
+            "readyState",
+            "JavaScript"
+          ],
+          "prerequisites": [
+            "theory_ajax_fetch_api"
+          ],
+          "complexity": 5,
+          "interviewFrequency": 6,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_ajax_fetch_api_4",
+          "topic": "Fetch API vs XMLHttpRequest",
+          "level": "open",
+          "type": "open",
+          "question": "Compare and contrast `XMLHttpRequest` with the `Fetch API`. Discuss their main differences, advantages, and disadvantages. Which one would you prefer for new development and why?",
+          "answer": "**XMLHttpRequest (XHR)**\n\n*   **Nature:** Older, callback-based API. Event-driven model (`onreadystatechange`, `onload`, `onerror`).\n*   **Pros:**\n    *   More control over request lifecycle (e.g., progress events).\n    *   Legacy support (works in older browsers).\n*   **Cons:**\n    *   **Callback Hell:** Complex sequences of requests lead to deeply nested callbacks, making code hard to read and maintain.\n    *   Verbose API: Requires more boilerplate code to set up and manage requests.\n    *   Error Handling: HTTP errors (e.g., 404, 500) are not distinct from network errors; you must manually check `status`.\n    *   No built-in support for Promises, requiring manual wrapping for modern async patterns.\n    *   Doesn't support streams by default.\n\n**Fetch API**\n\n*   **Nature:** Modern, Promise-based API. Provides a more powerful and flexible mechanism for making network requests.\n*   **Pros:**\n    *   **Promise-based:** Naturally handles asynchronous operations, leading to cleaner code with `.then()`, `.catch()`, and `async/await`.\n    *   Simpler API: Less boilerplate code compared to XHR.\n    *   Separation of Concerns: HTTP errors don't cause a promise rejection by default, forcing explicit error checks (`response.ok`). This is often considered an advantage as successful network requests (even with 4xx/5xx status) are distinct from actual network failures.\n    *   Supports advanced features: Streams, `AbortController` for cancellation, CORS control with `mode` option.\n    *   More aligned with modern JavaScript syntax and patterns.\n*   **Cons:**\n    *   No built-in `onprogress` event handling like XHR (though you can implement this with ReadableStream).\n    *   Does not reject the promise on HTTP error status codes (e.g., 404, 500); requires manual `response.ok` check.\n    *   Less robust browser support for very old browsers (though polyfills exist).\n\n**Which one to prefer for new development and why?**\n\nFor **new development**, I would strongly prefer the **Fetch API**. \n\n**Reasons:**\n1.  **Readability and Maintainability (Promises/Async/Await):** The promise-based nature of Fetch, especially when combined with `async/await`, makes asynchronous code significantly easier to read, write, and debug compared to the nested callbacks often associated with XHR. This directly reduces 'callback hell'.\n2.  **Modern API Design:** Fetch is designed with modern web development patterns in mind. Its `Response` object and options are more intuitive and powerful for handling various aspects of HTTP requests (headers, body, credentials, etc.).\n3.  **Built-in Cancellation (`AbortController`):** The native support for request cancellation via `AbortController` is a critical feature for managing long-running requests or preventing race conditions in dynamic UIs, which is more cumbersome to implement with XHR.\n4.  **Flexibility and Features:** Fetch offers better support for features like Streams, which are becoming increasingly important for handling large data payloads efficiently.\n\nWhile XHR still has its place for very specific legacy scenarios or highly granular control over certain aspects (like progress event reporting in old browsers without alternative solutions), Fetch API is generally superior for building robust, modern, and maintainable web applications.",
+          "options": [],
+          "analysisPoints": [
+            "Comprehensive comparison covering nature, pros, and cons of both APIs.",
+            "Clear statement of preference with strong justifications.",
+            "Discussion of key features like Promises, `AbortController`, error handling, and verbosity."
+          ],
+          "keyConcepts": [
+            "Fetch API",
+            "XMLHttpRequest",
+            "Promises",
+            "Async/Await",
+            "Callback Hell",
+            "Error Handling",
+            "AbortController",
+            "HTTP"
+          ],
+          "evaluationCriteria": [
+            "Depth and accuracy of the comparison.",
+            "Sound reasoning for the preferred choice.",
+            "Demonstration of practical experience and architectural thinking."
+          ],
+          "example": "",
+          "tags": [
+            "AJAX",
+            "Fetch API",
+            "XMLHttpRequest",
+            "Comparison",
+            "Open-ended",
+            "Advanced"
+          ],
+          "prerequisites": [
+            "theory_ajax_fetch_api",
+            "javascript_promises",
+            "javascript_async_await"
+          ],
+          "complexity": 9,
+          "interviewFrequency": 10,
+          "learningPath": "advanced"
+        },
+        {
+          "id": "question_ajax_fetch_api_5",
+          "topic": "AbortController",
+          "level": "medium",
+          "type": "flashcard",
+          "question": "What is the purpose of `AbortController` in the context of the Fetch API?",
+          "answer": "`AbortController` provides a way to cancel one or more ongoing `fetch` requests.",
+          "options": [],
+          "analysisPoints": [
+            "Recall the core functionality of `AbortController`."
+          ],
+          "keyConcepts": [
+            "AbortController",
+            "Fetch API",
+            "Request Cancellation",
+            "Asynchronous Operations"
+          ],
+          "evaluationCriteria": [
+            "Quick and accurate recall."
+          ],
+          "example": "```typescript\nconst controller = new AbortController();\nconst signal = controller.signal;\n\nfetch('https://api.example.com/data', { signal })\n  .catch(error => {\n    if (error.name === 'AbortError') {\n      console.log('Fetch request was aborted.');\n    }\n  });\n\n// To cancel the request:\ncontroller.abort();\n```",
+          "tags": [
+            "Fetch API",
+            "AbortController",
+            "Flashcard",
+            "JavaScript"
+          ],
+          "prerequisites": [
+            "theory_ajax_fetch_api"
+          ],
+          "complexity": 6,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_ajax_fetch_api_6",
+          "topic": "Fetch API - POST Request",
+          "level": "medium",
+          "type": "code",
+          "question": "Write a JavaScript function `createPost(title, body, userId)` that uses the Fetch API to send a POST request to `https://jsonplaceholder.typicode.com/posts`. The function should return a Promise that resolves with the created post data or rejects with an error message.\n\nEnsure that:\n1.  The `Content-Type` header is set to `application/json`.\n2.  The request body is correctly JSON stringified.\n3.  HTTP errors (e.g., 4xx or 5xx) are properly handled and result in a rejected promise with a descriptive error message.",
+          "answer": "```typescript\nasync function createPost(title, body, userId) {\n  const postData = {\n    title: title,\n    body: body,\n    userId: userId,\n  };\n\n  try {\n    const response = await fetch('https://jsonplaceholder.typicode.com/posts', {\n      method: 'POST',\n      headers: {\n        'Content-Type': 'application/json',\n        // 'Accept': 'application/json' // Often good practice to include\n      },\n      body: JSON.stringify(postData), // Convert JavaScript object to JSON string\n    });\n\n    // Check if the response status is OK (200-299 range)\n    if (!response.ok) {\n      // For non-OK responses, throw an Error which will be caught by the catch block\n      const errorText = await response.text(); // Get more detailed error from body if available\n      throw new Error(`HTTP error! Status: ${response.status}. Message: ${errorText || response.statusText}`);\n    }\n\n    // Parse the response body as JSON\n    const data = await response.json();\n    return data; // Return the created post data\n\n  } catch (error) {\n    // Catch network errors or errors thrown from the response.ok check\n    console.error('Error creating post:', error);\n    throw new Error(`Failed to create post: ${error.message}`); // Re-throw with a more user-friendly message\n  }\n}\n\n// Example Usage:\ncreatePost('My New Title', 'This is the body of my new post.', 1)\n  .then(newPost => {\n    console.log('Post created successfully:', newPost);\n    // The JSONPlaceholder API will return an object with an 'id' for new posts\n    // Example output: { title: 'My New Title', body: '...', userId: 1, id: 101 }\n  })\n  .catch(err => {\n    console.error('Failed to create post:', err.message);\n  });\n\n// Example with invalid data (might trigger server-side validation error if API was stricter)\ncreatePost('', '', null) // Sending empty data to test error handling\n  .then(response => console.log('Created (possibly invalid) post:', response))\n  .catch(err => console.error('Attempt to create invalid post failed:', err.message));\n```",
+          "options": [],
+          "analysisPoints": [
+            "Correctly sets HTTP method to POST.",
+            "Sets `Content-Type` header.",
+            "Uses `JSON.stringify` for the request body.",
+            "Properly uses `await` for promise resolution.",
+            "Includes robust error handling for HTTP status codes.",
+            "Handles potential network errors via `try...catch`.",
+            "Returns a Promise as required."
+          ],
+          "keyConcepts": [
+            "Fetch API",
+            "POST Request",
+            "Headers",
+            "JSON.stringify",
+            "Async/Await",
+            "Error Handling",
+            "Promises"
+          ],
+          "evaluationCriteria": [
+            "Code is functional and follows best practices for Fetch POST requests.",
+            "Error handling is comprehensive.",
+            "Demonstrates understanding of asynchronous patterns.",
+            "Code is clean and readable."
+          ],
+          "example": "",
+          "tags": [
+            "Fetch API",
+            "AJAX",
+            "Code Challenge",
+            "POST",
+            "JavaScript"
+          ],
+          "prerequisites": [
+            "theory_ajax_fetch_api",
+            "javascript_async_await"
+          ],
+          "complexity": 8,
+          "interviewFrequency": 9,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_ajax_fetch_api_7",
+          "topic": "Fetch API - AbortController",
+          "level": "hard",
+          "type": "code",
+          "question": "Implement a `debounceFetch(url, delay)` function that wraps a `fetch` call and debounces it. If the function is called multiple times within the `delay` period, only the *last* call should trigger a network request, and any previous ongoing requests should be aborted. The function should return a Promise that resolves with the fetch data or rejects with an error (including `AbortError`).\n\n**Hints:**\n*   You'll need an `AbortController` instance.\n*   Store the controller instance to access it later.\n*   Use `setTimeout` for debouncing.\n*   Remember to `clearTimeout` if the function is called again within the delay.\n\n```javascript\n// Example Usage (conceptual):\n// const debouncedFetcher = debounceFetch('https://api.example.com/data', 300);\n// debouncedFetcher().then(data => console.log(data)).catch(err => console.error(err));\n// debouncedFetcher().then(...); // This will cancel the previous one if called within 300ms\n```",
+          "answer": "```javascript\nlet activeController = null; // Stores the current AbortController instance\nlet debounceTimer = null;    // Stores the timeout ID for debouncing\n\n/**\n * Creates a debounced fetch function that cancels previous ongoing requests.\n * @param {string} url The URL to fetch.\n * @param {number} delay The debounce delay in milliseconds.\n * @returns {Function} A function that, when called, initiates a debounced fetch.\n */\nfunction debounceFetch(url, delay) {\n  return function() {\n    // Return a new Promise for each call to debounceFetch's inner function\n    return new Promise((resolve, reject) => {\n      // 1. Clear any existing debounce timer\n      if (debounceTimer) {\n        clearTimeout(debounceTimer);\n      }\n\n      // 2. If there's an active request, abort it\n      if (activeController) {\n        activeController.abort();\n        console.log('Aborting previous request...');\n      }\n\n      // 3. Create a new AbortController for the upcoming request\n      const newController = new AbortController();\n      const signal = newController.signal;\n      activeController = newController; // Store this new controller as the active one\n\n      // 4. Set a new debounce timer\n      debounceTimer = setTimeout(() => {\n        // Perform the fetch request after the delay\n        fetch(url, { signal })\n          .then(response => {\n            // Check if this response is from the currently active controller\n            // This guards against race conditions where a *very fast* prior request\n            // might resolve after a subsequent one has started but before it's aborted.\n            if (activeController !== newController) {\n                // This request was superseded by a newer one, ignore its resolution\n                return Promise.reject(new Error('Stale request result ignored'));\n            }\n\n            if (!response.ok) {\n              throw new Error(`HTTP error! status: ${response.status}`);\n            }\n            return response.json();\n          })\n          .then(data => {\n            if (activeController === newController) { // Ensure current controller's response\n                resolve(data);\n            }\n          })\n          .catch(error => {\n            if (error.name === 'AbortError') {\n              console.warn('Fetch request was aborted intentionally.');\n              reject(new Error('Request aborted.')); // Indicate cancellation to user of the promise\n            } else if (error.message === 'Stale request result ignored') {\n                console.log('Stale request result ignored.');\n                // Do not reject the current promise here, as it was superseded\n                // The promise for the *latest* call is the one we care about.\n            } else {\n              console.error('Fetch error:', error);\n              reject(new Error(`Fetch failed: ${error.message}`));\n            }\n          })\n          .finally(() => {\n            // Clean up the active controller reference if this request just finished\n            if (activeController === newController) {\n                activeController = null;\n            }\n            debounceTimer = null; // Clear the timer ID\n          });\n      }, delay);\n    });\n  };\n}\n\n// --- Example Usage ---\nconst debouncedApiCall = debounceFetch('https://jsonplaceholder.typicode.com/posts/1', 500);\n\nconsole.log('Calling 1st time');\ndebouncedApiCall()\n  .then(data => console.log('1st call resolved (should be the last one):', data.title))\n  .catch(err => console.error('1st call error:', err.message));\n\nsetTimeout(() => {\n  console.log('Calling 2nd time (within debounce period)');\n  debouncedApiCall()\n    .then(data => console.log('2nd call resolved (should be the last one):', data.title))\n    .catch(err => console.error('2nd call error:', err.message));\n}, 200);\n\nsetTimeout(() => {\n  console.log('Calling 3rd time (within debounce period of 2nd)');\n  debouncedApiCall()\n    .then(data => console.log('3rd call resolved (THIS should be the last one):', data.title))\n    .catch(err => console.error('3rd call error:', err.message));\n}, 400);\n\nsetTimeout(() => {\n  console.log('Calling 4th time (after delay, starting new sequence)');\n  debouncedApiCall()\n    .then(data => console.log('4th call resolved (should be the last one of this sequence):', data.title))\n    .catch(err => console.error('4th call error:', err.message));\n}, 1200);\n\n/* Expected console output (approximate timing):\nCalling 1st time\nCalling 2nd time (within debounce period) -> Aborting previous request...\nCalling 3rd time (within debounce period of 2nd) -> Aborting previous request...\nFetch request was aborted intentionally. (for 1st and 2nd calls' promises)\n3rd call resolved (THIS should be the last one): ...\nCalling 4th time (after delay, starting new sequence)\n4th call resolved (should be the last one of this sequence): ...\n*/\n```",
+          "options": [],
+          "analysisPoints": [
+            "Correct implementation of debouncing logic (`setTimeout`, `clearTimeout`).",
+            "Correct use of `AbortController` to cancel previous requests.",
+            "Proper handling of `AbortError` in the catch block.",
+            "Ensuring the returned promise resolves/rejects correctly based on the *latest* fetch attempt.",
+            "Managing `activeController` and `debounceTimer` state correctly across calls."
+          ],
+          "keyConcepts": [
+            "Debouncing",
+            "Fetch API",
+            "AbortController",
+            "Promises",
+            "Async/Await",
+            "Error Handling",
+            "Higher-Order Functions",
+            "Cancellation"
+          ],
+          "evaluationCriteria": [
+            "Solution correctly implements debouncing and cancellation.",
+            "Error handling for `AbortError` is robust.",
+            "Code is well-structured and handles edge cases of rapid calls.",
+            "Demonstrates advanced JavaScript concepts for asynchronous control."
+          ],
+          "example": "",
+          "tags": [
+            "Fetch API",
+            "AJAX",
+            "Code Challenge",
+            "Promises",
+            "AbortController",
+            "Debouncing",
+            "Advanced"
+          ],
+          "prerequisites": [
+            "theory_ajax_fetch_api",
+            "javascript_async",
+            "javascript_promises"
+          ],
+          "complexity": 10,
+          "interviewFrequency": 8,
+          "learningPath": "expert"
+        }
+      ],
+      "tasks": [
+        {
+          "id": "task_dom_events_1",
+          "title": "Interactive To-Do List with Event Delegation",
+          "description": "\nCreate a simple interactive To-Do list. The application should allow users to add new tasks, mark tasks as completed, and delete tasks. All interaction with list items (marking/deleting) should leverage event delegation.\n\n**Requirements:**\n1.  **Add Task:** An input field and a button to add new tasks to the list. New tasks should be appended as `<li>` elements inside an unordered list (`<ul>`).\n2.  **Mark as Completed:** Clicking on a list item (`<li>`) should toggle a 'completed' class on that item, changing its appearance (e.g., strikethrough text).\n3.  **Delete Task:** Each list item should have a small 'X' button or icon next to it. Clicking this button should remove the corresponding list item from the DOM.\n4.  **Event Delegation:** Both 'mark as completed' and 'delete task' functionalities **must** use event delegation by attaching a single event listener to the parent `<ul>` element.\n5.  **Dynamic Content:** Ensure that new tasks added to the list automatically inherit the 'mark as completed' and 'delete' functionalities without needing new event listeners.\n\n**HTML Structure:**\n```html\n<input type=\"text\" id=\"taskInput\" placeholder=\"Add a new task\">\n<button id=\"addTaskBtn\">Add Task</button>\n<ul id=\"todoList\">\n  <!-- Tasks will be added here -->\n</ul>\n```\n",
+          "difficulty": "medium",
+          "startingCode": "document.addEventListener('DOMContentLoaded', () => {\n  const taskInput = document.getElementById('taskInput');\n  const addTaskBtn = document.getElementById('addTaskBtn');\n  const todoList = document.getElementById('todoList');\n\n  // Add Task functionality\n  addTaskBtn.addEventListener('click', () => {\n    const taskText = taskInput.value.trim();\n    if (taskText !== '') {\n      const listItem = document.createElement('li');\n      listItem.innerHTML = `\n        <span>${taskText}</span>\n        <button class=\"delete-btn\">X</button>\n      `;\n      todoList.appendChild(listItem);\n      taskInput.value = ''; // Clear input\n    }\n  });\n\n  // TODO: Implement event delegation for marking/deleting tasks here\n  // Hint: Attach a single listener to `todoList`\n  // Check event.target.classList for 'delete-btn' or event.target.tagName for 'SPAN' for toggling\n\n});\n\n// Basic CSS for visual feedback (can be added to a <style> tag or CSS file)\n/*\n#todoList li {\n  padding: 8px;\n  margin-bottom: 5px;\n  border: 1px solid #ddd;\n  display: flex;\n  justify-content: space-between;\n  align-items: center;\n  background-color: #f9f9f9;\n}\n\n#todoList li.completed span {\n  text-decoration: line-through;\n  color: #888;\n}\n\n.delete-btn {\n  background-color: #f44336;\n  color: white;\n  border: none;\n  padding: 5px 10px;\n  cursor: pointer;\n  border-radius: 3px;\n}\n\n.delete-btn:hover {\n  background-color: #d32f2f;\n}\n*/\n",
+          "solutionCode": "document.addEventListener('DOMContentLoaded', () => {\n  const taskInput = document.getElementById('taskInput');\n  const addTaskBtn = document.getElementById('addTaskBtn');\n  const todoList = document.getElementById('todoList');\n\n  // Add Task functionality\n  addTaskBtn.addEventListener('click', () => {\n    const taskText = taskInput.value.trim();\n    if (taskText !== '') {\n      const listItem = document.createElement('li');\n      // Use a span for the text content to make it a distinct target for toggling\n      listItem.innerHTML = `\n        <span>${taskText}</span>\n        <button class=\"delete-btn\">X</button>\n      `;\n      todoList.appendChild(listItem);\n      taskInput.value = ''; // Clear input\n    }\n  });\n\n  // Event Delegation for Marking as Completed and Deleting Tasks\n  todoList.addEventListener('click', (event) => {\n    const target = event.target; // The actual element that was clicked\n\n    // 1. Delete Task\n    if (target.classList.contains('delete-btn')) {\n      const listItemToDelete = target.closest('li'); // Find the nearest parent <li>\n      if (listItemToDelete) {\n        todoList.removeChild(listItemToDelete);\n        console.log('Task deleted:', listItemToDelete.querySelector('span').textContent);\n      }\n    } \n    // 2. Mark as Completed (toggle 'completed' class on the li item)\n    // Check if the clicked element is the span (task text) or the li itself\n    else if (target.tagName === 'SPAN' && target.parentElement.tagName === 'LI') {\n      target.parentElement.classList.toggle('completed');\n      console.log('Task status toggled for:', target.textContent);\n    } else if (target.tagName === 'LI') {\n      // If clicking directly on the LI (and not the span), also toggle\n      target.classList.toggle('completed');\n      console.log('Task status toggled for:', target.querySelector('span').textContent);\n    }\n  });\n});\n\n/* Add this CSS to your <style> tag or CSS file */\n/*\n#taskInput {\n  padding: 8px;\n  width: 200px;\n  margin-right: 10px;\n}\n#addTaskBtn {\n  padding: 8px 15px;\n  background-color: #4CAF50;\n  color: white;\n  border: none;\n  cursor: pointer;\n}\n#addTaskBtn:hover {\n  background-color: #45a049;\n}\n\n#todoList {\n  list-style-type: none;\n  padding: 0;\n  margin-top: 20px;\n  border: 1px solid #eee;\n  border-radius: 5px;\n}\n\n#todoList li {\n  padding: 10px 15px;\n  margin-bottom: 0px;\n  border-bottom: 1px solid #eee;\n  display: flex;\n  justify-content: space-between;\n  align-items: center;\n  background-color: #fff;\n  transition: background-color 0.2s ease;\n}\n#todoList li:last-child {\n  border-bottom: none;\n}\n#todoList li:hover {\n  background-color: #f5f5f5;\n}\n\n#todoList li.completed {\n  background-color: #e0ffe0; /* Light green background */\n}\n\n#todoList li.completed span {\n  text-decoration: line-through;\n  color: #888;\n  font-style: italic;\n}\n\n.delete-btn {\n  background-color: #f44336;\n  color: white;\n  border: none;\n  padding: 5px 10px;\n  border-radius: 3px;\n  cursor: pointer;\n  font-size: 0.8em;\n}\n\n.delete-btn:hover {\n  background-color: #d32f2f;\n}\n*/\n",
+          "testCases": [
+            "Adding a new task via input and button should append a new `<li>` to `todoList`.",
+            "Clicking an existing `<li>` (its text part) should toggle its 'completed' class.",
+            "Clicking a dynamically added `<li>` (its text part) should toggle its 'completed' class.",
+            "Clicking the 'X' button on an existing `<li>` should remove that `<li>` from the DOM.",
+            "Clicking the 'X' button on a dynamically added `<li>` should remove that `<li>` from the DOM.",
+            "Clicking outside any `<li>` but within the `<ul>` (if allowed by padding/margin) should not trigger any task-specific actions.",
+            "Submitting an empty task text should not add a new `<li>`."
+          ],
+          "hints": [
+            "For event delegation, attach the `click` listener to the `todoList` (the `<ul>` element).",
+            "Inside the event listener, use `event.target` to identify which specific element was clicked.",
+            "To check if the clicked element is the delete button, use `event.target.classList.contains('delete-btn')`.",
+            "To check if the clicked element is the task text (or the list item itself), you can check `event.target.tagName` or use `event.target.closest('li')` to find the parent list item.",
+            "When deleting, use `parentElement.removeChild(childElement)` to remove the `<li>`."
+          ],
+          "tags": [
+            "DOM",
+            "Events",
+            "Event Delegation",
+            "JavaScript",
+            "Frontend",
+            "UI"
+          ],
+          "timeEstimate": 45,
+          "prerequisites": [
+            "theory_dom_events",
+            "dom_manipulation_basics"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 9,
+          "learningPath": "intermediate",
+          "relatedConcepts": [
+            "event_bubbling",
+            "event.target",
+            "dom_manipulation",
+            "dynamic_content"
+          ]
+        },
+        {
+          "id": "task_event_methods_1",
+          "title": "Nested Modal Interaction Control",
+          "description": "\nImplement a scenario with a modal dialog that demonstrates the use of `event.stopPropagation()` and `event.preventDefault()` to control complex nested interactions.\n\n**Requirements:**\n1.  **Modal Overlay:** A full-screen overlay (`#modalOverlay`) that appears when a 'Open Modal' button is clicked. Clicking the overlay itself should close the modal.\n2.  **Modal Content:** Inside the overlay, there should be a central modal dialog box (`#modalContent`) with some text and a 'Close' button.\n3.  **Prevent Overlay Closure:** Clicking *inside* `#modalContent` (but not the 'Close' button) should **not** close the modal. This requires `event.stopPropagation()`.\n4.  **Prevent Default Form Submission:** Inside `#modalContent`, add a simple form (`<form>`) with an input and a submit button. Submitting this form should **not** reload the page but instead log a message to the console. This requires `event.preventDefault()`.\n5.  **Combined Use Case:** The 'Close' button inside `#modalContent` should close the modal. If this button were part of a form, ensure its click doesn't trigger form submission or bubble up to close the modal via the overlay listener. (Though for simplicity, it can just close the modal here). For an additional challenge, make it a submit button that *doesn't* submit the form, and *does* stop bubbling up to the overlay.\n\n**HTML Structure:**\n```html\n<button id=\"openModalBtn\">Open Modal</button>\n\n<div id=\"modalOverlay\" style=\"display: none;\">\n  <div id=\"modalContent\">\n    <h2>Modal Title</h2>\n    <p>This is modal content.</p>\n    <form id=\"modalForm\">\n      <input type=\"text\" placeholder=\"Enter something\">\n      <button type=\"submit\" id=\"formSubmitBtn\">Submit Form (Prevent Default)</button>\n    </form>\n    <button id=\"closeModalBtn\">Close Modal</button>\n  </div>\n</div>\n```\n\n**CSS (minimal for visibility, include in solution):**\n```css\n#modalOverlay {\n  position: fixed;\n  top: 0; left: 0; right: 0; bottom: 0;\n  background: rgba(0, 0, 0, 0.5);\n  display: flex;\n  justify-content: center;\n  align-items: center;\n  z-index: 1000;\n}\n\n#modalContent {\n  background: white;\n  padding: 20px;\n  border-radius: 8px;\n  width: 80%;\n  max-width: 500px;\n  box-shadow: 0 4px 8px rgba(0,0,0,0.2);\n}\n\n#modalForm {\n  margin-top: 15px;\n  border: 1px dashed #ccc;\n  padding: 10px;\n}\n\n#modalForm input, #modalForm button {\n  margin-right: 5px;\n}\n```\n",
+          "difficulty": "hard",
+          "startingCode": "document.addEventListener('DOMContentLoaded', () => {\n  const openModalBtn = document.getElementById('openModalBtn');\n  const modalOverlay = document.getElementById('modalOverlay');\n  const modalContent = document.getElementById('modalContent');\n  const closeModalBtn = document.getElementById('closeModalBtn');\n  const modalForm = document.getElementById('modalForm');\n  const formSubmitBtn = document.getElementById('formSubmitBtn');\n\n  function openModal() {\n    modalOverlay.style.display = 'flex';\n  }\n\n  function closeModal() {\n    modalOverlay.style.display = 'none';\n  }\n\n  openModalBtn.addEventListener('click', openModal);\n  closeModalBtn.addEventListener('click', closeModal);\n\n  // TODO: Implement logic for #modalOverlay, #modalContent, and #modalForm\n  // 1. Clicking overlay closes modal.\n  // 2. Clicking inside modalContent *doesn't* close modal (stopPropagation).\n  // 3. Submitting modalForm *doesn't* reload page (preventDefault).\n  // 4. (Optional) Make closeModalBtn also stop propagation from the form.\n\n});\n",
+          "solutionCode": "document.addEventListener('DOMContentLoaded', () => {\n  const openModalBtn = document.getElementById('openModalBtn');\n  const modalOverlay = document.getElementById('modalOverlay');\n  const modalContent = document.getElementById('modalContent');\n  const closeModalBtn = document.getElementById('closeModalBtn');\n  const modalForm = document.getElementById('modalForm');\n  const formSubmitBtn = document.getElementById('formSubmitBtn');\n\n  function openModal() {\n    modalOverlay.style.display = 'flex';\n  }\n\n  function closeModal() {\n    modalOverlay.style.display = 'none';\n  }\n\n  openModalBtn.addEventListener('click', openModal);\n\n  // 1. Clicking overlay closes modal.\n  // This listener must be on the overlay itself, not its children.\n  modalOverlay.addEventListener('click', closeModal);\n\n  // 2. Clicking inside modalContent *doesn't* close modal.\n  // This is crucial: the click event from modalContent would bubble up to modalOverlay.\n  // We stop that bubbling here.\n  modalContent.addEventListener('click', (event) => {\n    event.stopPropagation(); // Prevents clicks inside the content from reaching the overlay\n    console.log('Clicked inside modal content (propagation stopped).');\n  });\n\n  // 3. Submitting modalForm *doesn't* reload page (preventDefault).\n  modalForm.addEventListener('submit', (event) => {\n    event.preventDefault(); // Stops the default form submission behavior (page reload)\n    console.log('Form submitted! Default action prevented.');\n    const inputValue = modalForm.querySelector('input').value;\n    console.log('Form input value:', inputValue);\n    // In a real app, you'd send an AJAX request here.\n  });\n\n  // 4. Close Modal Button: Closes the modal. \n  // It's good practice to also stop propagation if it's nested in a clickable area,\n  // e.g., if clicking the button would otherwise close the modal via a parent click.\n  closeModalBtn.addEventListener('click', (event) => {\n    event.stopPropagation(); // Prevent this click from bubbling to modalContent or modalOverlay\n    closeModal();\n    console.log('Modal closed by button.');\n  });\n\n});\n",
+          "testCases": [
+            "Clicking 'Open Modal' button should make the modal overlay visible.",
+            "Clicking the gray area (modal overlay) outside `modalContent` should close the modal.",
+            "Clicking inside `modalContent` (e.g., on text or an input field) should *not* close the modal.",
+            "Clicking the 'Submit Form' button inside the modal should log 'Form submitted! Default action prevented.' and *not* cause a page reload.",
+            "Clicking the 'Close Modal' button should close the modal.",
+            "Ensure no console errors or unexpected behaviors when rapidly clicking or clicking different areas."
+          ],
+          "hints": [
+            "The `modalOverlay` is the ideal place for the 'close modal on outside click' listener.",
+            "To prevent `modalContent` clicks from closing the modal, you need to stop the event from bubbling up from `modalContent` to `modalOverlay`.",
+            "For the form, remember that `submit` is a special event. You'll need to listen for the `submit` event on the `form` element itself, not just the button.",
+            "`event.stopPropagation()` stops the event from reaching parent elements, while `event.preventDefault()` stops the browser's default action for that event.",
+            "Think about where the `event.target` will be for each interaction."
+          ],
+          "tags": [
+            "DOM",
+            "Events",
+            "stopPropagation",
+            "preventDefault",
+            "Modal",
+            "UI",
+            "JavaScript"
+          ],
+          "timeEstimate": 60,
+          "prerequisites": [
+            "theory_dom_events",
+            "theory_event_methods",
+            "dom_manipulation_basics"
+          ],
+          "complexity": 8,
+          "interviewRelevance": 10,
+          "learningPath": "intermediate",
+          "relatedConcepts": [
+            "event_bubbling",
+            "event.target",
+            "form_handling"
+          ]
+        },
+        {
+          "id": "task_dom_traversal_1",
+          "title": "Dynamic Tree Navigation with Highlighting",
+          "description": "\nBuild a dynamic navigation structure that allows users to highlight clicked items and their ancestors, while de-highlighting siblings and their children. This task will test your understanding of DOM traversal methods.\n\n**Requirements:**\n1.  **HTML Structure:** Create a nested unordered list (`<ul>` and `<li>`) that represents a file system or menu structure. Ensure some `<li>` elements have nested `<ul>`s.\n    ```html\n    <ul id=\"fileSystem\">\n      <li>Folder 1\n        <ul>\n          <li>File A</li>\n          <li>File B</li>\n        </ul>\n      </li>\n      <li>Folder 2\n        <ul>\n          <li>Folder 2.1\n            <ul>\n              <li>File C</li>\n            </ul>\n          </li>\n          <li>File D</li>\n        </ul>\n      </li>\n      <li>File E</li>\n    </ul>\n    ```\n2.  **Click Event:** Attach a single event listener to the root `<ul>` (`#fileSystem`) using event delegation.\n3.  **Highlighting:** When a `<li>` element is clicked:\n    *   Add a `highlighted` class to the clicked `<li>`.\n    *   Add a `highlighted` class to *all* its parent `<li>` elements up to the root.\n4.  **De-highlighting:** Simultaneously, remove the `highlighted` class from:\n    *   All sibling `<li>` elements of the clicked `<li>`.\n    *   All children `<li>` elements of all sibling `<li>` elements (i.e., hide everything 'else' at the same level and below).\n    *   All previously highlighted elements that are no longer part of the current path.\n5.  **Reset:** Clicking outside any `<li>` (but within `#fileSystem` if possible, or a reset button) should remove all `highlighted` classes.\n\n**CSS (minimal, include in solution):**\n```css\n.highlighted {\n  background-color: yellow;\n  font-weight: bold;\n}\n\nul {\n  list-style-type: none;\n  padding-left: 20px;\n}\n\nli {\n  cursor: pointer;\n  margin: 5px 0;\n  padding: 3px;\n  border: 1px solid transparent;\n}\n\nli:hover {\n  border-color: #ccc;\n}\n```\n",
+          "difficulty": "hard",
+          "startingCode": "document.addEventListener('DOMContentLoaded', () => {\n  const fileSystem = document.getElementById('fileSystem');\n\n  // Function to remove 'highlighted' class from all elements\n  function clearAllHighlights() {\n    document.querySelectorAll('.highlighted').forEach(el => el.classList.remove('highlighted'));\n  }\n\n  fileSystem.addEventListener('click', (event) => {\n    const clickedItem = event.target.closest('li'); // Find the clicked <li> or its ancestor\n\n    // TODO: Implement highlighting and de-highlighting logic here\n\n    if (clickedItem && fileSystem.contains(clickedItem)) {\n      clearAllHighlights(); // Start fresh\n\n      // 1. Highlight clicked item and its ancestors\n      let current = clickedItem;\n      while (current && current !== fileSystem) {\n        current.classList.add('highlighted');\n        current = current.parentElement.closest('li'); // Go up to the nearest parent LI\n      }\n\n      // 2. TODO: De-highlight siblings and their children\n      // Hint: Iterate through siblings of clickedItem and their descendants\n\n    } else {\n      // Clicking outside an <li> (but within fileSystem) should clear all highlights\n      clearAllHighlights();\n    }\n  });\n});\n",
+          "solutionCode": "document.addEventListener('DOMContentLoaded', () => {\n  const fileSystem = document.getElementById('fileSystem');\n\n  // Function to remove 'highlighted' class from all elements\n  function clearAllHighlights() {\n    document.querySelectorAll('.highlighted').forEach(el => el.classList.remove('highlighted'));\n  }\n\n  fileSystem.addEventListener('click', (event) => {\n    const clickedItem = event.target.closest('li'); // Find the clicked <li> or its ancestor\n\n    // Prevent default actions for links if any, and stop propagation if needed\n    event.preventDefault(); // Prevents default link behavior if LIs contained <a>\n    // event.stopPropagation(); // Not strictly needed here, as we handle everything on fileSystem\n\n    if (clickedItem && fileSystem.contains(clickedItem)) { // Ensure the click is within an LI of our tree\n      clearAllHighlights(); // Start fresh before applying new highlights\n\n      // 1. Highlight clicked item and its ancestors\n      let current = clickedItem;\n      while (current && current !== fileSystem) {\n        current.classList.add('highlighted');\n        // Move up to the next parent <li> that is not the root fileSystem ul\n        // parentElement.closest('li') is robust for skipping intermediate ul/text nodes\n        current = current.parentElement.closest('li');\n      }\n\n      // 2. De-highlight siblings and their descendants\n      let node = clickedItem.parentNode.firstElementChild; // Start from the first child of the parent UL\n      while (node) {\n        if (node.tagName === 'LI' && node !== clickedItem) {\n          node.classList.remove('highlighted'); // Remove highlight from sibling LI\n\n          // Remove highlight from all descendants of this sibling\n          node.querySelectorAll('li.highlighted').forEach(descendant => {\n            descendant.classList.remove('highlighted');\n          });\n        }\n        node = node.nextElementSibling; // Move to the next sibling element\n      }\n\n    } else {\n      // Clicking outside any <li> (but within fileSystem, or a general click)\n      // This handles the reset requirement.\n      clearAllHighlights();\n    }\n  });\n});\n\n/* Add this CSS to your <style> tag or CSS file */\n/*\nbody { font-family: sans-serif; }\n\n#fileSystem {\n  border: 1px solid #ccc;\n  padding: 10px;\n  min-height: 150px;\n  background-color: #f9f9f9;\n  width: 300px;\n}\n\nul {\n  list-style-type: none;\n  padding-left: 20px;\n  margin: 0;\n}\n\nli {\n  cursor: pointer;\n  margin: 5px 0;\n  padding: 3px;\n  border: 1px solid transparent;\n  transition: background-color 0.2s ease, font-weight 0.2s ease;\n}\n\nli:hover {\n  border-color: #aaa;\n}\n\n.highlighted {\n  background-color: #ffe082; /* Light yellow */\n  font-weight: bold;\n  border-color: orange;\n}\n*/\n",
+          "testCases": [
+            "Clicking 'File A' should highlight 'File A' and 'Folder 1', and de-highlight 'File B', 'Folder 2', and 'File E'.",
+            "Clicking 'File C' should highlight 'File C', 'Folder 2.1', and 'Folder 2'. All other items (File D, File E, Folder 1 and its children) should be de-highlighted.",
+            "Clicking 'File E' should highlight only 'File E' and de-highlight all other elements in the tree.",
+            "Repeated clicks on the same item should maintain its highlight.",
+            "Clicking on a blank space within the `#fileSystem` container (but not on an `<li>`) should clear all highlights.",
+            "Ensure performance is reasonable with nested structures (no noticeable lag)."
+          ],
+          "hints": [
+            "Use `event.target.closest('li')` to get the actual `<li>` that was clicked, even if a child text node was clicked.",
+            "To highlight ancestors, start from `clickedItem` and traverse upwards using `parentElement` or `closest('li')` in a loop until you reach `#fileSystem`.",
+            "To de-highlight siblings and their children, you can get the `parentElement` of `clickedItem`, then iterate through its `children` (which are siblings). For each sibling that is *not* `clickedItem`, remove its highlight and recursively or iteratively remove highlights from its descendants using `querySelectorAll('.highlighted')` within that sibling's subtree.",
+            "Remember to clear all existing highlights first (`clearAllHighlights()`) before applying new ones to ensure only the correct path is highlighted."
+          ],
+          "tags": [
+            "DOM",
+            "Traversal",
+            "Event Delegation",
+            "UI",
+            "JavaScript",
+            "Algorithm",
+            "Tree Traversal"
+          ],
+          "timeEstimate": 90,
+          "prerequisites": [
+            "theory_dom_events",
+            "theory_dom_traversal",
+            "javascript_loops"
+          ],
+          "complexity": 9,
+          "interviewRelevance": 9,
+          "learningPath": "advanced",
+          "relatedConcepts": [
+            "event.target",
+            "dom_manipulation",
+            "tree_data_structures",
+            "css_classes"
+          ]
+        },
+        {
+          "id": "task_ajax_fetch_api_1",
+          "title": "User Search Component with API Integration and Cancellation",
+          "description": "\nBuild a simple user search component that fetches user data from a mock API (`https://jsonplaceholder.typicode.com/users`) based on user input. The component should display search results and include functionality to cancel pending requests to optimize performance and user experience.\n\n**Requirements:**\n1.  **Search Input & Results Display:** An input field (`#searchInput`) for user queries and a `div` (`#resultsContainer`) to display matching user names.\n2.  **Fetch Users:** When the user types into the input field, fetch user data from `https://jsonplaceholder.typicode.com/users`. Filter the results to show users whose names contain the input text (case-insensitive).\n3.  **Display Results:** Display each matching user's `name` property in a list (`<ul>` or series of `div`s) within `#resultsContainer`.\n4.  **Debouncing:** Implement a debounce mechanism for the fetch requests. Requests should only be sent after the user stops typing for a short delay (e.g., 300-500ms).\n5.  **Request Cancellation:** Crucially, if a new request is triggered while a previous one is still pending (due to rapid typing), the *previous* request must be aborted using `AbortController`. This prevents outdated responses from being displayed and saves bandwidth.\n6.  **Loading Indicator:** Show a loading indicator (e.g., 'Loading...') while a request is in progress and hide it when results are displayed or an error occurs.\n7.  **Error Handling:** Display a user-friendly error message if the fetch request fails (network error or HTTP error like 404/500). Distinguish `AbortError` (for cancelled requests) from actual errors, and don't display an error message for an `AbortError`.\n8.  **No Results Message:** Display a 'No users found.' message if the filtered results are empty.\n\n**HTML Structure:**\n```html\n<div>\n  <input type=\"text\" id=\"searchInput\" placeholder=\"Search for users...\">\n  <p id=\"loadingIndicator\" style=\"display: none;\">Loading...</p>\n  <div id=\"resultsContainer\"></div>\n</div>\n```\n",
+          "difficulty": "hard",
+          "startingCode": "document.addEventListener('DOMContentLoaded', () => {\n  const searchInput = document.getElementById('searchInput');\n  const loadingIndicator = document.getElementById('loadingIndicator');\n  const resultsContainer = document.getElementById('resultsContainer');\n\n  let debounceTimer;      // Timer for debouncing\n  let currentController;  // AbortController for cancelling previous requests\n\n  function showLoading() {\n    loadingIndicator.style.display = 'block';\n    resultsContainer.innerHTML = ''; // Clear previous results\n  }\n\n  function hideLoading() {\n    loadingIndicator.style.display = 'none';\n  }\n\n  async function fetchUsers(query) {\n    showLoading();\n    \n    // TODO: Implement AbortController logic here:\n    // 1. If there's an old controller, abort it.\n    // 2. Create a new AbortController.\n    // 3. Pass its signal to the fetch request.\n\n    const url = 'https://jsonplaceholder.typicode.com/users';\n\n    try {\n      const response = await fetch(url /* , { signal: currentController.signal } */);\n      \n      if (!response.ok) {\n        throw new Error(`HTTP error! status: ${response.status}`);\n      }\n      \n      const users = await response.json();\n      const filteredUsers = users.filter(user => \n        user.name.toLowerCase().includes(query.toLowerCase())\n      );\n      \n      displayResults(filteredUsers);\n\n    } catch (error) {\n      // TODO: Handle AbortError specifically (don't show general error)\n      // TODO: Display general error message if it's not an AbortError\n      displayError(error.message);\n    } finally {\n      hideLoading();\n    }\n  }\n\n  function displayResults(users) {\n    resultsContainer.innerHTML = ''; // Clear previous results\n    if (users.length === 0) {\n      resultsContainer.innerHTML = '<p>No users found.</p>';\n    } else {\n      const ul = document.createElement('ul');\n      users.forEach(user => {\n        const li = document.createElement('li');\n        li.textContent = user.name;\n        ul.appendChild(li);\n      });\n      resultsContainer.appendChild(ul);\n    }\n  }\n\n  function displayError(message) {\n    resultsContainer.innerHTML = `<p style=\"color: red;\">Error: ${message}</p>`;\n  }\n\n  // TODO: Implement debouncing on searchInput 'input' event\n  // Clear existing timeout, set new timeout to call fetchUsers\n  searchInput.addEventListener('input', (event) => {\n    const query = event.target.value;\n    // Example of debouncing, but also need AbortController logic\n    // clearTimeout(debounceTimer);\n    // debounceTimer = setTimeout(() => {\n    //   if (query.length > 0) {\n    //     fetchUsers(query);\n    //   } else {\n    //     resultsContainer.innerHTML = '';\n    //     hideLoading();\n    //   }\n    // }, 500); // Debounce delay\n  });\n\n});\n",
+          "solutionCode": "document.addEventListener('DOMContentLoaded', () => {\n  const searchInput = document.getElementById('searchInput');\n  const loadingIndicator = document.getElementById('loadingIndicator');\n  const resultsContainer = document.getElementById('resultsContainer');\n\n  let debounceTimer;      // Timer for debouncing\n  let currentController;  // Stores the AbortController for the currently active fetch request\n\n  function showLoading() {\n    loadingIndicator.style.display = 'block';\n    resultsContainer.innerHTML = ''; // Clear previous results immediately\n  }\n\n  function hideLoading() {\n    loadingIndicator.style.display = 'none';\n  }\n\n  async function fetchUsers(query) {\n    // If there's an ongoing request, abort it before starting a new one\n    if (currentController) {\n      currentController.abort();\n      console.log('Previous request aborted.');\n    }\n    \n    showLoading();\n\n    // Create a new AbortController for the current request\n    currentController = new AbortController();\n    const signal = currentController.signal;\n\n    const url = 'https://jsonplaceholder.typicode.com/users';\n\n    try {\n      const response = await fetch(url, { signal });\n      \n      if (!response.ok) {\n        // Read response text for more detailed error, if available\n        const errorBody = await response.text();\n        throw new Error(`HTTP error! status: ${response.status} - ${errorBody || response.statusText}`);\n      }\n      \n      const users = await response.json();\n      const filteredUsers = users.filter(user => \n        user.name.toLowerCase().includes(query.toLowerCase())\n      );\n      \n      displayResults(filteredUsers);\n\n    } catch (error) {\n      // Check if the error is due to an intentional abort\n      if (error.name === 'AbortError') {\n        console.log('Fetch request was cancelled by AbortController.');\n        // Do not display an error message to the user for cancellation\n        if (query.length === 0) { // If query is empty after abort, clear results\n          resultsContainer.innerHTML = '';\n        } else { // Otherwise, it means a newer request is coming or is active, so don't show 'No users found' just yet\n          // You might want to keep the loading indicator if a new fetch is about to start\n        }\n      } else {\n        // Display general error message for other types of errors (network, parsing, etc.)\n        displayError(error.message);\n        console.error('Fetch error:', error);\n      }\n    } finally {\n      // Hide loading indicator once the request (or abort) is handled\n      hideLoading();\n      // Clear the currentController reference if this fetch has completed (successfully or with error)\n      // This is important so the next fetch doesn't try to abort an already finished/cleared controller.\n      if (currentController && !currentController.signal.aborted) { // Only clear if it wasn't aborted by a newer request\n          currentController = null;\n      }\n    }\n  }\n\n  function displayResults(users) {\n    resultsContainer.innerHTML = ''; // Clear previous results\n    if (users.length === 0) {\n      resultsContainer.innerHTML = '<p>No users found.</p>';\n    } else {\n      const ul = document.createElement('ul');\n      ul.style.listStyleType = 'none';\n      ul.style.paddingLeft = '0';\n      users.forEach(user => {\n        const li = document.createElement('li');\n        li.textContent = user.name;\n        li.style.padding = '5px 0';\n        li.style.borderBottom = '1px solid #eee';\n        ul.appendChild(li);\n      });\n      resultsContainer.appendChild(ul);\n    }\n  }\n\n  function displayError(message) {\n    resultsContainer.innerHTML = `<p style=\"color: red;\">Error: ${message}</p>`;\n  }\n\n  // Implement debouncing on searchInput 'input' event\n  searchInput.addEventListener('input', (event) => {\n    const query = event.target.value.trim();\n\n    clearTimeout(debounceTimer);\n\n    if (query.length > 0) {\n      showLoading(); // Show loading immediately on input change\n      debounceTimer = setTimeout(() => {\n        fetchUsers(query);\n      }, 300); // Debounce delay: 300ms\n    } else {\n      // If query is empty, clear results and hide loading/errors\n      resultsContainer.innerHTML = '';\n      hideLoading();\n      // Abort any pending requests if user clears search field quickly\n      if (currentController) {\n        currentController.abort();\n        currentController = null;\n      }\n    }\n  });\n});\n\n/* Add this CSS to your <style> tag or CSS file */\n/*\nbody { font-family: sans-serif; padding: 20px; }\n#searchInput {\n  padding: 10px;\n  width: 300px;\n  font-size: 16px;\n  border: 1px solid #ccc;\n  border-radius: 4px;\n}\n#loadingIndicator {\n  color: #007bff;\n  font-style: italic;\n  margin-top: 10px;\n}\n#resultsContainer {\n  margin-top: 15px;\n  border: 1px solid #eee;\n  min-height: 100px;\n  padding: 10px;\n  border-radius: 4px;\n  background-color: #fcfcfc;\n}\n#resultsContainer p { margin: 5px 0; }\n*/\n",
+          "testCases": [
+            "Typing 'Leanne' should display 'Leanne Graham'.",
+            "Typing 'Ervin' should display 'Ervin Howell'.",
+            "Typing 'xxxx' (non-existent name) should display 'No users found.'.",
+            "Typing rapidly (e.g., 'brev', 'brevi', 'brevitas') should only trigger one fetch request for 'brevitas' after the delay, and intermediate requests should be cancelled.",
+            "Clearing the input field (`event.target.value = ''`) should clear results and hide loading/errors, and abort any pending requests.",
+            "Simulate a network error (e.g., by fetching an invalid URL or blocking network for `jsonplaceholder.typicode.com`) and verify a descriptive error message is shown (and not an `AbortError` message if applicable).",
+            "Verify loading indicator appears when typing starts and disappears when results or an error are displayed."
+          ],
+          "hints": [
+            "The `currentController` variable should store the `AbortController` instance for the *most recent* active fetch request.",
+            "Before starting a new `fetch` request, check if `currentController` exists. If it does, call `currentController.abort()` to cancel the previous request.",
+            "When creating a new `fetch` request, assign a `new AbortController()` to `currentController` and pass `currentController.signal` to the fetch options.",
+            "In the `catch` block of your `fetch` promise, differentiate `error.name === 'AbortError'` from other errors. Only display user-facing messages for non-abort errors.",
+            "Ensure `hideLoading()` is called in the `finally` block of your `fetch` promise to cover both success and error scenarios.",
+            "The `input` event listener is suitable for triggering the debounce logic."
+          ],
+          "tags": [
+            "Fetch API",
+            "AJAX",
+            "AbortController",
+            "Debouncing",
+            "Async/Await",
+            "Error Handling",
+            "UI Component",
+            "JavaScript"
+          ],
+          "timeEstimate": 120,
+          "prerequisites": [
+            "theory_ajax_fetch_api",
+            "javascript_async_await",
+            "javascript_promises",
+            "javascript_closures"
+          ],
+          "complexity": 10,
+          "interviewRelevance": 10,
+          "learningPath": "advanced",
+          "relatedConcepts": [
+            "api_integration",
+            "user_experience",
+            "performance_optimization",
+            "race_conditions"
+          ]
+        }
+      ]
+    }
+  }
+]

@@ -1,14 +1,720 @@
 {
-  "totalChunks": 1,
+  "totalChunks": 89,
   "totalItems": 168,
+  "estimatedTotalTokens": 3312173,
+  "tokensPerChunk": 48000,
   "chunks": [
     {
       "chunkId": "chunk-0",
-      "itemCount": 168,
+      "itemCount": 3,
       "startIndex": 0,
-      "endIndex": 167,
+      "endIndex": 2,
       "filePath": "/Users/alex/Downloads/Interview/frontend-interviewer/curriculum/chunks/chunk-0.json",
-      "sizeBytes": 13248522
+      "sizeBytes": 154517
+    },
+    {
+      "chunkId": "chunk-1",
+      "itemCount": 2,
+      "startIndex": 3,
+      "endIndex": 4,
+      "filePath": "/Users/alex/Downloads/Interview/frontend-interviewer/curriculum/chunks/chunk-1.json",
+      "sizeBytes": 191425
+    },
+    {
+      "chunkId": "chunk-2",
+      "itemCount": 2,
+      "startIndex": 5,
+      "endIndex": 6,
+      "filePath": "/Users/alex/Downloads/Interview/frontend-interviewer/curriculum/chunks/chunk-2.json",
+      "sizeBytes": 183187
+    },
+    {
+      "chunkId": "chunk-3",
+      "itemCount": 2,
+      "startIndex": 7,
+      "endIndex": 8,
+      "filePath": "/Users/alex/Downloads/Interview/frontend-interviewer/curriculum/chunks/chunk-3.json",
+      "sizeBytes": 182144
+    },
+    {
+      "chunkId": "chunk-4",
+      "itemCount": 2,
+      "startIndex": 9,
+      "endIndex": 10,
+      "filePath": "/Users/alex/Downloads/Interview/frontend-interviewer/curriculum/chunks/chunk-4.json",
+      "sizeBytes": 120097
+    },
+    {
+      "chunkId": "chunk-5",
+      "itemCount": 1,
+      "startIndex": 11,
+      "endIndex": 11,
+      "filePath": "/Users/alex/Downloads/Interview/frontend-interviewer/curriculum/chunks/chunk-5.json",
+      "sizeBytes": 81409
+    },
+    {
+      "chunkId": "chunk-6",
+      "itemCount": 2,
+      "startIndex": 12,
+      "endIndex": 13,
+      "filePath": "/Users/alex/Downloads/Interview/frontend-interviewer/curriculum/chunks/chunk-6.json",
+      "sizeBytes": 180630
+    },
+    {
+      "chunkId": "chunk-7",
+      "itemCount": 2,
+      "startIndex": 14,
+      "endIndex": 15,
+      "filePath": "/Users/alex/Downloads/Interview/frontend-interviewer/curriculum/chunks/chunk-7.json",
+      "sizeBytes": 152648
+    },
+    {
+      "chunkId": "chunk-8",
+      "itemCount": 2,
+      "startIndex": 16,
+      "endIndex": 17,
+      "filePath": "/Users/alex/Downloads/Interview/frontend-interviewer/curriculum/chunks/chunk-8.json",
+      "sizeBytes": 157855
+    },
+    {
+      "chunkId": "chunk-9",
+      "itemCount": 2,
+      "startIndex": 18,
+      "endIndex": 19,
+      "filePath": "/Users/alex/Downloads/Interview/frontend-interviewer/curriculum/chunks/chunk-9.json",
+      "sizeBytes": 150335
+    },
+    {
+      "chunkId": "chunk-10",
+      "itemCount": 1,
+      "startIndex": 20,
+      "endIndex": 20,
+      "filePath": "/Users/alex/Downloads/Interview/frontend-interviewer/curriculum/chunks/chunk-10.json",
+      "sizeBytes": 125928
+    },
+    {
+      "chunkId": "chunk-11",
+      "itemCount": 2,
+      "startIndex": 21,
+      "endIndex": 22,
+      "filePath": "/Users/alex/Downloads/Interview/frontend-interviewer/curriculum/chunks/chunk-11.json",
+      "sizeBytes": 183896
+    },
+    {
+      "chunkId": "chunk-12",
+      "itemCount": 2,
+      "startIndex": 23,
+      "endIndex": 24,
+      "filePath": "/Users/alex/Downloads/Interview/frontend-interviewer/curriculum/chunks/chunk-12.json",
+      "sizeBytes": 139250
+    },
+    {
+      "chunkId": "chunk-13",
+      "itemCount": 3,
+      "startIndex": 25,
+      "endIndex": 27,
+      "filePath": "/Users/alex/Downloads/Interview/frontend-interviewer/curriculum/chunks/chunk-13.json",
+      "sizeBytes": 177134
+    },
+    {
+      "chunkId": "chunk-14",
+      "itemCount": 3,
+      "startIndex": 28,
+      "endIndex": 30,
+      "filePath": "/Users/alex/Downloads/Interview/frontend-interviewer/curriculum/chunks/chunk-14.json",
+      "sizeBytes": 183774
+    },
+    {
+      "chunkId": "chunk-15",
+      "itemCount": 2,
+      "startIndex": 31,
+      "endIndex": 32,
+      "filePath": "/Users/alex/Downloads/Interview/frontend-interviewer/curriculum/chunks/chunk-15.json",
+      "sizeBytes": 169460
+    },
+    {
+      "chunkId": "chunk-16",
+      "itemCount": 2,
+      "startIndex": 33,
+      "endIndex": 34,
+      "filePath": "/Users/alex/Downloads/Interview/frontend-interviewer/curriculum/chunks/chunk-16.json",
+      "sizeBytes": 143554
+    },
+    {
+      "chunkId": "chunk-17",
+      "itemCount": 1,
+      "startIndex": 35,
+      "endIndex": 35,
+      "filePath": "/Users/alex/Downloads/Interview/frontend-interviewer/curriculum/chunks/chunk-17.json",
+      "sizeBytes": 85025
+    },
+    {
+      "chunkId": "chunk-18",
+      "itemCount": 1,
+      "startIndex": 36,
+      "endIndex": 36,
+      "filePath": "/Users/alex/Downloads/Interview/frontend-interviewer/curriculum/chunks/chunk-18.json",
+      "sizeBytes": 137859
+    },
+    {
+      "chunkId": "chunk-19",
+      "itemCount": 3,
+      "startIndex": 37,
+      "endIndex": 39,
+      "filePath": "/Users/alex/Downloads/Interview/frontend-interviewer/curriculum/chunks/chunk-19.json",
+      "sizeBytes": 184231
+    },
+    {
+      "chunkId": "chunk-20",
+      "itemCount": 3,
+      "startIndex": 40,
+      "endIndex": 42,
+      "filePath": "/Users/alex/Downloads/Interview/frontend-interviewer/curriculum/chunks/chunk-20.json",
+      "sizeBytes": 179802
+    },
+    {
+      "chunkId": "chunk-21",
+      "itemCount": 2,
+      "startIndex": 43,
+      "endIndex": 44,
+      "filePath": "/Users/alex/Downloads/Interview/frontend-interviewer/curriculum/chunks/chunk-21.json",
+      "sizeBytes": 150613
+    },
+    {
+      "chunkId": "chunk-22",
+      "itemCount": 1,
+      "startIndex": 45,
+      "endIndex": 45,
+      "filePath": "/Users/alex/Downloads/Interview/frontend-interviewer/curriculum/chunks/chunk-22.json",
+      "sizeBytes": 77197
+    },
+    {
+      "chunkId": "chunk-23",
+      "itemCount": 1,
+      "startIndex": 46,
+      "endIndex": 46,
+      "filePath": "/Users/alex/Downloads/Interview/frontend-interviewer/curriculum/chunks/chunk-23.json",
+      "sizeBytes": 148770
+    },
+    {
+      "chunkId": "chunk-24",
+      "itemCount": 1,
+      "startIndex": 47,
+      "endIndex": 47,
+      "filePath": "/Users/alex/Downloads/Interview/frontend-interviewer/curriculum/chunks/chunk-24.json",
+      "sizeBytes": 75497
+    },
+    {
+      "chunkId": "chunk-25",
+      "itemCount": 1,
+      "startIndex": 48,
+      "endIndex": 48,
+      "filePath": "/Users/alex/Downloads/Interview/frontend-interviewer/curriculum/chunks/chunk-25.json",
+      "sizeBytes": 127645
+    },
+    {
+      "chunkId": "chunk-26",
+      "itemCount": 2,
+      "startIndex": 49,
+      "endIndex": 50,
+      "filePath": "/Users/alex/Downloads/Interview/frontend-interviewer/curriculum/chunks/chunk-26.json",
+      "sizeBytes": 181588
+    },
+    {
+      "chunkId": "chunk-27",
+      "itemCount": 1,
+      "startIndex": 51,
+      "endIndex": 51,
+      "filePath": "/Users/alex/Downloads/Interview/frontend-interviewer/curriculum/chunks/chunk-27.json",
+      "sizeBytes": 101691
+    },
+    {
+      "chunkId": "chunk-28",
+      "itemCount": 1,
+      "startIndex": 52,
+      "endIndex": 52,
+      "filePath": "/Users/alex/Downloads/Interview/frontend-interviewer/curriculum/chunks/chunk-28.json",
+      "sizeBytes": 99253
+    },
+    {
+      "chunkId": "chunk-29",
+      "itemCount": 1,
+      "startIndex": 53,
+      "endIndex": 53,
+      "filePath": "/Users/alex/Downloads/Interview/frontend-interviewer/curriculum/chunks/chunk-29.json",
+      "sizeBytes": 117429
+    },
+    {
+      "chunkId": "chunk-30",
+      "itemCount": 2,
+      "startIndex": 54,
+      "endIndex": 55,
+      "filePath": "/Users/alex/Downloads/Interview/frontend-interviewer/curriculum/chunks/chunk-30.json",
+      "sizeBytes": 136455
+    },
+    {
+      "chunkId": "chunk-31",
+      "itemCount": 2,
+      "startIndex": 56,
+      "endIndex": 57,
+      "filePath": "/Users/alex/Downloads/Interview/frontend-interviewer/curriculum/chunks/chunk-31.json",
+      "sizeBytes": 182888
+    },
+    {
+      "chunkId": "chunk-32",
+      "itemCount": 2,
+      "startIndex": 58,
+      "endIndex": 59,
+      "filePath": "/Users/alex/Downloads/Interview/frontend-interviewer/curriculum/chunks/chunk-32.json",
+      "sizeBytes": 127814
+    },
+    {
+      "chunkId": "chunk-33",
+      "itemCount": 3,
+      "startIndex": 60,
+      "endIndex": 62,
+      "filePath": "/Users/alex/Downloads/Interview/frontend-interviewer/curriculum/chunks/chunk-33.json",
+      "sizeBytes": 189061
+    },
+    {
+      "chunkId": "chunk-34",
+      "itemCount": 2,
+      "startIndex": 63,
+      "endIndex": 64,
+      "filePath": "/Users/alex/Downloads/Interview/frontend-interviewer/curriculum/chunks/chunk-34.json",
+      "sizeBytes": 178537
+    },
+    {
+      "chunkId": "chunk-35",
+      "itemCount": 2,
+      "startIndex": 65,
+      "endIndex": 66,
+      "filePath": "/Users/alex/Downloads/Interview/frontend-interviewer/curriculum/chunks/chunk-35.json",
+      "sizeBytes": 169567
+    },
+    {
+      "chunkId": "chunk-36",
+      "itemCount": 3,
+      "startIndex": 67,
+      "endIndex": 69,
+      "filePath": "/Users/alex/Downloads/Interview/frontend-interviewer/curriculum/chunks/chunk-36.json",
+      "sizeBytes": 186384
+    },
+    {
+      "chunkId": "chunk-37",
+      "itemCount": 3,
+      "startIndex": 70,
+      "endIndex": 72,
+      "filePath": "/Users/alex/Downloads/Interview/frontend-interviewer/curriculum/chunks/chunk-37.json",
+      "sizeBytes": 152866
+    },
+    {
+      "chunkId": "chunk-38",
+      "itemCount": 3,
+      "startIndex": 73,
+      "endIndex": 75,
+      "filePath": "/Users/alex/Downloads/Interview/frontend-interviewer/curriculum/chunks/chunk-38.json",
+      "sizeBytes": 191416
+    },
+    {
+      "chunkId": "chunk-39",
+      "itemCount": 2,
+      "startIndex": 76,
+      "endIndex": 77,
+      "filePath": "/Users/alex/Downloads/Interview/frontend-interviewer/curriculum/chunks/chunk-39.json",
+      "sizeBytes": 107444
+    },
+    {
+      "chunkId": "chunk-40",
+      "itemCount": 2,
+      "startIndex": 78,
+      "endIndex": 79,
+      "filePath": "/Users/alex/Downloads/Interview/frontend-interviewer/curriculum/chunks/chunk-40.json",
+      "sizeBytes": 149079
+    },
+    {
+      "chunkId": "chunk-41",
+      "itemCount": 3,
+      "startIndex": 80,
+      "endIndex": 82,
+      "filePath": "/Users/alex/Downloads/Interview/frontend-interviewer/curriculum/chunks/chunk-41.json",
+      "sizeBytes": 179952
+    },
+    {
+      "chunkId": "chunk-42",
+      "itemCount": 2,
+      "startIndex": 83,
+      "endIndex": 84,
+      "filePath": "/Users/alex/Downloads/Interview/frontend-interviewer/curriculum/chunks/chunk-42.json",
+      "sizeBytes": 139211
+    },
+    {
+      "chunkId": "chunk-43",
+      "itemCount": 2,
+      "startIndex": 85,
+      "endIndex": 86,
+      "filePath": "/Users/alex/Downloads/Interview/frontend-interviewer/curriculum/chunks/chunk-43.json",
+      "sizeBytes": 161113
+    },
+    {
+      "chunkId": "chunk-44",
+      "itemCount": 2,
+      "startIndex": 87,
+      "endIndex": 88,
+      "filePath": "/Users/alex/Downloads/Interview/frontend-interviewer/curriculum/chunks/chunk-44.json",
+      "sizeBytes": 146400
+    },
+    {
+      "chunkId": "chunk-45",
+      "itemCount": 2,
+      "startIndex": 89,
+      "endIndex": 90,
+      "filePath": "/Users/alex/Downloads/Interview/frontend-interviewer/curriculum/chunks/chunk-45.json",
+      "sizeBytes": 141447
+    },
+    {
+      "chunkId": "chunk-46",
+      "itemCount": 2,
+      "startIndex": 91,
+      "endIndex": 92,
+      "filePath": "/Users/alex/Downloads/Interview/frontend-interviewer/curriculum/chunks/chunk-46.json",
+      "sizeBytes": 185967
+    },
+    {
+      "chunkId": "chunk-47",
+      "itemCount": 2,
+      "startIndex": 93,
+      "endIndex": 94,
+      "filePath": "/Users/alex/Downloads/Interview/frontend-interviewer/curriculum/chunks/chunk-47.json",
+      "sizeBytes": 119790
+    },
+    {
+      "chunkId": "chunk-48",
+      "itemCount": 2,
+      "startIndex": 95,
+      "endIndex": 96,
+      "filePath": "/Users/alex/Downloads/Interview/frontend-interviewer/curriculum/chunks/chunk-48.json",
+      "sizeBytes": 180441
+    },
+    {
+      "chunkId": "chunk-49",
+      "itemCount": 2,
+      "startIndex": 97,
+      "endIndex": 98,
+      "filePath": "/Users/alex/Downloads/Interview/frontend-interviewer/curriculum/chunks/chunk-49.json",
+      "sizeBytes": 148200
+    },
+    {
+      "chunkId": "chunk-50",
+      "itemCount": 2,
+      "startIndex": 99,
+      "endIndex": 100,
+      "filePath": "/Users/alex/Downloads/Interview/frontend-interviewer/curriculum/chunks/chunk-50.json",
+      "sizeBytes": 172635
+    },
+    {
+      "chunkId": "chunk-51",
+      "itemCount": 3,
+      "startIndex": 101,
+      "endIndex": 103,
+      "filePath": "/Users/alex/Downloads/Interview/frontend-interviewer/curriculum/chunks/chunk-51.json",
+      "sizeBytes": 183021
+    },
+    {
+      "chunkId": "chunk-52",
+      "itemCount": 2,
+      "startIndex": 104,
+      "endIndex": 105,
+      "filePath": "/Users/alex/Downloads/Interview/frontend-interviewer/curriculum/chunks/chunk-52.json",
+      "sizeBytes": 179097
+    },
+    {
+      "chunkId": "chunk-53",
+      "itemCount": 2,
+      "startIndex": 106,
+      "endIndex": 107,
+      "filePath": "/Users/alex/Downloads/Interview/frontend-interviewer/curriculum/chunks/chunk-53.json",
+      "sizeBytes": 164987
+    },
+    {
+      "chunkId": "chunk-54",
+      "itemCount": 1,
+      "startIndex": 108,
+      "endIndex": 108,
+      "filePath": "/Users/alex/Downloads/Interview/frontend-interviewer/curriculum/chunks/chunk-54.json",
+      "sizeBytes": 110865
+    },
+    {
+      "chunkId": "chunk-55",
+      "itemCount": 1,
+      "startIndex": 109,
+      "endIndex": 109,
+      "filePath": "/Users/alex/Downloads/Interview/frontend-interviewer/curriculum/chunks/chunk-55.json",
+      "sizeBytes": 128006
+    },
+    {
+      "chunkId": "chunk-56",
+      "itemCount": 2,
+      "startIndex": 110,
+      "endIndex": 111,
+      "filePath": "/Users/alex/Downloads/Interview/frontend-interviewer/curriculum/chunks/chunk-56.json",
+      "sizeBytes": 178562
+    },
+    {
+      "chunkId": "chunk-57",
+      "itemCount": 3,
+      "startIndex": 112,
+      "endIndex": 114,
+      "filePath": "/Users/alex/Downloads/Interview/frontend-interviewer/curriculum/chunks/chunk-57.json",
+      "sizeBytes": 187276
+    },
+    {
+      "chunkId": "chunk-58",
+      "itemCount": 2,
+      "startIndex": 115,
+      "endIndex": 116,
+      "filePath": "/Users/alex/Downloads/Interview/frontend-interviewer/curriculum/chunks/chunk-58.json",
+      "sizeBytes": 155240
+    },
+    {
+      "chunkId": "chunk-59",
+      "itemCount": 2,
+      "startIndex": 117,
+      "endIndex": 118,
+      "filePath": "/Users/alex/Downloads/Interview/frontend-interviewer/curriculum/chunks/chunk-59.json",
+      "sizeBytes": 131125
+    },
+    {
+      "chunkId": "chunk-60",
+      "itemCount": 2,
+      "startIndex": 119,
+      "endIndex": 120,
+      "filePath": "/Users/alex/Downloads/Interview/frontend-interviewer/curriculum/chunks/chunk-60.json",
+      "sizeBytes": 166706
+    },
+    {
+      "chunkId": "chunk-61",
+      "itemCount": 1,
+      "startIndex": 121,
+      "endIndex": 121,
+      "filePath": "/Users/alex/Downloads/Interview/frontend-interviewer/curriculum/chunks/chunk-61.json",
+      "sizeBytes": 94163
+    },
+    {
+      "chunkId": "chunk-62",
+      "itemCount": 1,
+      "startIndex": 122,
+      "endIndex": 122,
+      "filePath": "/Users/alex/Downloads/Interview/frontend-interviewer/curriculum/chunks/chunk-62.json",
+      "sizeBytes": 155674
+    },
+    {
+      "chunkId": "chunk-63",
+      "itemCount": 3,
+      "startIndex": 123,
+      "endIndex": 125,
+      "filePath": "/Users/alex/Downloads/Interview/frontend-interviewer/curriculum/chunks/chunk-63.json",
+      "sizeBytes": 190253
+    },
+    {
+      "chunkId": "chunk-64",
+      "itemCount": 2,
+      "startIndex": 126,
+      "endIndex": 127,
+      "filePath": "/Users/alex/Downloads/Interview/frontend-interviewer/curriculum/chunks/chunk-64.json",
+      "sizeBytes": 161646
+    },
+    {
+      "chunkId": "chunk-65",
+      "itemCount": 3,
+      "startIndex": 128,
+      "endIndex": 130,
+      "filePath": "/Users/alex/Downloads/Interview/frontend-interviewer/curriculum/chunks/chunk-65.json",
+      "sizeBytes": 180082
+    },
+    {
+      "chunkId": "chunk-66",
+      "itemCount": 1,
+      "startIndex": 131,
+      "endIndex": 131,
+      "filePath": "/Users/alex/Downloads/Interview/frontend-interviewer/curriculum/chunks/chunk-66.json",
+      "sizeBytes": 206708
+    },
+    {
+      "chunkId": "chunk-67",
+      "itemCount": 2,
+      "startIndex": 132,
+      "endIndex": 133,
+      "filePath": "/Users/alex/Downloads/Interview/frontend-interviewer/curriculum/chunks/chunk-67.json",
+      "sizeBytes": 121782
+    },
+    {
+      "chunkId": "chunk-68",
+      "itemCount": 2,
+      "startIndex": 134,
+      "endIndex": 135,
+      "filePath": "/Users/alex/Downloads/Interview/frontend-interviewer/curriculum/chunks/chunk-68.json",
+      "sizeBytes": 153222
+    },
+    {
+      "chunkId": "chunk-69",
+      "itemCount": 2,
+      "startIndex": 136,
+      "endIndex": 137,
+      "filePath": "/Users/alex/Downloads/Interview/frontend-interviewer/curriculum/chunks/chunk-69.json",
+      "sizeBytes": 153189
+    },
+    {
+      "chunkId": "chunk-70",
+      "itemCount": 2,
+      "startIndex": 138,
+      "endIndex": 139,
+      "filePath": "/Users/alex/Downloads/Interview/frontend-interviewer/curriculum/chunks/chunk-70.json",
+      "sizeBytes": 146490
+    },
+    {
+      "chunkId": "chunk-71",
+      "itemCount": 2,
+      "startIndex": 140,
+      "endIndex": 141,
+      "filePath": "/Users/alex/Downloads/Interview/frontend-interviewer/curriculum/chunks/chunk-71.json",
+      "sizeBytes": 167298
+    },
+    {
+      "chunkId": "chunk-72",
+      "itemCount": 2,
+      "startIndex": 142,
+      "endIndex": 143,
+      "filePath": "/Users/alex/Downloads/Interview/frontend-interviewer/curriculum/chunks/chunk-72.json",
+      "sizeBytes": 127909
+    },
+    {
+      "chunkId": "chunk-73",
+      "itemCount": 2,
+      "startIndex": 144,
+      "endIndex": 145,
+      "filePath": "/Users/alex/Downloads/Interview/frontend-interviewer/curriculum/chunks/chunk-73.json",
+      "sizeBytes": 153748
+    },
+    {
+      "chunkId": "chunk-74",
+      "itemCount": 2,
+      "startIndex": 146,
+      "endIndex": 147,
+      "filePath": "/Users/alex/Downloads/Interview/frontend-interviewer/curriculum/chunks/chunk-74.json",
+      "sizeBytes": 123016
+    },
+    {
+      "chunkId": "chunk-75",
+      "itemCount": 2,
+      "startIndex": 148,
+      "endIndex": 149,
+      "filePath": "/Users/alex/Downloads/Interview/frontend-interviewer/curriculum/chunks/chunk-75.json",
+      "sizeBytes": 152205
+    },
+    {
+      "chunkId": "chunk-76",
+      "itemCount": 2,
+      "startIndex": 150,
+      "endIndex": 151,
+      "filePath": "/Users/alex/Downloads/Interview/frontend-interviewer/curriculum/chunks/chunk-76.json",
+      "sizeBytes": 160126
+    },
+    {
+      "chunkId": "chunk-77",
+      "itemCount": 3,
+      "startIndex": 152,
+      "endIndex": 154,
+      "filePath": "/Users/alex/Downloads/Interview/frontend-interviewer/curriculum/chunks/chunk-77.json",
+      "sizeBytes": 177905
+    },
+    {
+      "chunkId": "chunk-78",
+      "itemCount": 2,
+      "startIndex": 155,
+      "endIndex": 156,
+      "filePath": "/Users/alex/Downloads/Interview/frontend-interviewer/curriculum/chunks/chunk-78.json",
+      "sizeBytes": 161532
+    },
+    {
+      "chunkId": "chunk-79",
+      "itemCount": 2,
+      "startIndex": 157,
+      "endIndex": 158,
+      "filePath": "/Users/alex/Downloads/Interview/frontend-interviewer/curriculum/chunks/chunk-79.json",
+      "sizeBytes": 150169
+    },
+    {
+      "chunkId": "chunk-80",
+      "itemCount": 1,
+      "startIndex": 159,
+      "endIndex": 159,
+      "filePath": "/Users/alex/Downloads/Interview/frontend-interviewer/curriculum/chunks/chunk-80.json",
+      "sizeBytes": 106262
+    },
+    {
+      "chunkId": "chunk-81",
+      "itemCount": 1,
+      "startIndex": 160,
+      "endIndex": 160,
+      "filePath": "/Users/alex/Downloads/Interview/frontend-interviewer/curriculum/chunks/chunk-81.json",
+      "sizeBytes": 86379
+    },
+    {
+      "chunkId": "chunk-82",
+      "itemCount": 1,
+      "startIndex": 161,
+      "endIndex": 161,
+      "filePath": "/Users/alex/Downloads/Interview/frontend-interviewer/curriculum/chunks/chunk-82.json",
+      "sizeBytes": 130155
+    },
+    {
+      "chunkId": "chunk-83",
+      "itemCount": 1,
+      "startIndex": 162,
+      "endIndex": 162,
+      "filePath": "/Users/alex/Downloads/Interview/frontend-interviewer/curriculum/chunks/chunk-83.json",
+      "sizeBytes": 225572
+    },
+    {
+      "chunkId": "chunk-84",
+      "itemCount": 1,
+      "startIndex": 163,
+      "endIndex": 163,
+      "filePath": "/Users/alex/Downloads/Interview/frontend-interviewer/curriculum/chunks/chunk-84.json",
+      "sizeBytes": 104513
+    },
+    {
+      "chunkId": "chunk-85",
+      "itemCount": 1,
+      "startIndex": 164,
+      "endIndex": 164,
+      "filePath": "/Users/alex/Downloads/Interview/frontend-interviewer/curriculum/chunks/chunk-85.json",
+      "sizeBytes": 106430
+    },
+    {
+      "chunkId": "chunk-86",
+      "itemCount": 1,
+      "startIndex": 165,
+      "endIndex": 165,
+      "filePath": "/Users/alex/Downloads/Interview/frontend-interviewer/curriculum/chunks/chunk-86.json",
+      "sizeBytes": 134248
+    },
+    {
+      "chunkId": "chunk-87",
+      "itemCount": 1,
+      "startIndex": 166,
+      "endIndex": 166,
+      "filePath": "/Users/alex/Downloads/Interview/frontend-interviewer/curriculum/chunks/chunk-87.json",
+      "sizeBytes": 79765
+    },
+    {
+      "chunkId": "chunk-88",
+      "itemCount": 1,
+      "startIndex": 167,
+      "endIndex": 167,
+      "filePath": "/Users/alex/Downloads/Interview/frontend-interviewer/curriculum/chunks/chunk-88.json",
+      "sizeBytes": 63590
     }
   ]
 }

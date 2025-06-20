@@ -1,0 +1,2014 @@
+[
+  {
+    "id": "ade35d3f-c53f-4798-b113-2d73e4c21b8c",
+    "startLine": 14200,
+    "endLine": 14299,
+    "processedDate": "2025-06-17T13:52:17.968Z",
+    "content": {
+      "logicalBlockInfo": {
+        "suggestedEndLine": -1
+      },
+      "theory": [
+        {
+          "id": "theory_controlled_components",
+          "title": "Controlled Components in React",
+          "content": "## Overview\nIn React, a 'controlled component' is a form input element whose value is controlled by React state. This means that instead of the DOM managing its own state, React's state is the single source of truth for the input's value. Every time the input's value changes (e.g., a user types), an `onChange` event handler is triggered. This handler updates the React state, and the input's `value` prop is then re-rendered with the new state value. This creates a data flow where the React state 'controls' the input.\n\n## Key Characteristics\n- **State as Source of Truth**: The input's current value is always derived from the component's state.\n- **`value` Prop**: The input element's `value` attribute is explicitly set to a state variable.\n- **`onChange` Handler**: An `onChange` event listener is required to update the state whenever the user interacts with the input. Without it, the input would be read-only as its `value` is tied to a static state.\n\n## Benefits\n- **Direct Control over Form Data**: React state provides immediate access to the current value of the input at any time.\n- **Immediate Validation and Feedback**: Since the value is in state, validation logic can run instantly as the user types, providing real-time feedback (e.g., showing error messages).\n- **Ability to Conditionally Disable Submit Button**: The state can be used to determine if the form is valid and enable/disable the submit button accordingly.\n- **Enforcing Input Format**: You can transform or restrict input values as they are typed (e.g., converting to uppercase, limiting characters, ensuring numeric input).\n- **Easier Dynamic Form Logic**: Building forms where one input affects others (e.g., showing/hiding fields based on selections) is straightforward due to centralized state management.\n\n## Drawbacks\n- **More Code Required**: Each input needs both a `value` prop tied to state and an `onChange` handler to update that state, leading to more boilerplate code, especially for large forms.\n- **Can Impact Performance on Very Large Forms**: Frequent state updates (on every keystroke) can lead to numerous re-renders of the component and potentially the entire form, which might cause performance issues in extremely large forms with many inputs, though React's reconciliation is generally efficient.",
+          "examples": [
+            {
+              "id": "example_controlled_components_1",
+              "title": "Basic Controlled Form",
+              "code": "import React, { useState } from 'react';\n\nfunction ControlledForm() {\n  const [formData, setFormData] = useState({\n    name: '',\n    email: '',\n    message: ''\n  });\n\n  const handleChange = (e) => {\n    const { name, value } = e.target;\n    setFormData(prevFormData => ({\n      ...prevFormData,\n      [name]: value\n    }));\n  };\n\n  const handleSubmit = (e) => {\n    e.preventDefault();\n    console.log('Form submitted:', formData);\n    // Typically, you'd send formData to an API here\n  };\n\n  return (\n    <form onSubmit={handleSubmit}>\n      <div>\n        <label htmlFor=\"name\">Name:</label>\n        <input\n          type=\"text\"\n          id=\"name\"\n          name=\"name\"\n          value={formData.name}\n          onChange={handleChange}\n        />\n      </div>\n      <div>\n        <label htmlFor=\"email\">Email:</label>\n        <input\n          type=\"email\"\n          id=\"email\"\n          name=\"email\"\n          value={formData.email}\n          onChange={handleChange}\n        />\n      </div>\n      <div>\n        <label htmlFor=\"message\">Message:</label>\n        <textarea\n          id=\"message\"\n          name=\"message\"\n          value={formData.message}\n          onChange={handleChange}\n        />\n      </div>\n      <button type=\"submit\">Submit</button>\n    </form>\n  );\n}",
+              "explanation": "This example demonstrates a basic controlled form. The `formData` state object holds the values for all inputs. The `handleChange` function is a generic handler that updates the correct field in `formData` based on the input's `name` attribute. Each input's `value` prop is bound to its corresponding state property, and `onChange` is set to `handleChange`, ensuring React state is always the source of truth.",
+              "language": "typescript"
+            }
+          ],
+          "relatedQuestions": [
+            "question_controlled_concept_1",
+            "question_controlled_benefits_2",
+            "question_controlled_drawbacks_3",
+            "question_controlled_implementation_4",
+            "question_controlled_validation_5",
+            "question_form_types_mcq_1"
+          ],
+          "relatedTasks": [
+            "task_controlled_form_validation",
+            "task_controlled_dynamic_form"
+          ],
+          "tags": [
+            "React",
+            "Forms",
+            "Controlled Components",
+            "State Management",
+            "Frontend Development"
+          ],
+          "technology": "React",
+          "prerequisites": [
+            "React Basics",
+            "useState Hook",
+            "Event Handling"
+          ],
+          "complexity": 6,
+          "interviewRelevance": 9,
+          "learningPath": "intermediate",
+          "requiredFor": [
+            "Form Validation",
+            "Dynamic Forms",
+            "User Input Management"
+          ]
+        },
+        {
+          "id": "theory_uncontrolled_components",
+          "title": "Uncontrolled Components in React",
+          "content": "## Overview\nIn React, an 'uncontrolled component' is a form input element whose value is managed by the DOM itself, rather than by React state. These components behave more like traditional HTML form inputs. React uses 'refs' to access the DOM node directly and retrieve its current value when needed, typically during form submission. The component itself maintains its internal state without React explicitly controlling its value.\n\n## Key Characteristics\n- **DOM as Source of Truth**: The input's current value is managed internally by the DOM.\n- **`ref` Attribute**: Instead of a `value` prop, a `ref` attribute is used to get a direct reference to the DOM element.\n- **`defaultValue` (Optional)**: Can be used to set an initial value for the input, but subsequent changes are handled by the DOM, not React state.\n- **No `onChange` for State**: While `onChange` can still be used for other purposes (like triggering side effects), it's not used to update React state for the input's value.\n\n## Benefits\n- **Simpler Code for Basic Forms**: Requires less boilerplate code compared to controlled components as you don't need `useState` and `onChange` handlers for every input.\n- **Better Performance (Fewer Re-renders)**: Since React state is not being updated on every keystroke, there are fewer component re-renders, which can be a performance advantage for forms with a very large number of inputs or high-frequency updates.\n- **Can Integrate More Easily with Non-React Code**: Because they rely on the DOM for state management, uncontrolled components can be simpler to integrate with third-party libraries that directly manipulate the DOM (e.g., certain jQuery plugins, custom DOM-based input widgets).\n- **Good for One-Time Inputs Like File Uploads**: File inputs (`<input type=\"file\"/>`) are inherently uncontrolled because their value (the file path) is read-only for security reasons and cannot be programmatically set by JavaScript. Using `ref` is the standard way to access the selected file.\n\n## Drawbacks\n- **Less Control over Validation Timing**: Validation typically occurs only when the form is submitted, making it harder to provide real-time feedback to the user as they type.\n- **Cannot Enforce Input Constraints During Typing**: It's difficult to restrict or transform input on the fly since React isn't actively managing the value.\n- **More Difficult to Implement Dynamic Form Logic**: Logic that depends on the current value of an input (e.g., showing a password confirmation field only when the password field is filled) becomes more cumbersome to implement without the value being readily available in React state.\n- **Less 'React-like'**: It deviates from React's typical declarative approach where the UI reflects the state.",
+          "examples": [
+            {
+              "id": "example_uncontrolled_components_1",
+              "title": "Basic Uncontrolled Form with useRef",
+              "code": "import React, { useRef } from 'react';\n\nfunction UncontrolledForm() {\n  const nameRef = useRef(null);\n  const emailRef = useRef(null);\n  const messageRef = useRef(null);\n\n  const handleSubmit = (e) => {\n    e.preventDefault();\n    const formData = {\n      name: nameRef.current ? nameRef.current.value : '',\n      email: emailRef.current ? emailRef.current.value : '',\n      message: messageRef.current ? messageRef.current.value : ''\n    };\n    \n    console.log('Form submitted:', formData);\n    // Submit to server, etc.\n  };\n\n  return (\n    <form onSubmit={handleSubmit}>\n      <div>\n        <label htmlFor=\"name\">Name:</label>\n        <input\n          type=\"text\"\n          id=\"name\"\n          name=\"name\"\n          ref={nameRef}\n          defaultValue=\"\"\n        />\n      </div>\n      <div>\n        <label htmlFor=\"email\">Email:</label>\n        <input\n          type=\"email\"\n          id=\"email\"\n          name=\"email\"\n          ref={emailRef}\n          defaultValue=\"\"\n        />\n      </div>\n      <div>\n        <label htmlFor=\"message\">Message:</label>\n        <textarea\n          id=\"message\"\n          name=\"message\"\n          ref={messageRef}\n          defaultValue=\"\"\n        />\n      </div>\n      <button type=\"submit\">Submit</button>\n    </form>\n  );\n}",
+              "explanation": "This example shows an uncontrolled form using `useRef`. Each input has a `ref` attribute pointing to a mutable ref object created by `useRef`. When the form is submitted, the `handleSubmit` function accesses the current values of the inputs directly from the DOM nodes via `ref.current.value`. Note the `defaultValue` prop for initial values, as `value` would make it controlled.",
+              "language": "typescript"
+            },
+            {
+              "id": "example_uncontrolled_components_file_upload",
+              "title": "Uncontrolled File Input",
+              "code": "import React, { useRef } from 'react';\n\nfunction FileUploadForm() {\n  const fileInputRef = useRef(null);\n\n  const handleSubmit = (e) => {\n    e.preventDefault();\n    if (fileInputRef.current && fileInputRef.current.files.length > 0) {\n      const selectedFile = fileInputRef.current.files[0];\n      console.log('Selected file:', selectedFile.name);\n      // Typically, you'd upload the file here\n    } else {\n      console.log('No file selected.');\n    }\n  };\n\n  return (\n    <form onSubmit={handleSubmit}>\n      <div>\n        <label htmlFor=\"fileUpload\">Upload File:</label>\n        <input\n          type=\"file\"\n          id=\"fileUpload\"\n          name=\"fileUpload\"\n          ref={fileInputRef}\n        />\n      </div>\n      <button type=\"submit\">Upload</button>\n    </form>\n  );\n}",
+              "explanation": "This example demonstrates using an uncontrolled component for a file input. File inputs are inherently uncontrolled because their `value` property is read-only for security reasons. `useRef` is used to get a reference to the `<input type='file'>` DOM element, and `fileInputRef.current.files` provides access to the selected files.",
+              "language": "typescript"
+            }
+          ],
+          "relatedQuestions": [
+            "question_uncontrolled_concept_1",
+            "question_uncontrolled_benefits_2",
+            "question_uncontrolled_drawbacks_3",
+            "question_uncontrolled_implementation_4",
+            "question_form_types_mcq_1"
+          ],
+          "relatedTasks": [
+            "task_uncontrolled_file_upload",
+            "task_uncontrolled_basic_form"
+          ],
+          "tags": [
+            "React",
+            "Forms",
+            "Uncontrolled Components",
+            "Refs",
+            "DOM Manipulation"
+          ],
+          "technology": "React",
+          "prerequisites": [
+            "React Basics",
+            "useRef Hook",
+            "DOM API"
+          ],
+          "complexity": 5,
+          "interviewRelevance": 8,
+          "learningPath": "intermediate",
+          "requiredFor": [
+            "File Uploads",
+            "Integrating with Legacy Code",
+            "Performance Optimization"
+          ]
+        },
+        {
+          "id": "theory_comparison_form_components",
+          "title": "Controlled vs. Uncontrolled Components: Comparison and Use Cases",
+          "content": "## Comparison Overview\nChoosing between controlled and uncontrolled components depends on the specific requirements of your form. While controlled components are generally preferred in React for their explicit data flow and easier debugging, uncontrolled components have their place for simpler use cases or performance-critical scenarios.\n\n| Feature/Aspect      | Controlled Components                                      | Uncontrolled Components                                    |\n| :------------------ | :--------------------------------------------------------- | :--------------------------------------------------------- |\n| **Data Source**     | React state is the single source of truth                  | DOM manages its own internal state                         |\n| **Value Access**    | Read directly from `state` at any time                   | Accessed via `ref` at the time of form submission          |\n| **Updates**         | `onChange` handler updates React state on every change     | DOM handles updates; `onChange` not strictly needed for value |\n| **Validation**      | Real-time, as user types (immediate feedback)              | Typically on form submission                               |\n| **Dynamic Behavior**| Easy to implement (e.g., conditional fields)               | More difficult, requires direct DOM interaction            |\n| **Boilerplate**     | More code for `value` and `onChange` for each input        | Less code, simpler for basic inputs                        |\n| **Performance**     | Potential re-renders on every keystroke (can be an issue for very large forms) | Fewer re-renders, potentially better for very large forms |\n| **Integration**     | Best for React ecosystem                                   | Easier with non-React libraries or legacy DOM code         |\n| **Common Use Cases**| Most general forms, forms needing validation, complex forms, forms with interdependent inputs | Simple forms, file uploads, integration with external libraries |\n\n## When to Use Which\n- **Controlled Components (Recommended for most cases)**:\n    - When you need immediate input validation and feedback.\n    - When input needs to be programmatically manipulated (e.g., format enforcement, character limits).\n    - When you have dynamic forms where input values affect other parts of the UI or other form fields.\n    - For most standard forms in a typical React application due to the clear data flow and declarative nature.\n\n- **Uncontrolled Components (Specific use cases)**:\n    - For simple, isolated forms where you only need the value on submission and no real-time validation is required.\n    - When dealing with file inputs (`<input type=\"file\"/>`) as they are inherently uncontrolled.\n    - When integrating with non-React code or legacy DOM-based libraries that expect direct DOM access.\n    - For performance optimization in extremely large forms with hundreds of inputs where frequent re-renders might be a concern (though this is rare and often better addressed by memoization or form libraries).\n\nIn most modern React applications, controlled components are the default and preferred approach due to the benefits of a predictable data flow and easy state management. Uncontrolled components are reserved for specific edge cases.",
+          "examples": [],
+          "relatedQuestions": [
+            "question_comparison_benefits_1",
+            "question_form_types_mcq_1",
+            "question_form_type_choice_open_2",
+            "question_controlled_uncontrolled_diff_flashcard_1",
+            "question_controlled_uncontrolled_usecase_flashcard_2"
+          ],
+          "relatedTasks": [
+            "task_refactor_controlled_to_uncontrolled",
+            "task_controlled_uncontrolled_mixed_form"
+          ],
+          "tags": [
+            "React",
+            "Forms",
+            "Controlled Components",
+            "Uncontrolled Components",
+            "Design Patterns",
+            "Performance",
+            "Best Practices"
+          ],
+          "technology": "React",
+          "prerequisites": [
+            "React Basics",
+            "State Management",
+            "Refs",
+            "Form Handling"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 10,
+          "learningPath": "intermediate",
+          "requiredFor": [
+            "Advanced Form Handling",
+            "Performance Optimization in React",
+            "Architectural Decisions"
+          ]
+        }
+      ],
+      "questions": [
+        {
+          "id": "question_form_types_mcq_1",
+          "topic": "Controlled vs. Uncontrolled Components",
+          "level": "medium",
+          "type": "mcq",
+          "question": "Which of the following statements accurately describes a key difference between controlled and uncontrolled components in React?",
+          "answer": "Controlled components manage input values through React state, while uncontrolled components manage input values internally via the DOM.",
+          "options": [
+            "Controlled components manage input values through React state, while uncontrolled components manage input values internally via the DOM.",
+            "Uncontrolled components always require the `onChange` event handler, whereas controlled components do not.",
+            "Controlled components are primarily used for file uploads, while uncontrolled components are used for text inputs.",
+            "Performance is generally better with controlled components due to fewer re-renders."
+          ],
+          "analysisPoints": [
+            "Controlled components centralize form data in React state, making it the single source of truth. Changes propagate from input to state, then back to input.",
+            "Uncontrolled components allow the DOM to manage its own state for input values. React typically accesses these values using refs at specific times (e.g., form submission).",
+            "The `onChange` handler is crucial for controlled components to update React state; without it, the input would be read-only. For uncontrolled components, `onChange` is not used for value management.",
+            "File uploads are a classic use case for uncontrolled components due to browser security restrictions on programmatically setting file input values.",
+            "Uncontrolled components can sometimes offer better performance for very large forms due to fewer React re-renders triggered by state updates on every keystroke, although this is a niche scenario."
+          ],
+          "keyConcepts": [
+            "Controlled Components",
+            "Uncontrolled Components",
+            "React State",
+            "DOM Management",
+            "Refs",
+            "onChange event",
+            "Performance implications"
+          ],
+          "evaluationCriteria": [
+            "Understanding of the core principle of state management in React forms.",
+            "Ability to distinguish between explicit React control and DOM-native control.",
+            "Knowledge of common use cases and performance characteristics."
+          ],
+          "example": "This question tests the fundamental definition and distinction between the two types of form components. The correct answer highlights the core difference in how input values are managed.",
+          "tags": [
+            "React",
+            "Forms",
+            "Controlled Components",
+            "Uncontrolled Components",
+            "Core Concepts"
+          ],
+          "prerequisites": [
+            "React Basics",
+            "State Management",
+            "Refs"
+          ],
+          "complexity": 7,
+          "interviewFrequency": 9,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_controlled_concept_1",
+          "topic": "Controlled Components",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "What is the primary mechanism by which a controlled component updates its value in React?",
+          "answer": "Through a `value` prop bound to React state and an `onChange` handler that updates that state.",
+          "analysisPoints": [
+            "Controlled components require both a `value` prop (to display the state) and an `onChange` prop (to update the state)."
+          ],
+          "keyConcepts": [
+            "Controlled Components",
+            "React State",
+            "onChange event",
+            "value prop"
+          ],
+          "evaluationCriteria": [
+            "Recall of fundamental controlled component principles."
+          ],
+          "example": "A fundamental question to check basic understanding of controlled components.",
+          "tags": [
+            "React",
+            "Forms",
+            "Controlled Components",
+            "Flashcard"
+          ],
+          "prerequisites": [
+            "React Basics"
+          ],
+          "complexity": 3,
+          "interviewFrequency": 7,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_controlled_benefits_2",
+          "topic": "Controlled Components",
+          "level": "medium",
+          "type": "open",
+          "question": "Name three significant benefits of using controlled components in React forms and briefly explain each.",
+          "answer": "1. **Direct Control over Form Data**: The component's state is the single source of truth, giving immediate access to the input's value for processing, display, or manipulation at any time.\n2. **Immediate Validation and Feedback**: Validation logic can run as the user types, allowing for real-time error messages or formatting corrections, improving user experience.\n3. **Enforcing Input Format/Dynamic Logic**: Values can be transformed (e.g., to uppercase, numeric-only) or conditionally rendered (e.g., showing/hiding fields based on other inputs) directly within the `onChange` handler before updating state, enabling complex form behavior.",
+          "analysisPoints": [
+            "The ability to access the input's value from state at any point.",
+            "The advantage of real-time validation over post-submission validation.",
+            "How `onChange` can be used not just for updating state, but also for transforming or conditional logic.",
+            "Mentioning conditional disabling of the submit button or dynamic form fields as examples of dynamic logic."
+          ],
+          "keyConcepts": [
+            "Controlled Components Benefits",
+            "Real-time Validation",
+            "Form Data Control",
+            "Dynamic Forms",
+            "User Experience"
+          ],
+          "evaluationCriteria": [
+            "Ability to articulate core advantages of controlled components.",
+            "Depth of explanation for each benefit.",
+            "Understanding of practical applications."
+          ],
+          "example": "This question assesses the candidate's understanding of why controlled components are a powerful pattern in React.",
+          "tags": [
+            "React",
+            "Forms",
+            "Controlled Components",
+            "Benefits",
+            "Open-Ended"
+          ],
+          "prerequisites": [
+            "Controlled Components Theory"
+          ],
+          "complexity": 6,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_controlled_drawbacks_3",
+          "topic": "Controlled Components",
+          "level": "medium",
+          "type": "flashcard",
+          "question": "What are two main drawbacks of using controlled components, especially for very large forms?",
+          "answer": "1. **More Code Required**: Each input needs `value` and `onChange` props, leading to boilerplate. 2. **Potential Performance Impact**: Frequent re-renders on every keystroke can affect performance on extremely large forms.",
+          "analysisPoints": [
+            "Boilerplate code for `useState` and `handleChange` for multiple inputs.",
+            "The concept of re-renders on every state change and its implications for performance in specific large-scale scenarios."
+          ],
+          "keyConcepts": [
+            "Controlled Components Drawbacks",
+            "Boilerplate",
+            "Performance",
+            "Re-renders"
+          ],
+          "evaluationCriteria": [
+            "Recall of disadvantages and their context."
+          ],
+          "example": "This checks if the candidate understands the trade-offs of using controlled components.",
+          "tags": [
+            "React",
+            "Forms",
+            "Controlled Components",
+            "Drawbacks",
+            "Flashcard"
+          ],
+          "prerequisites": [
+            "Controlled Components Theory"
+          ],
+          "complexity": 5,
+          "interviewFrequency": 6,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_uncontrolled_concept_1",
+          "topic": "Uncontrolled Components",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "How do you typically access the value of an uncontrolled input in React?",
+          "answer": "Using a `ref` attached to the input element and accessing `ref.current.value`.",
+          "analysisPoints": [
+            "The `useRef` hook creates a mutable `ref` object.",
+            "Attaching the `ref` object to the `ref` prop of a DOM element allows direct access to the DOM node.",
+            "`ref.current` provides the direct DOM element, from which `value` can be read."
+          ],
+          "keyConcepts": [
+            "Uncontrolled Components",
+            "Refs",
+            "useRef Hook",
+            "DOM Access"
+          ],
+          "evaluationCriteria": [
+            "Recall of how uncontrolled components work."
+          ],
+          "example": "A basic recall question about uncontrolled components.",
+          "tags": [
+            "React",
+            "Forms",
+            "Uncontrolled Components",
+            "Flashcard"
+          ],
+          "prerequisites": [
+            "React Basics",
+            "useRef Hook"
+          ],
+          "complexity": 3,
+          "interviewFrequency": 7,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_uncontrolled_benefits_2",
+          "topic": "Uncontrolled Components",
+          "level": "medium",
+          "type": "open",
+          "question": "When would you prefer to use an uncontrolled component over a controlled component? Provide at least two distinct scenarios.",
+          "answer": "1. **File Uploads**: `<input type=\"file\"/>` is a classic example. Due to browser security, its value cannot be set programmatically, making it inherently uncontrolled. You must use a `ref` to access the `files` property.\n2. **Integrating with Non-React Libraries / Legacy Code**: If you're working with a third-party DOM-manipulating library (e.g., a jQuery plugin) or existing legacy JavaScript code that directly interacts with form elements, an uncontrolled component can be simpler as it lets the DOM manage its own state without React's intervention.\n3. **Very Simple Forms with No Real-time Validation**: For a form with only a few inputs where values are only needed upon submission and no immediate feedback or complex logic is required, uncontrolled components can reduce boilerplate.",
+          "analysisPoints": [
+            "The security restriction on file inputs making them uncontrolled by nature.",
+            "The benefit of less friction when integrating with external, non-React DOM manipulation.",
+            "The simplicity for basic forms where `useState` and `onChange` add unnecessary overhead.",
+            "Mentioning performance benefits for extremely large forms could also be valid, but less common."
+          ],
+          "keyConcepts": [
+            "Uncontrolled Components Use Cases",
+            "File Inputs",
+            "Third-party Libraries",
+            "Legacy Code Integration",
+            "Simplicity"
+          ],
+          "evaluationCriteria": [
+            "Ability to identify appropriate use cases for uncontrolled components.",
+            "Understanding of the limitations of controlled components in certain scenarios.",
+            "Demonstrates practical decision-making."
+          ],
+          "example": "This question evaluates the candidate's understanding of the practical application and trade-offs of uncontrolled components.",
+          "tags": [
+            "React",
+            "Forms",
+            "Uncontrolled Components",
+            "Use Cases",
+            "Open-Ended"
+          ],
+          "prerequisites": [
+            "Uncontrolled Components Theory",
+            "Controlled Components Theory"
+          ],
+          "complexity": 7,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_controlled_implementation_4",
+          "topic": "Controlled Components",
+          "level": "medium",
+          "type": "code",
+          "question": "The following `UsernameInput` component is intended to be controlled, but it has a bug. Identify the bug and fix the code so that the input's value updates as the user types.",
+          "answer": "The bug is that the `value` prop of the `input` is not connected to the `username` state. When a controlled component is defined, its `value` prop must always be tied to a state variable. The fix is to set `value={username}` on the input element.\n\n```typescript\nimport React, { useState } from 'react';\n\nfunction UsernameInput() {\n  const [username, setUsername] = useState('');\n\n  const handleChange = (event) => {\n    setUsername(event.target.value);\n  };\n\n  return (\n    <div>\n      <label htmlFor=\"username\">Username:</label>\n      <input\n        id=\"username\"\n        type=\"text\"\n        // FIX: Connect the value prop to the state variable\n        value={username}\n        onChange={handleChange}\n      />\n      <p>Current Username: {username}</p>\n    </div>\n  );\n}\n```",
+          "options": [],
+          "analysisPoints": [
+            "Understanding that a controlled input must always have its `value` prop explicitly set by React state.",
+            "Recognizing that without `value={stateVariable}`, the input becomes an uncontrolled input that React doesn't manage, even if an `onChange` handler is present.",
+            "Correctly applying the `value` prop to establish the controlled component pattern."
+          ],
+          "keyConcepts": [
+            "Controlled Components",
+            "value prop",
+            "onChange event",
+            "React State",
+            "Debugging Forms"
+          ],
+          "evaluationCriteria": [
+            "Ability to identify a common error in controlled component implementation.",
+            "Correctly apply the controlled component pattern.",
+            "Debugging skills."
+          ],
+          "example": "```typescript\nimport React, { useState } from 'react';\n\nfunction UsernameInput() {\n  const [username, setUsername] = useState('');\n\n  const handleChange = (event) => {\n    setUsername(event.target.value);\n  };\n\n  return (\n    <div>\n      <label htmlFor=\"username\">Username:</label>\n      <input\n        id=\"username\"\n        type=\"text\"\n        // Missing value prop, this input is currently uncontrolled despite having onChange\n        onChange={handleChange}\n      />\n      <p>Current Username: {username}</p>\n    </div>\n  );\n}\n```",
+          "tags": [
+            "React",
+            "Forms",
+            "Controlled Components",
+            "Debugging",
+            "Code Challenge"
+          ],
+          "prerequisites": [
+            "Controlled Components Theory",
+            "React Hooks"
+          ],
+          "complexity": 6,
+          "interviewFrequency": 9,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_controlled_validation_5",
+          "topic": "Controlled Components",
+          "level": "hard",
+          "type": "code",
+          "question": "Implement a controlled `PasswordInput` component that meets the following requirements:\n1. It takes a `password` state and `setPassword` updater function as props.\n2. It enforces a minimum length of 6 characters.\n3. It displays an error message 'Password must be at least 6 characters.' *below* the input if the current password is less than 6 characters and the user has 'touched' (focused and then blurred) the input.\n4. The error message should disappear if the password length meets the requirement.\n\nProvide the `PasswordInput` component and demonstrate its usage within a parent component.",
+          "answer": "```typescript\nimport React, { useState } from 'react';\n\ninterface PasswordInputProps {\n  password: string;\n  setPassword: (value: string) => void;\n}\n\nconst PasswordInput: React.FC<PasswordInputProps> = ({ password, setPassword }) => {\n  const [isTouched, setIsTouched] = useState(false);\n  const hasError = isTouched && password.length < 6;\n\n  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {\n    setPassword(e.target.value);\n  };\n\n  const handleBlur = () => {\n    setIsTouched(true);\n  };\n\n  return (\n    <div>\n      <label htmlFor=\"password\">Password:</label>\n      <input\n        type=\"password\"\n        id=\"password\"\n        name=\"password\"\n        value={password}\n        onChange={handleChange}\n        onBlur={handleBlur} // Detect when the input is touched/blurred\n        style={{ borderColor: hasError ? 'red' : '' }}\n      />\n      {hasError && (\n        <p style={{ color: 'red', fontSize: '0.8em' }}>Password must be at least 6 characters.</p>\n      )}\n    </div>\n  );\n};\n\n// Parent component for demonstration\nfunction App() {\n  const [appPassword, setAppPassword] = useState('');\n  const [appEmail, setAppEmail] = useState('');\n\n  const handleSubmit = (e: React.FormEvent) => {\n    e.preventDefault();\n    console.log('Form Submitted:', { appEmail, appPassword });\n    if (appPassword.length < 6) {\n      alert('Please fix password errors before submitting.');\n    }\n  };\n\n  return (\n    <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '15px', maxWidth: '300px', margin: '20px auto', padding: '20px', border: '1px solid #ccc', borderRadius: '8px' }}>\n      <div>\n        <label htmlFor=\"email\">Email:</label>\n        <input\n          type=\"email\"\n          id=\"email\"\n          value={appEmail}\n          onChange={(e) => setAppEmail(e.target.value)}\n        />\n      </div>\n      <PasswordInput password={appPassword} setPassword={setAppPassword} />\n      <button type=\"submit\">Submit</button>\n    </form>\n  );\n}\n\n// To render this in a typical React app:\n// ReactDOM.render(<App />, document.getElementById('root'));\n```",
+          "options": [],
+          "analysisPoints": [
+            "Correct implementation of a controlled input using `value` and `onChange`.",
+            "Managing validation state (`isTouched`, `hasError`) to control when error messages are shown (e.g., only after blur/touch, not on initial render).",
+            "Conditional rendering of error messages based on validation rules and user interaction.",
+            "Passing state and updater functions as props for modularity.",
+            "Demonstrating proper usage within a parent component."
+          ],
+          "keyConcepts": [
+            "Controlled Components",
+            "Form Validation",
+            "Conditional Rendering",
+            "State Management",
+            "Event Handling (onChange, onBlur)",
+            "Component Props"
+          ],
+          "evaluationCriteria": [
+            "Ability to implement robust controlled components with validation logic.",
+            "Understanding of user experience considerations for validation feedback.",
+            "Proper use of state and event handlers.",
+            "Component composition and reusability."
+          ],
+          "example": "This task requires combining state management, event handling, and conditional rendering to build a practical controlled input with validation.",
+          "tags": [
+            "React",
+            "Forms",
+            "Controlled Components",
+            "Validation",
+            "Code Challenge",
+            "Advanced"
+          ],
+          "prerequisites": [
+            "Controlled Components Theory",
+            "React Hooks",
+            "Conditional Rendering"
+          ],
+          "complexity": 8,
+          "interviewFrequency": 9,
+          "learningPath": "advanced"
+        },
+        {
+          "id": "question_uncontrolled_implementation_4",
+          "topic": "Uncontrolled Components",
+          "level": "medium",
+          "type": "code",
+          "question": "You need to create a simple `SearchForm` component where the user types a query and submits it. The search query is only needed when the form is submitted, and there's no need for real-time validation or state management. Implement this using an uncontrolled component pattern. The component should log the search query to the console upon submission.",
+          "answer": "```typescript\nimport React, { useRef } from 'react';\n\nfunction SearchForm() {\n  const searchInputRef = useRef<HTMLInputElement>(null);\n\n  const handleSubmit = (event: React.FormEvent) => {\n    event.preventDefault(); // Prevent default browser form submission\n    const searchQuery = searchInputRef.current ? searchInputRef.current.value : '';\n    console.log('Search Query Submitted:', searchQuery);\n    // In a real app, you'd trigger a search API call here\n  };\n\n  return (\n    <form onSubmit={handleSubmit} style={{ display: 'flex', gap: '10px', maxWidth: '300px', margin: '20px auto', padding: '20px', border: '1px solid #ccc', borderRadius: '8px' }}>\n      <label htmlFor=\"search\">Search:</label>\n      <input\n        type=\"text\"\n        id=\"search\"\n        name=\"search\"\n        ref={searchInputRef} // Attach the ref to the input\n        placeholder=\"Enter search term\"\n      />\n      <button type=\"submit\">Search</button>\n    </form>\n  );\n}\n\n// To render this in a typical React app:\n// ReactDOM.render(<SearchForm />, document.getElementById('root'));\n```",
+          "options": [],
+          "analysisPoints": [
+            "Correct use of `useRef` to create a ref object.",
+            "Attaching the ref object to the `ref` prop of the input element.",
+            "Accessing the input's value via `ref.current.value` inside the `handleSubmit` function.",
+            "Preventing the default form submission behavior using `event.preventDefault()`.",
+            "Understanding when an uncontrolled component is appropriate (simple, no real-time validation)."
+          ],
+          "keyConcepts": [
+            "Uncontrolled Components",
+            "useRef Hook",
+            "Form Submission",
+            "DOM Access",
+            "Event Handling"
+          ],
+          "evaluationCriteria": [
+            "Ability to implement a functional uncontrolled component.",
+            "Correct application of the `useRef` hook for form inputs.",
+            "Demonstrates understanding of event prevention."
+          ],
+          "example": "This task tests the basic implementation of an uncontrolled component, suitable for scenarios where real-time value tracking is not necessary.",
+          "tags": [
+            "React",
+            "Forms",
+            "Uncontrolled Components",
+            "Code Challenge"
+          ],
+          "prerequisites": [
+            "Uncontrolled Components Theory",
+            "React Hooks"
+          ],
+          "complexity": 5,
+          "interviewFrequency": 7,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_form_type_choice_open_2",
+          "topic": "Controlled vs. Uncontrolled Components",
+          "level": "hard",
+          "type": "open",
+          "question": "You are building a complex multi-step form that includes user registration, profile details, and preferences. Some steps require real-time validation and conditional rendering of fields based on previous inputs (e.g., 'other' text input appears if 'Other' is selected from a dropdown). One step also involves uploading a profile picture. Discuss your strategy for choosing between controlled and uncontrolled components for different parts of this form, justifying your choices with respect to benefits and drawbacks.",
+          "answer": "For a complex multi-step form with real-time validation, conditional rendering, and inter-field dependencies, **controlled components would be the primary choice for almost all text inputs, selections, and checkboxes.**\n\n**Justification for Controlled Components:**\n- **Real-time Validation & Feedback**: User registration and profile details heavily benefit from immediate feedback on validity (e.g., email format, password strength, required fields). Controlled components allow validation logic to run `onChange`, providing a superior user experience.\n- **Conditional Rendering & Dynamic Logic**: The requirement for fields appearing based on previous inputs (like the 'other' text input) is natively supported and much easier to manage with controlled components. The state of one input directly influences the rendering logic of others.\n- **Centralized State Management**: With a multi-step form, managing the overall form data as a single, consistent state object is crucial for navigation between steps, saving progress, and final submission. Controlled components inherently support this by keeping all values in React state.\n- **Easier Debugging**: The clear data flow (UI -> Event -> State -> UI) makes it easier to trace where data comes from and how it changes.\n\n**Justification for Uncontrolled Components:**\n- **File Upload (Profile Picture)**: The `<input type=\"file\"/>` element is the canonical use case for an uncontrolled component. Due to security restrictions, its value cannot be programmatically set, making a controlled approach impossible. Using a `ref` to access the selected file at the time of submission is the only viable method.\n\n**Mixed Strategy:**\nI would primarily use controlled components for all textual inputs, number inputs, text areas, checkboxes, and radio buttons. For the profile picture upload, I would specifically use an uncontrolled component with a `useRef` hook. When the form is finally submitted, I would gather the data from the controlled state and the file(s) from the uncontrolled `ref` to form the complete payload.\n\n**Considerations:**\n- **Performance**: While large controlled forms can sometimes lead to performance concerns due to frequent re-renders, React's memoization techniques (e.g., `React.memo`, `useCallback`) can mitigate this. For a multi-step form, only the inputs on the *current* step would typically re-render frequently, making this less of a global issue.\n- **Form Libraries**: For such complexity, I would also consider using a form library like Formik or React Hook Form, which abstract away much of the boilerplate for controlled components and optimize performance, while still allowing for `ref` usage where necessary (like file inputs). These libraries often combine the best aspects of both patterns.",
+          "analysisPoints": [
+            "Identifying controlled components as the default for most interactive form elements due to validation and dynamic behavior needs.",
+            "Recognizing file inputs as the primary and most significant use case for uncontrolled components.",
+            "Explaining the 'why' behind each choice, relating it back to the benefits and drawbacks.",
+            "Discussing the feasibility of a mixed approach and how data would be gathered.",
+            "Considering performance implications and potential solutions (e.g., memoization, form libraries).",
+            "Demonstrating a holistic understanding of form management in React."
+          ],
+          "keyConcepts": [
+            "Controlled Components",
+            "Uncontrolled Components",
+            "Form Design Patterns",
+            "Validation",
+            "Dynamic Forms",
+            "File Uploads",
+            "Performance Optimization",
+            "Form Libraries",
+            "Architectural Decisions"
+          ],
+          "evaluationCriteria": [
+            "Depth of understanding of both component types.",
+            "Ability to apply theoretical knowledge to a realistic, complex scenario.",
+            "Strategic thinking and justification of design choices.",
+            "Awareness of best practices and potential optimizations."
+          ],
+          "example": "This question challenges the candidate to demonstrate comprehensive knowledge of form handling in React by designing a strategy for a complex real-world application.",
+          "tags": [
+            "React",
+            "Forms",
+            "Architecture",
+            "Design Patterns",
+            "Controlled Components",
+            "Uncontrolled Components",
+            "Advanced",
+            "Open-Ended"
+          ],
+          "prerequisites": [
+            "Controlled Components Theory",
+            "Uncontrolled Components Theory"
+          ],
+          "complexity": 9,
+          "interviewFrequency": 10,
+          "learningPath": "advanced"
+        },
+        {
+          "id": "question_controlled_uncontrolled_diff_flashcard_1",
+          "topic": "Controlled vs. Uncontrolled Components",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "What is the key difference in how 'value' is managed for controlled vs. uncontrolled components?",
+          "answer": "Controlled: Value is managed by React state (`value` prop). Uncontrolled: Value is managed by the DOM (`ref` to access DOM value).",
+          "analysisPoints": [
+            "Focus on the source of truth for the input's value."
+          ],
+          "keyConcepts": [
+            "Controlled Components",
+            "Uncontrolled Components",
+            "React State",
+            "DOM",
+            "Ref"
+          ],
+          "evaluationCriteria": [
+            "Quick recall of fundamental distinction."
+          ],
+          "example": "A flashcard for rapid review of the core difference.",
+          "tags": [
+            "React",
+            "Forms",
+            "Controlled Components",
+            "Uncontrolled Components",
+            "Flashcard"
+          ],
+          "prerequisites": [
+            "React Forms Basics"
+          ],
+          "complexity": 3,
+          "interviewFrequency": 8,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_controlled_uncontrolled_usecase_flashcard_2",
+          "topic": "Controlled vs. Uncontrolled Components",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "Which type of component is generally preferred for real-time form validation and why?",
+          "answer": "Controlled components, because their values are directly tied to React state, allowing validation logic to run immediately on `onChange`.",
+          "analysisPoints": [
+            "Connect real-time validation directly to the nature of controlled components."
+          ],
+          "keyConcepts": [
+            "Controlled Components",
+            "Real-time Validation",
+            "onChange"
+          ],
+          "evaluationCriteria": [
+            "Recall of a key benefit/use case."
+          ],
+          "example": "Another flashcard focusing on a practical advantage.",
+          "tags": [
+            "React",
+            "Forms",
+            "Controlled Components",
+            "Validation",
+            "Flashcard"
+          ],
+          "prerequisites": [
+            "Controlled Components Theory"
+          ],
+          "complexity": 4,
+          "interviewFrequency": 7,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_comparison_benefits_1",
+          "topic": "Controlled vs. Uncontrolled Components",
+          "level": "medium",
+          "type": "mcq",
+          "question": "You are building a login form where the 'Submit' button should only be enabled when both the email and password fields are non-empty. Which component pattern is best suited for this requirement, and why?",
+          "answer": "Controlled components, because their values are readily available in React state, allowing for immediate checks on input validity to enable/disable the button.",
+          "options": [
+            "Controlled components, because their values are readily available in React state, allowing for immediate checks on input validity to enable/disable the button.",
+            "Uncontrolled components, because they offer better performance for forms with multiple inputs like login forms.",
+            "Controlled components, but only if you use a third-party form library like Formik.",
+            "Uncontrolled components, as `useRef` provides direct access to the button's DOM node for enabling/disabling."
+          ],
+          "analysisPoints": [
+            "The core requirement is real-time interaction (enabling/disabling a button based on input state).",
+            "Controlled components expose input values via React state as they are typed, making such real-time checks straightforward.",
+            "Uncontrolled components' values are typically accessed only on submission, making real-time conditional logic much harder or impossible without introducing extra state management.",
+            "Performance is less critical for a simple login form, and the benefits of controlled components outweigh potential minor performance overhead.",
+            "Form libraries are built on controlled component principles to simplify this, but the underlying concept is still controlled components."
+          ],
+          "keyConcepts": [
+            "Controlled Components",
+            "Conditional UI",
+            "Form Validation",
+            "React State",
+            "Uncontrolled Components Limitations"
+          ],
+          "evaluationCriteria": [
+            "Ability to choose the correct pattern based on a functional requirement.",
+            "Understanding the underlying reason for the choice.",
+            "Knowledge of component interactions."
+          ],
+          "example": "This MCQ tests the practical application of controlled components for dynamic UI behavior based on form input.",
+          "tags": [
+            "React",
+            "Forms",
+            "Controlled Components",
+            "Conditional Rendering",
+            "MCQ"
+          ],
+          "prerequisites": [
+            "Controlled Components Theory"
+          ],
+          "complexity": 7,
+          "interviewFrequency": 9,
+          "learningPath": "intermediate"
+        }
+      ],
+      "tasks": [
+        {
+          "id": "task_controlled_form_validation",
+          "title": "Build a Controlled Registration Form with Basic Validation",
+          "description": "\nImplement a `RegistrationForm` component using **controlled components** that includes the following fields:\n\n1.  **Username**: Text input, required.\n2.  **Email**: Email input, required, must be a valid email format.\n3.  **Password**: Password input, required, minimum 8 characters.\n4.  **Confirm Password**: Password input, required, must match the 'Password' field.\n\n**Requirements:**\n-   Each input's value must be managed by React state.\n-   Display validation error messages for each field *as the user types* (for format/length) and *after the input loses focus* (for required fields or matching passwords).\n-   The 'Register' button should only be enabled if all fields are valid.\n-   Upon successful submission (all fields valid), log the form data to the console.\n\n**Hint**: Consider using a separate state variable for `isTouched` or `isDirty` for each input to control when to show validation messages.",
+          "difficulty": "medium",
+          "startingCode": "import React, { useState } from 'react';\n\nfunction RegistrationForm() {\n  const [formData, setFormData] = useState({\n    username: '',\n    email: '',\n    password: '',\n    confirmPassword: ''\n  });\n\n  // State to track if fields have been touched/blurred\n  const [touched, setTouched] = useState({\n    username: false,\n    email: false,\n    password: false,\n    confirmPassword: false\n  });\n\n  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {\n    const { name, value } = e.target;\n    setFormData(prevData => ({ ...prevData, [name]: value }));\n  };\n\n  const handleBlur = (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => {\n    const { name } = e.target;\n    setTouched(prevTouched => ({ ...prevTouched, [name]: true }));\n  };\n\n  // TODO: Implement validation logic here\n  const validate = () => {\n    const errors: Record<string, string> = {};\n    // Example: Username validation\n    if (!formData.username.trim()) {\n      errors.username = 'Username is required';\n    }\n    // Add more validation rules...\n    return errors;\n  };\n\n  const errors = validate();\n  const isFormValid = Object.keys(errors).length === 0;\n\n  const handleSubmit = (e: React.FormEvent) => {\n    e.preventDefault();\n    // Only submit if form is valid\n    if (isFormValid) {\n      console.log('Registration Data:', formData);\n      alert('Registration Successful!');\n      // Reset form or navigate\n    } else {\n      // Mark all fields as touched to show all errors on submit attempt\n      setTouched({\n        username: true,\n        email: true,\n        password: true,\n        confirmPassword: true\n      });\n      alert('Please fix the errors in the form.');\n    }\n  };\n\n  return (\n    <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '15px', maxWidth: '400px', margin: '40px auto', padding: '25px', border: '1px solid #ddd', borderRadius: '10px', boxShadow: '0 4px 8px rgba(0,0,0,0.1)' }}>\n      <h2>Register</h2>\n      <div>\n        <label htmlFor=\"username\">Username:</label>\n        <input\n          type=\"text\"\n          id=\"username\"\n          name=\"username\"\n          value={formData.username}\n          onChange={handleChange}\n          onBlur={handleBlur}\n        />\n        {(touched.username && errors.username) && <p style={{ color: 'red', fontSize: '0.8em' }}>{errors.username}</p>}\n      </div>\n      {/* TODO: Add Email, Password, Confirm Password fields with validation */}\n      \n      <button type=\"submit\" disabled={!isFormValid}>Register</button>\n    </form>\n  );\n  }\n",
+          "solutionCode": "import React, { useState } from 'react';\n\nfunction RegistrationForm() {\n  const [formData, setFormData] = useState({\n    username: '',\n    email: '',\n    password: '',\n    confirmPassword: ''\n  });\n\n  const [touched, setTouched] = useState({\n    username: false,\n    email: false,\n    password: false,\n    confirmPassword: false\n  });\n\n  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {\n    const { name, value } = e.target;\n    setFormData(prevData => ({ ...prevData, [name]: value }));\n  };\n\n  const handleBlur = (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => {\n    const { name } = e.target;\n    setTouched(prevTouched => ({ ...prevTouched, [name]: true }));\n  };\n\n  const validate = () => {\n    const errors: Record<string, string> = {};\n\n    if (!formData.username.trim()) {\n      errors.username = 'Username is required.';\n    } else if (formData.username.length < 3) {\n      errors.username = 'Username must be at least 3 characters.';\n    }\n\n    if (!formData.email.trim()) {\n      errors.email = 'Email is required.';\n    } else if (!/^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$/g.test(formData.email)) {\n      errors.email = 'Invalid email format.';\n    }\n\n    if (!formData.password) {\n      errors.password = 'Password is required.';\n    } else if (formData.password.length < 8) {\n      errors.password = 'Password must be at least 8 characters.';\n    }\n\n    if (!formData.confirmPassword) {\n      errors.confirmPassword = 'Confirm Password is required.';\n    } else if (formData.confirmPassword !== formData.password) {\n      errors.confirmPassword = 'Passwords do not match.';\n    }\n\n    return errors;\n  };\n\n  const errors = validate();\n  const isFormValid = Object.keys(errors).length === 0 &&\n                      Object.values(formData).every(value => value.trim() !== ''); // Ensure all fields are filled even if error obj is empty due to initial state\n\n  const handleSubmit = (e: React.FormEvent) => {\n    e.preventDefault();\n    \n    // Mark all fields as touched on submit attempt to show all errors\n    setTouched({\n      username: true,\n      email: true,\n      password: true,\n      confirmPassword: true\n    });\n\n    if (isFormValid) {\n      console.log('Registration Data:', formData);\n      alert('Registration Successful!');\n      setFormData({ username: '', email: '', password: '', confirmPassword: '' }); // Clear form\n      setTouched({ username: false, email: false, password: false, confirmPassword: false }); // Reset touched state\n    } else {\n      alert('Please fix the errors in the form.');\n    }\n  };\n\n  const getErrorMessage = (fieldName: keyof typeof formData) => {\n    return touched[fieldName] && errors[fieldName] ? (\n      <p style={{ color: 'red', fontSize: '0.8em', margin: '5px 0 0 0' }}>{errors[fieldName]}</p>\n    ) : null;\n  };\n\n  return (\n    <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '15px', maxWidth: '400px', margin: '40px auto', padding: '25px', border: '1px solid #ddd', borderRadius: '10px', boxShadow: '0 4px 8px rgba(0,0,0,0.1)' }}>\n      <h2>Register</h2>\n      <div>\n        <label htmlFor=\"username\">Username:</label>\n        <input\n          type=\"text\"\n          id=\"username\"\n          name=\"username\"\n          value={formData.username}\n          onChange={handleChange}\n          onBlur={handleBlur}\n          style={{ borderColor: (touched.username && errors.username) ? 'red' : '' }}\n        />\n        {getErrorMessage('username')}\n      </div>\n      <div>\n        <label htmlFor=\"email\">Email:</label>\n        <input\n          type=\"email\"\n          id=\"email\"\n          name=\"email\"\n          value={formData.email}\n          onChange={handleChange}\n          onBlur={handleBlur}\n          style={{ borderColor: (touched.email && errors.email) ? 'red' : '' }}\n        />\n        {getErrorMessage('email')}\n      </div>\n      <div>\n        <label htmlFor=\"password\">Password:</label>\n        <input\n          type=\"password\"\n          id=\"password\"\n          name=\"password\"\n          value={formData.password}\n          onChange={handleChange}\n          onBlur={handleBlur}\n          style={{ borderColor: (touched.password && errors.password) ? 'red' : '' }}\n        />\n        {getErrorMessage('password')}\n      </div>\n      <div>\n        <label htmlFor=\"confirmPassword\">Confirm Password:</label>\n        <input\n          type=\"password\"\n          id=\"confirmPassword\"\n          name=\"confirmPassword\"\n          value={formData.confirmPassword}\n          onChange={handleChange}\n          onBlur={handleBlur}\n          style={{ borderColor: (touched.confirmPassword && errors.confirmPassword) ? 'red' : '' }}\n        />\n        {getErrorMessage('confirmPassword')}\n      </div>\n      \n      <button type=\"submit\" disabled={!isFormValid}>Register</button>\n    </form>\n  );\n}\n",
+          "testCases": [
+            "Initial render: Button should be disabled, no errors shown.",
+            "Typing valid username: Username input should update, no error.",
+            "Typing invalid email (e.g., 'abc'): Email error should appear after blur.",
+            "Typing short password: Password error should appear after blur.",
+            "Typing non-matching confirm password: Confirm password error should appear after blur.",
+            "Filling all fields correctly: Button should enable, no errors visible. Submission should log data.",
+            "Attempting to submit with empty fields: All required field errors should appear.",
+            "Clearing a valid field: Error should reappear and button disable."
+          ],
+          "hints": [
+            "The `validate` function should return an object where keys are field names and values are error messages.",
+            "Use the `touched` state to decide *when* to show an error message (e.g., `touched.username && errors.username`).",
+            "The `isFormValid` check needs to consider both `Object.keys(errors).length === 0` AND ensure all fields have some content if they are required.",
+            "Remember to use `onBlur` alongside `onChange` to control error display timing."
+          ],
+          "tags": [
+            "React",
+            "Forms",
+            "Controlled Components",
+            "Validation",
+            "Frontend Interview",
+            "State Management"
+          ],
+          "timeEstimate": 60,
+          "prerequisites": [
+            "theory_controlled_components"
+          ],
+          "complexity": 8,
+          "interviewRelevance": 10,
+          "learningPath": "intermediate",
+          "relatedConcepts": [
+            "Form Validation Patterns",
+            "Conditional Rendering",
+            "React Hooks"
+          ]
+        },
+        {
+          "id": "task_uncontrolled_file_upload",
+          "title": "Implement an Uncontrolled File Uploader",
+          "description": "\nCreate a `FileUploadComponent` that allows a user to select a single file and simulate its upload upon form submission. This component **must** use the uncontrolled component pattern.\n\n**Requirements:**\n-   Use `useRef` to get access to the file input DOM element.\n-   The component should have an `<input type=\"file\"/>` and a 'Upload' button.\n-   When the 'Upload' button is clicked, prevent the default form submission.\n-   Access the selected file(s) using the `ref`.\n-   Log the name and size of the selected file to the console. If no file is selected, log an appropriate message.\n-   Do not use any React state (`useState`) to manage the file input's value.\n\n**Hint**: File input values are accessed via the `files` property of the input DOM element.",
+          "difficulty": "easy",
+          "startingCode": "import React, { useRef } from 'react';\n\nfunction FileUploadComponent() {\n  const fileInputRef = useRef<HTMLInputElement>(null);\n\n  const handleSubmit = (event: React.FormEvent) => {\n    event.preventDefault();\n\n    // TODO: Access the selected file(s) using fileInputRef\n    // TODO: Log file details or 'no file selected' message\n\n  };\n\n  return (\n    <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '15px', maxWidth: '300px', margin: '40px auto', padding: '25px', border: '1px solid #ddd', borderRadius: '10px', boxShadow: '0 4px 8px rgba(0,0,0,0.1)' }}>\n      <h2>Upload File</h2>\n      <div>\n        <label htmlFor=\"fileInput\">Choose file:</label>\n        <input\n          type=\"file\"\n          id=\"fileInput\"\n          name=\"fileInput\"\n          ref={fileInputRef} // Attach the ref here\n        />\n      </div>\n      <button type=\"submit\">Upload</button>\n    </form>\n  );\n}\n",
+          "solutionCode": "import React, { useRef } from 'react';\n\nfunction FileUploadComponent() {\n  const fileInputRef = useRef<HTMLInputElement>(null);\n\n  const handleSubmit = (event: React.FormEvent) => {\n    event.preventDefault();\n\n    if (fileInputRef.current && fileInputRef.current.files && fileInputRef.current.files.length > 0) {\n      const selectedFile = fileInputRef.current.files[0];\n      console.log('File Selected:');\n      console.log('  Name:', selectedFile.name);\n      console.log('  Size:', selectedFile.size, 'bytes');\n      console.log('  Type:', selectedFile.type);\n      alert(`File '${selectedFile.name}' selected for upload.`);\n    } else {\n      console.log('No file selected.');\n      alert('Please select a file to upload.');\n    }\n  };\n\n  return (\n    <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '15px', maxWidth: '300px', margin: '40px auto', padding: '25px', border: '1px solid #ddd', borderRadius: '10px', boxShadow: '0 4px 8px rgba(0,0,0,0.1)' }}>\n      <h2>Upload File</h2>\n      <div>\n        <label htmlFor=\"fileInput\">Choose file:</label>\n        <input\n          type=\"file\"\n          id=\"fileInput\"\n          name=\"fileInput\"\n          ref={fileInputRef}\n        />\n      </div>\n      <button type=\"submit\">Upload</button>\n    </form>\n  );\n}\n",
+          "testCases": [
+            "Submit without selecting a file: Should log 'No file selected.' and alert.",
+            "Select a text file and submit: Should log file name, size, and type, and alert with file name.",
+            "Select an image file and submit: Should log file name, size, and type, and alert with file name.",
+            "Select multiple files (if input supports it, though task specifies single): Test behavior (should only get first file).",
+            "Test `event.preventDefault()`: Ensure page does not reload on submission."
+          ],
+          "hints": [
+            "The `ref.current` property will give you the actual DOM element.",
+            "File inputs have a `files` property which is a `FileList` object.",
+            "Remember to call `event.preventDefault()` in the `handleSubmit` function."
+          ],
+          "tags": [
+            "React",
+            "Forms",
+            "Uncontrolled Components",
+            "FileUpload",
+            "useRef",
+            "Frontend Interview"
+          ],
+          "timeEstimate": 30,
+          "prerequisites": [
+            "theory_uncontrolled_components"
+          ],
+          "complexity": 5,
+          "interviewRelevance": 8,
+          "learningPath": "intermediate",
+          "relatedConcepts": [
+            "DOM Manipulation",
+            "File API",
+            "React Hooks"
+          ]
+        },
+        {
+          "id": "task_refactor_controlled_to_uncontrolled",
+          "title": "Refactor a Controlled Form to Uncontrolled",
+          "description": "\nGiven a simple React component that uses the **controlled component pattern** for a single text input, refactor it to use the **uncontrolled component pattern**.\n\n**Original Controlled Component:**\n```typescript\nimport React, { useState } from 'react';\n\nfunction ControlledTextInput() {\n  const [text, setText] = useState('');\n\n  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {\n    setText(e.target.value);\n  };\n\n  const handleSubmit = (e: React.FormEvent) => {\n    e.preventDefault();\n    console.log('Submitted (Controlled):', text);\n  };\n\n  return (\n    <form onSubmit={handleSubmit}>\n      <label htmlFor=\"myInput\">Controlled Input:</label>\n      <input\n        id=\"myInput\"\n        type=\"text\"\n        value={text}\n        onChange={handleChange}\n      />\n      <button type=\"submit\">Submit</button>\n    </form>\n  );\n}\n```\n\n**Your task is to refactor `ControlledTextInput` into `UncontrolledTextInput` meeting the following requirements:**\n-   Remove `useState` for the input value.\n-   Use `useRef` to get a direct reference to the input element.\n-   Access the input's value via the `ref` during form submission.\n-   Log the value upon submission (e.g., `console.log('Submitted (Uncontrolled):', value)`).\n-   Optionally, set an initial value using `defaultValue`.",
+          "difficulty": "medium",
+          "startingCode": "import React, { useState, useRef } from 'react';\n\n// Original Controlled Component (for reference, do not modify this part directly)\nfunction ControlledTextInput() {\n  const [text, setText] = useState('');\n\n  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {\n    setText(e.target.value);\n  };\n\n  const handleSubmit = (e: React.FormEvent) => {\n    e.preventDefault();\n    console.log('Submitted (Controlled):', text);\n  };\n\n  return (\n    <form onSubmit={handleSubmit}>\n      <label htmlFor=\"myInputControlled\">Controlled Input:</label>\n      <input\n        id=\"myInputControlled\"\n        type=\"text\"\n        value={text}\n        onChange={handleChange}\n      />\n      <button type=\"submit\">Submit</button>\n    </form>\n  );\n}\n\n// TODO: Implement the UncontrolledTextInput component here\nfunction UncontrolledTextInput() {\n  const inputRef = useRef<HTMLInputElement>(null);\n\n  const handleSubmit = (e: React.FormEvent) => {\n    e.preventDefault();\n    // TODO: Access value using ref and log it\n  };\n\n  return (\n    <form onSubmit={handleSubmit} style={{ marginTop: '20px' }}>\n      <label htmlFor=\"myInputUncontrolled\">Uncontrolled Input:</label>\n      <input\n        id=\"myInputUncontrolled\"\n        type=\"text\"\n        // TODO: Attach ref and set defaultValue\n      />\n      <button type=\"submit\">Submit</button>\n    </form>\n  );\n}\n\n// Example usage for rendering both:\n// ReactDOM.render(\n//   <>\n//     <ControlledTextInput />\n//     <UncontrolledTextInput />\n//   </>,\n//   document.getElementById('root')\n// );\n",
+          "solutionCode": "import React, { useState, useRef } from 'react';\n\n// Original Controlled Component (for reference)\nfunction ControlledTextInput() {\n  const [text, setText] = useState('');\n\n  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {\n    setText(e.target.value);\n  };\n\n  const handleSubmit = (e: React.FormEvent) => {\n    e.preventDefault();\n    console.log('Submitted (Controlled):', text);\n  };\n\n  return (\n    <form onSubmit={handleSubmit}>\n      <label htmlFor=\"myInputControlled\">Controlled Input:</label>\n      <input\n        id=\"myInputControlled\"\n        type=\"text\"\n        value={text}\n        onChange={handleChange}\n      />\n      <button type=\"submit\">Submit</button>\n    </form>\n  );\n}\n\n// Refactored UncontrolledTextInput component\nfunction UncontrolledTextInput() {\n  const inputRef = useRef<HTMLInputElement>(null);\n\n  const handleSubmit = (e: React.FormEvent) => {\n    e.preventDefault();\n    const value = inputRef.current ? inputRef.current.value : '';\n    console.log('Submitted (Uncontrolled):', value);\n  };\n\n  return (\n    <form onSubmit={handleSubmit} style={{ marginTop: '20px' }}>\n      <label htmlFor=\"myInputUncontrolled\">Uncontrolled Input:</label>\n      <input\n        id=\"myInputUncontrolled\"\n        type=\"text\"\n        ref={inputRef} // Attach the ref here\n        defaultValue=\"Initial Uncontrolled Value\" // Optional: set an initial value\n      />\n      <button type=\"submit\">Submit</button>\n    </form>\n  );\n}\n",
+          "testCases": [
+            "Type text into ControlledTextInput and submit: Should log the current typed text.",
+            "Type text into UncontrolledTextInput and submit: Should log the current typed text.",
+            "Verify `useState` is removed from `UncontrolledTextInput`.",
+            "Verify `useRef` is properly used in `UncontrolledTextInput`.",
+            "Verify `value` prop is removed and `defaultValue` is used (if chosen) in `UncontrolledTextInput`."
+          ],
+          "hints": [
+            "Remember that `useRef` returns a mutable ref object, and the actual DOM element is available via `ref.current`.",
+            "For uncontrolled components, the `value` prop is typically not used. If you want to set an initial value, use `defaultValue`.",
+            "You'll need to remove the `onChange` handler from the uncontrolled input, as it's not needed for value management."
+          ],
+          "tags": [
+            "React",
+            "Forms",
+            "Controlled Components",
+            "Uncontrolled Components",
+            "Refactoring",
+            "useRef",
+            "Frontend Interview"
+          ],
+          "timeEstimate": 45,
+          "prerequisites": [
+            "theory_controlled_components",
+            "theory_uncontrolled_components"
+          ],
+          "complexity": 6,
+          "interviewRelevance": 9,
+          "learningPath": "intermediate",
+          "relatedConcepts": [
+            "React Hooks",
+            "DOM Interaction"
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "dd44c0ce-fc65-4f0e-ac33-66cd780b10aa",
+    "startLine": 14300,
+    "endLine": 14399,
+    "processedDate": "2025-06-17T13:55:19.292Z",
+    "content": {
+      "logicalBlockInfo": {
+        "suggestedEndLine": -1
+      },
+      "theory": [
+        {
+          "id": "theory_basic_react_forms_useref",
+          "title": "Basic React Forms with useRef Hook",
+          "content": "In React, handling forms can be approached in various ways. For simpler forms or when direct DOM manipulation is required, the `useRef` hook provides a way to access DOM elements or React components directly. This approach is often referred to as managing 'uncontrolled components' because the form data is handled by the DOM itself rather than by React state.\n\n## Key Concepts\n- **`useRef` Hook**: A React Hook that lets you reference a value that’s not needed for rendering. It can be used to hold a mutable value in its `.current` property, which persists across renders, making it ideal for direct DOM interactions, such as managing form input values.\n- **Uncontrolled Components**: Form elements whose values are handled by the DOM. You use a ref to get their current value when you need it (e.g., on form submission).\n- **`defaultValue` Prop**: Used for initial values in uncontrolled form inputs. Unlike `value` (which is used for controlled components), `defaultValue` sets the initial value, but subsequent changes are managed by the DOM.\n\n## Implementation Details\nTo use `useRef` for form inputs:\n1.  **Initialize `useRef`**: Call `const inputRef = useRef(null);` at the top level of your component.\n2.  **Attach to Input**: Pass the `ref` prop to the desired DOM element (e.g., `<input ref={inputRef} />`).\n3.  **Access Value**: On form submission, access the current value using `inputRef.current.value`.\n\nThis method is lightweight and avoids re-renders on every keystroke, which can be beneficial for very simple forms or specific use cases where you don't need real-time validation or complex state management.",
+          "examples": [
+            {
+              "id": "example_useref_form_1",
+              "title": "Basic Contact Form with useRef",
+              "code": "import React, { useRef } from 'react';\n\nfunction BasicForm() {\n  const nameRef = useRef(null);\n  const emailRef = useRef(null);\n  const messageRef = useRef(null);\n\n  const handleSubmit = (event) => {\n    event.preventDefault(); // Prevent default form submission behavior\n    const name = nameRef.current.value;\n    const email = emailRef.current.value;\n    const message = messageRef.current.value;\n    \n    console.log('Form Submitted:', {\n      name,\n      email,\n      message,\n    });\n    \n    // Optionally clear form fields after submission\n    nameRef.current.value = '';\n    emailRef.current.value = '';\n    messageRef.current.value = '';\n  };\n\n  return (\n    <form onSubmit={handleSubmit}>\n      <div>\n        <label htmlFor=\"name\">Name:</label>\n        <input\n          id=\"name\"\n          name=\"name\"\n          type=\"text\"\n          ref={nameRef}\n          defaultValue=\"\"\n        />\n      </div>\n      <div>\n        <label htmlFor=\"email\">Email:</label>\n        <input\n          id=\"email\"\n          name=\"email\"\n          type=\"email\"\n          ref={emailRef}\n          defaultValue=\"\"\n        />\n      </div>\n      <div>\n        <label htmlFor=\"message\">Message:</label>\n        <textarea\n          id=\"message\"\n          name=\"message\"\n          ref={messageRef}\n          defaultValue=\"\"\n        />\n      </div>\n      <button type=\"submit\">Submit</button>\n    </form>\n  );\n}",
+              "explanation": "This example demonstrates a basic form where input values are managed using `useRef`. Each input element (`input`, `textarea`) is assigned a ref. On form submission, `handleSubmit` is called, which prevents the default browser behavior (`event.preventDefault()`). The current values are then accessed via `ref.current.value` and logged to the console. Finally, the fields are manually cleared.",
+              "language": "typescript"
+            }
+          ],
+          "relatedQuestions": [
+            "question_useref_form_purpose_1",
+            "question_useref_form_comparison_mcq_2",
+            "question_useref_form_clear_open_3",
+            "question_useref_form_validation_mcq_4",
+            "question_useref_form_refactor_code_1",
+            "question_useref_form_flashcard_1",
+            "question_useref_form_flashcard_2"
+          ],
+          "relatedTasks": [
+            "task_basic_contact_form_useref"
+          ],
+          "tags": [
+            "React",
+            "Forms",
+            "Hooks",
+            "useRef",
+            "Uncontrolled Components",
+            "DOM Manipulation"
+          ],
+          "technology": "React",
+          "prerequisites": [
+            "react_functional_components",
+            "react_hooks_basics",
+            "html_forms_basics"
+          ],
+          "complexity": 5,
+          "interviewRelevance": 7,
+          "learningPath": "intermediate",
+          "requiredFor": [
+            "controlled_components",
+            "form_libraries_understanding"
+          ]
+        },
+        {
+          "id": "theory_formik_library",
+          "title": "Form Management with Formik",
+          "content": "Formik is a popular open-source library designed to simplify form handling in React applications. It addresses many common challenges associated with forms, such as managing form state, handling submission, validation, and error messages, reducing boilerplate code significantly. Formik makes it easier to build robust and scalable forms by abstracting away much of the complexity.\n\n## Key Concepts\n- **`Formik` Component**: The main wrapper component that provides context for your form. It takes `initialValues`, `validationSchema` (or `validate` prop), and an `onSubmit` handler as props.\n- **`Form` Component**: A small wrapper around an HTML `<form>` element that automatically hooks into Formik's context, making it unnecessary to manually call `handleSubmit` or `handleReset`.\n- **`Field` Component**: A wrapper for standard HTML input elements (`<input>`, `<select>`, `<textarea>`). It automatically handles value, `onChange`, `onBlur`, and `name` props, connecting the input to Formik's state.\n  - `as` prop: Allows specifying the component type (e.g., `<Field as=\"textarea\" />`).\n- **`ErrorMessage` Component**: Renders an error message for a specific field if that field has been touched and has an error. It takes a `name` prop (corresponding to the field's name) and can optionally take a `component` prop to render the error message with a specific HTML element (e.g., `div`).\n- **`Yup` for Validation**: Formik often integrates seamlessly with Yup, a JavaScript schema validation library. Yup allows you to define validation rules for your form fields in a concise and declarative way. The `validationSchema` prop of the `Formik` component accepts a Yup schema.\n- **`isSubmitting` Prop**: A boolean value passed to the render prop of `Formik` (or accessible via `useFormik` hook) that indicates whether the form is currently in the process of being submitted. Useful for disabling the submit button to prevent multiple submissions.\n\n## How Formik Simplifies Forms\nFormik centralizes form logic, handling:\n- **Getting values in and out of form state**: Automatically binds input values to Formik's internal state.\n- **Validation and error messages**: Integrates with Yup or custom validation functions to display errors.\n- **Handling form submission**: Provides a robust `onSubmit` handler with utilities like `setSubmitting`.\n- **Tracking field status**: Keeps track of whether fields have been 'touched' (visited) or are 'dirty' (modified), useful for displaying errors at the right time.",
+          "examples": [
+            {
+              "id": "example_formik_basic_1",
+              "title": "Formik Form with Yup Validation",
+              "code": "import React from 'react';\nimport { Formik, Form, Field, ErrorMessage } from 'formik';\nimport * as Yup from 'yup';\n\n// Validation schema using Yup\nconst validationSchema = Yup.object({\n  name: Yup.string().required('Name is required'),\n  email: Yup.string().email('Invalid email address').required('Email is required'),\n  message: Yup.string().required('Message is required')\n});\n\nfunction FormikForm() {\n  return (\n    <Formik\n      initialValues={{ name: '', email: '', message: '' }}\n      validationSchema={validationSchema}\n      onSubmit={(values, { setSubmitting, resetForm }) => {\n        setTimeout(() => {\n          console.log('Form submitted:', values);\n          setSubmitting(false); // Re-enable the submit button\n          resetForm(); // Optionally reset the form fields\n        }, 400);\n      }}\n    >\n      {({ isSubmitting }) => ( // isSubmitting is provided by Formik's render prop\n        <Form>\n          <div>\n            <label htmlFor=\"name\">Name:</label>\n            <Field type=\"text\" name=\"name\" id=\"name\" />\n            <ErrorMessage name=\"name\" component=\"div\" className=\"error\" />\n          </div>\n\n          <div>\n            <label htmlFor=\"email\">Email:</label>\n            <Field type=\"email\" name=\"email\" id=\"email\" />\n            <ErrorMessage name=\"email\" component=\"div\" className=\"error\" />\n          </div>\n\n          <div>\n            <label htmlFor=\"message\">Message:</label>\n            <Field as=\"textarea\" name=\"message\" id=\"message\" />\n            <ErrorMessage name=\"message\" component=\"div\" className=\"error\" />\n          </div>\n\n          <button type=\"submit\" disabled={isSubmitting}>\n            {isSubmitting ? 'Submitting...' : 'Submit'}\n          </button>\n        </Form>\n      )}\n    </Formik>\n  );\n}",
+              "explanation": "This example showcases a Formik form with integrated Yup validation. The `Formik` component defines initial values, a validation schema, and an `onSubmit` handler. `Field` components are used for inputs, automatically binding to Formik's state. `ErrorMessage` components display validation feedback. The submit button's `disabled` state is controlled by `isSubmitting`, preventing multiple submissions during asynchronous operations. After submission, `setSubmitting(false)` re-enables the button and `resetForm()` clears the fields.",
+              "language": "typescript"
+            }
+          ],
+          "relatedQuestions": [
+            "question_formik_purpose_open_1",
+            "question_formik_components_mcq_1",
+            "question_formik_yup_mcq_3",
+            "question_formik_isSubmitting_mcq_5",
+            "question_formik_field_as_mcq_6",
+            "question_formik_add_field_code_2",
+            "question_formik_workflow_open_4",
+            "question_formik_flashcard_3",
+            "question_formik_flashcard_4"
+          ],
+          "relatedTasks": [
+            "task_enhanced_formik_registration"
+          ],
+          "tags": [
+            "React",
+            "Forms",
+            "Form Libraries",
+            "Formik",
+            "Validation",
+            "Yup",
+            "Controlled Components"
+          ],
+          "technology": "React",
+          "prerequisites": [
+            "react_functional_components",
+            "react_props_state",
+            "javascript_objects",
+            "npm_package_management"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 9,
+          "learningPath": "intermediate",
+          "requiredFor": [
+            "complex_form_management",
+            "frontend_application_development"
+          ]
+        },
+        {
+          "id": "theory_formik_vs_redux_form",
+          "title": "Formik vs. Redux Form: A Comparative Analysis",
+          "content": "When choosing a form management library for React, Formik and Redux Form are two prominent options. While both aim to simplify form handling, they differ significantly in their architecture, performance characteristics, and integration patterns, especially concerning state management.\n\n## Key Differences\n\n| Feature         | Redux Form                                | Formik                                          |\n| :-------------- | :---------------------------------------- | :---------------------------------------------- |\n| **State Storage** | Stores form state in the Redux store      | Keeps form state locally within the component   |\n| **Performance** | Calls the entire Redux reducer on every keystroke, which can impact performance in large applications | Handles state changes locally, resulting in better performance as it avoids unnecessary Redux store updates |\n| **Bundle Size** | Larger (approx. 22.5 kB minified gzipped) | Smaller (approx. 12.7 kB minified gzipped)      |\n| **Complexity**  | More complex due to deep Redux integration, requiring more boilerplate and understanding of Redux principles | Simpler API with less boilerplate, designed specifically for forms without external state management dependencies |\n| **Use Case**    | Better for applications already using Redux extensively and where form state needs to be globally accessible or integrated with other Redux-managed data. | Ideal for most React applications, especially when a lightweight, performant, and simple solution for local form state is preferred. |\n\n## Reasons to Choose Formik Over Redux Form\nFormik generally emerges as the preferred choice for most modern React applications due to several compelling reasons:\n\n1.  **Local State Management for Forms**: Form state is typically short-lived and local to a component. Storing it in a global Redux store is often unnecessary and can lead to over-engineering.\n2.  **Superior Performance**: Redux Form's pattern of dispatching actions and updating the entire Redux reducer on every keystroke (e.g., for every character typed in an input) can introduce significant input latency and performance bottlenecks in large applications with many fields or frequent updates. Formik's local state management avoids these global store updates, leading to a much smoother user experience.\n3.  **Smaller Bundle Size**: A smaller library size means faster loading times for your application, which is crucial for web performance.\n4.  **Simpler API and Less Boilerplate**: Formik's API is more intuitive and requires less setup and code to get a form working. This reduces development time and makes the code easier to read and maintain.\n\nWhile Redux Form might still be considered if an application is already heavily invested in Redux and there's a strong architectural reason to keep form state within Redux (e.g., integrating form data with other global state immediately), Formik's advantages in performance, simplicity, and bundle size make it the default recommendation for most new and existing React projects.",
+          "examples": [],
+          "relatedQuestions": [
+            "question_formik_redux_performance_mcq_7",
+            "question_formik_redux_state_mcq_8",
+            "question_formik_redux_bundle_mcq_9",
+            "question_formik_redux_choice_open_5",
+            "question_formik_redux_tradeoffs_open_6",
+            "question_formik_redux_flashcard_5",
+            "question_formik_redux_flashcard_6"
+          ],
+          "relatedTasks": [
+            "task_form_library_choice_analysis"
+          ],
+          "tags": [
+            "React",
+            "Forms",
+            "Form Libraries",
+            "Formik",
+            "Redux Form",
+            "State Management",
+            "Performance Comparison",
+            "Bundle Size",
+            "Architecture"
+          ],
+          "technology": "React",
+          "prerequisites": [
+            "redux_basics",
+            "react_forms",
+            "form_libraries_understanding"
+          ],
+          "complexity": 6,
+          "interviewRelevance": 8,
+          "learningPath": "advanced",
+          "requiredFor": [
+            "frontend_architecture_decisions",
+            "performance_optimization"
+          ]
+        }
+      ],
+      "questions": [
+        {
+          "id": "question_useref_form_purpose_1",
+          "topic": "Basic React Forms with useRef Hook",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "What is the primary purpose of `useRef` when handling form inputs in React?",
+          "answer": "`useRef` is used to directly access and interact with DOM elements (like input fields) in React, allowing you to get their current value without making the component re-render on every input change.",
+          "options": [],
+          "analysisPoints": [
+            "Identifies the core function of `useRef` for DOM access.",
+            "Distinguishes `useRef` from state management for re-renders.",
+            "Relates `useRef` to uncontrolled components."
+          ],
+          "keyConcepts": [
+            "useRef",
+            "Uncontrolled Components",
+            "DOM Access"
+          ],
+          "evaluationCriteria": [
+            "Understanding of `useRef` fundamentals",
+            "Knowledge of uncontrolled components"
+          ],
+          "example": "",
+          "tags": [
+            "React",
+            "useRef",
+            "Forms",
+            "Hooks"
+          ],
+          "prerequisites": [
+            "react_functional_components",
+            "react_hooks_basics"
+          ],
+          "complexity": 4,
+          "interviewFrequency": 6,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_useref_form_comparison_mcq_2",
+          "topic": "Basic React Forms with useRef Hook",
+          "level": "medium",
+          "type": "mcq",
+          "question": "Consider the following React form implementation:\n\n```jsx\nimport React, { useRef } from 'react';\n\nfunction MyForm() {\n  const inputRef = useRef(null);\n\n  const handleSubmit = (e) => {\n    e.preventDefault();\n    console.log(inputRef.current.value);\n  };\n\n  return (\n    <form onSubmit={handleSubmit}>\n      <input type=\"text\" ref={inputRef} />\n      <button type=\"submit\">Submit</button>\n    </form>\n  );\n}\n```\n\nWhich of the following statements is TRUE about how the `input` field's value is handled in this `MyForm` component?",
+          "answer": "The input's value is managed by the DOM, and React accesses it only when needed via `inputRef.current.value`.",
+          "options": [
+            "The input's value is stored in React state and updates on every keystroke.",
+            "The input's value is managed by the DOM, and React accesses it only when needed via `inputRef.current.value`.",
+            "The input's value is directly controlled by the `defaultValue` prop, which changes dynamically.",
+            "The input element is a controlled component because `useRef` is used."
+          ],
+          "analysisPoints": [
+            "Tests understanding of `useRef`'s role in forms.",
+            "Distinguishes between controlled and uncontrolled components.",
+            "Clarifies that `useRef` does not manage state or cause re-renders on input changes.",
+            "Highlights the nature of DOM-managed input values with `useRef`."
+          ],
+          "keyConcepts": [
+            "useRef",
+            "Uncontrolled Components",
+            "DOM Management",
+            "Form Handling"
+          ],
+          "evaluationCriteria": [
+            "Ability to differentiate controlled vs. uncontrolled components",
+            "Understanding of `useRef`'s behavior"
+          ],
+          "example": "The example demonstrates an uncontrolled component. The `inputRef` is attached to the DOM `input` element. React doesn't directly manage the `input`'s value through state; instead, the browser handles it. The value is only read when `inputRef.current.value` is accessed, typically during form submission. This contrasts with controlled components where `value` and `onChange` props are used with `useState` to keep React state synchronized with the input.",
+          "tags": [
+            "React",
+            "useRef",
+            "Forms",
+            "Uncontrolled Components",
+            "MCQ"
+          ],
+          "prerequisites": [
+            "react_forms_basics",
+            "react_hooks_basics"
+          ],
+          "complexity": 5,
+          "interviewFrequency": 7,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_useref_form_clear_open_3",
+          "topic": "Basic React Forms with useRef Hook",
+          "level": "medium",
+          "type": "open",
+          "question": "After a successful form submission using `useRef` to manage inputs, how would you programmatically clear all the input fields, and why is this approach necessary compared to using React state?",
+          "answer": "To clear input fields after a successful submission when using `useRef`, you would directly access the `.current` property of each ref and set its `value` to an empty string. For example, `nameRef.current.value = '';` for a name input.\n\nThis direct DOM manipulation is necessary because `useRef` creates uncontrolled components. Unlike controlled components (where input values are bound to React state and updates to state automatically re-render the component and update the input's value), uncontrolled components' values are managed by the DOM. React doesn't re-render them based on state changes in the same way. Therefore, to change their displayed value, you must imperatively modify the DOM element's `value` property via the ref.",
+          "options": [],
+          "analysisPoints": [
+            "Demonstrates practical application of `useRef` for form manipulation.",
+            "Explains the underlying reason for direct DOM manipulation with uncontrolled components.",
+            "Contrasts the behavior with controlled components and state management.",
+            "Assesses understanding of component control types."
+          ],
+          "keyConcepts": [
+            "useRef",
+            "Uncontrolled Components",
+            "DOM Manipulation",
+            "Form Reset",
+            "Controlled vs Uncontrolled"
+          ],
+          "evaluationCriteria": [
+            "Practical problem-solving with `useRef`",
+            "Conceptual understanding of controlled vs. uncontrolled components"
+          ],
+          "example": "```typescript\nimport React, { useRef } from 'react';\n\nfunction MyForm() {\n  const nameRef = useRef(null);\n  const emailRef = useRef(null);\n\n  const handleSubmit = (event) => {\n    event.preventDefault();\n    console.log('Name:', nameRef.current.value);\n    console.log('Email:', emailRef.current.value);\n\n    // Clear fields:\n    nameRef.current.value = '';\n    emailRef.current.value = '';\n  };\n\n  return (\n    <form onSubmit={handleSubmit}>\n      <label>Name: <input type=\"text\" ref={nameRef} defaultValue=\"\" /></label><br/>\n      <label>Email: <input type=\"email\" ref={emailRef} defaultValue=\"\" /></label><br/>\n      <button type=\"submit\">Submit</button>\n    </form>\n  );\n}\n```",
+          "tags": [
+            "React",
+            "useRef",
+            "Forms",
+            "Uncontrolled Components",
+            "Open-Ended"
+          ],
+          "prerequisites": [
+            "react_hooks_basics",
+            "react_forms_basics"
+          ],
+          "complexity": 6,
+          "interviewFrequency": 7,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_useref_form_validation_mcq_4",
+          "topic": "Basic React Forms with useRef Hook",
+          "level": "medium",
+          "type": "mcq",
+          "question": "Which of the following is a common challenge when implementing form validation using `useRef` for inputs in React?",
+          "answer": "Displaying validation messages in real-time as the user types.",
+          "options": [
+            "Displaying validation messages in real-time as the user types.",
+            "Accessing the input values on form submission.",
+            "Preventing the default browser form submission.",
+            "Setting initial values for the form fields."
+          ],
+          "analysisPoints": [
+            "Highlights a limitation of `useRef` for real-time interactivity.",
+            "Confirms what `useRef` handles well (submission, initial values).",
+            "Reinforces the concept that `useRef` doesn't trigger re-renders."
+          ],
+          "keyConcepts": [
+            "useRef",
+            "Form Validation",
+            "Real-time Updates",
+            "Uncontrolled Components"
+          ],
+          "evaluationCriteria": [
+            "Understanding of `useRef` limitations",
+            "Knowledge of form validation patterns"
+          ],
+          "example": "When using `useRef`, React doesn't re-render the component when the input's value changes. This means if you want to validate an input and show an error message *as the user types*, you'd have to manually attach `onChange` handlers to the input, manage state for validation errors, and potentially trigger re-renders yourself. This adds complexity that libraries like Formik handle automatically by making inputs 'controlled' components.",
+          "tags": [
+            "React",
+            "useRef",
+            "Forms",
+            "Validation",
+            "MCQ"
+          ],
+          "prerequisites": [
+            "react_forms_basics"
+          ],
+          "complexity": 5,
+          "interviewFrequency": 6,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_useref_form_refactor_code_1",
+          "topic": "Basic React Forms with useRef Hook",
+          "level": "medium",
+          "type": "code",
+          "question": "Refactor the following form component to use `useRef` instead of `useState` for managing the input value. Ensure the value is logged to the console on submit.\n\n```jsx\nimport React, { useState } from 'react';\n\nfunction ControlledForm() {\n  const [inputValue, setInputValue] = useState('');\n\n  const handleSubmit = (e) => {\n    e.preventDefault();\n    console.log('Submitted Value:', inputValue);\n    setInputValue(''); // Clear field\n  };\n\n  return (\n    <form onSubmit={handleSubmit}>\n      <label>\n        Input:\n        <input\n          type=\"text\"\n          value={inputValue}\n          onChange={(e) => setInputValue(e.target.value)}\n        />\n      </label>\n      <button type=\"submit\">Submit</button>\n    </form>\n  );\n}\n```",
+          "answer": "",
+          "options": [],
+          "analysisPoints": [
+            "Correctly replaces `useState` with `useRef`.",
+            "Removes `value` and `onChange` props from `input` when using `useRef`.",
+            "Accesses input value via `ref.current.value` on submission.",
+            "Implements programmatic clearing of the input field."
+          ],
+          "keyConcepts": [
+            "useRef",
+            "useState",
+            "Controlled vs Uncontrolled Components",
+            "Form Handling"
+          ],
+          "evaluationCriteria": [
+            "Code transformation skills",
+            "Understanding of `useRef` usage",
+            "Correct handling of input properties"
+          ],
+          "example": "",
+          "tags": [
+            "React",
+            "useRef",
+            "useState",
+            "Forms",
+            "Code Challenge"
+          ],
+          "prerequisites": [
+            "react_hooks_basics",
+            "react_forms_basics"
+          ],
+          "complexity": 6,
+          "interviewFrequency": 7,
+          "learningPath": "intermediate",
+          "startingCode": "import React, { useState } from 'react';\n\nfunction ControlledForm() {\n  const [inputValue, setInputValue] = useState('');\n\n  const handleSubmit = (e) => {\n    e.preventDefault();\n    console.log('Submitted Value:', inputValue);\n    setInputValue(''); // Clear field\n  };\n\n  return (\n    <form onSubmit={handleSubmit}>\n      <label>\n        Input:\n        <input\n          type=\"text\"\n          value={inputValue}\n          onChange={(e) => setInputValue(e.target.value)}\n        />\n      </label>\n      <button type=\"submit\">Submit</button>\n    </form>\n  );\n}\n",
+          "solutionCode": "import React, { useRef } from 'react';\n\nfunction UncontrolledForm() {\n  const inputRef = useRef(null);\n\n  const handleSubmit = (e) => {\n    e.preventDefault();\n    console.log('Submitted Value:', inputRef.current.value);\n    inputRef.current.value = ''; // Clear field using ref\n  };\n\n  return (\n    <form onSubmit={handleSubmit}>\n      <label>\n        Input:\n        <input\n          type=\"text\"\n          ref={inputRef}\n          defaultValue=\"\"\n        />\n      </label>\n      <button type=\"submit\">Submit</button>\n    </form>\n  );\n}\n"
+        },
+        {
+          "id": "question_useref_form_flashcard_1",
+          "topic": "Basic React Forms with useRef Hook",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "True or False: Using `useRef` for a form input makes it a controlled component.",
+          "answer": "False. Using `useRef` makes the input an uncontrolled component, as its value is managed by the DOM, not React state.",
+          "options": [],
+          "analysisPoints": [
+            "Tests knowledge of controlled vs. uncontrolled components.",
+            "Confirms understanding of `useRef`'s role."
+          ],
+          "keyConcepts": [
+            "useRef",
+            "Controlled Components",
+            "Uncontrolled Components"
+          ],
+          "evaluationCriteria": [
+            "Accurate definition recall"
+          ],
+          "example": "",
+          "tags": [
+            "React",
+            "useRef",
+            "Forms",
+            "Flashcard"
+          ],
+          "prerequisites": [
+            "react_forms_basics"
+          ],
+          "complexity": 3,
+          "interviewFrequency": 6,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_useref_form_flashcard_2",
+          "topic": "Basic React Forms with useRef Hook",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "What property of a ref is used to access the DOM element itself?",
+          "answer": "The `.current` property (e.g., `myRef.current`).",
+          "options": [],
+          "analysisPoints": [
+            "Tests basic syntax recall for `useRef`."
+          ],
+          "keyConcepts": [
+            "useRef",
+            "current property",
+            "DOM Access"
+          ],
+          "evaluationCriteria": [
+            "Syntax knowledge"
+          ],
+          "example": "",
+          "tags": [
+            "React",
+            "useRef",
+            "Hooks",
+            "Flashcard"
+          ],
+          "prerequisites": [
+            "react_hooks_basics"
+          ],
+          "complexity": 3,
+          "interviewFrequency": 7,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_formik_purpose_open_1",
+          "topic": "Form Management with Formik",
+          "level": "medium",
+          "type": "open",
+          "question": "Explain the main problems Formik aims to solve in React application development and how it addresses them.",
+          "answer": "Formik aims to solve several common problems associated with building forms in React:\n\n1.  **Managing Form State**: Manually managing input values, `onChange` handlers, and `onBlur` handlers for multiple fields using `useState` can lead to a lot of repetitive boilerplate code. Formik's `Field` component abstracts this away by automatically binding to form state based on the `name` prop.\n2.  **Handling Form Submission**: Coordinating `onSubmit` logic, preventing default browser behavior, and handling `isSubmitting` states can be complex. Formik provides a central `onSubmit` prop on the `Formik` component and manages the `isSubmitting` flag automatically.\n3.  **Validation and Error Messages**: Implementing real-time or on-blur validation, displaying specific error messages for each field, and knowing when to show them (e.g., only after touch) can be cumbersome. Formik integrates seamlessly with validation libraries like Yup (`validationSchema` prop) or custom `validate` functions. Its `ErrorMessage` component simplifies error display, ensuring errors appear only when appropriate (e.g., after a field is touched and invalid).\n\nBy centralizing these concerns, Formik significantly reduces boilerplate, improves code readability, and helps developers build robust forms more efficiently.",
+          "options": [],
+          "analysisPoints": [
+            "Identifies key pain points in React forms (state, submission, validation).",
+            "Explains how Formik's features (Field, onSubmit, ErrorMessage, validationSchema) address these problems.",
+            "Demonstrates understanding of Formik's value proposition.",
+            "Uses correct terminology."
+          ],
+          "keyConcepts": [
+            "Formik",
+            "Form State Management",
+            "Form Validation",
+            "Boilerplate Reduction",
+            "Form Submission"
+          ],
+          "evaluationCriteria": [
+            "Comprehensive explanation of Formik's purpose",
+            "Ability to link features to problems solved"
+          ],
+          "example": "",
+          "tags": [
+            "React",
+            "Formik",
+            "Forms",
+            "Open-Ended"
+          ],
+          "prerequisites": [
+            "react_forms_basics"
+          ],
+          "complexity": 7,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_formik_components_mcq_1",
+          "topic": "Form Management with Formik",
+          "level": "easy",
+          "type": "mcq",
+          "question": "Which Formik component is responsible for automatically connecting an HTML input element to Formik's state and handling `value`, `onChange`, and `onBlur`?",
+          "answer": "`Field`",
+          "options": [
+            "`Formik`",
+            "`Form`",
+            "`Field`",
+            "`ErrorMessage`"
+          ],
+          "analysisPoints": [
+            "Tests knowledge of core Formik component responsibilities.",
+            "Distinguishes `Field` from other wrapper components."
+          ],
+          "keyConcepts": [
+            "Formik Components",
+            "Field Component",
+            "Controlled Inputs"
+          ],
+          "evaluationCriteria": [
+            "Recall of Formik API",
+            "Understanding of component roles"
+          ],
+          "example": "The `Field` component is a higher-order component that renders a standard HTML input (or other form element) and automatically wires it up to Formik's internal state. This means you don't need to manually set `value={formik.values.myField}` or `onChange={formik.handleChange}`.",
+          "tags": [
+            "React",
+            "Formik",
+            "Forms",
+            "MCQ"
+          ],
+          "prerequisites": [
+            "formik_basics"
+          ],
+          "complexity": 4,
+          "interviewFrequency": 7,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_formik_yup_mcq_3",
+          "topic": "Form Management with Formik",
+          "level": "medium",
+          "type": "mcq",
+          "question": "You are using Formik for a registration form. You need to ensure the `password` field is required, has a minimum length of 8 characters, and includes at least one uppercase letter, one lowercase letter, and one number. Which of the following `Yup` schemas correctly defines this validation?\n\n```typescript\nimport * as Yup from 'yup';\n\nconst schema = Yup.object({\n  password: Yup.string()\n    // ...validation rules here\n});\n```",
+          "answer": "```typescript\npassword: Yup.string()\n  .required('Password is required')\n  .min(8, 'Password must be at least 8 characters')\n  .matches(/[A-Z]/, 'Password must contain at least one uppercase letter')\n  .matches(/[a-z]/, 'Password must contain at least one lowercase letter')\n  .matches(/\\d/, 'Password must contain at least one number')\n```",
+          "options": [
+            "```typescript\npassword: Yup.string().required().min(8).regex(/[A-Z]/).regex(/[a-z]/).regex(/\\d/)\n```",
+            "```typescript\npassword: Yup.string()\n  .required('Password is required')\n  .min(8, 'Password must be at least 8 characters')\n  .matches(/[A-Z]/, 'Password must contain at least one uppercase letter')\n  .matches(/[a-z]/, 'Password must contain at least one lowercase letter')\n  .matches(/\\d/, 'Password must contain at least one number')\n```",
+            "```typescript\npassword: Yup.string()\n  .required('Required')\n  .length(8, 'Min length 8')\n  .pattern(/[A-Za-z0-9]/)\n```",
+            "```typescript\npassword: Yup.string()\n  .required()\n  .atLeast(8)\n  .containsUppercase()\n  .containsLowercase()\n  .containsNumber()\n```"
+          ],
+          "analysisPoints": [
+            "Tests knowledge of common Yup validation methods (`required`, `min`, `matches`).",
+            "Assesses understanding of regular expressions for password complexity.",
+            "Checks for correct syntax and chaining of Yup methods.",
+            "Ensures correct error messages are associated."
+          ],
+          "keyConcepts": [
+            "Formik Validation",
+            "Yup",
+            "Schema Validation",
+            "Regular Expressions"
+          ],
+          "evaluationCriteria": [
+            "Accuracy of Yup schema definition",
+            "Correct use of `matches` for regex",
+            "Clarity of error messages"
+          ],
+          "example": "The correct option uses `required()` for mandatory, `min(8, ...)` for minimum length, and `matches()` with specific regular expressions to enforce the presence of uppercase, lowercase, and numeric characters. Each rule is chained, and custom error messages are provided for better user feedback.",
+          "tags": [
+            "Formik",
+            "Yup",
+            "Validation",
+            "MCQ",
+            "Code"
+          ],
+          "prerequisites": [
+            "javascript_regex",
+            "formik_basics"
+          ],
+          "complexity": 7,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_formik_isSubmitting_mcq_5",
+          "topic": "Form Management with Formik",
+          "level": "medium",
+          "type": "mcq",
+          "question": "In Formik, what is the primary purpose of the `isSubmitting` boolean prop passed to the render function or accessible via `useFormik`?",
+          "answer": "To indicate whether the form's `onSubmit` handler is currently executing.",
+          "options": [
+            "To indicate if the form has any validation errors.",
+            "To check if any form field has been touched by the user.",
+            "To indicate whether the form's `onSubmit` handler is currently executing.",
+            "To determine if the form's `initialValues` have changed."
+          ],
+          "analysisPoints": [
+            "Tests understanding of `isSubmitting`'s specific role.",
+            "Distinguishes it from validation or dirty state.",
+            "Relates it to preventing multiple submissions."
+          ],
+          "keyConcepts": [
+            "Formik",
+            "Form Submission",
+            "isSubmitting",
+            "UI/UX"
+          ],
+          "evaluationCriteria": [
+            "Accurate definition of `isSubmitting`",
+            "Knowledge of form submission flow"
+          ],
+          "example": "The `isSubmitting` prop is true from the moment `onSubmit` is called until `setSubmitting(false)` is invoked within the `onSubmit` handler. It's commonly used to disable the submit button and show a loading indicator, preventing users from submitting the form multiple times while an asynchronous operation (like an API call) is in progress.\n\n```jsx\n// ... inside Formik render prop\n{({ isSubmitting }) => (\n  <Form>\n    {/* ... fields */}\n    <button type=\"submit\" disabled={isSubmitting}>\n      {isSubmitting ? 'Sending...' : 'Submit'}\n    </button>\n  </Form>\n)}\n```",
+          "tags": [
+            "Formik",
+            "Forms",
+            "State Management",
+            "MCQ"
+          ],
+          "prerequisites": [
+            "formik_basics"
+          ],
+          "complexity": 5,
+          "interviewFrequency": 7,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_formik_field_as_mcq_6",
+          "topic": "Form Management with Formik",
+          "level": "medium",
+          "type": "mcq",
+          "question": "When using Formik's `Field` component, what is the purpose of the `as` prop?",
+          "answer": "To specify which HTML element or React component the `Field` should render.",
+          "options": [
+            "To define the HTML `id` attribute for the input.",
+            "To specify which HTML element or React component the `Field` should render.",
+            "To provide an initial value for the field.",
+            "To define the validation schema for that specific field."
+          ],
+          "analysisPoints": [
+            "Tests understanding of `Field` component's versatility.",
+            "Clarifies its role in rendering different input types (e.g., `textarea`, `select`)."
+          ],
+          "keyConcepts": [
+            "Formik",
+            "Field Component",
+            "HTML Elements",
+            "Custom Components"
+          ],
+          "evaluationCriteria": [
+            "Knowledge of `Field` component props",
+            "Understanding of component rendering"
+          ],
+          "example": "The `as` prop allows you to render `Field` as something other than a default `<input type='text'>`. For example, `<Field as=\"textarea\" name=\"message\" />` will render a `<textarea>` element, and `<Field as=\"select\" name=\"country\" />` will render a `<select>` element. You can also pass a custom React component to `as`.",
+          "tags": [
+            "Formik",
+            "Forms",
+            "Components",
+            "MCQ"
+          ],
+          "prerequisites": [
+            "formik_basics"
+          ],
+          "complexity": 5,
+          "interviewFrequency": 6,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_formik_add_field_code_2",
+          "topic": "Form Management with Formik",
+          "level": "medium",
+          "type": "code",
+          "question": "Extend the given Formik form to include a new `age` field. The `age` field should be required and must be a number greater than or equal to 18. Display its error message if validation fails.\n\n```jsx\nimport { Formik, Form, Field, ErrorMessage } from 'formik';\nimport * as Yup from 'yup';\n\nconst validationSchema = Yup.object({\n  name: Yup.string().required('Required'),\n});\n\nfunction MyFormikForm() {\n  return (\n    <Formik\n      initialValues={{ name: '' }}\n      validationSchema={validationSchema}\n      onSubmit={(values) => {\n        console.log(values);\n      }}\n    >\n      {() => (\n        <Form>\n          <div>\n            <label htmlFor=\"name\">Name:</label>\n            <Field type=\"text\" name=\"name\" />\n            <ErrorMessage name=\"name\" component=\"div\" className=\"error\" />\n          </div>\n          <button type=\"submit\">Submit</button>\n        </Form>\n      )}\n    </Formik>\n  );\n}\n```",
+          "answer": "",
+          "options": [],
+          "analysisPoints": [
+            "Correctly adds a new field to `initialValues`.",
+            "Extends `validationSchema` with `number()` and `min()` for age validation.",
+            "Adds a new `Field` and `ErrorMessage` component to the JSX.",
+            "Ensures correct error messages for `age`."
+          ],
+          "keyConcepts": [
+            "Formik",
+            "Yup",
+            "Form Fields",
+            "Validation",
+            "Code Extension"
+          ],
+          "evaluationCriteria": [
+            "Ability to modify existing Formik setup",
+            "Correct Yup number validation",
+            "Proper integration of new field in JSX"
+          ],
+          "example": "",
+          "tags": [
+            "Formik",
+            "Yup",
+            "Forms",
+            "Code Challenge"
+          ],
+          "prerequisites": [
+            "formik_basics",
+            "yup_basics"
+          ],
+          "complexity": 6,
+          "interviewFrequency": 7,
+          "learningPath": "intermediate",
+          "startingCode": "import { Formik, Form, Field, ErrorMessage } from 'formik';\nimport * as Yup from 'yup';\n\nconst validationSchema = Yup.object({\n  name: Yup.string().required('Required'),\n});\n\nfunction MyFormikForm() {\n  return (\n    <Formik\n      initialValues={{ name: '' }}\n      validationSchema={validationSchema}\n      onSubmit={(values) => {\n        console.log(values);\n      }}\n    >\n      {() => (\n        <Form>\n          <div>\n            <label htmlFor=\"name\">Name:</label>\n            <Field type=\"text\" name=\"name\" />\n            <ErrorMessage name=\"name\" component=\"div\" className=\"error\" />\n          </div>\n          <button type=\"submit\">Submit</button>\n        </Form>\n      )}\n    </Formik>\n  );\n}\n",
+          "solutionCode": "import { Formik, Form, Field, ErrorMessage } from 'formik';\nimport * as Yup from 'yup';\n\nconst validationSchema = Yup.object({\n  name: Yup.string().required('Name is required'),\n  age: Yup.number()\n    .required('Age is required')\n    .min(18, 'Must be at least 18 years old')\n    .integer('Age must be an integer')\n    .typeError('Age must be a number'), // Handle non-numeric input\n});\n\nfunction MyFormikForm() {\n  return (\n    <Formik\n      initialValues={{ name: '', age: '' }} // Add 'age' to initialValues\n      validationSchema={validationSchema}\n      onSubmit={(values) => {\n        console.log('Form submitted:', values);\n      }}\n    >\n      {() => (\n        <Form>\n          <div>\n            <label htmlFor=\"name\">Name:</label>\n            <Field type=\"text\" name=\"name\" id=\"name\" />\n            <ErrorMessage name=\"name\" component=\"div\" className=\"error\" />\n          </div>\n\n          <div>\n            <label htmlFor=\"age\">Age:</label>\n            <Field type=\"number\" name=\"age\" id=\"age\" /> {/* Use type=\"number\" */}\n            <ErrorMessage name=\"age\" component=\"div\" className=\"error\" />\n          </div>\n\n          <button type=\"submit\">Submit</button>\n        </Form>\n      )}\n    </Formik>\n  );\n}\n"
+        },
+        {
+          "id": "question_formik_workflow_open_4",
+          "topic": "Form Management with Formik",
+          "level": "hard",
+          "type": "open",
+          "question": "Describe the typical workflow of a form built with Formik, from user interaction (typing in a field) to successful submission, highlighting how Formik handles validation and state changes throughout the process.",
+          "answer": "The typical workflow of a Formik form is as follows:\n\n1.  **Initialization**: When the component mounts, Formik initializes its internal state with `initialValues` and sets up the validation schema provided by `validationSchema` (or `validate` function). All fields are initially considered untouched and not dirty.\n2.  **User Interaction (Typing)**:\n    *   When a user types in a `Field` component, Formik's internal `handleChange` (automatically bound by `Field`) updates the corresponding field's value in Formik's state.\n    *   Formik then re-runs validation based on its configured strategy (e.g., on change, on blur, on submit). If `validationSchema` is provided, Yup will validate the updated field (and potentially other related fields).\n    *   If there are validation errors, Formik updates its internal `errors` object. It also marks the field as 'dirty' (value changed) and 'touched' (user interacted).\n3.  **Displaying Errors**: `ErrorMessage` components listen for changes in the `errors` and `touched` objects. An `ErrorMessage` for a field (`name`) will only display its content if `errors[name]` exists AND `touched[name]` is `true`, preventing errors from showing before the user has interacted with the field.\n4.  **User Interaction (Blurring)**:\n    *   When a user leaves a `Field`, Formik's internal `handleBlur` (automatically bound by `Field`) marks the field as `touched`.\n    *   Validation may be re-triggered on blur, similar to `onChange`, leading to error messages appearing if the field is invalid.\n5.  **Submission Attempt**: When the user clicks the submit button (within a `Form` component or explicitly calling `handleSubmit()`):\n    *   Formik first runs a full form validation against all fields.\n    *   If there are any errors, `onSubmit` is *not* called. Instead, Formik updates its `errors` object and marks all fields as `touched` (so all applicable error messages appear).\n    *   If the form is valid (no errors), Formik sets `isSubmitting` to `true` and then calls the `onSubmit` handler provided to the `Formik` component.\n6.  **`onSubmit` Execution**: Inside the `onSubmit` handler, you typically perform side effects like sending data to an API. This function receives `values` (the current form data) and a `formikBag` object (containing utilities like `setSubmitting`, `resetForm`, etc.).\n7.  **Post-Submission**: After your asynchronous `onSubmit` logic completes (e.g., an API call returns), you typically call `setSubmitting(false)` from the `formikBag` to re-enable the submit button. You might also call `resetForm()` to clear the form fields for another submission.",
+          "options": [],
+          "analysisPoints": [
+            "Provides a step-by-step breakdown of the form lifecycle.",
+            "Details how Formik manages state, validation, and error display throughout.",
+            "Explains the role of `isSubmitting`, `touched`, `dirty`, `errors` objects.",
+            "Demonstrates a deep understanding of Formik's internal mechanisms."
+          ],
+          "keyConcepts": [
+            "Formik Workflow",
+            "Form State",
+            "Validation Lifecycle",
+            "Yup Integration",
+            "Form Submission Flow",
+            "Touched/Dirty State"
+          ],
+          "evaluationCriteria": [
+            "Comprehensive and accurate description",
+            "Logical flow of events",
+            "Correct use of Formik terminology"
+          ],
+          "example": "",
+          "tags": [
+            "Formik",
+            "Forms",
+            "Workflow",
+            "Validation",
+            "State Management",
+            "Open-Ended"
+          ],
+          "prerequisites": [
+            "formik_basics",
+            "yup_basics"
+          ],
+          "complexity": 8,
+          "interviewFrequency": 9,
+          "learningPath": "advanced"
+        },
+        {
+          "id": "question_formik_flashcard_3",
+          "topic": "Form Management with Formik",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "What validation library is commonly used with Formik?",
+          "answer": "Yup",
+          "options": [],
+          "analysisPoints": [
+            "Tests recall of common Formik ecosystem tools."
+          ],
+          "keyConcepts": [
+            "Formik",
+            "Validation",
+            "Yup"
+          ],
+          "evaluationCriteria": [
+            "Direct recall"
+          ],
+          "example": "",
+          "tags": [
+            "Formik",
+            "Validation",
+            "Yup",
+            "Flashcard"
+          ],
+          "prerequisites": [
+            "formik_basics"
+          ],
+          "complexity": 3,
+          "interviewFrequency": 7,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_formik_flashcard_4",
+          "topic": "Form Management with Formik",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "Which prop of the `Formik` component defines the initial values for the form fields?",
+          "answer": "`initialValues`",
+          "options": [],
+          "analysisPoints": [
+            "Tests recall of basic Formik component props."
+          ],
+          "keyConcepts": [
+            "Formik",
+            "initialValues",
+            "Form State"
+          ],
+          "evaluationCriteria": [
+            "Direct recall"
+          ],
+          "example": "",
+          "tags": [
+            "Formik",
+            "Forms",
+            "Flashcard"
+          ],
+          "prerequisites": [
+            "formik_basics"
+          ],
+          "complexity": 3,
+          "interviewFrequency": 6,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_formik_redux_performance_mcq_7",
+          "topic": "Formik vs. Redux Form Comparison",
+          "level": "medium",
+          "type": "mcq",
+          "question": "Regarding performance in large applications with many form fields, which of the following statements accurately describes the difference between Formik and Redux Form?",
+          "answer": "Formik generally offers better performance because it handles form state locally within the component, avoiding global Redux store updates on every keystroke.",
+          "options": [
+            "Redux Form performs better as it leverages the optimized Redux store for state changes.",
+            "Formik generally offers better performance because it handles form state locally within the component, avoiding global Redux store updates on every keystroke.",
+            "Both libraries have similar performance profiles, as they both use React's reconciliation process efficiently.",
+            "Performance heavily depends on the validation library used, not the form library itself."
+          ],
+          "analysisPoints": [
+            "Correctly identifies the performance advantage of Formik.",
+            "Explains the underlying reason: local vs. global state management.",
+            "Highlights the impact of Redux Form's architecture (calling reducer on every keystroke).",
+            "Refutes common misconceptions about performance."
+          ],
+          "keyConcepts": [
+            "Formik",
+            "Redux Form",
+            "Performance",
+            "State Management",
+            "Redux"
+          ],
+          "evaluationCriteria": [
+            "Understanding of architectural trade-offs",
+            "Knowledge of performance implications"
+          ],
+          "example": "Redux Form, by design, stores form state in the Redux store. This means every input change triggers a Redux action dispatch, which then updates the Redux store, causing the entire Redux reducer tree to be re-evaluated. For large applications with many active forms or frequent input, this can lead to noticeable input latency and performance degradation. Formik, conversely, keeps its form state within the component's local state, avoiding these global Redux updates and resulting in smoother, faster interactions.",
+          "tags": [
+            "Formik",
+            "Redux Form",
+            "Performance",
+            "State Management",
+            "MCQ"
+          ],
+          "prerequisites": [
+            "redux_basics",
+            "react_forms"
+          ],
+          "complexity": 7,
+          "interviewFrequency": 8,
+          "learningPath": "advanced"
+        },
+        {
+          "id": "question_formik_redux_state_mcq_8",
+          "topic": "Formik vs. Redux Form Comparison",
+          "level": "easy",
+          "type": "mcq",
+          "question": "Where does Formik primarily store its form state?",
+          "answer": "Locally within the component where it's used.",
+          "options": [
+            "In the Redux store.",
+            "In the browser's local storage.",
+            "Locally within the component where it's used.",
+            "In a global context API provider."
+          ],
+          "analysisPoints": [
+            "Tests fundamental knowledge of Formik's state management approach.",
+            "Distinguishes it from Redux Form's approach."
+          ],
+          "keyConcepts": [
+            "Formik",
+            "State Storage",
+            "Local State",
+            "Redux Form"
+          ],
+          "evaluationCriteria": [
+            "Recall of state management strategy"
+          ],
+          "example": "Formik manages form state internally using React's own state mechanisms (like `useState` or a reducer pattern internally) within the `Formik` component, rather than dispatching actions to a global store like Redux. This keeps form data encapsulated and prevents unnecessary global re-renders.",
+          "tags": [
+            "Formik",
+            "State Management",
+            "Forms",
+            "MCQ"
+          ],
+          "prerequisites": [
+            "formik_basics"
+          ],
+          "complexity": 4,
+          "interviewFrequency": 7,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_formik_redux_bundle_mcq_9",
+          "topic": "Formik vs. Redux Form Comparison",
+          "level": "easy",
+          "type": "mcq",
+          "question": "Which form library, Formik or Redux Form, typically has a smaller bundle size, and why is this a relevant consideration?",
+          "answer": "Formik has a smaller bundle size because it has a simpler API and fewer dependencies, making the application load faster.",
+          "options": [
+            "Redux Form has a smaller bundle size because it relies on Redux's core libraries.",
+            "Formik has a smaller bundle size because it has a simpler API and fewer dependencies, making the application load faster.",
+            "Both libraries have negligible bundle size differences, so it's not a relevant consideration.",
+            "Bundle size is only relevant for server-side rendering, not client-side applications."
+          ],
+          "analysisPoints": [
+            "Correctly identifies Formik's smaller bundle size.",
+            "Explains why bundle size is important (loading speed).",
+            "Compares the complexity/dependencies of the two libraries."
+          ],
+          "keyConcepts": [
+            "Formik",
+            "Redux Form",
+            "Bundle Size",
+            "Performance Optimization",
+            "Web Performance"
+          ],
+          "evaluationCriteria": [
+            "Knowledge of library characteristics",
+            "Understanding of web performance factors"
+          ],
+          "example": "Formik's minified gzipped size is approximately 12.7 kB, while Redux Form is around 22.5 kB. A smaller bundle size means less data needs to be downloaded by the user's browser, leading to faster initial page loads and better user experience, especially on slower networks or mobile devices.",
+          "tags": [
+            "Formik",
+            "Redux Form",
+            "Bundle Size",
+            "Performance",
+            "MCQ"
+          ],
+          "prerequisites": [
+            "web_performance_basics"
+          ],
+          "complexity": 5,
+          "interviewFrequency": 6,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_formik_redux_choice_open_5",
+          "topic": "Formik vs. Redux Form Comparison",
+          "level": "hard",
+          "type": "open",
+          "question": "You are leading the development of a new React application. The team is deciding between Formik and Redux Form for handling forms. The application is a single-page application (SPA) with moderate complexity, and state management for core application data is being handled by a custom Context API implementation, NOT Redux. Which library would you recommend and why, focusing on the trade-offs?",
+          "answer": "In this scenario, I would strongly recommend **Formik**.\n\n**Reasons for Formik:**\n1.  **Alignment with Existing State Management**: The application uses a custom Context API, not Redux. Formik's design philosophy aligns better here as it manages form state locally within components, avoiding the overhead and integration complexity of introducing Redux just for forms.\n2.  **Performance**: Formik handles state changes locally, meaning form updates (like keystrokes) do not trigger global state updates or reducer calls. This leads to superior performance, especially for forms with many fields or high interaction frequency, as it avoids unnecessary re-renders associated with a global store.\n3.  **Simplicity and Bundle Size**: Formik has a simpler API and significantly less boilerplate compared to Redux Form. Its smaller bundle size (approx. 12.7 kB gzipped) contributes to faster application loading times. This simplicity translates to quicker development, easier maintenance, and a gentler learning curve for new team members.\n4.  **Purpose-Built**: Formik is purpose-built for form logic, providing abstractions for validation, submission, and error display without dictating a specific global state management solution.\n\n**Why NOT Redux Form:**\n1.  **Unnecessary Redux Dependency**: Introducing Redux Form would mean bringing in Redux and its ecosystem (actions, reducers, store configuration) purely for forms, even though the application already uses Context API for global state. This adds significant complexity and a larger bundle size without leveraging an existing Redux setup.\n2.  **Performance Overhead**: As discussed, Redux Form updates the Redux store on every keystroke, which can lead to performance issues in large forms or frequently used forms due to global reducer calls, even if the main application state is not in Redux.\n3.  **Increased Boilerplate**: Redux Form requires more boilerplate code to set up forms due to its Redux integration, making the codebase more verbose for what is often a local concern.\n\n**Trade-offs Considered:**\n*   **Formik**: The main 'trade-off' is that if, in the future, there's a strong *architectural* need to expose form data globally *during* the filling process (which is rare for typical forms), it would require manually lifting state or using Context API for that specific data. However, for most form-related data, it's submitted once, and then the final data is processed, not the intermediate state.\n*   **Redux Form**: The trade-off is sacrificing simplicity, performance, and bundle size for a tight integration with Redux, which is not present in this application's current architecture. The benefits of Redux Form are mainly realized when Redux is *already* the primary state management solution and forms need to deeply interact with that global state in real-time before submission.\n\n**Conclusion:** Given the existing Context API usage and the general advantages of Formik (performance, simplicity, smaller size), it is the superior choice for this new application.",
+          "options": [],
+          "analysisPoints": [
+            "Recommends Formik with strong, justified arguments.",
+            "Compares both libraries based on state management, performance, bundle size, and complexity.",
+            "Specifically addresses the context of a Context API-based application.",
+            "Demonstrates critical thinking about architectural choices and trade-offs.",
+            "Explains why Redux Form would be a poor fit in this specific scenario."
+          ],
+          "keyConcepts": [
+            "Formik",
+            "Redux Form",
+            "Architectural Decisions",
+            "State Management",
+            "Performance",
+            "Bundle Size",
+            "Context API"
+          ],
+          "evaluationCriteria": [
+            "Sound reasoning and justification",
+            "Comprehensive comparison",
+            "Ability to apply knowledge to a scenario"
+          ],
+          "example": "",
+          "tags": [
+            "Formik",
+            "Redux Form",
+            "Architecture",
+            "Decision Making",
+            "Open-Ended"
+          ],
+          "prerequisites": [
+            "redux_basics",
+            "formik_basics",
+            "react_context_api"
+          ],
+          "complexity": 8,
+          "interviewFrequency": 9,
+          "learningPath": "expert"
+        },
+        {
+          "id": "question_formik_redux_tradeoffs_open_6",
+          "topic": "Formik vs. Redux Form Comparison",
+          "level": "hard",
+          "type": "open",
+          "question": "While Formik is generally preferred, describe a specific scenario or set of requirements where Redux Form might still be a more justifiable choice over Formik.",
+          "answer": "While Formik excels in most scenarios due to its performance, simplicity, and smaller footprint, Redux Form might be a more justifiable choice in specific situations:\n\n1.  **Existing, Deeply Integrated Redux Ecosystem**: If the application is already heavily invested in Redux for global state management, and there's a strong architectural requirement to integrate form state directly into the Redux store (e.g., to share form values across different, disconnected parts of the application *before submission*, or to persist form state globally on navigation).\n2.  **Server-Side Rendering (SSR) with Hydration of Form State**: In complex SSR applications where initial form values might be pre-filled from the server and the intermediate form state needs to be serialized/deserialized efficiently as part of the overall Redux state hydration process.\n3.  **Complex Cross-Form / Cross-Component State Dependencies**: If the logic dictates that the form's intermediate values need to influence or be influenced by other non-form-related global application state *in real-time*, and this interaction is naturally handled through Redux's centralized store and selectors. For example, if a selection in one form field needs to immediately update a dashboard component elsewhere on the page, and that dashboard component already consumes data from Redux.\n4.  **Team Familiarity/Expertise**: If the development team has deep, established expertise and a strong preference for Redux Form, and the overheads (bundle size, performance for simple forms) are deemed acceptable given the team's efficiency and existing tooling around Redux. (This is less an architectural advantage and more a pragmatic, short-term project consideration).\n\nIn essence, Redux Form's primary strength lies in its tight integration with Redux. If an application's existing architecture and complex real-time global state needs genuinely benefit from forms being part of the global Redux state tree, then Redux Form could be considered. However, even in these cases, developers often find ways to manage form state locally with Formik and only dispatch the final form values to Redux upon successful submission, thus avoiding the performance penalties of Redux Form.",
+          "options": [],
+          "analysisPoints": [
+            "Identifies specific, nuanced scenarios where Redux Form's strengths might apply.",
+            "Focuses on Redux integration and global state needs.",
+            "Acknowledges the general preference for Formik while providing counter-examples.",
+            "Demonstrates an advanced understanding of state management patterns."
+          ],
+          "keyConcepts": [
+            "Redux Form",
+            "Formik",
+            "Redux Integration",
+            "Global State Management",
+            "SSR",
+            "Architectural Patterns"
+          ],
+          "evaluationCriteria": [
+            "Ability to identify niche use cases",
+            "Deep understanding of Redux architecture",
+            "Balanced perspective on library choice"
+          ],
+          "example": "",
+          "tags": [
+            "Formik",
+            "Redux Form",
+            "Architecture",
+            "Decision Making",
+            "Open-Ended"
+          ],
+          "prerequisites": [
+            "redux_advanced",
+            "form_libraries_comparison"
+          ],
+          "complexity": 9,
+          "interviewFrequency": 7,
+          "learningPath": "expert"
+        },
+        {
+          "id": "question_formik_redux_flashcard_5",
+          "topic": "Formik vs. Redux Form Comparison",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "Which form library, Formik or Redux Form, typically causes more re-renders by calling the entire Redux reducer on every keystroke?",
+          "answer": "Redux Form",
+          "options": [],
+          "analysisPoints": [
+            "Tests recall of performance characteristics."
+          ],
+          "keyConcepts": [
+            "Formik",
+            "Redux Form",
+            "Performance",
+            "Re-renders"
+          ],
+          "evaluationCriteria": [
+            "Direct recall of comparative performance"
+          ],
+          "example": "",
+          "tags": [
+            "Formik",
+            "Redux Form",
+            "Performance",
+            "Flashcard"
+          ],
+          "prerequisites": [
+            "redux_basics"
+          ],
+          "complexity": 4,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_formik_redux_flashcard_6",
+          "topic": "Formik vs. Redux Form Comparison",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "True or False: Formik is generally recommended for applications already using Redux extensively.",
+          "answer": "False. Formik is generally recommended for most React applications because it manages state locally and has better performance/smaller bundle size. Redux Form is only potentially preferred if an application is *already* using Redux extensively AND requires forms to be deeply integrated into the Redux store for global state management.",
+          "options": [],
+          "analysisPoints": [
+            "Tests understanding of use cases and recommendations.",
+            "Clarifies the nuances of library choice based on existing architecture."
+          ],
+          "keyConcepts": [
+            "Formik",
+            "Redux Form",
+            "Use Cases",
+            "Redux Integration"
+          ],
+          "evaluationCriteria": [
+            "Accurate understanding of library suitability"
+          ],
+          "example": "",
+          "tags": [
+            "Formik",
+            "Redux Form",
+            "Use Cases",
+            "Flashcard"
+          ],
+          "prerequisites": [
+            "redux_basics",
+            "form_libraries_comparison"
+          ],
+          "complexity": 5,
+          "interviewFrequency": 7,
+          "learningPath": "intermediate"
+        }
+      ],
+      "tasks": [
+        {
+          "id": "task_basic_contact_form_useref",
+          "title": "Build a Basic Contact Form with useRef",
+          "description": "\nImplement a simple contact form in React using the `useRef` hook to manage input values. The form should include fields for 'Name', 'Email', and 'Message'. On submission, log the current values of these fields to the console and then clear the input fields.\n\n**Requirements:**\n1.  Create a React functional component `ContactFormRef`.\n2.  Render three input fields: a text input for Name, an email input for Email, and a textarea for Message.\n3.  Use `useRef` to create a separate ref for each input field.\n4.  Attach the respective refs to their corresponding input elements using the `ref` prop.\n5.  Implement a `handleSubmit` function that:\n    *   Prevents the default form submission behavior.\n    *   Accesses the current value of each input using its ref (e.g., `nameRef.current.value`).\n    *   Logs an object containing all three values to the console.\n    *   Clears each input field by setting its `current.value` to an empty string.\n6.  Ensure the submit button's type is `\"submit\"`.\n",
+          "difficulty": "medium",
+          "startingCode": "import React, { useRef } from 'react';\n\nfunction ContactFormRef() {\n  // TODO: Create refs here\n\n  const handleSubmit = (event) => {\n    // TODO: Implement submission logic\n  };\n\n  return (\n    <form onSubmit={handleSubmit}>\n      <div>\n        <label htmlFor=\"name\">Name:</label>\n        {/* TODO: Add input for name with ref */}\n      </div>\n      <div>\n        <label htmlFor=\"email\">Email:</label>\n        {/* TODO: Add input for email with ref */}\n      </div>\n      <div>\n        <label htmlFor=\"message\">Message:</label>\n        {/* TODO: Add textarea for message with ref */}\n      </div>\n      <button type=\"submit\">Submit</button>\n    </form>\n  );\n}\n\nexport default ContactFormRef;\n",
+          "solutionCode": "import React, { useRef } from 'react';\n\nfunction ContactFormRef() {\n  const nameRef = useRef(null);\n  const emailRef = useRef(null);\n  const messageRef = useRef(null);\n\n  const handleSubmit = (event) => {\n    event.preventDefault(); // Prevent default form submission\n\n    const name = nameRef.current.value;\n    const email = emailRef.current.value;\n    const message = messageRef.current.value;\n\n    console.log('Form Submitted:', {\n      name,\n      email,\n      message,\n    });\n\n    // Clear input fields\n    nameRef.current.value = '';\n    emailRef.current.value = '';\n    messageRef.current.value = '';\n  };\n\n  return (\n    <form onSubmit={handleSubmit}>\n      <div>\n        <label htmlFor=\"name\">Name:</label>\n        <input\n          id=\"name\"\n          name=\"name\"\n          type=\"text\"\n          ref={nameRef}\n          defaultValue=\"\"\n        />\n      </div>\n      <div>\n        <label htmlFor=\"email\">Email:</label>\n        <input\n          id=\"email\"\n          name=\"email\"\n          type=\"email\"\n          ref={emailRef}\n          defaultValue=\"\"\n        />\n      </div>\n      <div>\n        <label htmlFor=\"message\">Message:</label>\n        <textarea\n          id=\"message\"\n          name=\"message\"\n          ref={messageRef}\n          defaultValue=\"\"\n        />\n      </div>\n      <button type=\"submit\">Submit</button>\n    </form>\n  );\n}\n\nexport default ContactFormRef;\n",
+          "testCases": [
+            "**Test Case 1: Valid Submission**\n\n**Input:**\n- Name: \"John Doe\"\n- Email: \"john.doe@example.com\"\n- Message: \"Hello, this is a test message.\"\n\n**Expected Output (console.log):**\n```\nForm Submitted: { name: \"John Doe\", email: \"john.doe@example.com\", message: \"Hello, this is a test message.\" }\n```\n\n**Post-submission State:**\n- Name input field should be empty.\n- Email input field should be empty.\n- Message textarea should be empty.\n\n**Test Case 2: Empty Submission**\n\n**Input:**\n- All fields left empty.\n\n**Expected Output (console.log):**\n```\nForm Submitted: { name: \"\", email: \"\", message: \"\" }\n```\n\n**Post-submission State:**\n- All input fields should remain empty.",
+            "**Test Case 3: Submission with Partial Data**\n\n**Input:**\n- Name: \"Jane Smith\"\n- Email: \"\"\n- Message: \"Partial data test.\"\n\n**Expected Output (console.log):**\n```\nForm Submitted: { name: \"Jane Smith\", email: \"\", message: \"Partial data test.\" }\n```\n\n**Post-submission State:**\n- Name input field should be empty.\n- Email input field should be empty.\n- Message textarea should be empty."
+          ],
+          "hints": [
+            "Remember to call `event.preventDefault()` in your `handleSubmit` function.",
+            "To clear the input fields, directly modify the `value` property of the `current` DOM element, e.g., `myRef.current.value = '';`",
+            "Consider using `defaultValue=\"\"` for your inputs for consistency, though it's not strictly necessary for clearing."
+          ],
+          "tags": [
+            "React",
+            "Forms",
+            "useRef",
+            "Uncontrolled Components",
+            "DOM Manipulation"
+          ],
+          "timeEstimate": 45,
+          "prerequisites": [
+            "react_functional_components",
+            "react_hooks_basics",
+            "html_forms_basics"
+          ],
+          "complexity": 6,
+          "interviewRelevance": 7,
+          "learningPath": "intermediate",
+          "relatedConcepts": [
+            "theory_basic_react_forms_useref"
+          ]
+        },
+        {
+          "id": "task_enhanced_formik_registration",
+          "title": "Implement an Enhanced Formik Registration Form with Yup Validation",
+          "description": "\nBuild a user registration form using Formik and Yup for robust validation. The form should include a username, password, and confirm password fields with specific validation rules. Display error messages and disable the submit button appropriately.\n\n**Requirements:**\n1.  Create a React functional component `RegistrationFormFormik`.\n2.  Set up `Formik` with the following `initialValues`:\n    *   `username: ''`\n    *   `password: ''`\n    *   `confirmPassword: ''`\n3.  Define a `validationSchema` using `Yup.object()` with the following rules:\n    *   **Username**: Required, minimum 4 characters.\n    *   **Password**: Required, minimum 6 characters, must contain at least one uppercase letter, one lowercase letter, and one number.\n    *   **Confirm Password**: Required, must match the `password` field.\n4.  Render the form using Formik's `Form`, `Field`, and `ErrorMessage` components.\n5.  For each field, display its `ErrorMessage` when validation fails and the field has been touched.\n6.  In the `onSubmit` handler, simulate an asynchronous submission (e.g., with `setTimeout`) and log the form values. Ensure `setSubmitting(false)` is called after the async operation.\n7.  Disable the submit button while `isSubmitting` is true or if the form is invalid (using `isValid` and `dirty` or `isSubmitting`).\n",
+          "difficulty": "hard",
+          "startingCode": "import React from 'react';\nimport { Formik, Form, Field, ErrorMessage } from 'formik';\nimport * as Yup from 'yup';\n\nconst validationSchema = Yup.object({\n  // TODO: Define validation rules for username, password, confirmPassword\n});\n\nfunction RegistrationFormFormik() {\n  return (\n    <Formik\n      initialValues={{ /* TODO: Add initial values */ }}\n      validationSchema={validationSchema}\n      onSubmit={(values, { setSubmitting, resetForm }) => {\n        // TODO: Implement submission logic\n      }}\n    >\n      {({ isSubmitting, isValid, dirty }) => (\n        <Form>\n          {/* TODO: Add username, password, confirmPassword fields with labels and ErrorMessages */}\n\n          <button type=\"submit\" disabled={isSubmitting || !isValid || !dirty}> {/* Example disable condition */}\n            {isSubmitting ? 'Registering...' : 'Register'}\n          </button>\n        </Form>\n      )}\n    </Formik>\n  );\n}\n\nexport default RegistrationFormFormik;\n",
+          "solutionCode": "import React from 'react';\nimport { Formik, Form, Field, ErrorMessage } from 'formik';\nimport * as Yup from 'yup';\n\nconst validationSchema = Yup.object({\n  username: Yup.string()\n    .required('Username is required')\n    .min(4, 'Username must be at least 4 characters long'),\n  password: Yup.string()\n    .required('Password is required')\n    .min(6, 'Password must be at least 6 characters long')\n    .matches(/[A-Z]/, 'Password must contain at least one uppercase letter')\n    .matches(/[a-z]/, 'Password must contain at least one lowercase letter')\n    .matches(/\\d/, 'Password must contain at least one number'),\n  confirmPassword: Yup.string()\n    .required('Confirm Password is required')\n    .oneOf([Yup.ref('password'), null], 'Passwords must match')\n});\n\nfunction RegistrationFormFormik() {\n  return (\n    <Formik\n      initialValues={{ username: '', password: '', confirmPassword: '' }}\n      validationSchema={validationSchema}\n      onSubmit={(values, { setSubmitting, resetForm }) => {\n        setTimeout(() => {\n          console.log('Registration submitted:', values);\n          setSubmitting(false);\n          resetForm(); // Clear form after successful submission\n        }, 1000); // Simulate API call\n      }}\n    >\n      {({ isSubmitting, isValid, dirty }) => (\n        <Form>\n          <div>\n            <label htmlFor=\"username\">Username:</label>\n            <Field type=\"text\" name=\"username\" id=\"username\" />\n            <ErrorMessage name=\"username\" component=\"div\" className=\"error\" />\n          </div>\n\n          <div>\n            <label htmlFor=\"password\">Password:</label>\n            <Field type=\"password\" name=\"password\" id=\"password\" />\n            <ErrorMessage name=\"password\" component=\"div\" className=\"error\" />\n          </div>\n\n          <div>\n            <label htmlFor=\"confirmPassword\">Confirm Password:</label>\n            <Field type=\"password\" name=\"confirmPassword\" id=\"confirmPassword\" />\n            <ErrorMessage name=\"confirmPassword\" component=\"div\" className=\"error\" />\n          </div>\n\n          <button type=\"submit\" disabled={isSubmitting || !isValid || !dirty}> \n            {isSubmitting ? 'Registering...' : 'Register'}\n          </button>\n        </Form>\n      )}\n    </Formik>\n  );\n}\n\nexport default RegistrationFormFormik;\n",
+          "testCases": [
+            "**Test Case 1: All Fields Valid**\n\n**Input:**\n- Username: \"TestUser\"\n- Password: \"Passw0rd1\"\n- Confirm Password: \"Passw0rd1\"\n\n**Expected Behavior:**\n- Submit button enabled.\n- On submit, `console.log` shows the values.\n- Submit button shows \"Registering...\" then reverts to \"Register\" and form clears.\n\n**Test Case 2: Missing Required Field (Username)**\n\n**Input:**\n- Username: \"\"\n- Password: \"Passw0rd1\"\n- Confirm Password: \"Passw0rd1\"\n\n**Expected Behavior:**\n- \"Username is required\" error message appears under Username field.\n- Submit button remains disabled.\n\n**Test Case 3: Password Too Short**\n\n**Input:**\n- Username: \"TestUser\"\n- Password: \"Pass1\"\n- Confirm Password: \"Pass1\"\n\n**Expected Behavior:**\n- \"Password must be at least 6 characters long\" error message appears.\n- Submit button disabled.\n\n**Test Case 4: Password Complexity Failure (Missing Uppercase)**\n\n**Input:**\n- Username: \"TestUser\"\n- Password: \"password1\"\n- Confirm Password: \"password1\"\n\n**Expected Behavior:**\n- \"Password must contain at least one uppercase letter\" error message appears.\n- Submit button disabled.\n\n**Test Case 5: Passwords Do Not Match**\n\n**Input:**\n- Username: \"TestUser\"\n- Password: \"Passw0rd1\"\n- Confirm Password: \"Passw0rd2\"\n\n**Expected Behavior:**\n- \"Passwords must match\" error message appears under Confirm Password field.\n- Submit button disabled.",
+            "**Test Case 6: Form Invalid on Load**\n\n**Input:**\n- No user interaction, form initially rendered.\n\n**Expected Behavior:**\n- No error messages should be visible (as fields are not touched).\n- Submit button should be disabled (due to `!isValid || !dirty`).\n\n**Test Case 7: Subsequent Valid Submission**\n\n**Precondition:** User submitted an invalid form, fixed errors, and submitted successfully.\n\n**Expected Behavior:**\n- Form clears, allowing for a new submission.",
+            "**Test Case 8: Field Type Mismatch (e.g., trying to use type=\"text\" for password for visual debug)**\n\n**Note**: The solution uses `type=\"password\"`, but if one were to try `type=\"text\"` for a password field for debugging, ensure the validation still works correctly even if the visual masking is removed.\n\n**Input:**\n- Username: \"TestUser\"\n- Password: \"P1\"\n- Confirm Password: \"P1\"\n\n**Expected Behavior:**\n- \"Password must be at least 6 characters long\" error appears."
+          ],
+          "hints": [
+            "For matching passwords, Yup provides `Yup.ref('fieldName')` and `oneOf()` method.",
+            "Remember to include `id` attributes for your `Field` components and ensure `htmlFor` on labels matches for accessibility.",
+            "The `disabled` prop on the button should consider `isSubmitting` AND `!isValid` (form is not valid) AND `!dirty` (form hasn't been changed from initial state yet, preventing submission of an empty form that is technically 'valid' if all fields are optional). `isSubmitting || !isValid || !dirty` is a robust condition.",
+            "Use `setTimeout` in the `onSubmit` to simulate an asynchronous API call, and remember to call `setSubmitting(false)` after your simulated call completes."
+          ],
+          "tags": [
+            "React",
+            "Formik",
+            "Yup",
+            "Forms",
+            "Validation",
+            "User Registration"
+          ],
+          "timeEstimate": 90,
+          "prerequisites": [
+            "formik_basics",
+            "yup_basics",
+            "javascript_async_patterns"
+          ],
+          "complexity": 8,
+          "interviewRelevance": 9,
+          "learningPath": "advanced",
+          "relatedConcepts": [
+            "theory_formik_library"
+          ]
+        },
+        {
+          "id": "task_form_library_choice_analysis",
+          "title": "Analyze and Justify Form Library Choice for a Given Scenario",
+          "description": "\nYou are a senior frontend architect. A new project requires building several complex forms. The backend will be a REST API, and the frontend will be a React SPA. The team is currently evaluating different libraries for form management.\n\n**Scenario:** The application is a new dashboard for managing large datasets. It will have several forms:\n1.  A \"Create New Record\" form with 15-20 fields, including nested objects and arrays.\n2.  A \"Filter Data\" form used frequently on a dashboard, with 5-10 fields, where real-time input responsiveness is critical for filtering results.\n3.  The application **does not** use Redux for its global state management; instead, it relies on a combination of React Context API and `useReducer` for global state.\n\nBased on this scenario, analyze the suitability of **Formik** and **Redux Form**. Your analysis should culminate in a recommendation for one library, thoroughly justifying your choice by comparing features relevant to the scenario.\n\n**Requirements:**\n1.  **Comparison Points**: Discuss how each library handles:\n    *   State Management (local vs. global)\n    *   Performance (especially for high-interaction forms)\n    *   Bundle Size\n    *   Integration with existing (non-Redux) state management solutions\n    *   Complexity/Developer Experience\n2.  **Scenario Application**: Relate each comparison point directly to the given scenario (e.g., how a 15-20 field form impacts performance).\n3.  **Recommendation and Justification**: Clearly state which library you recommend and provide a detailed justification, weighing the pros and cons of each in the context of the scenario.\n",
+          "difficulty": "hard",
+          "startingCode": "/* \nThis is a theoretical task; no executable code is required. \nProvide your answer in a detailed markdown comment block or a string. \n*/\n\nconst analysisAndRecommendation = `\n## Form Library Analysis and Recommendation\n\n### Scenario Overview:\n- New dashboard React SPA\n- REST API backend\n- Global state: React Context API + useReducer (NOT Redux)\n- Forms:\n  - \"Create New Record\": 15-20 fields (nested objects/arrays)\n  - \"Filter Data\": 5-10 fields, real-time responsiveness critical\n\n### Analysis of Formik:\n\n### Analysis of Redux Form:\n\n### Recommendation and Justification:\n\n`;\n\n// console.log(analysisAndRecommendation);\n",
+          "solutionCode": "/* \nThis is a theoretical task; no executable code is required. \nProvide your answer in a detailed markdown comment block or a string. \n*/\n\nconst analysisAndRecommendation = `\n## Form Library Analysis and Recommendation\n\n### Scenario Overview:\n- New dashboard React SPA for managing large datasets.\n- Backend: REST API.\n- Global state: React Context API + useReducer (NOT Redux).\n- Forms:\n  - \"Create New Record\" (15-20 fields, nested objects/arrays).\n  - \"Filter Data\" (5-10 fields, real-time input responsiveness critical).\n\n### Analysis of Formik:\n\n**1. State Management (local vs. global):**\n   Formik manages form state locally within the component tree. This aligns well with React's component-level state and also with the existing Context API + useReducer pattern, where specific domains of state are managed without a single, monolithic global store.\n\n**2. Performance (especially for high-interaction forms):**\n   Formik's local state management is a significant advantage. For the \"Filter Data\" form (5-10 fields, critical real-time responsiveness), Formik will perform much better because input changes only trigger re-renders of the Formik-managed component and its children, not the entire application's state tree. For the \"Create New Record\" form (15-20 fields), this also means less overhead on keystrokes, leading to a smoother user experience.\n\n**3. Bundle Size:**\n   Formik has a smaller bundle size (approx. 12.7 kB minified gzipped) compared to Redux Form. In a new SPA, keeping the initial bundle size small is crucial for faster load times, especially for a dashboard application that might be accessed frequently.\n\n**4. Integration with existing (non-Redux) state management solutions:**\n   Formik is agnostic to the global state management solution. It will integrate seamlessly with the existing Context API and useReducer setup. Final form data can be easily dispatched to the Context/Reducer once the form is submitted, without forcing the intermediate form state into the global store.\n\n**5. Complexity/Developer Experience:**\n   Formik offers a simpler, more intuitive API with less boilerplate. This will result in a faster development cycle and easier onboarding for new developers, which is valuable for a new project.\n\n### Analysis of Redux Form:\n\n**1. State Management (local vs. global):**\n   Redux Form stores form state within the Redux store. While this offers centralized state, it introduces a global dependency for what is often a local concern. It would necessitate adding Redux to the project's dependency tree and architectural setup, even though it's explicitly stated that Redux is *not* used for global state.\n\n**2. Performance (especially for high-interaction forms):**\n   This is Redux Form's biggest drawback in this scenario. Every keystroke would trigger a Redux action dispatch, causing the entire Redux reducer tree to be re-evaluated. For a 15-20 field form or the critical \"Filter Data\" form, this could lead to noticeable input latency and performance bottlenecks, directly contradicting the requirement for real-time responsiveness.\n\n**3. Bundle Size:**\n   Redux Form has a larger bundle size (approx. 22.5 kB minified gzipped). This additional size would contribute to slower initial page loads, which is undesirable for any SPA, especially one focused on data interaction.\n\n**4. Integration with existing (non-Redux) state management solutions:**\n   Integrating Redux Form without an existing Redux setup is counter-intuitive and adds unnecessary architectural complexity. It would mean introducing a separate Redux store solely for forms, which complicates debugging and state flow for the team already managing state with Context/useReducer.\n\n**5. Complexity/Developer Experience:**\n   Redux Form comes with more boilerplate and requires a deeper understanding of Redux principles (actions, reducers, selectors) for form management, increasing the learning curve and potentially slowing down development for a team not already steeped in Redux.\n\n### Recommendation and Justification:\n\nI strongly recommend **Formik** for this new dashboard application.\n\n**Justification:**\n\n1.  **Architectural Alignment**: The project explicitly uses React Context API and `useReducer` for global state. Formik's local state management approach for forms fits seamlessly into this architecture, avoiding the introduction of an unnecessary Redux dependency that would add significant complexity and a larger surface area for state management without commensurate benefits.\n2.  **Superior Performance**: The \"Filter Data\" form's critical need for real-time responsiveness, and the potential performance hit of a 15-20 field form, makes Formik the clear winner. Its local state handling prevents the global Redux store updates on every keystroke that would plague Redux Form, ensuring a smooth and responsive user experience.\n3.  **Efficiency and Simplicity**: Formik's smaller bundle size and simpler API mean faster loading times, quicker development cycles, and a better developer experience. This is crucial for a new project aiming for efficiency and maintainability.\n4.  **Focused Solution**: Formik is designed specifically to solve form-related problems efficiently. It provides all the necessary features (validation, submission, error handling) without dictating the broader application's state management paradigm.\n\nWhile Redux Form is powerful when deeply integrated into an existing Redux application where form state needs truly global accessibility *before* submission, it is an overkill and a detrimental choice for a project that doesn't use Redux and prioritizes performance and simplicity for its forms.\n\n`;\n\n// To view the analysis, uncomment the line below:\n// console.log(analysisAndRecommendation);\n",
+          "testCases": [
+            "**Test Case 1: Overall Justification**\n\n**Criteria:** Does the recommendation clearly state a choice and provide a comprehensive, well-reasoned justification covering all comparison points (state, performance, bundle size, integration, complexity)?\n\n**Expected Outcome:** The justification should convincingly argue for Formik by highlighting its benefits (local state, performance, small size, easy integration with Context/useReducer) and explain why Redux Form's downsides (global Redux dependency, performance penalty, complexity) make it unsuitable for this specific scenario.",
+            "**Test Case 2: Performance Argument Depth**\n\n**Criteria:** Does the analysis specifically address the performance impact of each library, particularly for the \"Filter Data\" form and the 15-20 field form, and explain the underlying technical reasons (local state vs. global reducer calls)?\n\n**Expected Outcome:** The response should clearly link Formik's local state to better responsiveness and Redux Form's global updates to potential latency issues for both form types.",
+            "**Test Case 3: State Management Integration**\n\n**Criteria:** How well does the analysis discuss the integration of each form library with the existing Context API/useReducer global state setup?\n\n**Expected Outcome:** The analysis should emphasize Formik's seamless integration due to its agnosticism to global state, and highlight the architectural friction of introducing Redux Form into a non-Redux ecosystem."
+          ],
+          "hints": [
+            "Think about the core architectural principle of each library: where do they prefer to store form data (local component state vs. global Redux store)?",
+            "Consider the frequency of updates in form fields (especially the 'Filter Data' form) and how each library's state management approach impacts re-renders and performance.",
+            "Evaluate the 'cost' of introducing a new major dependency (like Redux, if not already used) purely for forms.",
+            "Focus on how each library aligns (or clashes) with the existing `Context API + useReducer` global state strategy."
+          ],
+          "tags": [
+            "Formik",
+            "Redux Form",
+            "Architecture",
+            "Decision Making",
+            "State Management",
+            "Performance",
+            "Frontend Interview"
+          ],
+          "timeEstimate": 60,
+          "prerequisites": [
+            "theory_formik_vs_redux_form",
+            "react_context_api",
+            "redux_basics"
+          ],
+          "complexity": 9,
+          "interviewRelevance": 10,
+          "learningPath": "expert",
+          "relatedConcepts": [
+            "theory_formik_vs_redux_form"
+          ]
+        }
+      ]
+    }
+  }
+]

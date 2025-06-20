@@ -1,0 +1,1415 @@
+[
+  {
+    "id": "14eaab9c-4864-4090-a403-69a74653ee18",
+    "startLine": 17200,
+    "endLine": 17299,
+    "processedDate": "2025-06-17T15:52:39.259Z",
+    "content": {
+      "logicalBlockInfo": {
+        "suggestedEndLine": -1
+      },
+      "theory": [
+        {
+          "id": "theory_web_app_production_readiness",
+          "title": "Web Application Production Readiness: Build, Performance, Deployment, CI/CD, and Monitoring",
+          "content": "Preparing a web application for production involves several critical steps to ensure it is optimized, performant, reliable, and maintainable. This encompasses build processes, performance enhancements, deployment strategies, continuous integration/continuous delivery (CI/CD) pipelines, and robust monitoring and logging.\n\n## 1. Production Build Optimization\nBefore deployment, the application's source code needs to be transformed into an optimized production-ready bundle. This typically involves:\n- **Building the application**: Running build commands (e.g., `npm run build` for React/Vue/Angular) to compile source code, transpile JavaScript (e.g., TypeScript/ES6+ to ES5), and bundle assets.\n- **Environment Variables**: Configuring proper environment variables (e.g., `NODE_ENV=production`) to ensure production-specific settings are applied, such as API endpoints or feature flags.\n- **Code Splitting**: Breaking down the large JavaScript bundle into smaller chunks that can be loaded on demand. This reduces the initial load time as users only download code necessary for the current view.\n- **Tree Shaking**: Eliminating dead code (unused exports) from the final bundle. This is crucial for reducing bundle size, especially when using libraries that might include features not utilized by the application.\n\n## 2. Performance Considerations\nOptimizing application performance is crucial for user experience and SEO. Key strategies include:\n- **Caching Strategies**: Implementing HTTP caching (browser-level caching via headers like `Cache-Control`, `Expires`, `ETag`, `Last-Modified`) and Service Worker caching (programmable caching enabling offline capabilities).\n- **Content Delivery Network (CDN)**: Using a CDN for static assets (images, CSS, JS bundles) to serve content from geographically distributed servers closer to the user, reducing latency.\n- **Compression**: Enabling Brotli or Gzip compression for text-based assets (HTML, CSS, JavaScript) to reduce their transfer size over the network.\n- **Image and Font Loading Optimization**: \n    - **Image Optimization**: Compressing images, using modern formats (WebP, AVIF), responsive images (`srcset`), and lazy loading.\n    - **Font Optimization**: Self-hosting fonts, preloading critical fonts, and using `font-display: swap` to prevent invisible text during font loading.\n\n## 3. Deployment Options\nChoosing the right deployment strategy depends on application complexity, scalability needs, and budget:\n- **Static Hosting**: Ideal for single-page applications (SPAs) or static sites. Services like Netlify, Vercel, and GitHub Pages offer seamless deployment, automatic SSL, and CDN integration.\n- **Container-based Deployment (Docker + Kubernetes)**: For complex, microservices-based applications requiring high scalability and fault tolerance. Docker containers package the application and its dependencies, while Kubernetes orchestrates their deployment, scaling, and management.\n- **Platform-as-a-Service (PaaS)**: Services like Heroku or AWS Amplify abstract away infrastructure management, allowing developers to focus on code. They provide environments for various programming languages, databases, and often include CI/CD features.\n- **Server with Reverse Proxy (Nginx + Node.js)**: A common setup for server-rendered applications or APIs. Nginx acts as a reverse proxy, handling incoming requests, SSL termination, load balancing, and serving static files, while forwarding dynamic requests to a Node.js (or other backend) application.\n\n## 4. CI/CD Pipeline\nA Continuous Integration/Continuous Delivery (CI/CD) pipeline automates the software delivery process, from code commit to deployment:\n- **Automated Testing**: Running unit, integration, and end-to-end tests automatically before deployment to catch bugs early.\n- **Blue-Green Deployment Strategy**: A deployment technique that minimizes downtime by running two identical production environments (Blue and Green). New releases are deployed to the inactive environment (Green), tested, and then traffic is switched to it. The old environment (Blue) is kept as a rollback option.\n- **Rollback Capabilities**: The ability to quickly revert to a previous stable version of the application in case of issues with a new deployment. This is crucial for maintaining application availability.\n\n## 5. Monitoring and Logging\nPost-deployment, continuous monitoring and logging are essential for identifying and resolving issues, understanding user behavior, and tracking performance:\n- **Error Tracking**: Tools like Sentry or LogRocket capture and report errors in real-time, providing detailed stack traces and context to aid debugging.\n- **Analytics Implementation**: Integrating analytics platforms (e.g., Google Analytics, Mixpanel) to track user interactions, traffic sources, and conversion rates.\n- **Performance Monitoring**: Using tools (e.g., Lighthouse, WebPageTest, New Relic, Datadog) to continuously monitor application performance metrics (e.g., loading times, rendering performance, API response times) in production.\n\nThese practices collectively contribute to a robust, performant, and reliable web application ready for production environments.",
+          "examples": [
+            {
+              "id": "example_prod_build_env_vars",
+              "title": "Production Environment Variables",
+              "code": "// webpack.config.js (or similar build configuration)\nconst webpack = require('webpack');\n\nmodule.exports = {\n  mode: 'production',\n  plugins: [\n    new webpack.DefinePlugin({\n      'process.env.NODE_ENV': JSON.stringify('production'),\n      'process.env.API_BASE_URL': JSON.stringify('https://api.your-prod-domain.com')\n    })\n  ]\n};",
+              "explanation": "This Webpack configuration snippet demonstrates how to define `process.env.NODE_ENV` as 'production' and set a production-specific API base URL during the build process. This ensures that the application uses the correct configurations when deployed.",
+              "language": "javascript"
+            },
+            {
+              "id": "example_nginx_reverse_proxy",
+              "title": "Nginx Reverse Proxy Configuration",
+              "code": "# /etc/nginx/sites-available/your_app\nserver {\n    listen 80;\n    server_name your_domain.com www.your_domain.com;\n\n    location / {\n        proxy_pass http://localhost:3000; # Proxy to your Node.js app running on port 3000\n        proxy_http_version 1.1;\n        proxy_set_header Upgrade $http_upgrade;\n        proxy_set_header Connection 'upgrade';\n        proxy_set_header Host $host;\n        proxy_cache_bypass $http_upgrade;\n    }\n\n    location /static/ {\n        alias /var/www/your_app/static/;\n        expires 30d;\n        add_header Cache-Control \"public, max-age=2592000\";\n    }\n}",
+              "explanation": "This Nginx configuration sets up a reverse proxy. Requests to the root path (`/`) are forwarded to a Node.js application running on `localhost:3000`. It also includes a `location /static/` block to serve static files directly from the Nginx server with appropriate caching headers, reducing the load on the Node.js application and improving static asset delivery.",
+              "language": "nginx"
+            }
+          ],
+          "relatedQuestions": [
+            "question_web_app_prod_1",
+            "question_web_app_prod_2",
+            "question_web_app_prod_3",
+            "question_web_app_prod_4",
+            "question_web_app_prod_5",
+            "question_web_app_prod_6",
+            "question_web_app_prod_7",
+            "question_web_app_prod_8"
+          ],
+          "relatedTasks": [
+            "task_optimize_bundle_size",
+            "task_implement_cdn_caching"
+          ],
+          "tags": [
+            "frontend",
+            "deployment",
+            "performance",
+            "CI/CD",
+            "monitoring",
+            "optimization",
+            "production"
+          ],
+          "technology": "Web",
+          "prerequisites": [
+            "javascript_basics",
+            "node_npm",
+            "web_development_fundamentals"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 9,
+          "learningPath": "advanced",
+          "requiredFor": [
+            "devops_frontend",
+            "senior_frontend_engineer"
+          ]
+        },
+        {
+          "id": "theory_service_workers",
+          "title": "Service Workers vs. Web Workers: Background JavaScript Execution",
+          "content": "Service Workers and Web Workers are powerful JavaScript APIs that enable scripts to run in the background, separate from the main browser thread. While both improve responsiveness and performance, they serve distinct purposes and have different capabilities.\n\n## Service Workers\nService Workers are essentially programmable network proxies that sit between the web application, the browser, and the network. They are a core component of Progressive Web Apps (PWAs) and provide advanced capabilities:\n\n- **Offline Functionality & Caching**: The most prominent feature. Service Workers can intercept network requests and serve cached responses, enabling web applications to work reliably even when offline or on flaky networks. They offer fine-grained control over caching strategies.\n- **Progressive Web App (PWA) Foundation**: They power key PWA features like installability (Add to Home Screen) and a native-like user experience.\n- **Background Sync**: Allow deferred network requests to be sent when connectivity is restored, improving reliability for operations like sending messages or uploading data.\n- **Push Notifications**: Enable web applications to receive push messages from a server even when the user is not actively using the application, delivering timely updates or alerts.\n- **Persistence**: Unlike regular scripts, Service Workers persist beyond page refreshes and can even start when the browser is closed (e.g., for push notifications).\n- **Network Request Control**: They can intercept, modify, and respond to network requests programmatically, offering powerful control over how resources are fetched.\n\n**Lifecycle**: A Service Worker goes through an install and activate phase. It's registered via `navigator.serviceWorker.register()`, installs itself (e.g., caches initial assets), and then activates. It only controls pages opened *after* its activation. Updates involve fetching a new version, installing it, and waiting for all controlled clients to unload before activating the new version, or forcing activation.\n\n## Web Workers\nWeb Workers are designed for running CPU-intensive operations in a separate thread, preventing the main thread from becoming blocked and keeping the user interface responsive.\n\n- **UI Thread Blocking Prevention**: They offload heavy computations (e.g., complex calculations, large data processing, image manipulation, encryption) from the main thread, ensuring the UI remains smooth and interactive.\n- **DOM and Window Object Access**: Web Workers *cannot* directly access the DOM (`document` object), the `window` object, or many other browser APIs. This is a key limitation that ensures they remain isolated and cannot inadvertently block the UI.\n- **Message Passing Communication**: Communication between the main thread and a Web Worker occurs through a message-passing API (`postMessage()` and `onmessage` event listener). Data passed is copied, not shared, ensuring thread safety.\n- **Termination**: A Web Worker is tied to the page that created it and terminates automatically when that page closes. They do not persist across page refreshes.\n- **Types of Web Workers**: `Dedicated Workers` (one-to-one communication), `Shared Workers` (multiple scripts can access the same worker), and `Service Workers` (a specific type of worker with network proxy capabilities).\n\n## Key Differences Summary\n| Feature           | Service Worker                                   | Web Worker                                      |\n| :---------------- | :----------------------------------------------- | :---------------------------------------------- |\n| **Primary Use**   | Network proxy, offline support, PWAs, push     | Offload CPU-intensive tasks from main thread    |\n| **Network Access**| Intercepts and controls network requests         | Can make network requests (e.g., `fetch`) but doesn't intercept browser's main requests |\n| **DOM Access**    | No direct DOM access                             | No direct DOM access                            |\n| **Lifecycle**     | Persists, active even when app is closed, installation/activation phases | Tied to creating page, terminates when page closes |\n| **Scope**         | Defined by path, can control multiple pages within its scope | Limited to the script that created it           |\n| **Protocol**      | Requires HTTPS (for production), localhost for dev | No specific protocol requirement                |\n| **Notifications** | Enables Push API for notifications               | No direct support for Push API                  |\n| **Background Sync**| Yes                                              | No                                              |",
+          "examples": [
+            {
+              "id": "example_service_worker_registration",
+              "title": "Basic Service Worker Registration",
+              "code": "if ('serviceWorker' in navigator) {\n  window.addEventListener('load', () => {\n    navigator.serviceWorker.register('/service-worker.js', { scope: '/' })\n      .then(registration => {\n        console.log('Service Worker registered successfully with scope:', registration.scope);\n      })\n      .catch(error => {\n        console.error('Service Worker registration failed:', error);\n      });\n  });\n}",
+              "explanation": "This JavaScript code snippet demonstrates the basic way to register a Service Worker. It checks if `serviceWorker` is supported by the browser, then registers the `/service-worker.js` file when the page has fully loaded. The `scope` option defines the URL path that the Service Worker controls; here, it controls the entire origin.",
+              "language": "javascript"
+            },
+            {
+              "id": "example_web_worker_communication",
+              "title": "Web Worker Communication",
+              "code": "// main.js\nif (window.Worker) {\n  const myWorker = new Worker('worker.js');\n\n  myWorker.postMessage({ data: [1, 2, 3, 4, 5], operation: 'sum' });\n  console.log('Message posted to worker');\n\n  myWorker.onmessage = function(e) {\n    console.log('Message received from worker:', e.data);\n  };\n\n  myWorker.onerror = function(error) {\n    console.error('Worker error:', error);\n  };\n}\n\n// worker.js\nonmessage = function(e) {\n  console.log('Message received in worker:', e.data);\n  const { data, operation } = e.data;\n  if (operation === 'sum') {\n    const sum = data.reduce((acc, num) => acc + num, 0);\n    postMessage({ result: sum, originalOperation: operation });\n  }\n};",
+              "explanation": "This example shows basic communication between the main thread and a Web Worker. `main.js` creates a new `Worker` instance, sends a message (an array and an operation) using `postMessage`, and listens for messages back from the worker using `onmessage`. `worker.js` receives the message, performs a calculation (summation in this case), and sends the result back to the main thread using its own `postMessage`.",
+              "language": "javascript"
+            }
+          ],
+          "relatedQuestions": [
+            "question_service_worker_1",
+            "question_service_worker_2",
+            "question_service_worker_3",
+            "question_service_worker_4",
+            "question_worker_type_diff_1",
+            "question_worker_type_diff_2",
+            "question_web_worker_1",
+            "question_web_worker_2"
+          ],
+          "relatedTasks": [
+            "task_implement_offline_page",
+            "task_background_computation"
+          ],
+          "tags": [
+            "service-workers",
+            "web-workers",
+            "pwa",
+            "offline",
+            "performance",
+            "background-tasks",
+            "browser-apis"
+          ],
+          "technology": "Web API",
+          "prerequisites": [
+            "javascript_async",
+            "event_listeners",
+            "dom_manipulation_basics"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 8,
+          "learningPath": "advanced",
+          "requiredFor": [
+            "pwa_development",
+            "performance_optimization"
+          ]
+        },
+        {
+          "id": "theory_client_side_caching",
+          "title": "Client-Side Caching Strategies for Web Performance",
+          "content": "Client-side caching is a fundamental technique for improving web application performance, reducing server load, and enhancing user experience by storing resources locally in the user's browser. By serving cached content, applications can load faster, especially on repeat visits or unstable network conditions. Various strategies can be employed, often in combination, to achieve optimal caching behavior.\n\n## 1. HTTP Caching (Browser Cache)\nThis is the most basic and widely used form of caching, managed by the browser based on HTTP headers sent by the server.\n- **`Cache-Control` Headers**: The primary header to define caching policies. Examples include:\n    - `no-store`: Never cache, fetch from server every time.\n    - `no-cache`: Cache, but revalidate with server before using.\n    - `public`: Can be cached by any cache (browser, CDN).\n    - `private`: Can only be cached by the user's browser.\n    - `max-age=<seconds>`: Resource is fresh for `seconds`.\n    - `s-maxage=<seconds>`: Similar to `max-age` but for shared caches (CDNs).\n    - `immutable`: Indicates the resource will never change, allowing browsers to cache it indefinitely without revalidation (useful for versioned URLs).\n- **`Expires` Header**: An older, HTTP/1.0 header that specifies an absolute expiration date/time. Less flexible than `Cache-Control`'s `max-age`.\n- **`ETag` (Entity Tag)**: A unique identifier (hash) for a specific version of a resource. The browser sends this tag in an `If-None-Match` header on subsequent requests. If the ETag matches, the server returns a `304 Not Modified` status, indicating the cached version is still valid.\n- **`Last-Modified` Header**: Indicates the last time the resource was modified. The browser sends this in an `If-Modified-Since` header. Similar to ETag, if the resource hasn't changed, a `304 Not Modified` is returned.\n- **Versioned URLs (Cache Busting)**: Appending a hash or version number to static asset filenames (e.g., `bundle.1a2b3c.js`, `style.v1.css`). When the file content changes, its URL changes, forcing the browser to fetch the new version and bypass the old cache. This is the most reliable way to ensure users get the latest version of critical assets.\n\n## 2. Service Worker Caching (Cache API)\nService Workers provide programmatic control over caching using the Cache API, enabling powerful offline capabilities and custom caching strategies.\n- **Cache-First Strategy**: For static assets (CSS, JS, images). The Service Worker first tries to serve the response from its cache. If not found, it goes to the network and then caches the response for future use. This provides immediate loading for cached assets.\n- **Network-First Strategy**: For frequently changing data like API requests. The Service Worker first attempts to fetch from the network. If successful, it caches the new response. If the network fails, it falls back to a cached version if available. This ensures freshness while providing offline resilience.\n- **Stale-While-Revalidate**: A balanced approach. The Service Worker immediately returns a cached response (stale) while simultaneously fetching the latest version from the network (revalidate). Once the network response is received, it updates the cache for future requests. This provides instant feedback with eventual consistency.\n- **Cache Fallback for Offline Functionality**: If both cache and network requests fail (e.g., completely offline), the Service Worker can serve a generic offline page or a fallback asset (e.g., a placeholder image).\n\n## 3. Application Data Caching\nBeyond static assets, applications often need to cache dynamic data for performance and offline access.\n- **`localStorage` / `sessionStorage`**: Web Storage APIs for small amounts of key-value pair data. `localStorage` persists across browser sessions; `sessionStorage` is cleared when the session ends. Suitable for user preferences, simple settings, or session tokens.\n- **IndexedDB**: A low-level API for client-side storage of large amounts of structured data, including binary data. It's an object-oriented database within the browser, suitable for complex application data, large datasets, or offline data synchronization.\n- **Memory Caching (JavaScript Map/Object)**: Storing data in JavaScript objects or Maps directly in memory during the application's runtime. This is the fastest form of caching but is volatile and cleared upon page refresh. Useful for frequently accessed computed values or data that changes often but is only needed for the current session.\n\n## 4. Library/Framework Specific Caching (e.g., React Query / SWR)\nModern data fetching libraries often include built-in caching mechanisms that handle common patterns for fetching, caching, and revalidating data from APIs.\n- **Automatic Revalidation**: Libraries like React Query and SWR automatically revalidate cached data in the background on events like window focus, network reconnect, or interval polling. This keeps the UI updated with fresh data while providing an instant initial render from the cache.\n- **Cache Invalidation**: Provide mechanisms to manually invalidate specific cache entries, forcing a re-fetch when data is known to be outdated (e.g., after a mutation).\n\nEffective client-side caching requires a multi-faceted approach, combining browser-level controls, Service Worker logic, and application-specific data storage strategies.",
+          "examples": [
+            {
+              "id": "example_http_cache_control",
+              "title": "HTTP Cache-Control Header Example",
+              "code": "// Node.js Express server example\napp.get('/static/bundle.js', (req, res) => {\n  res.set('Cache-Control', 'public, max-age=31536000, immutable');\n  res.sendFile(path.join(__dirname, 'public', 'bundle.js'));\n});\n\napp.get('/api/data', (req, res) => {\n  // For dynamic data, less aggressive caching\n  res.set('Cache-Control', 'no-cache, must-revalidate');\n  res.json({ message: 'Dynamic data' });\n});",
+              "explanation": "This Express.js example demonstrates setting `Cache-Control` headers. For a static JS bundle, `public, max-age=31536000, immutable` tells browsers and CDNs to cache it for one year and never revalidate because its URL will change if content changes. For dynamic API data, `no-cache, must-revalidate` instructs the browser to always revalidate with the server before using a cached response, ensuring data freshness.",
+              "language": "javascript"
+            },
+            {
+              "id": "example_service_worker_cache_first",
+              "title": "Service Worker: Cache-First Strategy",
+              "code": "// service-worker.js\nconst CACHE_NAME = 'my-app-cache-v1';\nconst urlsToCache = [\n  '/',\n  '/styles.css',\n  '/script.js',\n  '/images/logo.png'\n];\n\nself.addEventListener('install', event => {\n  event.waitUntil(\n    caches.open(CACHE_NAME)\n      .then(cache => {\n        console.log('Opened cache');\n        return cache.addAll(urlsToCache);\n      })\n  );\n});\n\nself.addEventListener('fetch', event => {\n  event.respondWith(\n    caches.match(event.request)\n      .then(response => {\n        // Cache hit - return response\n        if (response) {\n          return response;\n        }\n        // No cache hit - fetch from network\n        return fetch(event.request);\n      })\n  );\n});",
+              "explanation": "This Service Worker implements a cache-first strategy. During the `install` event, it opens a cache and adds predefined static assets. During the `fetch` event, it intercepts network requests. It first attempts to `match` the request in its cache. If a match is found (`response`), it returns the cached version immediately. Otherwise, it proceeds to `fetch` the resource from the network.",
+              "language": "javascript"
+            },
+            {
+              "id": "example_indexeddb_basic",
+              "title": "IndexedDB Basic Usage",
+              "code": "// JavaScript (client-side)\nconst DB_NAME = 'myDatabase';\nconst DB_VERSION = 1;\nconst STORE_NAME = 'myObjectStore';\n\nlet db;\n\nfunction openDB() {\n  return new Promise((resolve, reject) => {\n    const request = indexedDB.open(DB_NAME, DB_VERSION);\n\n    request.onerror = event => {\n      console.error('IndexedDB error:', event.target.errorCode);\n      reject('IndexedDB error');\n    };\n\n    request.onsuccess = event => {\n      db = event.target.result;\n      console.log('IndexedDB opened successfully');\n      resolve(db);\n    };\n\n    request.onupgradeneeded = event => {\n      db = event.target.result;\n      if (!db.objectStoreNames.contains(STORE_NAME)) {\n        db.createObjectStore(STORE_NAME, { keyPath: 'id', autoIncrement: true });\n        console.log('Object store created');\n      }\n    };\n  });\n}\n\nasync function addData(data) {\n  await openDB();\n  const transaction = db.transaction([STORE_NAME], 'readwrite');\n  const store = transaction.objectStore(STORE_NAME);\n  const request = store.add(data);\n\n  request.onsuccess = () => console.log('Data added:', data);\n  request.onerror = () => console.error('Error adding data');\n}\n\n// Usage\naddData({ name: 'Alice', age: 30 });\naddData({ name: 'Bob', age: 25 });",
+              "explanation": "This example demonstrates basic IndexedDB operations: opening a database, creating an object store (if it doesn't exist during an upgrade), and adding data. IndexedDB is asynchronous and uses an event-driven API. `openDB` handles database initialization and upgrades, while `addData` creates a transaction to add new records to the `myObjectStore`.",
+              "language": "javascript"
+            }
+          ],
+          "relatedQuestions": [
+            "question_caching_1",
+            "question_caching_2",
+            "question_caching_3",
+            "question_caching_4",
+            "question_caching_5",
+            "question_caching_6",
+            "question_caching_7",
+            "question_caching_8",
+            "question_caching_9"
+          ],
+          "relatedTasks": [
+            "task_implement_offline_page",
+            "task_implement_cache_strategies",
+            "task_data_cache_with_indexeddb"
+          ],
+          "tags": [
+            "caching",
+            "performance",
+            "http-headers",
+            "service-workers",
+            "localStorage",
+            "IndexedDB",
+            "frontend",
+            "optimization"
+          ],
+          "technology": "Web",
+          "prerequisites": [
+            "http_protocols",
+            "javascript_async",
+            "browser_storage"
+          ],
+          "complexity": 8,
+          "interviewRelevance": 9,
+          "learningPath": "advanced",
+          "requiredFor": [
+            "pwa_development",
+            "performance_engineering",
+            "senior_frontend_engineer"
+          ]
+        }
+      ],
+      "questions": [
+        {
+          "id": "question_web_app_prod_1",
+          "topic": "Production Build Optimization",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "What is the primary purpose of running `npm run build` in a frontend project before deployment?",
+          "answer": "To create an optimized production-ready bundle of the application, often involving compilation, minification, and bundling.",
+          "options": [],
+          "analysisPoints": [
+            "Focus on the 'optimized' aspect of the build process.",
+            "Mention common transformations like minification and bundling."
+          ],
+          "keyConcepts": [
+            "production build",
+            "optimization",
+            "bundling"
+          ],
+          "evaluationCriteria": [
+            "Basic understanding of build process"
+          ],
+          "example": null,
+          "tags": [
+            "build-process",
+            "optimization",
+            "production"
+          ],
+          "prerequisites": [
+            "node_npm"
+          ],
+          "complexity": 3,
+          "interviewFrequency": 7,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_web_app_prod_2",
+          "topic": "Performance Optimization",
+          "level": "medium",
+          "type": "mcq",
+          "question": "Which of the following techniques is primarily used to reduce the initial load time of a web application by breaking down a large JavaScript bundle into smaller, on-demand chunks?",
+          "answer": "Code Splitting",
+          "options": [
+            "Tree Shaking",
+            "Brotli Compression",
+            "Code Splitting",
+            "HTTP Caching"
+          ],
+          "analysisPoints": [
+            "Tree Shaking removes unused code, reducing total bundle size, but not necessarily splitting it.",
+            "Brotli Compression reduces transfer size but doesn't split the bundle.",
+            "HTTP Caching speeds up subsequent loads, not necessarily the initial load for a new user.",
+            "Code Splitting directly addresses the problem of large initial bundles by segmenting them."
+          ],
+          "keyConcepts": [
+            "code splitting",
+            "performance optimization",
+            "bundle size"
+          ],
+          "evaluationCriteria": [
+            "Distinguishing between build optimization techniques",
+            "Understanding the impact on initial load time"
+          ],
+          "example": "Code splitting divides your application into logical chunks (e.g., by route or component) that are loaded only when needed. For instance, if you have an admin dashboard and a public-facing page, their code can be split, so a user on the public page doesn't download the admin dashboard's code.",
+          "tags": [
+            "performance",
+            "optimization",
+            "webpack",
+            "code-splitting"
+          ],
+          "prerequisites": [
+            "javascript_modules",
+            "bundlers"
+          ],
+          "complexity": 6,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_web_app_prod_3",
+          "topic": "Deployment Options",
+          "level": "medium",
+          "type": "open",
+          "question": "You are deploying a Single-Page Application (SPA) with no backend services, only static assets. What deployment option would you choose and why?",
+          "answer": "I would choose static hosting platforms like Netlify, Vercel, or GitHub Pages. \n\n**Reasons:**\n1.  **Simplicity**: They are designed for deploying static sites and SPAs, making setup and deployment straightforward, often integrating directly with Git repositories.\n2.  **Performance**: They typically provide built-in CDN services, ensuring fast global content delivery.\n3.  **Cost-Effectiveness**: Many offer generous free tiers suitable for personal projects or small-to-medium applications.\n4.  **Automatic SSL & CI/CD**: They often include automatic SSL certificate management and simple CI/CD features (e.g., build on push to Git branch).\n5.  **Scalability**: They inherently scale well as they mostly serve pre-built static files.",
+          "options": [],
+          "analysisPoints": [
+            "Identification of appropriate deployment type (static hosting).",
+            "Justification with multiple benefits (simplicity, performance, cost, features)."
+          ],
+          "keyConcepts": [
+            "static hosting",
+            "SPA deployment",
+            "Netlify",
+            "Vercel",
+            "GitHub Pages"
+          ],
+          "evaluationCriteria": [
+            "Knowledge of deployment strategies",
+            "Ability to justify choices based on application characteristics"
+          ],
+          "example": null,
+          "tags": [
+            "deployment",
+            "SPA",
+            "static-hosting",
+            "cloud"
+          ],
+          "prerequisites": [
+            "web_hosting_concepts"
+          ],
+          "complexity": 6,
+          "interviewFrequency": 7,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_web_app_prod_4",
+          "topic": "CI/CD Pipeline",
+          "level": "hard",
+          "type": "open",
+          "question": "Explain the concept of Blue-Green deployment and discuss its advantages and disadvantages in the context of a frontend application deployment.",
+          "answer": "Blue-Green deployment is a strategy that minimizes downtime by running two identical production environments, let's call them 'Blue' and 'Green'. At any given time, only one environment is live (e.g., Blue) and serving user traffic. When a new version of the application is to be deployed, it is deployed to the inactive environment (Green). Once the new version is thoroughly tested in Green, traffic is switched from Blue to Green, making Green the new live environment. The old Blue environment is kept as a standby for quick rollback or for future deployments.\n\n**Advantages for Frontend Applications:**\n1.  **Zero Downtime Deployment**: Users experience no interruption as traffic is seamlessly switched between environments.\n2.  **Instant Rollback**: If issues are detected post-switch, traffic can be immediately routed back to the old 'Blue' environment, minimizing impact.\n3.  **Safe Testing**: New versions can be tested in a production-like environment (the inactive 'Green' one) without affecting live users.\n4.  **Reduced Risk**: The isolation between environments reduces the risk of new deployments introducing breaking changes to the live application.\n5.  **A/B Testing Potential**: Can be adapted for simple A/B testing by routing a small percentage of users to the new 'Green' environment.\n\n**Disadvantages for Frontend Applications:**\n1.  **Infrastructure Cost**: Requires maintaining two full production environments, doubling infrastructure costs.\n2.  **Complexity**: Managing two environments, synchronizing databases (if applicable for stateful parts), and orchestrating the switch adds complexity to the CI/CD pipeline.\n3.  **State Management**: For applications with persistent user sessions or real-time connections (like WebSockets), careful consideration is needed to ensure a smooth transition without dropping user state.\n4.  **Database Migrations**: If the frontend deployment is tightly coupled with backend changes that require database migrations, coordinating these can be challenging, as the Blue environment might still be relying on the old database schema while the Green requires the new one.\n5.  **Asset Cache Invalidation**: While the deployment itself is smooth, ensuring browsers fetch new assets and not stale cached ones requires proper cache busting strategies (e.g., versioned URLs) regardless of the deployment method.",
+          "options": [],
+          "analysisPoints": [
+            "Clear definition of Blue-Green deployment.",
+            "Comprehensive list of advantages relevant to frontend.",
+            "Comprehensive list of disadvantages relevant to frontend, including infrastructure, complexity, and specific frontend concerns like caching and state.",
+            "Demonstrates understanding of deployment strategies beyond basic hosting."
+          ],
+          "keyConcepts": [
+            "blue-green deployment",
+            "CI/CD",
+            "downtime",
+            "rollback",
+            "deployment strategies"
+          ],
+          "evaluationCriteria": [
+            "In-depth understanding of advanced deployment patterns",
+            "Ability to articulate pros and cons specific to frontend context",
+            "Critical thinking about operational challenges"
+          ],
+          "example": null,
+          "tags": [
+            "CI/CD",
+            "deployment",
+            "devops",
+            "advanced-topics",
+            "scalability"
+          ],
+          "prerequisites": [
+            "web_hosting_concepts",
+            "server_architecture"
+          ],
+          "complexity": 9,
+          "interviewFrequency": 7,
+          "learningPath": "advanced"
+        },
+        {
+          "id": "question_web_app_prod_5",
+          "topic": "Monitoring and Logging",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "Name two types of monitoring that are crucial for a production web application.",
+          "answer": "Error tracking and performance monitoring.",
+          "options": [],
+          "analysisPoints": [
+            "Recall common monitoring categories."
+          ],
+          "keyConcepts": [
+            "monitoring",
+            "error tracking",
+            "performance monitoring"
+          ],
+          "evaluationCriteria": [
+            "Basic recall of monitoring types"
+          ],
+          "example": null,
+          "tags": [
+            "monitoring",
+            "production",
+            "operations"
+          ],
+          "prerequisites": [],
+          "complexity": 2,
+          "interviewFrequency": 6,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_web_app_prod_6",
+          "topic": "Production Build",
+          "level": "medium",
+          "type": "mcq",
+          "question": "What is the primary benefit of 'Tree Shaking' in a frontend build process?",
+          "answer": "It eliminates unused code from the final bundle, reducing its size.",
+          "options": [
+            "It splits the code into smaller, asynchronously loaded chunks.",
+            "It transpiles modern JavaScript into older, compatible versions.",
+            "It eliminates unused code from the final bundle, reducing its size.",
+            "It caches assets in the browser for faster subsequent loads."
+          ],
+          "analysisPoints": [
+            "Option A describes Code Splitting.",
+            "Option B describes Transpilation (e.g., Babel).",
+            "Option D describes Caching.",
+            "The correct answer directly defines Tree Shaking's function."
+          ],
+          "keyConcepts": [
+            "tree shaking",
+            "bundle size",
+            "optimization"
+          ],
+          "evaluationCriteria": [
+            "Understanding of build process specifics",
+            "Distinguishing between optimization techniques"
+          ],
+          "example": "If a library exports functions A, B, and C, but your application only imports and uses function A, tree shaking will remove functions B and C from your final JavaScript bundle, leading to a smaller file size.",
+          "tags": [
+            "optimization",
+            "build-process",
+            "webpack"
+          ],
+          "prerequisites": [
+            "bundlers"
+          ],
+          "complexity": 5,
+          "interviewFrequency": 7,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_web_app_prod_7",
+          "topic": "Performance Considerations",
+          "level": "medium",
+          "type": "open",
+          "question": "Why is using a CDN (Content Delivery Network) important for static assets in a globally distributed web application?",
+          "answer": "A CDN is crucial for globally distributed web applications because it significantly improves the delivery speed of static assets (like images, CSS, JavaScript files) to users worldwide.\n\n**Key reasons:**\n1.  **Reduced Latency**: CDNs have servers (Points of Presence or PoPs) located in various geographical regions. When a user requests an asset, the CDN serves it from the PoP closest to them, minimizing the physical distance data has to travel.\n2.  **Improved Availability**: If one CDN PoP goes down, traffic can be automatically routed to another healthy PoP, ensuring high availability of assets.\n3.  **Reduced Server Load**: By offloading static asset delivery to the CDN, the origin server (where your application runs) experiences less traffic, freeing up resources for dynamic content and API requests.\n4.  **Scalability**: CDNs are built to handle massive amounts of traffic, scaling automatically to accommodate spikes in demand without impacting your origin server.\n5.  **Enhanced Security**: Many CDNs offer additional security features like DDoS protection and WAF (Web Application Firewall) that protect your assets and potentially your origin server from malicious attacks.",
+          "options": [],
+          "analysisPoints": [
+            "Explanation of CDN's core function (geographic distribution).",
+            "Detailed benefits: reduced latency, availability, server load, scalability, security."
+          ],
+          "keyConcepts": [
+            "CDN",
+            "static assets",
+            "latency",
+            "performance"
+          ],
+          "evaluationCriteria": [
+            "Understanding of network infrastructure",
+            "Ability to explain performance benefits"
+          ],
+          "example": null,
+          "tags": [
+            "performance",
+            "CDN",
+            "network",
+            "deployment"
+          ],
+          "prerequisites": [
+            "web_performance_basics"
+          ],
+          "complexity": 7,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_web_app_prod_8",
+          "topic": "CI/CD Pipeline",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "What is the primary goal of implementing automated testing in a CI/CD pipeline?",
+          "answer": "To catch bugs and regressions early in the development cycle, ensuring code quality and stability before deployment.",
+          "options": [],
+          "analysisPoints": [
+            "Focus on 'early detection' and 'quality assurance'."
+          ],
+          "keyConcepts": [
+            "CI/CD",
+            "automated testing",
+            "quality assurance"
+          ],
+          "evaluationCriteria": [
+            "Basic understanding of CI/CD principles"
+          ],
+          "example": null,
+          "tags": [
+            "CI/CD",
+            "testing",
+            "automation"
+          ],
+          "prerequisites": [
+            "software_testing_basics"
+          ],
+          "complexity": 3,
+          "interviewFrequency": 6,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_service_worker_1",
+          "topic": "Service Workers",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "What is the main capability of a Service Worker that enables offline functionality?",
+          "answer": "Its ability to act as a programmable network proxy and cache network requests.",
+          "options": [],
+          "analysisPoints": [
+            "Highlight the proxy and caching roles."
+          ],
+          "keyConcepts": [
+            "service worker",
+            "offline",
+            "caching",
+            "network proxy"
+          ],
+          "evaluationCriteria": [
+            "Core function of Service Worker"
+          ],
+          "example": null,
+          "tags": [
+            "service-workers",
+            "pwa",
+            "offline",
+            "caching"
+          ],
+          "prerequisites": [],
+          "complexity": 3,
+          "interviewFrequency": 8,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_service_worker_2",
+          "topic": "Service Workers",
+          "level": "medium",
+          "type": "mcq",
+          "question": "Which of the following is NOT a capability of a Service Worker?",
+          "answer": "Directly manipulate the DOM elements of the main page.",
+          "options": [
+            "Intercepting and controlling network requests.",
+            "Enabling push notifications.",
+            "Providing offline functionality through caching.",
+            "Directly manipulate the DOM elements of the main page."
+          ],
+          "analysisPoints": [
+            "Service Workers run in a separate thread and cannot directly access the DOM, similar to Web Workers.",
+            "The other options are core features of Service Workers."
+          ],
+          "keyConcepts": [
+            "service worker",
+            "dom access",
+            "limitations"
+          ],
+          "evaluationCriteria": [
+            "Understanding of Service Worker capabilities and limitations",
+            "Distinguishing from main thread JavaScript"
+          ],
+          "example": "Service Workers operate in their own context and communicate with the main thread via `postMessage`. This isolation prevents them from blocking the UI thread but also restricts direct DOM manipulation.",
+          "tags": [
+            "service-workers",
+            "pwa",
+            "limitations",
+            "dom"
+          ],
+          "prerequisites": [
+            "javascript_async"
+          ],
+          "complexity": 6,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_service_worker_3",
+          "topic": "Service Workers",
+          "level": "medium",
+          "type": "open",
+          "question": "Describe the lifecycle of a Service Worker from registration to activation, and explain why it's important for ensuring updated content.",
+          "answer": "The Service Worker lifecycle involves several stages:\n\n1.  **Registration**: The main thread JavaScript initiates the process by calling `navigator.serviceWorker.register('/service-worker.js')`. The browser downloads the Service Worker script.\n2.  **Installation**: Once downloaded, the `install` event is fired in the Service Worker. During this phase, it typically performs initial caching of static assets using `event.waitUntil()` and `caches.addAll()`. If caching fails, the installation fails.\n3.  **Activation**: After successful installation, the `activate` event is fired. This is where the Service Worker takes control of its registered scope (e.g., all pages under a specific URL path). During activation, it might clean up old caches from previous versions using `caches.keys()` and `cache.delete()`.\n\n**Why it's important for updated content (updating a Service Worker):**\nWhen you deploy a new version of your `service-worker.js` file, the browser detects the byte-difference. It then downloads the new version in the background and attempts to install it. This new version is called the 'waiting' Service Worker. It will only 'activate' and take control once all previously controlled tabs for the old Service Worker are closed or navigated away from (or if `self.skipWaiting()` is called). This ensures a smooth transition: a user won't suddenly get a mixed version of your app (old HTML, new JS, etc.). The old Service Worker continues to serve content until no clients are using it, then the new one activates, ensuring content consistency.",
+          "options": [],
+          "analysisPoints": [
+            "Accurate description of registration, installation, and activation steps.",
+            "Clear explanation of how updates work and why it ensures content consistency.",
+            "Mention of `event.waitUntil()` and `self.skipWaiting()` (optional but good).",
+            "Understanding of the controlled client concept."
+          ],
+          "keyConcepts": [
+            "service worker lifecycle",
+            "installation",
+            "activation",
+            "updating service workers",
+            "cache management"
+          ],
+          "evaluationCriteria": [
+            "Detailed understanding of Service Worker operation",
+            "Ability to explain practical implications for updates"
+          ],
+          "example": null,
+          "tags": [
+            "service-workers",
+            "pwa",
+            "lifecycle",
+            "caching",
+            "updates"
+          ],
+          "prerequisites": [
+            "javascript_async",
+            "event_listeners"
+          ],
+          "complexity": 7,
+          "interviewFrequency": 9,
+          "learningPath": "advanced"
+        },
+        {
+          "id": "question_service_worker_4",
+          "topic": "Service Workers",
+          "level": "medium",
+          "type": "code",
+          "question": "Write a `service-worker.js` snippet that implements a 'network-first with cache fallback' strategy for non-HTML requests.",
+          "answer": "```javascript\n// service-worker.js\nconst CACHE_NAME = 'dynamic-data-cache-v1';\n\nself.addEventListener('fetch', event => {\n  // Only apply this strategy to non-HTML requests (e.g., API calls, images, fonts)\n  // HTML requests often benefit more from cache-first or network-only\n  if (event.request.mode === 'navigate') { // This checks if it's a navigation request (for HTML pages)\n    return; // Let the browser handle it normally or apply a different strategy\n  }\n\n  event.respondWith(\n    fetch(event.request)\n      .then(networkResponse => {\n        // If network request succeeds, clone the response to store in cache\n        // A response can only be consumed once, so clone if you want to also return it.\n        const responseToCache = networkResponse.clone();\n        caches.open(CACHE_NAME)\n          .then(cache => {\n            cache.put(event.request, responseToCache);\n          });\n        return networkResponse;\n      })\n      .catch(() => {\n        // Network failed, try to get from cache\n        return caches.match(event.request);\n      })\n  );\n});\n\nself.addEventListener('activate', event => {\n  event.waitUntil(\n    caches.keys().then(cacheNames => {\n      return Promise.all(\n        cacheNames.map(cacheName => {\n          if (cacheName !== CACHE_NAME) {\n            return caches.delete(cacheName);\n          }\n        })\n      );\n    })\n  );\n});\n```",
+          "options": [],
+          "analysisPoints": [
+            "Correct implementation of `fetch` listener.",
+            "Demonstrates network-first logic (try `fetch` first, then `catch` for cache).",
+            "Uses `response.clone()` correctly for caching network responses.",
+            "Includes a basic `activate` event listener for cache cleanup (good practice).",
+            "Distinguishes between navigation requests and other asset requests (optional but good for specific strategies)."
+          ],
+          "keyConcepts": [
+            "service worker",
+            "caching strategies",
+            "fetch event",
+            "cache api",
+            "network-first"
+          ],
+          "evaluationCriteria": [
+            "Ability to implement Service Worker caching logic",
+            "Understanding of network-first pattern",
+            "Correct use of `caches` API and `response.clone()`"
+          ],
+          "example": null,
+          "tags": [
+            "service-workers",
+            "caching",
+            "pwa",
+            "code-challenge"
+          ],
+          "prerequisites": [
+            "javascript_promises",
+            "fetch_api"
+          ],
+          "complexity": 7,
+          "interviewFrequency": 8,
+          "learningPath": "advanced"
+        },
+        {
+          "id": "question_worker_type_diff_1",
+          "topic": "Service Workers vs. Web Workers",
+          "level": "medium",
+          "type": "mcq",
+          "question": "What is a key difference between a Service Worker and a Web Worker regarding their access to the DOM?",
+          "answer": "Neither Service Workers nor Web Workers can directly access the DOM.",
+          "options": [
+            "Service Workers can access the DOM, but Web Workers cannot.",
+            "Web Workers can access the DOM, but Service Workers cannot.",
+            "Both Service Workers and Web Workers can directly access the DOM.",
+            "Neither Service Workers nor Web Workers can directly access the DOM."
+          ],
+          "analysisPoints": [
+            "Both worker types run in separate threads to avoid blocking the main thread.",
+            "Direct DOM access from background threads would violate this isolation principle.",
+            "Communication is always via message passing."
+          ],
+          "keyConcepts": [
+            "service worker",
+            "web worker",
+            "dom access",
+            "isolation"
+          ],
+          "evaluationCriteria": [
+            "Understanding the core limitations of background workers",
+            "Ability to distinguish worker types based on capabilities"
+          ],
+          "example": "If a Web Worker or Service Worker needed to update the UI, it would send a message to the main thread. The main thread would then receive the message and perform the DOM manipulation.",
+          "tags": [
+            "service-workers",
+            "web-workers",
+            "comparison",
+            "dom"
+          ],
+          "prerequisites": [],
+          "complexity": 5,
+          "interviewFrequency": 7,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_worker_type_diff_2",
+          "topic": "Service Workers vs. Web Workers",
+          "level": "hard",
+          "type": "open",
+          "question": "You have a web application that needs to perform a complex image processing task (e.g., applying multiple filters) without freezing the UI, and also needs to send push notifications and enable offline access. Which type(s) of background workers would you use for each functionality, and why?",
+          "answer": "For this scenario, I would use both a Web Worker and a Service Worker, as they serve distinct purposes:\n\n1.  **For Complex Image Processing (e.g., applying multiple filters):** I would use a **Web Worker**.\n    *   **Reasoning**: Web Workers are specifically designed to run CPU-intensive tasks in a separate thread, preventing the main browser thread (and thus the UI) from becoming unresponsive. Image processing can be very computationally demanding, making it a perfect candidate for a Web Worker. It communicates with the main thread via message passing, sending the processed image data back once completed.\n\n2.  **For Push Notifications and Offline Access:** I would use a **Service Worker**.\n    *   **Reasoning**: Service Workers are purpose-built for these capabilities. They act as a network proxy, allowing them to intercept requests and serve cached content for offline access. They also implement the Push API, enabling the application to receive messages from a server and display notifications even when the user is not actively on the page or the browser is closed. These features require the Service Worker's persistent and network-interception abilities, which Web Workers do not possess.\n\nIn summary, the Web Worker handles the intensive, synchronous-like computation, keeping the UI fluid, while the Service Worker manages network-related tasks like caching and background communication for push notifications and offline mode.",
+          "options": [],
+          "analysisPoints": [
+            "Correctly identifies Web Worker for CPU-intensive task and provides reasoning.",
+            "Correctly identifies Service Worker for network/PWA features and provides reasoning.",
+            "Demonstrates understanding of the unique strengths and limitations of each worker type.",
+            "Shows ability to apply theoretical knowledge to a practical, multi-functional scenario."
+          ],
+          "keyConcepts": [
+            "service worker",
+            "web worker",
+            "use cases",
+            "offline",
+            "push notifications",
+            "performance",
+            "ui responsiveness"
+          ],
+          "evaluationCriteria": [
+            "Deep understanding of worker types' roles",
+            "Ability to choose appropriate technology for specific problems",
+            "Justification of choices with technical reasoning"
+          ],
+          "example": null,
+          "tags": [
+            "service-workers",
+            "web-workers",
+            "pwa",
+            "architecture",
+            "performance",
+            "expert"
+          ],
+          "prerequisites": [
+            "theory_service_workers"
+          ],
+          "complexity": 8,
+          "interviewFrequency": 9,
+          "learningPath": "advanced"
+        },
+        {
+          "id": "question_web_worker_1",
+          "topic": "Web Workers",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "What is the main benefit of using a Web Worker?",
+          "answer": "To run CPU-intensive operations in a background thread, preventing the main UI thread from blocking.",
+          "options": [],
+          "analysisPoints": [
+            "Focus on 'CPU-intensive' and 'non-blocking UI'."
+          ],
+          "keyConcepts": [
+            "web worker",
+            "performance",
+            "ui blocking"
+          ],
+          "evaluationCriteria": [
+            "Basic understanding of Web Worker's purpose"
+          ],
+          "example": null,
+          "tags": [
+            "web-workers",
+            "performance",
+            "background-tasks"
+          ],
+          "prerequisites": [],
+          "complexity": 3,
+          "interviewFrequency": 6,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_web_worker_2",
+          "topic": "Web Workers",
+          "level": "medium",
+          "type": "code",
+          "question": "Implement a simple Web Worker that takes an array of numbers and returns their sum. Show both the main thread code and the worker script.",
+          "answer": "```javascript\n// main.js\nfunction calculateSumInWorker(numbers) {\n  return new Promise((resolve, reject) => {\n    if (typeof Worker === 'undefined') {\n      reject('Web Workers are not supported in this browser.');\n      return;\n    }\n\n    const sumWorker = new Worker('sumWorker.js');\n\n    sumWorker.onmessage = function(event) {\n      console.log('Main thread: Received sum from worker:', event.data.sum);\n      sumWorker.terminate(); // Terminate worker after receiving result\n      resolve(event.data.sum);\n    };\n\n    sumWorker.onerror = function(error) {\n      console.error('Main thread: Worker error:', error);\n      sumWorker.terminate();\n      reject(error);\n    };\n\n    console.log('Main thread: Sending numbers to worker:', numbers);\n    sumWorker.postMessage({ numbers: numbers });\n  });\n}\n\n// Example usage:\ncalculateSumInWorker([1, 2, 3, 4, 5])\n  .then(sum => console.log('Final Sum:', sum))\n  .catch(err => console.error(err));\n\ncalculateSumInWorker([100, 200, 300])\n  .then(sum => console.log('Final Sum:', sum))\n  .catch(err => console.error(err));\n\n\n// sumWorker.js\nonmessage = function(event) {\n  const numbers = event.data.numbers;\n  console.log('Worker: Received numbers:', numbers);\n  let sum = 0;\n  for (let i = 0; i < numbers.length; i++) {\n    sum += numbers[i];\n  }\n  console.log('Worker: Calculated sum:', sum);\n  postMessage({ sum: sum });\n};\n```",
+          "options": [],
+          "analysisPoints": [
+            "Correct `Worker` instantiation in main thread.",
+            "Proper use of `postMessage` for sending data to worker.",
+            "Correct `onmessage` listener in main thread for receiving results.",
+            "Correct `onmessage` listener in worker for receiving data.",
+            "Proper use of `postMessage` in worker for sending results back.",
+            "Basic error handling and worker termination.",
+            "Demonstrates data copying (not sharing) implicitly."
+          ],
+          "keyConcepts": [
+            "web worker",
+            "message passing",
+            "postMessage",
+            "onmessage",
+            "background processing"
+          ],
+          "evaluationCriteria": [
+            "Ability to implement basic Web Worker communication",
+            "Understanding of asynchronous worker patterns",
+            "Correct separation of concerns between main thread and worker"
+          ],
+          "example": null,
+          "tags": [
+            "web-workers",
+            "code-challenge",
+            "javascript",
+            "performance"
+          ],
+          "prerequisites": [
+            "javascript_async_promises"
+          ],
+          "complexity": 6,
+          "interviewFrequency": 7,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_caching_1",
+          "topic": "Client-Side Caching Strategies",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "Name two common HTTP caching headers.",
+          "answer": "`Cache-Control`, `ETag`, `Last-Modified`, `Expires` (any two).",
+          "options": [],
+          "analysisPoints": [
+            "Recall standard HTTP caching headers."
+          ],
+          "keyConcepts": [
+            "http caching",
+            "cache-control",
+            "etag",
+            "last-modified"
+          ],
+          "evaluationCriteria": [
+            "Basic recall of HTTP caching"
+          ],
+          "example": null,
+          "tags": [
+            "caching",
+            "http",
+            "performance"
+          ],
+          "prerequisites": [
+            "http_basics"
+          ],
+          "complexity": 3,
+          "interviewFrequency": 8,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_caching_2",
+          "topic": "Client-Side Caching Strategies",
+          "level": "medium",
+          "type": "mcq",
+          "question": "Which `Cache-Control` directive instructs the browser to always revalidate a cached resource with the server before using it, even if it's still considered fresh?",
+          "answer": "`no-cache`",
+          "options": [
+            "`no-store`",
+            "`max-age=0`",
+            "`must-revalidate`",
+            "`no-cache`"
+          ],
+          "analysisPoints": [
+            "`no-store` means don't cache at all.",
+            "`max-age=0` means it's immediately stale, requiring revalidation, but `no-cache` explicitly forces revalidation regardless of freshness.",
+            "`must-revalidate` is used *in conjunction* with `max-age` to say 'don't use stale copies', but `no-cache` is the primary directive for 'always revalidate'."
+          ],
+          "keyConcepts": [
+            "http caching",
+            "cache-control",
+            "no-cache",
+            "revalidation"
+          ],
+          "evaluationCriteria": [
+            "Precise understanding of Cache-Control directives",
+            "Ability to distinguish subtle differences between similar directives"
+          ],
+          "example": "A server might send `Cache-Control: no-cache` for an API response that needs to be fresh, but also shouldn't be re-fetched on every single request if the user navigates back to the page very quickly. The browser will check `If-None-Match` or `If-Modified-Since` on the server.",
+          "tags": [
+            "caching",
+            "http",
+            "performance"
+          ],
+          "prerequisites": [
+            "http_headers"
+          ],
+          "complexity": 6,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_caching_3",
+          "topic": "Client-Side Caching Strategies",
+          "level": "medium",
+          "type": "open",
+          "question": "Explain the 'stale-while-revalidate' caching strategy in the context of Service Workers and provide a scenario where it would be beneficial.",
+          "answer": "The 'stale-while-revalidate' caching strategy is a Service Worker pattern where the Service Worker immediately returns a cached response (which might be 'stale' or outdated) to the client while simultaneously making a network request in the background to fetch the freshest version of the resource. Once the fresh network response is received, it updates the cache for future requests.\n\n**Scenario where it would be beneficial:**\nConsider a news feed or a social media application. Users expect to see content quickly, but they also want to see the most up-to-date information. If a user has previously visited the page, the Service Worker can:\n1.  **Immediately display the cached news feed** (stale content), giving the user instant feedback and a responsive UI.\n2.  **Concurrently fetch the latest news articles from the network**.\n3.  **Update the cache** with the new articles and, potentially, notify the user or refresh a specific section of the UI with the fresh data.\n\nThis strategy provides an excellent balance between performance (instant load from cache) and data freshness (eventual consistency with network data), enhancing the user experience, especially on slow or intermittent network connections.",
+          "options": [],
+          "analysisPoints": [
+            "Clear definition of stale-while-revalidate.",
+            "Demonstrates understanding of its mechanics (return stale, revalidate in background, update cache).",
+            "Provides a relevant and detailed scenario demonstrating its benefits (news feed, social media) focusing on speed and freshness.",
+            "Articulates the balance between performance and freshness."
+          ],
+          "keyConcepts": [
+            "service worker",
+            "caching strategies",
+            "stale-while-revalidate",
+            "performance",
+            "user experience"
+          ],
+          "evaluationCriteria": [
+            "In-depth knowledge of Service Worker caching patterns",
+            "Ability to apply strategy to real-world problems",
+            "Explanation of trade-offs and benefits"
+          ],
+          "example": null,
+          "tags": [
+            "service-workers",
+            "caching",
+            "performance",
+            "pwa",
+            "strategy"
+          ],
+          "prerequisites": [
+            "theory_service_workers",
+            "theory_client_side_caching"
+          ],
+          "complexity": 8,
+          "interviewFrequency": 9,
+          "learningPath": "advanced"
+        },
+        {
+          "id": "question_caching_4",
+          "topic": "Application Data Caching",
+          "level": "medium",
+          "type": "code",
+          "question": "When would you choose `IndexedDB` over `localStorage` for client-side data storage, and provide a simple JavaScript code example for a basic `localStorage` operation.",
+          "answer": "I would choose `IndexedDB` over `localStorage` in the following scenarios:\n\n*   **Larger Data Volumes**: `localStorage` is designed for small key-value pairs (typically 5-10 MB limit per origin). `IndexedDB` is a full-fledged, transactional object-oriented database within the browser, capable of storing much larger amounts of structured data (hundreds of MBs to GBs depending on browser/device).\n*   **Structured Data / Complex Queries**: `localStorage` only supports string key-value pairs, requiring manual serialization/deserialization for objects. `IndexedDB` can store JavaScript objects directly, supports indexes for efficient querying, and transactions for reliable operations.\n*   **Offline Data Synchronization**: For complex offline-first applications that need to manage large datasets, synchronize with a backend, or perform sophisticated data manipulations, `IndexedDB` is the appropriate choice.\n*   **Binary Data Storage**: `IndexedDB` can store binary data (like `ArrayBuffer`, `Blob`, `File`), which `localStorage` cannot.\n\n`localStorage` remains suitable for simple, small pieces of data like user preferences, session tokens, or theme settings due to its synchronous, easy-to-use API.\n\n**Simple `localStorage` operation example:**\n\n```javascript\n// Store data\nlocalStorage.setItem('username', 'Alice');\nlocalStorage.setItem('user_settings', JSON.stringify({ theme: 'dark', notifications: true }));\n\n// Retrieve data\nconst username = localStorage.getItem('username');\nconst userSettingsString = localStorage.getItem('user_settings');\nconst userSettings = userSettingsString ? JSON.parse(userSettingsString) : {};\n\nconsole.log(`Username: ${username}`); // Output: Username: Alice\nconsole.log(`User Theme: ${userSettings.theme}`); // Output: User Theme: dark\n\n// Remove data\n// localStorage.removeItem('username');\n// localStorage.clear(); // Clears all data for the current origin\n\n// Check if item exists\nif (localStorage.getItem('username')) {\n  console.log('Username is stored.');\n}\n```",
+          "options": [],
+          "analysisPoints": [
+            "Clear distinction between IndexedDB and localStorage based on data volume, structure, and use cases.",
+            "Provides specific examples for when each would be preferred.",
+            "Correct and runnable `localStorage` example including set, get, and parse/stringify.",
+            "Mention of `removeItem` and `clear` for completeness."
+          ],
+          "keyConcepts": [
+            "localStorage",
+            "IndexedDB",
+            "client-side storage",
+            "data caching",
+            "web storage"
+          ],
+          "evaluationCriteria": [
+            "Understanding of different browser storage mechanisms",
+            "Ability to choose the right tool for the job",
+            "Practical coding example demonstrating usage"
+          ],
+          "example": null,
+          "tags": [
+            "caching",
+            "browser-storage",
+            "localStorage",
+            "IndexedDB",
+            "code-example"
+          ],
+          "prerequisites": [
+            "javascript_basics"
+          ],
+          "complexity": 7,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_caching_5",
+          "topic": "Client-Side Caching Strategies",
+          "level": "hard",
+          "type": "open",
+          "question": "Discuss the problem of 'cache busting' and explain at least two common techniques used to solve it in frontend development.",
+          "answer": "Cache busting is the process of ensuring that a web browser fetches the latest version of a resource (like a JavaScript file, CSS file, or image) from the server, rather than serving an outdated version from its local cache, even if the browser's cache headers suggest the old version is still valid. This problem arises because browsers aggressively cache static assets to improve performance, but when those assets change on the server, developers need a reliable way to force clients to download the new version.\n\n**Common Techniques for Cache Busting:**\n\n1.  **Versioned URLs (Fingerprinting / Hashing)**:\n    *   **Explanation**: This is the most robust and widely used method. It involves appending a unique identifier (often a hash of the file's content or a version number) to the filename or as a query parameter in the URL of the resource. For example: `app.js?v=1.2.3` or `app.1a2b3c.js`.\n    *   **Mechanism**: When the content of `app.js` changes, its hash (or version number) also changes, resulting in a completely new URL (`app.4d5e6f.js`). From the browser's perspective, this is a brand new resource, so it bypasses its cache and fetches the new file from the server. The old, un-versioned or differently versioned file remains in cache but is never requested again by the application.\n    *   **Implementation**: Build tools like Webpack, Rollup, and Parcel automate this process by generating unique hashes for bundled assets during the build step.\n    *   **Pros**: Highly effective, leverages browser's default caching behavior (long `Cache-Control: max-age` can be used for versioned files), works well with CDNs.\n    *   **Cons**: Requires a build step; can make inspecting source files in browser dev tools slightly harder due to hash in filenames.\n\n2.  **`Cache-Control: no-cache` or `max-age=0, must-revalidate` (with ETag/Last-Modified)**:\n    *   **Explanation**: While `no-cache` literally means 'do not cache', its true meaning is 'cache the resource, but always revalidate it with the origin server before using it'. When the browser makes a request for a `no-cache` resource, it includes `If-None-Match` (with ETag) or `If-Modified-Since` (with Last-Modified date).\n    *   **Mechanism**: If the server determines the resource hasn't changed (based on ETag or Last-Modified), it responds with a `304 Not Modified` status, telling the browser to use its cached version. If the resource has changed, the server sends the new resource with a `200 OK` status. This ensures freshness without necessarily downloading the entire resource if it hasn't changed.\n    *   **Pros**: Simpler to implement on the server side; good for dynamic resources that need freshness but can still benefit from conditional caching.\n    *   **Cons**: Still involves a network request (though smaller for 304); can introduce a slight delay compared to directly serving from cache; not as aggressive for ensuring *all* users get the *very latest* version instantly as versioned URLs for critical static assets.",
+          "options": [],
+          "analysisPoints": [
+            "Clear definition of cache busting problem.",
+            "Detailed explanation of versioned URLs, including mechanism, implementation tools, pros, and cons.",
+            "Detailed explanation of `no-cache` strategy with ETag/Last-Modified, including mechanism, pros, and cons.",
+            "Demonstrates comprehensive understanding of caching and its challenges.",
+            "Compares and contrasts the effectiveness of different techniques."
+          ],
+          "keyConcepts": [
+            "cache busting",
+            "http caching",
+            "versioned urls",
+            "etag",
+            "last-modified",
+            "cache-control",
+            "frontend build"
+          ],
+          "evaluationCriteria": [
+            "Expert-level understanding of caching challenges",
+            "Ability to articulate and compare solutions",
+            "Knowledge of build tool implications"
+          ],
+          "example": null,
+          "tags": [
+            "caching",
+            "performance",
+            "http",
+            "build-process",
+            "hard"
+          ],
+          "prerequisites": [
+            "http_protocols",
+            "frontend_build_tools"
+          ],
+          "complexity": 9,
+          "interviewFrequency": 9,
+          "learningPath": "advanced"
+        },
+        {
+          "id": "question_caching_6",
+          "topic": "Service Worker Caching",
+          "level": "medium",
+          "type": "flashcard",
+          "question": "What Service Worker caching strategy prioritizes serving an asset immediately from cache, then fetching an updated version from the network for future requests?",
+          "answer": "Stale-while-revalidate.",
+          "options": [],
+          "analysisPoints": [
+            "Accurate identification of the strategy based on its behavior."
+          ],
+          "keyConcepts": [
+            "service worker",
+            "caching strategies",
+            "stale-while-revalidate"
+          ],
+          "evaluationCriteria": [
+            "Recall of Service Worker caching patterns"
+          ],
+          "example": null,
+          "tags": [
+            "service-workers",
+            "caching",
+            "pwa"
+          ],
+          "prerequisites": [
+            "theory_service_workers"
+          ],
+          "complexity": 5,
+          "interviewFrequency": 7,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_caching_7",
+          "topic": "Application Data Caching",
+          "level": "medium",
+          "type": "mcq",
+          "question": "You need to store a user's large, structured application data (e.g., a complex document or a list of items with multiple properties) client-side for offline access. Which browser storage API is the most appropriate choice?",
+          "answer": "IndexedDB",
+          "options": [
+            "localStorage",
+            "sessionStorage",
+            "Cookies",
+            "IndexedDB"
+          ],
+          "analysisPoints": [
+            "localStorage and sessionStorage are limited to small, string key-value pairs.",
+            "Cookies are primarily for server communication and have very small storage limits.",
+            "IndexedDB is designed for large volumes of structured data and asynchronous operations, making it ideal for this use case."
+          ],
+          "keyConcepts": [
+            "indexeddb",
+            "localstorage",
+            "sessionstorage",
+            "client-side storage",
+            "offline data"
+          ],
+          "evaluationCriteria": [
+            "Knowledge of browser storage APIs",
+            "Ability to select the best API based on data characteristics and requirements"
+          ],
+          "example": "For a note-taking application that needs to save user notes with titles, content, tags, and last-modified dates, and support offline editing, IndexedDB would be chosen due to its ability to store structured objects and support queries.",
+          "tags": [
+            "caching",
+            "indexeddb",
+            "offline",
+            "data-storage"
+          ],
+          "prerequisites": [
+            "browser_storage"
+          ],
+          "complexity": 6,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_caching_8",
+          "topic": "HTTP Caching",
+          "level": "medium",
+          "type": "open",
+          "question": "How do `ETag` and `Last-Modified` headers work together to optimize subsequent requests for a resource?",
+          "answer": "`ETag` and `Last-Modified` headers are both mechanisms for **conditional requests** in HTTP caching, used by the server to determine if a cached resource held by the client is still fresh, avoiding the need to re-send the entire resource if it hasn't changed. They work during the revalidation phase of caching (when `Cache-Control: no-cache` or `max-age=0` is used):\n\n1.  **Initial Request (Resource Not Cached / Stale):**\n    *   The client requests a resource (e.g., `GET /script.js`).\n    *   The server responds with a `200 OK` status and includes the `Last-Modified` header (timestamp of last change) and/or an `ETag` header (a unique identifier, often a hash of the content).\n    *   The browser caches the resource along with these headers.\n\n2.  **Subsequent Request (Revalidation):**\n    *   When the client requests the same resource again, and its cached copy is deemed 'stale' (e.g., `max-age` expired, or `no-cache` is set), the browser sends a **conditional GET request**.\n    *   It includes the `If-Modified-Since` header with the value from the `Last-Modified` header it previously received.\n    *   It also includes the `If-None-Match` header with the value from the `ETag` header it previously received.\n\n3.  **Server Response:**\n    *   The server checks the `If-Modified-Since` and/or `If-None-Match` headers against its current version of the resource.\n    *   **If the resource has NOT changed**: The server responds with a `304 Not Modified` status. This response contains no body, signaling the browser to use its existing cached copy. This is highly efficient as it saves bandwidth.\n    *   **If the resource HAS changed**: The server responds with a `200 OK` status, includes the *new* resource body, and updated `Last-Modified` and `ETag` headers. The browser then replaces its old cached copy with the new one.\n\n`ETag` is generally preferred over `Last-Modified` because it is more precise (e.g., `Last-Modified` might not change if content changes but timestamp doesn't, or vice-versa with small non-functional changes) and can handle changes that don't affect the modification date. They can be used together, with `ETag` usually taking precedence if both are present.",
+          "options": [],
+          "analysisPoints": [
+            "Explains the purpose of both headers in conditional requests.",
+            "Details the flow from initial request to subsequent revalidation.",
+            "Clearly states the `If-Modified-Since` and `If-None-Match` request headers.",
+            "Explains the `304 Not Modified` response and its benefit.",
+            "Highlights the precision advantage of `ETag` over `Last-Modified`."
+          ],
+          "keyConcepts": [
+            "http caching",
+            "etag",
+            "last-modified",
+            "conditional requests",
+            "304 not modified",
+            "revalidation"
+          ],
+          "evaluationCriteria": [
+            "Deep understanding of HTTP caching mechanisms",
+            "Ability to explain the request/response flow",
+            "Comparison of header strengths"
+          ],
+          "example": null,
+          "tags": [
+            "http",
+            "caching",
+            "performance",
+            "networking",
+            "advanced"
+          ],
+          "prerequisites": [
+            "http_methods_headers"
+          ],
+          "complexity": 8,
+          "interviewFrequency": 9,
+          "learningPath": "advanced"
+        },
+        {
+          "id": "question_caching_9",
+          "topic": "React Query / SWR Caching",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "What is 'automatic revalidation' in the context of libraries like React Query or SWR?",
+          "answer": "Automatically re-fetching data from the server in the background (and updating cache) when certain events occur, like window focus or network reconnect.",
+          "options": [],
+          "analysisPoints": [
+            "Focus on automatic background re-fetching and common triggers."
+          ],
+          "keyConcepts": [
+            "react query",
+            "swr",
+            "caching",
+            "revalidation"
+          ],
+          "evaluationCriteria": [
+            "Basic understanding of library-specific caching"
+          ],
+          "example": null,
+          "tags": [
+            "react-query",
+            "swr",
+            "caching",
+            "frontend-libraries"
+          ],
+          "prerequisites": [
+            "react_basics"
+          ],
+          "complexity": 4,
+          "interviewFrequency": 6,
+          "learningPath": "intermediate"
+        }
+      ],
+      "tasks": [
+        {
+          "id": "task_optimize_bundle_size",
+          "title": "Optimize Webpack Configuration for Production Bundle Size",
+          "description": "\nGiven a minimal Webpack configuration, extend it to include common production optimizations aimed at reducing the final JavaScript bundle size and improving load performance. Specifically, implement configurations for:\n\n1.  **Code Splitting**: Split the application into separate chunks (e.g., vendors, main application, and dynamic imports).\n2.  **Tree Shaking**: Ensure unused exports from libraries are removed.\n3.  **Minification**: Minify JavaScript and CSS.\n4.  **Environment Variables**: Inject `process.env.NODE_ENV` as 'production'.\n\nYour goal is to demonstrate how these settings are applied in a Webpack setup.\n",
+          "difficulty": "medium",
+          "startingCode": "const path = require('path');\nconst HtmlWebpackPlugin = require('html-webpack-plugin');\nconst MiniCssExtractPlugin = require('mini-css-extract-plugin');\n\nmodule.exports = {\n  mode: 'development', // Change to 'production' for this task\n  entry: './src/index.js',\n  output: {\n    filename: 'bundle.js',\n    path: path.resolve(__dirname, 'dist'),\n  },\n  module: {\n    rules: [\n      {\n        test: /\\.js$/,\n        exclude: /node_modules/,\n        use: {\n          loader: 'babel-loader',\n          options: {\n            presets: ['@babel/preset-env', '@babel/preset-react'],\n          },\n        },\n      },\n      {\n        test: /\\.css$/,\n        use: ['style-loader', 'css-loader'],\n      },\n    ],\n  },\n  plugins: [\n    new HtmlWebpackPlugin({\n      template: './public/index.html',\n    }),\n  ],\n};\n\n// src/index.js (Example App)\nimport React from 'react';\nimport ReactDOM from 'react-dom/client';\nimport './index.css';\n\nconst App = () => {\n  return (\n    <div>\n      <h1>Hello Webpack Optimization!</h1>\n      <button onClick={() => import('./dynamicComponent').then(module => {\n        const DynamicComponent = module.default;\n        alert('Dynamic Component Loaded!');\n        // In a real app, you'd render it here\n      })}>Load Dynamic Component</button>\n    </div>\n  );\n};\n\nconst root = ReactDOM.createRoot(document.getElementById('root'));\nroot.render(<App />);\n\n// src/index.css\nbody {\n  font-family: sans-serif;\n  background-color: #f0f0f0;\n}\n\n/* src/dynamicComponent.js (This file should be lazy-loaded) */\nexport default function DynamicComponent() {\n  return <h2>I'm a dynamically loaded component!</h2>;\n}\n\n/* public/index.html */\n<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n    <meta charset=\"UTF-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <title>Webpack App</title>\n</head>\n<body>\n    <div id=\"root\"></div>\n</body>\n</html>\n",
+          "solutionCode": "const path = require('path');\nconst HtmlWebpackPlugin = require('html-webpack-plugin');\nconst MiniCssExtractPlugin = require('mini-css-extract-plugin');\nconst CssMinimizerPlugin = require('css-minimizer-webpack-plugin');\nconst TerserPlugin = require('terser-webpack-plugin');\nconst webpack = require('webpack');\n\nmodule.exports = {\n  mode: 'production', // CRITICAL: Set mode to production\n  entry: './src/index.js',\n  output: {\n    filename: '[name].[contenthash].js', // Use contenthash for cache busting\n    path: path.resolve(__dirname, 'dist'),\n    clean: true, // Clean the dist folder before each build\n    chunkFilename: '[name].[contenthash].js', // For dynamic imports\n  },\n  module: {\n    rules: [\n      {\n        test: /\\.js$/,\n        exclude: /node_modules/,\n        use: {\n          loader: 'babel-loader',\n          options: {\n            presets: ['@babel/preset-env', '@babel/preset-react'],\n          },\n        },\n      },\n      {\n        test: /\\.css$/,\n        use: [MiniCssExtractPlugin.loader, 'css-loader'], // Use MiniCssExtractPlugin for production CSS\n      },\n    ],\n  },\n  plugins: [\n    new HtmlWebpackPlugin({\n      template: './public/index.html',\n    }),\n    new MiniCssExtractPlugin({\n      filename: '[name].[contenthash].css', // Use contenthash for cache busting\n    }),\n    new webpack.DefinePlugin({\n      'process.env.NODE_ENV': JSON.stringify('production'), // Inject production env variable\n    }),\n  ],\n  optimization: {\n    minimize: true, // Enable minification\n    minimizer: [\n      new TerserPlugin(), // Minify JavaScript\n      new CssMinimizerPlugin(), // Minify CSS\n    ],\n    splitChunks: {\n      chunks: 'all', // Apply code splitting to all chunks\n      // Optional: more granular control for caching groups\n      cacheGroups: {\n        vendor: {\n          test: /[\\\\/]node_modules[\\\\/]/,\n          name: 'vendors',\n          chunks: 'all',\n        },\n      },\n    },\n    usedExports: true, // Enable tree shaking (Webpack does this by default in 'production' mode, but good to be explicit)\n  },\n};\n\n// src/index.js (Example App)\nimport React from 'react';\nimport ReactDOM from 'react-dom/client';\nimport './index.css';\n\n// Make sure to use named imports for tree shaking benefit\nimport { SomeUnusedFunction } from './utility'; // This should be tree-shaken\n\nconst App = () => {\n  return (\n    <div>\n      <h1>Hello Webpack Optimization!</h1>\n      <button onClick={() => import('./dynamicComponent').then(module => {\n        const DynamicComponent = module.default;\n        alert('Dynamic Component Loaded!');\n        // In a real app, you'd render it here\n      })}>Load Dynamic Component</button>\n    </div>\n  );\n};\n\nconst root = ReactDOM.createRoot(document.getElementById('root'));\nroot.render(<App />);\n\n// src/index.css\nbody {\n  font-family: sans-serif;\n  background-color: #f0f0f0;\n}\n\n/* src/dynamicComponent.js (This file should be lazy-loaded) */\nexport default function DynamicComponent() {\n  return <h2>I'm a dynamically loaded component!</h2>;\n}\n\n// src/utility.js (New file to demonstrate tree shaking)\nexport function SomeUsedFunction() {\n  console.log('This function is used.');\n}\n\nexport function SomeUnusedFunction() {\n  console.log('This function is NOT used and should be tree-shaken.');\n}\n\n/* public/index.html */\n<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n    <meta charset=\"UTF-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <title>Webpack App</title>\n</head>\n<body>\n    <div id=\"root\"></div>\n</body>\n</html>\n",
+          "testCases": [
+            "Run `npm run build` and inspect the `dist` folder: Verify multiple `.js` and `.css` files with `contenthash` are generated (main bundle, vendor bundle, dynamic component bundle).",
+            "Inspect the generated JavaScript files: Confirm that the `SomeUnusedFunction` from `utility.js` is not present in the final main bundle (evidence of tree shaking).",
+            "Inspect the generated `.js` and `.css` files: Confirm they are minified (no whitespace, short variable names).",
+            "Serve the `dist` folder and check developer tools: Observe that the `dynamicComponent.js` chunk is only loaded when the button is clicked, not on initial page load (evidence of code splitting).",
+            "Check browser console for `process.env.NODE_ENV`: Ensure it is 'production' when the app runs."
+          ],
+          "hints": [
+            "Remember to set `mode: 'production'` in your Webpack config, as it enables many optimizations by default.",
+            "For CSS extraction and minification, you'll need `mini-css-extract-plugin` and `css-minimizer-webpack-plugin`.",
+            "`optimization.splitChunks` is key for code splitting.",
+            "To effectively demonstrate tree shaking, ensure you have unused `export` functions/variables and use named imports where possible."
+          ],
+          "tags": [
+            "webpack",
+            "optimization",
+            "production",
+            "build-process",
+            "code-splitting",
+            "tree-shaking",
+            "minification"
+          ],
+          "timeEstimate": 60,
+          "prerequisites": [
+            "webpack_basics",
+            "javascript_modules"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 9,
+          "learningPath": "advanced",
+          "relatedConcepts": [
+            "theory_web_app_production_readiness"
+          ]
+        },
+        {
+          "id": "task_implement_cdn_caching",
+          "title": "Simulate CDN and HTTP Caching for Static Assets",
+          "description": "\nCreate a simple Node.js Express server that serves static assets (e.g., `index.html`, `app.js`, `style.css`) and configures appropriate HTTP `Cache-Control` headers for them. The goal is to simulate how a CDN or a well-configured web server would handle caching of static files.\n\n**Requirements:**\n1.  Serve `index.html` with a `Cache-Control` header indicating `no-cache` or `max-age=0, must-revalidate` (as HTML pages often need to be fresh).\n2.  Serve `app.js` and `style.css` (simulating versioned assets) with a `Cache-Control` header for aggressive caching, e.g., `public, max-age=31536000, immutable`.\n3.  Include a basic `app.js` and `style.css` that can be loaded by `index.html`.\n4.  Optionally, include `ETag` or `Last-Modified` headers for the `index.html` to demonstrate revalidation.\n\n**Bonus:** Implement a dynamic API endpoint `/api/data` that serves JSON and has `Cache-Control: no-store` to demonstrate completely preventing caching for sensitive data.\n",
+          "difficulty": "medium",
+          "startingCode": "// server.js\nconst express = require('express');\nconst path = require('path');\nconst app = express();\nconst PORT = 3000;\n\n// Basic static file serving (needs modification)\napp.use(express.static(path.join(__dirname, 'public')));\n\n// Start the server\napp.listen(PORT, () => {\n  console.log(`Server running on http://localhost:${PORT}`);\n});\n\n// public/index.html\n<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n    <meta charset=\"UTF-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <title>Caching Demo</title>\n    <link rel=\"stylesheet\" href=\"/style.css\">\n</head>\n<body>\n    <h1>HTTP Caching Demo</h1>\n    <p>Check network tab for cache headers!</p>\n    <script src=\"/app.js\"></script>\n</body>\n</html>\n\n// public/app.js\nconsole.log('App script loaded!');\n\n// public/style.css\nbody {\n    background-color: lightblue;\n}\n",
+          "solutionCode": "// server.js\nconst express = require('express');\nconst path = require('path');\nconst fs = require('fs');\nconst crypto = require('crypto');\nconst app = express();\nconst PORT = 3000;\n\nconst publicPath = path.join(__dirname, 'public');\n\n// Middleware for ETag generation (for index.html)\napp.use((req, res, next) => {\n  if (req.path === '/index.html' || req.path === '/') {\n    const filePath = path.join(publicPath, 'index.html');\n    fs.readFile(filePath, (err, data) => {\n      if (err) {\n        return next(err);\n      }\n      const hash = crypto.createHash('md5').update(data).digest('hex');\n      res.setHeader('ETag', `\"${hash}\"`);\n      res.setHeader('Last-Modified', new Date().toUTCString()); // Use current time for simplicity\n      next();\n    });\n  } else {\n    next();\n  }\n});\n\n// 1. Serve index.html (or root path) with no-cache strategy\napp.get('/', (req, res) => {\n  res.setHeader('Cache-Control', 'no-cache, must-revalidate'); // Always revalidate\n  // Check for conditional request headers if ETag/Last-Modified are used\n  if (req.fresh) { // Express's req.fresh checks If-None-Match and If-Modified-Since\n    return res.sendStatus(304); // Send Not Modified if browser's cache is still valid\n  }\n  res.sendFile(path.join(publicPath, 'index.html'));\n});\n\n// 2. Serve versioned assets (app.js, style.css) with aggressive caching\napp.get('/app.js', (req, res) => {\n  res.setHeader('Cache-Control', 'public, max-age=31536000, immutable'); // Cache for 1 year, never revalidate\n  res.sendFile(path.join(publicPath, 'app.js'));\n});\n\napp.get('/style.css', (req, res) => {\n  res.setHeader('Cache-Control', 'public, max-age=31536000, immutable'); // Cache for 1 year, never revalidate\n  res.sendFile(path.join(publicPath, 'style.css'));\n});\n\n// 4. Bonus: Dynamic API endpoint with no-store\napp.get('/api/data', (req, res) => {\n  res.setHeader('Cache-Control', 'no-store'); // Never cache this response\n  res.json({ timestamp: new Date().toISOString(), message: 'Sensitive dynamic data' });\n});\n\n// Serve other static files (optional, for robustness)\napp.use(express.static(publicPath));\n\n// Start the server\napp.listen(PORT, () => {\n  console.log(`Server running on http://localhost:${PORT}`);\n  console.log('Open http://localhost:3000 in your browser and check the Network tab.');\n  console.log('Reload the page multiple times to observe caching behavior.');\n});\n\n// public/index.html (Note: scripts and links paths assume they are served directly at root or with path segments)\n<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n    <meta charset=\"UTF-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <title>Caching Demo</title>\n    <link rel=\"stylesheet\" href=\"/style.css\">\n</head>\n<body>\n    <h1>HTTP Caching Demo</h1>\n    <p>Check network tab for cache headers!</p>\n    <script src=\"/app.js\"></script>\n    <button id=\"fetchApi\">Fetch API Data</button>\n    <div id=\"api-data\"></div>\n    <script>\n        document.getElementById('fetchApi').addEventListener('click', async () => {\n            const response = await fetch('/api/data');\n            const data = await response.json();\n            document.getElementById('api-data').innerText = JSON.stringify(data, null, 2);\n        });\n    </script>\n</body>\n</html>\n\n// public/app.js\nconsole.log('App script loaded! Version 1.0'); // Add a version to easily see if it changes\n\n// public/style.css\nbody {\n    background-color: lightblue;\n}\n",
+          "testCases": [
+            "Access `http://localhost:3000` in your browser. Open developer tools (Network tab).",
+            "Observe the initial load: `index.html` should show `200 OK` with `Cache-Control: no-cache, must-revalidate`. `app.js` and `style.css` should show `200 OK` with `Cache-Control: public, max-age=31536000, immutable`.",
+            "Perform a hard refresh (Ctrl+Shift+R or Cmd+Shift+R): `index.html` should still be `200 OK` (full revalidation). `app.js` and `style.css` should show `200 OK` (CDN-like re-fetch for hard refresh, but ideally `from memory/disk cache` for soft refresh).",
+            "Perform a soft refresh (F5 or Cmd+R): `index.html` should show `304 Not Modified` (if ETag/Last-Modified logic is correctly applied and content hasn't changed). `app.js` and `style.css` should show `200 OK` or `from disk cache` or `from memory cache` (not a network request) for aggressive caching.",
+            "Click the 'Fetch API Data' button: The `/api/data` request should always show `200 OK` and `Cache-Control: no-store`.",
+            "Modify `public/app.js` (e.g., change the console log message). Restart the server. Reload the page. Verify the new `app.js` content is loaded (simulating a new version in a real CDN).",
+            "Clear browser cache completely, then reload. Observe fresh downloads of all resources."
+          ],
+          "hints": [
+            "Use `express.static` for basic static file serving, but you'll need custom `app.get` routes for specific header control.",
+            "Use `res.setHeader('Cache-Control', '...')` to set the headers.",
+            "For `index.html` revalidation, you can leverage Express's `req.fresh` property after setting `ETag` or `Last-Modified` headers.",
+            "Ensure your `index.html` links to `/app.js` and `/style.css` without explicit versioning in the URL for this test, to show header-based caching.",
+            "Remember to clear your browser cache between tests to get a clean slate."
+          ],
+          "tags": [
+            "http",
+            "caching",
+            "performance",
+            "node.js",
+            "express.js",
+            "frontend-deployment"
+          ],
+          "timeEstimate": 90,
+          "prerequisites": [
+            "node_npm",
+            "express_js",
+            "http_protocols"
+          ],
+          "complexity": 8,
+          "interviewRelevance": 9,
+          "learningPath": "advanced",
+          "relatedConcepts": [
+            "theory_web_app_production_readiness",
+            "theory_client_side_caching"
+          ]
+        },
+        {
+          "id": "task_implement_offline_page",
+          "title": "Implement a Basic Offline Page with Service Worker",
+          "description": "\nCreate a simple web application that displays an offline page when the user loses network connectivity. This task requires implementing a Service Worker to intercept network requests and serve cached content.\n\n**Requirements:**\n1.  Create an `index.html` and a basic `style.css`.\n2.  Create an `offline.html` page that will be displayed when offline.\n3.  Register a `service-worker.js`.\n4.  In the `service-worker.js`:\n    *   During the `install` event, cache `index.html`, `style.css`, and `offline.html`.\n    *   During the `fetch` event, implement a **network-first with cache fallback** strategy for *all* requests. If the network request fails, serve the `offline.html`.\n\n**Testing:**\nServe the application, visit it, then go offline (e.g., disable Wi-Fi, use Chrome DevTools 'Offline' mode). Try to navigate or refresh.\n",
+          "difficulty": "medium",
+          "startingCode": "// public/index.html\n<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n    <meta charset=\"UTF-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <title>Offline App</title>\n    <link rel=\"stylesheet\" href=\"/style.css\">\n</head>\n<body>\n    <h1>Welcome to My Offline-Enabled App!</h1>\n    <p>This is the main page.</p>\n    <p>Try going offline and refreshing or navigating.</p>\n\n    <script>\n        if ('serviceWorker' in navigator) {\n            window.addEventListener('load', () => {\n                navigator.serviceWorker.register('/service-worker.js')\n                    .then(registration => {\n                        console.log('Service Worker registered:', registration);\n                    })\n                    .catch(error => {\n                        console.error('Service Worker registration failed:', error);\n                    });\n            });\n        }\n    </script>\n</body>\n</html>\n\n// public/style.css\nbody {\n    font-family: sans-serif;\n    text-align: center;\n    padding: 20px;\n    background-color: #f4f4f4;\n    color: #333;\n}\n\nh1 {\n    color: #007bff;\n}\n\n// public/offline.html\n<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n    <meta charset=\"UTF-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <title>You are Offline!</title>\n    <style>\n        body {\n            font-family: sans-serif;\n            text-align: center;\n            padding: 50px;\n            background-color: #ffe0b2; /* Light orange */\n            color: #d32f2f; /* Dark red */\n        }\n        h1 {\n            color: #ef6c00; /* Orange */\n        }\n        p {\n            font-size: 1.2em;\n        }\n    </style>\n</head>\n<body>\n    <h1>Oops! You're Offline.</h1>\n    <p>It looks like you're not connected to the internet.</p>\n    <p>Don't worry, you can still use some features!</p>\n</body>\n</html>\n\n// service-worker.js (Empty - needs to be implemented)\n",
+          "solutionCode": "// server.js (for serving files, if not using a static host)\nconst express = require('express');\nconst path = require('path');\nconst app = express();\nconst PORT = 3000;\n\napp.use(express.static(path.join(__dirname, 'public')));\n\napp.listen(PORT, () => {\n  console.log(`Server running on http://localhost:${PORT}`);\n  console.log('Visit http://localhost:3000');\n  console.log('Then try going offline (DevTools -> Network -> Offline) and refresh/navigate.');\n});\n\n// public/index.html (Same as starting code)\n<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n    <meta charset=\"UTF-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <title>Offline App</title>\n    <link rel=\"stylesheet\" href=\"/style.css\">\n</head>\n<body>\n    <h1>Welcome to My Offline-Enabled App!</h1>\n    <p>This is the main page.</p>\n    <p>Try going offline and refreshing or navigating.</p>\n\n    <script>\n        if ('serviceWorker' in navigator) {\n            window.addEventListener('load', () => {\n                navigator.serviceWorker.register('/service-worker.js', { scope: '/' })\n                    .then(registration => {\n                        console.log('Service Worker registered:', registration);\n                    })\n                    .catch(error => {\n                        console.error('Service Worker registration failed:', error);\n                    });\n            });\n        }\n    </script>\n</body>\n</html>\n\n// public/style.css (Same as starting code)\nbody {\n    font-family: sans-serif;\n    text-align: center;\n    padding: 20px;\n    background-color: #f4f4f4;\n    color: #333;\n}\n\nh1 {\n    color: #007bff;\n}\n\n// public/offline.html (Same as starting code)\n<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n    <meta charset=\"UTF-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <title>You are Offline!</title>\n    <style>\n        body {\n            font-family: sans-serif;\n            text-align: center;\n            padding: 50px;\n            background-color: #ffe0b2; /* Light orange */\n            color: #d32f2f; /* Dark red */\n        }\n        h1 {\n            color: #ef6c00; /* Orange */\n        }\n        p {\n            font-size: 1.2em;\n        }\n    </style>\n</head>\n<body>\n    <h1>Oops! You're Offline.</h1>\n    <p>It looks like you're not connected to the internet.</p>\n    <p>Don't worry, you can still use some features!</p>\n</body>\n</html>\n\n// public/service-worker.js\nconst CACHE_NAME = 'offline-fallback-cache-v1';\nconst OFFLINE_URL = '/offline.html';\nconst ASSETS_TO_CACHE = [\n  '/', // '/' represents index.html\n  '/index.html',\n  '/style.css',\n  OFFLINE_URL\n];\n\nself.addEventListener('install', event => {\n  event.waitUntil(\n    caches.open(CACHE_NAME)\n      .then(cache => {\n        console.log('[Service Worker] Caching critical assets for offline use.');\n        return cache.addAll(ASSETS_TO_CACHE);\n      })\n      .catch(error => console.error('[Service Worker] Failed to cache assets during install:', error))\n  );\n});\n\nself.addEventListener('activate', event => {\n  event.waitUntil(\n    // Clean up old caches if any\n    caches.keys().then(cacheNames => {\n      return Promise.all(\n        cacheNames.map(cacheName => {\n          if (cacheName !== CACHE_NAME) {\n            console.log('[Service Worker] Deleting old cache:', cacheName);\n            return caches.delete(cacheName);\n          }\n        })\n      );\n    })\n  );\n  // Take control of uncontrolled clients immediately\n  self.clients.claim();\n  console.log('[Service Worker] Activated and claimed clients.');\n});\n\nself.addEventListener('fetch', event => {\n  // Handle navigation requests (e.g., direct page loads) and other requests\n  event.respondWith(\n    fetch(event.request)\n      .then(networkResponse => {\n        // If network is successful, cache the new response and return it\n        // Make sure the response is valid before caching\n        if (!networkResponse || networkResponse.status !== 200 || networkResponse.type !== 'basic') {\n          return networkResponse; // Don't cache opaque responses or errors\n        }\n        const responseToCache = networkResponse.clone();\n        caches.open(CACHE_NAME)\n          .then(cache => {\n            cache.put(event.request, responseToCache);\n          });\n        return networkResponse;\n      })\n      .catch(() => {\n        // Network failed (e.g., offline or network error)\n        // Try to serve from cache first\n        return caches.match(event.request)\n          .then(cachedResponse => {\n            if (cachedResponse) {\n              console.log('[Service Worker] Serving from cache:', event.request.url);\n              return cachedResponse;\n            }\n            // If not in cache, fallback to the offline page for navigation requests\n            if (event.request.mode === 'navigate') {\n                console.log('[Service Worker] Network failed and not in cache, serving offline page for navigation.');\n                return caches.match(OFFLINE_URL);\n            }\n            // For other asset requests (images, scripts, etc.), return a generic error or nothing\n            return new Response('Network error or not found in cache.', { status: 503, statusText: 'Service Unavailable' });\n          });\n      })\n  );\n});\n",
+          "testCases": [
+            "**Initial Load (Online):** Visit `http://localhost:3000`. Observe in DevTools Network tab that `index.html` and `style.css` are fetched normally (status 200). `service-worker.js` should register.",
+            "**Verify Cache:** Go to DevTools -> Application -> Cache Storage. Expand `offline-fallback-cache-v1` and confirm `index.html`, `style.css`, and `offline.html` are present.",
+            "**Go Offline and Refresh:** In DevTools Network tab, check 'Offline'. Refresh the page. The `offline.html` content should be displayed instead of `index.html` (even though `index.html` is cached, the strategy prioritizes network first for navigations, and upon failure, falls back to the specified offline URL).",
+            "**Go Offline and Navigate:** With 'Offline' checked, try navigating to an un-cached URL (e.g., `http://localhost:3000/nonexistent.html`). The `offline.html` should be displayed.",
+            "**Go Online Again:** Uncheck 'Offline'. Refresh. The main `index.html` content should return."
+          ],
+          "hints": [
+            "Remember that Service Workers require HTTPS or `localhost` for development.",
+            "The `install` event is where you typically precache core assets.",
+            "The `fetch` event listener is where you define your caching strategy.",
+            "Use `event.respondWith()` to intercept and handle network requests.",
+            "The `caches.open()` and `cache.addAll()` methods are for precaching.",
+            "For network-first with fallback, use `fetch().catch()` to handle network failures, and then `caches.match()` for the fallback.",
+            "Don't forget to cache the `offline.html` itself during installation.",
+            "`self.clients.claim()` in the `activate` event helps the new Service Worker take immediate control of existing open tabs."
+          ],
+          "tags": [
+            "service-workers",
+            "pwa",
+            "offline",
+            "caching",
+            "frontend"
+          ],
+          "timeEstimate": 75,
+          "prerequisites": [
+            "javascript_promises",
+            "fetch_api",
+            "basic_web_server_setup"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 8,
+          "learningPath": "advanced",
+          "relatedConcepts": [
+            "theory_service_workers",
+            "theory_client_side_caching"
+          ]
+        },
+        {
+          "id": "task_background_computation",
+          "title": "Implement a Fibonacci Sequence Calculator with a Web Worker",
+          "description": "\nCreate a web page that calculates the Nth Fibonacci number. Implement the calculation logic in a Web Worker to ensure the main thread (UI) remains responsive, even for large N values that would otherwise block the page.\n\n**Requirements:**\n1.  Create an `index.html` with an input field for 'N', a button to trigger calculation, a display area for the result, and a simple UI element (e.g., a spinning loader or an incrementing counter) that updates frequently on the main thread.\n2.  Create a `worker.js` file to perform the Fibonacci calculation (recursive or iterative).\n3.  In `index.html`, register and communicate with the `worker.js`:\n    *   Send the input `N` to the worker when the button is clicked.\n    *   Display the result received from the worker.\n    *   Ensure the UI element (spinner/counter) remains responsive *while* the calculation is ongoing in the worker.\n\n**Fibonacci Calculation (Nth number):**\n- `fib(0) = 0`\n- `fib(1) = 1`\n- `fib(n) = fib(n-1) + fib(n-2)` for `n > 1`\n\nChoose a recursive implementation for simplicity, as it demonstrates blocking behavior well if not in a worker (or use an iterative one if recursion depth is a concern for large N).\n",
+          "difficulty": "medium",
+          "startingCode": "// public/index.html\n<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n    <meta charset=\"UTF-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <title>Fibonacci Worker</title>\n    <style>\n        body { font-family: sans-serif; text-align: center; padding: 20px; }\n        input, button { margin: 10px; padding: 8px; }\n        #counter { font-size: 2em; margin-top: 20px; color: green; }\n        #result { font-size: 1.5em; margin-top: 20px; color: blue; }\n    </style>\n</head>\n<body>\n    <h1>Fibonacci Calculator (Web Worker Demo)</h1>\n    <div>\n        <label for=\"fib-input\">Calculate Fibonacci for N:</label>\n        <input type=\"number\" id=\"fib-input\" value=\"40\">\n        <button id=\"calculate-btn\">Calculate</button>\n    </div>\n    <p id=\"result\">Result: </p>\n    <p id=\"counter\">Counter: 0</p>\n\n    <script>\n        const fibInput = document.getElementById('fib-input');\n        const calculateBtn = document.getElementById('calculate-btn');\n        const resultDiv = document.getElementById('result');\n        const counterDiv = document.getElementById('counter');\n        let counter = 0;\n\n        // Simple counter to prove UI responsiveness\n        setInterval(() => {\n            counter++;\n            counterDiv.textContent = `Counter: ${counter}`;\n        }, 100);\n\n        calculateBtn.addEventListener('click', () => {\n            const n = parseInt(fibInput.value, 10);\n            if (isNaN(n) || n < 0) {\n                alert('Please enter a valid positive number for N.');\n                return;\n            }\n            resultDiv.textContent = 'Result: Calculating...';\n            // TODO: Implement Web Worker logic here\n            // For now, a blocking call (remove later):\n            // resultDiv.textContent = `Result: ${fibonacci(n)}`;\n        });\n\n        // Blocking Fibonacci function (for comparison/initial test)\n        // function fibonacci(num) {\n        //     if (num <= 1) return num;\n        //     return fibonacci(num - 1) + fibonacci(num - 2);\n        // }\n\n        // TODO: Create worker.js and integrate\n    </script>\n</body>\n</html>\n\n// worker.js (Empty - needs to be implemented)\n",
+          "solutionCode": "// public/index.html\n<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n    <meta charset=\"UTF-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <title>Fibonacci Worker</title>\n    <style>\n        body { font-family: sans-serif; text-align: center; padding: 20px; }\n        input, button { margin: 10px; padding: 8px; }\n        #counter { font-size: 2em; margin-top: 20px; color: green; }\n        #result { font-size: 1.5em; margin-top: 20px; color: blue; }\n    </style>\n</head>\n<body>\n    <h1>Fibonacci Calculator (Web Worker Demo)</h1>\n    <div>\n        <label for=\"fib-input\">Calculate Fibonacci for N:</label>\n        <input type=\"number\" id=\"fib-input\" value=\"40\">\n        <button id=\"calculate-btn\">Calculate</button>\n    </div>\n    <p id=\"result\">Result: </p>\n    <p id=\"counter\">Counter: 0</p>\n\n    <script>\n        const fibInput = document.getElementById('fib-input');\n        const calculateBtn = document.getElementById('calculate-btn');\n        const resultDiv = document.getElementById('result');\n        const counterDiv = document.getElementById('counter');\n        let counter = 0;\n\n        // Simple counter to prove UI responsiveness\n        setInterval(() => {\n            counter++;\n            counterDiv.textContent = `Counter: ${counter}`;\n        }, 100);\n\n        // Web Worker integration\n        if (window.Worker) {\n            const fibWorker = new Worker('/worker.js'); // Path to your worker script\n\n            fibWorker.onmessage = function(event) {\n                const { result, n } = event.data;\n                resultDiv.textContent = `Result for fib(${n}): ${result}`;\n                console.log(`Calculation for fib(${n}) completed in worker.`);\n            };\n\n            fibWorker.onerror = function(error) {\n                console.error('Worker error:', error);\n                resultDiv.textContent = 'Result: Error during calculation.';\n            };\n\n            calculateBtn.addEventListener('click', () => {\n                const n = parseInt(fibInput.value, 10);\n                if (isNaN(n) || n < 0) {\n                    alert('Please enter a valid positive number for N.');\n                    return;\n                }\n                resultDiv.textContent = 'Result: Calculating... (Check Counter for responsiveness)';\n                console.log(`Sending fib(${n}) to worker...`);\n                fibWorker.postMessage({ n: n }); // Send data to the worker\n            });\n        } else {\n            resultDiv.textContent = 'Web Workers are not supported in this browser.';\n            calculateBtn.disabled = true;\n        }\n    </script>\n</body>\n</html>\n\n// public/worker.js\n// Fibonacci calculation function\nfunction fibonacci(num) {\n    if (num <= 1) return num;\n    let a = 0, b = 1, temp;\n    for (let i = 2; i <= num; i++) {\n        temp = a + b;\n        a = b;\n        b = temp;\n    }\n    return b;\n    // Recursive (more demonstrative of blocking if not in worker, but less efficient for large N)\n    // if (num <= 1) return num;\n    // return fibonacci(num - 1) + fibonacci(num - 2);\n}\n\n// Listen for messages from the main thread\nonmessage = function(event) {\n    const n = event.data.n;\n    console.log(`Worker: Calculating fib(${n})...`);\n    const result = fibonacci(n);\n    console.log(`Worker: Finished fib(${n}) = ${result}.`);\n    // Send the result back to the main thread\n    postMessage({ result: result, n: n });\n};\n",
+          "testCases": [
+            "**UI Responsiveness Test:**\n    *   Start the server and open the page.\n    *   Enter a large number for N (e.g., 40-45 for recursive, or 100,000 for iterative) into the input field.\n    *   Click 'Calculate'.\n    *   Observe the 'Counter' text: It should continue incrementing smoothly while the Fibonacci calculation is running in the background. If it freezes, the worker is not correctly implemented or the calculation is still on the main thread.",
+            "**Calculation Accuracy Test:**\n    *   Test with `N = 0`, expected result `0`.\n    *   Test with `N = 1`, expected result `1`.\n    *   Test with `N = 10`, expected result `55`.\n    *   Test with `N = 20`, expected result `6765`.\n    *   Test with a large N (e.g., 40-45) and verify the correct (large) number appears in the result area.",
+            "**Error Handling (Optional):**\n    *   Enter a non-numeric or negative value for N and ensure the alert message appears correctly without breaking the application.",
+            "**Worker Termination (Implicit):**\n    *   After a calculation, the worker will be idle. In a more complex app, you might explicitly `terminate()` it when no longer needed to free resources."
+          ],
+          "hints": [
+            "Remember that Web Workers cannot directly access the DOM. All communication must be done via `postMessage` and `onmessage`.",
+            "The `Worker` constructor takes the path to your worker script.",
+            "Ensure your `worker.js` file is accessible from the root of your served application.",
+            "For the Fibonacci function, an iterative approach is much more efficient for large N than a recursive one, though the recursive one highlights blocking better for smaller N if run on the main thread."
+          ],
+          "tags": [
+            "web-workers",
+            "performance",
+            "background-tasks",
+            "javascript",
+            "algorithms"
+          ],
+          "timeEstimate": 60,
+          "prerequisites": [
+            "javascript_async",
+            "dom_manipulation",
+            "basic_algorithms"
+          ],
+          "complexity": 6,
+          "interviewRelevance": 8,
+          "learningPath": "intermediate",
+          "relatedConcepts": [
+            "theory_service_workers"
+          ]
+        },
+        {
+          "id": "task_implement_cache_strategies",
+          "title": "Implement Multiple Service Worker Caching Strategies",
+          "description": "\nEnhance a `service-worker.js` file to demonstrate multiple caching strategies based on the type of request.\n\n**Requirements:**\n1.  **Cache-First for Static Assets:** Implement a strategy where the Service Worker first attempts to serve `index.html` and `style.css` from cache. If not found, it fetches from the network and caches the response.\n2.  **Network-First for API Requests:** For requests to a dummy API endpoint (e.g., `/api/data`), implement a network-first strategy. Try the network first; if it fails, fall back to a cached version. (You'll need a simple Express route for this API).\n3.  **Stale-While-Revalidate for Images:** For image requests (e.g., `.png`, `.jpg`), implement stale-while-revalidate. Serve a cached image immediately while fetching a fresh one in the background.\n4.  **Offline Fallback:** Ensure `index.html` and `offline.html` are always available for navigation fallback.\n\n**Test Setup:**\n*   `index.html` (main page)\n*   `style.css` (CSS)\n*   `offline.html` (fallback page)\n*   `sample.png` (an image file)\n*   A Node.js Express server to serve these static files and the `/api/data` endpoint.\n",
+          "difficulty": "hard",
+          "startingCode": "// server.js\nconst express = require('express');\nconst path = require('path');\nconst app = express();\nconst PORT = 3000;\n\napp.use(express.static(path.join(__dirname, 'public')));\n\napp.get('/api/data', (req, res) => {\n  // Simulate an API call\n  setTimeout(() => {\n    res.json({ message: 'Hello from API!', timestamp: new Date().toISOString() });\n  }, 500);\n});\n\napp.listen(PORT, () => {\n  console.log(`Server running on http://localhost:${PORT}`);\n  console.log('Visit http://localhost:3000');\n});\n\n// public/index.html\n<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n    <meta charset=\"UTF-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <title>Multi-Strategy Caching</title>\n    <link rel=\"stylesheet\" href=\"/style.css\">\n</head>\n<body>\n    <h1>Multi-Strategy Caching Demo</h1>\n    <img src=\"/sample.png\" alt=\"Sample Image\" width=\"200\">\n    <button id=\"fetchApi\">Fetch API Data</button>\n    <div id=\"api-data\"></div>\n\n    <script>\n        if ('serviceWorker' in navigator) {\n            window.addEventListener('load', () => {\n                navigator.serviceWorker.register('/service-worker.js')\n                    .then(registration => console.log('SW registered:', registration))\n                    .catch(error => console.error('SW registration failed:', error));\n            });\n        }\n\n        document.getElementById('fetchApi').addEventListener('click', async () => {\n            const response = await fetch('/api/data');\n            const data = await response.json();\n            document.getElementById('api-data').innerText = JSON.stringify(data, null, 2);\n        });\n    </script>\n</body>\n</html>\n\n// public/style.css\nbody { font-family: sans-serif; text-align: center; padding: 20px; }\nimg { border: 2px solid #ccc; margin: 20px; }\nbutton { padding: 10px 20px; }\n#api-data { margin-top: 20px; border: 1px solid #eee; padding: 10px; }\n\n// public/offline.html (Same as previous task's)\n<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n    <meta charset=\"UTF-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <title>You are Offline!</title>\n    <style>\n        body {\n            font-family: sans-serif;\n            text-align: center;\n            padding: 50px;\n            background-color: #ffe0b2; /* Light orange */\n            color: #d32f2f; /* Dark red */\n        }\n        h1 {\n            color: #ef6c00; /* Orange */\n        }\n        p {\n            font-size: 1.2em;\n        }\n    </style>\n</head>\n<body>\n    <h1>Oops! You're Offline.</h1>\n    <p>It looks like you're not connected to the internet.</p>\n    <p>Don't worry, you can still use some features!</p>\n</body>\n</html>\n\n// public/sample.png (Any small image file)\n\n// public/service-worker.js (Empty - needs implementation)\n",
+          "solutionCode": "// server.js (Same as starting code, ensures static files and API are served)\nconst express = require('express');\nconst path = require('path');\nconst app = express();\nconst PORT = 3000;\n\napp.use(express.static(path.join(__dirname, 'public')));\n\napp.get('/api/data', (req, res) => {\n  // Simulate an API call\n  setTimeout(() => {\n    res.json({ message: 'Hello from API!', timestamp: new Date().toISOString() });\n  }, 500);\n});\n\napp.listen(PORT, () => {\n  console.log(`Server running on http://localhost:${PORT}`);\n  console.log('Visit http://localhost:3000');\n});\n\n// public/index.html (Same as starting code)\n<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n    <meta charset=\"UTF-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <title>Multi-Strategy Caching</title>\n    <link rel=\"stylesheet\" href=\"/style.css\">\n</head>\n<body>\n    <h1>Multi-Strategy Caching Demo</h1>\n    <img src=\"/sample.png\" alt=\"Sample Image\" width=\"200\">\n    <button id=\"fetchApi\">Fetch API Data</button>\n    <div id=\"api-data\"></div>\n\n    <script>\n        if ('serviceWorker' in navigator) {\n            window.addEventListener('load', () => {\n                navigator.serviceWorker.register('/service-worker.js')\n                    .then(registration => console.log('SW registered:', registration))\n                    .catch(error => console.error('SW registration failed:', error));\n            });\n        }\n\n        document.getElementById('fetchApi').addEventListener('click', async () => {\n            const response = await fetch('/api/data');\n            const data = await response.json();\n            document.getElementById('api-data').innerText = JSON.stringify(data, null, 2);\n        });\n    </script>\n</body>\n</html>\n\n// public/style.css (Same as starting code)\nbody { font-family: sans-serif; text-align: center; padding: 20px; }\nimg { border: 2px solid #ccc; margin: 20px; }\nbutton { padding: 10px 20px; }\n#api-data { margin-top: 20px; border: 1px solid #eee; padding: 10px; }\n\n// public/offline.html (Same as previous task's solution)\n<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n    <meta charset=\"UTF-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <title>You are Offline!</title>\n    <style>\n        body {\n            font-family: sans-serif;\n            text-align: center;\n            padding: 50px;\n            background-color: #ffe0b2; /* Light orange */\n            color: #d32f2f; /* Dark red */\n        }\n        h1 {\n            color: #ef6c00; /* Orange */\n        }\n        p {\n            font-size: 1.2em;\n        }\n    </style>\n</head>\n<body>\n    <h1>Oops! You're Offline.</h1>\n    <p>It looks like you're not connected to the internet.</p>\n    <p>Don't worry, you can still use some features!</p>\n</body>\n</html>\n\n// public/sample.png (Any small image file, ensure it exists)\n\n// public/service-worker.js\nconst CACHE_NAME_STATIC = 'static-assets-cache-v1';\nconst CACHE_NAME_DYNAMIC = 'dynamic-data-cache-v1';\nconst CACHE_NAME_IMAGES = 'images-cache-v1';\nconst OFFLINE_URL = '/offline.html';\n\nconst staticAssetsToCache = [\n  '/',\n  '/index.html',\n  '/style.css',\n  OFFLINE_URL\n];\n\nself.addEventListener('install', event => {\n  event.waitUntil(\n    Promise.all([\n      caches.open(CACHE_NAME_STATIC).then(cache => cache.addAll(staticAssetsToCache)),\n      // Pre-cache common images if desired, otherwise let stale-while-revalidate handle it\n      // caches.open(CACHE_NAME_IMAGES).then(cache => cache.addAll(['/sample.png']))\n    ]).then(() => {\n      console.log('[Service Worker] Installation successful. Static assets cached.');\n    }).catch(error => {\n      console.error('[Service Worker] Installation failed:', error);\n    })\n  );\n});\n\nself.addEventListener('activate', event => {\n  event.waitUntil(\n    caches.keys().then(cacheNames => {\n      return Promise.all(\n        cacheNames.map(cacheName => {\n          if (![CACHE_NAME_STATIC, CACHE_NAME_DYNAMIC, CACHE_NAME_IMAGES].includes(cacheName)) {\n            console.log('[Service Worker] Deleting old cache:', cacheName);\n            return caches.delete(cacheName);\n          }\n        })\n      );\n    })\n  );\n  self.clients.claim(); // Take control of uncontrolled clients\n  console.log('[Service Worker] Activated and claimed clients.');\n});\n\nself.addEventListener('fetch', event => {\n  const requestUrl = new URL(event.request.url);\n  const requestPath = requestUrl.pathname;\n  const isNavigation = event.request.mode === 'navigate';\n\n  // 1. Cache-First for Static HTML/CSS (and navigation requests fallback)\n  if (isNavigation || staticAssetsToCache.includes(requestPath)) {\n    event.respondWith(\n      caches.match(event.request).then(cachedResponse => {\n        if (cachedResponse) {\n          console.log(`[Cache-First] Serving ${requestPath} from cache.`);\n          return cachedResponse;\n        }\n        console.log(`[Cache-First] Fetching ${requestPath} from network.`);\n        return fetch(event.request).then(networkResponse => {\n          return caches.open(CACHE_NAME_STATIC).then(cache => {\n            cache.put(event.request, networkResponse.clone());\n            return networkResponse;\n          });\n        }).catch(() => {\n          // Fallback for navigation requests if network and cache fail\n          if (isNavigation) {\n            console.log('[Fallback] Network and cache failed for navigation, serving offline page.');\n            return caches.match(OFFLINE_URL);\n          }\n          return new Response('Offline and not in cache.', { status: 503 });\n        });\n      })\n    );\n    return;\n  }\n\n  // 2. Network-First for API Requests\n  if (requestPath.startsWith('/api/data')) {\n    event.respondWith(\n      fetch(event.request).then(networkResponse => {\n        console.log(`[Network-First] Fetching API ${requestPath} from network.`);\n        return caches.open(CACHE_NAME_DYNAMIC).then(cache => {\n          cache.put(event.request, networkResponse.clone());\n          return networkResponse;\n        });\n      }).catch(() => {\n        console.log(`[Network-First] Network failed for API ${requestPath}, serving from cache.`);\n        return caches.match(event.request);\n      })\n    );\n    return;\n  }\n\n  // 3. Stale-While-Revalidate for Images\n  if (requestPath.match(/\\.(png|jpg|jpeg|gif|webp)$/i)) {\n    event.respondWith(\n      caches.match(event.request).then(cachedResponse => {\n        const fetchPromise = fetch(event.request).then(networkResponse => {\n          console.log(`[Stale-While-Revalidate] Fetching image ${requestPath} from network.`);\n          return caches.open(CACHE_NAME_IMAGES).then(cache => {\n            cache.put(event.request, networkResponse.clone());\n            return networkResponse;\n          });\n        }).catch(error => {\n            console.error(`[Stale-While-Revalidate] Network revalidation failed for image ${requestPath}:`, error);\n            return new Response('Image network error.', { status: 503 });\n        });\n\n        if (cachedResponse) {\n          console.log(`[Stale-While-Revalidate] Serving image ${requestPath} from cache.`);\n          return cachedResponse; // Return cached response immediately\n        }\n        return fetchPromise; // If no cached, wait for network\n      })\n    );\n    return;\n  }\n\n  // Default: Go to network for anything else\n  event.respondWith(fetch(event.request));\n});\n",
+          "testCases": [
+            "**Static Asset (Cache-First) Test:**\n    *   Load `http://localhost:3000` (online).\n    *   Go to DevTools -> Application -> Cache Storage. Verify `index.html` and `style.css` are in `static-assets-cache-v1`.\n    *   Go 'Offline' in DevTools. Reload the page. `index.html` and `style.css` should load instantly from cache, without any network requests failing.",
+            "**API (Network-First) Test:**\n    *   Load `http://localhost:3000` (online). Click 'Fetch API Data'. Observe a slight delay, then data appears. Verify API response is cached in `dynamic-data-cache-v1`.\n    *   Go 'Offline'. Click 'Fetch API Data' again. Data should appear *instantly* from cache. (The network request will still appear in DevTools but show as failed/from Service Worker).",
+            "**Image (Stale-While-Revalidate) Test:**\n    *   Load `http://localhost:3000` (online). Image appears. Go to DevTools -> Application -> Cache Storage. Verify `sample.png` is in `images-cache-v1`.\n    *   Go 'Offline'. Refresh the page. The image should appear instantly. The DevTools Network tab might show a failed network request for the image, but it's served from cache.",
+            "**Offline Fallback Test:**\n    *   Clear all caches in DevTools -> Application -> Cache Storage.\n    *   Go 'Offline'. Try to visit `http://localhost:3000`. The `offline.html` page should be displayed (as `index.html` wasn't cached yet, and network failed)."
+          ],
+          "hints": [
+            "Use `event.request.url`, `event.request.destination`, or `event.request.mode` to differentiate request types inside the `fetch` event.",
+            "For `stale-while-revalidate`, you need to `match` from cache and return immediately, but *also* kick off a `fetch` and `put` the new response into cache.",
+            "Remember to `clone()` network responses before putting them into cache, as a `Response` object can only be consumed once.",
+            "Clear browser cache and unregister Service Workers in DevTools -> Application -> Service Workers frequently during testing to ensure fresh installations."
+          ],
+          "tags": [
+            "service-workers",
+            "caching",
+            "pwa",
+            "offline",
+            "frontend",
+            "architecture",
+            "advanced"
+          ],
+          "timeEstimate": 120,
+          "prerequisites": [
+            "theory_service_workers",
+            "theory_client_side_caching",
+            "node_express"
+          ],
+          "complexity": 9,
+          "interviewRelevance": 10,
+          "learningPath": "advanced",
+          "relatedConcepts": [
+            "theory_service_workers",
+            "theory_client_side_caching"
+          ]
+        },
+        {
+          "id": "task_data_cache_with_indexeddb",
+          "title": "Implement a Simple Note-Taking App with IndexedDB for Offline Data",
+          "description": "\nDevelop a basic web-based note-taking application that stores user notes using `IndexedDB`. The application should allow users to add new notes and view existing notes. All data should persist across browser sessions and be available offline.\n\n**Requirements:**\n1.  **HTML Structure**: Create an `index.html` with:\n    *   An input field for the note title.\n    *   A textarea for the note content.\n    *   A 'Save Note' button.\n    *   A section to display the list of saved notes.\n2.  **IndexedDB Setup**: Implement JavaScript to:\n    *   Open an IndexedDB database.\n    *   Create an object store for notes (e.g., `notes` object store with `id` as keyPath and `autoIncrement`).\n    *   Handle `upgradeneeded` events for database versioning.\n3.  **CRUD Operations (Basic)**:\n    *   **Add Note**: On 'Save Note' button click, take input values and add a new note object to the `notes` object store. Include `title`, `content`, and `timestamp` fields.\n    *   **Display Notes**: When the page loads, fetch all notes from IndexedDB and display them in the dedicated section. Notes should be displayed with their title, content, and save time.\n4.  **Error Handling**: Include basic `onerror` and `onsuccess` handlers for IndexedDB operations.\n\n**Optional (Advanced):**\n*   Add a delete button for each note.\n*   Implement a Service Worker to cache `index.html` and its dependencies so the app itself is available offline (this task focuses on IndexedDB, but combining with Service Worker is a common pattern for PWA).\n",
+          "difficulty": "hard",
+          "startingCode": "// public/index.html\n<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n    <meta charset=\"UTF-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <title>Offline Notes</title>\n    <style>\n        body { font-family: sans-serif; padding: 20px; max-width: 800px; margin: auto; }\n        #note-form { border: 1px solid #ccc; padding: 20px; margin-bottom: 20px; }\n        input[type=\"text\"], textarea { width: 100%; padding: 8px; margin-bottom: 10px; border: 1px solid #ddd; }\n        button { padding: 10px 15px; background-color: #007bff; color: white; border: none; cursor: pointer; }\n        .note-item { border: 1px solid #eee; padding: 15px; margin-bottom: 10px; background-color: #f9f9f9; }\n        .note-item h3 { margin-top: 0; color: #333; }\n        .note-item p { font-size: 0.9em; color: #666; }\n    </style>\n</head>\n<body>\n    <h1>Offline Note-Taking App</h1>\n\n    <div id=\"note-form\">\n        <h2>Add New Note</h2>\n        <input type=\"text\" id=\"note-title\" placeholder=\"Note Title\" required>\n        <textarea id=\"note-content\" placeholder=\"Note Content\" rows=\"5\" required></textarea>\n        <button id=\"save-note-btn\">Save Note</button>\n    </div>\n\n    <div id=\"notes-list\">\n        <h2>Your Notes</h2>\n        <!-- Notes will be loaded here -->\n        <p id=\"no-notes-message\">No notes yet. Start by adding one!</p>\n    </div>\n\n    <script>\n        // TODO: Implement IndexedDB logic here\n        const noteTitleInput = document.getElementById('note-title');\n        const noteContentInput = document.getElementById('note-content');\n        const saveNoteBtn = document.getElementById('save-note-btn');\n        const notesListDiv = document.getElementById('notes-list');\n        const noNotesMessage = document.getElementById('no-notes-message');\n\n        // Example (replace with IndexedDB calls)\n        saveNoteBtn.addEventListener('click', () => {\n            const title = noteTitleInput.value;\n            const content = noteContentInput.value;\n            if (title && content) {\n                const newNote = document.createElement('div');\n                newNote.className = 'note-item';\n                newNote.innerHTML = `<h3>${title}</h3><p>${content}</p><p><em>Saved: ${new Date().toLocaleString()}</em></p>`;\n                notesListDiv.prepend(newNote);\n                noNotesMessage.style.display = 'none';\n                noteTitleInput.value = '';\n                noteContentInput.value = '';\n            } else {\n                alert('Please enter both title and content.');\n            }\n        });\n\n        // Initial load of notes (replace with IndexedDB fetch)\n        // if (notesListDiv.children.length === 1) { // Only the h2 is there\n        //     noNotesMessage.style.display = 'block';\n        // }\n    </script>\n</body>\n</html>\n",
+          "solutionCode": "// server.js (for serving files, if not using a static host)\nconst express = require('express');\nconst path = require('path');\nconst app = express();\nconst PORT = 3000;\n\napp.use(express.static(path.join(__dirname, 'public')));\n\napp.listen(PORT, () => {\n  console.log(`Server running on http://localhost:${PORT}`);\n  console.log('Visit http://localhost:3000');\n  console.log('Add some notes, then close and reopen your browser or go offline.');\n});\n\n// public/index.html\n<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n    <meta charset=\"UTF-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <title>Offline Notes</title>\n    <style>\n        body { font-family: sans-serif; padding: 20px; max-width: 800px; margin: auto; }\n        #note-form { border: 1px solid #ccc; padding: 20px; margin-bottom: 20px; }\n        input[type=\"text\"], textarea { width: 100%; padding: 8px; margin-bottom: 10px; border: 1px solid #ddd; }\n        button { padding: 10px 15px; background-color: #007bff; color: white; border: none; cursor: pointer; }\n        .note-item { border: 1px solid #eee; padding: 15px; margin-bottom: 10px; background-color: #f9f9f9; display: flex; justify-content: space-between; align-items: flex-start; }\n        .note-item .content { flex-grow: 1; }\n        .note-item h3 { margin-top: 0; color: #333; }\n        .note-item p { font-size: 0.9em; color: #666; }\n        .note-item button.delete-btn { background-color: #dc3545; margin-left: 10px; border-radius: 4px; }\n    </style>\n</head>\n<body>\n    <h1>Offline Note-Taking App</h1>\n\n    <div id=\"note-form\">\n        <h2>Add New Note</h2>\n        <input type=\"text\" id=\"note-title\" placeholder=\"Note Title\" required>\n        <textarea id=\"note-content\" placeholder=\"Note Content\" rows=\"5\" required></textarea>\n        <button id=\"save-note-btn\">Save Note</button>\n    </div>\n\n    <div id=\"notes-list\">\n        <h2>Your Notes</h2>\n        <!-- Notes will be loaded here -->\n        <p id=\"no-notes-message\">No notes yet. Start by adding one!</p>\n    </div>\n\n    <script>\n        const DB_NAME = 'OfflineNotesDB';\n        const DB_VERSION = 1;\n        const STORE_NAME = 'notes';\n\n        let db; // Global variable for the IndexedDB database instance\n\n        const noteTitleInput = document.getElementById('note-title');\n        const noteContentInput = document.getElementById('note-content');\n        const saveNoteBtn = document.getElementById('save-note-btn');\n        const notesListDiv = document.getElementById('notes-list');\n        const noNotesMessage = document.getElementById('no-notes-message');\n\n        // 2. IndexedDB Setup: Open database and create object store\n        function openDatabase() {\n            return new Promise((resolve, reject) => {\n                const request = indexedDB.open(DB_NAME, DB_VERSION);\n\n                request.onerror = event => {\n                    console.error('IndexedDB error:', event.target.errorCode);\n                    reject('Error opening database');\n                };\n\n                request.onsuccess = event => {\n                    db = event.target.result;\n                    console.log('Database opened successfully');\n                    resolve(db);\n                };\n\n                request.onupgradeneeded = event => {\n                    db = event.target.result;\n                    if (!db.objectStoreNames.contains(STORE_NAME)) {\n                        const objectStore = db.createObjectStore(STORE_NAME, { keyPath: 'id', autoIncrement: true });\n                        // Optionally create indexes if you need to query by other fields\n                        objectStore.createIndex('timestamp', 'timestamp', { unique: false });\n                        console.log('Object store created/upgraded');\n                    }\n                };\n            });\n        }\n\n        // 3. Add Note operation\n        async function addNote(title, content) {\n            if (!db) await openDatabase();\n\n            const transaction = db.transaction([STORE_NAME], 'readwrite');\n            const objectStore = transaction.objectStore(STORE_NAME);\n            const newNote = {\n                title: title,\n                content: content,\n                timestamp: new Date().toISOString()\n            };\n\n            const request = objectStore.add(newNote);\n\n            request.onsuccess = () => {\n                console.log('Note added successfully:', newNote);\n                displayNotes(); // Refresh list after adding\n                noteTitleInput.value = '';\n                noteContentInput.value = '';\n            };\n\n            request.onerror = event => {\n                console.error('Error adding note:', event.target.error);\n                alert('Error saving note.');\n            };\n        }\n\n        // 3. Display Notes operation\n        async function displayNotes() {\n            if (!db) await openDatabase();\n\n            // Clear existing notes from display\n            const existingNoteItems = notesListDiv.querySelectorAll('.note-item');\n            existingNoteItems.forEach(item => item.remove());\n\n            const transaction = db.transaction([STORE_NAME], 'readonly');\n            const objectStore = transaction.objectStore(STORE_NAME);\n            const request = objectStore.getAll(); // Get all notes\n\n            request.onsuccess = event => {\n                const notes = event.target.result;\n                if (notes.length === 0) {\n                    noNotesMessage.style.display = 'block';\n                } else {\n                    noNotesMessage.style.display = 'none';\n                    // Sort notes by timestamp in descending order (latest first)\n                    notes.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));\n\n                    notes.forEach(note => {\n                        const noteElement = document.createElement('div');\n                        noteElement.className = 'note-item';\n                        noteElement.dataset.id = note.id; // Store ID for delete operation\n                        noteElement.innerHTML = `\n                            <div class=\"content\">\n                                <h3>${note.title}</h3>\n                                <p>${note.content}</p>\n                                <p><em>Saved: ${new Date(note.timestamp).toLocaleString()}</em></p>\n                            </div>\n                            <button class=\"delete-btn\">Delete</button>\n                        `;\n                        notesListDiv.appendChild(noteElement);\n\n                        // Optional: Add delete button listener\n                        noteElement.querySelector('.delete-btn').addEventListener('click', () => deleteNote(note.id));\n                    });\n                }\n            };\n\n            request.onerror = event => {\n                console.error('Error fetching notes:', event.target.error);\n                alert('Error loading notes.');\n            };\n        }\n\n        // Optional: Delete Note operation\n        async function deleteNote(id) {\n            if (!db) await openDatabase();\n\n            const transaction = db.transaction([STORE_NAME], 'readwrite');\n            const objectStore = transaction.objectStore(STORE_NAME);\n            const request = objectStore.delete(id);\n\n            request.onsuccess = () => {\n                console.log('Note deleted:', id);\n                displayNotes(); // Refresh list after deleting\n            };\n\n            request.onerror = event => {\n                console.error('Error deleting note:', event.target.error);\n                alert('Error deleting note.');\n            };\n        }\n\n        // Event listener for saving note\n        saveNoteBtn.addEventListener('click', () => {\n            const title = noteTitleInput.value.trim();\n            const content = noteContentInput.value.trim();\n            if (title && content) {\n                addNote(title, content);\n            } else {\n                alert('Please enter both title and content.');\n            }\n        });\n\n        // Initialize database and display notes on page load\n        window.addEventListener('DOMContentLoaded', async () => {\n            try {\n                await openDatabase();\n                displayNotes();\n            } catch (error) {\n                console.error('Initialization failed:', error);\n                alert('Failed to initialize note app. IndexedDB might be unavailable.');\n            }\n        });\n    </script>\n</body>\n</html>\n",
+          "testCases": [
+            "**Add and Persist:**\n    *   Open `http://localhost:3000`.\n    *   Add several notes using the form.\n    *   Close the browser tab/window completely (not just refresh).\n    *   Reopen the page. All previously added notes should be displayed.",
+            "**Offline Access:**\n    *   Add some notes while online.\n    *   Go offline (e.g., disable Wi-Fi, use Chrome DevTools 'Offline' mode).\n    *   Refresh the page. The notes should still be displayed, demonstrating offline data availability.\n    *   Try adding a new note while offline. It should still save and appear in the list.",
+            "**Data Structure:**\n    *   Inspect IndexedDB using browser DevTools (Application -> IndexedDB). Verify that notes are stored as objects with `id`, `title`, `content`, and `timestamp` fields.",
+            "**Optional (Delete):**\n    *   Add notes, then click the 'Delete' button on a note. Verify it disappears from the list and is removed from IndexedDB.",
+            "**Error Handling:**\n    *   Try to save an empty note (only title or only content) and ensure the alert message appears."
+          ],
+          "hints": [
+            "IndexedDB operations are asynchronous and use requests and events (e.g., `request.onsuccess`, `request.onerror`). You can wrap these in Promises for easier `async/await` usage.",
+            "The `onupgradeneeded` event is crucial for creating and updating object stores when the database version changes.",
+            "Remember to create a `transaction` before performing operations on an `objectStore` (`'readonly'` for reading, `'readwrite'` for modifying).",
+            "To get all items from an object store, you can use `objectStore.getAll()` or `objectStore.openCursor()`."
+          ],
+          "tags": [
+            "indexeddb",
+            "offline",
+            "data-storage",
+            "frontend",
+            "pwa",
+            "crud",
+            "javascript"
+          ],
+          "timeEstimate": 150,
+          "prerequisites": [
+            "javascript_promises",
+            "dom_manipulation",
+            "basic_data_structures"
+          ],
+          "complexity": 9,
+          "interviewRelevance": 9,
+          "learningPath": "advanced",
+          "relatedConcepts": [
+            "theory_client_side_caching"
+          ]
+        }
+      ]
+    }
+  }
+]

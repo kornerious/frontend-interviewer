@@ -1,0 +1,1590 @@
+[
+  {
+    "id": "f6f06285-929d-4e61-9a70-9efbcfa470d0",
+    "startLine": 15200,
+    "endLine": 15299,
+    "processedDate": "2025-06-17T14:43:37.314Z",
+    "content": {
+      "logicalBlockInfo": {
+        "suggestedEndLine": -1
+      },
+      "theory": [
+        {
+          "id": "theory_data_manipulation",
+          "title": "Data Manipulation: Filtering, Sorting, and Aggregation in JavaScript",
+          "content": "This section covers fundamental JavaScript array methods (`filter`, `map`, `sort`, `reduce`) used for efficient data processing, transformation, and aggregation. These methods are crucial for handling lists of data in modern web applications.\n\n## Key Concepts\n\n### `Array.prototype.filter()`\nThe `filter()` method creates a new array with all elements that pass the test implemented by the provided function. It's used for selecting a subset of elements from an array based on a condition.\n\n### `Array.prototype.map()`\nThe `map()` method creates a new array populated with the results of calling a provided function on every element in the calling array. It's used for transforming elements without altering the original array's length or structure, but changing the content or adding new properties.\n\n### `Array.prototype.sort()`\nThe `sort()` method sorts the elements of an array *in place* and returns the sorted array. The default sort order is ascending, built upon converting the elements into strings, then comparing their sequences of UTF-16 code units. For numeric or complex object sorting, a comparison function must be provided. This function takes two arguments (`a`, `b`) and should return:\n- A negative value if `a` should come before `b`.\n- A positive value if `a` should come after `b`.\n- `0` if `a` and `b` are considered equal.\n\n### `Array.prototype.reduce()`\nThe `reduce()` method executes a user-supplied 'reducer' callback function on each element of the array, in order, passing in the return value from the calculation on the preceding element. The final result of running the reducer across all elements is a single value. It's highly versatile and can be used for summing values, flattening arrays, counting occurrences, or calculating averages.\n\n### Helper Functions for Modularity\nComplex data manipulation often benefits from breaking down logic into smaller, reusable helper functions. This improves readability, maintainability, and testability. Examples include functions for case conversion (`toLower`), substring checks (`isSubString`), or aggregate calculations (`getAvgRating`).\n\n### Combining Operations\nReal-world scenarios often require a sequence of these operations: first filtering data, then transforming it, and finally sorting it. The order of operations is crucial as it affects the intermediate and final results.",
+          "examples": [
+            {
+              "id": "example_data_manipulation_1",
+              "title": "Basic Array Method Usage",
+              "code": "const numbers = [1, 2, 3, 4, 5];\n\n// filter: get even numbers\nconst evenNumbers = numbers.filter(num => num % 2 === 0);\n// evenNumbers is [2, 4]\n\n// map: double each number\nconst doubledNumbers = numbers.map(num => num * 2);\n// doubledNumbers is [2, 4, 6, 8, 10]\n\n// reduce: sum all numbers\nconst sum = numbers.reduce((acc, num) => acc + num, 0);\n// sum is 15\n\n// sort: descending order\nconst sortedNumbers = [...numbers].sort((a, b) => b - a);\n// sortedNumbers is [5, 4, 3, 2, 1]",
+              "explanation": "This example demonstrates the basic usage of `filter`, `map`, `reduce`, and `sort` for common array manipulations. Note the use of `[...numbers]` before `sort` to avoid modifying the original array in place.",
+              "language": "typescript"
+            },
+            {
+              "id": "example_data_manipulation_2",
+              "title": "Calculating Average Rating (`getAvgRating`)",
+              "code": "const moviesWithRatings = [\n  { id: 1, movie_id: 101, rating: 8 },\n  { id: 2, movie_id: 102, rating: 7 },\n  { id: 3, movie_id: 101, rating: 9 },\n  { id: 4, movie_id: 103, rating: 6 }\n];\n\nconst getAvgRating = (movie, allRatings) => {\n  let count = 0;\n  const totalRating = allRatings.reduce((acc, value) => {\n    if (movie.id === value.movie_id) {\n      acc += value.rating;\n      count++;\n    }\n    return acc;\n  }, 0);\n  return count > 0 ? totalRating / count : 0;\n};\n\nconst movie101 = { id: 101, name: \"Movie A\" };\nconst avgRatingMovieA = getAvgRating(movie101, moviesWithRatings);\n// avgRatingMovieA is (8 + 9) / 2 = 8.5",
+              "explanation": "This helper function calculates the average rating for a given movie by iterating through all available ratings using `reduce`. It accumulates the sum of ratings and counts the number of relevant ratings to compute the average.",
+              "language": "typescript"
+            },
+            {
+              "id": "example_data_manipulation_3",
+              "title": "Substring Check (`isSubString`)",
+              "code": "const toLower = str => str.toLowerCase();\n\nconst isSubString = (str1, str2) => {\n  // Normalize strings by converting to lower case and removing spaces\n  str1 = toLower(str1.split(\" \").join(\"\"));\n  str2 = toLower(str2.split(\" \").join(\"\"));\n  \n  // Check if one string starts with the other, regardless of length\n  if (str1.length > str2.length) {\n    return str1.startsWith(str2);\n  } else {\n    return str2.startsWith(str1);\n  }\n};\n\nconsole.log(isSubString(\"The Dark Knight\", \"dark\")); // true\nconsole.log(isSubString(\"Avengers\", \"The Avengers\")); // true\nconsole.log(isSubString(\"Hello World\", \"world hello\")); // false",
+              "explanation": "The `isSubString` function checks if one string is a substring of another after normalizing them (converting to lowercase and removing spaces). It intelligently handles cases where `str1` is longer than `str2` or vice-versa by using `startsWith` on the longer string with the shorter one.",
+              "language": "typescript"
+            },
+            {
+              "id": "example_data_manipulation_4",
+              "title": "Dynamic Sorting Logic",
+              "code": "const movies = [\n  { name: 'Movie C', year: 2000 },\n  { name: 'Movie A', year: 2010 },\n  { name: 'Movie B', year: 1995 }\n];\n\n// Sort by 'year' ascending\nlet sortedByYearAsc = [...movies].sort((a, b) => a['year'] - b['year']);\n// [{ name: 'Movie B', year: 1995 }, { name: 'Movie C', year: 2000 }, { name: 'Movie A', year: 2010 }]\n\n// Sort by 'name' descending\nlet sortedByNameDesc = [...movies].sort((a, b) => {\n  const value1 = a['name'];\n  const value2 = b['name'];\n  return value1 > value2 ? -1 : (value1 < value2 ? 1 : 0);\n});\n// [{ name: 'Movie C', year: 2000 }, { name: 'Movie B', year: 1995 }, { name: 'Movie A', year: 2010 }]\n\n// Example of how `queryMovies` handles sort parameter:\n// sort: \"-year\" for descending, \"name\" for ascending\nconst applySort = (arr, sortParam) => {\n    const isDescending = sortParam[0] === '-';\n    let sortField = isDescending ? sortParam.slice(1) : sortParam;\n\n    return [...arr].sort((a, b) => {\n        const value1 = a[sortField];\n        const value2 = b[sortField];\n        \n        if (typeof value1 === 'string') {\n            return isDescending ? value2.localeCompare(value1) : value1.localeCompare(value2);\n        } else {\n            return isDescending ? value2 - value1 : value1 - value2;\n        }\n    });\n};\n\nconst moviesSortedByYearDesc = applySort(movies, '-year');\nconst moviesSortedByNameAsc = applySort(movies, 'name');",
+              "explanation": "This example illustrates how sorting logic can be made dynamic based on a `sort` parameter. It extracts the sort field and direction (ascending/descending) from the parameter and applies the appropriate comparison logic. It differentiates between string and number comparison for robustness.",
+              "language": "typescript"
+            }
+          ],
+          "relatedQuestions": [
+            "question_filter_map_sort_reduce_mcq_1",
+            "question_sort_complexity_open_1",
+            "question_getAvgRating_complexity_open_1",
+            "question_queryMovies_refactor_code_1",
+            "question_sort_stability_flashcard_1",
+            "question_array_methods_flashcard_1"
+          ],
+          "relatedTasks": [
+            "task_product_catalog_filter_sort"
+          ],
+          "tags": [
+            "JavaScript",
+            "Array Methods",
+            "Data Manipulation",
+            "Filtering",
+            "Sorting",
+            "Aggregation",
+            "Functional Programming"
+          ],
+          "technology": "JavaScript",
+          "prerequisites": [
+            "basic_javascript_syntax",
+            "functions",
+            "arrays"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 9,
+          "learningPath": "intermediate",
+          "requiredFor": [
+            "advanced_data_structures",
+            "front_end_framework_development"
+          ]
+        },
+        {
+          "id": "theory_async_data_correlation",
+          "title": "Asynchronous Data Handling: `fetch` API and `Promise.all` for Data Correlation",
+          "content": "In modern frontend development, applications frequently interact with multiple backend API endpoints to fetch related data. Handling these asynchronous operations efficiently and then combining the results into a meaningful structure is a common challenge.\n\n## Key Concepts\n\n### The `fetch` API\nThe `fetch` API provides a modern, promise-based interface for making network requests. It's a powerful and flexible way to retrieve resources across the network. A `fetch()` call returns a `Promise` that resolves to a `Response` object. To get the actual data (e.g., JSON), you typically call `.json()` on the `Response` object, which also returns a Promise.\n\n### `Promise.all()`\n`Promise.all()` is a static method that takes an iterable of promises as input and returns a single `Promise`. This returned promise fulfills when all of the input promises have fulfilled, returning an array of their fulfilled values in the same order as the input promises. It rejects immediately upon the first promise's rejection. This is ideal for scenarios where you need to fetch multiple independent resources concurrently and wait for all of them to complete before proceeding.\n\n### Data Correlation Strategies\nOnce multiple related datasets are fetched, they often need to be 'joined' or correlated. Common strategies include:\n1.  **Iterating and Mapping (e.g., `reduce` or `forEach` with a `Map`):** For each item in a 'parent' dataset (e.g., posts), find its corresponding 'child' items (e.g., comments) from another dataset and attach them. Using a `Map` for the child data (keyed by `parentId`) can significantly improve lookup performance (O(1) average time complexity) compared to repeatedly iterating through the child array (O(n) time complexity) for each parent item.\n2.  **Database-like Joins:** While not directly available in JavaScript arrays, the concept of joining data based on a common key is applied. This involves iterating through one dataset and looking up related records in another.",
+          "examples": [
+            {
+              "id": "example_async_data_correlation_1",
+              "title": "Basic `fetch` API Usage",
+              "code": "const fetchData = async (url) => {\n  try {\n    const response = await fetch(url);\n    if (!response.ok) {\n      throw new Error(`HTTP error! status: ${response.status}`);\n    }\n    const data = await response.json();\n    return data;\n  } catch (error) {\n    console.error(\"Error fetching data:\", error);\n    throw error; // Re-throw to propagate the error\n  }\n};\n\nfetchData('https://jsonplaceholder.typicode.com/posts/1')\n  .then(post => console.log('Fetched Post:', post))\n  .catch(error => console.error('Failed to fetch post:', error));",
+              "explanation": "This example demonstrates how to use the `fetch` API to retrieve data from a URL. It shows handling the `Response` object, parsing JSON, and basic error handling using `async/await` and `try/catch` for cleaner asynchronous code.",
+              "language": "typescript"
+            },
+            {
+              "id": "example_async_data_correlation_2",
+              "title": "Concurrent Fetching with `Promise.all`",
+              "code": "// Service functions (as in original content)\nconst POSTS_URL = `https://jsonplaceholder.typicode.com/posts`;\nconst COMMENTS_URL = `https://jsonplaceholder.typicode.com/comments`;\n\nconst fetchAllPosts = () => {\n  return fetch(POSTS_URL).then(res => res.json());\n};\n\nconst fetchAllComments = () => {\n  return fetch(COMMENTS_URL).then(res => res.json());\n};\n\n// Combining them with Promise.all\nPromise.all([fetchAllPosts(), fetchAllComments()])\n  .then(([posts, comments]) => {\n    console.log('All posts fetched:', posts.length);\n    console.log('All comments fetched:', comments.length);\n    // Now you have both datasets to correlate\n  })\n  .catch(error => {\n    console.error('One of the fetches failed:', error);\n  });",
+              "explanation": "This demonstrates using `Promise.all` to concurrently fetch posts and comments. It waits for both promises to resolve, then provides an array containing their resolved values (`[posts, comments]`) in the `.then()` block.",
+              "language": "typescript"
+            },
+            {
+              "id": "example_async_data_correlation_3",
+              "title": "Correlating Data (`comments` to `posts`) using `Map`",
+              "code": "const correlatePostsAndComments = (posts, comments) => {\n  const commentsByPostId = new Map();\n  \n  // Group comments by postId for efficient lookup\n  comments.forEach(comment => {\n    if (!commentsByPostId.has(comment.postId)) {\n      commentsByPostId.set(comment.postId, []);\n    }\n    commentsByPostId.get(comment.postId).push(comment);\n  });\n\n  // Map comments to their respective posts\n  const postsWithComments = posts.map(post => ({\n    ...post,\n    comments: commentsByPostId.get(post.id) || [] // Attach comments, or empty array if none\n  }));\n\n  return postsWithComments;\n};\n\n// Example usage after fetching data:\n// Promise.all([fetchAllPosts(), fetchAllComments()])\n//   .then(([posts, comments]) => {\n//     const postsWithComments = correlatePostsAndComments(posts, comments);\n//     console.log('Posts with comments:', postsWithComments[0]); // Check the first post\n//   })",
+              "explanation": "This `correlatePostsAndComments` function efficiently maps comments to their respective posts. It first creates a `Map` where keys are `postId` and values are arrays of comments, allowing for O(1) average time complexity lookups. Then, it iterates through posts and attaches the relevant comments.",
+              "language": "typescript"
+            }
+          ],
+          "relatedQuestions": [
+            "question_promise_all_mcq_1",
+            "question_fetch_api_flashcard_1",
+            "question_promise_all_behavior_open_1",
+            "question_data_correlation_strategies_open_1",
+            "question_implement_post_comments_correlation_code_1"
+          ],
+          "relatedTasks": [
+            "task_fetch_user_photos"
+          ],
+          "tags": [
+            "JavaScript",
+            "Asynchronous",
+            "Promises",
+            "Fetch API",
+            "Promise.all",
+            "Data Correlation",
+            "API Integration"
+          ],
+          "technology": "JavaScript",
+          "prerequisites": [
+            "basic_javascript_syntax",
+            "callbacks",
+            "promises_basics"
+          ],
+          "complexity": 8,
+          "interviewRelevance": 10,
+          "learningPath": "intermediate",
+          "requiredFor": [
+            "api_integration",
+            "single_page_applications"
+          ]
+        }
+      ],
+      "questions": [
+        {
+          "id": "question_filter_map_sort_reduce_mcq_1",
+          "topic": "Array Methods: `filter`, `map`, `sort`, `reduce`",
+          "level": "medium",
+          "type": "mcq",
+          "question": "Given the `moviesList` and `moviesWithRatings` from the provided context, which of the following best describes the purpose of `filteredMovies = filteredMovies.map(movie => ({ ...movie, avgRating: getAvgRating(movie, moviesWithRatings) }));`?",
+          "answer": "To create a new array where each movie object includes its calculated average rating, without mutating existing properties.",
+          "options": [
+            "To filter out movies that do not have an average rating.",
+            "To sort the movies based on their average rating.",
+            "To create a new array where each movie object includes its calculated average rating, without mutating existing properties.",
+            "To reduce the movie list to a single object containing total average rating."
+          ],
+          "analysisPoints": [
+            "Understanding of `map()` method's core functionality: transformation and creation of a new array.",
+            "Recognition of the spread syntax (`...movie`) for creating a new object and adding/overwriting properties.",
+            "Distinguishing `map()` from `filter()`, `sort()`, and `reduce()`."
+          ],
+          "keyConcepts": [
+            "Array.prototype.map",
+            "Object Spread Syntax",
+            "Immutability in JavaScript"
+          ],
+          "evaluationCriteria": [
+            "Ability to distinguish between similar concepts",
+            "Understanding of fundamental principles"
+          ],
+          "example": "The `map` method is used to transform each element of an array. In this case, for each `movie` object, it creates a *new* object (`{ ...movie, avgRating: ... }`) that includes all original properties of the `movie` plus a new `avgRating` property. This is a common pattern for enriching data objects.",
+          "tags": [
+            "JavaScript",
+            "Array Methods",
+            "map",
+            "Data Transformation"
+          ],
+          "prerequisites": [
+            "array_map",
+            "object_spread_syntax"
+          ],
+          "complexity": 6,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_sort_complexity_open_1",
+          "topic": "Array Sorting",
+          "level": "medium",
+          "type": "open",
+          "question": "The provided `queryMovies` function uses `Array.prototype.sort()` to sort movies. What are the potential performance implications and side effects of `sort()` compared to methods like `filter()` or `map()`?",
+          "answer": "The `sort()` method sorts the elements of an array *in place*, meaning it directly modifies the original array. This is a side effect that can lead to unexpected behavior if the original array is still needed elsewhere or if immutability is desired. In contrast, `filter()` and `map()` return *new* arrays, leaving the original array untouched.\n\nFrom a performance perspective, `sort()`'s time complexity typically varies. For example, Chrome's V8 engine uses Timsort for arrays with more than 10 elements, which has an average and worst-case time complexity of O(n log n), where n is the number of elements. `filter()` and `map()` typically iterate through the array once, resulting in O(n) time complexity. Therefore, for large datasets, `sort()` can be computationally more expensive than `filter()` or `map()`.\n\nAdditionally, the comparison function within `sort()` can impact performance. If the comparison logic is complex or involves expensive operations (like re-calculating `avgRating` repeatedly if it wasn't pre-calculated), it can significantly slow down the sorting process.",
+          "analysisPoints": [
+            "Understanding of in-place vs. new array creation.",
+            "Knowledge of time complexity for common array methods (O(n log n) for sort, O(n) for filter/map).",
+            "Awareness of potential performance bottlenecks in custom comparison functions.",
+            "Concept of immutability in programming."
+          ],
+          "keyConcepts": [
+            "Array.prototype.sort",
+            "In-place Mutation",
+            "Time Complexity",
+            "Immutability",
+            "Side Effects"
+          ],
+          "evaluationCriteria": [
+            "Understanding of fundamental principles",
+            "Recognition of edge cases",
+            "Application of best practices"
+          ],
+          "example": "```javascript\nconst originalArray = [3, 1, 2];\n\n// sort modifies in-place\nconst sortedArray = originalArray.sort((a, b) => a - b);\nconsole.log(originalArray); // Output: [1, 2, 3] (original array is modified)\nconsole.log(sortedArray);   // Output: [1, 2, 3]\n\n// filter creates new array\nconst filteredArray = originalArray.filter(num => num > 1);\nconsole.log(originalArray); // Output: [1, 2, 3] (original array untouched)\nconsole.log(filteredArray); // Output: [2, 3]\n```",
+          "tags": [
+            "JavaScript",
+            "Array Methods",
+            "Sorting",
+            "Performance",
+            "Immutability"
+          ],
+          "prerequisites": [
+            "array_sort",
+            "javascript_performance"
+          ],
+          "complexity": 7,
+          "interviewFrequency": 7,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_getAvgRating_complexity_open_1",
+          "topic": "Algorithm Efficiency: `reduce` and `getAvgRating`",
+          "level": "hard",
+          "type": "open",
+          "question": "Analyze the time complexity of the `getAvgRating` helper function as implemented in the provided code. Suggest an alternative approach to calculate and store average ratings that could improve the overall efficiency of the `queryMovies` function, especially if `getMovies()` and `getRatings()` return large datasets.",
+          "answer": "### Time Complexity Analysis of `getAvgRating`\nThe `getAvgRating` function takes a `movie` object and `moviesWithRatings` (which is effectively all ratings). Inside, it uses `reduce` to iterate over `moviesWithRatings`. For each `movie` object passed to `getAvgRating`, it performs a full scan of the `moviesWithRatings` array.\n\nIf there are `M` movies and `R` total ratings, and `queryMovies` calls `getAvgRating` for *each* movie in the `moviesList` (which happens twice: once for the initial `filter` and once for the final `map`): \n- The time complexity of `getAvgRating` itself is O(R).\n- Since `queryMovies` calls `getAvgRating` for each of `M` movies, the overall complexity related to rating calculation becomes O(M * R).\n\nThis can be inefficient if both `M` and `R` are large.\n\n### Alternative Approach for Efficiency\nTo improve efficiency, especially with large datasets, the average ratings should be pre-calculated once and then cached or attached to the movie objects.\n\n**Suggested Approach: Pre-calculate and Store Average Ratings**\n1.  **Group Ratings by Movie ID:** Before iterating through movies, transform `moviesWithRatings` into a `Map` or an object where keys are `movie_id` and values are an array of ratings for that movie.\n    *   Example: `Map<movieId, [rating1, rating2, ...]>`.\n    *   This step takes O(R) time.\n2.  **Calculate Average for Each Movie:** Iterate through the grouped ratings map. For each movie ID, calculate its average rating once.\n    *   This step also takes O(R) time (summing ratings within each group, and the number of groups is at most `M`).\n3.  **Store/Attach:** Store these pre-calculated average ratings in a separate `Map<movieId, avgRating>` or directly attach them to the `moviesList` objects when they are initially loaded.\n\nThis approach would reduce the overall complexity of rating calculation in `queryMovies` from O(M * R) to O(M + R) (or O(R) if only `moviesWithRatings` is large), as each movie's average rating is computed only once and then accessed in O(1) average time.\n\n**Example Transformation:**\n```javascript\n// In queryMovies, after fetching moviesList and moviesWithRatings:\n\nconst movieAvgRatings = new Map();\nconst ratingsGroupedByMovie = new Map();\n\n// Group ratings by movie_id (O(R))\nmoviesWithRatings.forEach(rating => {\n  if (!ratingsGroupedByMovie.has(rating.movie_id)) {\n    ratingsGroupedByMovie.set(rating.movie_id, []);\n  }\n  ratingsGroupedByMovie.get(rating.movie_id).push(rating.rating);\n});\n\n// Calculate average for each movie (O(R) overall)\nratingsGroupedByMovie.forEach((ratingsArray, movieId) => {\n  const sum = ratingsArray.reduce((acc, r) => acc + r, 0);\n  movieAvgRatings.set(movieId, sum / ratingsArray.length);\n});\n\n// Now, when filtering/mapping movies, access avgRating from movieAvgRatings map (O(1) lookup)\nlet filteredMovies = moviesList.filter(movie => \n  (movieAvgRatings.get(movie.id) || 0) >= minAvgRating\n);\n\n// ... and later in map:\nfilteredMovies = filteredMovies.map(movie => ({\n  ...movie,\n  avgRating: movieAvgRatings.get(movie.id) || 0\n}));\n```",
+          "analysisPoints": [
+            "Ability to identify algorithmic inefficiencies (nested loops, repeated calculations).",
+            "Knowledge of time complexity analysis (O(n), O(n log n), O(n*m)).",
+            "Understanding of data structures like `Map` for optimized lookups.",
+            "Skill in proposing and explaining performance optimization strategies (pre-calculation, caching)."
+          ],
+          "keyConcepts": [
+            "Time Complexity",
+            "Algorithmic Efficiency",
+            "Data Preprocessing",
+            "Caching",
+            "Map Data Structure",
+            "Optimization"
+          ],
+          "evaluationCriteria": [
+            "Understanding of fundamental principles",
+            "Ability to identify performance bottlenecks",
+            "Skill in proposing optimized solutions",
+            "Application of best practices"
+          ],
+          "example": null,
+          "tags": [
+            "JavaScript",
+            "Algorithm",
+            "Performance",
+            "Optimization",
+            "Data Structure",
+            "reduce"
+          ],
+          "prerequisites": [
+            "time_complexity",
+            "array_reduce",
+            "map_object"
+          ],
+          "complexity": 9,
+          "interviewFrequency": 8,
+          "learningPath": "advanced"
+        },
+        {
+          "id": "question_queryMovies_refactor_code_1",
+          "topic": "Code Refactoring and Modularity",
+          "level": "medium",
+          "type": "code",
+          "question": "The `queryMovies` function combines filtering, sorting, and mapping logic. Refactor this function to improve its readability and maintainability by separating concerns. Specifically, create dedicated helper functions for:\n1.  `applyMinAvgRatingFilter(movies, ratings, minAvgRating)`\n2.  `applySearchFilter(movies, searchTerm)`\n3.  `applySort(movies, sortParam)`\n4.  `addAvgRatingToMovies(movies, ratings)`\n\nEnsure these new functions are pure (do not modify their input arrays directly where possible) and the `queryMovies` orchestrates them.",
+          "answer": "```typescript\n// Assuming getMovies(), getRatings(), getAvgRating(), toLower(), isSubString() are available\n\n// Helper for filtering by average rating\nconst applyMinAvgRatingFilter = (movies, allRatings, minAvgRating) => {\n  if (minAvgRating === undefined || minAvgRating === null) return movies; // No filter if not specified\n  return movies.filter(movie => \n    getAvgRating(movie, allRatings) >= minAvgRating\n  );\n};\n\n// Helper for filtering by search term\nconst applySearchFilter = (movies, search) => {\n  if (!search) return movies;\n  return movies.filter(movie => \n    isSubString(movie.name, search)\n  );\n};\n\n// Helper for sorting movies\nconst applySort = (movies, sortParam) => {\n  if (!sortParam) return [...movies]; // Return a shallow copy if no sort needed\n\n  const isDescending = sortParam[0] === '-';\n  let sortField = isDescending ? sortParam.slice(1) : sortParam;\n  \n  return [...movies].sort((a, b) => {\n    const value1 = a[sortField];\n    const value2 = b[sortField];\n    \n    // Handle string comparison for robustness\n    if (typeof value1 === 'string' && typeof value2 === 'string') {\n      const comparison = value1.localeCompare(value2);\n      return isDescending ? -comparison : comparison;\n    } else {\n      // Assume numeric or comparable non-string values\n      return isDescending ? (value2 - value1) : (value1 - value2);\n    }\n  });\n};\n\n// Helper for adding average rating to each movie\nconst addAvgRatingToMovies = (movies, allRatings) => {\n  // Pre-calculate all average ratings once for efficiency\n  const movieAvgRatings = new Map();\n  const ratingsGroupedByMovie = new Map();\n  allRatings.forEach(rating => {\n    if (!ratingsGroupedByMovie.has(rating.movie_id)) {\n      ratingsGroupedByMovie.set(rating.movie_id, []);\n    }\n    ratingsGroupedByMovie.get(rating.movie_id).push(rating.rating);\n  });\n\n  ratingsGroupedByMovie.forEach((ratingsArray, movieId) => {\n    const sum = ratingsArray.reduce((acc, r) => acc + r, 0);\n    movieAvgRatings.set(movieId, sum / ratingsArray.length);\n  });\n\n  return movies.map(movie => ({\n    ...movie,\n    avgRating: movieAvgRatings.get(movie.id) || 0 // Use pre-calculated value\n  }));\n};\n\n// Main filter function (refactored)\nfunction queryMoviesRefactored({ search, sort, minAvgRating }) {\n  const moviesList = getMovies();\n  const moviesWithRatings = getRatings();\n  \n  // Apply filters sequentially\n  let processedMovies = applyMinAvgRatingFilter(moviesList, moviesWithRatings, minAvgRating);\n  processedMovies = applySearchFilter(processedMovies, search);\n  \n  // Apply sorting\n  processedMovies = applySort(processedMovies, sort);\n  \n  // Add average rating to each movie\n  processedMovies = addAvgRatingToMovies(processedMovies, moviesWithRatings);\n  \n  return processedMovies;\n}\n\n// Example usage:\n// const result = queryMoviesRefactored({ search: \"dark\", sort: \"-year\", minAvgRating: 7 });\n// console.log(result);\n```",
+          "analysisPoints": [
+            "Demonstrates understanding of Single Responsibility Principle.",
+            "Applies functional programming concepts (pure functions, immutability).",
+            "Improves readability by breaking down complex logic.",
+            "Addresses potential performance issue in `getAvgRating` by pre-calculating ratings once.",
+            "Handles edge cases like `sortParam` or `search` being undefined gracefully."
+          ],
+          "keyConcepts": [
+            "Code Refactoring",
+            "Modularity",
+            "Single Responsibility Principle",
+            "Pure Functions",
+            "Immutability",
+            "Functional Programming",
+            "Performance Optimization"
+          ],
+          "evaluationCriteria": [
+            "Adherence to refactoring requirements",
+            "Correctness of implementation",
+            "Clarity and readability of code",
+            "Demonstrates understanding of software design principles"
+          ],
+          "example": null,
+          "tags": [
+            "JavaScript",
+            "Code Design",
+            "Refactoring",
+            "Functional Programming",
+            "Modularity"
+          ],
+          "prerequisites": [
+            "array_methods",
+            "functions_basics",
+            "object_spread_syntax"
+          ],
+          "complexity": 8,
+          "interviewFrequency": 9,
+          "learningPath": "advanced"
+        },
+        {
+          "id": "question_sort_stability_flashcard_1",
+          "topic": "Array Sorting",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "What does it mean for a sorting algorithm to be 'stable'?",
+          "answer": "A sorting algorithm is stable if it preserves the relative order of equal elements. If two elements compare as equal, their original order in the input array is maintained in the sorted output.",
+          "analysisPoints": [
+            "Understanding of sorting algorithm properties."
+          ],
+          "keyConcepts": [
+            "Sorting Algorithms",
+            "Stable Sort"
+          ],
+          "evaluationCriteria": [
+            "Quick recall of definition"
+          ],
+          "example": null,
+          "tags": [
+            "JavaScript",
+            "Sorting",
+            "Algorithm"
+          ],
+          "prerequisites": [],
+          "complexity": 3,
+          "interviewFrequency": 5,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_array_methods_flashcard_1",
+          "topic": "Array Methods",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "Which JavaScript array method is best suited for transforming each element of an array into a new value, resulting in a new array of the same length?",
+          "answer": "`Array.prototype.map()`",
+          "analysisPoints": [
+            "Recall of specific array method functions."
+          ],
+          "keyConcepts": [
+            "Array.prototype.map",
+            "Functional Programming"
+          ],
+          "evaluationCriteria": [
+            "Quick recall of definition"
+          ],
+          "example": null,
+          "tags": [
+            "JavaScript",
+            "Array Methods"
+          ],
+          "prerequisites": [],
+          "complexity": 2,
+          "interviewFrequency": 7,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_promise_all_mcq_1",
+          "topic": "Asynchronous JavaScript: `Promise.all`",
+          "level": "medium",
+          "type": "mcq",
+          "question": "Consider the following JavaScript code snippet:\n```javascript\nconst promise1 = Promise.resolve(3);\nconst promise2 = 42;\nconst promise3 = new Promise((resolve, reject) => {\n  setTimeout(resolve, 100, 'foo');\n});\nconst promise4 = new Promise((resolve, reject) => {\n  setTimeout(reject, 50, 'bar');\n});\n\nPromise.all([promise1, promise2, promise3, promise4])\n  .then(values => {\n    console.log(values);\n  })\n  .catch(error => {\n    console.error(error);\n  });\n```\nWhat will be logged to the console by this code?",
+          "answer": "bar",
+          "options": [
+            "[3, 42, 'foo']",
+            "['foo', 42, 3]",
+            "bar",
+            "An array containing 3, 42, and 'foo', followed by 'bar' as a separate error."
+          ],
+          "analysisPoints": [
+            "Understanding of `Promise.all`'s short-circuiting behavior on rejection.",
+            "Knowledge that `Promise.all` rejects as soon as *any* of the input promises reject.",
+            "Ability to identify which promise will reject first based on `setTimeout` delays."
+          ],
+          "keyConcepts": [
+            "Promise.all",
+            "Promise Rejection",
+            "Asynchronous Execution",
+            "setTimeout"
+          ],
+          "evaluationCriteria": [
+            "Understanding of fundamental principles",
+            "Recognition of edge cases"
+          ],
+          "example": "The `promise4` will reject after 50ms, which is faster than `promise3` resolves (100ms). `Promise.all` will immediately reject with the reason of the first rejected promise. Therefore, 'bar' will be logged by the `.catch` block.",
+          "tags": [
+            "JavaScript",
+            "Promises",
+            "Promise.all",
+            "Asynchronous"
+          ],
+          "prerequisites": [
+            "promises_basics",
+            "settimeout"
+          ],
+          "complexity": 7,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_fetch_api_flashcard_1",
+          "topic": "Asynchronous JavaScript: `fetch` API",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "What is the primary purpose of the `fetch` API in JavaScript?",
+          "answer": "The `fetch` API provides a modern, promise-based interface for making network requests (e.g., HTTP requests) to retrieve resources from a server.",
+          "analysisPoints": [
+            "Basic understanding of `fetch`."
+          ],
+          "keyConcepts": [
+            "Fetch API",
+            "Promises",
+            "HTTP Requests"
+          ],
+          "evaluationCriteria": [
+            "Quick recall of definition"
+          ],
+          "example": null,
+          "tags": [
+            "JavaScript",
+            "Fetch API",
+            "Asynchronous"
+          ],
+          "prerequisites": [],
+          "complexity": 3,
+          "interviewFrequency": 8,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_promise_all_behavior_open_1",
+          "topic": "Asynchronous JavaScript: `Promise.all` Error Handling",
+          "level": "hard",
+          "type": "open",
+          "question": "Describe the error handling behavior of `Promise.all()`. If you need to ensure that all promises in an iterable complete (either resolve or reject) before processing results, and collect all outcomes, what alternative `Promise` method would you use, and why?",
+          "answer": "### `Promise.all()` Error Handling Behavior\n`Promise.all()` rejects as soon as *any* of the promises in the input iterable rejects. It 'short-circuits'. This means that if you have 10 promises in `Promise.all` and the third one rejects, the `Promise.all` will immediately reject with the reason of that third promise, and it will not wait for the remaining 7 promises to settle (even if they would have resolved successfully). The results of any promises that resolved *before* the first rejection are discarded.\n\n### Alternative for Collecting All Outcomes\nIf the requirement is to ensure that *all* promises complete (regardless of whether they resolve or reject) and to collect all their individual outcomes, you should use `Promise.allSettled()`.\n\n`Promise.allSettled()` waits for all promises in the input iterable to settle (i.e., either fulfill or reject). It then returns a single promise that resolves to an array of objects, each describing the outcome of an individual promise. Each object has a `status` property (either `'fulfilled'` or `'rejected'`) and either a `value` (for fulfilled promises) or a `reason` (for rejected promises).\n\n**Why `Promise.allSettled()`?**\n-   **Robustness:** It allows you to process partial successes and failures gracefully, without one failure stopping the entire operation.\n-   **Comprehensive Results:** You get a full report of every promise's fate, which is invaluable for logging, auditing, or displaying detailed status to the user.",
+          "analysisPoints": [
+            "Deep understanding of `Promise.all`'s success and failure behavior.",
+            "Knowledge of `Promise.allSettled()` and its use cases.",
+            "Ability to compare and contrast asynchronous utility methods.",
+            "Understanding of error handling strategies in concurrent operations."
+          ],
+          "keyConcepts": [
+            "Promise.all",
+            "Promise.allSettled",
+            "Error Handling",
+            "Asynchronous Programming",
+            "Concurrency",
+            "Promise States"
+          ],
+          "evaluationCriteria": [
+            "Comprehensive understanding of promise methods",
+            "Ability to explain nuances and alternatives",
+            "Problem-solving for complex async scenarios"
+          ],
+          "example": "```javascript\nconst p1 = Promise.resolve(1);\nconst p2 = new Promise((resolve, reject) => setTimeout(() => reject('Error from P2'), 50));\nconst p3 = Promise.resolve(3);\n\n// Using Promise.all\nPromise.all([p1, p2, p3])\n  .then(values => console.log('All resolved:', values))\n  .catch(error => console.error('Promise.all rejected:', error));\n// Output: Promise.all rejected: Error from P2 (p1 and p3 results are discarded)\n\n// Using Promise.allSettled\nPromise.allSettled([p1, p2, p3])\n  .then(results => {\n    console.log('All settled:', results);\n    // Output: All settled: [\n    //   { status: 'fulfilled', value: 1 },\n    //   { status: 'rejected', reason: 'Error from P2' },\n    //   { status: 'fulfilled', value: 3 }\n    // ]\n  });\n```",
+          "tags": [
+            "JavaScript",
+            "Promises",
+            "Promise.all",
+            "Promise.allSettled",
+            "Error Handling",
+            "Asynchronous"
+          ],
+          "prerequisites": [
+            "promises_basics"
+          ],
+          "complexity": 8,
+          "interviewFrequency": 9,
+          "learningPath": "advanced"
+        },
+        {
+          "id": "question_data_correlation_strategies_open_1",
+          "topic": "Data Correlation",
+          "level": "medium",
+          "type": "open",
+          "question": "The provided solution for mapping comments to posts uses `Promise.all` and then `reduce` to create the mapping. Discuss the advantages and disadvantages of using `reduce` for this data correlation task, and propose an alternative strategy that might be more efficient for very large datasets.",
+          "answer": "### Advantages of using `reduce` for data correlation:\n*   **Conciseness:** For smaller datasets, `reduce` can be a compact way to transform an array into a new structure.\n*   **Flexibility:** `reduce` is very versatile and can handle various aggregation and transformation needs.\n\n### Disadvantages of using `reduce` for data correlation (as implied by the original Q&A):\n*   **Inefficiency for Lookups:** The original Q&A implies that you would `reduce` the *posts* array and for each post, iterate through the *comments* array to find relevant comments. This would lead to a nested loop structure, resulting in O(N*M) time complexity (where N is posts, M is comments) for correlation if comments aren't pre-indexed. Even if the `reduce` is on `comments` to group by `postId` *first* (as in `correlatePostsAndComments` example), the direct approach of iterating posts and then filtering comments for each post is inefficient.\n*   **Readability:** For complex correlation logic, `reduce` can sometimes become less readable than explicit loops or a combination of `forEach` and `map`.\n\n### Alternative Strategy for Very Large Datasets: Using a `Map` (Hash Map)\nFor optimal efficiency when correlating large datasets, especially when you need to match items from one array to many items in another, using a `Map` (or a plain object as a hash map) for pre-indexing is highly recommended.\n\n**Strategy:**\n1.  **Index the 'child' data:** Iterate through the `comments` array once and create a `Map` where the keys are `postId` and the values are arrays of comments associated with that `postId`. This step has a time complexity of O(M) (where M is the number of comments).\n2.  **Iterate and Attach:** Iterate through the `posts` array. For each `post`, look up its associated comments in the `Map` created in step 1 using `post.id` as the key. Attach the retrieved comments to the `post` object.\n    This step has a time complexity of O(N) (where N is the number of posts) because `Map` lookups are O(1) on average.\n\n**Overall Time Complexity:** O(M + N). This is significantly more efficient than O(N*M) for large datasets.\n\n**Example (as seen in theory block):**\n```javascript\nconst correlatePostsAndComments = (posts, comments) => {\n  const commentsByPostId = new Map();\n  \n  // Step 1: Group comments by postId (O(M))\n  comments.forEach(comment => {\n    if (!commentsByPostId.has(comment.postId)) {\n      commentsByPostId.set(comment.postId, []);\n    }\n    commentsByPostId.get(comment.postId).push(comment);\n  });\n\n  // Step 2: Map comments to their respective posts (O(N))\n  const postsWithComments = posts.map(post => ({\n    ...post,\n    comments: commentsByPostId.get(post.id) || [] \n  }));\n\n  return postsWithComments;\n};\n```",
+          "analysisPoints": [
+            "Understanding of common data correlation patterns.",
+            "Analysis of time complexity for different approaches (nested loops vs. hash map lookups).",
+            "Knowledge of `Map` data structure for efficiency.",
+            "Ability to articulate pros and cons of different solutions."
+          ],
+          "keyConcepts": [
+            "Data Correlation",
+            "Time Complexity",
+            "Map Data Structure",
+            "Hash Map",
+            "Algorithmic Efficiency",
+            "Reduce Method"
+          ],
+          "evaluationCriteria": [
+            "Depth of technical explanation",
+            "Ability to propose and justify optimized solutions",
+            "Understanding of fundamental data structures"
+          ],
+          "example": null,
+          "tags": [
+            "JavaScript",
+            "Data Structures",
+            "Algorithm",
+            "Performance",
+            "Map",
+            "reduce"
+          ],
+          "prerequisites": [
+            "time_complexity",
+            "map_object",
+            "array_reduce"
+          ],
+          "complexity": 8,
+          "interviewFrequency": 8,
+          "learningPath": "advanced"
+        },
+        {
+          "id": "question_implement_post_comments_correlation_code_1",
+          "topic": "Asynchronous Data Correlation",
+          "level": "medium",
+          "type": "code",
+          "question": "Implement a function `getPostsWithComments()` that fetches all posts and all comments from the provided `POSTS_URL` and `COMMENTS_URL` respectively. The function should use `Promise.all` to fetch the data concurrently. After fetching, it should correlate the comments with their corresponding posts, adding a `comments` array to each post object. Each comment object should be attached to the post whose `id` matches the comment's `postId`. Return the array of posts with their attached comments.",
+          "answer": "```typescript\nconst POSTS_URL = `https://jsonplaceholder.typicode.com/posts`;\nconst COMMENTS_URL = `https://jsonplaceholder.typicode.com/comments`;\n\nconst fetchAllPosts = () => {\n  return fetch(POSTS_URL).then(res => {\n    if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);\n    return res.json();\n  });\n};\n\nconst fetchAllComments = () => {\n  return fetch(COMMENTS_URL).then(res => {\n    if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);\n    return res.json();\n  });\n};\n\nasync function getPostsWithComments() {\n  try {\n    const [posts, comments] = await Promise.all([\n      fetchAllPosts(),\n      fetchAllComments()\n    ]);\n\n    const commentsByPostId = new Map();\n    comments.forEach(comment => {\n      if (!commentsByPostId.has(comment.postId)) {\n        commentsByPostId.set(comment.postId, []);\n      }\n      commentsByPostId.get(comment.postId).push(comment);\n    });\n\n    const postsWithComments = posts.map(post => ({\n      ...post,\n      comments: commentsByPostId.get(post.id) || []\n    }));\n\n    return postsWithComments;\n\n  } catch (error) {\n    console.error(\"Error fetching or correlating data:\", error);\n    throw error; // Re-throw to propagate the error\n  }\n}\n\n// Example usage:\n// getPostsWithComments()\n//   .then(data => {\n//     console.log('First post with comments:', data[0]);\n//     console.log('Number of comments for first post:', data[0]?.comments?.length);\n//     console.log('Total posts with comments:', data.length);\n//   })\n//   .catch(err => console.error('Failed to get posts with comments:', err));\n```",
+          "analysisPoints": [
+            "Correct use of `Promise.all` for concurrent fetching.",
+            "Effective use of `async/await` for cleaner asynchronous code.",
+            "Efficient data correlation logic using `Map` to group comments by `postId`.",
+            "Proper use of `map` to transform post objects and attach comments.",
+            "Basic error handling for network requests."
+          ],
+          "keyConcepts": [
+            "Promise.all",
+            "Fetch API",
+            "Async/Await",
+            "Data Correlation",
+            "Map Data Structure",
+            "Error Handling"
+          ],
+          "evaluationCriteria": [
+            "Correctness of asynchronous implementation",
+            "Efficiency of data correlation",
+            "Adherence to requirements",
+            "Robustness (error handling)"
+          ],
+          "example": null,
+          "tags": [
+            "JavaScript",
+            "Asynchronous",
+            "Promises",
+            "Fetch API",
+            "Data Manipulation",
+            "Code Challenge"
+          ],
+          "prerequisites": [
+            "promises_basics",
+            "fetch_api",
+            "map_object"
+          ],
+          "complexity": 7,
+          "interviewFrequency": 9,
+          "learningPath": "intermediate"
+        }
+      ],
+      "tasks": [
+        {
+          "id": "task_product_catalog_filter_sort",
+          "title": "Build a Dynamic Product Catalog Filter and Sort Utility",
+          "description": "\nImplement a JavaScript function `queryProducts({ search, sort, minPrice, maxPrice })` that simulates filtering and sorting a product catalog. Your function should:\n\n1.  **Retrieve Data:** Use the provided mock `getProducts()` function (assume it returns `[{ id, name, price, category }]`).\n2.  **Filter by Price Range:** Filter products to include only those within `minPrice` and `maxPrice` (inclusive). If `minPrice` or `maxPrice` is not provided, do not apply that specific bound.\n3.  **Filter by Search Term:** Filter products by `search` term. A product matches if its `name` (case-insensitive, spaces removed) contains the search term (also case-insensitive, spaces removed). Use a helper function similar to `isSubString` from the theory.\n4.  **Sort Products:** Sort the remaining products based on the `sort` parameter. The `sort` parameter can be `name`, `-name` (descending), `price`, or `-price` (descending). If no `sort` parameter is provided, return products in their original order.\n5.  **Return:** The final filtered and sorted list of products.\n\nYour solution should use modern JavaScript array methods (`filter`, `sort`). Focus on clear, maintainable code.\n",
+          "difficulty": "medium",
+          "startingCode": "function getProducts() {\n  return [\n    { id: 1, name: 'Laptop Pro 15', price: 1200, category: 'Electronics' },\n    { id: 2, name: 'Mechanical Keyboard', price: 150, category: 'Accessories' },\n    { id: 3, name: 'Wireless Mouse', price: 75, category: 'Accessories' },\n    { id: 4, name: 'External SSD 1TB', price: 180, category: 'Storage' },\n    { id: 5, name: 'Gaming Monitor 27', price: 450, category: 'Electronics' },\n    { id: 6, name: 'Webcam HD', price: 50, category: 'Peripherals' },\n    { id: 7, name: 'USB-C Hub', price: 40, category: 'Accessories' },\n    { id: 8, name: 'Laptop Stand', price: 60, category: 'Accessories' },\n  ];\n}\n\n// Helper for normalizing strings for search\nconst normalizeString = str => str.toLowerCase().replace(/\\s/g, '');\n\n// Helper for checking if one string contains another (case & space insensitive)\nconst containsNormalized = (source, query) => {\n  const normalizedSource = normalizeString(source);\n  const normalizedQuery = normalizeString(query);\n  return normalizedSource.includes(normalizedQuery);\n};\n\nfunction queryProducts({ search, sort, minPrice, maxPrice }) {\n  let products = getProducts();\n\n  // TODO: Implement filtering by price range\n\n  // TODO: Implement filtering by search term\n\n  // TODO: Implement sorting\n\n  return products;\n}\n\n// Example Usage:\n// console.log('All products:', queryProducts({}));\n// console.log('Filtered by price:', queryProducts({ minPrice: 100, maxPrice: 200 }));\n// console.log('Filtered by search:', queryProducts({ search: 'laptop' }));\n// console.log('Sorted by name desc:', queryProducts({ sort: '-name' }));\n// console.log('Combined filters and sort:', queryProducts({ search: 'Mouse', minPrice: 50, sort: 'price' }));\n",
+          "solutionCode": "function getProducts() {\n  return [\n    { id: 1, name: 'Laptop Pro 15', price: 1200, category: 'Electronics' },\n    { id: 2, name: 'Mechanical Keyboard', price: 150, category: 'Accessories' },\n    { id: 3, name: 'Wireless Mouse', price: 75, category: 'Accessories' },\n    { id: 4, name: 'External SSD 1TB', price: 180, category: 'Storage' },\n    { id: 5, name: 'Gaming Monitor 27', price: 450, category: 'Electronics' },\n    { id: 6, name: 'Webcam HD', price: 50, category: 'Peripherals' },\n    { id: 7, name: 'USB-C Hub', price: 40, category: 'Accessories' },\n    { id: 8, name: 'Laptop Stand', price: 60, category: 'Accessories' },\n  ];\n}\n\n// Helper for normalizing strings for search\nconst normalizeString = str => str.toLowerCase().replace(/\\s/g, '');\n\n// Helper for checking if one string contains another (case & space insensitive)\nconst containsNormalized = (source, query) => {\n  const normalizedSource = normalizeString(source);\n  const normalizedQuery = normalizeString(query);\n  return normalizedSource.includes(normalizedQuery);\n};\n\nfunction queryProducts({ search, sort, minPrice, maxPrice }) {\n  let products = getProducts();\n\n  // 1. Filter by price range\n  products = products.filter(product => {\n    const passesMin = minPrice === undefined || product.price >= minPrice;\n    const passesMax = maxPrice === undefined || product.price <= maxPrice;\n    return passesMin && passesMax;\n  });\n\n  // 2. Filter by search term\n  if (search) {\n    products = products.filter(product => \n      containsNormalized(product.name, search)\n    );\n  }\n\n  // 3. Sort products\n  if (sort) {\n    const isDescending = sort[0] === '-';\n    const sortField = isDescending ? sort.slice(1) : sort;\n\n    products = [...products].sort((a, b) => {\n      const valueA = a[sortField];\n      const valueB = b[sortField];\n\n      if (typeof valueA === 'string' && typeof valueB === 'string') {\n        const comparison = valueA.localeCompare(valueB);\n        return isDescending ? -comparison : comparison;\n      } else {\n        // Assume numeric or comparable non-string values\n        return isDescending ? (valueB - valueA) : (valueA - valueB);\n      }\n    });\n  }\n\n  return products;\n}\n",
+          "testCases": [
+            "queryProducts({}) should return all 8 products in original order.",
+            "queryProducts({ minPrice: 100, maxPrice: 200 }) should return products with price between 100 and 200 (Mechanical Keyboard, External SSD).",
+            "queryProducts({ search: 'mouse' }) should return Wireless Mouse.",
+            "queryProducts({ search: 'LAp top' }) should return Laptop Pro 15 and Laptop Stand.",
+            "queryProducts({ sort: 'price' }) should return products sorted by price ascending (40, 50, 60, 75, 150, 180, 450, 1200).",
+            "queryProducts({ sort: '-name' }) should return products sorted by name descending (Wireless Mouse, Webcam HD, USB-C Hub, Mechanical Keyboard, Laptop Stand, Laptop Pro 15, Gaming Monitor 27, External SSD 1TB).",
+            "queryProducts({ search: 'keyboard', minPrice: 100, sort: '-price' }) should return Mechanical Keyboard."
+          ],
+          "hints": [
+            "Remember to create a shallow copy of the array before sorting (`[...array]`) if you want to avoid modifying the original array in place.",
+            "For the price filter, `minPrice` and `maxPrice` might be `undefined` or `null`. Handle these cases gracefully to skip that specific bound.",
+            "The `String.prototype.localeCompare()` method is useful for robust string comparisons in sorting."
+          ],
+          "tags": [
+            "JavaScript",
+            "Array Methods",
+            "Filtering",
+            "Sorting",
+            "Data Manipulation",
+            "Frontend Logic"
+          ],
+          "timeEstimate": 45,
+          "prerequisites": [
+            "array_filter",
+            "array_sort",
+            "string_methods"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 9,
+          "learningPath": "intermediate",
+          "relatedConcepts": [
+            "functional_programming",
+            "immutability",
+            "single_responsibility_principle"
+          ]
+        },
+        {
+          "id": "task_fetch_user_photos",
+          "title": "Fetch and Correlate User Data with Photos",
+          "description": "\nImplement a JavaScript function `getUsersWithPhotos()` that fetches data from two different API endpoints concurrently and then combines them.\n\n**API Endpoints (mocked, but use `fetch`):**\n-   Users: `https://jsonplaceholder.typicode.com/users` (returns `[{ id, name, email, ... }]`)\n-   Photos: `https://jsonplaceholder.typicode.com/photos` (returns `[{ id, albumId, title, url, thumbnailUrl }]`)\n\n**Requirements:**\n1.  Use `Promise.all` to fetch both `users` and `photos` data concurrently.\n2.  Map the `photos` to their respective `users`. Each user should have a new property `photos` which is an array of photo objects where `photo.albumId` matches `user.id`.\n3.  Ensure your solution handles potential network errors gracefully (e.g., if one of the fetches fails, log the error and propagate it).\n4.  Return an array of user objects, each enriched with their `photos` array.\n\n**Note:** A user might not have any photos; in that case, their `photos` array should be empty.\n",
+          "difficulty": "medium",
+          "startingCode": "const USERS_URL = 'https://jsonplaceholder.typicode.com/users';\nconst PHOTOS_URL = 'https://jsonplaceholder.typicode.com/photos';\n\nasync function getUsersWithPhotos() {\n  // TODO: Fetch users and photos concurrently using Promise.all\n\n  // TODO: Correlate photos with users (each user should have a 'photos' array)\n  // Hint: Consider using a Map for efficient photo lookup by albumId\n\n  // TODO: Handle errors\n\n  return []; // Replace with your implementation\n}\n\n// Example Usage:\n// getUsersWithPhotos()\n//   .then(users => {\n//     console.log('First user with photos:', users[0]);\n//     console.log('Photos for first user:', users[0]?.photos?.length);\n//     console.log('Total users fetched:', users.length);\n//   })\n//   .catch(error => console.error('Failed to get users with photos:', error));\n",
+          "solutionCode": "const USERS_URL = 'https://jsonplaceholder.typicode.com/users';\nconst PHOTOS_URL = 'https://jsonplaceholder.typicode.com/photos';\n\nasync function getUsersWithPhotos() {\n  try {\n    // 1. Fetch users and photos concurrently\n    const [users, photos] = await Promise.all([\n      fetch(USERS_URL).then(res => {\n        if (!res.ok) throw new Error(`HTTP error! Users status: ${res.status}`);\n        return res.json();\n      }),\n      fetch(PHOTOS_URL).then(res => {\n        if (!res.ok) throw new Error(`HTTP error! Photos status: ${res.status}`);\n        return res.json();\n      })\n    ]);\n\n    // 2. Correlate photos with users\n    // Create a Map for efficient lookup of photos by albumId\n    const photosByAlbumId = new Map();\n    photos.forEach(photo => {\n      if (!photosByAlbumId.has(photo.albumId)) {\n        photosByAlbumId.set(photo.albumId, []);\n      }\n      photosByAlbumId.get(photo.albumId).push(photo);\n    });\n\n    // Attach photos array to each user object\n    const usersWithPhotos = users.map(user => ({\n      ...user,\n      photos: photosByAlbumId.get(user.id) || [] // If no photos, default to empty array\n    }));\n\n    return usersWithPhotos;\n\n  } catch (error) {\n    console.error(\"Error fetching or correlating data:\", error);\n    throw error; // Re-throw the error to calling context\n  }\n}\n",
+          "testCases": [
+            "Call `getUsersWithPhotos()` and verify it returns an array.",
+            "Check that each user object in the returned array has a `photos` property (which is an array).",
+            "Verify that `user.photos` array contains photos whose `albumId` matches `user.id`.",
+            "Ensure users with no corresponding photos have an empty `photos` array.",
+            "Simulate a network error (e.g., by changing a URL to an invalid one) and verify that the `catch` block is executed and an error is logged/thrown."
+          ],
+          "hints": [
+            "Remember that `fetch` returns a Promise that resolves to a `Response` object, and you'll need to call `.json()` on that response to parse the body.",
+            "Use `async/await` for cleaner Promise handling.",
+            "A `Map` data structure is excellent for grouping items by a key and then performing efficient lookups."
+          ],
+          "tags": [
+            "JavaScript",
+            "Asynchronous",
+            "Promises",
+            "Fetch API",
+            "Promise.all",
+            "Data Correlation",
+            "API Integration"
+          ],
+          "timeEstimate": 60,
+          "prerequisites": [
+            "promises_basics",
+            "fetch_api",
+            "async_await",
+            "map_object"
+          ],
+          "complexity": 8,
+          "interviewRelevance": 10,
+          "learningPath": "intermediate",
+          "relatedConcepts": [
+            "error_handling_promises",
+            "object_spread_syntax",
+            "array_map",
+            "array_foreach"
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "bbe7a56f-477d-45f5-92a3-25cee6c82a8e",
+    "startLine": 15300,
+    "endLine": 15399,
+    "processedDate": "2025-06-17T14:45:03.904Z",
+    "content": {
+      "logicalBlockInfo": {
+        "suggestedEndLine": -1
+      },
+      "theory": [
+        {
+          "id": "theory_async_data_processing",
+          "title": "Asynchronous Data Fetching and Transformation with Promise.all",
+          "content": "This section explains how to efficiently fetch data asynchronously and transform it using modern JavaScript features like `async/await` and `Promise.all`, along with array manipulation methods like `filter` and `reduce`.\n\n## Key Concepts\n\n### Asynchronous JavaScript (`async/await`)\n`async/await` is syntactic sugar built on top of Promises, designed to make asynchronous code easier to read and write. An `async` function always returns a Promise. The `await` keyword can only be used inside an `async` function and pauses the execution of the `async` function until the Promise is settled (resolved or rejected).\n\n### Parallel Promise Execution (`Promise.all`)\n`Promise.all` is a static method on the `Promise` object that takes an iterable of Promises (e.g., an array) as input. It returns a single Promise that fulfills when all of the input Promises have fulfilled, or rejects if any of the input Promises reject. The fulfillment value is an array of the fulfillment values of the input Promises, in the same order as the input.\n\n`Promise.all` is crucial for scenarios where multiple independent asynchronous operations need to complete before proceeding, optimizing performance by running them concurrently rather than sequentially.\n\n### Array Manipulation (`filter`, `reduce`)\n*   **`Array.prototype.filter()`**: Creates a new array with all elements that pass the test implemented by the provided function. It's used here to efficiently select comments belonging to a specific post.\n*   **`Array.prototype.reduce()`**: Executes a user-supplied 'reducer' callback function on each element of the array, in order, passing in the return value from the calculation on the preceding element. The final result of running the reducer across all elements of the array is a single value. It's used for aggregating or transforming data into a single, comprehensive structure (e.g., an object mapping posts to their comments).\n\n### Error Handling (`try...catch`)\nWhen working with `async/await`, `try...catch` blocks are the standard way to handle potential errors. Any rejected Promise awaited within a `try` block will throw an error that can be caught by the corresponding `catch` block.",
+          "examples": [
+            {
+              "id": "example_async_data_processing_1",
+              "title": "Fetch and Map Data Example",
+              "code": "/**\n * Mock function to simulate fetching all posts from an API.\n * @returns {Promise<Array<{id: number, title: string, body: string}>>}\n */\nconst fetchAllPosts = () => {\n  return new Promise(resolve => {\n    setTimeout(() => {\n      resolve([\n        { id: 1, title: 'Post 1', body: 'Content of post 1' },\n        { id: 2, title: 'Post 2', body: 'Content of post 2' }\n      ]);\n    }, 100);\n  });\n};\n\n/**\n * Mock function to simulate fetching all comments from an API.\n * @returns {Promise<Array<{id: number, postId: number, body: string}>>}\n */\nconst fetchAllComments = () => {\n  return new Promise(resolve => {\n    setTimeout(() => {\n      resolve([\n        { id: 101, postId: 1, body: 'Comment for post 1' },\n        { id: 102, postId: 2, body: 'Comment for post 2' },\n        { id: 103, postId: 1, body: 'Another comment for post 1' }\n      ]);\n    }, 150);\n  });\n};\n\nconst fetchAndMapData = async () => {\n  try {\n    // Fetch both posts and comments in parallel using Promise.all\n    const [posts, comments] = await Promise.all([\n      fetchAllPosts(),\n      fetchAllComments()\n    ]);\n\n    // Function to get all comments for a specific post using filter\n    const getCommentsForPost = postId =>\n      comments.filter(comment => comment.postId === postId);\n\n    // Map posts to their comments using reduce\n    const postsWithComments = posts.reduce((result, post) => {\n      result[post.id] = {\n        ...post,\n        comments: getCommentsForPost(post.id)\n      };\n      return result;\n    }, {}); // Initialize accumulator as an empty object\n\n    return postsWithComments;\n  } catch (error) {\n    console.error('Error fetching data:', error);\n    return {}; // Return an empty object on error\n  }\n};\n\n// Usage example\nfetchAndMapData().then(data => {\n  console.log('Posts with comments:', data);\n  /*\n  Expected output:\n  {\n    '1': {\n      id: 1,\n      title: 'Post 1',\n      body: 'Content of post 1',\n      comments: [\n        { id: 101, postId: 1, body: 'Comment for post 1' },\n        { id: 103, postId: 1, body: 'Another comment for post 1' }\n      ]\n    },\n    '2': {\n      id: 2,\n      title: 'Post 2',\n      body: 'Content of post 2',\n      comments: [\n        { id: 102, postId: 2, body: 'Comment for post 2' }\n      ]\n    }\n  }\n  */\n});\n",
+              "explanation": "This example demonstrates a common pattern in web development: fetching multiple related pieces of data from different endpoints and then combining them into a single, meaningful structure. `Promise.all` ensures that both `fetchAllPosts` and `fetchAllComments` run concurrently, significantly reducing the total waiting time compared to fetching them sequentially. Once both promises resolve, the `posts` and `comments` arrays are available. The `getCommentsForPost` helper uses `filter` to efficiently find relevant comments, and finally, `reduce` is used to transform the `posts` array into an object where each post is keyed by its `id` and augmented with its corresponding comments. Error handling is included via a `try...catch` block to gracefully manage network or data fetching failures.",
+              "language": "typescript"
+            }
+          ],
+          "relatedQuestions": [],
+          "relatedTasks": [],
+          "tags": [
+            "asynchronous-javascript",
+            "promises",
+            "async-await",
+            "array-methods",
+            "data-transformation",
+            "error-handling",
+            "frontend-architecture"
+          ],
+          "technology": "JavaScript",
+          "prerequisites": [
+            "Promises",
+            "Functions",
+            "Objects",
+            "Arrays"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 9,
+          "learningPath": "intermediate",
+          "requiredFor": [
+            "complex-api-integration",
+            "frontend-performance-optimization",
+            "state-management"
+          ]
+        },
+        {
+          "id": "theory_prototypes_and_extensions",
+          "title": "JavaScript Prototypes and Extending Built-in Objects",
+          "content": "JavaScript is a prototype-based language, meaning objects inherit properties and methods from other objects. This mechanism is fundamental to how inheritance works in JavaScript.\n\n## Key Concepts\n\n### Prototypes and Prototype Chain\nEvery JavaScript object has a `[[Prototype]]` (internal slot, exposed as `__proto__` in many environments) which links to another object. This linked object is its prototype. When you try to access a property or method on an object, if it's not found directly on the object, JavaScript looks it up on the object's `[[Prototype]]`, then on *that* prototype's `[[Prototype]]`, and so on, forming a 'prototype chain'. This chain continues until it reaches `Object.prototype`, which has `null` as its prototype.\n\n### `String.prototype` and Other Built-in Prototypes\nBuilt-in objects like `String`, `Array`, `Number`, `Function`, etc., also have prototypes. For instance, `String.prototype` contains all the default methods available on string instances (e.g., `toUpperCase()`, `substring()`, `length`). When you create a string like `let s = \"hello\";`, `s` inherits properties and methods from `String.prototype`.\n\n### Extending Built-in Prototypes\nYou can add new methods or properties to `String.prototype` (or any other built-in prototype), making them available to all instances of that type. This is demonstrated by adding `getHashCode` to `String.prototype`.\n\n```javascript\nif (!String.prototype.getHashCode) {\n  String.prototype.getHashCode = function() {\n    // Implementation here\n  };\n}\n```\n\n**Considerations and Best Practices for Extending Built-ins:**\n*   **Global Pollution**: Modifying built-in prototypes can 'pollute' the global namespace and conflict with future JavaScript versions or other libraries that might add methods with the same name. This is why the `if (!String.prototype.getHashCode)` check is crucial to prevent overwriting existing methods.\n*   **Maintainability**: It can make code harder to debug and maintain, as it changes the fundamental behavior of widely used objects.\n*   **Non-enumerable Properties**: For cleaner extensions, especially in shared libraries, it's often better to make new properties non-enumerable using `Object.defineProperty` to prevent them from showing up in `for...in` loops or `Object.keys()`.\n\n```javascript\nif (!String.prototype.getHashCode) {\n  Object.defineProperty(String.prototype, 'getHashCode', {\n    value: function() {\n      let hash = 0;\n      if (this.length === 0) return hash;\n      for (let i = 0; i < this.length; i++) {\n        const char = this.charCodeAt(i);\n        hash = ((hash << 5) - hash) + char;\n        hash = hash & hash; // Convert to 32bit integer\n      }\n      return hash;\n    },\n    writable: true,     // Can be reassigned\n    configurable: true, // Can be deleted or its attributes changed\n    enumerable: false   // Crucial: not iterable with for...in or Object.keys\n  });\n}\n```\n\n### `this` Keyword in Prototype Methods\nInside a method added to a prototype (e.g., `String.prototype.getHashCode`), the `this` keyword refers to the *instance* of the object on which the method was invoked. In the `getHashCode` example, `this` refers to the specific string instance (e.g., `\"sample\"`) for which the hash code is being calculated.",
+          "examples": [
+            {
+              "id": "example_prototype_extension_1",
+              "title": "Implementing getHashCode on String Prototype",
+              "code": "if (!String.prototype.getHashCode) {\n  /**\n   * Calculates a simple hash code for a string.\n   * This method will be available on all string instances.\n   * @returns {number} The hash code.\n   */\n  String.prototype.getHashCode = function() {\n    let hash = 0;\n    // If the string is empty, return 0 as its hash\n    if (this.length === 0) return hash;\n    \n    // Iterate through each character of the string\n    for (let i = 0; i < this.length; i++) {\n      // Get the Unicode value of the character\n      const char = this.charCodeAt(i);\n      // Update the hash using a common hashing algorithm bitwise operations\n      // (hash << 5) - hash is equivalent to hash * 31\n      hash = ((hash << 5) - hash) + char;\n      // Convert to 32-bit integer (effectively removes bits beyond 32nd, handling overflow)\n      hash = hash & hash;\n    }\n    \n    return hash;\n  };\n}\n\nlet s1 = \"sample\";\nlet s2 = \"another string\";\nlet s3 = \"sample\"; // Same string as s1\n\nconsole.log(`Hash for \"${s1}\": ${s1.getHashCode()}`); // e.g., -1320499623\nconsole.log(`Hash for \"${s2}\": ${s2.getHashCode()}`); // e.g., 2050963363\nconsole.log(`Hash for \"${s3}\": ${s3.getHashCode()}`); // e.g., -1320499623 (same as s1)\n\n// Demonstrating the 'this' context\nconst myString = \"Hello\";\nconst getMyStringHash = String.prototype.getHashCode.bind(myString);\nconsole.log(`Hash using bind: ${getMyStringHash()}`); // Same hash for \"Hello\"\n",
+              "explanation": "This example shows how to extend `String.prototype` with a custom `getHashCode` method. The `if (!String.prototype.getHashCode)` check is crucial to ensure that the method is only added if it doesn't already exist, preventing potential conflicts. Inside the `getHashCode` function, `this` refers to the actual string instance (e.g., `\"sample\"`) on which the method is called. The hash calculation uses bitwise operations, a common technique for performance in such algorithms. The example also briefly shows `bind` to explicitly set `this`, though typically prototype methods are called directly on the instance.",
+              "language": "typescript"
+            }
+          ],
+          "relatedQuestions": [],
+          "relatedTasks": [],
+          "tags": [
+            "prototypes",
+            "prototype-chain",
+            "object-oriented-javascript",
+            "inheritance",
+            "string-methods",
+            "this-keyword",
+            "javascript-internals",
+            "object-defineProperty"
+          ],
+          "technology": "JavaScript",
+          "prerequisites": [
+            "Objects",
+            "Functions",
+            "This-keyword"
+          ],
+          "complexity": 8,
+          "interviewRelevance": 7,
+          "learningPath": "intermediate",
+          "requiredFor": [
+            "custom-data-structures",
+            "library-development",
+            "understanding-frameworks"
+          ]
+        },
+        {
+          "id": "theory_type_coercion_and_operators",
+          "title": "JavaScript Type Coercion and Operator Behavior",
+          "content": "JavaScript is a loosely typed language, which means variables do not need to be declared with a specific type. This flexibility leads to 'type coercion', where JavaScript automatically converts values from one type to another when operations are performed.\n\n## Key Concepts\n\n### Implicit Type Coercion\nImplicit coercion happens automatically when an operator is used with values of different types. JavaScript attempts to make sense of the operation by converting one or both operands to a compatible type.\n\n### The `+` Operator\nThe `+` operator is unique because it performs both numeric addition and string concatenation. Its behavior depends on the types of its operands:\n*   **If either operand is a string**, JavaScript will convert the other operand to a string and perform string concatenation.\n*   **Otherwise (if neither operand is a string)**, JavaScript will convert both operands to numbers (if they aren't already) and perform numeric addition.\n\n**Rules for Conversion to Primitive (ToPrimitive)**:\nWhen a non-primitive value (like an object or array) is used in a context requiring a primitive, JavaScript calls its `Symbol.toPrimitive` method, or `valueOf()`, or `toString()` to get a primitive representation.\n\n**Rules for Conversion to Number (ToNumber)**:\n*   `true` becomes `1`.\n*   `false` becomes `0`.\n*   `null` becomes `0`.\n*   `undefined` becomes `NaN`.\n*   Strings are parsed as numbers if possible (e.g., `'10'` becomes `10`), otherwise `NaN` (e.g., `'abc'` becomes `NaN`).\n\n**Rules for Conversion to String (ToString)**:\n*   `null` becomes `'null'`.\n*   `undefined` becomes `'undefined'`.\n*   `true` becomes `'true'`.\n*   `false` becomes `'false'`.\n*   Numbers become their string representation (e.g., `123` becomes `'123'`).\n*   Objects/Arrays become `[object Object]` or comma-separated string for arrays.\n\n### Comparison Operators (`>`, `<`, `>=`, `<=`, `==`)\n*   **String Comparison**: When comparing two strings, JavaScript performs a lexicographical comparison, character by character, based on their Unicode (UTF-16) values. This means '2' > '3' is false because '2' comes before '3' in Unicode, but 'two' > 'three' is true because 'w' (119) comes after 'h' (104).\n*   **Mixed Type Comparison (`==`)**: The loose equality operator `==` performs type coercion before comparison. For example, `1 == '1'` is true because `'1'` is coerced to the number `1`. This is why it's generally recommended to use `===` (strict equality) which does not perform type coercion and checks both value and type.",
+          "examples": [
+            {
+              "id": "example_type_coercion_1",
+              "title": "Various Operations Demonstrating Type Coercion",
+              "code": "// Numeric addition (true is coerced to 1)\nconsole.log(1 + true);        // Output: 2 \n\n// Numeric addition (both true are coerced to 1)\nconsole.log(true + true);     // Output: 2\n\n// String concatenation (true is coerced to 'true')\nconsole.log('1' + true);      // Output: '1true'\n\n// String comparison (lexicographical: '2' comes before '3')\nconsole.log('2' > '3');       // Output: false \n\n// String comparison (lexicographical: 't' == 't', 'w' > 'h')\nconsole.log('two' > 'three'); // Output: true \n\n// More examples\nconsole.log(10 + 'abc');      // Output: '10abc'\nconsole.log('5' * '2');       // Output: 10 (Multiplication operator coerces to Number)\nconsole.log(5 + null);        // Output: 5 (null is coerced to 0)\nconsole.log(5 + undefined);   // Output: NaN (undefined is coerced to NaN)\n",
+              "explanation": "These examples illustrate the key behaviors of JavaScript operators with different data types. The `+` operator demonstrates its dual role as an adder and concatenator, prioritizing string concatenation if any operand is a string. When neither is a string, it defaults to numeric addition, coercing booleans (`true` to 1) or `null` to numbers. Comparison operators like `>` perform lexicographical comparison for strings and numeric comparison for numbers after potential coercion. Understanding these rules is crucial to avoid unexpected outcomes in JavaScript.",
+              "language": "typescript"
+            }
+          ],
+          "relatedQuestions": [],
+          "relatedTasks": [],
+          "tags": [
+            "type-coercion",
+            "javascript-fundamentals",
+            "operators",
+            "comparison",
+            "data-types",
+            "quirks"
+          ],
+          "technology": "JavaScript",
+          "prerequisites": [
+            "Data-types",
+            "Operators"
+          ],
+          "complexity": 6,
+          "interviewRelevance": 8,
+          "learningPath": "beginner",
+          "requiredFor": [
+            "debugging-javascript",
+            "writing-robust-code"
+          ]
+        },
+        {
+          "id": "theory_primitives_references_this",
+          "title": "JavaScript Variable Handling: Primitives, References, and 'this' Context",
+          "content": "Understanding how JavaScript handles different data types—specifically, the distinction between primitive values and reference values—is fundamental to predicting variable behavior. Equally important is grasping the dynamic nature of the `this` keyword.\n\n## Key Concepts\n\n### Primitive Values\nPrimitive values are data that are not objects and have no methods. There are seven primitive data types:\n*   `string`\n*   `number`\n*   `boolean`\n*   `symbol`\n*   `null`\n*   `undefined`\n*   `bigint`\n\nWhen a primitive value is assigned to a variable, the value itself is stored in that variable. When you assign one primitive variable to another, a *copy* of the value is made. Subsequent changes to one variable do not affect the other.\n\n### Reference Values (Objects)\nReference values are objects, which include plain objects, arrays, and functions. Unlike primitives, reference values are not stored directly in the variable. Instead, the variable stores a *reference* (a pointer) to the memory location where the object is stored.\n\nWhen you assign one reference variable to another, the *reference* is copied, not the object itself. This means both variables point to the *same* object in memory. Therefore, if you modify the object through one variable, those changes will be visible when accessed through the other variable.\n\n### The `this` Keyword\nThe `this` keyword in JavaScript is a special identifier that refers to the context in which a function is executed. Its value is determined dynamically at runtime, depending on *how* the function is called, rather than where it's defined (lexical scope), with the exception of arrow functions.\n\n**Common `this` Bindings:**\n1.  **Global Context**: When `this` is used outside of any function, or inside a regular function called directly (not as a method), `this` refers to the global object (`window` in browsers, `global` in Node.js). In strict mode, `this` inside a function called directly is `undefined`.\n    ```javascript\n    console.log(this); // In browser: Window object\n    function showThis() { console.log(this); }\n    showThis(); // In browser (non-strict): Window object; (strict): undefined\n    ```\n2.  **Method Context**: When a function is called as a method of an object, `this` refers to the object on which the method was called.\n    ```javascript\n    const person = {\n      name: 'Alice',\n      greet: function() {\n        console.log(`Hello, my name is ${this.name}`);\n      }\n    };\n    person.greet(); // `this` is `person` object, output: 'Hello, my name is Alice'\n    ```\n3.  **Constructor Context**: When a function is used as a constructor with the `new` keyword, `this` refers to the newly created instance of the object.\n    ```javascript\n    function Car(make) {\n      this.make = make;\n    }\n    const myCar = new Car('Toyota');\n    console.log(myCar.make); // `this` is `myCar` instance, output: 'Toyota'\n    ```\n4.  **Explicit Binding (`call`, `apply`, `bind`)**: These methods allow you to explicitly set the value of `this` for a function call.\n    ```javascript\n    function sayHello() { console.log(`Hello, ${this.name}`); }\n    const user = { name: 'Bob' };\n    sayHello.call(user); // `this` is `user`, output: 'Hello, Bob'\n    ```\n5.  **Arrow Functions**: Arrow functions do not have their own `this` binding. Instead, `this` inside an arrow function is lexically scoped; it inherits `this` from the enclosing (outer) lexical context at the time the arrow function is *defined*, not when it's called.\n    ```javascript\n    const user = {\n      name: 'Charlie',\n      greet: function() {\n        setTimeout(() => {\n          console.log(`Hello, ${this.name}`); // `this` here refers to `user` (inherited from `greet`)\n        }, 100);\n      }\n    };\n    user.greet(); // `this` correctly points to `user`\n    ```",
+          "examples": [
+            {
+              "id": "example_primitives_references_this_1",
+              "title": "Primitive vs Reference Values",
+              "code": "// Question 1: Primitive value behavior\nvar x_prim = 1;\nvar y_prim = x_prim; // y_prim gets a copy of the value 1\nx_prim = 0; // x_prim changes, y_prim remains 1\nconsole.log(x_prim, y_prim); // Output: 0, 1 (y_prim keeps original value)\n\n// Question 2: Reference value behavior (Arrays are objects)\nvar x_ref = [1];\nvar y_ref = x_ref; // y_ref gets a copy of the reference (pointer) to the array [1]\nx_ref = []; // x_ref now points to a NEW empty array. y_ref still points to the ORIGINAL [1]\nconsole.log(x_ref, y_ref); // Output: [], [1] (y_ref still refers to original array)\n\n// What if we modify the content of the referenced object?\nvar a_ref = { val: 1 };\nvar b_ref = a_ref;\na_ref.val = 2; // Modify the object through a_ref\nconsole.log(a_ref.val, b_ref.val); // Output: 2, 2 (Both variables see the change)\n\n",
+              "explanation": "This example vividly illustrates the core difference between primitive and reference values in JavaScript. For primitives, assignment creates a distinct copy, so changes to one variable don't affect the other. For objects (including arrays), assignment copies the reference, meaning both variables point to the same underlying data. If the object's content is modified through one variable, those changes are reflected when accessed through the other, as they are indeed the same object.",
+              "language": "typescript"
+            },
+            {
+              "id": "example_primitives_references_this_2",
+              "title": "'this' Context Demonstration",
+              "code": "// Global context\nfunction Abc() {\n  console.log('Inside Abc (non-strict mode):', this);\n}\nAbc(); // In browser: Window object; In Node: global object\n\n// Strict mode global context\n(function() {\n  'use strict';\n  function AbcStrict() {\n    console.log('Inside AbcStrict (strict mode):', this);\n  }\n  AbcStrict(); // Output: undefined\n})();\n\n// Method context\nconst myObject = {\n  value: 42,\n  getValue: function() {\n    console.log('Inside myObject.getValue:', this.value);\n  }\n};\nmyObject.getValue(); // Output: 42 (this is myObject)\n\n// Constructor context\nfunction Person(name) {\n  this.name = name;\n  this.greeting = function() {\n    console.log(`Hello from ${this.name}`);\n  };\n}\nconst person1 = new Person('Alice');\nperson1.greeting(); // Output: Hello from Alice (this is person1)\n\n// Explicit binding with .call()\nfunction displayValue() {\n  console.log('displayValue:', this.data);\n}\nconst dataObject = { data: 'important info' };\ndisplayValue.call(dataObject); // Output: important info (this is dataObject)\n\n// Arrow function context (lexical 'this')\nconst arrowObject = {\n  id: 'arrowObj',\n  delayLog: function() {\n    setTimeout(() => {\n      console.log('Inside arrow function:', this.id);\n    }, 100);\n  }\n};\narrowObject.delayLog(); // Output: arrowObj (this is arrowObject, captured from delayLog's scope)\n",
+              "explanation": "This example comprehensively demonstrates the various ways the `this` keyword is bound in JavaScript. It covers global execution context (both non-strict and strict mode), method invocation, constructor calls, explicit binding using `.call()`, and the lexical `this` behavior of arrow functions. Understanding these different binding rules is crucial for predicting and controlling function behavior, especially in complex applications and when dealing with callbacks or event handlers.",
+              "language": "typescript"
+            }
+          ],
+          "relatedQuestions": [],
+          "relatedTasks": [],
+          "tags": [
+            "primitives",
+            "references",
+            "this-keyword",
+            "scope",
+            "javascript-fundamentals",
+            "memory-management",
+            "function-context",
+            "data-types"
+          ],
+          "technology": "JavaScript",
+          "prerequisites": [
+            "Variables",
+            "Data-types",
+            "Functions",
+            "Objects"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 9,
+          "learningPath": "intermediate",
+          "requiredFor": [
+            "object-oriented-javascript",
+            "functional-programming",
+            "dom-manipulation"
+          ]
+        }
+      ],
+      "questions": [
+        {
+          "id": "question_async_data_processing_1",
+          "topic": "Asynchronous Operations with Promise.all",
+          "level": "medium",
+          "type": "mcq",
+          "question": "Consider the following JavaScript code snippet. What is the primary benefit of using `Promise.all` in the `fetchAndMapData` function?",
+          "answer": "It fetches posts and comments concurrently, improving performance.",
+          "options": [
+            "It fetches posts first, then comments, ensuring data consistency.",
+            "It fetches posts and comments concurrently, improving performance.",
+            "It automatically retries fetching if an error occurs.",
+            "It ensures that comments are always mapped to the correct post ID without extra logic."
+          ],
+          "analysisPoints": [
+            "`Promise.all` executes promises in parallel, not sequentially.",
+            "Concurrency leads to reduced overall execution time, hence better performance.",
+            "`Promise.all` itself does not provide retry mechanisms; that needs to be implemented separately.",
+            "The mapping logic (filter/reduce) is separate from `Promise.all`'s role in concurrency."
+          ],
+          "keyConcepts": [
+            "Promise.all",
+            "Concurrency vs. Sequential execution",
+            "Performance optimization",
+            "Asynchronous JavaScript"
+          ],
+          "evaluationCriteria": [
+            "Understanding of Promise.all's core functionality.",
+            "Ability to identify performance implications of concurrent operations.",
+            "Distinguishing Promise.all's role from other features."
+          ],
+          "example": "```typescript\nconst fetchAndMapData = async () => {\n  // ... (simplified)\n  const [posts, comments] = await Promise.all([\n    fetchAllPosts(),\n    fetchAllComments()\n  ]);\n  // ...\n};\n```",
+          "tags": [
+            "promise.all",
+            "async-await",
+            "performance",
+            "concurrency",
+            "mcq"
+          ],
+          "prerequisites": [
+            "Promises",
+            "Async/Await"
+          ],
+          "complexity": 6,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_async_data_processing_2",
+          "topic": "Error Handling in Async/Await with Promise.all",
+          "level": "medium",
+          "type": "open",
+          "question": "In the `fetchAndMapData` function, how would the error handling behavior change if one of the promises passed to `Promise.all` (e.g., `fetchAllPosts()`) rejects? Describe the expected outcome and how the `try...catch` block handles it.",
+          "answer": "If any of the promises passed to `Promise.all` rejects, `Promise.all` itself immediately rejects with the reason of the first promise that rejected, regardless of the status of other promises. In the `fetchAndMapData` function, this rejection would be caught by the `try...catch` block surrounding the `await Promise.all(...)` call. The `catch (error)` block would execute, logging the error and returning an empty object (`{}`). The application would then continue execution from the point where `fetchAndMapData().then(...)` was called, but with an empty data set, preventing a crash.",
+          "analysisPoints": [
+            "Knowledge of `Promise.all`'s fail-fast behavior.",
+            "Understanding of `try...catch` with `async/await`.",
+            "Ability to trace execution flow on error.",
+            "Consequences for the return value."
+          ],
+          "keyConcepts": [
+            "Promise.all rejection",
+            "Async/Await error handling",
+            "Try...catch block",
+            "Promise states"
+          ],
+          "evaluationCriteria": [
+            "Accuracy in describing `Promise.all` error propagation.",
+            "Correct understanding of `try...catch` in async functions.",
+            "Clarity of explanation."
+          ],
+          "example": null,
+          "tags": [
+            "promise.all",
+            "error-handling",
+            "async-await",
+            "open-ended"
+          ],
+          "prerequisites": [
+            "Promises",
+            "Error Handling"
+          ],
+          "complexity": 7,
+          "interviewFrequency": 7,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_async_data_processing_3",
+          "topic": "Array.prototype.reduce for Data Transformation",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "What is the primary purpose of `Array.prototype.reduce` in the `fetchAndMapData` function's data transformation step?",
+          "answer": "To transform an array of posts into an object where each post is a property keyed by its ID, and augmented with its related comments.",
+          "analysisPoints": [
+            "Recall `reduce`'s role in aggregation/transformation.",
+            "Identify the specific transformation being performed."
+          ],
+          "keyConcepts": [
+            "Array.prototype.reduce",
+            "Data transformation",
+            "Aggregation"
+          ],
+          "evaluationCriteria": [
+            "Ability to quickly recall the purpose of `reduce` in a specific context."
+          ],
+          "example": null,
+          "tags": [
+            "array-methods",
+            "reduce",
+            "data-transformation",
+            "flashcard"
+          ],
+          "prerequisites": [
+            "Arrays",
+            "Functions"
+          ],
+          "complexity": 5,
+          "interviewFrequency": 6,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_async_data_processing_4",
+          "topic": "Async/Await Best Practices",
+          "level": "hard",
+          "type": "code",
+          "question": "Refactor the `fetchAndMapData` function. Instead of fetching all comments and then filtering them, imagine there's a new API endpoint `fetchCommentsForPost(postId)`. Modify `fetchAndMapData` to use this new endpoint for each post, while still aiming for efficient execution. Consider how to handle errors if a specific `fetchCommentsForPost` call fails for one post, without stopping the entire process for other posts.",
+          "answer": "```typescript\n/**\n * Mock function for fetching all posts.\n */\nconst fetchAllPosts = () => {\n  return new Promise(resolve => {\n    setTimeout(() => {\n      resolve([\n        { id: 1, title: 'Post 1' },\n        { id: 2, title: 'Post 2' },\n        { id: 3, title: 'Post 3' }\n      ]);\n    }, 100);\n  });\n};\n\n/**\n * Mock function for fetching comments for a specific post.\n * Simulate a failure for postId 2.\n */\nconst fetchCommentsForPost = (postId) => {\n  return new Promise((resolve, reject) => {\n    setTimeout(() => {\n      if (postId === 2) {\n        reject(new Error(`Failed to fetch comments for post ${postId}`));\n      } else if (postId === 1) {\n        resolve([{ id: 101, postId: 1, body: 'C1 for P1' }, { id: 102, postId: 1, body: 'C2 for P1' }]);\n      } else if (postId === 3) {\n        resolve([{ id: 103, postId: 3, body: 'C1 for P3' }]);\n      } else {\n        resolve([]);\n      }\n    }, 150);\n  });\n};\n\nconst fetchAndMapDataRefactored = async () => {\n  try {\n    const posts = await fetchAllPosts();\n\n    // Create an array of promises for fetching comments for each post\n    // Use .then/.catch for each individual promise to handle errors gracefully\n    const postsWithCommentPromises = posts.map(async post => {\n      try {\n        const comments = await fetchCommentsForPost(post.id);\n        return { ...post, comments };\n      } catch (error) {\n        console.warn(`Warning: Could not fetch comments for Post ID ${post.id}. Error: ${error.message}`);\n        return { ...post, comments: [] }; // Return post with empty comments array on error\n      }\n    });\n\n    // Wait for all individual post-comment mapping promises to settle\n    const postsWithComments = await Promise.all(postsWithCommentPromises);\n\n    // Transform the array into an object keyed by post ID (optional, if original structure desired)\n    return postsWithComments.reduce((acc, post) => {\n      acc[post.id] = post;\n      return acc;\n    }, {});\n\n  } catch (error) {\n    console.error('Error fetching data:', error);\n    return {};\n  }\n};\n\n// Usage\nfetchAndMapDataRefactored().then(data => {\n  console.log('Refactored Posts with comments:', data);\n});\n```",
+          "analysisPoints": [
+            "Correct use of `map` to create an array of promises.",
+            "Proper use of `Promise.all` to wait for all *mapped* promises.",
+            "Handling individual promise rejections using `try...catch` inside the `map` callback to prevent `Promise.all` from failing if one comment fetch fails.",
+            "Returning a resolved value (e.g., post with empty comments) from the inner `catch` block to ensure `Promise.all` receives only resolved promises.",
+            "Maintaining the desired data structure after transformation."
+          ],
+          "keyConcepts": [
+            "Promise.all",
+            "Array.prototype.map",
+            "Async/Await",
+            "Error handling patterns",
+            "Resilience"
+          ],
+          "evaluationCriteria": [
+            "Ability to refactor and optimize asynchronous flows.",
+            "Understanding of `Promise.allSettled` vs `Promise.all` for partial failures (or how to simulate `allSettled` behavior with `Promise.all`).",
+            "Correct error handling for individual items in a parallel fetch.",
+            "Code clarity and efficiency."
+          ],
+          "example": null,
+          "tags": [
+            "async-await",
+            "promise.all",
+            "error-handling",
+            "refactoring",
+            "code-challenge",
+            "hard"
+          ],
+          "prerequisites": [
+            "Promises",
+            "Array.prototype.map",
+            "Async/Await",
+            "Error Handling"
+          ],
+          "complexity": 8,
+          "interviewFrequency": 8,
+          "learningPath": "advanced"
+        },
+        {
+          "id": "question_prototypes_1",
+          "topic": "Extending String.prototype",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "What is `String.prototype` in JavaScript, and what is its purpose when defining a method like `getHashCode`?",
+          "answer": "`String.prototype` is the object that all `String` instances inherit properties and methods from. Its purpose, when defining `getHashCode`, is to make the `getHashCode` method available directly on all JavaScript string instances, allowing them to call `\"mystring\".getHashCode()`.",
+          "analysisPoints": [
+            "Definition of prototype.",
+            "Role of `String.prototype` in inheritance.",
+            "How it enables method access on instances."
+          ],
+          "keyConcepts": [
+            "Prototypes",
+            "Prototype chain",
+            "String.prototype",
+            "Inheritance"
+          ],
+          "evaluationCriteria": [
+            "Quick recall of prototype definition and function."
+          ],
+          "example": null,
+          "tags": [
+            "prototypes",
+            "string.prototype",
+            "flashcard",
+            "inheritance"
+          ],
+          "prerequisites": [
+            "Objects",
+            "Basic JavaScript"
+          ],
+          "complexity": 4,
+          "interviewFrequency": 6,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_prototypes_2",
+          "topic": "this keyword in Prototype Methods",
+          "level": "medium",
+          "type": "mcq",
+          "question": "Consider the `getHashCode` method added to `String.prototype`. What does the `this` keyword refer to inside the `getHashCode` function?\n\n```javascript\nif (!String.prototype.getHashCode) {\n  String.prototype.getHashCode = function() {\n    // What is 'this' here?\n    return this.length;\n  };\n}\n\nlet myString = \"example\";\nmyString.getHashCode();\n```",
+          "answer": "The string instance (e.g., \"example\") on which the method was called.",
+          "options": [
+            "The `String` constructor function.",
+            "The `String.prototype` object itself.",
+            "The global window object (in browsers) or undefined (in strict mode).",
+            "The string instance (e.g., \"example\") on which the method was called."
+          ],
+          "analysisPoints": [
+            "Method invocation rule for `this`.",
+            "Context of `this` in prototype methods."
+          ],
+          "keyConcepts": [
+            "This keyword",
+            "Prototype methods",
+            "Function context"
+          ],
+          "evaluationCriteria": [
+            "Correct understanding of `this` binding in method calls.",
+            "Distinguishing between prototype object and instance."
+          ],
+          "example": null,
+          "tags": [
+            "this-keyword",
+            "prototypes",
+            "mcq",
+            "function-context"
+          ],
+          "prerequisites": [
+            "This keyword",
+            "Prototypes"
+          ],
+          "complexity": 6,
+          "interviewFrequency": 7,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_prototypes_3",
+          "topic": "Pros and Cons of Extending Built-in Prototypes",
+          "level": "medium",
+          "type": "open",
+          "question": "While extending built-in prototypes like `String.prototype` provides convenience, it also has potential drawbacks. Discuss at least two pros and two cons of extending built-in JavaScript prototypes in a production environment.",
+          "answer": "**Pros:**\n1.  **Convenience and Readability**: It makes methods available directly on instances, leading to more concise and readable code (e.g., `myString.getHashCode()` instead of `stringUtils.getHashCode(myString)`).\n2.  **Performance (sometimes)**: For very frequently used utility functions, adding them to the prototype can sometimes offer slight performance benefits by avoiding utility function calls with explicit arguments.\n\n**Cons:**\n1.  **Global Pollution/Conflicts**: Modifying global prototypes can lead to name collisions with future JavaScript versions or other libraries that might define methods with the same name, leading to unexpected behavior or breaking changes.\n2.  **Debugging Difficulty**: It can make code harder to debug because the source of a method might not be immediately obvious, and its behavior could be altered by different parts of the codebase.\n3.  **Maintainability and Predictability**: It can make the codebase less predictable and harder to maintain for new developers who might not expect built-in objects to have custom methods.",
+          "analysisPoints": [
+            "Ability to articulate the benefits of prototype extension.",
+            "Awareness of the risks associated with modifying global objects.",
+            "Consideration of maintainability and collaboration in a team setting."
+          ],
+          "keyConcepts": [
+            "Prototypes",
+            "Global scope",
+            "Maintainability",
+            "Code organization",
+            "Best practices"
+          ],
+          "evaluationCriteria": [
+            "Balance of arguments for and against.",
+            "Clarity and depth of explanation.",
+            "Identification of practical implications."
+          ],
+          "example": null,
+          "tags": [
+            "prototypes",
+            "best-practices",
+            "open-ended",
+            "design-patterns"
+          ],
+          "prerequisites": [
+            "Prototypes"
+          ],
+          "complexity": 7,
+          "interviewFrequency": 6,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_type_coercion_1",
+          "topic": "Type Coercion with '+' operator",
+          "level": "easy",
+          "type": "mcq",
+          "question": "What will be the output of `console.log('10' + 5 + true);` in JavaScript?",
+          "answer": "'105true'",
+          "options": [
+            "15",
+            "16",
+            "'105true'",
+            "NaN"
+          ],
+          "analysisPoints": [
+            "The `+` operator performs left-to-right evaluation.",
+            "If a string is encountered, subsequent `+` operations result in string concatenation.",
+            "Number `5` is coerced to `'5'`, and boolean `true` is coerced to `'true'`."
+          ],
+          "keyConcepts": [
+            "Type coercion",
+            "Plus operator behavior",
+            "String concatenation",
+            "Order of operations"
+          ],
+          "evaluationCriteria": [
+            "Understanding of step-by-step type coercion.",
+            "Knowledge of `+` operator rules."
+          ],
+          "example": "```javascript\nconsole.log('10' + 5 + true); \n// Step 1: '10' + 5  -> '105' (string concatenation because '10' is a string)\n// Step 2: '105' + true -> '105true' (string concatenation because '105' is a string)\n```",
+          "tags": [
+            "type-coercion",
+            "operators",
+            "mcq",
+            "javascript-fundamentals"
+          ],
+          "prerequisites": [
+            "Data types",
+            "Operators"
+          ],
+          "complexity": 5,
+          "interviewFrequency": 8,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_type_coercion_2",
+          "topic": "String vs Numeric Comparison",
+          "level": "medium",
+          "type": "mcq",
+          "question": "What is the output of the following JavaScript code snippets?\n\n```javascript\nconsole.log(10 > '9');\nconsole.log('10' > '9');\n```",
+          "answer": "true\nfalse",
+          "options": [
+            "true\ntrue",
+            "false\nfalse",
+            "true\nfalse",
+            "false\ntrue"
+          ],
+          "analysisPoints": [
+            "For `10 > '9'`, the string `'9'` is coerced to a number `9` before comparison, resulting in `10 > 9` which is `true`.",
+            "For `'10' > '9'`, both are strings, so a lexicographical comparison occurs. Character '1' is compared to '9'. '1' has a lower Unicode value than '9', so '10' is considered 'less than' '9' in string comparison. Thus, `'10' > '9'` is `false`."
+          ],
+          "keyConcepts": [
+            "Type coercion",
+            "Comparison operators",
+            "Numeric comparison",
+            "Lexicographical string comparison"
+          ],
+          "evaluationCriteria": [
+            "Ability to differentiate between numeric and string comparison rules.",
+            "Understanding of implicit type coercion in comparison operations."
+          ],
+          "example": null,
+          "tags": [
+            "type-coercion",
+            "operators",
+            "comparison",
+            "mcq"
+          ],
+          "prerequisites": [
+            "Data types",
+            "Operators"
+          ],
+          "complexity": 6,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_type_coercion_3",
+          "topic": "Falsy Values and Coercion",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "What value does `!!\"\"` evaluate to in JavaScript, and why?",
+          "answer": "`false`. The empty string `\"\"` is a 'falsy' value. The first `!` converts it to `true`, and the second `!` then converts `true` to `false`.",
+          "analysisPoints": [
+            "Recall common falsy values.",
+            "Understand `!` operator behavior (coercion to boolean and negation)."
+          ],
+          "keyConcepts": [
+            "Type coercion",
+            "Falsy values",
+            "Boolean operator"
+          ],
+          "evaluationCriteria": [
+            "Quick recall of boolean coercion rules for falsy values."
+          ],
+          "example": null,
+          "tags": [
+            "type-coercion",
+            "falsy",
+            "boolean",
+            "flashcard"
+          ],
+          "prerequisites": [
+            "Data types",
+            "Operators"
+          ],
+          "complexity": 4,
+          "interviewFrequency": 7,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_primitives_references_1",
+          "topic": "Primitive vs. Reference Assignment",
+          "level": "medium",
+          "type": "mcq",
+          "question": "What will be the output of the following JavaScript code snippets?\n\n```javascript\n// Snippet 1: Primitive vs reference values\nvar x1 = 10;\nvar y1 = x1;\nx1 = 20;\nconsole.log(x1, y1);\n\n// Snippet 2: Array reference\nvar x2 = [1, 2];\nvar y2 = x2;\nx2.push(3);\nconsole.log(x2, y2);\n```",
+          "answer": "20 10\n[1, 2, 3] [1, 2, 3]",
+          "options": [
+            "20 10\n[1, 2, 3] [1, 2, 3]",
+            "20 10\n[1, 2, 3] [1, 2]",
+            "10 20\n[1, 2] [1, 2, 3]",
+            "20 20\n[1, 2, 3] [1, 2, 3]"
+          ],
+          "analysisPoints": [
+            "In Snippet 1, `x1` and `y1` are primitives. `y1` gets a copy of `x1`'s *value*. Changing `x1` does not affect `y1`.",
+            "In Snippet 2, `x2` and `y2` are references (arrays). `y2` gets a copy of `x2`'s *reference* (pointer). Both point to the *same* array in memory. Modifying the array through `x2` (e.g., `push`) affects the array that `y2` also points to."
+          ],
+          "keyConcepts": [
+            "Primitive values",
+            "Reference values",
+            "Pass-by-value",
+            "Pass-by-reference (for assignment/object content)"
+          ],
+          "evaluationCriteria": [
+            "Correctly distinguishing between primitive and reference type behavior.",
+            "Understanding how assignments and mutations affect variables based on their type."
+          ],
+          "example": null,
+          "tags": [
+            "primitives",
+            "references",
+            "memory-management",
+            "mcq"
+          ],
+          "prerequisites": [
+            "Data types",
+            "Variables"
+          ],
+          "complexity": 6,
+          "interviewFrequency": 9,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_primitives_references_2",
+          "topic": "Array Reassignment vs. Mutation",
+          "level": "medium",
+          "type": "mcq",
+          "question": "What is the output of the following JavaScript code?\n\n```javascript\nvar arr1 = [5];\nvar arr2 = arr1;\narr1 = [];\nconsole.log(arr1, arr2);\n```",
+          "answer": "[] [5]",
+          "options": [
+            "[] []",
+            "[] [5]",
+            "[5] [5]",
+            "Error"
+          ],
+          "analysisPoints": [
+            "`arr1 = [5]` creates an array `[5]` and `arr1` points to it.",
+            "`arr2 = arr1` copies the *reference* from `arr1` to `arr2`. Now `arr1` and `arr2` both point to `[5]`.",
+            "`arr1 = []` reassigns `arr1` to point to a *new*, empty array. This does NOT affect what `arr2` is pointing to.",
+            "`arr2` still points to the original array `[5]`."
+          ],
+          "keyConcepts": [
+            "Reference values",
+            "Array assignment",
+            "Mutation vs. Reassignment"
+          ],
+          "evaluationCriteria": [
+            "Understanding that reassigning a reference variable creates a new reference, not modifies the original object.",
+            "Distinguishing between reassigning the variable and mutating the object it references."
+          ],
+          "example": null,
+          "tags": [
+            "references",
+            "arrays",
+            "memory-management",
+            "mcq"
+          ],
+          "prerequisites": [
+            "Arrays",
+            "Variables"
+          ],
+          "complexity": 5,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_this_context_1",
+          "topic": "this Context in Global Scope and Simple Function Calls",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "What does `this` refer to when called in the global scope (outside any function) in a browser, and inside a simple function call in strict mode?",
+          "answer": "In the global scope: `window` object. Inside a simple function call in strict mode: `undefined`.",
+          "analysisPoints": [
+            "Recall global `this` binding.",
+            "Recall strict mode `this` binding for simple function calls."
+          ],
+          "keyConcepts": [
+            "This keyword",
+            "Global context",
+            "Strict mode"
+          ],
+          "evaluationCriteria": [
+            "Quick recall of `this` behavior in basic contexts."
+          ],
+          "example": null,
+          "tags": [
+            "this-keyword",
+            "flashcard",
+            "strict-mode"
+          ],
+          "prerequisites": [
+            "This keyword"
+          ],
+          "complexity": 4,
+          "interviewFrequency": 7,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_this_context_2",
+          "topic": "this Context in Object Methods and Arrow Functions",
+          "level": "medium",
+          "type": "open",
+          "question": "Explain the difference in how `this` is bound when a function is called as a method of an object versus when an arrow function is used within that same object method. Provide a simple code example to illustrate your explanation.",
+          "answer": "When a regular function is called as a method of an object (`obj.method()`), `this` is dynamically bound to the object on which the method was called (`obj`). This is known as implicit binding. For example:\n\n```javascript\nconst myObject = {\n  value: 10,\n  getValue: function() {\n    console.log(this.value); // `this` will be `myObject`\n  }\n};\nmyObject.getValue(); // Output: 10\n```\n\nIn contrast, an arrow function does *not* have its own `this` binding. Instead, `this` inside an arrow function is lexically scoped; it inherits the `this` value from the enclosing execution context (the scope where the arrow function was defined). This means `this` in an arrow function behaves like a regular variable, capturing its value from the surrounding code.\n\n```javascript\nconst myObjectWithArrow = {\n  value: 20,\n  getValueDelayed: function() {\n    // 'this' here is bound to myObjectWithArrow\n    setTimeout(() => {\n      // 'this' here is lexically inherited from the enclosing `getValueDelayed` method\n      console.log(this.value);\n    }, 100);\n  }\n};\nmyObjectWithArrow.getValueDelayed(); // Output: 20 (correctly accesses myObjectWithArrow.value)\n\n// Compare with a regular function in setTimeout:\nconst myObjectWithRegularFunction = {\n  value: 30,\n  getValueDelayedWrong: function() {\n    // 'this' here is bound to myObjectWithRegularFunction\n    setTimeout(function() {\n      // 'this' here refers to the global object (window/undefined in strict mode)\n      // because it's a simple function call in the setTimeout callback context.\n      console.log(this.value); \n    }, 100);\n  }\n};\nmyObjectWithRegularFunction.getValueDelayedWrong(); // Output: undefined (or error in strict mode)\n```\n\nThe key difference is that regular functions' `this` context is determined by *how they are called*, while arrow functions' `this` context is determined by *where they are defined*.",
+          "analysisPoints": [
+            "Clear explanation of implicit `this` binding for regular functions.",
+            "Clear explanation of lexical `this` binding for arrow functions.",
+            "Illustrative code examples for both scenarios.",
+            "Highlighting the practical implications (e.g., in `setTimeout` callbacks)."
+          ],
+          "keyConcepts": [
+            "This keyword",
+            "Arrow functions",
+            "Lexical scope",
+            "Function context",
+            "Implicit binding"
+          ],
+          "evaluationCriteria": [
+            "Accuracy and completeness of `this` binding rules.",
+            "Quality and relevance of code examples.",
+            "Ability to compare and contrast different function types."
+          ],
+          "example": null,
+          "tags": [
+            "this-keyword",
+            "arrow-functions",
+            "open-ended",
+            "scope",
+            "function-context"
+          ],
+          "prerequisites": [
+            "This keyword",
+            "Functions"
+          ],
+          "complexity": 7,
+          "interviewFrequency": 9,
+          "learningPath": "intermediate"
+        }
+      ],
+      "tasks": [
+        {
+          "id": "task_async_data_dashboard",
+          "title": "Build a Concurrent Data Dashboard Fetcher",
+          "description": "\nAs a frontend developer, you need to build a function that fetches data for a user dashboard. The dashboard requires two main pieces of data:\n1.  A list of users.\n2.  A list of products.\n\nAfter fetching both, you need to process them to determine the most popular product category based on product sales (imagine products have a `category` and `salesCount` property).\n\n**Requirements:**\n1.  Implement `fetchUsers()` and `fetchProducts()` mock async functions that return promises resolving with sample data after a short delay.\n2.  Create an `initializeDashboardData()` async function that:\n    *   Fetches `users` and `products` concurrently using `Promise.all`.\n    *   Handles any errors during fetching gracefully, logging the error and returning an object with empty arrays for users and products if fetching fails.\n    *   After successful fetching, calculates the `mostPopularCategory` from the `products` data. The most popular category is the one with the highest total `salesCount`.\n    *   Returns an object `{ users: [], products: [], mostPopularCategory: string | null }`.\n\n3.  Ensure your solution is robust to errors and efficient.\n",
+          "difficulty": "medium",
+          "startingCode": "/**\n * Mock function to simulate fetching users from an API.\n * @returns {Promise<Array<{id: number, name: string}>>}\n */\nconst fetchUsers = () => {\n  return new Promise(resolve => {\n    setTimeout(() => {\n      resolve([\n        { id: 1, name: 'Alice' },\n        { id: 2, name: 'Bob' }\n      ]);\n    }, 200);\n  });\n};\n\n/**\n * Mock function to simulate fetching products from an API.\n * Products have a category and sales count.\n * @returns {Promise<Array<{id: number, name: string, category: string, salesCount: number}>>}\n */\nconst fetchProducts = () => {\n  return new Promise(resolve => {\n    setTimeout(() => {\n      resolve([\n        { id: 101, name: 'Laptop', category: 'Electronics', salesCount: 150 },\n        { id: 102, name: 'Mouse', category: 'Electronics', salesCount: 200 },\n        { id: 103, name: 'Keyboard', category: 'Electronics', salesCount: 100 },\n        { id: 104, name: 'T-Shirt', category: 'Apparel', salesCount: 300 },\n        { id: 105, name: 'Jeans', category: 'Apparel', salesCount: 250 }\n      ]);\n    }, 300);\n  });\n};\n\nasync function initializeDashboardData() {\n  // TODO: Implement the required functionality\n  // 1. Fetch users and products concurrently.\n  // 2. Handle errors gracefully.\n  // 3. Calculate the most popular category from products.\n  // 4. Return the structured dashboard data.\n  \n  return { users: [], products: [], mostPopularCategory: null };\n}\n\n// Example Usage (uncomment to test):\n// initializeDashboardData().then(data => {\n//   console.log('Dashboard Data:', data);\n//   // Expected output for successful run:\n//   // { \n//   //   users: [...],\n//   //   products: [...],\n//   //   mostPopularCategory: 'Apparel' \n//   // }\n// });\n\n// // Example of error handling (uncomment and modify fetchProducts to reject to test):\n// // const originalFetchProducts = fetchProducts;\n// // fetchProducts = () => Promise.reject(new Error('Network error'));\n// // initializeDashboardData().then(data => {\n// //   console.log('Dashboard Data (Error Scenario):', data);\n// //   // Expected output for error:\n// //   // { users: [], products: [], mostPopularCategory: null }\n// // });\n// // fetchProducts = originalFetchProducts; // Restore original for other tests\n",
+          "solutionCode": "/**\n * Mock function to simulate fetching users from an API.\n * @returns {Promise<Array<{id: number, name: string}>>}\n */\nconst fetchUsers = () => {\n  return new Promise(resolve => {\n    setTimeout(() => {\n      resolve([\n        { id: 1, name: 'Alice' },\n        { id: 2, name: 'Bob' }\n      ]);\n    }, 200);\n  });\n};\n\n/**\n * Mock function to simulate fetching products from an API.\n * Products have a category and sales count.\n * @returns {Promise<Array<{id: number, name: string, category: string, salesCount: number}>>}\n */\nconst fetchProducts = () => {\n  return new Promise(resolve => {\n    setTimeout(() => {\n      resolve([\n        { id: 101, name: 'Laptop', category: 'Electronics', salesCount: 150 },\n        { id: 102, name: 'Mouse', category: 'Electronics', salesCount: 200 },\n        { id: 103, name: 'Keyboard', category: 'Electronics', salesCount: 100 },\n        { id: 104, name: 'T-Shirt', category: 'Apparel', salesCount: 300 },\n        { id: 105, name: 'Jeans', category: 'Apparel', salesCount: 250 }\n      ]);\n    }, 300);\n  });\n};\n\nasync function initializeDashboardData() {\n  try {\n    // Fetch both users and products concurrently\n    const [users, products] = await Promise.all([\n      fetchUsers(),\n      fetchProducts()\n    ]);\n\n    // Calculate the most popular product category\n    const categorySales = products.reduce((acc, product) => {\n      acc[product.category] = (acc[product.category] || 0) + product.salesCount;\n      return acc;\n    }, {});\n\n    let mostPopularCategory = null;\n    let maxSales = 0;\n\n    for (const category in categorySales) {\n      if (categorySales[category] > maxSales) {\n        maxSales = categorySales[category];\n        mostPopularCategory = category;\n      }\n    }\n\n    return {\n      users,\n      products,\n      mostPopularCategory\n    };\n  } catch (error) {\n    console.error('Failed to initialize dashboard data:', error);\n    // Return default empty state on error\n    return {\n      users: [],\n      products: [],\n      mostPopularCategory: null\n    };\n  }\n}\n",
+          "testCases": [
+            "Should fetch users and products concurrently.",
+            "Should return correct `users` and `products` arrays on successful fetch.",
+            "Should correctly calculate `mostPopularCategory` based on `salesCount`.",
+            "Should return `{ users: [], products: [], mostPopularCategory: null }` if `fetchUsers` rejects.",
+            "Should return `{ users: [], products: [], mostPopularCategory: null }` if `fetchProducts` rejects.",
+            "Should return `{ users: [], products: [], mostPopularCategory: null }` if both fetch functions reject (first rejection takes precedence for Promise.all)."
+          ],
+          "hints": [
+            "Remember to use `Promise.all` to run your `fetchUsers` and `fetchProducts` promises in parallel.",
+            "Wrap your asynchronous logic in a `try...catch` block to handle potential errors from `Promise.all`.",
+            "For calculating the most popular category, consider using `Array.prototype.reduce` to aggregate sales by category, then iterate over the aggregated data to find the maximum."
+          ],
+          "tags": [
+            "async-await",
+            "promise.all",
+            "data-transformation",
+            "error-handling",
+            "array-methods",
+            "frontend-development"
+          ],
+          "timeEstimate": 60,
+          "prerequisites": [
+            "Promises",
+            "Async/Await",
+            "Array.prototype.reduce",
+            "Error Handling"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 9,
+          "learningPath": "intermediate",
+          "relatedConcepts": [
+            "concurrency",
+            "data-aggregation",
+            "api-integration"
+          ]
+        },
+        {
+          "id": "task_custom_array_prototype_method",
+          "title": "Implement `Array.prototype.deepFlatten()`",
+          "description": "\nImplement a `deepFlatten` method on `Array.prototype`. This method should recursively flatten a nested array structure into a single-level array, regardless of how deeply nested the arrays are.\n\n**Requirements:**\n1.  The method should be named `deepFlatten` and added to `Array.prototype`.\n2.  It should handle arrays containing elements that are not arrays (e.g., numbers, strings, objects) and include them in the flattened result.\n3.  It should work for arbitrarily deep nested arrays.\n4.  The original array should not be mutated.\n5.  Ensure the method is added safely, without overwriting if it already exists.\n\n**Example:**\n`[1, [2, 3], [4, [5, 6]], 7].deepFlatten()` should return `[1, 2, 3, 4, 5, 6, 7]`\n`[[1], 2, [3, [4, 5]]].deepFlatten()` should return `[1, 2, 3, 4, 5]`\n",
+          "difficulty": "medium",
+          "startingCode": "if (!Array.prototype.deepFlatten) {\n  Array.prototype.deepFlatten = function() {\n    // TODO: Implement the deepFlatten method\n    // 'this' refers to the array instance on which the method is called.\n    // Remember to return a new flattened array.\n    // Handle deeply nested arrays recursively.\n\n    return []; // Placeholder\n  };\n}\n\n// Example Usage (uncomment to test):\n// const nestedArray1 = [1, [2, 3], [4, [5, 6]], 7];\n// console.log(nestedArray1.deepFlatten()); // Expected: [1, 2, 3, 4, 5, 6, 7]\n\n// const nestedArray2 = [[1], 2, [3, [4, 5]]];\n// console.log(nestedArray2.deepFlatten()); // Expected: [1, 2, 3, 4, 5]\n\n// const emptyArray = [];\n// console.log(emptyArray.deepFlatten()); // Expected: []\n\n// const nonNestedArray = [1, 2, 3];\n// console.log(nonNestedArray.deepFlatten()); // Expected: [1, 2, 3]\n",
+          "solutionCode": "if (!Array.prototype.deepFlatten) {\n  Array.prototype.deepFlatten = function() {\n    // Use reduce to iterate over the array elements\n    return this.reduce((acc, item) => {\n      // If the item is an array, recursively call deepFlatten on it\n      // and concatenate the result to the accumulator\n      if (Array.isArray(item)) {\n        return acc.concat(item.deepFlatten());\n      } else {\n        // If the item is not an array, just add it to the accumulator\n        return acc.concat(item);\n      }\n    }, []); // Initialize the accumulator as an empty array\n  };\n}\n",
+          "testCases": [
+            "Test with a simple nested array: `[1, [2, 3], 4].deepFlatten()` should return `[1, 2, 3, 4]`.",
+            "Test with deeply nested array: `[1, [2, [3, [4]]], 5].deepFlatten()` should return `[1, 2, 3, 4, 5]`.",
+            "Test with an empty array: `[].deepFlatten()` should return `[]`.",
+            "Test with an array containing no nested arrays: `[1, 2, 3].deepFlatten()` should return `[1, 2, 3]`.",
+            "Test with mixed data types: `[1, 'hello', [2, {a:1}], [null, [undefined, 3]]].deepFlatten()` should return `[1, 'hello', 2, {a:1}, null, undefined, 3]`.",
+            "Verify that the original array is not mutated after calling `deepFlatten()`."
+          ],
+          "hints": [
+            "Think recursively: if an element is an array, how can you flatten it?",
+            "Consider using `Array.isArray()` to check if an element is an array.",
+            "The `reduce` method is very suitable for this type of aggregation and transformation.",
+            "Remember `this` inside the prototype method refers to the array instance itself.",
+            "To avoid mutation, ensure you are creating new arrays or concatenating results, rather than modifying the original array in place."
+          ],
+          "tags": [
+            "prototypes",
+            "recursion",
+            "array-methods",
+            "data-structures",
+            "functional-programming"
+          ],
+          "timeEstimate": 45,
+          "prerequisites": [
+            "Prototypes",
+            "Arrays",
+            "Recursion",
+            "Array.prototype.reduce"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 7,
+          "learningPath": "intermediate",
+          "relatedConcepts": [
+            "array-flattening",
+            "utility-functions",
+            "pure-functions"
+          ]
+        },
+        {
+          "id": "task_safe_config_parser",
+          "title": "Build a Safe Configuration Parser",
+          "description": "\nCreate a function `parseConfigValue(value)` that safely processes various input types (strings, numbers, booleans) from a configuration file, demonstrating an understanding of JavaScript's type coercion and explicit type conversion.\n\n**Requirements:**\n1.  The function should take a single argument `value` of mixed type.\n2.  If `value` is a string that represents a number (e.g., `'123'`, `'45.6'`), convert it to a `number`.\n3.  If `value` is a string that represents a boolean (e.g., `'true'`, `'false'`, case-insensitive), convert it to a `boolean`.\n4.  If `value` is an empty string `''`, it should be treated as `null`.\n5.  If `value` is `null` or `undefined`, it should remain as is.\n6.  For any other string value, it should remain a `string`.\n7.  For any other non-string, non-null, non-undefined primitive (e.g., a number or boolean that is already a number/boolean), it should remain unchanged.\n8.  The function should not throw errors for any valid input type.\n\n**Example Scenarios:**\n*   `parseConfigValue('123')` returns `123` (number)\n*   `parseConfigValue('TRUE')` returns `true` (boolean)\n*   `parseConfigValue('hello')` returns `'hello'` (string)\n*   `parseConfigValue('')` returns `null`\n*   `parseConfigValue(123)` returns `123` (number)\n*   `parseConfigValue(false)` returns `false` (boolean)\n*   `parseConfigValue(null)` returns `null`\n",
+          "difficulty": "medium",
+          "startingCode": "function parseConfigValue(value) {\n  // TODO: Implement safe configuration parsing.\n  // Consider type checking and explicit conversions.\n\n  return value; // Placeholder\n}\n\n// Example Usage (uncomment to test):\n// console.log(`'123' -> ${parseConfigValue('123')} (Type: ${typeof parseConfigValue('123')})`);\n// console.log(`'TRUE' -> ${parseConfigValue('TRUE')} (Type: ${typeof parseConfigValue('TRUE')})`);\n// console.log(`'false' -> ${parseConfigValue('false')} (Type: ${typeof parseConfigValue('false')})`);\n// console.log(`'hello' -> ${parseConfigValue('hello')} (Type: ${typeof parseConfigValue('hello')})`);\n// console.log(`'' -> ${parseConfigValue('')} (Type: ${typeof parseConfigValue('')})`);\n// console.log(`123 -> ${parseConfigValue(123)} (Type: ${typeof parseConfigValue(123)})`);\n// console.log(`false -> ${parseConfigValue(false)} (Type: ${typeof parseConfigValue(false)})`);\n// console.log(`null -> ${parseConfigValue(null)} (Type: ${typeof parseConfigValue(null)})`);\n// console.log(`undefined -> ${parseConfigValue(undefined)} (Type: ${typeof parseConfigValue(undefined)})`);\n// console.log(`'0' -> ${parseConfigValue('0')} (Type: ${typeof parseConfigValue('0')})`);\n// console.log(`'3.14' -> ${parseConfigValue('3.14')} (Type: ${typeof parseConfigValue('3.14')})`);\n",
+          "solutionCode": "function parseConfigValue(value) {\n  // Handle null or undefined first, as typeof null is 'object'\n  if (value === null || typeof value === 'undefined') {\n    return value;\n  }\n\n  // Process string values\n  if (typeof value === 'string') {\n    // Empty string to null\n    if (value === '') {\n      return null;\n    }\n\n    // Try to convert to number\n    const numValue = Number(value);\n    if (!isNaN(numValue) && String(numValue) === value) { // Check if it's a valid number string like '123' or '12.5' but not '123a'\n        return numValue;\n    }\n    \n    // Try to convert to boolean (case-insensitive)\n    const lowerCaseValue = value.toLowerCase();\n    if (lowerCaseValue === 'true') {\n      return true;\n    }\n    if (lowerCaseValue === 'false') {\n      return false;\n    }\n\n    // If none of the above, keep as original string\n    return value;\n  }\n\n  // For non-string primitives (numbers, booleans), return as is\n  return value;\n}\n",
+          "testCases": [
+            "Test with string '123' should return number 123.",
+            "Test with string '3.14' should return number 3.14.",
+            "Test with string 'TRUE' should return boolean true.",
+            "Test with string 'false' should return boolean false.",
+            "Test with string 'hello' should return string 'hello'.",
+            "Test with empty string '' should return null.",
+            "Test with number 123 should return number 123.",
+            "Test with boolean false should return boolean false.",
+            "Test with null should return null.",
+            "Test with undefined should return undefined.",
+            "Test with string '0' should return number 0.",
+            "Test with string '    42   ' (padded number) should return 42.",
+            "Test with string 'not_a_number' should return 'not_a_number'."
+          ],
+          "hints": [
+            "Use `typeof` to check the type of the input `value`.",
+            "For string-to-number conversion, `Number()` function and `isNaN()` can be helpful. Also consider `parseInt()` or `parseFloat()`.",
+            "For string-to-boolean conversion, `toLowerCase()` on the string value can simplify checks.",
+            "The order of checks matters. Handle edge cases like empty string, `null`, and `undefined` early."
+          ],
+          "tags": [
+            "type-coercion",
+            "type-conversion",
+            "javascript-fundamentals",
+            "string-manipulation",
+            "conditionals"
+          ],
+          "timeEstimate": 45,
+          "prerequisites": [
+            "Data types",
+            "Operators",
+            "Conditional statements"
+          ],
+          "complexity": 6,
+          "interviewRelevance": 7,
+          "learningPath": "intermediate",
+          "relatedConcepts": [
+            "input-validation",
+            "configuration-management",
+            "data-parsing"
+          ]
+        },
+        {
+          "id": "task_simple_shopping_cart",
+          "title": "Implement a Basic Shopping Cart Class with 'this' Context",
+          "description": "\nCreate a `ShoppingCart` class (or constructor function) that manages a collection of `CartItem` objects. This task emphasizes proper handling of reference types for items and correct `this` binding within class methods.\n\n**Requirements:**\n1.  Define a `CartItem` class/constructor for items with `id`, `name`, and `price` properties.\n2.  Define a `ShoppingCart` class/constructor with:\n    *   A private/internal `_items` array to store `CartItem` objects.\n    *   An `addItem(item)` method: Adds a `CartItem` to the cart. Ensure you're storing a *copy* of the item if external modification to the original item object should not affect the one in the cart. However, for simplicity, a direct reference is acceptable if the task doesn't explicitly require deep cloning.\n    *   A `removeItem(itemId)` method: Removes an item by its ID.\n    *   A `getTotal()` method: Calculates the total price of all items in the cart.\n    *   A `getCartContents()` method: Returns a *copy* of the `_items` array to prevent external modification of the cart's internal state.\n\n3.  Demonstrate correct `this` binding in all methods.\n\n",
+          "difficulty": "medium",
+          "startingCode": "/**\n * Represents an item in the shopping cart.\n * @param {number} id - Unique ID of the item.\n * @param {string} name - Name of the item.\n * @param {number} price - Price of the item.\n */\nclass CartItem {\n  constructor(id, name, price) {\n    this.id = id;\n    this.name = name;\n    this.price = price;\n  }\n}\n\nclass ShoppingCart {\n  constructor() {\n    this._items = []; // Internal array to store cart items\n  }\n\n  /**\n   * Adds an item to the cart.\n   * @param {CartItem} item - The item to add.\n   */\n  addItem(item) {\n    // TODO: Implement addItem. Ensure 'this' correctly refers to the ShoppingCart instance.\n  }\n\n  /**\n   * Removes an item from the cart by its ID.\n   * @param {number} itemId - The ID of the item to remove.\n   */\n  removeItem(itemId) {\n    // TODO: Implement removeItem. \n  }\n\n  /**\n   * Calculates the total price of all items in the cart.\n   * @returns {number} The total price.\n   */\n  getTotal() {\n    // TODO: Implement getTotal. Use array methods and ensure 'this' refers to the instance.\n    return 0;\n  }\n\n  /**\n   * Returns a copy of the cart contents to prevent external modification.\n   * @returns {Array<CartItem>} A copy of the items array.\n   */\n  getCartContents() {\n    // TODO: Implement getCartContents. Return a shallow copy.\n    return [];\n  }\n}\n\n// Example Usage (uncomment to test):\n// const cart = new ShoppingCart();\n// const item1 = new CartItem(1, 'Laptop', 1200);\n// const item2 = new CartItem(2, 'Mouse', 25);\n// const item3 = new CartItem(3, 'Keyboard', 75);\n\n// cart.addItem(item1);\n// cart.addItem(item2);\n// cart.addItem(item3);\n\n// console.log('Cart contents:', cart.getCartContents()); // Should show 3 items\n// console.log('Total price:', cart.getTotal()); // Should be 1300\n\n// cart.removeItem(2); // Remove Mouse\n// console.log('Cart contents after removal:', cart.getCartContents()); // Should show Laptop, Keyboard\n// console.log('Total price after removal:', cart.getTotal()); // Should be 1275\n\n// // Test immutability of getCartContents\n// const contents = cart.getCartContents();\n// contents.pop(); // Modify the copy\n// console.log('Original cart after modifying copy:', cart.getCartContents()); // Should still have Laptop, Keyboard\n",
+          "solutionCode": "/**\n * Represents an item in the shopping cart.\n * @param {number} id - Unique ID of the item.\n * @param {string} name - Name of the item.\n * @param {number} price - Price of the item.\n */\nclass CartItem {\n  constructor(id, name, price) {\n    this.id = id;\n    this.name = name;\n    this.price = price;\n  }\n}\n\nclass ShoppingCart {\n  constructor() {\n    this._items = []; // Internal array to store cart items\n  }\n\n  /**\n   * Adds an item to the cart. \n   * For simplicity, directly stores the item reference. For deep copy,\n   * one would use `JSON.parse(JSON.stringify(item))` or a dedicated cloning utility.\n   * @param {CartItem} item - The item to add.\n   */\n  addItem(item) {\n    // 'this' refers to the ShoppingCart instance\n    if (item && item.id && item.name && typeof item.price === 'number') {\n      this._items.push(item);\n    } else {\n      console.warn('Invalid item provided to addItem:', item);\n    }\n  }\n\n  /**\n   * Removes an item from the cart by its ID.\n   * @param {number} itemId - The ID of the item to remove.\n   */\n  removeItem(itemId) {\n    // 'this' refers to the ShoppingCart instance\n    this._items = this._items.filter(item => item.id !== itemId);\n  }\n\n  /**\n   * Calculates the total price of all items in the cart.\n   * @returns {number} The total price.\n   */\n  getTotal() {\n    // 'this' refers to the ShoppingCart instance\n    return this._items.reduce((total, item) => total + item.price, 0);\n  }\n\n  /**\n   * Returns a copy of the cart contents to prevent external modification.\n   * @returns {Array<CartItem>} A shallow copy of the items array.\n   */\n  getCartContents() {\n    // 'this' refers to the ShoppingCart instance\n    return [...this._items]; // Returns a shallow copy\n  }\n}\n",
+          "testCases": [
+            "Should correctly add items and increase the item count.",
+            "Should correctly calculate the total price of items in the cart.",
+            "Should correctly remove items by ID.",
+            "Should return an empty array if no items are in the cart.",
+            "Calling `getCartContents()` should return a new array, not the internal `_items` array (test immutability).",
+            "Adding an invalid item (missing ID, name, or price) should not add it to the cart."
+          ],
+          "hints": [
+            "Inside a class method, `this` automatically refers to the instance of the class.",
+            "For `removeItem`, `Array.prototype.filter` is a good choice to create a new array without the specified item.",
+            "For `getTotal`, `Array.prototype.reduce` can sum up the prices.",
+            "To return a copy of an array, you can use `[...this._items]` or `this._items.slice()`."
+          ],
+          "tags": [
+            "classes",
+            "this-keyword",
+            "object-oriented-javascript",
+            "array-methods",
+            "data-structures"
+          ],
+          "timeEstimate": 60,
+          "prerequisites": [
+            "Classes",
+            "This-keyword",
+            "Arrays",
+            "Functions"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 8,
+          "learningPath": "intermediate",
+          "relatedConcepts": [
+            "encapsulation",
+            "data-modeling",
+            "state-management"
+          ]
+        }
+      ]
+    }
+  }
+]

@@ -1,0 +1,1887 @@
+[
+  {
+    "id": "8ed9b91d-cd21-49e3-ab49-c93d7f748a64",
+    "startLine": 1600,
+    "endLine": 1699,
+    "processedDate": "2025-06-17T07:57:33.630Z",
+    "content": {
+      "logicalBlockInfo": {
+        "suggestedEndLine": -1
+      },
+      "theory": [
+        {
+          "id": "theory_promise_combinators",
+          "title": "Promise Combinators: allSettled and any",
+          "content": "Promise combinators are static methods on the `Promise` object that take an iterable (like an array) of Promises as input and return a single Promise. They are useful for orchestrating multiple asynchronous operations.\n\n### Promise.allSettled()\n\n`Promise.allSettled()` waits for all given promises to settle, regardless of whether they are fulfilled or rejected. It returns a promise that resolves with an array of objects, each describing the outcome of a promise.\n\nEach outcome object has a `status` string (`'fulfilled'` or `'rejected'`) and either a `value` (if fulfilled) or a `reason` (if rejected). This is particularly useful when you need to know the result of every promise, even if some of them fail, without the entire operation short-circuiting on the first rejection.\n\n### Promise.any()\n\n`Promise.any()` takes an iterable of Promises and returns a single Promise that resolves as soon as any of the input Promises resolves (fulfills). If no Promise in the iterable fulfills (i.e., all of them reject), then the Promise returned by `Promise.any()` rejects with an `AggregateError`, a subclass of `Error` that groups individual errors.\n\nThis combinator is useful when you need to get the fastest successful result from multiple competing asynchronous operations. It's conceptually the opposite of `Promise.all` in its error handling: `Promise.all` rejects on the first rejection, `Promise.any` resolves on the first fulfillment.\n\n| Combinator | Behavior (Success)                                   | Behavior (Failure)                                     | Use Case                                                                                                   |\n|------------|------------------------------------------------------|--------------------------------------------------------|------------------------------------------------------------------------------------------------------------|\n| `allSettled` | Resolves with an array of outcome objects (value/reason) once all promises have settled. | Never rejects if all promises settle. The outcome array will contain rejected statuses. | When you need results from all promises, regardless of success or failure.                                |\n| `any`      | Resolves with the value of the first promise that fulfills. | Rejects with an `AggregateError` if all promises reject. | When you need the first successful result from multiple options.                                          |",
+          "examples": [
+            {
+              "id": "example_promise_allsettled_1",
+              "title": "Using Promise.allSettled",
+              "code": "Promise.allSettled([\n  fetch('/api/users').then(res => res.json()),\n  fetch('/endpoint-that-might-fail').then(res => res.json())\n])\n  .then(results => {\n    console.log('All settled results:', results);\n    results.forEach(result => {\n      if (result.status === 'fulfilled') {\n        console.log('Fulfilled:', result.value);\n      } else {\n        console.log('Rejected:', result.reason);\n      }\n    });\n  })\n  .catch(err => {\n    // This catch block will typically not be hit unless Promise.allSettled itself fails,\n    // not because of individual promise rejections.\n    console.error('Promise.allSettled failed:', err);\n  });\n\n// Example of results array structure:\n/*\n[\n  { status: 'fulfilled', value: [...] },\n  { status: 'rejected', reason: Error('Network Error') }\n]\n*/",
+              "explanation": "This example demonstrates how `Promise.allSettled` collects the results (either `fulfilled` with `value` or `rejected` with `reason`) from all promises, allowing the application to continue processing even if some operations fail. The `.then()` block always executes once all input promises have completed.",
+              "language": "typescript"
+            },
+            {
+              "id": "example_promise_any_1",
+              "title": "Using Promise.any",
+              "code": "Promise.any([\n  fetch('/api/endpoint1').then(res => res.json()),\n  fetch('/api/endpoint2').then(res => res.json()),\n  fetch('/api/endpoint3').then(res => res.json())\n])\n  .then(firstSuccess => console.log('First successful result:', firstSuccess))\n  .catch(errors => {\n    console.log('All promises rejected, errors:', errors);\n    // errors will be an AggregateError instance\n    errors.errors.forEach(err => console.error('Individual rejection:', err));\n  });",
+              "explanation": "`Promise.any` is used here to resolve with the data from the first successful `fetch` call. If all three `fetch` calls fail (e.g., network errors, server errors), the `.catch()` block will execute, receiving an `AggregateError` containing all the individual rejection reasons.",
+              "language": "typescript"
+            }
+          ],
+          "relatedQuestions": [],
+          "relatedTasks": [],
+          "tags": [
+            "Promises",
+            "Asynchronous JavaScript",
+            "Promise Combinators",
+            "ES2020"
+          ],
+          "technology": "JavaScript",
+          "prerequisites": [
+            "Promises",
+            "Fetch API",
+            "Error Handling"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 8,
+          "learningPath": "intermediate",
+          "requiredFor": [
+            "Advanced Asynchronous Patterns",
+            "Robust API Integration"
+          ]
+        },
+        {
+          "id": "theory_async_await",
+          "title": "Async/Await: Simplifying Asynchronous Code",
+          "content": "Async/await is a modern JavaScript syntax introduced in ES2017 that makes asynchronous code look and behave more like synchronous code, making it easier to read and write. It's built on top of Promises, acting as syntactic sugar.\n\n### `async` Functions\n\nA function declared with the `async` keyword automatically returns a Promise. If the function returns a value, the Promise will resolve with that value. If the function throws an error, the Promise will reject with that error.\n\n```typescript\nasync function myFunction() {\n  return 'hello'; // Equivalent to return Promise.resolve('hello');\n}\n\nasync function myErrorFunction() {\n  throw new Error('Oops'); // Equivalent to return Promise.reject(new Error('Oops'));\n}\n```\n\n### `await` Operator\n\nThe `await` keyword can only be used inside an `async` function. It pauses the execution of the `async` function until the Promise it's waiting on settles (either fulfills or rejects). Once the Promise settles:\n\n*   If the Promise fulfills, `await` returns the fulfilled value.\n*   If the Promise rejects, `await` throws the rejected value as an error. This behavior allows `try...catch` blocks to handle errors in asynchronous code in a familiar synchronous manner.\n\n### Error Handling with `try...catch`\n\nOne of the significant advantages of `async/await` is the ability to use standard `try...catch` blocks for error handling, making the code more readable and robust compared to chaining `.catch()` calls.\n\n### Sequential vs. Parallel Execution\n\nWhen dealing with multiple `await` calls, it's crucial to understand the difference between sequential and parallel execution:\n\n*   **Sequential Execution**: If you `await` each Promise one after another, each operation will complete before the next one starts. This is useful when operations depend on the results of previous ones but can be slower if operations are independent.\n\n    ```typescript\n    async function sequentialFetch() {\n      const data1 = await fetchData1(); // Waits for data1\n      const data2 = await fetchData2(); // Waits for data2 after data1 is done\n      return [data1, data2];\n    }\n    ```\n\n*   **Parallel Execution**: For independent asynchronous operations, you can start all promises concurrently and then `await` them together using `Promise.all()` (or `Promise.allSettled()`, `Promise.any()`, `Promise.race()`). This significantly improves performance by running operations in parallel.\n\n    ```typescript\n    async function parallelFetch() {\n      const promise1 = fetchData1(); // Start fetching data1\n      const promise2 = fetchData2(); // Start fetching data2 concurrently\n\n      const [data1, data2] = await Promise.all([promise1, promise2]); // Wait for both to complete\n      return [data1, data2];\n    }\n    ```\n\nChoosing between sequential and parallel execution depends on whether the operations have dependencies on each other or can run independently.",
+          "examples": [
+            {
+              "id": "example_async_await_basic_1",
+              "title": "Basic Async/Await with Error Handling",
+              "code": "async function fetchUserData() {\n  try {\n    const response = await fetch('/api/user');\n    if (!response.ok) {\n      throw new Error(`HTTP error! status: ${response.status}`);\n    }\n    const userData = await response.json();\n    return userData;\n  } catch (error) {\n    console.error('Error fetching user data:', error);\n    // Re-throw or return default value for further handling\n    return { error: true, message: error.message };\n  }\n}\n\n// Example usage:\nfetchUserData().then(data => console.log('User Data:', data));",
+              "explanation": "This function `fetchUserData` demonstrates the basic use of `async/await` to perform an API call. The `await` keyword pauses execution until the `fetch` promise resolves. Error handling is managed using a standard `try...catch` block, which catches both network errors and errors thrown manually if the HTTP response is not OK.",
+              "language": "typescript"
+            },
+            {
+              "id": "example_async_await_promise_all_1",
+              "title": "Using Async/Await with Promise.all for Parallel Execution",
+              "code": "async function fetchAllData() {\n  try {\n    // Start all fetch operations concurrently\n    const usersPromise = fetch('/api/users').then(res => res.json());\n    const postsPromise = fetch('/api/posts').then(res => res.json());\n    const commentsPromise = fetch('/api/comments').then(res => res.json());\n\n    // Wait for all promises to resolve in parallel\n    const [users, posts, comments] = await Promise.all([\n      usersPromise, \n      postsPromise, \n      commentsPromise\n    ]);\n    \n    console.log('All data fetched successfully:');\n    console.log('Users:', users);\n    console.log('Posts:', posts);\n    console.log('Comments:', comments);\n\n    return { users, posts, comments };\n  } catch (error) {\n    console.error('Error fetching data:', error);\n    throw error; // Re-throw the error for the caller to handle\n  }\n}\n\n// Example usage:\nfetchAllData().catch(err => console.error('Failed to fetch all data:', err));",
+              "explanation": "This example shows how to perform multiple independent asynchronous operations in parallel using `async/await` combined with `Promise.all`. All `fetch` calls are initiated almost simultaneously. The `await Promise.all([...])` then waits for all of them to complete. If any of the promises passed to `Promise.all` reject, the `Promise.all` itself rejects, and the `try...catch` block handles it.",
+              "language": "typescript"
+            },
+            {
+              "id": "example_async_await_sequential_vs_parallel",
+              "title": "Sequential vs Parallel Execution Comparison",
+              "code": "const fetchData = (name, delay) => new Promise(resolve => {\n  setTimeout(() => {\n    console.log(`Fetched ${name} after ${delay}ms`);\n    resolve(`${name} Data`);\n  }, delay);\n});\n\nasync function sequential() {\n  console.log('\\n--- Starting Sequential Fetch ---');\n  const start = Date.now();\n  \n  const result1 = await fetchData('Data1', 1000); // 1s\n  const result2 = await fetchData('Data2', 500);  // 0.5s\n  const result3 = await fetchData('Data3', 800);  // 0.8s\n  \n  console.log(`Sequential Time taken: ${Date.now() - start}ms`); // Approx 1000 + 500 + 800 = 2300ms\n  return [result1, result2, result3];\n}\n\nasync function parallel() {\n  console.log('\\n--- Starting Parallel Fetch ---');\n  const start = Date.now();\n  \n  const promise1 = fetchData('Data1', 1000);\n  const promise2 = fetchData('Data2', 500);\n  const promise3 = fetchData('Data3', 800);\n  \n  const [result1, result2, result3] = await Promise.all([promise1, promise2, promise3]);\n  \n  console.log(`Parallel Time taken: ${Date.now() - start}ms`); // Approx max(1000, 500, 800) = 1000ms\n  return [result1, result2, result3];\n}\n\n// Run both to see the difference\nsequential().then(() => parallel());",
+              "explanation": "This example vividly illustrates the performance difference between sequential and parallel execution using `async/await`. In `sequential()`, each `await` pauses the function until the current `fetchData` Promise resolves, leading to a total time that's the sum of individual delays. In `parallel()`, all `fetchData` Promises are initiated at once. `Promise.all` then waits for the *longest* running promise to complete, resulting in significantly faster overall execution time.",
+              "language": "typescript"
+            }
+          ],
+          "relatedQuestions": [],
+          "relatedTasks": [],
+          "tags": [
+            "Async/Await",
+            "Asynchronous JavaScript",
+            "Promises",
+            "Error Handling",
+            "Performance"
+          ],
+          "technology": "JavaScript",
+          "prerequisites": [
+            "Promises",
+            "Callbacks",
+            "Error Handling"
+          ],
+          "complexity": 8,
+          "interviewRelevance": 9,
+          "learningPath": "intermediate",
+          "requiredFor": [
+            "Modern JavaScript Development",
+            "React/Vue/Angular Best Practices"
+          ]
+        },
+        {
+          "id": "theory_event_loop",
+          "title": "The JavaScript Event Loop",
+          "content": "The JavaScript Event Loop is a crucial concept for understanding how JavaScript handles asynchronous operations despite being single-threaded. JavaScript executes code line by line in a single call stack. When it encounters asynchronous operations (like `setTimeout`, `fetch`, `Promise`), it offloads them to Web APIs (or Node.js APIs in a Node environment).\n\n### Key Components:\n\n1.  **Call Stack**: Where synchronous code is executed. Functions are pushed onto the stack when called and popped off when they return.\n2.  **Web APIs**: Provided by the browser (or C++ APIs in Node.js) to handle asynchronous tasks like DOM events, HTTP requests (`fetch`), and timers (`setTimeout`, `setInterval`). When a Web API completes its task, it places a corresponding callback function into a queue.\n3.  **Callback Queue (Task Queue / Macrotask Queue)**: This queue holds callback functions for macrotasks (e.g., `setTimeout`, `setInterval`, I/O, UI rendering). When the Call Stack is empty, the Event Loop picks one callback from this queue and pushes it to the Call Stack for execution.\n4.  **Microtask Queue**: This queue holds callback functions for microtasks (e.g., Promise callbacks (`.then()`, `.catch()`, `.finally()`), `queueMicrotask`, `MutationObserver`). The Event Loop prioritizes the Microtask Queue. It processes *all* microtasks in the Microtask Queue *before* picking any macrotask from the Callback Queue, as long as the Call Stack is empty.\n\n### How it Works (The Loop):\n\nThe Event Loop continuously monitors the Call Stack and the various task queues. Its job is to:\n\n*   When the Call Stack is empty, it checks the Microtask Queue. If there are microtasks, it moves *all* of them (one by one) to the Call Stack for execution, emptying the Microtask Queue.\n*   After the Microtask Queue is empty (or if it was empty to begin with), if the Call Stack is still empty, the Event Loop checks the Callback Queue (Macrotask Queue). It picks *one* macrotask from the Callback Queue and moves it to the Call Stack for execution.\n*   This cycle repeats indefinitely.\n\nThis prioritization means that Promises will often execute their `.then()` callbacks before `setTimeout` callbacks, even if the `setTimeout` has a delay of 0ms.\n\n### Example Flow Trace:\n\nConsider the following code snippet:\n\n```javascript\nconsole.log('Script start');\n\nsetTimeout(() => {\n  console.log('setTimeout');\n}, 0);\n\nPromise.resolve().then(() => {\n  console.log('Promise resolved');\n});\n\nconsole.log('Script end');\n```\n\n1.  `console.log('Script start')` is executed immediately. Output: `Script start`.\n2.  `setTimeout(() => { console.log('setTimeout'); }, 0)` is encountered. The callback `() => { console.log('setTimeout'); }` is sent to the Web API for timers. After 0ms (or minimum browser delay, usually 4ms for HTML5 spec), the Web API places this callback into the **Callback Queue**.\n3.  `Promise.resolve().then(() => { console.log('Promise resolved'); })` is encountered. `Promise.resolve()` immediately resolves a Promise. Its `.then()` callback `() => { console.log('Promise resolved'); }` is placed into the **Microtask Queue**.\n4.  `console.log('Script end')` is executed immediately. Output: `Script end`.\n5.  The global script execution finishes. The Call Stack is now empty.\n6.  The Event Loop checks the **Microtask Queue**. It finds `() => { console.log('Promise resolved'); }` and moves it to the Call Stack.\n7.  `console.log('Promise resolved')` executes. Output: `Promise resolved`.\n8.  The Microtask Queue is now empty. The Call Stack is empty.\n9.  The Event Loop checks the **Callback Queue**. It finds `() => { console.log('setTimeout'); }` and moves it to the Call Stack.\n10. `console.log('setTimeout')` executes. Output: `setTimeout`.\n11. The Callback Queue is now empty. The Call Stack is empty. The Event Loop continues its cycle.\n\n**Final Output Order:**\n```\nScript start\nScript end\nPromise resolved\nsetTimeout\n```\nThis order highlights the microtask queue's priority over the macrotask queue.",
+          "examples": [
+            {
+              "id": "example_event_loop_basic_flow",
+              "title": "Event Loop Basic Flow Demonstration",
+              "code": "console.log('Script start');\n\nsetTimeout(() => {\n  console.log('setTimeout 1');\n  Promise.resolve().then(() => {\n    console.log('Promise resolved 2 (inside setTimeout)');\n  });\n}, 0);\n\nPromise.resolve().then(() => {\n  console.log('Promise resolved 1');\n  setTimeout(() => {\n    console.log('setTimeout 2 (inside Promise)');\n  }, 0);\n});\n\nconsole.log('Script end');\n\n// Expected Output:\n// Script start\n// Script end\n// Promise resolved 1\n// Promise resolved 2 (inside setTimeout)\n// setTimeout 1\n// setTimeout 2 (inside Promise)",
+              "explanation": "This example demonstrates a more complex interaction. `Script start` and `Script end` execute first. Then, `Promise resolved 1` (microtask) executes before `setTimeout 1` (macrotask). Inside `Promise resolved 1`, a new `setTimeout 2` is queued as a macrotask. Inside `setTimeout 1`, a new `Promise resolved 2` is queued as a microtask. When `setTimeout 1` executes, `Promise resolved 2` goes to the microtask queue, which is processed *before* any new macrotasks (like `setTimeout 2` or the *next* macrotask in general). Thus, `Promise resolved 2` executes before `setTimeout 1` *finishes* its execution (in the context of the next loop iteration of macrotasks), and `setTimeout 2` gets picked up even later.",
+              "language": "javascript"
+            }
+          ],
+          "relatedQuestions": [],
+          "relatedTasks": [],
+          "tags": [
+            "Event Loop",
+            "Asynchronous JavaScript",
+            "Concurrency Model",
+            "Promises",
+            "setTimeout",
+            "Microtasks",
+            "Macrotasks"
+          ],
+          "technology": "JavaScript",
+          "prerequisites": [
+            "Callbacks",
+            "Promises"
+          ],
+          "complexity": 9,
+          "interviewRelevance": 10,
+          "learningPath": "advanced",
+          "requiredFor": [
+            "Deep JavaScript Understanding",
+            "Debugging Asynchronous Issues",
+            "Node.js Event Loop"
+          ]
+        }
+      ],
+      "questions": [
+        {
+          "id": "question_promise_combinators_1",
+          "topic": "Promise.allSettled",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "What is the primary purpose of `Promise.allSettled()`?",
+          "answer": "To wait for all promises in an iterable to settle (either fulfill or reject) and get the outcome of each.",
+          "analysisPoints": [
+            "Focuses on 'all promises settling'.",
+            "Highlights receiving 'outcome of each' regardless of success/failure."
+          ],
+          "keyConcepts": [
+            "Promise.allSettled",
+            "Promise states",
+            "Asynchronous operations"
+          ],
+          "evaluationCriteria": [
+            "Understanding of `allSettled`'s core functionality"
+          ],
+          "example": "",
+          "tags": [
+            "Promises",
+            "allSettled",
+            "Basic"
+          ],
+          "prerequisites": [
+            "Promises"
+          ],
+          "complexity": 3,
+          "interviewFrequency": 6,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_promise_combinators_2",
+          "topic": "Promise.any",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "When does `Promise.any()` resolve?",
+          "answer": "It resolves as soon as any of the input promises fulfills.",
+          "analysisPoints": [
+            "Emphasis on 'any' promise fulfilling.",
+            "Contrast with `Promise.all` (all must fulfill)."
+          ],
+          "keyConcepts": [
+            "Promise.any",
+            "Promise fulfillment"
+          ],
+          "evaluationCriteria": [
+            "Understanding of `any`'s success condition"
+          ],
+          "example": "",
+          "tags": [
+            "Promises",
+            "any",
+            "Basic"
+          ],
+          "prerequisites": [
+            "Promises"
+          ],
+          "complexity": 3,
+          "interviewFrequency": 6,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_promise_combinators_3",
+          "topic": "Promise.allSettled vs Promise.all",
+          "level": "medium",
+          "type": "mcq",
+          "question": "Consider the following JavaScript code snippet:\n\n```javascript\nconst p1 = Promise.resolve('Success 1');\nconst p2 = Promise.reject('Failure 2');\nconst p3 = new Promise(resolve => setTimeout(() => resolve('Success 3'), 100));\n\nPromise.allSettled([p1, p2, p3])\n  .then(results => {\n    // What will 'results' contain?\n    console.log(results);\n  })\n  .catch(err => console.log('Caught:', err));\n```\n\nWhich of the following best describes the `results` array logged to the console?",
+          "answer": "[{status: 'fulfilled', value: 'Success 1'}, {status: 'rejected', reason: 'Failure 2'}, {status: 'fulfilled', value: 'Success 3'}]",
+          "options": [
+            "['Success 1', 'Failure 2', 'Success 3']",
+            "['Success 1', undefined, 'Success 3']",
+            "[{status: 'fulfilled', value: 'Success 1'}, {status: 'rejected', reason: 'Failure 2'}, {status: 'fulfilled', value: 'Success 3'}]",
+            "The `.catch` block will be executed with 'Failure 2'."
+          ],
+          "analysisPoints": [
+            "Tests understanding of `Promise.allSettled`'s return format (array of objects).",
+            "Verifies knowledge that `allSettled` waits for all promises, even rejections.",
+            "Distinguishes `allSettled` from `Promise.all`'s short-circuiting behavior.",
+            "Checks understanding of 'status', 'value', and 'reason' properties."
+          ],
+          "keyConcepts": [
+            "Promise.allSettled",
+            "Promise states",
+            "Error handling",
+            "Promise combinators"
+          ],
+          "evaluationCriteria": [
+            "Ability to predict `Promise.allSettled` output structure",
+            "Understanding of promise resolution and rejection outcomes"
+          ],
+          "example": "The key here is that `Promise.allSettled` does not short-circuit on rejection like `Promise.all` does. It waits for every promise to finish, whether successfully or with an error, and provides a structured object for each result. So, `p2` will appear as `status: 'rejected'` with its `reason`, and `p1` and `p3` as `status: 'fulfilled'` with their `value`.",
+          "tags": [
+            "Promises",
+            "allSettled",
+            "MCQ",
+            "Medium"
+          ],
+          "prerequisites": [
+            "Promises",
+            "Promise.all"
+          ],
+          "complexity": 6,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_promise_combinators_4",
+          "topic": "Promise.any vs Promise.race",
+          "level": "medium",
+          "type": "mcq",
+          "question": "Given the following promises:\n\n```javascript\nconst pA = new Promise((resolve) => setTimeout(() => resolve('A'), 100));\nconst pB = new Promise((_, reject) => setTimeout(() => reject('B'), 50));\nconst pC = new Promise((resolve) => setTimeout(() => resolve('C'), 200));\n\nPromise.any([pA, pB, pC])\n  .then(result => console.log('Any:', result))\n  .catch(err => console.log('Any Error:', err));\n```\n\nWhat will be logged to the console, and why?",
+          "answer": "Any: A",
+          "options": [
+            "Any: A",
+            "Any: B",
+            "Any Error: AggregateError",
+            "Any: C"
+          ],
+          "analysisPoints": [
+            "Tests understanding that `Promise.any` resolves with the *first fulfilled* promise.",
+            "Highlights that rejected promises are ignored by `Promise.any` unless *all* reject.",
+            "Distinguishes `Promise.any` from `Promise.race` (which resolves/rejects with the first *settled* promise)."
+          ],
+          "keyConcepts": [
+            "Promise.any",
+            "Promise.race",
+            "Promise fulfillment",
+            "Promise rejection"
+          ],
+          "evaluationCriteria": [
+            "Ability to differentiate `Promise.any` and `Promise.race` behavior.",
+            "Correctly identifying the resolving promise based on timing and type."
+          ],
+          "example": "Although `pB` settles first (rejects after 50ms), `Promise.any` only cares about fulfillments. `pA` fulfills after 100ms, making it the first promise to fulfill among `pA` and `pC`. Therefore, `Promise.any` will resolve with the value from `pA`, which is 'A'.",
+          "tags": [
+            "Promises",
+            "any",
+            "race",
+            "MCQ",
+            "Medium"
+          ],
+          "prerequisites": [
+            "Promises"
+          ],
+          "complexity": 7,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_promise_combinators_5",
+          "topic": "Promise.any Error Handling",
+          "level": "hard",
+          "type": "open",
+          "question": "Describe the specific error handling mechanism of `Promise.any()`. What is the type of error it rejects with, and when does this rejection occur? How would you typically access the individual errors?",
+          "answer": "If all promises in the iterable passed to `Promise.any()` reject, then `Promise.any()` rejects with an `AggregateError`. This special error class is a subclass of `Error` and contains an `errors` property, which is an array containing all the individual rejection reasons from the input promises. This rejection occurs only when every single promise in the input array has rejected. You would typically access the individual errors by catching the `AggregateError` and then iterating over its `errors` property.",
+          "analysisPoints": [
+            "Definition of `AggregateError`.",
+            "Condition for `Promise.any` rejection (all promises reject).",
+            "Accessing individual errors via the `errors` property.",
+            "Comparison to other combinators' error handling."
+          ],
+          "keyConcepts": [
+            "Promise.any",
+            "AggregateError",
+            "Error handling",
+            "Promise rejection"
+          ],
+          "evaluationCriteria": [
+            "Thorough understanding of `Promise.any`'s rejection behavior.",
+            "Knowledge of `AggregateError` structure and usage.",
+            "Ability to explain error handling implications."
+          ],
+          "example": "```javascript\nPromise.any([\n  Promise.reject('Error 1'),\n  Promise.reject(new Error('Error 2')),\n  Promise.reject('Error 3')\n])\n.then(val => console.log('Resolved:', val))\n.catch(err => {\n  console.error('All rejected:', err); // err will be an AggregateError\n  if (err instanceof AggregateError) {\n    err.errors.forEach((e, i) => {\n      console.error(`Individual Error ${i + 1}:`, e);\n    });\n  }\n});\n```",
+          "tags": [
+            "Promises",
+            "any",
+            "Error Handling",
+            "Hard"
+          ],
+          "prerequisites": [
+            "Promises",
+            "Error Handling"
+          ],
+          "complexity": 8,
+          "interviewFrequency": 7,
+          "learningPath": "advanced"
+        },
+        {
+          "id": "question_async_await_1",
+          "topic": "Async/Await Basics",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "What kind of value does an `async` function always return?",
+          "answer": "An `async` function always returns a Promise.",
+          "analysisPoints": [
+            "Understanding the fundamental return type of async functions.",
+            "Connecting `async/await` to Promises."
+          ],
+          "keyConcepts": [
+            "async function",
+            "Promise"
+          ],
+          "evaluationCriteria": [
+            "Basic knowledge of async function return value"
+          ],
+          "example": "",
+          "tags": [
+            "Async/Await",
+            "Promises",
+            "Basic"
+          ],
+          "prerequisites": [
+            "Promises"
+          ],
+          "complexity": 2,
+          "interviewFrequency": 7,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_async_await_2",
+          "topic": "Await Keyword",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "Where can the `await` keyword be used?",
+          "answer": "The `await` keyword can only be used inside an `async` function.",
+          "analysisPoints": [
+            "Understanding the contextual restriction of `await`.",
+            "Preventing common syntax errors."
+          ],
+          "keyConcepts": [
+            "await keyword",
+            "async function scope"
+          ],
+          "evaluationCriteria": [
+            "Basic knowledge of `await` usage rules"
+          ],
+          "example": "",
+          "tags": [
+            "Async/Await",
+            "Syntax",
+            "Basic"
+          ],
+          "prerequisites": [
+            "Async/Await"
+          ],
+          "complexity": 2,
+          "interviewFrequency": 7,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_async_await_3",
+          "topic": "Async/Await Error Handling",
+          "level": "medium",
+          "type": "mcq",
+          "question": "Consider the following `async` function:\n\n```javascript\nasync function getData() {\n  try {\n    const response = await fetch('https://invalid.url/api/data');\n    if (!response.ok) {\n      throw new Error('Network response was not ok.');\n    }\n    const data = await response.json();\n    return data;\n  } catch (error) {\n    console.error('Error in getData:', error.message);\n    return null;\n  }\n}\n\n// What will be the output if the fetch fails (e.g., network error or 404 response)?\ndata.getData().then(result => console.log('Result:', result));\n```",
+          "answer": "Error in getData: Network response was not ok. (or similar network error message)\nResult: null",
+          "options": [
+            "An unhandled promise rejection error.",
+            "Error in getData: Network response was not ok. (or similar network error message)\nResult: null",
+            "Result: undefined",
+            "The `catch` block will not be executed for network errors."
+          ],
+          "analysisPoints": [
+            "Tests understanding of `try...catch` within `async` functions for error handling.",
+            "Covers both `fetch` network errors and explicit `throw new Error` for non-OK responses.",
+            "Checks the function's return value in case of error (returning `null`)."
+          ],
+          "keyConcepts": [
+            "Async/Await",
+            "Error Handling",
+            "try...catch",
+            "Fetch API"
+          ],
+          "evaluationCriteria": [
+            "Correct prediction of error flow in `async/await`.",
+            "Understanding of how `await` propagates rejections as thrown errors.",
+            "Handling of network and HTTP errors."
+          ],
+          "example": "The `try...catch` block effectively handles both network errors (which `fetch` itself will reject for) and errors explicitly thrown when `response.ok` is false. In either case, the `catch` block executes, logs the error message, and the function returns `null`, leading to 'Result: null' being logged.",
+          "tags": [
+            "Async/Await",
+            "Error Handling",
+            "MCQ",
+            "Medium"
+          ],
+          "prerequisites": [
+            "Promises",
+            "Fetch API"
+          ],
+          "complexity": 6,
+          "interviewFrequency": 9,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_async_await_4",
+          "topic": "Sequential vs Parallel Async Execution",
+          "level": "hard",
+          "type": "code",
+          "question": "You need to fetch data from three independent API endpoints: `/users`, `/products`, and `/orders`. Each API call takes a variable amount of time. You want to retrieve all data as quickly as possible. \n\nWrite an `async` function `fetchAllIndependentData` that performs these fetches in parallel and returns an object `{ users, products, orders }`. Include proper error handling for individual API failures, ensuring that if one API fails, the others still attempt to complete, but the main function eventually reflects the failure.\n\nUse mock `fetch` functions for `fetchUsers`, `fetchProducts`, and `fetchOrders` that return Promises resolving after a delay or rejecting randomly.\n\n```javascript\n// Mock API functions\nconst fetchUsers = () => new Promise(resolve => setTimeout(() => resolve(['User1', 'User2']), 500));\nconst fetchProducts = () => new Promise((_, reject) => setTimeout(() => reject(new Error('Product API failed')), 200)); // Simulates failure\nconst fetchOrders = () => new Promise(resolve => setTimeout(() => resolve(['OrderA', 'OrderB']), 800));\n\n// Your task: Implement this function\nasync function fetchAllIndependentData() {\n  // TODO: Implement parallel fetching with error handling\n  // Return { users, products, orders } or throw an AggregateError if all fail\n}\n\n// Expected usage:\nfetchAllIndependentData()\n  .then(data => console.log('All data fetched:', data))\n  .catch(error => {\n    console.error('Failed to fetch all data:', error);\n    if (error instanceof AggregateError) {\n      console.error('Individual errors:', error.errors);\n    }\n  });\n```",
+          "answer": "```javascript\n// Mock API functions\nconst fetchUsers = () => new Promise(resolve => setTimeout(() => resolve(['User1', 'User2']), 500));\nconst fetchProducts = () => new Promise((_, reject) => setTimeout(() => reject(new Error('Product API failed')), 200)); // Simulates failure\nconst fetchOrders = () => new Promise(resolve => setTimeout(() => resolve(['OrderA', 'OrderB']), 800));\n\nasync function fetchAllIndependentData() {\n  try {\n    // Initiate all promises concurrently without awaiting immediately\n    const usersPromise = fetchUsers();\n    const productsPromise = fetchProducts();\n    const ordersPromise = fetchOrders();\n\n    // Use Promise.allSettled to wait for all to complete regardless of individual success/failure\n    const results = await Promise.allSettled([usersPromise, productsPromise, ordersPromise]);\n\n    const data = {};\n    const errors = [];\n\n    results.forEach((result, index) => {\n      if (result.status === 'fulfilled') {\n        if (index === 0) data.users = result.value;\n        else if (index === 1) data.products = result.value;\n        else if (index === 2) data.orders = result.value;\n      } else {\n        errors.push(result.reason);\n        // Optionally, assign default/null for failed categories\n        if (index === 0) data.users = null; \n        else if (index === 1) data.products = null;\n        else if (index === 2) data.orders = null;\n      }\n    });\n\n    if (errors.length > 0) {\n      // If there are any errors, we can throw an AggregateError to indicate partial failure\n      // or handle them gracefully based on specific requirements.\n      // For this problem, we'll throw to reflect failure.\n      throw new AggregateError(errors, 'One or more API calls failed');\n    }\n\n    return data;\n\n  } catch (error) {\n    // This catch block would primarily catch errors from Promise.allSettled itself (rare)\n    // or re-thrown errors like the AggregateError above.\n    console.error('Critical error in fetchAllIndependentData:', error);\n    throw error; // Re-throw for external handling\n  }\n}\n\n// Expected usage:\nfetchAllIndependentData()\n  .then(data => console.log('All data fetched:', data))\n  .catch(error => {\n    console.error('Failed to fetch all data:', error);\n    if (error instanceof AggregateError) {\n      console.error('Individual errors:', error.errors.map(e => e.message));\n    } else {\n      console.error('Unexpected error type:', error);\n    }\n  });\n\n/* Expected Output based on mocks:\nFailed to fetch all data: AggregateError: One or more API calls failed\nIndividual errors: [ 'Product API failed' ]\n*/\n```",
+          "analysisPoints": [
+            "Correctly uses `Promise.allSettled` for parallel execution and collection of all outcomes.",
+            "Demonstrates handling of individual `fulfilled` and `rejected` statuses.",
+            "Constructs a result object from successful fetches.",
+            "Collects and potentially re-throws errors using `AggregateError` for comprehensive failure reporting.",
+            "Distinguishes between starting promises concurrently and awaiting them."
+          ],
+          "keyConcepts": [
+            "Async/Await",
+            "Promise.allSettled",
+            "Parallel Execution",
+            "Error Handling",
+            "AggregateError"
+          ],
+          "evaluationCriteria": [
+            "Ability to implement parallel async operations.",
+            "Proficiency in `Promise.allSettled` for robust error handling.",
+            "Correctly aggregating and reporting individual errors.",
+            "Adherence to desired output structure."
+          ],
+          "example": "",
+          "tags": [
+            "Async/Await",
+            "Promise.allSettled",
+            "Coding",
+            "Hard",
+            "Error Handling"
+          ],
+          "prerequisites": [
+            "Promises",
+            "Async/Await",
+            "Promise.allSettled",
+            "Error Handling"
+          ],
+          "complexity": 8,
+          "interviewFrequency": 9,
+          "learningPath": "advanced"
+        },
+        {
+          "id": "question_async_await_5",
+          "topic": "Refactoring to Async/Await",
+          "level": "medium",
+          "type": "code",
+          "question": "Refactor the following Promise-based `fetchPostAndAuthor` function to use `async/await` syntax. Ensure the error handling logic remains the same (i.e., if either fetch fails, the main function should catch the error).",
+          "answer": "```javascript\n// Original Promise-based function\nfunction fetchPostAndAuthorPromise(postId) {\n  let postData;\n  return fetch(`/api/posts/${postId}`)\n    .then(response => {\n      if (!response.ok) {\n        throw new Error(`HTTP error! status: ${response.status}`);\n      }\n      return response.json();\n    })\n    .then(post => {\n      postData = post;\n      return fetch(`/api/authors/${post.authorId}`);\n    })\n    .then(response => {\n      if (!response.ok) {\n        throw new Error(`HTTP error! status: ${response.status}`);\n      }\n      return response.json();\n    })\n    .then(author => {\n      return { ...postData, author };\n    })\n    .catch(error => {\n      console.error('Failed to fetch post or author:', error);\n      throw error; // Re-throw to propagate\n    });\n}\n\n// Refactored async/await function\nasync function fetchPostAndAuthorAsync(postId) {\n  try {\n    // Fetch post data\n    const postResponse = await fetch(`/api/posts/${postId}`);\n    if (!postResponse.ok) {\n      throw new Error(`HTTP error! status: ${postResponse.status}`);\n    }\n    const postData = await postResponse.json();\n\n    // Fetch author data using authorId from postData\n    const authorResponse = await fetch(`/api/authors/${postData.authorId}`);\n    if (!authorResponse.ok) {\n      throw new Error(`HTTP error! status: ${authorResponse.status}`);\n    }\n    const author = await authorResponse.json();\n\n    // Combine and return results\n    return { ...postData, author };\n  } catch (error) {\n    console.error('Failed to fetch post or author:', error);\n    throw error; // Re-throw to propagate\n  }\n}\n\n// Example Usage (assuming mock API endpoints)\nasync function runExamples() {\n  // Successful case\n  // Mock fetch responses for success\n  window.fetch = async (url) => {\n    if (url.includes('/api/posts/1')) {\n      return new Response(JSON.stringify({ id: 1, title: 'My Post', authorId: 101 }), { status: 200 });\n    } else if (url.includes('/api/authors/101')) {\n      return new Response(JSON.stringify({ id: 101, name: 'John Doe' }), { status: 200 });\n    }\n    return new Response('', { status: 404 });\n  };\n  \n  console.log('\\n--- Successful Fetch ---');\n  try {\n    const data = await fetchPostAndAuthorAsync(1);\n    console.log('Fetched data (success):', data);\n  } catch (e) {\n    console.error('Error during successful fetch:', e);\n  }\n\n  // Error case (post not found)\n  // Mock fetch responses for post not found\n  window.fetch = async (url) => {\n    if (url.includes('/api/posts/999')) {\n      return new Response('Not Found', { status: 404 });\n    } else if (url.includes('/api/authors/')) {\n      return new Response(JSON.stringify({ id: 101, name: 'John Doe' }), { status: 200 });\n    }\n    return new Response('', { status: 404 });\n  };\n\n  console.log('\\n--- Error Fetch (Post Not Found) ---');\n  try {\n    const data = await fetchPostAndAuthorAsync(999);\n    console.log('Fetched data (error):', data);\n  } catch (e) {\n    console.error('Error during failed fetch:', e.message);\n  }\n\n  // Error case (author not found)\n  // Mock fetch responses for author not found\n  window.fetch = async (url) => {\n    if (url.includes('/api/posts/2')) {\n      return new Response(JSON.stringify({ id: 2, title: 'Another Post', authorId: 999 }), { status: 200 });\n    } else if (url.includes('/api/authors/999')) {\n      return new Response('Not Found', { status: 404 });\n    }\n    return new Response('', { status: 404 });\n  };\n\n  console.log('\\n--- Error Fetch (Author Not Found) ---');\n  try {\n    const data = await fetchPostAndAuthorAsync(2);\n    console.log('Fetched data (error):', data);\n  } catch (e) {\n    console.error('Error during failed fetch:', e.message);\n  }\n}\n\n// Call the example runner\nrunExamples();\n```",
+          "analysisPoints": [
+            "Correctly wraps the function in `async`.",
+            "Replaces `.then()` chains with `await` for sequential operations.",
+            "Uses a single `try...catch` block to handle errors from any `await` call.",
+            "Maintains the original error logging and re-throwing behavior.",
+            "Demonstrates improved readability compared to chained promises."
+          ],
+          "keyConcepts": [
+            "Async/Await",
+            "Promises",
+            "Refactoring",
+            "Error Handling",
+            "Sequential execution"
+          ],
+          "evaluationCriteria": [
+            "Ability to convert Promise chains to `async/await`.",
+            "Correct application of `try...catch` for error flow.",
+            "Maintaining functional equivalence after refactoring."
+          ],
+          "example": "",
+          "tags": [
+            "Async/Await",
+            "Refactoring",
+            "Coding",
+            "Medium"
+          ],
+          "prerequisites": [
+            "Promises",
+            "Async/Await"
+          ],
+          "complexity": 7,
+          "interviewFrequency": 9,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_event_loop_1",
+          "topic": "Event Loop Basics",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "What is the primary role of the JavaScript Event Loop?",
+          "answer": "To continuously monitor the Call Stack and task queues, and push functions from queues to the Call Stack when it's empty, allowing JavaScript to handle asynchronous operations.",
+          "analysisPoints": [
+            "Highlights the core function of the Event Loop.",
+            "Mentions its role in managing async operations.",
+            "Implies the single-threaded nature of JS execution."
+          ],
+          "keyConcepts": [
+            "Event Loop",
+            "Asynchronous JavaScript",
+            "Call Stack",
+            "Task Queue"
+          ],
+          "evaluationCriteria": [
+            "Understanding of the Event Loop's fundamental purpose"
+          ],
+          "example": "",
+          "tags": [
+            "Event Loop",
+            "Basic",
+            "Concurrency"
+          ],
+          "prerequisites": [
+            "Callbacks"
+          ],
+          "complexity": 3,
+          "interviewFrequency": 8,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_event_loop_2",
+          "topic": "Microtask vs Macrotask",
+          "level": "medium",
+          "type": "flashcard",
+          "question": "Which queue (Microtask or Macrotask) does the Event Loop prioritize, and what are typical examples of each type of task?",
+          "answer": "The Event Loop prioritizes the **Microtask Queue**. It processes all microtasks before moving to macrotasks in the next loop iteration. \n\n*   **Microtasks Examples**: Promise callbacks (`.then()`, `.catch()`, `.finally()`), `queueMicrotask`, `MutationObserver` callbacks.\n*   **Macrotasks Examples**: `setTimeout`, `setInterval`, I/O operations, UI rendering, `requestAnimationFrame`, `setImmediate` (Node.js specific).",
+          "analysisPoints": [
+            "Correctly identifies microtask queue priority.",
+            "Provides accurate examples for both microtasks and macrotasks.",
+            "Implies the 'run to completion' of microtasks before macrotasks."
+          ],
+          "keyConcepts": [
+            "Microtask Queue",
+            "Macrotask Queue",
+            "Event Loop Priority",
+            "Promises",
+            "setTimeout"
+          ],
+          "evaluationCriteria": [
+            "Knowledge of queue prioritization.",
+            "Ability to categorize common async operations."
+          ],
+          "example": "",
+          "tags": [
+            "Event Loop",
+            "Microtasks",
+            "Macrotasks",
+            "Medium"
+          ],
+          "prerequisites": [
+            "Promises",
+            "setTimeout"
+          ],
+          "complexity": 6,
+          "interviewFrequency": 9,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_event_loop_3",
+          "topic": "Event Loop Output Prediction",
+          "level": "hard",
+          "type": "code",
+          "question": "Predict the exact order of console outputs for the following JavaScript code snippet. Explain your reasoning based on the Event Loop mechanism, including the Call Stack, Web APIs, Microtask Queue, and Callback Queue.",
+          "answer": "```javascript\nconsole.log('A');\n\nsetTimeout(() => {\n  console.log('B');\n  Promise.resolve().then(() => console.log('C'));\n}, 0);\n\nPromise.resolve().then(() => {\n  console.log('D');\n  setTimeout(() => console.log('E'), 0);\n});\n\nconsole.log('F');\n\n// Predicted Output:\n// A\n// F\n// D\n// C\n// B\n// E\n```\n\n**Reasoning:**\n\n1.  **Initial Execution (Synchronous)**:\n    *   `console.log('A')` runs immediately. Output: `A`.\n    *   `setTimeout` callback for 'B' is sent to Web APIs. After ~0ms, it's moved to the **Callback Queue**.\n    *   `Promise.resolve().then()` callback for 'D' is created. It's immediately moved to the **Microtask Queue**.\n    *   `console.log('F')` runs immediately. Output: `F`.\n    *   The Call Stack becomes empty.\n\n2.  **First Event Loop Turn - Microtask Phase**:\n    *   The Event Loop checks the Microtask Queue. It finds the callback for 'D'.\n    *   This callback is moved to the Call Stack.\n    *   `console.log('D')` executes. Output: `D`.\n    *   Inside this callback, `setTimeout` for 'E' is encountered. It's sent to Web APIs, then moved to the **Callback Queue** (at this point, the Callback Queue contains 'B', then 'E').\n    *   The callback for 'D' finishes. Call Stack is empty.\n\n3.  **First Event Loop Turn - Macrotask Phase**:\n    *   The Event Loop checks the Microtask Queue again (it's empty).\n    *   The Event Loop checks the Callback Queue. It takes the first item: the callback for 'B'.\n    *   This callback is moved to the Call Stack.\n    *   `console.log('B')` executes. Output: `B`.\n    *   Inside this callback, `Promise.resolve().then()` callback for 'C' is created. It's immediately moved to the **Microtask Queue**.\n    *   The callback for 'B' finishes. Call Stack is empty.\n\n4.  **Second Event Loop Turn - Microtask Phase**:\n    *   The Event Loop checks the Microtask Queue. It finds the callback for 'C'.\n    *   This callback is moved to the Call Stack.\n    *   `console.log('C')` executes. Output: `C`.\n    *   The callback for 'C' finishes. Call Stack is empty.\n\n5.  **Second Event Loop Turn - Macrotask Phase**:\n    *   The Event Loop checks the Microtask Queue again (it's empty).\n    *   The Event Loop checks the Callback Queue. It takes the next item: the callback for 'E'.\n    *   This callback is moved to the Call Stack.\n    *   `console.log('E')` executes. Output: `E`.\n    *   The callback for 'E' finishes. Call Stack is empty.\n\nThe Event Loop continues to run, but no more tasks are pending.",
+          "options": [],
+          "analysisPoints": [
+            "Accurate identification of synchronous vs. asynchronous code execution.",
+            "Correct understanding of `setTimeout` (macrotask) and `Promise.then` (microtask) queuing.",
+            "Application of microtask queue priority (all microtasks before any macrotask).",
+            "Ability to trace nested asynchronous operations and their impact on queue order.",
+            "Detailed explanation of each step in the Event Loop cycle."
+          ],
+          "keyConcepts": [
+            "Event Loop",
+            "Microtask Queue",
+            "Macrotask Queue",
+            "Call Stack",
+            "setTimeout",
+            "Promises",
+            "Execution Order"
+          ],
+          "evaluationCriteria": [
+            "Precise prediction of output.",
+            "Clear and comprehensive explanation of Event Loop mechanics.",
+            "Demonstration of deep understanding of task prioritization.",
+            "Ability to reason about complex asynchronous flows."
+          ],
+          "example": "",
+          "tags": [
+            "Event Loop",
+            "Concurrency",
+            "Coding",
+            "Hard",
+            "Debugging"
+          ],
+          "prerequisites": [
+            "Promises",
+            "setTimeout",
+            "Event Loop Basics"
+          ],
+          "complexity": 9,
+          "interviewFrequency": 10,
+          "learningPath": "advanced"
+        }
+      ],
+      "tasks": [
+        {
+          "id": "task_promise_combinators_1",
+          "title": "Robust Multi-Source Data Fetching (allSettled)",
+          "description": "\nImplement an `async` function `fetchDataFromMultipleSources(urls)` that takes an array of URLs. This function should:\n\n1.  Initiate a `fetch` request for each URL in parallel.\n2.  Wait for all `fetch` requests to complete, regardless of whether they succeed or fail.\n3.  Return an array of objects, where each object represents the outcome of a single fetch. For successful fetches, include `status: 'fulfilled'` and the parsed JSON data (`value`). For failed fetches, include `status: 'rejected'` and the error object (`reason`).\n4.  Ensure that network errors (e.g., unreachable server) and HTTP errors (e.g., 404, 500) are correctly captured as `rejected` outcomes with their respective reasons.\n\nUse `Promise.allSettled` for this task. You can use a mock `fetch` function for testing.\n",
+          "difficulty": "medium",
+          "startingCode": "async function fetchDataFromMultipleSources(urls) {\n  // Mock fetch for testing purposes\n  const mockFetch = async (url) => {\n    console.log(`Attempting to fetch: ${url}`);\n    if (url.includes('success')) {\n      return new Response(JSON.stringify({ data: `${url}-data` }), { status: 200 });\n    } else if (url.includes('error')) {\n      return new Response('Not Found', { status: 404 });\n    } else if (url.includes('network-fail')) {\n      return Promise.reject(new TypeError('Failed to fetch (mock network error)'));\n    }\n    return new Response(JSON.stringify({ data: `${url}-default` }), { status: 200 });\n  };\n\n  // TODO: Implement the required functionality using Promise.allSettled\n\n  // Example structure for fetch calls:\n  // const promises = urls.map(url => mockFetch(url).then(res => {\n  //   if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);\n  //   return res.json();\n  // }));\n  // return await Promise.allSettled(promises);\n}\n\n// Example usage (for testing):\n// fetchDataFromMultipleSources([\n//   '/api/data/success1',\n//   '/api/data/error1',\n//   '/api/data/success2',\n//   '/api/data/network-fail1'\n// ]).then(results => {\n//   console.log('Final Results:', results);\n// });",
+          "solutionCode": "async function fetchDataFromMultipleSources(urls) {\n  // Mock fetch for testing purposes\n  const mockFetch = async (url) => {\n    console.log(`Attempting to fetch: ${url}`);\n    return new Promise((resolve, reject) => {\n      if (url.includes('success')) {\n        setTimeout(() => resolve(new Response(JSON.stringify({ data: `${url}-data` }), { status: 200 })), Math.random() * 100 + 50);\n      } else if (url.includes('error')) {\n        setTimeout(() => resolve(new Response('Not Found', { status: 404 })), Math.random() * 100 + 50);\n      } else if (url.includes('network-fail')) {\n        setTimeout(() => reject(new TypeError('Failed to fetch (mock network error)')), Math.random() * 100 + 50);\n      } else {\n        setTimeout(() => resolve(new Response(JSON.stringify({ data: `${url}-default` }), { status: 200 })), Math.random() * 100 + 50);\n      }\n    });\n  };\n\n  const fetchPromises = urls.map(url => \n    mockFetch(url)\n      .then(response => {\n        if (!response.ok) {\n          // For HTTP errors (e.g., 404, 500), explicitly throw an Error\n          // so it gets caught by Promise.allSettled as a rejection.\n          return Promise.reject(new Error(`HTTP Error: ${response.status} ${response.statusText || response.url}`));\n        }\n        return response.json();\n      })\n      .catch(error => {\n        // Catch network errors or errors from .then() block, then re-throw\n        // or return a specific rejection reason for allSettled.\n        return Promise.reject(error);\n      })\n  );\n\n  return await Promise.allSettled(fetchPromises);\n}\n\n// Test Cases:\nasync function runTests() {\n  console.log('\\n--- Test Case 1: All Success ---');\n  let results1 = await fetchDataFromMultipleSources([\n    '/api/data/success1',\n    '/api/data/success2'\n  ]);\n  console.log('Results 1:', JSON.stringify(results1, null, 2));\n  /* Expected:\n  [\n    { status: 'fulfilled', value: { data: '/api/data/success1-data' } },\n    { status: 'fulfilled', value: { data: '/api/data/success2-data' } }\n  ]\n  */\n\n  console.log('\\n--- Test Case 2: Mixed Success and HTTP Error ---');\n  let results2 = await fetchDataFromMultipleSources([\n    '/api/data/success1',\n    '/api/data/error1' // Simulates 404\n  ]);\n  console.log('Results 2:', JSON.stringify(results2, null, 2));\n  /* Expected:\n  [\n    { status: 'fulfilled', value: { data: '/api/data/success1-data' } },\n    { status: 'rejected', reason: { message: 'HTTP Error: 404 ' } } // message property might vary based on mock\n  ]\n  */\n\n  console.log('\\n--- Test Case 3: Mixed Success and Network Error ---');\n  let results3 = await fetchDataFromMultipleSources([\n    '/api/data/success1',\n    '/api/data/network-fail1' // Simulates network error\n  ]);\n  console.log('Results 3:', JSON.stringify(results3, null, 2));\n  /* Expected:\n  [\n    { status: 'fulfilled', value: { data: '/api/data/success1-data' } },\n    { status: 'rejected', reason: { message: 'Failed to fetch (mock network error)' } } \n  ]\n  */\n\n  console.log('\\n--- Test Case 4: All Failures ---');\n  let results4 = await fetchDataFromMultipleSources([\n    '/api/data/error1',\n    '/api/data/network-fail1'\n  ]);\n  console.log('Results 4:', JSON.stringify(results4, null, 2));\n  /* Expected:\n  [\n    { status: 'rejected', reason: { message: 'HTTP Error: 404 ' } },\n    { status: 'rejected', reason: { message: 'Failed to fetch (mock network error)' } }\n  ]\n  */\n\n  console.log('\\n--- Test Case 5: Empty Array ---');\n  let results5 = await fetchDataFromMultipleSources([]);\n  console.log('Results 5:', JSON.stringify(results5, null, 2));\n  /* Expected:\n  []\n  */\n}\n\nrunTests();",
+          "testCases": [
+            "Test with all successful URLs.",
+            "Test with a mix of successful and HTTP error (e.g., 404) URLs.",
+            "Test with a mix of successful and network error URLs.",
+            "Test with all failing URLs (both HTTP and network errors).",
+            "Test with an empty array of URLs."
+          ],
+          "hints": [
+            "Remember that `fetch` itself only rejects for network errors. For HTTP errors (like 404 or 500), `response.ok` will be `false`, and you'll need to explicitly `throw new Error()` inside the `.then()` block to trigger a rejection that `allSettled` can capture.",
+            "`Promise.allSettled`'s return value directly provides the `status`, `value`, or `reason`.",
+            "Map each URL to a promise that includes `.then()` for parsing JSON and handling `response.ok`, and a `.catch()` if needed to propagate network errors cleanly."
+          ],
+          "tags": [
+            "Promises",
+            "Promise.allSettled",
+            "Fetch API",
+            "Asynchronous Programming",
+            "Error Handling",
+            "Frontend"
+          ],
+          "timeEstimate": 45,
+          "prerequisites": [
+            "Promises",
+            "Fetch API",
+            "Promise.allSettled"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 8,
+          "learningPath": "intermediate",
+          "relatedConcepts": [
+            "Promise Combinators",
+            "Error Handling in Async",
+            "Robust API Integration"
+          ]
+        },
+        {
+          "id": "task_promise_combinators_2",
+          "title": "Fetch Fastest Data Source (any)",
+          "description": "\nImplement an `async` function `fetchFirstSuccessfulData(urls)` that takes an array of URLs. This function should:\n\n1.  Initiate a `fetch` request for each URL in parallel.\n2.  Return the JSON data from the *first* `fetch` request that successfully resolves (HTTP status 200-299).\n3.  If all `fetch` requests fail (either network error or non-OK HTTP status), the function should throw an `AggregateError` containing all the individual rejection reasons.\n\nUse `Promise.any` for this task. You can use a mock `fetch` function for testing.\n",
+          "difficulty": "medium",
+          "startingCode": "async function fetchFirstSuccessfulData(urls) {\n  // Mock fetch for testing purposes\n  const mockFetch = async (url) => {\n    console.log(`Attempting to fetch: ${url}`);\n    return new Promise((resolve, reject) => {\n      if (url.includes('fast-success')) {\n        setTimeout(() => resolve(new Response(JSON.stringify({ data: `${url}-data` }), { status: 200 })), 50);\n      } else if (url.includes('slow-success')) {\n        setTimeout(() => resolve(new Response(JSON.stringify({ data: `${url}-data` }), { status: 200 })), 500);\n      } else if (url.includes('http-error')) {\n        setTimeout(() => resolve(new Response('Forbidden', { status: 403 })), 100);\n      } else if (url.includes('network-fail')) {\n        setTimeout(() => reject(new TypeError('Failed to fetch (mock network error)')), 20);\n      }\n    });\n  };\n\n  // TODO: Implement the required functionality using Promise.any\n\n  // Example structure for fetch calls:\n  // const promises = urls.map(url => mockFetch(url).then(res => {\n  //   if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);\n  //   return res.json();\n  // }));\n  // return await Promise.any(promises);\n}\n\n// Example usage (for testing):\n// fetchFirstSuccessfulData([\n//   '/api/data/slow-success',\n//   '/api/data/fast-success',\n//   '/api/data/http-error'\n// ]).then(result => {\n//   console.log('First successful data:', result);\n// }).catch(error => {\n//   console.error('All sources failed:', error.errors.map(e => e.message));\n// });",
+          "solutionCode": "async function fetchFirstSuccessfulData(urls) {\n  // Mock fetch for testing purposes\n  const mockFetch = async (url) => {\n    console.log(`Attempting to fetch: ${url}`);\n    return new Promise((resolve, reject) => {\n      if (url.includes('fast-success')) {\n        setTimeout(() => resolve(new Response(JSON.stringify({ data: `${url}-data` }), { status: 200 })), 50);\n      } else if (url.includes('slow-success')) {\n        setTimeout(() => resolve(new Response(JSON.stringify({ data: `${url}-data` }), { status: 200 })), 500);\n      } else if (url.includes('http-error')) {\n        setTimeout(() => resolve(new Response('Forbidden', { status: 403 })), 100); // Resolves, but not .ok\n      } else if (url.includes('network-fail')) {\n        setTimeout(() => reject(new TypeError('Failed to fetch (mock network error)')), 20);\n      } else {\n        setTimeout(() => resolve(new Response(JSON.stringify({ data: `${url}-default` }), { status: 200 })), 150);\n      }\n    });\n  };\n\n  const fetchPromises = urls.map(url => \n    mockFetch(url)\n      .then(response => {\n        if (!response.ok) {\n          // For HTTP errors, make sure it rejects so Promise.any considers it a failure\n          return Promise.reject(new Error(`HTTP Error: ${response.status} ${response.statusText || response.url}`));\n        }\n        return response.json();\n      })\n      .catch(error => {\n        // Catch network errors and re-throw to ensure Promise.any sees it as a rejection\n        return Promise.reject(error);\n      })\n  );\n\n  try {\n    return await Promise.any(fetchPromises);\n  } catch (error) {\n    // Promise.any rejects with AggregateError if all input promises reject\n    throw error; // Re-throw the AggregateError for the caller to handle\n  }\n}\n\n// Test Cases:\nasync function runTests() {\n  console.log('\\n--- Test Case 1: First is Fast Success ---');\n  try {\n    let result1 = await fetchFirstSuccessfulData([\n      '/api/data/slow-success',\n      '/api/data/fast-success',\n      '/api/data/http-error'\n    ]);\n    console.log('Result 1:', result1);\n  } catch (e) { console.error('Error 1:', e); }\n  /* Expected: Result 1: { data: '/api/data/fast-success-data' } */\n\n  console.log('\\n--- Test Case 2: All Failures ---');\n  try {\n    let result2 = await fetchFirstSuccessfulData([\n      '/api/data/http-error-1',\n      '/api/data/network-fail-1',\n      '/api/data/http-error-2'\n    ]);\n    console.log('Result 2:', result2);\n  } catch (e) {\n    console.error('Error 2 (All Failed):', e.errors.map(err => err.message));\n  }\n  /* Expected: Error 2 (All Failed): [ 'HTTP Error: 403 ', 'Failed to fetch (mock network error)', 'HTTP Error: 403 ' ] */\n\n  console.log('\\n--- Test Case 3: Empty Array ---');\n  try {\n    let result3 = await fetchFirstSuccessfulData([]);\n    console.log('Result 3:', result3);\n  } catch (e) { \n    console.error('Error 3 (Empty Array):', e.message); \n  }\n  /* Expected: Error 3 (Empty Array): No promises in Promise.any */\n\n  console.log('\\n--- Test Case 4: One Success, others fail slowly ---');\n  try {\n    let result4 = await fetchFirstSuccessfulData([\n      '/api/data/network-fail-20ms',\n      '/api/data/slow-success-500ms',\n      '/api/data/http-error-100ms'\n    ]);\n    console.log('Result 4:', result4);\n  } catch (e) { console.error('Error 4:', e); }\n  /* Expected: Result 4: { data: '/api/data/slow-success-500ms-data' } */\n}\n\nrunTests();\n",
+          "testCases": [
+            "Test where the fastest promise is a success.",
+            "Test where all promises fail (mix of HTTP errors and network errors).",
+            "Test with an empty array of URLs.",
+            "Test where a fast-rejecting promise exists, but a slower-resolving promise eventually succeeds.",
+            "Test where the first promise to settle is a rejection, but a later promise succeeds."
+          ],
+          "hints": [
+            "`Promise.any` only considers 'fulfilled' promises for resolution. If `fetch` returns a non-`ok` response (like 404 or 500), that's technically a 'resolved' promise for `fetch` itself, but you need to explicitly `throw` an error for `Promise.any` to treat it as a rejection.",
+            "Remember to transform the `Response` object into actual JSON data.",
+            "The `.catch` block of `Promise.any` will receive an `AggregateError` when all promises reject. You'll need to unpack its `errors` property."
+          ],
+          "tags": [
+            "Promises",
+            "Promise.any",
+            "Fetch API",
+            "Asynchronous Programming",
+            "Error Handling",
+            "Frontend"
+          ],
+          "timeEstimate": 45,
+          "prerequisites": [
+            "Promises",
+            "Fetch API",
+            "Promise.any"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 8,
+          "learningPath": "intermediate",
+          "relatedConcepts": [
+            "Promise Combinators",
+            "Race Conditions",
+            "Error Handling in Async"
+          ]
+        },
+        {
+          "id": "task_async_await_1",
+          "title": "Sequential API Calls with Chained Dependencies",
+          "description": "\nImplement an `async` function `fetchUserProfileAndDetails(userId)` that fetches user profile information and then uses data from the profile (specifically, a `detailsId`) to fetch additional user details. Both API calls are dependent on each other, meaning the second call cannot start until the first one successfully completes.\n\nYour function should:\n\n1.  Fetch user profile data from `/api/users/:userId`.\n2.  Extract `detailsId` from the fetched profile.\n3.  Fetch user details from `/api/user-details/:detailsId`.\n4.  Combine the profile and details into a single object `{ ...profileData, details: detailsData }` and return it.\n5.  Implement robust error handling using `try...catch`. If any `fetch` call fails (network error or non-OK HTTP status), log the error and re-throw it to the caller.\n\nUse the provided mock `fetch` helper for testing.\n",
+          "difficulty": "medium",
+          "startingCode": "const mockFetch = async (url) => {\n  console.log(`Mock Fetching: ${url}`);\n  return new Promise((resolve, reject) => {\n    if (url.includes('/api/users/1')) {\n      setTimeout(() => resolve(new Response(JSON.stringify({ id: 1, name: 'Alice', detailsId: 'abc' }), { status: 200 })), 100);\n    } else if (url.includes('/api/user-details/abc')) {\n      setTimeout(() => resolve(new Response(JSON.stringify({ age: 30, city: 'New York' }), { status: 200 })), 150);\n    } else if (url.includes('/api/users/invalid')) {\n      setTimeout(() => resolve(new Response('User Not Found', { status: 404 })), 50);\n    } else if (url.includes('/api/user-details/invalid')) {\n      setTimeout(() => resolve(new Response('Details Not Found', { status: 404 })), 50);\n    } else if (url.includes('network-fail')) {\n      setTimeout(() => reject(new TypeError('Mock network error')), 20);\n    }\n    else {\n      setTimeout(() => reject(new Error('Unknown URL')), 10);\n    }\n  });\n};\n\nasync function fetchUserProfileAndDetails(userId) {\n  // TODO: Implement sequential fetches with error handling\n}\n\n// Example usage (for testing):\n// fetchUserProfileAndDetails(1)\n//   .then(data => console.log('Successfully fetched:', data))\n//   .catch(error => console.error('Failed to fetch user data:', error.message));\n",
+          "solutionCode": "const mockFetch = async (url) => {\n  console.log(`Mock Fetching: ${url}`);\n  return new Promise((resolve, reject) => {\n    if (url.includes('/api/users/1')) {\n      setTimeout(() => resolve(new Response(JSON.stringify({ id: 1, name: 'Alice', detailsId: 'abc' }), { status: 200 })), 100);\n    } else if (url.includes('/api/user-details/abc')) {\n      setTimeout(() => resolve(new Response(JSON.stringify({ age: 30, city: 'New York' }), { status: 200 })), 150);\n    } else if (url.includes('/api/users/invalid')) {\n      setTimeout(() => resolve(new Response('User Not Found', { status: 404 })), 50);\n    } else if (url.includes('/api/user-details/invalid')) {\n      setTimeout(() => resolve(new Response('Details Not Found', { status: 404 })), 50);\n    } else if (url.includes('network-fail')) {\n      setTimeout(() => reject(new TypeError('Mock network error')), 20);\n    }\n    else {\n      setTimeout(() => reject(new Error('Unknown URL')), 10);\n    }\n  });\n};\n\nasync function fetchUserProfileAndDetails(userId) {\n  try {\n    // 1. Fetch user profile\n    const userProfileResponse = await mockFetch(`/api/users/${userId}`);\n    if (!userProfileResponse.ok) {\n      throw new Error(`HTTP Error fetching profile: ${userProfileResponse.status} ${userProfileResponse.statusText || userProfileResponse.url}`);\n    }\n    const userProfile = await userProfileResponse.json();\n\n    // Check if detailsId exists before attempting to fetch details\n    if (!userProfile.detailsId) {\n      // Handle case where user might not have details (e.g., return profile only or throw specific error)\n      console.warn(`User ${userId} has no detailsId.`);\n      return { ...userProfile, details: null }; \n    }\n\n    // 2. Fetch user details using detailsId\n    const userDetailsResponse = await mockFetch(`/api/user-details/${userProfile.detailsId}`);\n    if (!userDetailsResponse.ok) {\n      throw new Error(`HTTP Error fetching details: ${userDetailsResponse.status} ${userDetailsResponse.statusText || userDetailsResponse.url}`);\n    }\n    const userDetails = await userDetailsResponse.json();\n\n    // 3. Combine and return\n    return { ...userProfile, details: userDetails };\n\n  } catch (error) {\n    console.error(`Failed to fetch user profile or details for userId ${userId}:`, error.message);\n    throw error; // Re-throw to propagate the error to the caller\n  }\n}\n\n// Test Cases:\nasync function runTests() {\n  console.log('\\n--- Test Case 1: Successful Fetch ---');\n  try {\n    const data = await fetchUserProfileAndDetails(1);\n    console.log('Test 1 Result (Success):', data);\n  } catch (e) {\n    console.error('Test 1 Error:', e.message);\n  }\n  /* Expected:\n  Test 1 Result (Success): { id: 1, name: 'Alice', detailsId: 'abc', details: { age: 30, city: 'New York' } }\n  */\n\n  console.log('\\n--- Test Case 2: Profile Not Found (404) ---');\n  try {\n    const data = await fetchUserProfileAndDetails('invalid');\n    console.log('Test 2 Result (Should not be here):', data);\n  } catch (e) {\n    console.error('Test 2 Error (Profile Not Found):', e.message);\n  }\n  /* Expected: Test 2 Error (Profile Not Found): HTTP Error fetching profile: 404 User Not Found */\n\n  console.log('\\n--- Test Case 3: Details Not Found (404) ---');\n  // To simulate this, we need a profile that returns a valid detailsId but the details endpoint fails\n  // Temporarily adjust mock fetch for this specific test\n  const originalMockFetch = global.mockFetch;\n  global.mockFetch = async (url) => {\n    if (url.includes('/api/users/2')) {\n      return new Response(JSON.stringify({ id: 2, name: 'Bob', detailsId: 'invalid-details' }), { status: 200 });\n    } else if (url.includes('/api/user-details/invalid-details')) {\n      return new Response('Details Not Found', { status: 404 });\n    } else {\n      return originalMockFetch(url); // Fallback to original mock for other calls\n    }\n  };\n  try {\n    const data = await fetchUserProfileAndDetails(2);\n    console.log('Test 3 Result (Should not be here):', data);\n  } catch (e) {\n    console.error('Test 3 Error (Details Not Found):', e.message);\n  } finally {\n    global.mockFetch = originalMockFetch; // Restore original mock\n  }\n  /* Expected: Test 3 Error (Details Not Found): HTTP Error fetching details: 404 Details Not Found */\n\n  console.log('\\n--- Test Case 4: Network Error during Profile Fetch ---');\n  try {\n    const data = await fetchUserProfileAndDetails('network-fail');\n    console.log('Test 4 Result (Should not be here):', data);\n  } catch (e) {\n    console.error('Test 4 Error (Network Failure):', e.message);\n  }\n  /* Expected: Test 4 Error (Network Failure): Mock network error */\n\n  console.log('\\n--- Test Case 5: User with no detailsId ---');\n  // Mock fetch responses for user with no detailsId\n  const originalMockFetch2 = global.mockFetch;\n  global.mockFetch = async (url) => {\n    if (url.includes('/api/users/no-details')) {\n      return new Response(JSON.stringify({ id: 'no-details', name: 'Charlie', detailsId: null }), { status: 200 });\n    }\n    return originalMockFetch2(url); \n  };\n  try {\n    const data = await fetchUserProfileAndDetails('no-details');\n    console.log('Test 5 Result (No Details):', data);\n  } catch (e) {\n    console.error('Test 5 Error:', e.message);\n  } finally {\n    global.mockFetch = originalMockFetch2;\n  }\n  /* Expected: Test 5 Result (No Details): { id: 'no-details', name: 'Charlie', detailsId: null, details: null } */\n}\n\n// Make mockFetch globally available for testing context\nglobal.mockFetch = mockFetch;\n\nrunTests();",
+          "testCases": [
+            "Successful fetch of both profile and details.",
+            "Profile fetch fails with a 404 (or other HTTP error).",
+            "Profile fetch succeeds, but details fetch fails with a 404.",
+            "Network error during the initial profile fetch.",
+            "Network error during the details fetch.",
+            "Edge case: User profile is found but has no `detailsId` (should gracefully handle this)."
+          ],
+          "hints": [
+            "Remember that `await` pauses execution until the promise resolves or rejects. Use it sequentially for dependent calls.",
+            "Error handling with `try...catch` works for any `await` operation that results in a rejected promise (either by network error or explicit `throw`).",
+            "Make sure to check `response.ok` after each `await fetch` call and `throw` an `Error` if it's `false`."
+          ],
+          "tags": [
+            "Async/Await",
+            "Sequential Fetch",
+            "API Integration",
+            "Error Handling",
+            "Frontend"
+          ],
+          "timeEstimate": 60,
+          "prerequisites": [
+            "Async/Await",
+            "Promises",
+            "Fetch API",
+            "Error Handling"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 9,
+          "learningPath": "intermediate",
+          "relatedConcepts": [
+            "Asynchronous Programming Patterns",
+            "API Chaining",
+            "Data Transformation"
+          ]
+        },
+        {
+          "id": "task_event_loop_1",
+          "title": "Event Loop Puzzle: Predict Output and Explain",
+          "description": "\nGiven the JavaScript code snippet below, predict the exact order of outputs to the console. After predicting, provide a step-by-step explanation of how the JavaScript Event Loop processes this code, detailing the roles of the Call Stack, Web APIs, Microtask Queue, and Callback Queue at each stage.\n\n```javascript\nconsole.log('Start');\n\nsetTimeout(() => {\n  console.log('Timeout 1');\n  Promise.resolve().then(() => console.log('Promise 2'));\n}, 0);\n\nPromise.resolve().then(() => {\n  console.log('Promise 1');\n  setTimeout(() => console.log('Timeout 2'), 0);\n});\n\nconsole.log('End');\n```\n\nYour explanation should clearly justify the predicted order based on Event Loop rules.\n",
+          "difficulty": "hard",
+          "startingCode": "console.log('Start');\n\nsetTimeout(() => {\n  console.log('Timeout 1');\n  Promise.resolve().then(() => console.log('Promise 2'));\n}, 0);\n\nPromise.resolve().then(() => {\n  console.log('Promise 1');\n  setTimeout(() => console.log('Timeout 2'), 0);\n});\n\nconsole.log('End');\n\n// TODO: Predict the output order and write your explanation below.\n// Predicted Output:\n// Your Explanation:\n",
+          "solutionCode": "console.log('Start');\n\nsetTimeout(() => {\n  console.log('Timeout 1');\n  Promise.resolve().then(() => console.log('Promise 2'));\n}, 0);\n\nPromise.resolve().then(() => {\n  console.log('Promise 1');\n  setTimeout(() => console.log('Timeout 2'), 0);\n});\n\nconsole.log('End');\n\n// Predicted Output:\n// Start\n// End\n// Promise 1\n// Promise 2\n// Timeout 1\n// Timeout 2\n\n/*\nExplanation:\n\n1.  **Initial Synchronous Execution (Call Stack)**:\n    *   `console.log('Start')` is executed. Output: `Start`.\n    *   `setTimeout` callback (`() => { console.log('Timeout 1'); ... }`) is passed to Web APIs. After 0ms, it's moved to the **Callback Queue**.\n    *   `Promise.resolve().then()` callback (`() => { console.log('Promise 1'); ... }`) is created. It's immediately moved to the **Microtask Queue**.\n    *   `console.log('End')` is executed. Output: `End`.\n    *   The Call Stack becomes empty.\n\n    *Current State:* \n    *   Call Stack: Empty\n    *   Microtask Queue: `[Promise 1's callback]`\n    *   Callback Queue: `[Timeout 1's callback]`\n\n2.  **First Event Loop Turn - Microtask Phase**:\n    *   The Event Loop sees the Call Stack is empty. It checks the Microtask Queue. It finds 'Promise 1's callback'.\n    *   'Promise 1's callback' is moved to the Call Stack.\n    *   `console.log('Promise 1')` executes. Output: `Promise 1`.\n    *   Inside 'Promise 1's callback', `setTimeout` for 'Timeout 2' is encountered. It's passed to Web APIs, then moved to the **Callback Queue**.\n    *   'Promise 1's callback' finishes. Call Stack is empty.\n\n    *Current State:* \n    *   Call Stack: Empty\n    *   Microtask Queue: `[]`\n    *   Callback Queue: `[Timeout 1's callback, Timeout 2's callback]`\n\n3.  **First Event Loop Turn - Macrotask Phase**:\n    *   The Event Loop sees the Call Stack is empty. It checks the Microtask Queue (it's empty).\n    *   It checks the Callback Queue. It takes the first item: 'Timeout 1's callback'.\n    *   'Timeout 1's callback' is moved to the Call Stack.\n    *   `console.log('Timeout 1')` executes. Output: `Timeout 1`.\n    *   Inside 'Timeout 1's callback', `Promise.resolve().then()` callback for 'Promise 2' is created. It's immediately moved to the **Microtask Queue**.\n    *   'Timeout 1's callback' finishes. Call Stack is empty.\n\n    *Current State:* \n    *   Call Stack: Empty\n    *   Microtask Queue: `[Promise 2's callback]`\n    *   Callback Queue: `[Timeout 2's callback]`\n\n4.  **Second Event Loop Turn - Microtask Phase**:\n    *   The Event Loop sees the Call Stack is empty. It checks the Microtask Queue. It finds 'Promise 2's callback'.\n    *   'Promise 2's callback' is moved to the Call Stack.\n    *   `console.log('Promise 2')` executes. Output: `Promise 2`.\n    *   'Promise 2's callback' finishes. Call Stack is empty.\n\n    *Current State:* \n    *   Call Stack: Empty\n    *   Microtask Queue: `[]`\n    *   Callback Queue: `[Timeout 2's callback]`\n\n5.  **Second Event Loop Turn - Macrotask Phase**:\n    *   The Event Loop sees the Call Stack is empty. It checks the Microtask Queue (it's empty).\n    *   It checks the Callback Queue. It takes the next item: 'Timeout 2's callback'.\n    *   'Timeout 2's callback' is moved to the Call Stack.\n    *   `console.log('Timeout 2')` executes. Output: `Timeout 2`.\n    *   'Timeout 2's callback' finishes. Call Stack is empty.\n\n    *Current State:* \n    *   Call Stack: Empty\n    *   Microtask Queue: `[]`\n    *   Callback Queue: `[]`\n\nThe Event Loop continues its cycle, but there are no more tasks.\n*/\n",
+          "testCases": [
+            "Predict output and provide step-by-step Event Loop explanation."
+          ],
+          "hints": [
+            "Start by identifying all synchronous operations.",
+            "Then, identify all `setTimeout` calls (macrotasks) and `Promise.then` calls (microtasks).",
+            "Trace how each task is placed into its respective queue (Web APIs -> Queue).",
+            "Remember the Event Loop's priority: complete all microtasks from the current cycle before moving to the next macrotask."
+          ],
+          "tags": [
+            "Event Loop",
+            "Concurrency",
+            "Execution Order",
+            "Debugging",
+            "JavaScript Fundamentals"
+          ],
+          "timeEstimate": 60,
+          "prerequisites": [
+            "Event Loop Basics",
+            "Promises",
+            "setTimeout"
+          ],
+          "complexity": 9,
+          "interviewRelevance": 10,
+          "learningPath": "advanced",
+          "relatedConcepts": [
+            "Call Stack",
+            "Microtask Queue",
+            "Macrotask Queue",
+            "Asynchronous Programming"
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "fac2bbd6-07b6-4fa0-8d23-f952c04b99e8",
+    "startLine": 1700,
+    "endLine": 1799,
+    "processedDate": "2025-06-17T07:59:23.607Z",
+    "content": {
+      "logicalBlockInfo": {
+        "suggestedEndLine": -1
+      },
+      "theory": [
+        {
+          "id": "theory_event_loop_async",
+          "title": "Asynchronous JavaScript and the Event Loop",
+          "content": "JavaScript is a single-threaded, non-blocking, asynchronous, concurrent language. This means it has one call stack and executes one thing at a time. To handle operations that take time (like network requests, timers, or user interactions) without blocking the main thread, JavaScript uses the Event Loop.\n\n### Call Stack\nThis is where synchronous code is executed. Functions are pushed onto the stack when called and popped off when they return.\n\n### Web APIs\nBrowser provides Web APIs (e.g., `setTimeout`, `DOM events`, `fetch`) that JavaScript can interact with. When these APIs are called, they move the operation out of the call stack and handle it asynchronously.\n\n### Callback Queue (Macrotask Queue)\nAfter a Web API completes its operation (e.g., `setTimeout` timer expires, `fetch` request resolves), its callback function is moved to the Callback Queue. Examples of macrotasks include `setTimeout`, `setInterval`, `setImmediate` (Node.js), I/O operations.\n\n### Microtask Queue\nThis queue has higher priority than the Callback Queue. Callbacks for Promises (`.then()`, `.catch()`, `.finally()`) and `MutationObserver` are placed in the Microtask Queue. The Event Loop checks and empties the Microtask Queue *before* checking the Macrotask Queue after each tick of the call stack.\n\n### Event Loop\nThe Event Loop constantly monitors the Call Stack and the queues. If the Call Stack is empty, it first checks the Microtask Queue and pushes any tasks from it to the Call Stack. Once the Microtask Queue is empty, it then checks the Callback Queue (Macrotask Queue) and pushes the first task from it to the Call Stack. This process repeats, allowing asynchronous operations to be handled without blocking the main thread.\n\n**Execution Order Summary:**\n1.  All synchronous code in the Call Stack runs to completion.\n2.  The Event Loop checks and executes all tasks in the Microtask Queue.\n3.  The Event Loop checks and executes one task from the Macrotask Queue.\n4.  Steps 2 and 3 repeat.",
+          "examples": [
+            {
+              "id": "example_event_loop_1",
+              "title": "Promise and setTimeout Execution Order",
+              "code": "console.log('Script start');\n\nsetTimeout(() => {\n  console.log('setTimeout');\n}, 0);\n\nPromise.resolve().then(() => {\n  console.log('Promise 1');\n}).then(() => {\n  console.log('Promise 2');\n});\n\nconsole.log('Script end');\n\n// Output:\n// Script start\n// Script end\n// Promise 1\n// Promise 2\n// setTimeout",
+              "explanation": "1.  `console.log('Script start')` runs immediately (synchronous).\n2.  `setTimeout` callback is sent to Web APIs, then pushed to the Macrotask Queue after 0ms.\n3.  `Promise.resolve().then()` callback is sent to Web APIs, then pushed to the Microtask Queue.\n4.  `console.log('Script end')` runs immediately (synchronous).\n5.  Synchronous code finishes. The Call Stack is empty.\n6.  The Event Loop checks the Microtask Queue: `Promise 1` callback is found and executed.\n7.  The second `.then()` (for `Promise 2`) is then pushed to the Microtask Queue.\n8.  The Event Loop checks the Microtask Queue again: `Promise 2` callback is found and executed.\n9.  Microtask Queue is empty. The Event Loop checks the Macrotask Queue: `setTimeout` callback is found and executed.",
+              "language": "javascript"
+            }
+          ],
+          "relatedQuestions": [
+            "question_event_loop_1",
+            "question_event_loop_2",
+            "question_event_loop_3",
+            "question_event_loop_4",
+            "question_event_loop_5"
+          ],
+          "relatedTasks": [
+            "task_event_loop_1"
+          ],
+          "tags": [
+            "JavaScript",
+            "Asynchronous",
+            "Event Loop",
+            "Promises",
+            "setTimeout",
+            "Microtasks",
+            "Macrotasks"
+          ],
+          "technology": "JavaScript",
+          "prerequisites": [
+            "Basic JavaScript Syntax",
+            "Functions",
+            "Callbacks"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 9,
+          "learningPath": "intermediate",
+          "requiredFor": [
+            "Advanced Asynchronous Patterns",
+            "Node.js Concurrency",
+            "Frontend Performance Optimization"
+          ]
+        },
+        {
+          "id": "theory_event_propagation",
+          "title": "Event Bubbling and Capturing",
+          "content": "Event propagation describes the order in which events are handled on elements nested within each other in the DOM tree. When an event occurs on an element, it doesn't just trigger handlers on that element; it also propagates through its ancestors.\n\nThere are three distinct phases in the event flow:\n\n1.  **Capturing Phase (Trickle Down)**: The event starts from the `window` object, then travels down through the document root (`document`) and its descendants, reaching the target element's parent before finally reaching the target element itself. During this phase, listeners registered with `useCapture: true` (or the third parameter set to `true`) will be triggered.\n\n2.  **Target Phase**: The event reaches the actual element on which the event occurred (the `e.target`). Listeners on this element are executed.\n\n3.  **Bubbling Phase (Bubble Up)**: After the event reaches the target, it then bubbles up from the target element back up to the `window` object, traversing through its ancestors. During this phase, listeners registered with `useCapture: false` (or the third parameter omitted, as `false` is the default) will be triggered.\n\n### `addEventListener` Third Parameter\n\nThe `addEventListener(type, listener, options)` method's third parameter (`options` or `useCapture`) determines which phase the listener will be active in:\n\n*   `false` (default): The event listener is triggered during the **bubbling phase**.\n*   `true`: The event listener is triggered during the **capturing phase**.\n\nIt's important to understand this flow, especially when dealing with nested elements and event delegation.",
+          "examples": [
+            {
+              "id": "example_event_propagation_1",
+              "title": "Demonstrating Bubbling and Capturing",
+              "code": "<!-- HTML Structure for example -->\n<div id=\"parent\" style=\"border: 1px solid blue; padding: 20px;\">\n  Parent\n  <button id=\"child\" style=\"margin: 10px; padding: 10px;\">Child Button</button>\n</div>\n\n// JavaScript\ndocument.getElementById('parent').addEventListener('click', function(e) {\n  console.log('Parent clicked - bubbling phase');\n}, false); // Bubbling\n\ndocument.getElementById('child').addEventListener('click', function(e) {\n  console.log('Child clicked - bubbling phase');\n}, false); // Bubbling\n\ndocument.getElementById('parent').addEventListener('click', function(e) {\n  console.log('Parent clicked - capturing phase');\n}, true); // Capturing\n\ndocument.getElementById('child').addEventListener('click', function(e) {\n  console.log('Child clicked - capturing phase');\n}, true); // Capturing\n\n// If 'Child Button' is clicked, the output will be:\n// Parent clicked - capturing phase (due to event traveling down to child)\n// Child clicked - capturing phase (due to event reaching child in capturing phase)\n// Child clicked - bubbling phase (due to event reaching child in bubbling phase)\n// Parent clicked - bubbling phase (due to event bubbling up from child to parent)",
+              "explanation": "When the 'Child Button' is clicked, the event first travels down the DOM tree (capturing phase). The `parent` element's capturing listener triggers. Then, the event reaches the `child` element, and its capturing listener triggers. After the target phase (where any non-phase-specific listeners on the child would run), the event bubbles up. The `child` element's bubbling listener triggers, and finally, the `parent` element's bubbling listener triggers.",
+              "language": "typescript"
+            }
+          ],
+          "relatedQuestions": [
+            "question_event_propagation_1",
+            "question_event_propagation_2",
+            "question_event_propagation_3",
+            "question_event_propagation_4",
+            "question_event_propagation_5"
+          ],
+          "relatedTasks": [
+            "task_event_propagation_1"
+          ],
+          "tags": [
+            "DOM Events",
+            "Event Propagation",
+            "Bubbling",
+            "Capturing",
+            "addEventListener"
+          ],
+          "technology": "JavaScript",
+          "prerequisites": [
+            "HTML DOM Structure",
+            "JavaScript Functions",
+            "Event Handling Basics"
+          ],
+          "complexity": 6,
+          "interviewRelevance": 8,
+          "learningPath": "intermediate",
+          "requiredFor": [
+            "Event Delegation",
+            "Custom Event Systems",
+            "Understanding Browser Behavior"
+          ]
+        },
+        {
+          "id": "theory_event_control",
+          "title": "Controlling Event Propagation",
+          "content": "While event bubbling and capturing provide a powerful mechanism for event handling, sometimes you need to halt or modify the default event flow. JavaScript provides methods on the `Event` object for this purpose.\n\n### `event.stopPropagation()`\n\nThis method prevents the event from propagating further up or down the DOM tree. If called during the capturing phase, it stops further capturing listeners from being triggered on ancestor elements. If called during the bubbling phase, it prevents the event from bubbling up to parent elements.\n\n**Important**: `stopPropagation()` *does not* prevent other event listeners attached to the *same element* from firing. It only stops the event from moving to the next element in the propagation path.\n\n### `event.stopImmediatePropagation()`\n\nThis method is more aggressive than `stopPropagation()`. It not only prevents the event from propagating further up or down the DOM tree but also prevents any other event listeners attached to the *same element* from being executed. If multiple listeners are attached to a single element for the same event type, and one of them calls `stopImmediatePropagation()`, subsequent listeners on that element will not run.\n\n### `event.preventDefault()`\n\nThis method prevents the default action that the browser would normally take in response to an event. For example:\n\n*   Clicking an `<a>` tag normally navigates to the `href` URL.\n*   Submitting a `<form>` normally reloads the page.\n*   Clicking a checkbox normally toggles its checked state.\n\n`preventDefault()` will stop these default actions. Crucially, `preventDefault()` *does not* stop the event from bubbling or capturing. The event will continue its propagation through the DOM tree, and other listeners will still fire, but the browser's default behavior for that specific event type will be suppressed.",
+          "examples": [
+            {
+              "id": "example_event_control_1",
+              "title": "Using stopPropagation()",
+              "code": "<!-- HTML Structure -->\n<div id=\"parent\" style=\"border: 1px solid blue; padding: 20px;\">\n  Parent\n  <button id=\"child\" style=\"margin: 10px; padding: 10px;\">Child Button</button>\n</div>\n\n// JavaScript\ndocument.getElementById('parent').addEventListener('click', function(e) {\n  console.log('Parent clicked - bubbling phase');\n}, false);\n\ndocument.getElementById('child').addEventListener('click', function(e) {\n  e.stopPropagation();\n  console.log('Child clicked - event will not bubble to parent');\n});\n\n// If 'Child Button' is clicked, output:\n// Child clicked - event will not bubble to parent\n// (Parent's bubbling listener will NOT fire)",
+              "explanation": "When the child button is clicked, its listener executes and calls `e.stopPropagation()`. This prevents the click event from bubbling up to the parent element, so the parent's click listener for the bubbling phase is never triggered.",
+              "language": "typescript"
+            },
+            {
+              "id": "example_event_control_2",
+              "title": "Using stopImmediatePropagation()",
+              "code": "<!-- HTML Structure (same as above) -->\n<div id=\"child\" style=\"border: 1px solid green; padding: 20px;\">Child</div>\n\n// JavaScript\ndocument.getElementById('child').addEventListener('click', function(e) {\n  console.log('First handler on child');\n});\n\ndocument.getElementById('child').addEventListener('click', function(e) {\n  e.stopImmediatePropagation();\n  console.log('Second handler on child - no subsequent handlers will run');\n});\n\ndocument.getElementById('child').addEventListener('click', function(e) {\n  console.log('This handler will never run if the event is clicked');\n});\n\n// If 'Child' is clicked, output:\n// First handler on child\n// Second handler on child - no subsequent handlers will run\n// (The third handler on child will NOT fire)",
+              "explanation": "When the child element is clicked, the first two handlers execute. When the second handler calls `e.stopImmediatePropagation()`, it not only stops the event from bubbling up but also prevents any other handlers attached to the *same* child element (the third one in this case) from executing.",
+              "language": "typescript"
+            },
+            {
+              "id": "example_event_control_3",
+              "title": "Using preventDefault()",
+              "code": "<!-- HTML Structure -->\n<a id=\"link\" href=\"https://www.example.com\">Visit Example.com</a>\n<div id=\"parent\" style=\"border: 1px solid blue; padding: 20px;\">Parent</div>\n\n// JavaScript\ndocument.getElementById('link').addEventListener('click', function(e) {\n  e.preventDefault(); // Link won't navigate\n  console.log('Link clicked but default behavior prevented');\n});\n\ndocument.getElementById('parent').addEventListener('click', function(e) {\n  console.log('Parent clicked - event still bubbled up');\n}, false);\n\n// If 'Visit Example.com' is clicked, output:\n// Link clicked but default behavior prevented\n// Parent clicked - event still bubbled up\n// (Browser navigation to example.com is prevented)",
+              "explanation": "When the link is clicked, `e.preventDefault()` stops the browser from navigating to the URL. However, the event continues to bubble up the DOM, and thus the parent's click listener is still triggered.",
+              "language": "typescript"
+            }
+          ],
+          "relatedQuestions": [
+            "question_event_control_1",
+            "question_event_control_2",
+            "question_event_control_3",
+            "question_event_control_4",
+            "question_event_control_5"
+          ],
+          "relatedTasks": [
+            "task_event_control_1"
+          ],
+          "tags": [
+            "DOM Events",
+            "Event Propagation",
+            "stopPropagation",
+            "stopImmediatePropagation",
+            "preventDefault",
+            "Event Handling"
+          ],
+          "technology": "JavaScript",
+          "prerequisites": [
+            "Event Bubbling and Capturing",
+            "HTML DOM Structure"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 9,
+          "learningPath": "intermediate",
+          "requiredFor": [
+            "Building Interactive UIs",
+            "Form Validation",
+            "Custom Controls"
+          ]
+        },
+        {
+          "id": "theory_event_delegation",
+          "title": "Event Delegation",
+          "content": "Event delegation is a powerful technique in JavaScript where you attach a single event listener to a common ancestor element, rather than attaching individual listeners to multiple descendant elements. This technique relies on event bubbling.\n\nWhen an event occurs on a child element, it bubbles up the DOM tree. The single listener on the ancestor element can then 'catch' the event. Inside this single listener, you can determine which specific descendant element triggered the event using the `Event.target` property. You can then apply specific logic based on `e.target` or its closest ancestor using `e.target.closest()`.\n\n### Benefits of Event Delegation:\n\n1.  **Performance Optimization**: Reduces the number of event listeners attached to the DOM, which can significantly improve performance, especially for large lists or tables. Fewer listeners mean less memory consumption and faster DOM updates.\n2.  **Dynamic Elements**: It simplifies handling events on elements that are added to the DOM dynamically (after the initial page load). Since the listener is on a static ancestor, it automatically applies to new children without needing to re-attach listeners every time an element is added or removed.\n3.  **Simpler Code**: Can lead to cleaner and more maintainable code, as event handling logic is centralized.",
+          "examples": [
+            {
+              "id": "example_event_delegation_1",
+              "title": "Basic Event Delegation for a List",
+              "code": "<!-- HTML Structure -->\n<ul id=\"task-list\" style=\"border: 1px solid gray; padding: 15px;\">\n  <li>Task 1 <button class=\"delete-btn\">Delete</button> <button class=\"edit-btn\">Edit</button></li>\n  <li>Task 2 <button class=\"delete-btn\">Delete</button> <button class=\"edit-btn\">Edit</button></li>\n  <li>Task 3 <button class=\"delete-btn\">Delete</button> <button class=\"edit-btn\">Edit</button></li>\n</ul>\n<button id=\"add-task\">Add New Task</button>\n\n// JavaScript\ndocument.getElementById('task-list').addEventListener('click', function(e) {\n  // Check if the clicked element is a list item or a child within a list item\n  const listItem = e.target.closest('li');\n  \n  if (listItem) {\n    console.log('List item clicked:', listItem.textContent.trim());\n    \n    // You can also check for specific child elements within the list item\n    if (e.target.classList.contains('delete-btn')) {\n      console.log('Delete button clicked for:', listItem.textContent.trim());\n      listItem.remove(); // Remove the item\n    } else if (e.target.classList.contains('edit-btn')) {\n      console.log('Edit button clicked for:', listItem.textContent.trim());\n      // Logic to edit the item\n    }\n  }\n});\n\n// Example of dynamically adding an item\ndocument.getElementById('add-task').addEventListener('click', function() {\n  const ul = document.getElementById('task-list');\n  const newTaskNumber = ul.children.length + 1;\n  const newLi = document.createElement('li');\n  newLi.innerHTML = `New Task ${newTaskNumber} <button class=\"delete-btn\">Delete</button> <button class=\"edit-btn\">Edit</button>`;\n  ul.appendChild(newLi);\n  console.log(`Added New Task ${newTaskNumber}. Listener still works.`);\n});",
+              "explanation": "Instead of attaching a click listener to each `<li>` or each button within the `<li>`, a single listener is attached to the parent `<ul>` (`task-list`). When a click occurs anywhere inside the `<ul>`, the event bubbles up to it. The listener then uses `e.target.closest('li')` to identify if a list item was involved in the click and `e.target.classList.contains()` to determine which specific button (delete/edit) was clicked. This works seamlessly even when new list items are added dynamically, as demonstrated by the 'Add New Task' button, because the listener is on the static parent.",
+              "language": "typescript"
+            }
+          ],
+          "relatedQuestions": [
+            "question_event_delegation_1",
+            "question_event_delegation_2",
+            "question_event_delegation_3",
+            "question_event_delegation_4"
+          ],
+          "relatedTasks": [
+            "task_event_delegation_1"
+          ],
+          "tags": [
+            "DOM Events",
+            "Event Delegation",
+            "Performance",
+            "Dynamic Content",
+            "e.target",
+            "closest()"
+          ],
+          "technology": "JavaScript",
+          "prerequisites": [
+            "Event Bubbling",
+            "DOM Manipulation",
+            "e.target"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 9,
+          "learningPath": "intermediate",
+          "requiredFor": [
+            "Complex UI Interactions",
+            "Building Component Libraries",
+            "Optimizing Large Applications"
+          ]
+        }
+      ],
+      "questions": [
+        {
+          "id": "question_event_loop_1",
+          "topic": "Event Loop and Asynchronous Execution",
+          "level": "medium",
+          "type": "mcq",
+          "question": "What will be the correct order of console logs when the following JavaScript code is executed?\n\n```javascript\nconsole.log('A');\n\nsetTimeout(() => {\n  console.log('B');\n}, 0);\n\nPromise.resolve().then(() => {\n  console.log('C');\n});\n\nconsole.log('D');\n```",
+          "answer": "A, D, C, B",
+          "options": [
+            "A, B, C, D",
+            "A, D, B, C",
+            "A, C, D, B",
+            "A, D, C, B"
+          ],
+          "analysisPoints": [
+            "Understanding synchronous execution first.",
+            "Differentiating between microtask queue (Promises) and macrotask queue (setTimeout).",
+            "Knowing the priority of microtasks over macrotasks in the event loop."
+          ],
+          "keyConcepts": [
+            "Call Stack",
+            "Microtask Queue",
+            "Macrotask Queue",
+            "Event Loop Priority"
+          ],
+          "evaluationCriteria": [
+            "Correctly identifies synchronous code execution order.",
+            "Correctly prioritizes Promise callbacks (microtasks).",
+            "Correctly places setTimeout callbacks (macrotasks) last."
+          ],
+          "example": "Explanation: 'A' and 'D' are synchronous and execute immediately. `Promise.resolve().then()` adds 'C' to the microtask queue. `setTimeout` adds 'B' to the macrotask queue. The event loop prioritizes microtasks over macrotasks, so 'C' runs before 'B'.",
+          "tags": [
+            "JavaScript",
+            "Event Loop",
+            "Promises",
+            "setTimeout",
+            "Asynchronous"
+          ],
+          "prerequisites": [
+            "Basic JavaScript",
+            "Functions"
+          ],
+          "complexity": 7,
+          "interviewFrequency": 9,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_event_loop_2",
+          "topic": "Event Loop and Call Stack",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "What is the primary role of the Call Stack in JavaScript's execution model?",
+          "answer": "The Call Stack executes synchronous JavaScript code one function at a time. When a function is called, it's pushed onto the stack, and when it returns, it's popped off.",
+          "analysisPoints": [],
+          "keyConcepts": [
+            "Call Stack",
+            "Synchronous Execution"
+          ],
+          "evaluationCriteria": [
+            "Defines Call Stack's purpose."
+          ],
+          "example": "",
+          "tags": [
+            "JavaScript",
+            "Event Loop",
+            "Call Stack"
+          ],
+          "prerequisites": [
+            "Basic JavaScript"
+          ],
+          "complexity": 4,
+          "interviewFrequency": 7,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_event_loop_3",
+          "topic": "Microtask vs. Macrotask",
+          "level": "medium",
+          "type": "open",
+          "question": "Explain the difference between the microtask queue and the macrotask queue in the context of the JavaScript Event Loop. Provide examples of operations that go into each queue.",
+          "answer": "",
+          "analysisPoints": [
+            "Definition of microtask queue (e.g., higher priority, promises, mutation observers).",
+            "Definition of macrotask queue (e.g., lower priority, setTimeout, setInterval, I/O).",
+            "Explanation of how the Event Loop processes them (microtasks emptied before one macrotask).",
+            "Correct examples for both queues."
+          ],
+          "keyConcepts": [
+            "Microtask Queue",
+            "Macrotask Queue",
+            "Event Loop Priority",
+            "Promises",
+            "setTimeout"
+          ],
+          "evaluationCriteria": [
+            "Clarity and accuracy of definitions.",
+            "Completeness of examples.",
+            "Demonstrates understanding of processing order."
+          ],
+          "example": "A microtask queue (e.g., Promise callbacks, MutationObserver) has higher priority. All microtasks are processed completely before the event loop moves to the macrotask queue. The macrotask queue (e.g., `setTimeout`, `setInterval`, I/O operations) is processed one task at a time per event loop cycle. After a macrotask finishes, the event loop checks for and empties the microtask queue again before picking another macrotask.",
+          "tags": [
+            "JavaScript",
+            "Event Loop",
+            "Microtasks",
+            "Macrotasks",
+            "Asynchronous"
+          ],
+          "prerequisites": [
+            "Event Loop Basics",
+            "Promises"
+          ],
+          "complexity": 8,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_event_loop_4",
+          "topic": "Event Loop Practical Application",
+          "level": "hard",
+          "type": "code",
+          "question": "Predict the output of the following code snippet and explain your reasoning step-by-step, relating it to the event loop phases:\n\n```javascript\nconsole.log('Start');\n\nnew Promise(resolve => {\n  console.log('Promise constructor');\n  resolve();\n}).then(() => {\n  console.log('Promise then 1');\n  setTimeout(() => console.log('Timeout inside Promise'), 0);\n}).then(() => {\n  console.log('Promise then 2');\n});\n\nsetTimeout(() => console.log('Timeout outside Promise'), 0);\n\nconsole.log('End');\n```",
+          "answer": "Start\nPromise constructor\nEnd\nPromise then 1\nPromise then 2\nTimeout outside Promise\nTimeout inside Promise",
+          "options": [],
+          "analysisPoints": [
+            "Identifies synchronous code first.",
+            "Understands Promise constructor runs synchronously.",
+            "Correctly places initial Promise .then() callbacks in microtask queue.",
+            "Correctly places setTimeout callbacks in macrotask queue.",
+            "Understands that new setTimeouts within microtasks are still macrotasks.",
+            "Applies microtask priority over macrotasks repeatedly."
+          ],
+          "keyConcepts": [
+            "Call Stack",
+            "Microtask Queue",
+            "Macrotask Queue",
+            "Promise Constructor Execution",
+            "Nested Asynchronous Operations"
+          ],
+          "evaluationCriteria": [
+            "Accurate prediction of output.",
+            "Detailed, correct step-by-step explanation.",
+            "Proper use of event loop terminology (call stack, microtasks, macrotasks)."
+          ],
+          "example": "```javascript\n// Execution Steps:\n// 1. console.log('Start') -> 'Start' printed (Synchronous)\n// 2. new Promise(resolve => { console.log('Promise constructor'); resolve(); }) -> 'Promise constructor' printed. resolve() schedules the first .then() callback to microtask queue. (Synchronous for constructor)\n// 3. setTimeout(() => console.log('Timeout outside Promise'), 0); -> Schedules 'Timeout outside Promise' callback to macrotask queue. (Web API, then Macrotask Queue)\n// 4. console.log('End') -> 'End' printed (Synchronous)\n// 5. Synchronous code finished. Call stack empty.\n// 6. Event Loop checks Microtask Queue. 'Promise then 1' callback is executed. -> 'Promise then 1' printed. Inside this, another setTimeout is scheduled for 'Timeout inside Promise' to the macrotask queue. The second .then() (for 'Promise then 2') is scheduled to the microtask queue.\n// 7. Event Loop checks Microtask Queue again. 'Promise then 2' callback is executed. -> 'Promise then 2' printed. (Microtask Queue is now empty).\n// 8. Event Loop checks Macrotask Queue. 'Timeout outside Promise' is executed. -> 'Timeout outside Promise' printed.\n// 9. Event Loop checks Macrotask Queue again. 'Timeout inside Promise' is executed. -> 'Timeout inside Promise' printed.\n```",
+          "tags": [
+            "JavaScript",
+            "Event Loop",
+            "Promises",
+            "setTimeout",
+            "Asynchronous",
+            "Advanced"
+          ],
+          "prerequisites": [
+            "theory_event_loop_async"
+          ],
+          "complexity": 9,
+          "interviewFrequency": 9,
+          "learningPath": "advanced"
+        },
+        {
+          "id": "question_event_loop_5",
+          "topic": "Event Loop Flow",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "In what order does the Event Loop prioritize executing tasks from different queues?",
+          "answer": "Synchronous code first, then all microtasks (e.g., Promises) from the microtask queue, and finally one macrotask (e.g., setTimeout) from the macrotask queue per cycle. This cycle repeats.",
+          "analysisPoints": [],
+          "keyConcepts": [
+            "Event Loop",
+            "Microtask Queue",
+            "Macrotask Queue"
+          ],
+          "evaluationCriteria": [
+            "Correctly states the priority order."
+          ],
+          "example": "",
+          "tags": [
+            "JavaScript",
+            "Event Loop",
+            "Flashcard"
+          ],
+          "prerequisites": [
+            "theory_event_loop_async"
+          ],
+          "complexity": 5,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_event_propagation_1",
+          "topic": "Event Bubbling vs. Capturing",
+          "level": "medium",
+          "type": "mcq",
+          "question": "Consider the following HTML and JavaScript. If you click on the `div#child` element, what will be the order of console logs?\n\nHTML:\n```html\n<div id=\"parent\">\n  Parent\n  <div id=\"child\">Child</div>\n</div>\n```\n\nJavaScript:\n```javascript\ndocument.getElementById('parent').addEventListener('click', function() {\n  console.log('Parent - Bubbling');\n}, false);\n\ndocument.getElementById('child').addEventListener('click', function() {\n  console.log('Child - Bubbling');\n}, false);\n\ndocument.getElementById('parent').addEventListener('click', function() {\n  console.log('Parent - Capturing');\n}, true);\n\ndocument.getElementById('child').addEventListener('click', function() {\n  console.log('Child - Capturing');\n}, true);\n```",
+          "answer": "Parent - Capturing, Child - Capturing, Child - Bubbling, Parent - Bubbling",
+          "options": [
+            "Child - Bubbling, Parent - Bubbling, Child - Capturing, Parent - Capturing",
+            "Parent - Bubbling, Child - Bubbling, Parent - Capturing, Child - Capturing",
+            "Parent - Capturing, Child - Capturing, Child - Bubbling, Parent - Bubbling",
+            "Child - Capturing, Parent - Capturing, Parent - Bubbling, Child - Bubbling"
+          ],
+          "analysisPoints": [
+            "Understanding that capturing phase occurs before bubbling phase.",
+            "Understanding that listeners on the target element are triggered in both phases if registered for them.",
+            "Correctly identifying the default behavior of `addEventListener` (bubbling) vs. `useCapture: true` (capturing)."
+          ],
+          "keyConcepts": [
+            "Event Bubbling",
+            "Event Capturing",
+            "addEventListener",
+            "Event Flow"
+          ],
+          "evaluationCriteria": [
+            "Correctly orders event phases.",
+            "Identifies which listeners fire in each phase.",
+            "Demonstrates understanding of event propagation."
+          ],
+          "example": "When `child` is clicked:\n1.  **Capturing Phase**: Event travels down from `document` -> `parent` -> `child`. `parent`'s capturing listener fires first. Then `child`'s capturing listener fires.\n2.  **Target Phase**: Event reaches the target element (`child`).\n3.  **Bubbling Phase**: Event bubbles up from `child` -> `parent` -> `document`. `child`'s bubbling listener fires. Then `parent`'s bubbling listener fires.",
+          "tags": [
+            "DOM Events",
+            "Event Propagation",
+            "Bubbling",
+            "Capturing"
+          ],
+          "prerequisites": [
+            "HTML DOM Structure",
+            "addEventListener"
+          ],
+          "complexity": 7,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_event_propagation_2",
+          "topic": "Event Propagation Phases",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "What are the two main phases of event propagation in the DOM?",
+          "answer": "Capturing Phase and Bubbling Phase.",
+          "analysisPoints": [],
+          "keyConcepts": [
+            "Event Propagation",
+            "Capturing Phase",
+            "Bubbling Phase"
+          ],
+          "evaluationCriteria": [
+            "Recalls the two main phases."
+          ],
+          "example": "",
+          "tags": [
+            "DOM Events",
+            "Flashcard",
+            "Event Propagation"
+          ],
+          "prerequisites": [
+            "Basic Event Handling"
+          ],
+          "complexity": 3,
+          "interviewFrequency": 6,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_event_propagation_3",
+          "topic": "addEventListener useCapture",
+          "level": "medium",
+          "type": "open",
+          "question": "How does the third parameter of `addEventListener` affect the event listener's behavior regarding event propagation? Provide a use case where setting this parameter to `true` would be beneficial.",
+          "answer": "",
+          "analysisPoints": [
+            "Explains that `true` means capturing phase, `false` (default) means bubbling phase.",
+            "Provides a relevant example use case for capturing (e.g., global click handler for dropdowns, stopping propagation early, analytics).",
+            "Discusses why capturing might be preferred in that use case (e.g., to intercept before target or other bubbling listeners)."
+          ],
+          "keyConcepts": [
+            "addEventListener",
+            "useCapture",
+            "Capturing Phase",
+            "Bubbling Phase"
+          ],
+          "evaluationCriteria": [
+            "Accurate explanation of the parameter's effect.",
+            "Realistic and well-justified use case."
+          ],
+          "example": "The third parameter of `addEventListener` (often `useCapture` or an `options` object with `capture` property) determines whether the listener is invoked during the capturing phase (`true`) or the bubbling phase (`false`, which is the default). If `true`, the listener fires as the event travels down from the root to the target. If `false`, it fires as the event bubbles up from the target to the root. A beneficial use case for `true` (capturing) could be a global click handler for a dropdown menu. You could attach a capturing listener to the `document` that closes any open dropdowns if the click target is *not* inside a dropdown. This allows you to intercept the click *before* it reaches the dropdown's own elements (which might have their own bubbling listeners), ensuring the dropdown closes effectively when clicking outside.",
+          "tags": [
+            "DOM Events",
+            "Event Propagation",
+            "addEventListener",
+            "Capturing"
+          ],
+          "prerequisites": [
+            "Event Propagation"
+          ],
+          "complexity": 7,
+          "interviewFrequency": 7,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_event_propagation_4",
+          "topic": "Event Propagation Behavior",
+          "level": "easy",
+          "type": "code",
+          "question": "Given the following HTML structure and JavaScript, if `item 2` is clicked, what will be logged to the console? (Assume default `useCapture: false` for all listeners)\n\nHTML:\n```html\n<div id=\"container\">\n  <ul id=\"myList\">\n    <li>item 1</li>\n    <li>item 2</li>\n    <li>item 3</li>\n  </ul>\n</div>\n```\n\nJavaScript:\n```javascript\ndocument.getElementById('container').addEventListener('click', function(e) {\n  console.log('Container clicked');\n});\n\ndocument.getElementById('myList').addEventListener('click', function(e) {\n  console.log('List clicked');\n});\n\nconst items = document.querySelectorAll('#myList li');\nitems.forEach(item => {\n  item.addEventListener('click', function(e) {\n    console.log(`Item clicked: ${e.target.textContent.trim()}`);\n  });\n});\n```",
+          "answer": "Item clicked: item 2\nList clicked\nContainer clicked",
+          "options": [],
+          "analysisPoints": [
+            "Recognizes default bubbling behavior.",
+            "Understands that the event originates at the clicked `li` and bubbles up.",
+            "Correctly orders the execution of listeners from target upwards."
+          ],
+          "keyConcepts": [
+            "Event Bubbling",
+            "e.target",
+            "addEventListener"
+          ],
+          "evaluationCriteria": [
+            "Accurate prediction of console output.",
+            "Implicit understanding of bubbling order."
+          ],
+          "example": "When 'item 2' is clicked, the event originates on the `<li>` element. The listener on that specific `<li>` is triggered first. Then, the event bubbles up to its parent `<ul>` (`myList`), triggering its listener. Finally, it bubbles up to the `<div>` (`container`), triggering its listener. All listeners are set for the bubbling phase by default.",
+          "tags": [
+            "DOM Events",
+            "Event Bubbling",
+            "Event Propagation"
+          ],
+          "prerequisites": [
+            "theory_event_propagation"
+          ],
+          "complexity": 6,
+          "interviewFrequency": 7,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_event_propagation_5",
+          "topic": "Event Flow Fundamentals",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "Which phase of event propagation occurs first: bubbling or capturing?",
+          "answer": "Capturing phase.",
+          "analysisPoints": [],
+          "keyConcepts": [
+            "Capturing Phase",
+            "Bubbling Phase",
+            "Event Propagation"
+          ],
+          "evaluationCriteria": [
+            "Recalls the correct order of phases."
+          ],
+          "example": "",
+          "tags": [
+            "DOM Events",
+            "Flashcard",
+            "Event Propagation"
+          ],
+          "prerequisites": [
+            "theory_event_propagation"
+          ],
+          "complexity": 3,
+          "interviewFrequency": 6,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_event_control_1",
+          "topic": "stopPropagation vs. preventDefault",
+          "level": "medium",
+          "type": "mcq",
+          "question": "Which of the following statements accurately describes the difference between `event.stopPropagation()` and `event.preventDefault()`?",
+          "answer": "`stopPropagation()` prevents the event from reaching parent/child elements, while `preventDefault()` stops the browser's default action for the event.",
+          "options": [
+            "`stopPropagation()` prevents the browser's default action, while `preventDefault()` stops event propagation.",
+            "Both `stopPropagation()` and `preventDefault()` stop event propagation up the DOM tree.",
+            "`stopPropagation()` stops all event handlers on the same element, while `preventDefault()` stops bubbling.",
+            "`stopPropagation()` prevents the event from reaching parent/child elements, while `preventDefault()` stops the browser's default action for the event."
+          ],
+          "analysisPoints": [
+            "Distinguishes between stopping propagation (event flow) and stopping default actions (browser behavior).",
+            "Correctly identifies the effect of each method.",
+            "Avoids common misconceptions (e.g., `preventDefault` stopping bubbling)."
+          ],
+          "keyConcepts": [
+            "stopPropagation",
+            "preventDefault",
+            "Event Propagation",
+            "Default Browser Action"
+          ],
+          "evaluationCriteria": [
+            "Accurate understanding of each method's purpose.",
+            "Clear distinction between event flow and default behavior."
+          ],
+          "example": "`stopPropagation()` influences how the event travels through the DOM (up/down). If a `child` element calls `stopPropagation()` on a click, its `parent`'s click listeners (in the bubbling phase) will not be triggered. `preventDefault()` influences what the browser does by default. For an `<a>` tag, `preventDefault()` stops navigation, but the click event will still bubble up to its parents.",
+          "tags": [
+            "DOM Events",
+            "Event Control",
+            "stopPropagation",
+            "preventDefault"
+          ],
+          "prerequisites": [
+            "Event Propagation"
+          ],
+          "complexity": 7,
+          "interviewFrequency": 9,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_event_control_2",
+          "topic": "stopImmediatePropagation() usage",
+          "level": "medium",
+          "type": "open",
+          "question": "In what scenario would `event.stopImmediatePropagation()` be more appropriate than `event.stopPropagation()`? Provide a concise example.",
+          "answer": "",
+          "analysisPoints": [
+            "Explains that `stopImmediatePropagation()` stops propagation AND subsequent listeners on the *same element*.",
+            "Explains that `stopPropagation()` only stops propagation to other elements, but not other listeners on the same element.",
+            "Provides a scenario where preventing *all* further handlers on the current element is crucial (e.g., error handling, mutually exclusive actions, A/B testing).",
+            "Provides a clear, simple code example demonstrating the difference in output.",
+            "```javascript\n// Scenario: You have multiple click handlers on a button, and one of them is a 'guard' or 'cleanup' handler that should prevent any subsequent handlers from running if a certain condition is met.\n\nconst button = document.getElementById('myButton');\n\nbutton.addEventListener('click', function(e) {\n  console.log('Handler 1: Logging analytics');\n});\n\nbutton.addEventListener('click', function(e) {\n  // Imagine this handler checks a condition, and if met, should stop further processing\n  if (Math.random() < 0.5) { // 50% chance to stop\n    e.stopImmediatePropagation();\n    console.log('Handler 2: Condition met, stopping further handlers on this button and bubbling.');\n  } else {\n    console.log('Handler 2: Condition not met, proceeding.');\n  }\n});\n\nbutton.addEventListener('click', function(e) {\n  console.log('Handler 3: Performing main action'); // This might not run\n});\n\n// If Handler 2 calls stopImmediatePropagation(), Handler 3 will NOT run.\n// If Handler 2 only called stopPropagation(), Handler 3 *would* still run.\n```"
+          ],
+          "keyConcepts": [
+            "stopImmediatePropagation",
+            "stopPropagation",
+            "Event Handler Order",
+            "DOM Events"
+          ],
+          "evaluationCriteria": [
+            "Accurate comparison of the two methods.",
+            "Identifies a specific and valid use case.",
+            "Provides a correct and illustrative code example."
+          ],
+          "example": "Use `event.stopImmediatePropagation()` when you have multiple event listeners attached to the *same element* for the same event type, and you need to ensure that after a certain listener executes, no other listeners on that specific element (or any parent/child elements) will run for that event. For instance, if you have a button with several click handlers, and one handler performs a critical validation or a 'once-only' action that should prevent any subsequent handlers on that button from executing, then `stopImmediatePropagation()` is appropriate. `stopPropagation()` would only prevent the event from bubbling/capturing further in the DOM tree, but all other handlers on the *current* element would still execute.",
+          "tags": [
+            "DOM Events",
+            "Event Control",
+            "stopImmediatePropagation",
+            "stopPropagation",
+            "Advanced"
+          ],
+          "prerequisites": [
+            "Event Propagation",
+            "Multiple Event Listeners"
+          ],
+          "complexity": 8,
+          "interviewFrequency": 7,
+          "learningPath": "advanced"
+        },
+        {
+          "id": "question_event_control_3",
+          "topic": "preventDefault()",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "What is the purpose of `event.preventDefault()`?",
+          "answer": "To stop the default action associated with an event (e.g., a link navigating, a form submitting, a checkbox toggling).",
+          "analysisPoints": [],
+          "keyConcepts": [
+            "preventDefault",
+            "Default Browser Action"
+          ],
+          "evaluationCriteria": [
+            "Correctly defines the method's purpose."
+          ],
+          "example": "",
+          "tags": [
+            "DOM Events",
+            "Flashcard",
+            "Event Control"
+          ],
+          "prerequisites": [
+            "Basic Event Handling"
+          ],
+          "complexity": 4,
+          "interviewFrequency": 8,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_event_control_4",
+          "topic": "Event Control Methods",
+          "level": "medium",
+          "type": "code",
+          "question": "Consider an `<a>` tag nested inside a `div`. Write JavaScript code to prevent the link from navigating and also prevent the click event from bubbling up to the parent `div`.\n\nHTML:\n```html\n<div id=\"parent-container\">\n  <a id=\"myLink\" href=\"https://example.com\">Click Me</a>\n</div>\n```",
+          "answer": "```javascript\ndocument.getElementById('myLink').addEventListener('click', function(e) {\n  e.preventDefault(); // Prevents navigation\n  e.stopPropagation(); // Prevents bubbling to parent-container\n  console.log('Link clicked, default prevented and propagation stopped.');\n});\n\ndocument.getElementById('parent-container').addEventListener('click', function() {\n  console.log('Parent container clicked'); // This should not log if link is clicked\n});\n```",
+          "options": [],
+          "analysisPoints": [
+            "Correctly uses `e.preventDefault()` to stop default action.",
+            "Correctly uses `e.stopPropagation()` to stop bubbling.",
+            "Demonstrates understanding that both methods are required for the given requirements."
+          ],
+          "keyConcepts": [
+            "preventDefault",
+            "stopPropagation",
+            "Event Propagation",
+            "Default Browser Action"
+          ],
+          "evaluationCriteria": [
+            "Provides correct and complete code.",
+            "Shows understanding of combining event control methods."
+          ],
+          "example": "The code uses `e.preventDefault()` to stop the browser's default navigation behavior for the `<a>` tag. It then uses `e.stopPropagation()` to prevent the click event from continuing its journey up the DOM tree, thus ensuring the `parent-container`'s click listener is not triggered.",
+          "tags": [
+            "DOM Events",
+            "Event Control",
+            "stopPropagation",
+            "preventDefault",
+            "Coding"
+          ],
+          "prerequisites": [
+            "theory_event_control"
+          ],
+          "complexity": 7,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_event_control_5",
+          "topic": "stopImmediatePropagation",
+          "level": "medium",
+          "type": "flashcard",
+          "question": "What is the key distinction between `stopPropagation()` and `stopImmediatePropagation()`?",
+          "answer": "`stopPropagation()` prevents the event from propagating to *ancestor/descendant elements*, but *other handlers on the same element* still run. `stopImmediatePropagation()` prevents propagation to other elements *AND* prevents any *subsequent handlers on the same element* from running.",
+          "analysisPoints": [],
+          "keyConcepts": [
+            "stopImmediatePropagation",
+            "stopPropagation",
+            "Event Listeners"
+          ],
+          "evaluationCriteria": [
+            "Clearly articulates the difference in scope."
+          ],
+          "example": "",
+          "tags": [
+            "DOM Events",
+            "Flashcard",
+            "Event Control"
+          ],
+          "prerequisites": [
+            "theory_event_control"
+          ],
+          "complexity": 6,
+          "interviewFrequency": 7,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_event_delegation_1",
+          "topic": "Event Delegation Benefits",
+          "level": "medium",
+          "type": "mcq",
+          "question": "Which of the following is NOT a primary benefit of using event delegation?",
+          "answer": "It automatically prevents default browser actions for delegated events.",
+          "options": [
+            "Reduced memory footprint by using fewer event listeners.",
+            "Simplified handling of dynamically added elements.",
+            "Improved performance for large lists of interactive elements.",
+            "It automatically prevents default browser actions for delegated events."
+          ],
+          "analysisPoints": [
+            "Identifies the core benefits of event delegation (performance, dynamic elements, cleaner code).",
+            "Recognizes that event delegation does not inherently prevent default actions; `preventDefault()` must still be explicitly called."
+          ],
+          "keyConcepts": [
+            "Event Delegation",
+            "Performance Optimization",
+            "Dynamic Content",
+            "preventDefault"
+          ],
+          "evaluationCriteria": [
+            "Understands the advantages of event delegation.",
+            "Correctly identifies a false claim about its capabilities."
+          ],
+          "example": "Event delegation provides benefits like better performance due to fewer listeners and easier management of elements added to the DOM after initial load. However, it does not automatically call `preventDefault()`; you still need to explicitly use `e.preventDefault()` within your delegated handler if you wish to stop a default browser action (e.g., clicking an `<a>` tag or submitting a form).",
+          "tags": [
+            "DOM Events",
+            "Event Delegation",
+            "Performance"
+          ],
+          "prerequisites": [
+            "Event Bubbling"
+          ],
+          "complexity": 6,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_event_delegation_2",
+          "topic": "Event Delegation Implementation",
+          "level": "medium",
+          "type": "open",
+          "question": "Explain the concept of event delegation and how it works, including how you would identify the actual clicked element within a delegated event handler. Provide an example scenario where event delegation is particularly useful.",
+          "answer": "",
+          "analysisPoints": [
+            "Defines event delegation (single listener on ancestor).",
+            "Explains its reliance on event bubbling.",
+            "Describes using `e.target` to identify the origin of the event.",
+            "Mentions `e.target.closest()` as a robust way to find a specific ancestor.",
+            "Provides a clear and common use case (e.g., dynamic lists, tables with many interactive cells).",
+            "Highlights the benefits in the chosen scenario (performance, dynamic elements)."
+          ],
+          "keyConcepts": [
+            "Event Delegation",
+            "Event Bubbling",
+            "e.target",
+            "closest()",
+            "Dynamic Elements"
+          ],
+          "evaluationCriteria": [
+            "Clear and accurate explanation.",
+            "Correctly identifies methods for target detection.",
+            "Relevant and well-explained scenario."
+          ],
+          "example": "Event delegation is a technique where you attach a single event listener to a common parent element, rather than attaching separate listeners to many child elements. It works because of event bubbling: when an event occurs on a child element, it bubbles up to its ancestors. The single listener on the parent 'catches' the event. Inside this handler, you can identify the element that *originally* triggered the event using `e.target`. For example, if you click a button inside a list item, `e.target` would be the button. You can then use `e.target.closest('selector')` to find the nearest ancestor matching a selector (e.g., `e.target.closest('li')` to find the list item containing the button).\n\n**Example Scenario**: A dynamic to-do list where users can add or delete tasks. Each task `<li>` might contain 'delete' and 'edit' buttons. Instead of attaching a click listener to every 'delete' and 'edit' button (which would be inefficient for a long list and require re-attaching for new tasks), you can attach one click listener to the parent `<ul>`. When a click happens, you check `e.target` to see if it's a delete or edit button, and `e.target.closest('li')` to identify which task it belongs to. This makes the code more efficient and handles new tasks automatically.",
+          "tags": [
+            "DOM Events",
+            "Event Delegation",
+            "Performance",
+            "Dynamic Content"
+          ],
+          "prerequisites": [
+            "theory_event_delegation"
+          ],
+          "complexity": 8,
+          "interviewFrequency": 9,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_event_delegation_3",
+          "topic": "Event Delegation vs. Direct Event Handling",
+          "level": "hard",
+          "type": "code",
+          "question": "You are building a chat application where new messages are continuously appended to a `div` with `id=\"messages\"`. Each message `div` contains a `span` with `class=\"timestamp\"` which should display an alert when clicked. Implement this using both direct event handling and event delegation. Discuss which approach is better and why.\n\nHTML (initial):\n```html\n<div id=\"messages\" style=\"border: 1px solid black; height: 200px; overflow-y: scroll;\">\n  <!-- Messages will be added here -->\n</div>\n<button id=\"addMessage\">Add New Message</button>\n```",
+          "answer": "```javascript\n// Direct Event Handling (Less Ideal for dynamic content)\nlet messageCounterDirect = 0;\ndocument.getElementById('addMessage').addEventListener('click', () => {\n  const messagesDiv = document.getElementById('messages');\n  const newMessage = document.createElement('div');\n  newMessage.className = 'message-item';\n  newMessage.innerHTML = `<span>Message ${++messageCounterDirect}</span> <span class=\"timestamp\">${new Date().toLocaleTimeString()}</span>`;\n  messagesDiv.appendChild(newMessage);\n\n  // Attach listener directly to the new timestamp span\n  const newTimestampSpan = newMessage.querySelector('.timestamp');\n  if (newTimestampSpan) {\n    newTimestampSpan.addEventListener('click', function() {\n      alert(`Timestamp clicked (Direct): ${this.textContent}`);\n    });\n  }\n});\n\nconsole.log('--- Direct Event Handling setup ---\\n');\n\n\n// Event Delegation (More Ideal for dynamic content)\nlet messageCounterDelegated = 0;\nconst messagesContainerDelegated = document.createElement('div');\nmessagesContainerDelegated.id = 'messages-delegated';\nmessagesContainerDelegated.style = \"border: 1px solid green; height: 200px; overflow-y: scroll; margin-top: 20px;\";\nmessagesContainerDelegated.innerHTML = \"<h3>Delegated Messages</h3>\";\ndocument.body.appendChild(messagesContainerDelegated);\n\nconst addMessageDelegatedBtn = document.createElement('button');\naddMessageDelegatedBtn.id = 'addMessageDelegated';\naddMessageDelegatedBtn.textContent = 'Add New Delegated Message';\ndocument.body.appendChild(addMessageDelegatedBtn);\n\nmessagesContainerDelegated.addEventListener('click', function(e) {\n  if (e.target.classList.contains('timestamp')) {\n    alert(`Timestamp clicked (Delegated): ${e.target.textContent}`);\n  }\n});\n\naddMessageDelegatedBtn.addEventListener('click', () => {\n  const newMessage = document.createElement('div');\n  newMessage.className = 'message-item';\n  newMessage.innerHTML = `<span>Message ${++messageCounterDelegated}</span> <span class=\"timestamp\">${new Date().toLocaleTimeString()}</span>`;\n  messagesContainerDelegated.appendChild(newMessage);\n});\n\nconsole.log('\\n--- Event Delegation setup ---');\n\n/*\nDiscussion:\nDirect event handling requires attaching a new listener every time a new message is added. This can lead to:\n1. Performance issues: Many listeners consume more memory and CPU.\n2. Code complexity: More lines of code and logic to manage individual listeners.\n3. Error prone: Easy to forget to attach a listener to new elements.\n\nEvent delegation is better for this scenario because:\n1. Efficiency: Only one listener is attached to the parent `div#messages-delegated`.\n2. Handles dynamic content automatically: New messages added to the DOM automatically work with the existing listener, as the event will bubble up to the parent.\n3. Cleaner code: Centralized event handling logic.\n\nThe choice depends on whether elements are static or dynamic, and the scale of interactive elements. For dynamically growing lists, delegation is almost always preferred.\n*/\n```",
+          "options": [],
+          "analysisPoints": [
+            "Provides correct implementation for direct event handling.",
+            "Provides correct implementation for event delegation.",
+            "Correctly uses `e.target` and `classList.contains` for delegation.",
+            "Articulates the performance and maintenance advantages of delegation for dynamic content.",
+            "Compares the two approaches effectively."
+          ],
+          "keyConcepts": [
+            "Event Delegation",
+            "Direct Event Handling",
+            "Dynamic DOM Manipulation",
+            "Performance",
+            "e.target"
+          ],
+          "evaluationCriteria": [
+            "Correct and functional code for both approaches.",
+            "Comprehensive comparison and justification for delegation's superiority.",
+            "Demonstrates advanced understanding of event handling strategies."
+          ],
+          "example": "This task demonstrates how direct event handling can become cumbersome with dynamic content, requiring a new listener for each added element. Event delegation provides a more scalable and efficient solution by using a single listener on a static ancestor, which automatically handles events on dynamically added children through event bubbling.",
+          "tags": [
+            "DOM Events",
+            "Event Delegation",
+            "Performance",
+            "Dynamic Content",
+            "Coding"
+          ],
+          "prerequisites": [
+            "theory_event_delegation",
+            "DOM Manipulation"
+          ],
+          "complexity": 9,
+          "interviewFrequency": 8,
+          "learningPath": "advanced"
+        },
+        {
+          "id": "question_event_delegation_4",
+          "topic": "Event Delegation Key Properties",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "Which `Event` object property is crucial for identifying the element that originally triggered an event when using event delegation?",
+          "answer": "`event.target`",
+          "analysisPoints": [],
+          "keyConcepts": [
+            "Event Delegation",
+            "e.target"
+          ],
+          "evaluationCriteria": [
+            "Recalls the correct property."
+          ],
+          "example": "",
+          "tags": [
+            "DOM Events",
+            "Flashcard",
+            "Event Delegation"
+          ],
+          "prerequisites": [
+            "theory_event_delegation"
+          ],
+          "complexity": 4,
+          "interviewFrequency": 7,
+          "learningPath": "intermediate"
+        }
+      ],
+      "tasks": [
+        {
+          "id": "task_event_loop_1",
+          "title": "Predicting Event Loop Output with Complex Asynchronicity",
+          "description": "\nAnalyze the provided JavaScript code snippet and predict the exact order of console logs. Your solution should explain step-by-step how the JavaScript Event Loop processes the different asynchronous operations (Promises, setTimeout, synchronous code).\n\n```javascript\nconsole.log('Synchronous 1');\n\nsetTimeout(() => {\n  console.log('Timeout 1');\n  Promise.resolve().then(() => console.log('Promise inside Timeout'));\n}, 0);\n\nPromise.resolve().then(() => {\n  console.log('Promise 1');\n});\n\nsetTimeout(() => {\n  console.log('Timeout 2');\n}, 0);\n\nPromise.resolve().then(() => {\n  console.log('Promise 2');\n});\n\nconsole.log('Synchronous 2');\n```\n\nYour response should be the predicted output and a detailed explanation of why it happens in that order, referencing the Call Stack, Microtask Queue, and Macrotask Queue.",
+          "difficulty": "hard",
+          "startingCode": "console.log('Synchronous 1');\n\nsetTimeout(() => {\n  console.log('Timeout 1');\n  Promise.resolve().then(() => console.log('Promise inside Timeout'));\n}, 0);\n\nPromise.resolve().then(() => {\n  console.log('Promise 1');\n});\n\nsetTimeout(() => {\n  console.log('Timeout 2');\n}, 0);\n\nPromise.resolve().then(() => {\n  console.log('Promise 2');\n});\n\nconsole.log('Synchronous 2');\n\n// TODO: Predict output and explain steps.\n",
+          "solutionCode": "// Predicted Output:\n// Synchronous 1\n// Synchronous 2\n// Promise 1\n// Promise 2\n// Timeout 1\n// Promise inside Timeout\n// Timeout 2\n\n/*\nDetailed Explanation:\n\n1.  **Initial Synchronous Execution (Call Stack)**:\n    *   `console.log('Synchronous 1')` is executed. Output: `Synchronous 1`\n    *   `setTimeout` callback for 'Timeout 1' is sent to Web APIs, then added to the **Macrotask Queue**.\n    *   `Promise.resolve().then()` callback for 'Promise 1' is added to the **Microtask Queue**.\n    *   `setTimeout` callback for 'Timeout 2' is sent to Web APIs, then added to the **Macrotask Queue**.\n    *   `Promise.resolve().then()` callback for 'Promise 2' is added to the **Microtask Queue**.\n    *   `console.log('Synchronous 2')` is executed. Output: `Synchronous 2`\n    *   The Call Stack becomes empty.\n\n2.  **First Event Loop Cycle (Call Stack empty)**:\n    *   **Microtask Queue processing**: The Event Loop checks the Microtask Queue first and processes all tasks in it before moving to macrotasks.\n        *   'Promise 1' callback is moved to Call Stack and executed. Output: `Promise 1`\n        *   'Promise 2' callback is moved to Call Stack and executed. Output: `Promise 2`\n    *   The Microtask Queue is now empty.\n\n3.  **Second Event Loop Cycle (Call Stack empty, Microtask Queue empty)**:\n    *   **Macrotask Queue processing**: The Event Loop picks **one** task from the Macrotask Queue. The first one added was 'Timeout 1'.\n        *   'Timeout 1' callback is moved to Call Stack and executed. Output: `Timeout 1`\n        *   Inside 'Timeout 1', `Promise.resolve().then(() => console.log('Promise inside Timeout'))` is encountered. Its callback is immediately added to the **Microtask Queue**.\n        *   The Call Stack becomes empty again.\n\n4.  **Third Event Loop Cycle (Call Stack empty)**:\n    *   **Microtask Queue processing**: The Event Loop checks the Microtask Queue again. It finds 'Promise inside Timeout'.\n        *   'Promise inside Timeout' callback is moved to Call Stack and executed. Output: `Promise inside Timeout`\n    *   The Microtask Queue is now empty.\n\n5.  **Fourth Event Loop Cycle (Call Stack empty, Microtask Queue empty)**:\n    *   **Macrotask Queue processing**: The Event Loop picks the next task from the Macrotask Queue. The next one is 'Timeout 2'.\n        *   'Timeout 2' callback is moved to Call Stack and executed. Output: `Timeout 2`\n    *   The Macrotask Queue is now empty. All tasks are processed.\n*/\n",
+          "testCases": [],
+          "hints": [
+            "Remember the strict priority: synchronous > microtasks > macrotasks.",
+            "A new Promise's `.then()` callback is always a microtask.",
+            "A `setTimeout` callback is always a macrotask.",
+            "Microtasks are emptied completely before the event loop processes even one macrotask.",
+            "If a macrotask or another microtask schedules a new microtask, that new microtask will run before any *further* macrotasks."
+          ],
+          "tags": [
+            "JavaScript",
+            "Event Loop",
+            "Asynchronous",
+            "Promises",
+            "setTimeout",
+            "Microtasks",
+            "Macrotasks"
+          ],
+          "timeEstimate": 45,
+          "prerequisites": [
+            "theory_event_loop_async"
+          ],
+          "complexity": 9,
+          "interviewRelevance": 9,
+          "learningPath": "advanced",
+          "relatedConcepts": [
+            "Call Stack",
+            "Web APIs",
+            "Concurrency Model"
+          ]
+        },
+        {
+          "id": "task_event_propagation_1",
+          "title": "Interactive Event Propagation Visualizer",
+          "description": "\nCreate a simple HTML structure with nested `div` elements and apply click listeners to them, demonstrating both the capturing and bubbling phases.\n\n**Requirements:**\n1.  Create at least three nested `div` elements (e.g., Grandparent > Parent > Child).\n2.  Add a unique background color and padding to each `div` to make them visually distinct.\n3.  Attach two `click` event listeners to *each* `div`:\n    *   One for the **capturing phase** (using `true` as the third parameter).\n    *   One for the **bubbling phase** (using `false` or omitting the third parameter).\n4.  When any `div` is clicked, log to the console the `id` of the clicked element, and indicate whether the event listener fired during the 'Capturing' or 'Bubbling' phase.\n5.  Add a `p` tag inside the innermost `div` as a target. When this `p` tag is clicked, it should clearly show the full propagation path through all its ancestors, first capturing then bubbling.\n\n**Example Output (if 'Child' is clicked):**\n```\nGrandparent clicked - Capturing\nParent clicked - Capturing\nChild clicked - Capturing\nChild clicked - Bubbling\nParent clicked - Bubbling\nGrandparent clicked - Bubbling\n```\n",
+          "difficulty": "medium",
+          "startingCode": "<!-- index.html -->\n<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"UTF-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n  <title>Event Propagation</title>\n  <style>\n    body { font-family: sans-serif; margin: 20px; }\n    div {\n      padding: 30px;\n      border: 2px solid #ccc;\n      margin: 10px;\n      text-align: center;\n      font-weight: bold;\n    }\n    #grandparent { background-color: #e0f7fa; border-color: #00bcd4; }\n    #parent { background-color: #e8f5e9; border-color: #4caf50; }\n    #child { background-color: #fce4ec; border-color: #e91e63; }\n    p { cursor: pointer; background-color: #fff; padding: 10px; margin: 10px auto; border: 1px dashed #333; }\n  </style>\n</head>\n<body>\n  <div id=\"grandparent\">\n    Grandparent\n    <div id=\"parent\">\n      Parent\n      <div id=\"child\">\n        Child\n        <p>Click me</p>\n      </div>\n    </div>\n  </div>\n\n  <script>\n    // TODO: Implement event listeners here\n\n  </script>\n</body>\n</html>\n",
+          "solutionCode": "<!-- index.html -->\n<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"UTF-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n  <title>Event Propagation</title>\n  <style>\n    body { font-family: sans-serif; margin: 20px; }\n    div {\n      padding: 30px;\n      border: 2px solid #ccc;\n      margin: 10px;\n      text-align: center;\n      font-weight: bold;\n    }\n    #grandparent { background-color: #e0f7fa; border-color: #00bcd4; }\n    #parent { background-color: #e8f5e9; border-color: #4caf50; }\n    #child { background-color: #fce4ec; border-color: #e91e63; }\n    p {\n      cursor: pointer;\n      background-color: #fff;\n      padding: 10px;\n      margin: 10px auto;\n      border: 1px dashed #333;\n      width: fit-content;\n    }\n  </style>\n</head>\n<body>\n  <div id=\"grandparent\">\n    Grandparent\n    <div id=\"parent\">\n      Parent\n      <div id=\"child\">\n        Child\n        <p>Click me</p>\n      </div>\n    </div>\n  </div>\n\n  <script>\n    const grandparent = document.getElementById('grandparent');\n    const parent = document.getElementById('parent');\n    const child = document.getElementById('child');\n    const clickableP = child.querySelector('p');\n\n    const elements = [grandparent, parent, child];\n\n    elements.forEach(element => {\n      // Capturing Phase Listener\n      element.addEventListener('click', function(e) {\n        console.log(`${element.id} clicked - Capturing`);\n        // Optionally, prevent default browser behavior for text selection or other default actions if needed\n        // e.preventDefault(); \n      }, true); // true for capturing phase\n\n      // Bubbling Phase Listener\n      element.addEventListener('click', function(e) {\n        console.log(`${element.id} clicked - Bubbling`);\n      }, false); // false or omit for bubbling phase\n    });\n    \n    // Add listener to the actual <p> tag as well for clarity on target\n    clickableP.addEventListener('click', function(e) {\n        console.log(`P tag clicked - (Target phase)`);\n        // For extra clarity, you could add this also for capturing/bubbling specific to P\n        // e.stopPropagation(); // Try uncommenting to see its effect\n        // e.preventDefault(); // Try uncommenting to see its effect\n    }, false); // Default bubbling\n\n    clickableP.addEventListener('click', function(e) {\n        console.log(`P tag clicked - Capturing (Target)`);\n    }, true); // Capturing\n  </script>\n</body>\n</html>\n",
+          "testCases": [
+            "Click on the 'Grandparent' div: Only 'Grandparent clicked - Bubbling' should appear.",
+            "Click on the 'Parent' div: 'Parent clicked - Capturing', 'Parent clicked - Bubbling' should appear (assuming event propagates from document to parent then stops if it's the target).",
+            "Click on the 'Child' div: 'Grandparent clicked - Capturing', 'Parent clicked - Capturing', 'Child clicked - Capturing', 'Child clicked - Bubbling', 'Parent clicked - Bubbling', 'Grandparent clicked - Bubbling' should appear.",
+            "Click on the 'Click me' paragraph inside the Child div: 'Grandparent clicked - Capturing', 'Parent clicked - Capturing', 'Child clicked - Capturing', 'P tag clicked - Capturing (Target)', 'P tag clicked - (Target phase)', 'Child clicked - Bubbling', 'Parent clicked - Bubbling', 'Grandparent clicked - Bubbling' should appear (order depends on whether target phase listeners are before/after target phase capturing/bubbling ones, but generally target phase is between capturing and bubbling for the target element). The key is capturing first, then target, then bubbling.",
+            "Verify that if `e.stopPropagation()` is added to the Child's capturing listener, Parent and Grandparent bubbling listeners are not triggered when Child is clicked.",
+            "Verify that if `e.stopImmediatePropagation()` is added to the Child's first capturing listener, its second (bubbling) listener is not triggered when Child is clicked."
+          ],
+          "hints": [
+            "Remember that `addEventListener`'s third parameter, when `true`, means the listener will fire during the capturing phase.",
+            "When `false` (or omitted), it fires during the bubbling phase.",
+            "The event always goes down during capturing and up during bubbling.",
+            "The target element itself can have listeners for both phases."
+          ],
+          "tags": [
+            "DOM Events",
+            "Event Propagation",
+            "Bubbling",
+            "Capturing",
+            "addEventListener",
+            "Frontend Basics"
+          ],
+          "timeEstimate": 60,
+          "prerequisites": [
+            "theory_event_propagation"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 8,
+          "learningPath": "intermediate",
+          "relatedConcepts": [
+            "e.target",
+            "e.currentTarget"
+          ]
+        },
+        {
+          "id": "task_event_control_1",
+          "title": "Build a Preventable Interactive Form with Propagation Control",
+          "description": "\nCreate an HTML form with multiple interactive elements (a link, a checkbox, and a submit button). Implement JavaScript to demonstrate `preventDefault()`, `stopPropagation()`, and `stopImmediatePropagation()` in a practical scenario.\n\n**Requirements:**\n1.  **HTML Structure:**\n    *   A `div` with `id=\"overlay-container\"` (acting as a clickable overlay).\n    *   Inside, a `form` with `id=\"myForm\"`.\n    *   Inside the form:\n        *   An `<a>` tag (`id=\"external-link\"`) with a `href` attribute (e.g., to example.com).\n        *   A `label` with a `checkbox` input (`id=\"myCheckbox\"`).\n        *   A `button` with `type=\"submit\"` (`id=\"submitBtn\"`).\n2.  **JavaScript Functionality:**\n    *   **External Link (`#external-link`)**: Add a click listener that `preventDefault()` to stop navigation. `console.log` a message indicating prevention.\n    *   **Checkbox (`#myCheckbox`)**: Add a click listener. If the checkbox is checked, it should `stopPropagation()` to prevent the event from reaching the form or `overlay-container`. `console.log` its state and propagation status.\n    *   **Submit Button (`#submitBtn`)**: Add a click listener.\n        *   The *first* listener should `console.log` 'Submit Button: Processing request...'.\n        *   The *second* listener on the *same button* should `console.log` 'Submit Button: Validation successful.' and then `stopImmediatePropagation()` if a random condition (e.g., `Math.random() > 0.5`) is met. This listener should `preventDefault()` to stop form submission regardless.\n        *   The *third* listener on the *same button* should `console.log` 'Submit Button: Final cleanup' (this should only run if `stopImmediatePropagation()` wasn't called).\n    *   **Form (`#myForm`)**: Add a `submit` listener that `preventDefault()` (as a fallback) and `console.log` 'Form submitted (prevented)'. Add a `click` listener that `console.log` 'Form clicked'.\n    *   **Overlay Container (`#overlay-container`)**: Add a click listener that `console.log` 'Overlay clicked'.\n\n**Testing Scenarios:**\n*   Click the link.\n*   Click the checkbox (both checked and unchecked state).\n*   Click the submit button (multiple times to test random condition for `stopImmediatePropagation`).\n*   Click the form background (not a control).\n*   Click the overlay background (not inside form).\n",
+          "difficulty": "hard",
+          "startingCode": "<!-- index.html -->\n<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"UTF-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n  <title>Event Control Demo</title>\n  <style>\n    body { font-family: sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; background-color: #f0f0f0; }\n    #overlay-container {\n      border: 3px solid #f0ad4e;\n      padding: 40px;\n      background-color: #fdf5e6;\n      box-shadow: 0 4px 8px rgba(0,0,0,0.1);\n      cursor: pointer; /* To show click detection */\n    }\n    #myForm {\n      border: 2px solid #5cb85c;\n      padding: 30px;\n      background-color: #e6ffe6;\n      display: flex;\n      flex-direction: column;\n      gap: 15px;\n      align-items: flex-start;\n    }\n    button, a, label { margin-top: 10px; }\n  </style>\n</head>\n<body>\n  <div id=\"overlay-container\">\n    <h2>Overlay Container</h2>\n    <form id=\"myForm\">\n      <h3>My Form</h3>\n      <a id=\"external-link\" href=\"https://www.example.com\">Visit Example.com</a>\n      \n      <div>\n        <input type=\"checkbox\" id=\"myCheckbox\">\n        <label for=\"myCheckbox\">Check to Stop Propagation</label>\n      </div>\n      \n      <button type=\"submit\" id=\"submitBtn\">Submit Form</button>\n    </form>\n  </div>\n\n  <script>\n    // Get elements\n    const overlayContainer = document.getElementById('overlay-container');\n    const myForm = document.getElementById('myForm');\n    const externalLink = document.getElementById('external-link');\n    const myCheckbox = document.getElementById('myCheckbox');\n    const submitBtn = document.getElementById('submitBtn');\n\n    // TODO: Implement event listeners as per requirements\n    \n  </script>\n</body>\n</html>\n",
+          "solutionCode": "<!-- index.html -->\n<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"UTF-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n  <title>Event Control Demo</title>\n  <style>\n    body { font-family: sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; background-color: #f0f0f0; }\n    #overlay-container {\n      border: 3px solid #f0ad4e;\n      padding: 40px;\n      background-color: #fdf5e6;\n      box-shadow: 0 4px 8px rgba(0,0,0,0.1);\n      cursor: pointer; /* To show click detection */\n    }\n    #myForm {\n      border: 2px solid #5cb85c;\n      padding: 30px;\n      background-color: #e6ffe6;\n      display: flex;\n      flex-direction: column;\n      gap: 15px;\n      align-items: flex-start;\n    }\n    button, a, label { margin-top: 10px; }\n  </style>\n</head>\n<body>\n  <div id=\"overlay-container\">\n    <h2>Overlay Container</h2>\n    <form id=\"myForm\">\n      <h3>My Form</h3>\n      <a id=\"external-link\" href=\"https://www.example.com\">Visit Example.com</a>\n      \n      <div>\n        <input type=\"checkbox\" id=\"myCheckbox\">\n        <label for=\"myCheckbox\">Check to Stop Propagation</label>\n      </div>\n      \n      <button type=\"submit\" id=\"submitBtn\">Submit Form</button>\n    </form>\n  </div>\n\n  <script>\n    // Get elements\n    const overlayContainer = document.getElementById('overlay-container');\n    const myForm = document.getElementById('myForm');\n    const externalLink = document.getElementById('external-link');\n    const myCheckbox = document.getElementById('myCheckbox');\n    const submitBtn = document.getElementById('submitBtn');\n\n    // 1. External Link (#external-link): preventDefault()\n    externalLink.addEventListener('click', function(e) {\n      e.preventDefault(); \n      console.log('Link: Default navigation prevented.');\n    });\n\n    // 2. Checkbox (#myCheckbox): stopPropagation() conditionally\n    myCheckbox.addEventListener('click', function(e) {\n      if (this.checked) {\n        e.stopPropagation();\n        console.log('Checkbox: Is CHECKED. Click event propagation STOPPED to parent elements (form, overlay).');\n      } else {\n        console.log('Checkbox: Is UNCHECKED. Click event will bubble normally.');\n      }\n    });\n\n    // 3. Submit Button (#submitBtn): stopImmediatePropagation() conditionally, preventDefault()\n    submitBtn.addEventListener('click', function(e) {\n      console.log('Submit Button: Handler 1 - Processing request...');\n    });\n\n    submitBtn.addEventListener('click', function(e) {\n      e.preventDefault(); // Always prevent form submission default behavior\n      console.log('Submit Button: Handler 2 - Validation successful.');\n\n      if (Math.random() > 0.5) { // 50% chance to stop immediate propagation\n        e.stopImmediatePropagation();\n        console.log('Submit Button: Handler 2 - Condition met, stopping ALL further handlers on this button and propagation.');\n      }\n    });\n\n    submitBtn.addEventListener('click', function(e) {\n      console.log('Submit Button: Handler 3 - Final cleanup (only runs if not stopped immediately).');\n    });\n\n    // 4. Form (#myForm): submit listener (fallback preventDefault) and click listener\n    myForm.addEventListener('submit', function(e) {\n      e.preventDefault(); // Fallback prevent default form submission\n      console.log('Form: Submit event triggered and prevented.');\n    });\n\n    myForm.addEventListener('click', function(e) {\n      console.log('Form: Click event occurred.');\n    });\n\n    // 5. Overlay Container (#overlay-container): click listener\n    overlayContainer.addEventListener('click', function(e) {\n      console.log('Overlay Container: Click event occurred.');\n    });\n  </script>\n</body>\n</html>\n",
+          "testCases": [
+            "**Scenario 1: Click the 'Visit Example.com' link.**\n  *   Expected output: `Link: Default navigation prevented.` followed by `Form: Click event occurred.`, `Overlay Container: Click event occurred.`\n  *   Verification: Browser should not navigate away.",
+            "**Scenario 2: Click the 'Check to Stop Propagation' checkbox (unchecked to checked).**\n  *   Expected output: `Checkbox: Is CHECKED. Click event propagation STOPPED to parent elements (form, overlay).`\n  *   Verification: No `Form: Click event occurred.` or `Overlay Container: Click event occurred.` should appear.",
+            "**Scenario 3: Click the 'Check to Stop Propagation' checkbox (checked to unchecked).**\n  *   Expected output: `Checkbox: Is UNCHECKED. Click event will bubble normally.` followed by `Form: Click event occurred.`, `Overlay Container: Click event occurred.`\n  *   Verification: All console logs should appear.",
+            "**Scenario 4: Click the 'Submit Form' button (multiple times).**\n  *   Expected output (varied due to random condition):\n    *   Always: `Submit Button: Handler 1 - Processing request...` and `Submit Button: Handler 2 - Validation successful.`\n    *   Sometimes: `Submit Button: Handler 2 - Condition met, stopping ALL further handlers on this button and propagation.` (followed by no Handler 3, and no form/overlay clicks).\n    *   Sometimes: `Submit Button: Handler 3 - Final cleanup (only runs if not stopped immediately).` (followed by `Form: Click event occurred.`, `Overlay Container: Click event occurred.`)\n  *   Verification: Form should never submit (page reload). Console logs should reflect conditional `stopImmediatePropagation` and `preventDefault`.",
+            "**Scenario 5: Click on the form background (not directly on a control).**\n  *   Expected output: `Form: Click event occurred.`, `Overlay Container: Click event occurred.`",
+            "**Scenario 6: Click on the overlay container background (outside the form).**\n  *   Expected output: `Overlay Container: Click event occurred.`"
+          ],
+          "hints": [
+            "Remember that `preventDefault()` stops the *browser's default action*, while `stopPropagation()` affects *event propagation* through the DOM tree.",
+            "`stopImmediatePropagation()` is stronger than `stopPropagation()` because it also stops other listeners on the *same element*.",
+            "A `submit` event on a form can be triggered by clicking a button with `type=\"submit\"` or by pressing Enter inside an input field. Always `preventDefault()` on the `submit` event if you want to handle it with JavaScript.",
+            "Test each interaction separately to clearly see the effect of each control method."
+          ],
+          "tags": [
+            "DOM Events",
+            "Event Control",
+            "preventDefault",
+            "stopPropagation",
+            "stopImmediatePropagation",
+            "Form Handling",
+            "Frontend Interview"
+          ],
+          "timeEstimate": 75,
+          "prerequisites": [
+            "theory_event_propagation",
+            "theory_event_control"
+          ],
+          "complexity": 8,
+          "interviewRelevance": 9,
+          "learningPath": "advanced",
+          "relatedConcepts": [
+            "Event Object",
+            "Event Target",
+            "Event Bubbling"
+          ]
+        },
+        {
+          "id": "task_event_delegation_1",
+          "title": "Build a Dynamic Item List with Event Delegation",
+          "description": "\nCreate a dynamic list of items where each item can be marked as 'completed' or 'deleted'. The list should be able to add new items without manually attaching new event listeners to them.\n\n**Requirements:**\n1.  **HTML Structure:**\n    *   A `div` acting as a container (`id=\"app\"`).\n    *   Inside `app`, a heading (e.g., `<h2>My To-Do List</h2>`).\n    *   An input field (`id=\"new-task-input\"`) and a button (`id=\"add-task-btn\"`) to add new tasks.\n    *   An empty `ul` element (`id=\"task-list\"`) where tasks will be displayed.\n2.  **JavaScript Functionality:**\n    *   **Add Task:** When the 'Add Task' button is clicked (or Enter is pressed in the input field):\n        *   Get the value from the input field.\n        *   If the input is not empty, create a new `li` element.\n        *   Each `li` should contain the task text, a 'Complete' button, and a 'Delete' button.\n        *   Append the new `li` to the `ul#task-list`.\n        *   Clear the input field.\n    *   **Event Delegation:** Implement a single `click` event listener on the `ul#task-list`.\n        *   When a 'Complete' button is clicked, toggle a `completed` CSS class on its parent `li` element (e.g., `text-decoration: line-through; color: gray;`).\n        *   When a 'Delete' button is clicked, remove its parent `li` element from the DOM.\n        *   Ensure that clicking anywhere else in the `li` (but not the buttons) also logs the task content to the console.\n\n**CSS (minimal for visual feedback):**\n```css\n.completed { text-decoration: line-through; color: #888; }\n#task-list button { margin-left: 10px; cursor: pointer; }\n#task-list li { padding: 8px 0; border-bottom: 1px dashed #eee; display: flex; align-items: center; }\n#task-list li span { flex-grow: 1; cursor: pointer; }\n```\n\n**Test Cases:**\n*   Add several new tasks.\n*   Click the 'Complete' button on different tasks to toggle their completed state.\n*   Click the 'Delete' button on tasks to remove them.\n*   Verify that newly added tasks respond correctly to 'Complete' and 'Delete' clicks without new listeners being attached.\n*   Click on the task text (not the buttons) and observe console logs.\n",
+          "difficulty": "medium",
+          "startingCode": "<!-- index.html -->\n<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"UTF-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n  <title>Dynamic To-Do List</title>\n  <style>\n    body { font-family: sans-serif; margin: 20px; }\n    #app { max-width: 600px; margin: 20px auto; padding: 20px; border: 1px solid #ddd; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }\n    #new-task-input { width: 70%; padding: 8px; margin-right: 10px; }\n    #add-task-btn { padding: 8px 15px; cursor: pointer; }\n    #task-list { list-style: none; padding: 0; margin-top: 20px; }\n    .completed { text-decoration: line-through; color: #888; }\n    #task-list button { margin-left: 10px; cursor: pointer; padding: 5px 10px; }\n    #task-list li { padding: 8px 0; border-bottom: 1px dashed #eee; display: flex; align-items: center; }\n    #task-list li:last-child { border-bottom: none; }\n    #task-list li span { flex-grow: 1; cursor: pointer; }\n  </style>\n</head>\n<body>\n  <div id=\"app\">\n    <h2>My To-Do List</h2>\n    <div>\n      <input type=\"text\" id=\"new-task-input\" placeholder=\"Add a new task\">\n      <button id=\"add-task-btn\">Add Task</button>\n    </div>\n    <ul id=\"task-list\">\n      <!-- Tasks will be added here -->\n    </ul>\n  </div>\n\n  <script>\n    const newTaskInput = document.getElementById('new-task-input');\n    const addTaskBtn = document.getElementById('add-task-btn');\n    const taskList = document.getElementById('task-list');\n\n    // TODO: Implement add task logic and event delegation\n\n  </script>\n</body>\n</html>\n",
+          "solutionCode": "<!-- index.html -->\n<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"UTF-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n  <title>Dynamic To-Do List</title>\n  <style>\n    body { font-family: sans-serif; margin: 20px; }\n    #app { max-width: 600px; margin: 20px auto; padding: 20px; border: 1px solid #ddd; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }\n    #new-task-input { width: 70%; padding: 8px; margin-right: 10px; }\n    #add-task-btn { padding: 8px 15px; cursor: pointer; background-color: #4CAF50; color: white; border: none; border-radius: 4px; }\n    #add-task-btn:hover { background-color: #45a049; }\n    #task-list { list-style: none; padding: 0; margin-top: 20px; }\n    .completed { text-decoration: line-through; color: #888; }\n    #task-list button { margin-left: 10px; cursor: pointer; padding: 5px 10px; border: none; border-radius: 3px; }\n    #task-list .complete-btn { background-color: #008CBA; color: white; }\n    #task-list .complete-btn:hover { background-color: #007bb5; }\n    #task-list .delete-btn { background-color: #f44336; color: white; }\n    #task-list .delete-btn:hover { background-color: #da190b; }\n    #task-list li { padding: 8px 0; border-bottom: 1px dashed #eee; display: flex; align-items: center; }\n    #task-list li:last-child { border-bottom: none; }\n    #task-list li span { flex-grow: 1; cursor: pointer; }\n  </style>\n</head>\n<body>\n  <div id=\"app\">\n    <h2>My To-Do List</h2>\n    <div>\n      <input type=\"text\" id=\"new-task-input\" placeholder=\"Add a new task\">\n      <button id=\"add-task-btn\">Add Task</button>\n    </div>\n    <ul id=\"task-list\">\n      <!-- Tasks will be added here -->\n    </ul>\n  </div>\n\n  <script>\n    const newTaskInput = document.getElementById('new-task-input');\n    const addTaskBtn = document.getElementById('add-task-btn');\n    const taskList = document.getElementById('task-list');\n\n    function addTask() {\n      const taskText = newTaskInput.value.trim();\n      if (taskText === '') {\n        alert('Task cannot be empty!');\n        return;\n      }\n\n      const li = document.createElement('li');\n      li.innerHTML = `\n        <span>${taskText}</span>\n        <button class=\"complete-btn\">Complete</button>\n        <button class=\"delete-btn\">Delete</button>\n      `;\n      taskList.appendChild(li);\n      newTaskInput.value = ''; // Clear input\n      newTaskInput.focus(); // Keep focus for quick adding\n    }\n\n    addTaskBtn.addEventListener('click', addTask);\n    newTaskInput.addEventListener('keypress', function(e) {\n      if (e.key === 'Enter') {\n        addTask();\n      }\n    });\n\n    // Event Delegation for task-list\n    taskList.addEventListener('click', function(e) {\n      const target = e.target;\n\n      // Check if a 'Complete' button was clicked\n      if (target.classList.contains('complete-btn')) {\n        const listItem = target.closest('li');\n        if (listItem) {\n          listItem.classList.toggle('completed');\n          console.log(`Task '${listItem.querySelector('span').textContent}' completion toggled.`);\n        }\n      }\n      // Check if a 'Delete' button was clicked\n      else if (target.classList.contains('delete-btn')) {\n        const listItem = target.closest('li');\n        if (listItem) {\n          console.log(`Task '${listItem.querySelector('span').textContent}' deleted.`);\n          listItem.remove();\n        }\n      }\n      // Check if the task text (span inside li) was clicked\n      else if (target.tagName === 'SPAN' && target.closest('li')) {\n        console.log(`Task text clicked: '${target.textContent}'`);\n      }\n    });\n  </script>\n</body>\n</html>\n",
+          "testCases": [
+            "**Test Case 1: Add Multiple Tasks**\n  *   **Steps:** Type 'Buy groceries' and click 'Add Task'. Type 'Walk the dog' and press Enter. Type 'Read book' and click 'Add Task'.\n  *   **Expected:** Three list items appear in the `ul`.",
+            "**Test Case 2: Toggle Completion**\n  *   **Steps:** Click the 'Complete' button next to 'Buy groceries'. Click it again.\n  *   **Expected:** The 'Buy groceries' task should toggle `line-through` text decoration and gray color. Console should log completion status changes.",
+            "**Test Case 3: Delete Task**\n  *   **Steps:** Click the 'Delete' button next to 'Walk the dog'.\n  *   **Expected:** The 'Walk the dog' list item should be removed from the DOM. Console should log deletion.",
+            "**Test Case 4: Click Task Text**\n  *   **Steps:** Click on the text 'Read book' (not the buttons).\n  *   **Expected:** Console should log `Task text clicked: 'Read book'`. The item's appearance should not change.",
+            "**Test Case 5: Dynamic Item Handling**\n  *   **Steps:** After adding, completing, and deleting some tasks, add a new task 'New dynamic task'. Then try to 'Complete' and 'Delete' this newly added task.\n  *   **Expected:** The new task should respond correctly to 'Complete' and 'Delete' actions, proving that event delegation works for dynamically added elements.",
+            "**Test Case 6: Empty Input**\n  *   **Steps:** Click 'Add Task' button with an empty input field.\n  *   **Expected:** An alert 'Task cannot be empty!' should appear, and no new list item should be added."
+          ],
+          "hints": [
+            "Attach only *one* event listener to the `ul#task-list` for clicks.",
+            "Use `e.target` inside the listener to identify the specific element that was clicked (e.g., a button or the text itself).",
+            "Use `e.target.classList.contains('className')` to check if the clicked element is a 'complete-btn' or 'delete-btn'.",
+            "Use `e.target.closest('li')` to find the nearest `li` ancestor of the clicked button, which represents the task item.",
+            "Remember to handle both button clicks and clicks on the task text itself (the `span`).",
+            "The `keypress` event listener on the input should check for `e.key === 'Enter'` to trigger adding a task."
+          ],
+          "tags": [
+            "DOM Events",
+            "Event Delegation",
+            "Dynamic Content",
+            "CRUD",
+            "Frontend Development",
+            "JavaScript"
+          ],
+          "timeEstimate": 90,
+          "prerequisites": [
+            "theory_event_delegation",
+            "DOM Manipulation"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 9,
+          "learningPath": "intermediate",
+          "relatedConcepts": [
+            "e.target",
+            "closest()",
+            "classList",
+            "appendChild",
+            "remove()"
+          ]
+        }
+      ]
+    }
+  }
+]

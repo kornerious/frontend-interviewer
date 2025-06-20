@@ -1,0 +1,1910 @@
+[
+  {
+    "id": "8535c6f5-6cbf-4926-ae76-4e4900fe37ee",
+    "startLine": 6500,
+    "endLine": 6599,
+    "processedDate": "2025-06-17T10:01:45.038Z",
+    "content": {
+      "logicalBlockInfo": {
+        "suggestedEndLine": -1
+      },
+      "theory": [
+        {
+          "id": "theory_react_router_v5_vs_v6_navigation",
+          "title": "React Router v5 vs. v6: Navigation Differences",
+          "content": "This section details the evolution of navigation paradigms in React Router, specifically comparing versions 5 and 6. React Router is a standard library for declarative routing in React applications, allowing navigation between different components without full page reloads, giving the impression of a multi-page application within a single-page application (SPA).\n\n## React Router v5 Navigation (Class Components)\nIn React Router v5, when working with class components, navigation was often handled using the `Redirect` component. The `Redirect` component, when rendered, causes the application to navigate to a new URL. This is a declarative way to handle redirects, often used after an action (like a successful login) completes.\n\nKey characteristics:\n-   Primarily used with class components.\n-   `Redirect` is a component that renders to perform navigation.\n-   Relies on the component lifecycle for triggering redirects.\n\n## React Router v6 Navigation (Functional Components & Hooks)\nReact Router v6 embraces React Hooks, providing the `useNavigate` hook for programmatic navigation. This hook returns a function that can be called to navigate to a different route. This approach is more flexible and integrates seamlessly with functional components and the React Hooks ecosystem.\n\nKey characteristics:\n-   Designed for functional components and React Hooks.\n-   `useNavigate` is a hook that provides a navigation function.\n-   Allows for imperative navigation, often triggered by user interactions or side effects (`useEffect`).\n-   `Navigate` component exists as a direct replacement for `Redirect` in functional components, also for declarative redirects.\n\n## Key Differences Summarized\n-   **Pattern:** v6 uses component composition pattern with `children` prop (e.g., `Routes` and `Route` components), while v5 primarily used render props pattern (e.g., `Switch` and `Route`).\n-   **Navigation Component/Hook:** v5 uses `Redirect` component; v6 uses `useNavigate` hook for programmatic navigation and `Navigate` component for declarative rendering-based redirects.\n-   **Relative Routing:** v6 has built-in, improved support for relative routing, making it easier to define routes relative to the current path.\n-   **API Simplicity:** v6 aims for a simpler and more intuitive API, particularly with the introduction of the `Routes` component instead of `Switch` and more streamlined route definitions.",
+          "examples": [
+            {
+              "id": "example_v5_redirect",
+              "title": "React Router v5 with Redirect (Class Component)",
+              "code": "import React, { Component } from 'react';\nimport { Redirect } from 'react-router-dom';\n\nclass LoginPageV5 extends Component {\n  constructor(props) {\n    super(props);\n    this.state = {\n      username: '',\n      password: '',\n      isLoggedIn: false\n    };\n  }\n\n  handleInputChange = (e) => {\n    this.setState({\n      [e.target.name]: e.target.value\n    });\n  };\n\n  handleLogin = () => {\n    // Simulate authentication logic\n    if (this.state.username === 'user' && this.state.password === 'pass') {\n      this.setState({ isLoggedIn: true });\n    } else {\n      alert('Invalid credentials');\n    }\n  };\n\n  render() {\n    if (this.state.isLoggedIn) {\n      return <Redirect to=\"/dashboard\" />;\n    } else {\n      return (\n        <div>\n          <h2>Login (v5)</h2>\n          <input \n            type=\"text\" \n            name=\"username\" \n            value={this.state.username} \n            onChange={this.handleInputChange} \n            placeholder=\"Username\"\n          />\n          <input \n            type=\"password\" \n            name=\"password\" \n            value={this.state.password} \n            onChange={this.handleInputChange} \n            placeholder=\"Password\"\n          />\n          <button onClick={this.handleLogin}>Login</button>\n        </div>\n      );\n    }\n  }\n}\n\nexport default LoginPageV5;",
+              "explanation": "This example demonstrates a login component in React Router v5. Upon successful login, the `isLoggedIn` state is set to `true`. In the `render` method, if `isLoggedIn` is true, the `Redirect` component is rendered, which causes the browser to navigate to the `/dashboard` path. This is a declarative way of handling redirects.",
+              "language": "typescript"
+            },
+            {
+              "id": "example_v6_use_navigate",
+              "title": "React Router v6 with useNavigate (Functional Component)",
+              "code": "import React, { useState, useEffect } from 'react';\nimport { useNavigate } from 'react-router-dom';\n\nconst LoginPageV6 = () => {\n  const navigate = useNavigate();\n  const [isLoggedIn, setIsLoggedIn] = useState(false);\n  const [username, setUsername] = useState('');\n  const [password, setPassword] = useState('');\n  \n  useEffect(() => {\n    if (isLoggedIn) {\n      navigate('/dashboard');\n    }\n  }, [isLoggedIn, navigate]); // `navigate` is stable, but included for completeness in dependency array\n  \n  const handleLogin = () => {\n    // Simulate authentication logic\n    if (username === 'user' && password === 'pass') {\n      setIsLoggedIn(true);\n    } else {\n      alert('Invalid credentials');\n    }\n  };\n  \n  return (\n    <div>\n      <h2>Login (v6)</h2>\n      <input\n        type=\"text\"\n        value={username}\n        onChange={(e) => setUsername(e.target.value)}\n        placeholder=\"Username\"\n      />\n      <input\n        type=\"password\"\n        value={password}\n        onChange={(e) => setPassword(e.target.value)}\n        placeholder=\"Password\"\n      />\n      <button onClick={handleLogin}>Login</button>\n    </div>\n  );\n};\n\nexport default LoginPageV6;",
+              "explanation": "This example shows the equivalent login component using React Router v6 and functional components. The `useNavigate` hook provides the `navigate` function. After a successful login, `setIsLoggedIn` is set to `true`. A `useEffect` hook then watches for `isLoggedIn` to become `true` and calls `navigate('/dashboard')` to perform the navigation. This is an imperative way of handling navigation.",
+              "language": "typescript"
+            }
+          ],
+          "relatedQuestions": [
+            "question_v5_v6_diff_mcq_1",
+            "question_use_navigate_flashcard_1",
+            "question_redirect_vs_navigate_open_1",
+            "question_refactor_login_code_1",
+            "question_router_composition_mcq_1"
+          ],
+          "relatedTasks": [
+            "task_refactor_login_component",
+            "task_implement_auth_navigation"
+          ],
+          "tags": [
+            "React Router",
+            "React Hooks",
+            "SPA",
+            "Navigation",
+            "Authentication",
+            "Frontend Architecture"
+          ],
+          "technology": "React",
+          "prerequisites": [
+            "react_functional_components",
+            "react_class_components",
+            "react_state",
+            "react_hooks_basics"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 9,
+          "learningPath": "intermediate",
+          "requiredFor": [
+            "advanced_react_router",
+            "spa_development",
+            "authentication_flows"
+          ]
+        },
+        {
+          "id": "theory_react_router_vs_conventional_routing",
+          "title": "React Router vs. Conventional (Server-Side) Routing",
+          "content": "Routing is a fundamental aspect of web applications, determining how different views or content are displayed based on the URL. This section contrasts React Router (client-side routing) with traditional server-side routing.\n\n## Conventional (Server-Side) Routing\nIn conventional routing, each view or page typically corresponds to a distinct HTML file or a server-rendered page. When a user navigates to a new URL, the browser sends a new HTTP request to the server, which then responds with a fresh HTML page. This means the entire page reloads, and the server is responsible for rendering and delivering the content for each 'page'.\n\n**Characteristics:**\n-   **Pages Involved:** Each view corresponds to a new file (e.g., `index.html`, `about.html`, `products.php`).\n-   **URL Changes:** A full HTTP request is sent to the server for each navigation, and a corresponding HTML page is received.\n-   **Feel:** Users experience actual navigation across different pages, often with noticeable page reloads.\n-   **Performance:** Generally slower due to full page reloads for every navigation.\n-   **SEO:** Traditional SEO techniques work well as each 'page' is a distinct HTML document readily crawlable by search engines.\n\n## React Routing (Client-Side Routing)\nReact Router, like other client-side routing libraries, enables Single-Page Applications (SPAs). In an SPA, the browser initially loads a single HTML page (e.g., `index.html`). All subsequent 'page' navigations occur on the client side without requesting new HTML documents from the server. Instead, React Router dynamically updates the UI by rendering different React components based on the URL. It manipulates the browser's History API to change the URL without a full page reload.\n\n**Characteristics:**\n-   **Pages Involved:** Only a single HTML page is involved (the `index.html` that bootstraps the React app).\n-   **URL Changes:** Only the browser's History attribute (URL path) is changed using the History API; no full HTTP request for new HTML is sent.\n-   **Feel:** Users are given the impression they are navigating across different pages, but with seamless transitions and no full page reloads.\n-   **Performance:** Generally faster due to seamless transitions and only fetching data (not full pages) from the server after the initial load.\n-   **SEO:** Requires additional techniques (e.g., server-side rendering (SSR), static site generation (SSG), pre-rendering, or dynamic rendering) for proper indexing by search engines, as initial page content is often empty or generated by JavaScript.",
+          "examples": [],
+          "relatedQuestions": [
+            "question_conventional_vs_react_routing_mcq_1",
+            "question_spa_performance_open_1",
+            "question_seo_spa_flashcard_1",
+            "question_url_changes_flashcard_1",
+            "question_spa_pros_cons_open_1"
+          ],
+          "relatedTasks": [
+            "task_build_simple_spa",
+            "task_simulate_server_side_rendering"
+          ],
+          "tags": [
+            "React Router",
+            "SPA",
+            "Routing",
+            "Frontend Performance",
+            "SEO",
+            "Web Architecture"
+          ],
+          "technology": "React",
+          "prerequisites": [
+            "web_basics_http",
+            "html_css_js_fundamentals",
+            "react_basics"
+          ],
+          "complexity": 8,
+          "interviewRelevance": 9,
+          "learningPath": "intermediate",
+          "requiredFor": [
+            "spa_architecture",
+            "performance_optimization",
+            "seo_strategies"
+          ]
+        },
+        {
+          "id": "theory_advanced_react_router_nested_routes_layouts",
+          "title": "Advanced React Router Techniques: Nested Routes and Layouts",
+          "content": "React Router's strength lies not only in basic page navigation but also in its ability to handle complex UI structures through nested routes and shared layouts. This allows for hierarchical navigation and reusable UI components across different sections of an application.\n\n## Nested Routes\nNested routes allow you to define routes within other routes. This is particularly useful for building applications with dashboards, user profiles, or any section where a parent component manages a common UI structure, and its children routes render different content within that structure. In React Router v6, nested routes are defined by nesting `<Route>` components inside a parent `<Route>`'s `element` prop, or by defining them directly within a `Routes` component and rendering an `Outlet` in the parent component.\n\n**Key concepts:**\n-   **Hierarchical Structure:** Routes reflect the logical and often visual hierarchy of your application's UI.\n-   **`Outlet` Component:** In v6, the `<Outlet />` component from `react-router-dom` is used within a parent route's element to render the matched child route's component. It acts as a placeholder for nested UI.\n-   **Relative Paths:** Nested routes often utilize relative paths, making route definitions more modular and easier to manage.\n\n## Layouts\nLayouts are components that wrap child routes, providing a consistent UI structure (e.g., header, sidebar, footer) that remains present while the nested content changes. This is achieved by defining a parent route that renders the layout component, and then rendering an `<Outlet />` inside that layout where the child route's content will appear. This pattern promotes code reusability and maintains a uniform user experience.\n\n**Benefits of Layouts:**\n-   **Consistency:** Ensures a consistent look and feel across different parts of the application.\n-   **Reusability:** Avoids duplicating common UI elements in every component.\n-   **Modularity:** Separates layout concerns from content concerns.\n-   **Performance:** Common layout elements are rendered once and only the inner content updates.\n\n## Implementation in React Router v6\nIn React Router v6, nested routes and layouts are typically implemented by defining a parent `Route` with a path and an `element` prop that renders your layout component. Inside this layout component, you render an `<Outlet />`. Child `Route` components are then defined within this parent `Route` or within a `Routes` component where their path is relative to the parent, or their full path is explicitly defined.\n\n```typescript\nimport React from 'react';\nimport { Routes, Route, Outlet, Link } from 'react-router-dom';\n\n// Layout Component\nconst DashboardLayout = () => (\n  <div>\n    <nav>\n      <Link to=\"/dashboard\">Dashboard Home</Link> |\n      <Link to=\"profile\">Profile</Link> |\n      <Link to=\"settings\">Settings</Link>\n    </nav>\n    <hr />\n    {/* This is where the nested routes will render */}\n    <Outlet /> \n  </div>\n);\n\n// Child Components\nconst DashboardHome = () => <h3>Welcome to your Dashboard!</h3>;\nconst Profile = () => <h3>User Profile Page</h3>;\nconst Settings = () => <h3>Application Settings</h3>;\n\nconst AppRouter = () => {\n  return (\n    <Routes>\n      <Route path=\"/\" element={<h1>Home Page</h1>} />\n      {/* Parent route for dashboard layout and nested routes */}\n      <Route path=\"dashboard\" element={<DashboardLayout />}>\n        <Route index element={<DashboardHome />} /> {/* Renders at /dashboard */}\n        <Route path=\"profile\" element={<Profile />} /> {/* Renders at /dashboard/profile */}\n        <Route path=\"settings\" element={<Settings />} /> {/* Renders at /dashboard/settings */}\n      </Route>\n      <Route path=\"*\" element={<h2>404 Not Found</h2>} />\n    </Routes>\n  );\n};\n\nexport default AppRouter;\n```\n\nIn this example, `DashboardLayout` acts as the parent layout. When the URL matches `/dashboard` or any of its children (`/dashboard/profile`, `/dashboard/settings`), `DashboardLayout` is rendered, and the corresponding child component (`DashboardHome`, `Profile`, or `Settings`) is rendered inside the `<Outlet />` placeholder.",
+          "examples": [],
+          "relatedQuestions": [
+            "question_nested_routes_open_1",
+            "question_outlet_component_flashcard_1",
+            "question_layouts_mcq_1",
+            "question_implement_nested_dashboard_code_1"
+          ],
+          "relatedTasks": [
+            "task_implement_dashboard_layout",
+            "task_dynamic_nested_routes"
+          ],
+          "tags": [
+            "React Router",
+            "Nested Routes",
+            "Layouts",
+            "UI Architecture",
+            "Component Composition"
+          ],
+          "technology": "React",
+          "prerequisites": [
+            "react_functional_components",
+            "react_router_basics",
+            "react_hooks_basics"
+          ],
+          "complexity": 8,
+          "interviewRelevance": 9,
+          "learningPath": "advanced",
+          "requiredFor": [
+            "complex_spa_architecture",
+            "enterprise_applications",
+            "design_systems"
+          ]
+        }
+      ],
+      "questions": [
+        {
+          "id": "question_v5_v6_diff_mcq_1",
+          "topic": "React Router v5 vs. v6 Navigation",
+          "level": "medium",
+          "type": "mcq",
+          "question": "Which of the following best describes a key difference in programmatic navigation between React Router v5 and v6?",
+          "answer": "React Router v5 typically used the `Redirect` component for declarative navigation, while v6 introduced the `useNavigate` hook for imperative navigation.",
+          "options": [
+            "React Router v5 primarily used the `useHistory` hook, whereas v6 uses the `useLocation` hook for navigation.",
+            "React Router v5 typically used the `Redirect` component for declarative navigation, while v6 introduced the `useNavigate` hook for imperative navigation.",
+            "React Router v5 enforced client-side rendering for all routes, but v6 allows for server-side rendering by default.",
+            "React Router v5 supported nested routes, but v6 completely removed this feature in favor of flat routing."
+          ],
+          "analysisPoints": [
+            "Identifies the core shift from component-based (Redirect) to hook-based (useNavigate) navigation.",
+            "Distinguishes between declarative (rendering a component) and imperative (calling a function) navigation.",
+            "Highlights the move towards functional components and hooks in v6.",
+            "Incorrect options represent common misconceptions or unrelated features."
+          ],
+          "keyConcepts": [
+            "React Router v5 `Redirect`",
+            "React Router v6 `useNavigate` hook",
+            "Declarative vs. Imperative navigation",
+            "Class vs. Functional components"
+          ],
+          "evaluationCriteria": [
+            "Understanding of fundamental changes in React Router API between versions.",
+            "Ability to differentiate navigation patterns.",
+            "Knowledge of React Hooks adoption in routing."
+          ],
+          "example": "In React Router v5:\n```jsx\nimport { Redirect } from 'react-router-dom';\n// ... in a class component render method\nif (loggedIn) {\n  return <Redirect to=\"/dashboard\" />;\n}\n```\nIn React Router v6:\n```jsx\nimport { useNavigate } from 'react-router-dom';\n// ... in a functional component\nconst navigate = useNavigate();\n// ... inside an event handler or useEffect\nif (loggedIn) {\n  navigate('/dashboard');\n}\n```\nThis example clarifies how `Redirect` (v5) is a component that you render, while `useNavigate` (v6) provides a function that you call.",
+          "tags": [
+            "React Router",
+            "React Hooks",
+            "Navigation",
+            "v5 vs v6",
+            "MCQ"
+          ],
+          "prerequisites": [
+            "react_hooks_basics",
+            "react_router_basics"
+          ],
+          "complexity": 7,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_use_navigate_flashcard_1",
+          "topic": "React Router v6 Navigation",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "What React Router v6 hook is used for programmatic navigation?",
+          "answer": "`useNavigate`",
+          "options": [],
+          "analysisPoints": [],
+          "keyConcepts": [
+            "React Router v6",
+            "useNavigate",
+            "Hooks",
+            "Programmatic navigation"
+          ],
+          "evaluationCriteria": [
+            "Recall of React Router v6 API"
+          ],
+          "example": "",
+          "tags": [
+            "React Router",
+            "Hooks",
+            "Navigation",
+            "Flashcard"
+          ],
+          "prerequisites": [
+            "react_hooks_basics"
+          ],
+          "complexity": 4,
+          "interviewFrequency": 7,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_redirect_vs_navigate_open_1",
+          "topic": "React Router v5 vs. v6 Navigation",
+          "level": "medium",
+          "type": "open",
+          "question": "Explain the conceptual difference between using `Redirect` in React Router v5 and `useNavigate` (or `Navigate` component) in React Router v6 for handling navigation. Discuss why the shift was made and its implications for component design.",
+          "answer": "",
+          "options": [],
+          "analysisPoints": [
+            "Distinguish `Redirect` as a component that triggers navigation when rendered (declarative) vs. `useNavigate` as a hook providing a function for imperative navigation.",
+            "Mention `Navigate` component in v6 as the direct declarative equivalent to `Redirect`.",
+            "Discuss the tie-in with React's move towards functional components and hooks.",
+            "Explain how `useNavigate` allows for more flexible control over navigation within event handlers or `useEffect` hooks, separating concerns from render logic.",
+            "Consider implications on lifecycle methods for class components versus `useEffect` for functional components.",
+            "Discuss the benefits of `useNavigate` for testability and composability."
+          ],
+          "keyConcepts": [
+            "React Router v5 `Redirect`",
+            "React Router v6 `useNavigate`",
+            "Declarative vs. Imperative programming",
+            "React Hooks paradigm",
+            "Component lifecycle",
+            "Functional vs. Class components"
+          ],
+          "evaluationCriteria": [
+            "Depth of understanding of React Router's API evolution.",
+            "Ability to articulate the advantages of the Hooks paradigm.",
+            "Insight into how API design impacts application architecture.",
+            "Clear and concise explanation."
+          ],
+          "example": "",
+          "tags": [
+            "React Router",
+            "Hooks",
+            "Navigation",
+            "Architectural Patterns",
+            "Open-Ended"
+          ],
+          "prerequisites": [
+            "react_hooks_basics",
+            "react_router_basics",
+            "react_component_lifecycle"
+          ],
+          "complexity": 8,
+          "interviewFrequency": 9,
+          "learningPath": "advanced"
+        },
+        {
+          "id": "question_refactor_login_code_1",
+          "topic": "React Router v5 vs. v6 Navigation",
+          "level": "medium",
+          "type": "code",
+          "question": "Given the following React Router v5 login component, refactor it to use React Router v6 hooks (`useNavigate`, `useState`, `useEffect`). Ensure the authentication logic and navigation behavior remain the same.",
+          "answer": "```typescript\nimport React, { useState, useEffect } from 'react';\nimport { useNavigate } from 'react-router-dom';\n\nconst LoginPageV6Refactored = () => {\n  const navigate = useNavigate();\n  const [username, setUsername] = useState('');\n  const [password, setPassword] = useState('');\n  const [isLoggedIn, setIsLoggedIn] = useState(false);\n  \n  useEffect(() => {\n    if (isLoggedIn) {\n      navigate('/dashboard');\n    }\n  }, [isLoggedIn, navigate]);\n  \n  const handleLogin = () => {\n    // Original authentication logic\n    if (username === 'user' && password === 'pass') {\n      setIsLoggedIn(true);\n    } else {\n      alert('Invalid credentials');\n    }\n  };\n  \n  return (\n    <div>\n      <h2>Login Refactored (v6)</h2>\n      <input\n        type=\"text\"\n        value={username}\n        onChange={(e) => setUsername(e.target.value)}\n        placeholder=\"Username\"\n      />\n      <input\n        type=\"password\"\n        value={password}\n        onChange={(e) => setPassword(e.target.value)}\n        placeholder=\"Password\"\n      />\n      <button onClick={handleLogin}>Login</button>\n    </div>\n  );\n};\n\nexport default LoginPageV6Refactored;\n```",
+          "options": [],
+          "analysisPoints": [
+            "Correctly converts class component state (`this.state`) to functional component state (`useState`).",
+            "Correctly converts class methods (`handleInputChange`, `handleLogin`) to functional component handlers.",
+            "Replaces `Redirect` component with `useNavigate` hook within a `useEffect` to manage side effects (navigation).",
+            "Ensures correct dependency array for `useEffect` (`[isLoggedIn, navigate]`)."
+          ],
+          "keyConcepts": [
+            "React Hooks (`useState`, `useEffect`, `useNavigate`)",
+            "Class to Functional component refactoring",
+            "React Router v5 to v6 migration",
+            "Side effects in React"
+          ],
+          "evaluationCriteria": [
+            "Correct use of `useState` and `useEffect` for state and side effects.",
+            "Proper implementation of `useNavigate` for routing.",
+            "Maintenance of original functionality.",
+            "Adherence to React Hooks best practices."
+          ],
+          "example": "```jsx\n// Original React Router v5 Code:\nimport React, { Component } from 'react';\nimport { Redirect } from 'react-router-dom';\n\nclass LoginPage extends Component {\n  constructor(props) {\n    super(props);\n    this.state = {\n      username: '',\n      password: '',\n      isLoggedIn: false\n    };\n  }\n  handleInputChange = (e) => {\n    this.setState({\n      [e.target.name]: e.target.value\n    });\n  };\n  handleLogin = () => {\n    this.setState({ isLoggedIn: true }); // Simplified for example\n  };\n  render() {\n    if (this.state.isLoggedIn) {\n      return <Redirect to=\"/dashboard\" />;\n    } else {\n      return (\n        <div>\n          <input type=\"text\" name=\"username\" value={this.state.username} onChange={this.handleInputChange} placeholder=\"Username\"/>\n          <input type=\"password\" name=\"password\" value={this.state.password} onChange={this.handleInputChange} placeholder=\"Password\"/>\n          <button onClick={this.handleLogin}>Login</button>\n        </div>\n      );\n    }\n  }\n}\n```",
+          "tags": [
+            "React",
+            "React Router",
+            "Hooks",
+            "Refactoring",
+            "Code Challenge"
+          ],
+          "prerequisites": [
+            "react_hooks_basics",
+            "react_router_basics",
+            "react_class_components"
+          ],
+          "complexity": 7,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_router_composition_mcq_1",
+          "topic": "React Router v5 vs. v6",
+          "level": "medium",
+          "type": "mcq",
+          "question": "React Router v6 primarily advocates for which pattern for defining routes and their child content, as opposed to the pattern often seen in v5?",
+          "answer": "Component composition with the `children` prop and `element` prop.",
+          "options": [
+            "Render props pattern with the `component` prop.",
+            "Higher-Order Components (HOCs) for route wrapping.",
+            "Context API for global route state management.",
+            "Component composition with the `children` prop and `element` prop."
+          ],
+          "analysisPoints": [
+            "Highlights the shift from render props (common in v5 with `Route`'s `component` or `render` props) to a more direct component composition approach (`element` prop) in v6.",
+            "Emphasizes the use of `children` for nested routes within `Routes` or `Route` components.",
+            "Distinguishes `element` prop in v6 from `component` or `render` in v5."
+          ],
+          "keyConcepts": [
+            "React Router v6 `element` prop",
+            "Component composition",
+            "Render props",
+            "React Router v5 patterns"
+          ],
+          "evaluationCriteria": [
+            "Understanding of core API changes in React Router v6.",
+            "Knowledge of common React design patterns (composition vs. render props).",
+            "Ability to identify the idiomatic way of defining routes in v6."
+          ],
+          "example": "In React Router v5:\n```jsx\n<Route path=\"/users\" component={UsersPage} />\n<Route path=\"/products\" render={() => <ProductsPage />} />\n```\nIn React Router v6:\n```jsx\n<Route path=\"/users\" element={<UsersPage />} />\n<Route path=\"/products\" element={<ProductsPage />} />\n```\nThis example clearly shows the shift from `component`/`render` props to the `element` prop in v6, which aligns with standard component composition.",
+          "tags": [
+            "React Router",
+            "v5 vs v6",
+            "Component Composition",
+            "Patterns",
+            "MCQ"
+          ],
+          "prerequisites": [
+            "react_component_props",
+            "react_router_basics"
+          ],
+          "complexity": 6,
+          "interviewFrequency": 7,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_conventional_vs_react_routing_mcq_1",
+          "topic": "React Router vs. Conventional Routing",
+          "level": "medium",
+          "type": "mcq",
+          "question": "Which statement accurately describes a key difference in performance between conventional (server-side) routing and React Router (client-side routing)?",
+          "answer": "React Router offers faster transitions due to seamless content updates without full page reloads, unlike conventional routing.",
+          "options": [
+            "Conventional routing is generally faster due to optimized server responses, while React Router always incurs a large initial load.",
+            "React Router requires a full page reload for every URL change, which is similar to conventional routing performance.",
+            "React Router offers faster transitions due to seamless content updates without full page reloads, unlike conventional routing.",
+            "Conventional routing benefits from better caching mechanisms natively, making it superior for repeated visits."
+          ],
+          "analysisPoints": [
+            "Highlights the core performance advantage of SPAs (client-side routing) – avoidance of full page reloads.",
+            "Contrasts the 'seamless transitions' of React Router with the 'page reloads' of conventional routing.",
+            "Correctly identifies that initial load can be larger for SPAs, but subsequent navigation is faster.",
+            "Addresses a common misconception about caching and performance."
+          ],
+          "keyConcepts": [
+            "Conventional Routing",
+            "React Router",
+            "SPA (Single-Page Application)",
+            "Page Reloads",
+            "Performance",
+            "User Experience"
+          ],
+          "evaluationCriteria": [
+            "Understanding of the fundamental performance characteristics of client-side vs. server-side routing.",
+            "Ability to compare user experience implications.",
+            "Recognition of the SPA benefit."
+          ],
+          "example": "Consider navigating from a 'Home' page to an 'About' page.\n*   **Conventional Routing:** Browser sends a request to `server.com/about`, server processes, sends back `about.html`, browser renders `about.html` (full reload).\n*   **React Router:** Browser uses `history.pushState('/about')`, React Router detects path change, renders `<AboutPage />` component without fetching new HTML (seamless transition).\nThis fundamental difference is why client-side routing generally feels faster for subsequent navigations.",
+          "tags": [
+            "Routing",
+            "SPA",
+            "Performance",
+            "Web Architecture",
+            "MCQ"
+          ],
+          "prerequisites": [
+            "web_basics_http"
+          ],
+          "complexity": 7,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_spa_performance_open_1",
+          "topic": "React Router vs. Conventional Routing",
+          "level": "medium",
+          "type": "open",
+          "question": "Discuss the performance implications of using React Router for a Single-Page Application (SPA) compared to a traditional Multi-Page Application (MPA) using conventional routing. Consider both initial page load and subsequent navigations.",
+          "answer": "",
+          "options": [],
+          "analysisPoints": [
+            "**Initial Load (MPA vs. SPA):** MPAs might have faster initial content rendering due to server-side rendering, while SPAs often have a larger initial bundle size as all (or most) app code is downloaded upfront, potentially leading to a slower 'time to interactive'.",
+            "**Subsequent Navigations (MPA vs. SPA):** SPAs significantly outperform MPAs here. MPAs require a full page reload and re-fetching of all assets (HTML, CSS, JS) for each navigation. SPAs, once loaded, only fetch necessary data (e.g., JSON from API) and dynamically update components, resulting in 'seamless transitions' and faster user experience.",
+            "**Perceived Performance:** SPAs often feel faster due to smooth transitions and lack of full page flashes.",
+            "**Network Load:** SPAs reduce repeated network requests for static assets, saving bandwidth on subsequent navigations.",
+            "**Optimization Techniques:** Mention techniques like code splitting and lazy loading in SPAs to mitigate initial load issues, and server-side rendering/static site generation to improve first paint."
+          ],
+          "keyConcepts": [
+            "SPA Performance",
+            "MPA Performance",
+            "Initial Load",
+            "Subsequent Navigation",
+            "Client-Side Rendering",
+            "Server-Side Rendering",
+            "Code Splitting",
+            "Perceived Performance"
+          ],
+          "evaluationCriteria": [
+            "Comprehensive understanding of performance factors.",
+            "Ability to compare and contrast effectively.",
+            "Knowledge of optimization strategies for SPAs.",
+            "Structured and clear explanation."
+          ],
+          "example": "",
+          "tags": [
+            "SPA",
+            "Performance",
+            "Web Architecture",
+            "Optimization",
+            "Open-Ended"
+          ],
+          "prerequisites": [
+            "web_performance_basics",
+            "spa_concepts"
+          ],
+          "complexity": 8,
+          "interviewFrequency": 9,
+          "learningPath": "advanced"
+        },
+        {
+          "id": "question_seo_spa_flashcard_1",
+          "topic": "React Router & SEO",
+          "level": "medium",
+          "type": "flashcard",
+          "question": "What is the primary challenge for SEO in Single-Page Applications (SPAs) that use client-side routing like React Router, and what are common solutions?",
+          "answer": "Primary Challenge: Search engine crawlers traditionally prefer fully rendered HTML content. SPAs often serve a minimal HTML file that relies on JavaScript to build the content, which can make it difficult for crawlers to index all content.\n\nCommon Solutions: Server-Side Rendering (SSR), Static Site Generation (SSG), Pre-rendering, or Dynamic Rendering.",
+          "options": [],
+          "analysisPoints": [],
+          "keyConcepts": [
+            "SPA SEO",
+            "Crawling",
+            "Indexing",
+            "SSR",
+            "SSG",
+            "Pre-rendering"
+          ],
+          "evaluationCriteria": [
+            "Recall of SPA SEO challenges and solutions"
+          ],
+          "example": "",
+          "tags": [
+            "SEO",
+            "SPA",
+            "React Router",
+            "Flashcard"
+          ],
+          "prerequisites": [
+            "seo_basics",
+            "spa_concepts"
+          ],
+          "complexity": 6,
+          "interviewFrequency": 7,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_url_changes_flashcard_1",
+          "topic": "React Router vs. Conventional Routing",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "When navigating in a React Router application, what changes in the browser's URL, and what does NOT happen, compared to conventional routing?",
+          "answer": "Only the History attribute (URL path) is changed; a full HTTP request to the server is NOT sent.",
+          "options": [],
+          "analysisPoints": [],
+          "keyConcepts": [
+            "History API",
+            "URL changes",
+            "HTTP requests",
+            "Client-side routing"
+          ],
+          "evaluationCriteria": [
+            "Understanding of how client-side routing works"
+          ],
+          "example": "",
+          "tags": [
+            "React Router",
+            "Routing",
+            "URL",
+            "Flashcard"
+          ],
+          "prerequisites": [
+            "web_basics_http"
+          ],
+          "complexity": 4,
+          "interviewFrequency": 6,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_spa_pros_cons_open_1",
+          "topic": "React Router vs. Conventional Routing",
+          "level": "hard",
+          "type": "open",
+          "question": "Beyond the points mentioned in the comparison table, elaborate on the broader pros and cons of adopting a Single-Page Application (SPA) architecture with client-side routing (like React Router) versus a Multi-Page Application (MPA) with conventional server-side routing. Consider developer experience, scalability, and specific use cases.",
+          "answer": "",
+          "options": [],
+          "analysisPoints": [
+            "**SPA Pros:** Richer user experience (desktop-app like), faster subsequent page loads, easier development with strong frontend frameworks (React, Angular, Vue), better API integration (frontend decouples from backend), potential for offline capabilities.",
+            "**SPA Cons:** Slower initial load times (large JS bundle), SEO challenges, memory leaks (if not managed well), browser history management complexities (handled by routers), requires JavaScript to be enabled.",
+            "**MPA Pros:** Better SEO out-of-the-box, faster initial page load (for simple pages), simpler browser history, easier to build small, content-focused sites.",
+            "**MPA Cons:** Slower transitions (full page reloads), less dynamic user experience, increased server load, more complex state management across pages.",
+            "**Developer Experience:** SPAs often lead to a more streamlined dev experience for complex UIs, leveraging component-based architecture. MPAs might be simpler for basic content sites.",
+            "**Scalability:** Both can scale. SPAs scale by scaling API servers and static file servers. MPAs scale by scaling web servers and database.",
+            "**Use Cases:** SPAs are ideal for dashboards, social networks, complex interactive tools. MPAs are good for blogs, e-commerce (though many hybrid now), simple informational websites."
+          ],
+          "keyConcepts": [
+            "SPA",
+            "MPA",
+            "Client-side Routing",
+            "Server-side Routing",
+            "Developer Experience",
+            "Scalability",
+            "Use Cases",
+            "SEO"
+          ],
+          "evaluationCriteria": [
+            "Demonstrates comprehensive understanding of web application architectures.",
+            "Ability to analyze trade-offs for different development scenarios.",
+            "Critical thinking on non-technical and technical implications.",
+            "Well-structured and detailed answer."
+          ],
+          "example": "",
+          "tags": [
+            "SPA",
+            "MPA",
+            "Architecture",
+            "Web Development",
+            "Open-Ended"
+          ],
+          "prerequisites": [
+            "web_architecture_patterns",
+            "frontend_development_principles"
+          ],
+          "complexity": 9,
+          "interviewFrequency": 9,
+          "learningPath": "expert"
+        },
+        {
+          "id": "question_nested_routes_open_1",
+          "topic": "Advanced React Router: Nested Routes",
+          "level": "medium",
+          "type": "open",
+          "question": "Describe the concept of 'nested routes' in React Router. Why are they beneficial for structuring a complex React application, and how does the `Outlet` component facilitate this in React Router v6?",
+          "answer": "",
+          "options": [],
+          "analysisPoints": [
+            "**Concept:** Nested routes allow you to define routes within other routes, creating a hierarchical URL structure that mirrors the UI's component hierarchy.",
+            "**Benefits:** Promotes modularity (parent components manage shared UI, children fill in details), improves code organization, enables consistent layouts, allows for progressive loading of child components, and simplifies complex navigation paths.",
+            "**`Outlet` Component:** Explains that `Outlet` acts as a placeholder within a parent route's element where its matched child route's component will be rendered. It signals where the nested UI content should be injected.",
+            "**Example Scenario:** Use a dashboard with various sections (profile, settings, reports) as an example to illustrate the utility of nested routes and a common layout."
+          ],
+          "keyConcepts": [
+            "Nested Routes",
+            "React Router v6",
+            "Outlet Component",
+            "UI Architecture",
+            "Component Hierarchy",
+            "Modularity"
+          ],
+          "evaluationCriteria": [
+            "Clear definition of nested routes.",
+            "Identification of practical benefits in application design.",
+            "Correct explanation of `Outlet`'s role.",
+            "Ability to connect concepts to real-world application structures."
+          ],
+          "example": "",
+          "tags": [
+            "React Router",
+            "Nested Routes",
+            "UI Architecture",
+            "Open-Ended"
+          ],
+          "prerequisites": [
+            "react_router_basics",
+            "component_composition"
+          ],
+          "complexity": 7,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_outlet_component_flashcard_1",
+          "topic": "Advanced React Router: Nested Routes",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "In React Router v6, what is the purpose of the `<Outlet />` component?",
+          "answer": "The `<Outlet />` component is used within a parent route's element to render the matched child route's component. It acts as a placeholder for nested UI.",
+          "options": [],
+          "analysisPoints": [],
+          "keyConcepts": [
+            "Outlet",
+            "React Router v6",
+            "Nested Routes",
+            "Layouts",
+            "Placeholder"
+          ],
+          "evaluationCriteria": [
+            "Recall of `Outlet`'s function"
+          ],
+          "example": "",
+          "tags": [
+            "React Router",
+            "Outlet",
+            "Nested Routes",
+            "Flashcard"
+          ],
+          "prerequisites": [
+            "react_router_basics"
+          ],
+          "complexity": 4,
+          "interviewFrequency": 7,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_layouts_mcq_1",
+          "topic": "Advanced React Router: Layouts",
+          "level": "medium",
+          "type": "mcq",
+          "question": "Which of the following is NOT a primary benefit of implementing shared layouts using nested routes in React Router?",
+          "answer": "Eliminates the need for API calls for dynamic content.",
+          "options": [
+            "Ensures consistent UI elements like headers and footers across multiple pages.",
+            "Promotes code reusability by avoiding duplication of common UI components.",
+            "Simplifies state management across different route components.",
+            "Eliminates the need for API calls for dynamic content."
+          ],
+          "analysisPoints": [
+            "Correctly identifies that layouts provide UI consistency and reusability.",
+            "Recognizes that layouts are about UI structure, not data fetching or state management (though they might house components that do these).",
+            "The incorrect option describes a data-fetching concern, not a layout benefit.",
+            "State management might be *influenced* by layouts (e.g., global state in a layout), but it's not a direct *benefit* of the layout pattern itself in the same way consistency and reusability are."
+          ],
+          "keyConcepts": [
+            "Layouts",
+            "Nested Routes",
+            "Component Reusability",
+            "UI Consistency",
+            "API Calls"
+          ],
+          "evaluationCriteria": [
+            "Understanding of the purpose and advantages of application layouts.",
+            "Ability to distinguish between UI structuring concerns and data concerns.",
+            "Critical evaluation of proposed benefits."
+          ],
+          "example": "A common layout in a dashboard includes a fixed sidebar and header. All dashboard sub-pages (e.g., '/dashboard/profile', '/dashboard/settings') share this sidebar and header, with only the main content area changing. This ensures consistent navigation and branding without duplicating the sidebar/header code for each sub-page. However, the layout itself doesn't magically fetch data; components within the layout or nested routes still handle their own data needs.",
+          "tags": [
+            "React Router",
+            "Layouts",
+            "UI Architecture",
+            "MCQ"
+          ],
+          "prerequisites": [
+            "react_router_basics",
+            "component_composition"
+          ],
+          "complexity": 7,
+          "interviewFrequency": 7,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_implement_nested_dashboard_code_1",
+          "topic": "Advanced React Router: Nested Routes and Layouts",
+          "level": "hard",
+          "type": "code",
+          "question": "Implement a simplified dashboard structure using React Router v6. It should have a main `DashboardLayout` component that includes a navigation bar (e.g., 'Overview', 'Reports', 'Settings') and an `<Outlet />`. When navigating to `/dashboard`, `/dashboard/reports`, or `/dashboard/settings`, the `DashboardLayout` should remain visible, and the corresponding child component (`DashboardOverview`, `DashboardReports`, `DashboardSettings`) should render within the layout's `Outlet`.",
+          "answer": "```typescript\nimport React from 'react';\nimport { Routes, Route, Outlet, Link, BrowserRouter } from 'react-router-dom';\n\n// 1. Dashboard Layout Component\nconst DashboardLayout = () => (\n  <div style={{ display: 'flex', height: '100vh' }}>\n    <nav style={{ padding: '20px', borderRight: '1px solid #ccc', minWidth: '150px' }}>\n      <h3>Dashboard Nav</h3>\n      <ul>\n        <li><Link to=\"/dashboard\">Overview</Link></li>\n        <li><Link to=\"reports\">Reports</Link></li>\n        <li><Link to=\"settings\">Settings</Link></li>\n      </ul>\n    </nav>\n    <main style={{ flexGrow: 1, padding: '20px' }}>\n      {/* 2. The Outlet component renders the matched child route */}\n      <Outlet /> \n    </main>\n  </div>\n);\n\n// 3. Child Components\nconst DashboardOverview = () => (\n  <div>\n    <h2>Dashboard Overview</h2>\n    <p>Welcome to your dashboard overview.</p>\n  </div>\n);\n\nconst DashboardReports = () => (\n  <div>\n    <h2>Reports</h2>\n    <p>View your performance reports here.</p>\n  </div>\n);\n\nconst DashboardSettings = () => (\n  <div>\n    <h2>Settings</h2>\n    <p>Manage your account settings.</p>\n  </div>\n);\n\n// Main App Component for Routing\nconst App = () => (\n  <BrowserRouter>\n    <Routes>\n      {/* Route for the Dashboard Layout and its children */}\n      <Route path=\"/dashboard\" element={<DashboardLayout />}>\n        {/* Index route for /dashboard */}\n        <Route index element={<DashboardOverview />} />\n        {/* Nested routes for /dashboard/reports and /dashboard/settings */}\n        <Route path=\"reports\" element={<DashboardReports />} />\n        <Route path=\"settings\" element={<DashboardSettings />} />\n      </Route>\n      {/* A simple home page */}\n      <Route path=\"/\" element={<h1>Welcome to the App!</h1>} />\n      {/* Catch-all for unmatched routes */}\n      <Route path=\"*\" element={<h2>404 Not Found</h2>} />\n    </Routes>\n  </BrowserRouter>\n);\n\nexport default App;\n```",
+          "options": [],
+          "analysisPoints": [
+            "Correctly sets up `BrowserRouter` and `Routes`.",
+            "Defines a parent `Route` (`/dashboard`) that renders `DashboardLayout`.",
+            "Integrates `<Outlet />` within `DashboardLayout`.",
+            "Defines nested `Route` components within the parent `Route` for each dashboard section.",
+            "Uses `index` prop for the default child route when the parent path is matched exactly.",
+            "Uses relative paths (`reports`, `settings`) for nested routes, which implicitly become `/dashboard/reports`, `/dashboard/settings`."
+          ],
+          "keyConcepts": [
+            "React Router v6",
+            "Nested Routes",
+            "Layouts",
+            "Outlet Component",
+            "BrowserRouter",
+            "Routes Component",
+            "Route Component",
+            "Index Route"
+          ],
+          "evaluationCriteria": [
+            "Ability to implement hierarchical routing structure.",
+            "Correct usage of `Outlet` for layout integration.",
+            "Proper definition of `Routes` and `Route` components for nesting.",
+            "Demonstrates understanding of index routes and relative paths.",
+            "Code correctness and readability."
+          ],
+          "example": "",
+          "tags": [
+            "React Router",
+            "Nested Routes",
+            "Layouts",
+            "Code Challenge",
+            "UI Architecture"
+          ],
+          "prerequisites": [
+            "react_router_basics",
+            "component_composition"
+          ],
+          "complexity": 8,
+          "interviewFrequency": 9,
+          "learningPath": "advanced"
+        }
+      ],
+      "tasks": [
+        {
+          "id": "task_refactor_login_component",
+          "title": "Refactor React Router v5 Login to v6 Hooks",
+          "description": "\nYour task is to refactor an existing React Router v5 class component for login into a React Router v6 functional component using hooks. The component should still handle user input for username and password, simulate an authentication process, and upon successful 'login' (setting `isLoggedIn` to true), navigate the user to a `/dashboard` route.\n\n**Requirements:**\n1.  Convert the `LoginPage` from a class component to a functional component.\n2.  Replace `this.state` with `useState` hooks for `username`, `password`, and `isLoggedIn`.\n3.  Replace `this.handleInputChange` with inline or separate event handlers using `useState` setters.\n4.  Replace the `Redirect` component with the `useNavigate` hook for navigation.\n5.  Ensure the navigation logic is triggered correctly after a simulated successful login.\n6.  Maintain the same visual UI (input fields, button, heading) and basic authentication logic.\n",
+          "difficulty": "medium",
+          "startingCode": "import React, { Component } from 'react';\nimport { Redirect } from 'react-router-dom';\n\n// DO NOT MODIFY THIS COMPONENT DIRECTLY. Refactor it into a new functional component.\nclass LoginPageV5Old extends Component {\n  constructor(props) {\n    super(props);\n    this.state = {\n      username: '',\n      password: '',\n      isLoggedIn: false\n    };\n  }\n\n  handleInputChange = (e) => {\n    this.setState({\n      [e.target.name]: e.target.value\n    });\n  };\n\n  handleLogin = () => {\n    // Simulate authentication logic\n    // In a real app, this would be an API call\n    if (this.state.username === 'user' && this.state.password === 'pass') {\n      this.setState({ isLoggedIn: true });\n    } else {\n      alert('Invalid credentials');\n    }\n  };\n\n  render() {\n    if (this.state.isLoggedIn) {\n      return <Redirect to=\"/dashboard\" />;\n    } else {\n      return (\n        <div>\n          <h2>Login</h2>\n          <input \n            type=\"text\" \n            name=\"username\" \n            value={this.state.username} \n            onChange={this.handleInputChange} \n            placeholder=\"Username\"\n          />\n          <input \n            type=\"password\" \n            name=\"password\" \n            value={this.state.password} \n            onChange={this.handleInputChange} \n            placeholder=\"Password\"\n          />\n          <button onClick={this.handleLogin}>Login</button>\n        </div>\n      );\n    }\n  }\n}\n\n// --- Your Refactored Component Below ---\n\n// export default LoginPageV6;\n\n// Add a mock Dashboard component for testing\n// const Dashboard = () => <h2>Welcome to Dashboard!</h2>;\n\n// You will also need to set up a basic router structure in your App.js or similar file for testing:\n/*\nimport { BrowserRouter, Routes, Route } from 'react-router-dom';\n\nfunction App() {\n  return (\n    <BrowserRouter>\n      <Routes>\n        <Route path=\"/\" element={<LoginPageV6 />} />\n        <Route path=\"/dashboard\" element={<Dashboard />} />\n      </Routes>\n    </BrowserRouter>\n  );\n}\n*/",
+          "solutionCode": "import React, { useState, useEffect } from 'react';\nimport { useNavigate } from 'react-router-dom';\n\nconst LoginPageV6 = () => {\n  const navigate = useNavigate();\n  const [username, setUsername] = useState('');\n  const [password, setPassword] = useState('');\n  const [isLoggedIn, setIsLoggedIn] = useState(false);\n  \n  useEffect(() => {\n    if (isLoggedIn) {\n      navigate('/dashboard');\n    }\n    // 'navigate' is stable in React Router v6, but including it is harmless\n    // and satisfies exhaustive-deps lint rule if not configured otherwise.\n  }, [isLoggedIn, navigate]); \n  \n  const handleLogin = () => {\n    // Simulate authentication logic\n    if (username === 'user' && password === 'pass') {\n      setIsLoggedIn(true);\n    } else {\n      alert('Invalid credentials');\n    }\n  };\n  \n  return (\n    <div>\n      <h2>Login (Refactored to v6)</h2>\n      <input\n        type=\"text\"\n        value={username}\n        onChange={(e) => setUsername(e.target.value)}\n        placeholder=\"Username\"\n      />\n      <input\n        type=\"password\"\n        value={password}\n        onChange={(e) => setPassword(e.target.value)}\n        placeholder=\"Password\"\n      />\n      <button onClick={handleLogin}>Login</button>\n    </div>\n  );\n};\n\nexport default LoginPageV6;\n\n// Mock Dashboard component for testing context\nexport const Dashboard = () => <h2>Welcome to Dashboard!</h2>;\n\n/* Example App setup for testing:\nimport { BrowserRouter, Routes, Route } from 'react-router-dom';\nimport LoginPageV6, { Dashboard } from './LoginPageV6'; // Assuming the file is named LoginPageV6.js\n\nfunction App() {\n  return (\n    <BrowserRouter>\n      <Routes>\n        <Route path=\"/\" element={<LoginPageV6 />} />\n        <Route path=\"/dashboard\" element={<Dashboard />} />\n      </Routes>\n    </BrowserRouter>\n  );\n}\n\nexport default App;\n*/\n",
+          "testCases": [
+            "Initial render: Login form should be displayed.",
+            "Input changes: Typing in username/password fields should update the component's state correctly.",
+            "Successful login: After entering 'user'/'pass' and clicking Login, the user should be redirected to '/dashboard'.",
+            "Failed login: After entering incorrect credentials, an alert should be shown, and no redirection should occur."
+          ],
+          "hints": [
+            "Remember to import `useState`, `useEffect`, and `useNavigate` from `react` and `react-router-dom` respectively.",
+            "State variables in functional components are managed using `useState`.",
+            "Side effects like navigation after a state change should be handled within a `useEffect` hook.",
+            "The `useNavigate` hook provides a function that you call to navigate, rather than rendering a component."
+          ],
+          "tags": [
+            "React",
+            "React Router",
+            "Hooks",
+            "Refactoring",
+            "Migration",
+            "Functional Components"
+          ],
+          "timeEstimate": 45,
+          "prerequisites": [
+            "react_hooks_basics",
+            "react_class_components",
+            "react_router_basics"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 8,
+          "learningPath": "intermediate",
+          "relatedConcepts": [
+            "theory_react_router_v5_vs_v6_navigation"
+          ]
+        },
+        {
+          "id": "task_implement_auth_navigation",
+          "title": "Implement User Authentication Flow with Conditional Routing",
+          "description": "\nBuild a simple React application using React Router v6 that demonstrates conditional routing based on user authentication status. The application should have:\n\n1.  A `LoginPage` component (similar to the one in the theory) that allows users to 'log in' (e.g., by setting a `isLoggedIn` state). This component should redirect to `/dashboard` upon successful login.\n2.  A `DashboardPage` component that is only accessible if the user is 'logged in'. If an unauthenticated user tries to access `/dashboard` directly, they should be redirected back to `/login`.\n3.  A `HomePage` component accessible to everyone.\n4.  A navigation bar with links to `Home`, `Login`, and `Dashboard`.\n\n**Requirements:**\n*   Use `useNavigate` for imperative navigation.\n*   Implement a `useEffect` hook to handle the redirection logic after login.\n*   Implement a protected route mechanism for the `DashboardPage` (e.g., using a wrapper component or conditional rendering within `element` prop).\n*   Use a global state (e.g., React Context or just lifting state up to `App` component) to manage authentication status, accessible by `LoginPage` and the protected route logic.\n",
+          "difficulty": "medium",
+          "startingCode": "import React, { useState, useEffect, createContext, useContext } from 'react';\nimport { BrowserRouter, Routes, Route, useNavigate, Link, Navigate } from 'react-router-dom';\n\n// Create an AuthContext to manage authentication state globally\nconst AuthContext = createContext(null);\n\n// Auth Provider component to wrap the application\nconst AuthProvider = ({ children }) => {\n  const [isLoggedIn, setIsLoggedIn] = useState(false);\n  \n  const login = () => setIsLoggedIn(true);\n  const logout = () => setIsLoggedIn(false);\n  \n  const authContextValue = { isLoggedIn, login, logout };\n  \n  return (\n    <AuthContext.Provider value={authContextValue}>\n      {children}\n    </AuthContext.Provider>\n  );\n};\n\n// 1. HomePage component\nconst HomePage = () => {\n  const { isLoggedIn } = useContext(AuthContext);\n  return (\n    <div>\n      <h2>Home Page</h2>\n      <p>Welcome! You are {isLoggedIn ? 'logged in.' : 'not logged in.'}</p>\n    </div>\n  );\n};\n\n// 2. LoginPage component - needs implementation for login logic and navigation\nconst LoginPage = () => {\n  const navigate = useNavigate();\n  const { isLoggedIn, login } = useContext(AuthContext);\n  const [username, setUsername] = useState('');\n  const [password, setPassword] = useState('');\n\n  useEffect(() => {\n    if (isLoggedIn) {\n      navigate('/dashboard');\n    }\n  }, [isLoggedIn, navigate]);\n\n  const handleLogin = () => {\n    // TODO: Implement actual login logic. For now, simulate success.\n    if (username === 'user' && password === 'pass') {\n      login(); // Call login from context\n    } else {\n      alert('Invalid credentials');\n    }\n  };\n\n  return (\n    <div>\n      <h2>Login Page</h2>\n      <input\n        type=\"text\"\n        value={username}\n        onChange={(e) => setUsername(e.target.value)}\n        placeholder=\"Username\"\n      />\n      <input\n        type=\"password\"\n        value={password}\n        onChange={(e) => setPassword(e.target.value)}\n        placeholder=\"Password\"\n      />\n      <button onClick={handleLogin}>Login</button>\n    </div>\n  );\n};\n\n// 3. DashboardPage component - needs implementation for protected access\nconst DashboardPage = () => {\n  const { logout } = useContext(AuthContext);\n  return (\n    <div>\n      <h2>Dashboard Page</h2>\n      <p>This is a protected dashboard.</p>\n      <button onClick={logout}>Logout</button>\n    </div>\n  );\n};\n\n// ProtectedRoute Wrapper - needs implementation for redirection logic\nconst ProtectedRoute = ({ children }) => {\n  const { isLoggedIn } = useContext(AuthContext);\n  // TODO: Implement logic to redirect to /login if not authenticated\n  // return children or <Navigate to=\"/login\" replace />\n  return null; // Placeholder\n};\n\n// Main App component to set up routes\nconst App = () => {\n  return (\n    <BrowserRouter>\n      <AuthProvider>\n        <nav>\n          <Link to=\"/\">Home</Link> | \n          <Link to=\"/login\">Login</Link> | \n          <Link to=\"/dashboard\">Dashboard</Link>\n        </nav>\n        <hr/>\n        <Routes>\n          <Route path=\"/\" element={<HomePage />} />\n          <Route path=\"/login\" element={<LoginPage />} />\n          {/* Dashboard route needs to be protected */}\n          <Route path=\"/dashboard\" element={\n            <ProtectedRoute>\n              <DashboardPage />\n            </ProtectedRoute>\n          } />\n          <Route path=\"*\" element={<h2>404 Not Found</h2>} />\n        </Routes>\n      </AuthProvider>\n    </BrowserRouter>\n  );\n};\n\nexport default App;\n",
+          "solutionCode": "import React, { useState, useEffect, createContext, useContext } from 'react';\nimport { BrowserRouter, Routes, Route, useNavigate, Link, Navigate } from 'react-router-dom';\n\n// Create an AuthContext to manage authentication state globally\nconst AuthContext = createContext(null);\n\n// Auth Provider component to wrap the application\nconst AuthProvider = ({ children }) => {\n  const [isLoggedIn, setIsLoggedIn] = useState(false);\n  \n  const login = () => setIsLoggedIn(true);\n  const logout = () => setIsLoggedIn(false);\n  \n  const authContextValue = { isLoggedIn, login, logout };\n  \n  return (\n    <AuthContext.Provider value={authContextValue}>\n      {children}\n    </AuthContext.Provider>\n  );\n};\n\n// HomePage component\nconst HomePage = () => {\n  const { isLoggedIn } = useContext(AuthContext);\n  return (\n    <div>\n      <h2>Home Page</h2>\n      <p>Welcome! You are {isLoggedIn ? 'logged in.' : 'not logged in.'}</p>\n    </div>\n  );\n};\n\n// LoginPage component\nconst LoginPage = () => {\n  const navigate = useNavigate();\n  const { isLoggedIn, login } = useContext(AuthContext);\n  const [username, setUsername] = useState('');\n  const [password, setPassword] = useState('');\n\n  useEffect(() => {\n    if (isLoggedIn) {\n      navigate('/dashboard', { replace: true }); // Use replace to prevent back button to login\n    }\n  }, [isLoggedIn, navigate]);\n\n  const handleLogin = () => {\n    // Implement actual login logic here (e.g., API call)\n    // For this task, we simulate success for 'user'/'pass'\n    if (username === 'user' && password === 'pass') {\n      login(); // Call login from context\n    } else {\n      alert('Invalid credentials');\n    }\n  };\n\n  return (\n    <div>\n      <h2>Login Page</h2>\n      <input\n        type=\"text\"\n        value={username}\n        onChange={(e) => setUsername(e.target.value)}\n        placeholder=\"Username\"\n      />\n      <input\n        type=\"password\"\n        value={password}\n        onChange={(e) => setPassword(e.target.value)}\n        placeholder=\"Password\"\n      />\n      <button onClick={handleLogin}>Login</button>\n    </div>\n  );\n};\n\n// DashboardPage component\nconst DashboardPage = () => {\n  const { logout } = useContext(AuthContext);\n  return (\n    <div>\n      <h2>Dashboard Page</h2>\n      <p>This is a protected dashboard.</p>\n      <button onClick={logout}>Logout</button>\n    </div>\n  );\n};\n\n// ProtectedRoute Wrapper\nconst ProtectedRoute = ({ children }) => {\n  const { isLoggedIn } = useContext(AuthContext);\n  if (!isLoggedIn) {\n    // Redirect to login if not authenticated\n    return <Navigate to=\"/login\" replace />;\n  }\n  return children;\n};\n\n// Main App component to set up routes\nconst App = () => {\n  return (\n    <BrowserRouter>\n      <AuthProvider>\n        <nav style={{ padding: '10px', backgroundColor: '#f0f0f0' }}>\n          <Link to=\"/\" style={{ margin: '0 10px' }}>Home</Link>\n          <Link to=\"/login\" style={{ margin: '0 10px' }}>Login</Link>\n          <Link to=\"/dashboard\" style={{ margin: '0 10px' }}>Dashboard</Link>\n        </nav>\n        <hr/>\n        <Routes>\n          <Route path=\"/\" element={<HomePage />} />\n          <Route path=\"/login\" element={<LoginPage />} />\n          {/* Dashboard route is protected using the ProtectedRoute component */}\n          <Route path=\"/dashboard\" element={\n            <ProtectedRoute>\n              <DashboardPage />\n            </ProtectedRoute>\n          } />\n          <Route path=\"*\" element={<h2>404 Not Found</h2>} />\n        </Routes>\n      </AuthProvider>\n    </BrowserRouter>\n  );\n};\n\nexport default App;\n",
+          "testCases": [
+            "Initial state: User is not logged in. Navigating to '/' shows HomePage. Navigating to '/login' shows LoginPage. Navigating to '/dashboard' should redirect to '/login'.",
+            "Successful Login: After logging in with 'user'/'pass' on '/login' page, the app should navigate to '/dashboard'. `isLoggedIn` should be true.",
+            "Post-Login Navigation: After logging in, user can navigate between '/home' and '/dashboard' freely. Attempting to go back to '/login' should not be possible (or redirect to dashboard if `replace` used).",
+            "Logout: Clicking 'Logout' on the DashboardPage should set `isLoggedIn` to false and potentially redirect to '/login' or '/home'. Subsequent attempt to access '/dashboard' should redirect to '/login'.",
+            "Invalid Login: Entering incorrect credentials on login page should display an alert and not redirect."
+          ],
+          "hints": [
+            "Use React Context API to manage the `isLoggedIn` state globally, so both `LoginPage` and `ProtectedRoute` can access it.",
+            "The `ProtectedRoute` component can conditionally render its `children` or a `Navigate` component based on the `isLoggedIn` status.",
+            "Remember to pass `replace: true` to `navigate()` or use the `<Navigate replace />` component when redirecting after login to prevent the user from going back to the login page via the browser's back button.",
+            "The `useEffect` hook in `LoginPage` is ideal for handling the navigation side effect after the `isLoggedIn` state changes."
+          ],
+          "tags": [
+            "React",
+            "React Router",
+            "Authentication",
+            "Conditional Routing",
+            "React Context",
+            "Hooks"
+          ],
+          "timeEstimate": 60,
+          "prerequisites": [
+            "react_hooks_basics",
+            "react_context_api",
+            "react_router_basics"
+          ],
+          "complexity": 8,
+          "interviewRelevance": 9,
+          "learningPath": "advanced",
+          "relatedConcepts": [
+            "theory_react_router_v5_vs_v6_navigation"
+          ]
+        },
+        {
+          "id": "task_build_simple_spa",
+          "title": "Build a Simple SPA with React Router",
+          "description": "\nCreate a basic Single-Page Application (SPA) using React Router v6 that demonstrates the concept of client-side routing and seamless transitions. The application should have three main 'pages' implemented as React components:\n\n1.  **`HomePage`**: A simple component displaying 'Welcome to the Home Page!'\n2.  **`AboutPage`**: A component displaying 'Learn more about us here.'\n3.  **`ContactPage`**: A component displaying 'Contact us at example@example.com.'\n\nThe application must include a simple navigation menu with `Link` components to switch between these pages. Observe the URL changes and the lack of full page reloads.\n\n**Requirements:**\n*   Set up React Router v6 (`BrowserRouter`, `Routes`, `Route`).\n*   Create three functional React components (`HomePage`, `AboutPage`, `ContactPage`).\n*   Define routes for `/`, `/about`, and `/contact`.\n*   Implement a navigation bar using `Link` components.\n*   Demonstrate that navigation between pages updates the URL without a full browser refresh.\n",
+          "difficulty": "easy",
+          "startingCode": "import React from 'react';\nimport { BrowserRouter, Routes, Route, Link } from 'react-router-dom';\n\n// TODO: Create HomePage component\nconst HomePage = () => null;\n\n// TODO: Create AboutPage component\nconst AboutPage = () => null;\n\n// TODO: Create ContactPage component\nconst ContactPage = () => null;\n\nconst App = () => {\n  return (\n    <BrowserRouter>\n      <nav>\n        {/* TODO: Add navigation links */}\n      </nav>\n      <hr />\n      <Routes>\n        {/* TODO: Define routes for HomePage, AboutPage, ContactPage */}\n      </Routes>\n    </BrowserRouter>\n  );\n};\n\nexport default App;\n",
+          "solutionCode": "import React from 'react';\nimport { BrowserRouter, Routes, Route, Link } from 'react-router-dom';\n\n// HomePage component\nconst HomePage = () => {\n  return (\n    <div>\n      <h2>Home Page</h2>\n      <p>Welcome to the Home Page!</p>\n    </div>\n  );\n};\n\n// AboutPage component\nconst AboutPage = () => {\n  return (\n    <div>\n      <h2>About Us</h2>\n      <p>Learn more about us here.</p>\n    </div>\n  );\n};\n\n// ContactPage component\nconst ContactPage = () => {\n  return (\n    <div>\n      <h2>Contact Us</h2>\n      <p>Contact us at example@example.com.</p>\n    </div>\n  );\n};\n\nconst App = () => {\n  return (\n    <BrowserRouter>\n      <nav style={{ padding: '10px', backgroundColor: '#e0e0e0' }}>\n        <Link to=\"/\" style={{ margin: '0 10px' }}>Home</Link>\n        <Link to=\"/about\" style={{ margin: '0 10px' }}>About</Link>\n        <Link to=\"/contact\" style={{ margin: '0 10px' }}>Contact</Link>\n      </nav>\n      <hr />\n      <Routes>\n        <Route path=\"/\" element={<HomePage />} />\n        <Route path=\"/about\" element={<AboutPage />} />\n        <Route path=\"/contact\" element={<ContactPage />} />\n        <Route path=\"*\" element={<h2>404 - Page Not Found</h2>} />\n      </Routes>\n    </BrowserRouter>\n  );\n};\n\nexport default App;\n",
+          "testCases": [
+            "Initial load: App renders with the home page content.",
+            "Navigation to About: Clicking 'About' link changes URL to '/about' and displays AboutPage content without a full refresh.",
+            "Navigation to Contact: Clicking 'Contact' link changes URL to '/contact' and displays ContactPage content without a full refresh.",
+            "Back/Forward browser buttons: Should work correctly, navigating between pages while maintaining SPA behavior.",
+            "Direct URL access: Navigating directly to '/about' or '/contact' in the browser should display the correct page content."
+          ],
+          "hints": [
+            "Remember to wrap your application with `BrowserRouter`.",
+            "Use `Routes` to define a collection of `Route` components.",
+            "Each `Route` needs a `path` and an `element` prop that points to your component.",
+            "`Link` components from `react-router-dom` are used for navigation within the SPA."
+          ],
+          "tags": [
+            "React",
+            "React Router",
+            "SPA",
+            "Routing",
+            "Beginner",
+            "UI"
+          ],
+          "timeEstimate": 30,
+          "prerequisites": [
+            "react_basics",
+            "react_functional_components"
+          ],
+          "complexity": 5,
+          "interviewRelevance": 7,
+          "learningPath": "beginner",
+          "relatedConcepts": [
+            "theory_react_router_vs_conventional_routing"
+          ]
+        },
+        {
+          "id": "task_implement_dashboard_layout",
+          "title": "Implement Dashboard with Nested Routes and Shared Layout",
+          "description": "\nImplement a multi-section dashboard application using React Router v6's nested routes and `Outlet` for a shared layout. The dashboard should have:\n\n1.  A `DashboardLayout` component that acts as the main wrapper, containing a persistent sidebar navigation and a main content area.\n2.  The sidebar should include links to 'Overview', 'Profile', and 'Settings'.\n3.  The main content area should display different components (`DashboardOverview`, `UserProfile`, `AppSettings`) based on the nested route.\n4.  The default route for `/dashboard` should display `DashboardOverview`.\n\n**Requirements:**\n*   Create a `DashboardLayout` component that renders a navigation (`Link`s) and an `Outlet`.\n*   Define a parent `Route` for `/dashboard` that uses `DashboardLayout` as its `element`.\n*   Define child `Route`s for `/dashboard`, `/dashboard/profile`, and `/dashboard/settings` within the parent `Route`.\n*   Use the `index` prop for the default child route (`/dashboard`).\n*   Ensure correct relative linking within the sidebar navigation.\n",
+          "difficulty": "medium",
+          "startingCode": "import React from 'react';\nimport { BrowserRouter, Routes, Route, Outlet, Link } from 'react-router-dom';\n\n// TODO: Implement DashboardLayout component with nav and Outlet\nconst DashboardLayout = () => {\n  return (\n    <div>\n      {/* Navigation links here */}\n      <nav>\n        {/* Links to: Overview, Profile, Settings */}\n      </nav>\n      <hr />\n      {/* Placeholder for nested routes */}\n      {/* <Outlet /> */}\n    </div>\n  );\n};\n\n// TODO: Implement DashboardOverview component\nconst DashboardOverview = () => null;\n\n// TODO: Implement UserProfile component\nconst UserProfile = () => null;\n\n// TODO: Implement AppSettings component\nconst AppSettings = () => null;\n\nconst App = () => {\n  return (\n    <BrowserRouter>\n      <Routes>\n        <Route path=\"/\" element={<h1>Home Page</h1>} />\n        {/* TODO: Define parent route for /dashboard and its children */}\n        {/* <Route path=\"dashboard\" element={<DashboardLayout />}> */}\n          {/* ... nested routes ... */}\n        {/* </Route> */}\n        <Route path=\"*\" element={<h2>404 Not Found</h2>} />\n      </Routes>\n    </BrowserRouter>\n  );\n};\n\nexport default App;\n",
+          "solutionCode": "import React from 'react';\nimport { BrowserRouter, Routes, Route, Outlet, Link } from 'react-router-dom';\n\n// DashboardLayout component\nconst DashboardLayout = () => {\n  return (\n    <div style={{ display: 'flex', height: '100vh' }}>\n      <nav style={{ padding: '20px', borderRight: '1px solid #ccc', minWidth: '150px' }}>\n        <h3>Dashboard Navigation</h3>\n        <ul>\n          <li><Link to=\"/dashboard\">Overview</Link></li>\n          <li><Link to=\"profile\">Profile</Link></li>\n          <li><Link to=\"settings\">Settings</Link></li>\n        </ul>\n      </nav>\n      <main style={{ flexGrow: 1, padding: '20px' }}>\n        {/* The Outlet component renders the matched child route */}\n        <Outlet /> \n      </main>\n    </div>\n  );\n};\n\n// DashboardOverview component\nconst DashboardOverview = () => (\n  <div>\n    <h2>Dashboard Overview</h2>\n    <p>Welcome to your personalized dashboard overview.</p>\n  </div>\n);\n\n// UserProfile component\nconst UserProfile = () => (\n  <div>\n    <h2>User Profile</h2>\n    <p>Manage your profile information here.</p>\n  </div>\n);\n\n// AppSettings component\nconst AppSettings = () => (\n  <div>\n    <h2>Application Settings</h2>\n    <p>Configure application settings.</p>\n  </div>\n);\n\nconst App = () => {\n  return (\n    <BrowserRouter>\n      <Routes>\n        <Route path=\"/\" element={<h1>Home Page</h1>} />\n        {/* Parent route for dashboard layout and nested routes */}\n        <Route path=\"dashboard\" element={<DashboardLayout />}>\n          {/* Index route for /dashboard (renders when parent path exactly matches) */}\n          <Route index element={<DashboardOverview />} />\n          {/* Nested routes. Paths are relative to the parent route's path. */}\n          <Route path=\"profile\" element={<UserProfile />} />\n          <Route path=\"settings\" element={<AppSettings />} />\n        </Route>\n        {/* Catch-all route for any unmatched paths */}\n        <Route path=\"*\" element={<h2>404 Not Found</h2>} />\n      </Routes>\n    </BrowserRouter>\n  );\n};\n\nexport default App;\n",
+          "testCases": [
+            "Initial navigation to `/dashboard`: Should display `DashboardLayout` with `DashboardOverview` inside the `Outlet`.",
+            "Navigation to `/dashboard/profile`: Should keep `DashboardLayout` visible and render `UserProfile` inside the `Outlet`.",
+            "Navigation to `/dashboard/settings`: Should keep `DashboardLayout` visible and render `AppSettings` inside the `Outlet`.",
+            "Sidebar links: Clicking 'Overview' link in the sidebar navigates to `/dashboard` and shows `DashboardOverview`. Similarly for 'Profile' and 'Settings'.",
+            "Direct URL access: Entering `/dashboard/profile` directly in the browser should load the correct layout and content.",
+            "Non-dashboard route: Navigating to `/` should show the `Home Page` and not the `DashboardLayout`."
+          ],
+          "hints": [
+            "The `Outlet` component is crucial; it marks where the child route's element will be rendered.",
+            "Use the `index` prop on a `Route` to specify the component that renders when the parent route's path is matched exactly.",
+            "When defining child routes within a parent `Route`, their `path` props are relative to the parent's path.",
+            "Ensure your `Link` components for nested routes use the correct relative or absolute paths (e.g., `<Link to=\"profile\">` or `<Link to=\"/dashboard/profile\">`)."
+          ],
+          "tags": [
+            "React Router",
+            "Nested Routes",
+            "Layouts",
+            "UI Architecture",
+            "Component Composition"
+          ],
+          "timeEstimate": 60,
+          "prerequisites": [
+            "react_router_basics",
+            "component_composition",
+            "react_functional_components"
+          ],
+          "complexity": 8,
+          "interviewRelevance": 9,
+          "learningPath": "advanced",
+          "relatedConcepts": [
+            "theory_advanced_react_router_nested_routes_layouts"
+          ]
+        },
+        {
+          "id": "task_dynamic_nested_routes",
+          "title": "Dynamic Nested Routes with Params",
+          "description": "\nExtend the previous dashboard example to include a dynamic nested route for viewing individual user details. This task will combine the concepts of nested routes, layouts, and route parameters.\n\n**Requirements:**\n1.  Add a new section to the dashboard sidebar called 'Users'.\n2.  When 'Users' is clicked, it should navigate to `/dashboard/users` and display a `UserListPage` which lists a few dummy users (e.g., 'Alice', 'Bob', 'Charlie'). Each user name should be a `Link`.\n3.  Clicking on a user's name (e.g., 'Alice') should navigate to a dynamic route like `/dashboard/users/alice` and render a `UserDetailPage`.\n4.  The `UserDetailPage` should display the name of the user obtained from the URL parameter.\n5.  Both `UserListPage` and `UserDetailPage` should render within the `DashboardLayout`.\n\n**Considerations:**\n*   How will you define the dynamic route with parameters in React Router v6?\n*   How will you access the parameter value in `UserDetailPage`?\n",
+          "difficulty": "hard",
+          "startingCode": "import React from 'react';\nimport { BrowserRouter, Routes, Route, Outlet, Link, useParams } from 'react-router-dom';\n\n// DashboardLayout, DashboardOverview, UserProfile, AppSettings from previous task (assume they are defined)\n// ... (copy/paste the solution code for DashboardLayout, DashboardOverview, UserProfile, AppSettings from task_implement_dashboard_layout)\n\n// TODO: Implement UserListPage\nconst UserListPage = () => {\n  const users = ['Alice', 'Bob', 'Charlie'];\n  return (\n    <div>\n      <h2>User List</h2>\n      <ul>\n        {/* TODO: Map users to Links to their detail pages */}\n      </ul>\n    </div>\n  );\n};\n\n// TODO: Implement UserDetailPage\nconst UserDetailPage = () => {\n  // TODO: Get user ID from URL params\n  // const { userId } = useParams();\n  return (\n    <div>\n      <h2>User Detail</h2>\n      {/* <p>Details for user: {userId}</p> */}\n    </div>\n  );\n};\n\nconst App = () => {\n  return (\n    <BrowserRouter>\n      <Routes>\n        <Route path=\"/\" element={<h1>Home Page</h1>} />\n        <Route path=\"dashboard\" element={<div>{/* Assume DashboardLayout here */}</div>}> {/* Placeholder */}\n          <Route index element={<div>{/* Assume DashboardOverview here */}</div>} /> {/* Placeholder */}\n          <Route path=\"profile\" element={<div>{/* Assume UserProfile here */}</div>} /> {/* Placeholder */}\n          <Route path=\"settings\" element={<div>{/* Assume AppSettings here */}</div>} /> {/* Placeholder */}\n          {/* TODO: Add routes for users list and dynamic user detail */}\n        </Route>\n        <Route path=\"*\" element={<h2>404 Not Found</h2>} />\n      </Routes>\n    </BrowserRouter>\n  );\n};\n\nexport default App;\n",
+          "solutionCode": "import React from 'react';\nimport { BrowserRouter, Routes, Route, Outlet, Link, useParams } from 'react-router-dom';\n\n// Reusing components from task_implement_dashboard_layout:\nconst DashboardLayout = () => {\n  return (\n    <div style={{ display: 'flex', height: '100vh' }}>\n      <nav style={{ padding: '20px', borderRight: '1px solid #ccc', minWidth: '150px' }}>\n        <h3>Dashboard Navigation</h3>\n        <ul>\n          <li><Link to=\"/dashboard\">Overview</Link></li>\n          <li><Link to=\"profile\">Profile</Link></li>\n          <li><Link to=\"settings\">Settings</Link></li>\n          <li><Link to=\"users\">Users</Link></li> {/* New link for Users */}\n        </ul>\n      </nav>\n      <main style={{ flexGrow: 1, padding: '20px' }}>\n        <Outlet /> \n      </main>\n    </div>\n  );\n};\n\nconst DashboardOverview = () => (\n  <div>\n    <h2>Dashboard Overview</h2>\n    <p>Welcome to your personalized dashboard overview.</p>\n  </div>\n);\n\nconst UserProfile = () => (\n  <div>\n    <h2>User Profile</h2>\n    <p>Manage your profile information here.</p>\n  </div>\n);\n\nconst AppSettings = () => (\n  <div>\n    <h2>Application Settings</h2>\n    <p>Configure application settings.</p>\n  </div>\n);\n\n// New: UserListPage component\nconst UserListPage = () => {\n  const users = ['alice', 'bob', 'charlie']; // Using lowercase for URL consistency\n  return (\n    <div>\n      <h2>User List</h2>\n      <ul>\n        {users.map(user => (\n          <li key={user}>\n            <Link to={user}>{user.charAt(0).toUpperCase() + user.slice(1)}</Link>\n          </li>\n        ))}\n      </ul>\n    </div>\n  );\n};\n\n// New: UserDetailPage component\nconst UserDetailPage = () => {\n  const { userId } = useParams(); // Access the dynamic URL parameter\n  return (\n    <div>\n      <h2>User Detail: {userId ? userId.charAt(0).toUpperCase() + userId.slice(1) : 'Not found'}</h2>\n      <p>This page displays details for user: <strong>{userId}</strong>.</p>\n      {/* In a real app, you would fetch user data based on userId */}\n    </div>\n  );\n};\n\nconst App = () => {\n  return (\n    <BrowserRouter>\n      <Routes>\n        <Route path=\"/\" element={<h1>Home Page</h1>} />\n        <Route path=\"dashboard\" element={<DashboardLayout />}>\n          <Route index element={<DashboardOverview />} />\n          <Route path=\"profile\" element={<UserProfile />} />\n          <Route path=\"settings\" element={<AppSettings />} />\n          \n          {/* Nested routes for users */}\n          <Route path=\"users\" element={<UserListPage />} /> {/* List page */}\n          <Route path=\"users/:userId\" element={<UserDetailPage />} /> {/* Dynamic detail page */}\n        </Route>\n        <Route path=\"*\" element={<h2>404 Not Found</h2>} />\n      </Routes>\n    </BrowserRouter>\n  );\n};\n\nexport default App;\n",
+          "testCases": [
+            "Navigation to `/dashboard/users`: Should display the UserListPage within the DashboardLayout.",
+            "Clicking user link: Clicking 'Alice' on the UserListPage should navigate to `/dashboard/users/alice` and display 'User Detail: Alice' in the UserDetailPage.",
+            "Direct URL access for dynamic route: Visiting `/dashboard/users/bob` directly should show 'User Detail: Bob'.",
+            "Invalid dynamic parameter: Visiting `/dashboard/users/nonexistent` should still render `UserDetailPage` with 'nonexistent' as the user ID (demonstrating how params work, not handling invalid data yet).",
+            "Back button functionality: Navigating to a user detail page and then using the browser's back button should return to the user list page, still within the layout."
+          ],
+          "hints": [
+            "To define a dynamic segment in a route path, use a colon (`:`) followed by the parameter name (e.g., `/:userId`).",
+            "The `useParams` hook from `react-router-dom` is used to access route parameters within your component.",
+            "Ensure your `Link` components for dynamic routes correctly construct the path (e.g., `/dashboard/users/${user.id}`).",
+            "Remember that the dynamic route must be placed after any static routes at the same level if there's ambiguity, or use `index` more carefully, though in this case `users` and `users/:userId` are distinct enough."
+          ],
+          "tags": [
+            "React Router",
+            "Nested Routes",
+            "Route Params",
+            "Dynamic Routing",
+            "Hooks",
+            "UI Architecture"
+          ],
+          "timeEstimate": 75,
+          "prerequisites": [
+            "react_router_basics",
+            "theory_advanced_react_router_nested_routes_layouts",
+            "react_hooks_basics"
+          ],
+          "complexity": 9,
+          "interviewRelevance": 9,
+          "learningPath": "advanced",
+          "relatedConcepts": [
+            "theory_advanced_react_router_nested_routes_layouts"
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "7693f2a5-396a-4ef5-9d31-e0f6c21e1415",
+    "startLine": 6600,
+    "endLine": 6699,
+    "processedDate": "2025-06-17T10:03:28.443Z",
+    "content": {
+      "logicalBlockInfo": {
+        "suggestedEndLine": -1
+      },
+      "theory": [
+        {
+          "id": "theory_react_router_basics_nested_routes",
+          "title": "React Router Basics and Nested Routes",
+          "content": "React Router is a standard library for routing in React applications. It enables navigation between different components based on the URL. Key components include `Routes` (a wrapper for all route definitions), `Route` (which defines a mapping between a URL path and a component), and `Outlet` (used for rendering child routes).\n\n## Core Concepts\n\n*   **`Routes` Component**: This component acts as a container for all your `Route` definitions. It listens to the URL and renders the first child `Route` that matches the current location.\n*   **`Route` Component**: Each `Route` component specifies a `path` (the URL segment it matches) and an `element` (the React component to render when the path matches).\n    *   **`path`**: A string representing the URL path. Can include dynamic segments (e.g., `:id`).\n    *   **`element`**: The JSX element to render when the route matches.\n*   **Nested Routes**: React Router allows for nested routing, where a parent route can have its own child routes. This is particularly useful for building layouts where a common UI (like a header, sidebar, or footer) remains consistent while only a specific content area changes.\n*   **`Outlet` Component**: When using nested routes, the `Outlet` component from `react-router-dom` is crucial. It acts as a placeholder where the matched child route's `element` will be rendered. The parent route's component is responsible for rendering the `Outlet` at the desired location within its layout.\n*   **`index` Route**: Within a `Route` that defines nested routes, an `index` route (a `Route` without a `path` property but with an `index` prop) serves as the default child route to render when the parent path is matched but no specific child path is specified. This is useful for defining a default view for a section of your application.\n\n## How Nested Routes Work\nWhen a parent `Route` (e.g., `/dashboard`) is matched, its `element` component is rendered. Inside this component, an `Outlet` component is placed. If a child route (e.g., `/dashboard/stats`) is then matched, the component for `/dashboard/stats` is rendered *inside* the `Outlet` of the `Dashboard` component. This allows for hierarchical UI structures and shared layouts.",
+          "examples": [
+            {
+              "id": "example_react_router_basics_1",
+              "title": "Basic App Routing Structure",
+              "code": "import React from 'react';\nimport { Routes, Route } from 'react-router-dom';\nimport Home from './components/Home';\nimport Dashboard from './components/Dashboard';\nimport Products from './components/Products';\n\nfunction App() {\n  return (\n    <Routes>\n      <Route path=\"/\" element={<Home />} />\n      <Route path=\"dashboard\" element={<Dashboard />} />\n      <Route path=\"products\" element={<Products />} />\n    </Routes>\n  );\n}",
+              "explanation": "This example shows a basic `App` component setting up multiple top-level routes. When the URL matches `/`, the `Home` component is rendered. Similarly, `Dashboard` and `Products` components are rendered for their respective paths.",
+              "language": "typescript"
+            },
+            {
+              "id": "example_react_router_nested_routes_2",
+              "title": "Nested Routes with Layout and Outlet",
+              "code": "import React from 'react';\nimport { Routes, Route, Outlet } from 'react-router-dom';\nimport Home from './components/Home';\nimport Dashboard from './components/Dashboard';\nimport Stats from './components/Stats';\nimport Profile from './components/Profile';\nimport Products from './components/Products';\n\n// Layout component for shared UI\nfunction Layout() {\n  return (\n    <div>\n      <header>App Header</header>\n      <nav>Sidebar Navigation</nav>\n      <main>\n        {/* Child routes render here */}\n        <Outlet /> \n      </main>\n      <footer>App Footer</footer>\n    </div>\n  );\n}\n\n// Main App routing setup\nfunction App() {\n  return (\n    <Routes>\n      {/* Parent Route for shared layout */}\n      <Route path=\"/\" element={<Layout />}>\n        {/* Index route for the root path within the layout */}\n        <Route index element={<Home />} />\n        \n        {/* Nested Dashboard routes */}\n        <Route path=\"dashboard\" element={<Dashboard />}>\n          <Route path=\"stats\" element={<Stats />} />\n          <Route path=\"profile\" element={<Profile />} />\n        </Route>\n        \n        {/* Another top-level route under the main layout */}\n        <Route path=\"products\" element={<Products />} />\n      </Route>\n    </Routes>\n  );\n}",
+              "explanation": "This example demonstrates nested routing. The `Layout` component provides a consistent header, sidebar, and footer. The `<Outlet />` within `Layout` determines where child routes like `Home`, `Dashboard`, and `Products` (or `Stats`/`Profile` within `Dashboard`) will be rendered. The `index` route `Home` serves as the default content for the `/` path when `Layout` is active.",
+              "language": "typescript"
+            }
+          ],
+          "relatedQuestions": [
+            "question_outlet_purpose",
+            "question_nested_route_element",
+            "question_index_route_vs_path",
+            "question_nested_routes_benefit"
+          ],
+          "relatedTasks": [
+            "task_nested_layout_implementation"
+          ],
+          "tags": [
+            "React Router",
+            "Routing",
+            "Nested Routes",
+            "UI Layout",
+            "Outlet",
+            "React"
+          ],
+          "technology": "React, React Router DOM",
+          "prerequisites": [
+            "react_components",
+            "jsx",
+            "functional_components"
+          ],
+          "complexity": 6,
+          "interviewRelevance": 8,
+          "learningPath": "intermediate",
+          "requiredFor": [
+            "complex_app_routing",
+            "shared_layouts"
+          ]
+        },
+        {
+          "id": "theory_route_guards_authentication",
+          "title": "Route Guards with Authentication (Protected Routes)",
+          "content": "Route guards, or protected routes, are a crucial pattern in web applications to restrict access to certain pages based on user authentication status or roles. In React Router, this is commonly achieved by wrapping a protected component with a higher-order component or a custom component that checks the authentication state and redirects the user if they don't meet the access requirements.\n\n## Key Concepts\n\n*   **`PrivateRoute` Component Pattern**: This pattern involves creating a dedicated component (e.g., `PrivateRoute`) that acts as a gatekeeper. It takes the component to be protected (`children`) as a prop. Before rendering `children`, it checks the user's authentication status.\n*   **Authentication State (`useAuth`)**: The authentication state typically comes from a global state management solution (like Redux, React Context API, or a custom authentication hook). The `useAuth()` hook in the example is a placeholder for such a mechanism that provides `isAuthenticated` status.\n*   **`useNavigate` Hook**: This hook from `react-router-dom` is used for programmatic navigation (i.e., navigating to a different URL via code, rather than user clicks on `Link` components). It returns a `navigate` function.\n*   **`useEffect` for Redirection**: The `useEffect` hook is used within `PrivateRoute` to perform the redirection logic. It runs after every render where its dependencies change. If `auth.isAuthenticated` becomes false, or `navigate` changes, the effect checks the condition and triggers a redirection.\n*   **Passing State During Redirection**: When redirecting an unauthenticated user to a login page, it's a common practice to pass the original location they tried to access. This is done using the `state` option in `navigate('/login', { state: { from: location } })`. After successful login, the user can then be redirected back to their intended page (`location.state.from`). The `location` object itself is available via the `useLocation` hook in React Router DOM.\n*   **Conditional Rendering**: The `PrivateRoute` component conditionally renders its `children` (the protected component) only if `auth.isAuthenticated` is true. Otherwise, it might render a `LoadingSpinner` or nothing, before the `useEffect` redirects the user.\n\nThis pattern ensures that sensitive parts of the application are only accessible to authorized users, enhancing security and user experience by guiding users through the authentication flow.",
+          "examples": [
+            {
+              "id": "example_private_route_1",
+              "title": "Basic PrivateRoute Implementation",
+              "code": "import React, { useEffect, useState } from 'react';\nimport { useNavigate, useLocation } from 'react-router-dom';\n\n// Dummy useAuth hook for demonstration\nconst useAuth = () => {\n  const [isAuthenticated, setIsAuthenticated] = useState(false);\n  // In a real app, this would check a token, context, or Redux state\n  useEffect(() => {\n    // Simulate async auth check\n    const token = localStorage.getItem('authToken');\n    setIsAuthenticated(!!token); // Set true if token exists\n  }, []);\n  return { isAuthenticated };\n};\n\nfunction PrivateRoute({ children }) {\n  const auth = useAuth(); // Your custom hook for auth state\n  const navigate = useNavigate();\n  const location = useLocation(); // To get current location and pass it\n  \n  useEffect(() => {\n    if (!auth.isAuthenticated) {\n      // Redirect to login, preserving the path user tried to access\n      navigate('/login', { state: { from: location } });\n    }\n  }, [auth.isAuthenticated, navigate, location]);\n  \n  // Render children if authenticated, otherwise a loading spinner or null\n  return auth.isAuthenticated ? children : <div>Loading...</div>; // Or a proper LoadingSpinner component\n}",
+              "explanation": "This `PrivateRoute` component uses a mock `useAuth` hook to check authentication status. If the user is not authenticated, it uses `useNavigate` to redirect them to the `/login` path, passing the current `location` (the path they attempted to access) in the navigation state. If authenticated, it renders the `children` (the protected content).",
+              "language": "typescript"
+            },
+            {
+              "id": "example_app_with_private_route_2",
+              "title": "Integrating PrivateRoute into App Routing",
+              "code": "import React from 'react';\nimport { Routes, Route } from 'react-router-dom';\nimport Login from './components/Login';\nimport Signup from './components/Signup';\nimport Dashboard from './components/Dashboard';\n// Assume PrivateRoute component from the previous example is imported\n\n// ... PrivateRoute component definition ...\n\nfunction App() {\n  return (\n    <Routes>\n      <Route path=\"/login\" element={<Login />} />\n      <Route path=\"/signup\" element={<Signup />} />\n      {/* Protect the Dashboard route */}\n      <Route \n        path=\"/dashboard\" \n        element={\n          <PrivateRoute>\n            <Dashboard />\n          </PrivateRoute>\n        } \n      />\n      {/* More routes... */}\n    </Routes>\n  );\n}",
+              "explanation": "This example shows how `PrivateRoute` is used within the main `App` component's routing setup. The `/dashboard` path is now protected; any attempt to access it will first go through the `PrivateRoute` component, which will handle the authentication check and redirection if necessary.",
+              "language": "typescript"
+            }
+          ],
+          "relatedQuestions": [
+            "question_private_route_purpose",
+            "question_use_navigate_in_private_route",
+            "question_passing_state_on_redirect",
+            "question_private_route_redirect_flow"
+          ],
+          "relatedTasks": [
+            "task_implement_protected_route"
+          ],
+          "tags": [
+            "React Router",
+            "Authentication",
+            "Authorization",
+            "Route Guards",
+            "Hooks",
+            "Programmatic Navigation",
+            "Security"
+          ],
+          "technology": "React, React Router DOM",
+          "prerequisites": [
+            "react_hooks_basics",
+            "state_management_basics",
+            "react_router_basics"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 9,
+          "learningPath": "intermediate",
+          "requiredFor": [
+            "user_authentication_systems",
+            "role_based_access_control"
+          ]
+        },
+        {
+          "id": "theory_react_router_redux_integration",
+          "title": "React Router with Redux Integration (Legacy `react-router-redux`)",
+          "content": "In applications using both React Router and Redux, there was a common need to keep the router's state synchronized with the Redux store. This integration allows the application's URL and navigation history to be part of the Redux state tree, enabling features like time-travel debugging for navigation or dispatching navigation actions from Redux actions/sagas.\n\n## Key Concepts\n\n*   **`react-router-redux` (Legacy)**: This library (and its successor `connected-react-router`) provided middleware and components to connect React Router's history object to the Redux store. This meant that changes in the URL would update the Redux state, and dispatching Redux actions could trigger navigation.\n*   **`history` Library**: `react-router-redux` internally relies on the `history` library, which provides a way to manage session history in JavaScript. `createBrowserHistory` from `history/createBrowserHistory` (for older versions) or `createBrowserHistory` from `'history'` (for newer versions) is used to create a history object that `ConnectedRouter` can then use.\n*   **`Provider` (Redux)**: As standard with Redux, the `Provider` component makes the Redux store available to any nested components that need to access it.\n*   **`ConnectedRouter`**: This component (from `react-router-redux` or `connected-react-router`) wraps your `Routes` (or `Router` in older versions) and connects the router's history to the Redux store. It takes the `history` object and the `store` as props.\n*   **Synchronization Benefit**: By syncing router state, developers could centralize more application state, enabling powerful patterns like dispatching `PUSH` or `REPLACE` actions from Redux reducers or sagas/thunks, making navigation testable and debuggable via Redux DevTools.\n\n**Note**: With React Router v6 and its focus on hooks (`useNavigate`, `useLocation`, `useParams`), the need to manually sync router state with Redux using `react-router-redux` or `connected-react-router` has largely diminished for typical use cases. Most routing logic can now be handled directly within components using these hooks. However, for specific advanced scenarios (e.g., dispatching navigation from Redux middleware or preserving router state in a global store), patterns combining `history` (from the `history` package) with Redux can still be relevant.",
+          "examples": [
+            {
+              "id": "example_react_router_redux_setup_1",
+              "title": "Redux and React Router Setup with `react-router-redux` (Legacy)",
+              "code": "import React from 'react';\nimport ReactDOM from 'react-dom';\nimport { Provider } from 'react-redux';\nimport { Route, Routes } from 'react-router-dom'; // Using Routes for modern React Router v6 syntax\nimport { createBrowserHistory } from 'history'; // Modern history library import\nimport { unstable_HistoryRouter as HistoryRouter } from 'react-router-dom'; // For using custom history object in React Router v6\n\nimport configureStore from './store'; // Assume this configures Redux store with router middleware\nimport App from './App';\n\nconst history = createBrowserHistory();\nconst store = configureStore(history); // Pass history to store configuration if router middleware is used\n\nReactDOM.render(\n  <Provider store={store}>\n    {/* \n      In React Router v6, ConnectedRouter is not directly available from react-router-redux. \n      You would typically use unstable_HistoryRouter with a custom history object \n      if you need to manage history outside of React Router's internal state. \n      The original markdown's `ConnectedRouter` is from an older version. \n    */}\n    <HistoryRouter history={history}>\n      <App /> {/* App would contain Routes and Route components */}\n    </HistoryRouter>\n  </Provider>,\n  document.getElementById('root')\n);\n",
+              "explanation": "This example shows a typical setup for integrating `react-router-redux` (or `connected-react-router`) with a Redux store. A `history` object is created and used with `unstable_HistoryRouter` (for React Router v6 compatibility, acknowledging the original content's older context). The Redux `Provider` wraps the entire application, making the store available, and the `HistoryRouter` connects the routing mechanism to this external `history` object, which in turn could be connected to Redux via middleware.",
+              "language": "typescript"
+            }
+          ],
+          "relatedQuestions": [
+            "question_react_router_redux_purpose",
+            "question_connected_router_role",
+            "question_history_library_role",
+            "question_redux_router_advantages"
+          ],
+          "relatedTasks": [
+            "task_integrate_redux_router"
+          ],
+          "tags": [
+            "React Router",
+            "Redux",
+            "State Management",
+            "Integration",
+            "Legacy",
+            "History API"
+          ],
+          "technology": "React, Redux, React Router DOM",
+          "prerequisites": [
+            "redux_fundamentals",
+            "react_router_basics",
+            "middleware_concepts"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 7,
+          "learningPath": "advanced",
+          "requiredFor": [
+            "complex_state_management",
+            "time_travel_debugging"
+          ]
+        },
+        {
+          "id": "theory_programmatic_navigation",
+          "title": "Programmatic Navigation and Redirection",
+          "content": "Programmatic navigation refers to triggering a change in the URL and page without direct user interaction with a `Link` component. This is essential for scenarios like redirects after form submissions, authentication flows, or navigating based on application logic. React Router provides hooks for this purpose in modern versions, while older versions relied on a `browserHistory` object.\n\n## Key Concepts\n\n*   **Manual Redirection**: The act of changing the current URL from within your JavaScript code, often in response to an event (e.g., successful login, form submission, API call completion).\n*   **`browserHistory` (Legacy)**: In older versions of React Router (v3-v4), the `browserHistory` object was a global singleton that provided methods like `push` to imperatively change the URL. It was imported directly and could be used anywhere in the application.\n    *   `browserHistory.push('/some/path')`: Navigates to the specified path.\n    *   `browserHistory.push({ pathname: '/some/path', state: { data: 'value' } })`: Navigates to a path and passes arbitrary state data, which can be retrieved on the destination component using `location.state`.\n*   **`useNavigate` Hook (Modern)**: In React Router v6+, the `useNavigate` hook is the primary way to perform programmatic navigation. It returns a `navigate` function that you can call with a path or a path object. This hook should be used within a React component or a custom hook.\n    *   `navigate('/some/path')`: Similar to `push`, navigates to a new path.\n    *   `navigate('/some/path', { replace: true })`: Replaces the current entry in the history stack instead of adding a new one.\n    *   `navigate('/some/path', { state: { data: 'value' } })`: Passes state data, accessible via `useLocation().state` at the destination.\n    *   `navigate(-1)`: Navigates back one entry in the history stack.\n*   **Passing State**: Both `browserHistory.push` and `useNavigate` allow passing a `state` object along with the navigation. This state is not part of the URL but is accessible via the `useLocation` hook (`location.state`) on the target component. It's useful for passing small, ephemeral data between routes without cluttering the URL parameters.\n\nThe `useNavigate` hook is the recommended approach for modern React Router applications due to its integration with React's component lifecycle and its declarative nature.",
+          "examples": [
+            {
+              "id": "example_browser_history_legacy_1",
+              "title": "Programmatic Redirection with `browserHistory` (Legacy)",
+              "code": "// In older versions of React Router (v3-v4)\nimport { browserHistory } from 'react-router';\n\nfunction handleLoginSuccess() {\n  // Redirect to another path\n  browserHistory.push('/dashboard');\n\n  // Redirect with state\n  browserHistory.push({\n    pathname: '/user/profile',\n    state: { userId: 123, fromDashboard: true }\n  });\n}\n\n// Example of retrieving state on the target component (e.g., in UserProfile component)\n// import { withRouter } from 'react-router'; // for class components\n// import { useLocation } from 'react-router-dom'; // for functional components\n\n// function UserProfile() {\n//   const location = useLocation();\n//   const { userId, fromDashboard } = location.state || {};\n//   // ... render logic using userId and fromDashboard\n// }",
+              "explanation": "This demonstrates how `browserHistory.push` was used in older React Router versions to perform redirects. It shows both simple path navigation and navigation with an associated `state` object, which allows passing additional data to the target route without it appearing in the URL.",
+              "language": "typescript"
+            },
+            {
+              "id": "example_use_navigate_modern_2",
+              "title": "Programmatic Redirection with `useNavigate` (Modern)",
+              "code": "import React from 'react';\nimport { useNavigate, useLocation } from 'react-router-dom';\n\nfunction LoginForm() {\n  const navigate = useNavigate();\n\n  const handleSubmit = (event) => {\n    event.preventDefault();\n    // Simulate login success\n    const loginSuccess = true; \n\n    if (loginSuccess) {\n      // Redirect to dashboard, replacing current entry in history\n      navigate('/dashboard', { replace: true, state: { loginTime: new Date().toISOString() } });\n    } else {\n      alert('Login failed!');\n    }\n  };\n\n  return (\n    <form onSubmit={handleSubmit}>\n      <input type=\"text\" placeholder=\"Username\" />\n      <button type=\"submit\">Login</button>\n    </form>\n  );\n}\n\n// On the Dashboard component, to retrieve state:\nfunction Dashboard() {\n  const location = useLocation();\n  const { loginTime } = location.state || {};\n\n  return (\n    <div>\n      <h1>Dashboard</h1>\n      {loginTime && <p>Logged in at: {new Date(loginTime).toLocaleString()}</p>}\n    </div>\n  );\n}",
+              "explanation": "This modern example uses the `useNavigate` hook for programmatic navigation. After a simulated login, it navigates to `/dashboard`, replacing the current history entry and passing a `loginTime` via the state object. The `Dashboard` component then retrieves and displays this `loginTime` using the `useLocation` hook.",
+              "language": "typescript"
+            }
+          ],
+          "relatedQuestions": [
+            "question_browser_history_vs_use_navigate",
+            "question_when_to_use_programmatic_navigation",
+            "question_pass_state_in_navigation",
+            "question_navigate_replace_option"
+          ],
+          "relatedTasks": [
+            "task_implement_programmatic_navigation"
+          ],
+          "tags": [
+            "React Router",
+            "Navigation",
+            "Programmatic",
+            "Hooks",
+            "History API",
+            "useNavigate",
+            "useLocation"
+          ],
+          "technology": "React, React Router DOM",
+          "prerequisites": [
+            "react_hooks_basics",
+            "react_router_basics"
+          ],
+          "complexity": 6,
+          "interviewRelevance": 8,
+          "learningPath": "intermediate",
+          "requiredFor": [
+            "form_handling",
+            "authentication_flows"
+          ]
+        }
+      ],
+      "questions": [
+        {
+          "id": "question_outlet_purpose",
+          "topic": "React Router Nested Routes",
+          "level": "easy",
+          "type": "mcq",
+          "question": "What is the primary purpose of the `<Outlet />` component in React Router DOM?",
+          "answer": "To render child route elements within a parent route's component.",
+          "options": [
+            "To define the root component of the application.",
+            "To navigate programmatically between routes.",
+            "To render child route elements within a parent route's component.",
+            "To define a protected route that requires authentication."
+          ],
+          "analysisPoints": [
+            "Tests understanding of React Router's nested routing mechanism.",
+            "Distinguishes `Outlet` from other routing components/hooks.",
+            "Emphasizes the role of `Outlet` in layout composition."
+          ],
+          "keyConcepts": [
+            "Outlet",
+            "Nested Routes",
+            "React Router DOM",
+            "Layouts"
+          ],
+          "evaluationCriteria": [
+            "Correct identification of `Outlet`'s function.",
+            "Ability to differentiate `Outlet` from other React Router features."
+          ],
+          "example": "The `<Outlet />` component acts as a placeholder in a parent layout component (e.g., `Layout.js`). When a nested route matches, its element is rendered at the position of `<Outlet />`. For example:\n\n```jsx\n// Layout.js\nfunction Layout() {\n  return (\n    <div>\n      <h1>My App Header</h1>\n      <nav>{/* Navigation links */}</nav>\n      <main>\n        <Outlet /> {/* Child components render here */}\n      </main>\n      <footer>My App Footer</footer>\n    </div>\n  );\n}\n\n// App.js\n<Routes>\n  <Route path=\"/\" element={<Layout />}>\n    <Route path=\"about\" element={<About />} />\n    <Route path=\"contact\" element={<Contact />} />\n  </Route>\n</Routes>\n```\n\nWhen navigating to `/about`, the `About` component will be rendered inside the `<main>` tag where `<Outlet />` is placed in `Layout`.",
+          "tags": [
+            "React Router",
+            "Outlet",
+            "Nested Routes",
+            "Layout"
+          ],
+          "prerequisites": [
+            "react_router_basics"
+          ],
+          "complexity": 3,
+          "interviewFrequency": 7,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_nested_route_element",
+          "topic": "React Router Nested Routes",
+          "level": "medium",
+          "type": "code",
+          "question": "Consider the following `App` and `Dashboard` component structure using React Router v6. Complete the `Dashboard` component so that `Stats` and `Profile` components render inside it when the respective nested paths (`/dashboard/stats` and `/dashboard/profile`) are accessed, using the `Outlet` component.",
+          "answer": "```jsx\nimport React from 'react';\nimport { Routes, Route, Outlet, Link } from 'react-router-dom';\n\n// Assume Home, Stats, Profile, Products components are defined elsewhere\nfunction Home() { return <h2>Home Page</h2>; }\nfunction Stats() { return <h3>Statistics View</h3>; }\nfunction Profile() { return <h3>User Profile View</h3>; }\nfunction Products() { return <h2>Products Page</h2>; }\n\nfunction Dashboard() {\n  return (\n    <div>\n      <h2>Dashboard</h2>\n      <nav>\n        <Link to=\"stats\">View Stats</Link> | \n        <Link to=\"profile\">View Profile</Link>\n      </nav>\n      {/* Child routes render here */}\n      <Outlet />\n    </div>\n  );\n}\n\nfunction Layout() {\n  return (\n    <div>\n      <header>App Header</header>\n      <nav>\n        <Link to=\"/\">Home</Link> | \n        <Link to=\"dashboard\">Dashboard</Link> | \n        <Link to=\"products\">Products</Link>\n      </nav>\n      <main>\n        <Outlet />\n      </main>\n      <footer>App Footer</footer>\n    </div>\n  );\n}\n\nfunction App() {\n  return (\n    <Routes>\n      <Route path=\"/\" element={<Layout />}>\n        <Route index element={<Home />} />\n        <Route path=\"dashboard\" element={<Dashboard />}>\n          <Route path=\"stats\" element={<Stats />} />\n          <Route path=\"profile\" element={<Profile />} />\n        </Route>\n        <Route path=\"products\" element={<Products />} />\n      </Route>\n    </Routes>\n  );\n}\n```",
+          "options": [],
+          "analysisPoints": [
+            "Tests ability to implement nested routing.",
+            "Verifies correct usage of `Outlet` within a parent component.",
+            "Checks understanding of how child routes are structured under a parent `Route`."
+          ],
+          "keyConcepts": [
+            "Outlet",
+            "Nested Routes",
+            "React Router DOM",
+            "Route"
+          ],
+          "evaluationCriteria": [
+            "Correct placement of `<Outlet />`.",
+            "Proper definition of nested `Route` components within the `Routes` tree."
+          ],
+          "example": "The key is to place `<Outlet />` inside the `Dashboard` component, as `Dashboard` is the parent component for `/dashboard/stats` and `/dashboard/profile`. The `<Outlet />` serves as the rendering spot for `Stats` or `Profile` when their respective paths are matched.",
+          "tags": [
+            "React Router",
+            "Code Challenge",
+            "Nested Routes",
+            "Outlet"
+          ],
+          "prerequisites": [
+            "react_router_basics",
+            "jsx"
+          ],
+          "complexity": 6,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_index_route_vs_path",
+          "topic": "React Router Nested Routes",
+          "level": "open",
+          "type": "open",
+          "question": "Explain the difference between an `index` route and a `path` route within a nested routing structure in React Router DOM. Provide a scenario where an `index` route would be particularly useful.",
+          "answer": "An `index` route in React Router DOM is a special type of child `Route` that renders when its parent route's `path` matches exactly, and no other child `path` route also matches. It's defined using the `index` prop instead of a `path` prop (e.g., `<Route index element={<Home />} />`).\n\nIn contrast, a `path` route is a standard `Route` that renders when its specific `path` matches, usually in conjunction with its parent's path (e.g., `<Route path=\"profile\" element={<Profile />} />` within a `/dashboard` parent route, meaning `/dashboard/profile`).\n\n**Key Differences:**\n*   **Matching Condition**: An `index` route matches when the *parent's path* is matched *without any further path segments*. A `path` route matches when its specific `path` segment (combined with its parent's path) is matched.\n*   **URL Segment**: An `index` route does not add a segment to the URL. A `path` route adds its defined segment to the URL.\n*   **Default Behavior**: An `index` route acts as the default child route that is rendered when the parent route is active but no specific child route is navigated to. This is crucial for providing a landing view for a section of the application.\n\n**Scenario where an `index` route is useful:**\nConsider a `/dashboard` route that displays a shared navigation bar and a content area. When a user navigates to `/dashboard` (i.e., exactly the parent path), you want to show a 'Dashboard Overview' component by default, without requiring a URL like `/dashboard/overview`. However, if the user navigates to `/dashboard/settings` or `/dashboard/reports`, those specific components should be shown. An `index` route is perfect for this 'Dashboard Overview' component:\n\n```jsx\n<Route path=\"dashboard\" element={<DashboardLayout />}>\n  <Route index element={<DashboardOverview />} /> {/* Renders for /dashboard */}\n  <Route path=\"settings\" element={<DashboardSettings />} /> {/* Renders for /dashboard/settings */}\n  <Route path=\"reports\" element={<DashboardReports />} /> {/* Renders for /dashboard/reports */}\n</Route>\n```\n\nIn this setup, `DashboardOverview` is the default content for `/dashboard`, providing a clean and intuitive user experience without forcing a redundant URL segment.",
+          "options": [],
+          "analysisPoints": [
+            "Tests conceptual understanding of route matching.",
+            "Ability to articulate nuanced differences.",
+            "Demonstrates practical application with a relevant scenario."
+          ],
+          "keyConcepts": [
+            "Index Route",
+            "Path Route",
+            "Nested Routes",
+            "React Router DOM",
+            "Default Route"
+          ],
+          "evaluationCriteria": [
+            "Clear and accurate definition of both types of routes.",
+            "Correctly identifies matching behavior and URL impact.",
+            "Provides a fitting, clear example scenario."
+          ],
+          "example": "",
+          "tags": [
+            "React Router",
+            "Nested Routes",
+            "Index Route",
+            "Routing Concepts"
+          ],
+          "prerequisites": [
+            "react_router_basics"
+          ],
+          "complexity": 7,
+          "interviewFrequency": 7,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_private_route_purpose",
+          "topic": "Route Guards with Authentication",
+          "level": "flashcard",
+          "type": "flashcard",
+          "question": "What is the primary purpose of a `PrivateRoute` component in React Router?",
+          "answer": "To restrict access to certain routes based on user authentication status or roles, redirecting unauthenticated/unauthorized users.",
+          "options": [],
+          "analysisPoints": [],
+          "keyConcepts": [
+            "PrivateRoute",
+            "Route Guards",
+            "Authentication",
+            "Authorization",
+            "Redirection"
+          ],
+          "evaluationCriteria": [],
+          "example": "",
+          "tags": [
+            "React Router",
+            "Authentication",
+            "Route Guards"
+          ],
+          "prerequisites": [
+            "react_router_basics"
+          ],
+          "complexity": 3,
+          "interviewFrequency": 8,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_use_navigate_in_private_route",
+          "topic": "Route Guards with Authentication",
+          "level": "mcq",
+          "type": "mcq",
+          "question": "In the `PrivateRoute` component provided, which hook is used to programmatically redirect an unauthenticated user to the login page?",
+          "answer": "`useNavigate`",
+          "options": [
+            "`useLocation`",
+            "`useParams`",
+            "`useNavigate`",
+            "`useEffect`"
+          ],
+          "analysisPoints": [
+            "Tests knowledge of React Router DOM hooks.",
+            "Specifically targets the hook for programmatic navigation.",
+            "Distinguishes navigation from other routing utilities."
+          ],
+          "keyConcepts": [
+            "useNavigate",
+            "PrivateRoute",
+            "Programmatic Navigation",
+            "React Router Hooks"
+          ],
+          "evaluationCriteria": [
+            "Correct identification of the `useNavigate` hook.",
+            "Understanding its role in imperative navigation."
+          ],
+          "example": "The `useNavigate` hook returns a function that allows you to change the current URL. In the `PrivateRoute` example, `navigate('/login', { state: { from: location } })` is called when the user is not authenticated to redirect them to the login page.\n\n```typescript\nimport { useNavigate, useLocation } from 'react-router-dom';\n\nfunction PrivateRoute({ children }) {\n  const auth = { isAuthenticated: false }; // Simplified for example\n  const navigate = useNavigate();\n  const location = useLocation();\n\n  if (!auth.isAuthenticated) {\n    // This is where navigate is used for redirection\n    navigate('/login', { state: { from: location } });\n    return null; // Or a loading spinner\n  }\n  return children;\n}\n```",
+          "tags": [
+            "React Router",
+            "Hooks",
+            "useNavigate",
+            "PrivateRoute"
+          ],
+          "prerequisites": [
+            "react_hooks_basics",
+            "react_router_basics"
+          ],
+          "complexity": 4,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_passing_state_on_redirect",
+          "topic": "Route Guards with Authentication",
+          "level": "open",
+          "type": "open",
+          "question": "In the `PrivateRoute` example, why is `location` passed in the state object during redirection (`navigate('/login', { state: { from: location } })`)? How would the login component typically use this information?",
+          "answer": "The `location` object is passed in the `state` object during redirection (`navigate('/login', { state: { from: location } })`) to remember the original route the user was trying to access before being redirected to the login page. This allows for a better user experience by enabling the application to redirect the user back to their intended destination after a successful login.\n\n**How the login component typically uses this information:**\n\n1.  **Retrieving the State**: The login component would use the `useLocation` hook from `react-router-dom` to access the `location.state` object.\n    ```typescript\n    import { useLocation, useNavigate } from 'react-router-dom';\n\n    function Login() {\n      const location = useLocation();\n      const navigate = useNavigate();\n      const from = location.state?.from?.pathname || '/dashboard'; // Default to dashboard\n\n      const handleLoginSuccess = () => {\n        // Simulate successful authentication\n        // ... auth logic ...\n\n        // Redirect back to the original path or a default path\n        navigate(from, { replace: true });\n      };\n\n      // ... rest of login component logic and JSX\n      return (\n        <div>\n          <h2>Login</h2>\n          <button onClick={handleLoginSuccess}>Log In</button>\n        </div>\n      );\n    }\n    ```\n\n2.  **Post-Login Redirection**: After the user successfully authenticates (e.g., by clicking a login button or submitting a form), the login component would then use `useNavigate` to redirect the user to the `from` path retrieved from `location.state`. It's common to use `{ replace: true }` with `navigate` to prevent the login page from staying in the browser history after a successful login, so the user can't hit 'back' to return to the login page.",
+          "options": [],
+          "analysisPoints": [
+            "Tests understanding of navigation state (`location.state`).",
+            "Evaluates knowledge of common authentication flow patterns.",
+            "Checks ability to connect different parts of a routing system."
+          ],
+          "keyConcepts": [
+            "location.state",
+            "useLocation",
+            "useNavigate",
+            "Authentication Flow",
+            "Redirection",
+            "PrivateRoute"
+          ],
+          "evaluationCriteria": [
+            "Clear explanation of the purpose of passing `location`.",
+            "Accurate description of how `location.state` is accessed.",
+            "Correct implementation strategy for post-login redirection."
+          ],
+          "example": "",
+          "tags": [
+            "React Router",
+            "Authentication",
+            "State Management",
+            "Redirection",
+            "Hooks"
+          ],
+          "prerequisites": [
+            "react_hooks_basics",
+            "react_router_basics"
+          ],
+          "complexity": 7,
+          "interviewFrequency": 9,
+          "learningPath": "advanced"
+        },
+        {
+          "id": "question_private_route_redirect_flow",
+          "topic": "Route Guards with Authentication",
+          "level": "hard",
+          "type": "code",
+          "question": "Implement a `ProtectedRoute` component. This component should:\n1.  Accept `children` as a prop (the component to protect).\n2.  Use a mock `useAuth` hook that returns `isAuthenticated: boolean` (you can hardcode `false` for testing the redirect).\n3.  If not authenticated, redirect the user to `/login`, passing the current location in the navigation state (`state: { from: location }`).\n4.  If authenticated, render `children`.\n5.  Include a `Login` component that, upon a simulated successful login, redirects the user back to the `from` path in the state, or to `/dashboard` if no `from` state exists. Use `replace: true` for post-login navigation.\n\nProvide the `ProtectedRoute` and `Login` components, and a minimal `App` setup to demonstrate.",
+          "answer": "```jsx\nimport React, { useEffect, useState } from 'react';\nimport { Routes, Route, Outlet, useNavigate, useLocation } from 'react-router-dom';\n\n// --- Mock Authentication Hook ---\nconst useAuth = () => {\n  const [isAuthenticated, setIsAuthenticated] = useState(() => {\n    // Initialize from session storage or local storage\n    return sessionStorage.getItem('isAuthenticated') === 'true';\n  });\n\n  const login = () => {\n    setIsAuthenticated(true);\n    sessionStorage.setItem('isAuthenticated', 'true');\n  };\n  const logout = () => {\n    setIsAuthenticated(false);\n    sessionStorage.removeItem('isAuthenticated');\n  };\n\n  return { isAuthenticated, login, logout };\n};\n\n// --- ProtectedRoute Component ---\nfunction ProtectedRoute({ children }) {\n  const { isAuthenticated } = useAuth();\n  const navigate = useNavigate();\n  const location = useLocation();\n\n  useEffect(() => {\n    if (!isAuthenticated) {\n      console.log(`Redirecting to /login from ${location.pathname}`);\n      navigate('/login', { state: { from: location } });\n    }\n  }, [isAuthenticated, navigate, location]);\n\n  return isAuthenticated ? children : <div>Checking authentication...</div>; // Or a loading spinner\n}\n\n// --- Login Component ---\nfunction Login() {\n  const { login } = useAuth();\n  const navigate = useNavigate();\n  const location = useLocation();\n\n  const from = location.state?.from?.pathname || '/dashboard';\n\n  const handleLogin = () => {\n    // Simulate API call for login\n    console.log('Simulating login...');\n    setTimeout(() => {\n      login(); // Set isAuthenticated to true\n      console.log(`Login successful. Navigating to: ${from}`);\n      navigate(from, { replace: true }); // Redirect to original path or dashboard\n    }, 500);\n  };\n\n  return (\n    <div>\n      <h2>Login Page</h2>\n      <p>Please log in to access the protected content.</p>\n      <button onClick={handleLogin}>Simulate Login</button>\n      <p>Redirecting to: {from}</p>\n    </div>\n  );\n}\n\n// --- Dashboard Component (Protected) ---\nfunction Dashboard() {\n  const { logout } = useAuth();\n  return (\n    <div>\n      <h1>Dashboard Content</h1>\n      <p>Welcome, authenticated user!</p>\n      <button onClick={logout}>Logout</button>\n      <p>Try refreshing the page to see protected route behavior.</p>\n    </div>\n  );\n}\n\n// --- Home Component ---\nfunction Home() {\n  return <h2>Home Page (Public)</h2>;\n}\n\n// --- App Component ---\nfunction App() {\n  return (\n    <Routes>\n      <Route path=\"/\" element={<Home />} />\n      <Route path=\"/login\" element={<Login />} />\n      {/* Protected Route */}\n      <Route \n        path=\"/dashboard\" \n        element={\n          <ProtectedRoute>\n            <Dashboard />\n          </ProtectedRoute>\n        } \n      />\n      <Route path=\"*\" element={<h2>404 Not Found</h2>} />\n    </Routes>\n  );\n}\n\n// To run this, you would typically render App into your root div:\n// import ReactDOM from 'react-dom/client';\n// const root = ReactDOM.createRoot(document.getElementById('root'));\n// root.render(<App />);\n\n```",
+          "options": [],
+          "analysisPoints": [
+            "Ability to integrate `useNavigate`, `useLocation`, and `useEffect` for authentication flow.",
+            "Correct handling of `location.state` for post-login redirection.",
+            "Demonstrates a complete practical authentication routing pattern."
+          ],
+          "keyConcepts": [
+            "PrivateRoute",
+            "Authentication Flow",
+            "useNavigate",
+            "useLocation",
+            "useEffect",
+            "Conditional Rendering",
+            "Programmatic Navigation"
+          ],
+          "evaluationCriteria": [
+            "Correct conditional rendering and redirection logic in `ProtectedRoute`.",
+            "Accurate retrieval and usage of `location.state` in `Login` component.",
+            "Proper use of `replace: true` for post-login navigation.",
+            "Clear demonstration of the complete flow."
+          ],
+          "example": "",
+          "tags": [
+            "React Router",
+            "Authentication",
+            "Code Challenge",
+            "Route Guards",
+            "Hooks",
+            "Complex"
+          ],
+          "prerequisites": [
+            "react_hooks_advanced",
+            "react_router_intermediate"
+          ],
+          "complexity": 9,
+          "interviewFrequency": 10,
+          "learningPath": "advanced"
+        },
+        {
+          "id": "question_react_router_redux_purpose",
+          "topic": "React Router with Redux Integration",
+          "level": "flashcard",
+          "type": "flashcard",
+          "question": "What was the primary purpose of libraries like `react-router-redux`?",
+          "answer": "To keep the router state in sync with the Redux store, allowing navigation actions to be dispatched from Redux.",
+          "options": [],
+          "analysisPoints": [],
+          "keyConcepts": [
+            "react-router-redux",
+            "Redux Integration",
+            "Router State",
+            "Synchronization"
+          ],
+          "evaluationCriteria": [],
+          "example": "",
+          "tags": [
+            "React Router",
+            "Redux",
+            "Integration",
+            "Legacy"
+          ],
+          "prerequisites": [
+            "redux_fundamentals"
+          ],
+          "complexity": 4,
+          "interviewFrequency": 6,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_connected_router_role",
+          "topic": "React Router with Redux Integration",
+          "level": "mcq",
+          "type": "mcq",
+          "question": "In a setup using `react-router-redux` (or `connected-react-router`), which component is responsible for wrapping your application's routes and connecting the router's history to the Redux store?",
+          "answer": "`ConnectedRouter`",
+          "options": [
+            "`Provider`",
+            "`Routes`",
+            "`ConnectedRouter`",
+            "`Outlet`"
+          ],
+          "analysisPoints": [
+            "Tests knowledge of specific components in Redux-Router integration.",
+            "Distinguishes `ConnectedRouter` from standard Redux and React Router components.",
+            "Focuses on the core component for this specific integration pattern."
+          ],
+          "keyConcepts": [
+            "ConnectedRouter",
+            "react-router-redux",
+            "Redux Integration",
+            "History Object"
+          ],
+          "evaluationCriteria": [
+            "Correct identification of `ConnectedRouter`'s role.",
+            "Understanding its position in the component tree relative to Redux `Provider`."
+          ],
+          "example": "The `ConnectedRouter` component acts as a bridge. It sits within the Redux `Provider` and wraps your React Router setup, effectively making the routing history accessible and dispatchable via the Redux store.\n\n```jsx\nimport { Provider } from 'react-redux';\nimport { ConnectedRouter } from 'connected-react-router'; // or react-router-redux\nimport { createBrowserHistory } from 'history';\nimport App from './App';\nimport configureStore from './store';\n\nconst history = createBrowserHistory();\nconst store = configureStore(history);\n\nReactDOM.render(\n  <Provider store={store}>\n    <ConnectedRouter history={history}>\n      <App /> {/* App contains your Routes, Route components */}\n    </ConnectedRouter>\n  </Provider>,\n  document.getElementById('root')\n);\n```",
+          "tags": [
+            "React Router",
+            "Redux",
+            "ConnectedRouter",
+            "Integration"
+          ],
+          "prerequisites": [
+            "redux_fundamentals",
+            "react_router_basics"
+          ],
+          "complexity": 5,
+          "interviewFrequency": 7,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_history_library_role",
+          "topic": "React Router with Redux Integration",
+          "level": "flashcard",
+          "type": "flashcard",
+          "question": "What external library is typically used by `react-router-redux` (and `connected-react-router`) to manage browser history?",
+          "answer": "The `history` library (e.g., `createBrowserHistory`).",
+          "options": [],
+          "analysisPoints": [],
+          "keyConcepts": [
+            "History Library",
+            "createBrowserHistory",
+            "react-router-redux",
+            "connected-react-router"
+          ],
+          "evaluationCriteria": [],
+          "example": "",
+          "tags": [
+            "React Router",
+            "Redux",
+            "History API",
+            "Libraries"
+          ],
+          "prerequisites": [
+            "react_router_basics"
+          ],
+          "complexity": 3,
+          "interviewFrequency": 5,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_redux_router_advantages",
+          "topic": "React Router with Redux Integration",
+          "level": "open",
+          "type": "open",
+          "question": "Discuss the advantages and potential disadvantages of integrating React Router's state into the Redux store using libraries like `react-router-redux`. Why is this approach less common with modern React Router v6 and hooks?",
+          "answer": "**Advantages of integrating React Router's state into Redux:**\n\n1.  **Single Source of Truth**: The URL and navigation history become part of your central Redux store, aligning with the Redux philosophy of a single, predictable state tree. This can simplify state management for complex applications.\n2.  **Time-Travel Debugging**: With router state in Redux, you can use Redux DevTools to replay navigation actions, inspect the state of the router at any point in time, and debug navigation issues more effectively.\n3.  **Programmatic Navigation from Anywhere**: You can dispatch Redux actions (e.g., `PUSH`, `REPLACE`) from Redux middleware (like Redux Thunk or Redux Saga), reducers, or actions, allowing complex navigation logic to reside within your Redux flow, separate from UI components.\n4.  **Persistent Navigation State**: In some complex applications, certain navigation-related state (e.g., scroll position per route, filtered search queries) might benefit from being persisted or managed globally within Redux.\n5.  **Server-Side Rendering (SSR)**: It can help in managing router state consistently between server and client during SSR.\n\n**Disadvantages/Why less common with modern React Router v6:**\n\n1.  **Increased Complexity**: Integrating two powerful libraries like React Router and Redux introduces additional boilerplate, setup, and concepts (`history` objects, middleware) that can be overkill for simpler applications.\n2.  **Over-Centralization**: For many common navigation needs, the router state doesn't necessarily need to be globalized in Redux. React Router's internal state is often sufficient and more localized.\n3.  **Modern React Router Hooks**: React Router v6's emphasis on hooks (`useNavigate`, `useLocation`, `useParams`) provides a more direct, React-idiomatic way to interact with router state and perform navigation directly within functional components. This reduces the need for external state management solutions for basic routing.\n    *   `useNavigate` directly provides imperative navigation.\n    *   `useLocation` provides access to the current URL state.\n    *   `useParams` handles URL parameters.\n    These hooks abstract away the underlying `history` object, making direct Redux integration less necessary unless very specific requirements (like dispatching navigation from non-component code) exist.\n4.  **Performance Overhead (Minor)**: Constantly syncing router state to Redux might introduce minor, often negligible, performance overhead or unnecessary re-renders if not managed carefully.\n\nIn essence, while Redux integration for routing offered powerful capabilities, modern React Router's design makes many of those capabilities directly accessible via hooks, reducing the default need for an additional layer of state synchronization.",
+          "options": [],
+          "analysisPoints": [
+            "Comprehensive understanding of the trade-offs involved in Redux-Router integration.",
+            "Knowledge of specific features enabled by this integration (e.g., time-travel debugging).",
+            "Understanding of how modern React Router hooks have changed the landscape."
+          ],
+          "keyConcepts": [
+            "Redux Integration",
+            "React Router v6",
+            "useNavigate",
+            "useLocation",
+            "Time-Travel Debugging",
+            "Complexity",
+            "Single Source of Truth"
+          ],
+          "evaluationCriteria": [
+            "Balanced discussion of pros and cons.",
+            "Accurate explanation of the shift due to React Router v6 hooks.",
+            "Demonstrates advanced conceptual understanding."
+          ],
+          "example": "",
+          "tags": [
+            "React Router",
+            "Redux",
+            "Architecture",
+            "Hooks",
+            "Advanced Concepts"
+          ],
+          "prerequisites": [
+            "redux_fundamentals",
+            "react_router_intermediate"
+          ],
+          "complexity": 8,
+          "interviewFrequency": 7,
+          "learningPath": "advanced"
+        },
+        {
+          "id": "question_browser_history_vs_use_navigate",
+          "topic": "Programmatic Navigation and Redirection",
+          "level": "open",
+          "type": "open",
+          "question": "Compare and contrast `browserHistory.push` (from older React Router versions) with the `useNavigate` hook (from React Router v6) for programmatic navigation. Discuss their usage contexts and any key differences.",
+          "answer": "**`browserHistory.push` (Legacy - React Router v3-v4)**\n\n*   **Nature**: It was an imperative method available on a singleton `browserHistory` object, which was imported directly from `react-router`.\n*   **Usage Context**: Could be called from any JavaScript file, not strictly within a React component. This made it flexible but also less React-idiomatic.\n*   **Syntax**: `browserHistory.push('/some/path')` or `browserHistory.push({ pathname: '/path', state: { data: 'value' } })`.\n*   **Dependencies**: Relied on a global `history` instance that the router used.\n*   **Drawbacks**: Being a singleton, it was harder to test in isolation, and its global nature could lead to less predictable side effects in complex applications. It also didn't leverage React's hook-based paradigm.\n\n**`useNavigate` Hook (Modern - React Router v6+)**\n\n*   **Nature**: It's a React Hook that returns a `navigate` function. As a hook, it must be called inside a functional React component or a custom React Hook.\n*   **Usage Context**: Primarily used within React components to trigger navigation in response to user actions (e.g., button clicks, form submissions) or component lifecycle events (e.g., `useEffect`).\n*   **Syntax**: `const navigate = useNavigate(); navigate('/some/path')` or `navigate('/path', { state: { data: 'value' }, replace: true })`.\n*   **Dependencies**: Integrates seamlessly with React's component tree and lifecycle, relying on context provided by `BrowserRouter` or `HashRouter`.\n*   **Advantages**: More idiomatic to modern React development. Easier to test as it's scoped to the component where it's used. Provides additional options like `replace: true` (to replace the current history entry) or navigating relative paths. Embraces the functional component paradigm.\n\n**Key Differences Summarized:**\n\n| Feature           | `browserHistory.push` (Legacy)                           | `useNavigate` (Modern)                                     |\n| :---------------- | :------------------------------------------------------- | :--------------------------------------------------------- |\n| **Type**          | Global singleton method                                  | React Hook that returns a function                         |\n| **Context**       | Any JS file                                              | Functional React component or custom Hook                  |\n| **Import From**   | `react-router` (or `history` library directly)           | `react-router-dom`                                         |\n| **State Passing** | `browserHistory.push({ pathname, state: {} })`          | `navigate(path, { state: {} })`                            |\n| **Replace Entry** | `browserHistory.replace('/path')` (separate method)      | `navigate('/path', { replace: true })` (option on `navigate`) |\n| **Idiomatic**     | Less React-idiomatic, global                               | Highly React-idiomatic, component-scoped                   |\n| **Testability**   | More challenging due to global nature                  | Easier to mock and test within component scope             |\n\nIn conclusion, `useNavigate` is the current best practice for programmatic navigation in React Router v6+ applications, offering a cleaner, more React-centric, and testable approach compared to the older `browserHistory.push` method.",
+          "options": [],
+          "analysisPoints": [
+            "Deep understanding of the evolution of programmatic navigation in React Router.",
+            "Ability to articulate the technical and philosophical differences between imperative global objects and React Hooks.",
+            "Highlights modern best practices."
+          ],
+          "keyConcepts": [
+            "browserHistory",
+            "useNavigate",
+            "Programmatic Navigation",
+            "React Router Hooks",
+            "Legacy vs. Modern",
+            "History API"
+          ],
+          "evaluationCriteria": [
+            "Accurate comparison of features, syntax, and usage contexts.",
+            "Clear explanation of why `useNavigate` is preferred now.",
+            "Structured and comprehensive answer."
+          ],
+          "example": "",
+          "tags": [
+            "React Router",
+            "Navigation",
+            "Hooks",
+            "Legacy",
+            "Comparison"
+          ],
+          "prerequisites": [
+            "react_hooks_basics",
+            "react_router_basics"
+          ],
+          "complexity": 8,
+          "interviewFrequency": 9,
+          "learningPath": "advanced"
+        },
+        {
+          "id": "question_when_to_use_programmatic_navigation",
+          "topic": "Programmatic Navigation and Redirection",
+          "level": "flashcard",
+          "type": "flashcard",
+          "question": "Give two common scenarios where you would use programmatic navigation (e.g., `useNavigate`) instead of a `<Link>` component.",
+          "answer": "1.  After a form submission (e.g., login, signup, order placement) to redirect the user to a success page or dashboard.\n2.  Inside a `useEffect` hook for conditional redirection, such as implementing a `PrivateRoute` or redirecting based on user roles or data loading status.",
+          "options": [],
+          "analysisPoints": [],
+          "keyConcepts": [
+            "Programmatic Navigation",
+            "useNavigate",
+            "Link Component",
+            "Redirection",
+            "Authentication"
+          ],
+          "evaluationCriteria": [],
+          "example": "",
+          "tags": [
+            "React Router",
+            "Navigation",
+            "useNavigate",
+            "Practical Application"
+          ],
+          "prerequisites": [
+            "react_router_basics"
+          ],
+          "complexity": 4,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_pass_state_in_navigation",
+          "topic": "Programmatic Navigation and Redirection",
+          "level": "mcq",
+          "type": "mcq",
+          "question": "Which of the following is the correct way to navigate to `/order-success` and pass an `orderId` of `123` as state data using `useNavigate` in React Router v6?",
+          "answer": "`navigate('/order-success', { state: { orderId: 123 } });`",
+          "options": [
+            "`navigate('/order-success?orderId=123');`",
+            "`navigate({ pathname: '/order-success', query: { orderId: 123 } });`",
+            "`navigate('/order-success', { state: { orderId: 123 } });`",
+            "`navigate('/order-success', { params: { orderId: 123 } });`"
+          ],
+          "analysisPoints": [
+            "Tests correct syntax for passing state with `useNavigate`.",
+            "Differentiates between state, query parameters, and path parameters.",
+            "Ensures understanding that `state` data is not part of the URL."
+          ],
+          "keyConcepts": [
+            "useNavigate",
+            "Navigation State",
+            "location.state",
+            "Query Parameters",
+            "Path Parameters"
+          ],
+          "evaluationCriteria": [
+            "Correct use of the `state` option in `navigate`.",
+            "Understanding that `state` is distinct from URL parameters."
+          ],
+          "example": "The `state` option in `navigate` allows you to pass arbitrary data that will be available via `useLocation().state` on the target route. This data is not visible in the URL.\n\n```typescript\nimport { useNavigate } from 'react-router-dom';\n\nfunction OrderConfirmation() {\n  const navigate = useNavigate();\n\n  const handleConfirmOrder = () => {\n    const orderId = Math.floor(Math.random() * 1000) + 1;\n    console.log(`Order ${orderId} confirmed!`);\n    // Correct way to navigate with state\n    navigate('/order-success', { state: { orderId: orderId, message: 'Your order has been placed successfully!' } });\n  };\n\n  return (\n    <div>\n      <p>Click to confirm your order.</p>\n      <button onClick={handleConfirmOrder}>Confirm Order</button>\n    </div>\n  );\n}\n\n// On the /order-success page:\nimport { useLocation } from 'react-router-dom';\n\nfunction OrderSuccess() {\n  const location = useLocation();\n  const { orderId, message } = location.state || {}; // Safely access state\n\n  return (\n    <div>\n      <h1>Order Success!</h1>\n      {orderId && <p>Order ID: <strong>{orderId}</strong></p>}\n      {message && <p>{message}</p>}\n    </div>\n  );\n}\n```",
+          "tags": [
+            "React Router",
+            "useNavigate",
+            "State",
+            "Programmatic Navigation"
+          ],
+          "prerequisites": [
+            "react_router_basics"
+          ],
+          "complexity": 6,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_navigate_replace_option",
+          "topic": "Programmatic Navigation and Redirection",
+          "level": "flashcard",
+          "type": "flashcard",
+          "question": "What is the effect of passing `{ replace: true }` as an option to the `navigate` function in React Router v6?",
+          "answer": "It replaces the current entry in the browser's history stack with the new URL, preventing the user from navigating back to the previous page using the browser's back button.",
+          "options": [],
+          "analysisPoints": [],
+          "keyConcepts": [
+            "useNavigate",
+            "History Stack",
+            "Replace Navigation",
+            "Browser History"
+          ],
+          "evaluationCriteria": [],
+          "example": "",
+          "tags": [
+            "React Router",
+            "useNavigate",
+            "History API",
+            "Navigation Options"
+          ],
+          "prerequisites": [
+            "react_router_basics"
+          ],
+          "complexity": 5,
+          "interviewFrequency": 7,
+          "learningPath": "intermediate"
+        }
+      ],
+      "tasks": [
+        {
+          "id": "task_nested_layout_implementation",
+          "title": "Implement a Multi-level Dashboard Navigation with Nested Layouts",
+          "description": "\nImplement a React application using `react-router-dom` v6 that features a multi-level dashboard with shared layouts.\n\n**Requirements:**\n\n1.  **Root Layout (`MainLayout`)**: Create a `MainLayout` component that includes a shared header, a navigation menu (for Home, Dashboard, About), and renders its children using `<Outlet />`.\n2.  **Dashboard Layout (`DashboardLayout`)**: Create a `DashboardLayout` component that acts as a nested layout specifically for dashboard-related routes. It should include a dashboard-specific sidebar navigation (for Dashboard Home, Settings, Reports) and also render its children using `<Outlet />`.\n3.  **Routes Structure**: \n    *   `/`: Renders `HomePage` within `MainLayout` (as an index route).\n    *   `/about`: Renders `AboutPage` within `MainLayout`.\n    *   `/dashboard`: Renders `DashboardOverviewPage` within `DashboardLayout`, which in turn is rendered within `MainLayout`. `DashboardOverviewPage` should be the *index route* for `/dashboard`.\n    *   `/dashboard/settings`: Renders `DashboardSettingsPage` within `DashboardLayout`.\n    *   `/dashboard/reports`: Renders `DashboardReportsPage` within `DashboardLayout`.\n4.  **Navigation**: Use `<Link>` components for all navigation within the layouts.\n5.  **Dummy Components**: Create simple functional components for `HomePage`, `AboutPage`, `DashboardOverviewPage`, `DashboardSettingsPage`, and `DashboardReportsPage` that just display their names.\n\nYour solution should clearly demonstrate the use of `Routes`, `Route`, `Outlet`, and `index` routes for creating a hierarchical UI with shared layouts.\n",
+          "difficulty": "medium",
+          "startingCode": "import React from 'react';\nimport { Routes, Route, Outlet, Link } from 'react-router-dom';\n\n// Dummy Page Components\nfunction HomePage() { return <h2>Welcome to the Home Page!</h2>; }\nfunction AboutPage() { return <h2>About Us</h2>; }\nfunction DashboardOverviewPage() { return <h3>Dashboard Overview</h3>; }\nfunction DashboardSettingsPage() { return <h3>Dashboard Settings</h3>; }\nfunction DashboardReportsPage() { return <h3>Dashboard Reports</h3>; }\n\n// TODO: Implement MainLayout component\nfunction MainLayout() {\n  return (\n    <div>\n      <header style={{ background: '#eee', padding: '10px' }}>\n        <h1>My App</h1>\n        <nav>\n          {/* Main navigation links */}\n          <Link to=\"/\">Home</Link> | \n          <Link to=\"dashboard\">Dashboard</Link> | \n          <Link to=\"about\">About</Link>\n        </nav>\n      </header>\n      <main style={{ padding: '20px' }}>\n        {/* Where child routes of MainLayout will render */}\n        {/* TODO: Add Outlet here */}\n      </main>\n      <footer style={{ background: '#eee', padding: '10px' }}>App Footer</footer>\n    </div>\n  );\n}\n\n// TODO: Implement DashboardLayout component\nfunction DashboardLayout() {\n  return (\n    <div style={{ display: 'flex', border: '1px solid #ccc', marginTop: '20px' }}>\n      <aside style={{ width: '150px', background: '#f9f9f9', padding: '10px' }}>\n        <h4>Dashboard Navigation</h4>\n        <nav>\n          {/* Dashboard specific navigation links */}\n          {/* TODO: Add Dashboard navigation links */}\n        </nav>\n      </aside>\n      <section style={{ flex: 1, padding: '10px' }}>\n        {/* Where child routes of DashboardLayout will render */}\n        {/* TODO: Add Outlet here */}\n      </section>\n    </div>\n  );\n}\n\nfunction App() {\n  return (\n    <Routes>\n      {/* TODO: Define routes structure as per requirements */}\n    </Routes>\n  );\n}\n\n// Example usage: ReactDOM.createRoot(document.getElementById('root')).render(<App />);\n",
+          "solutionCode": "import React from 'react';\nimport { Routes, Route, Outlet, Link } from 'react-router-dom';\n\n// Dummy Page Components\nfunction HomePage() { return <h2>Welcome to the Home Page!</h2>; }\nfunction AboutPage() { return <h2>About Us</h2>; }\nfunction DashboardOverviewPage() { return <h3>Dashboard Overview</h3>; }\nfunction DashboardSettingsPage() { return <h3>Dashboard Settings</h3>; }\nfunction DashboardReportsPage() { return <h3>Dashboard Reports</h3>; }\n\n// MainLayout component\nfunction MainLayout() {\n  return (\n    <div>\n      <header style={{ background: '#eee', padding: '10px' }}>\n        <h1>My App</h1>\n        <nav>\n          <Link to=\"/\">Home</Link> | \n          <Link to=\"dashboard\">Dashboard</Link> | \n          <Link to=\"about\">About</Link>\n        </nav>\n      </header>\n      <main style={{ padding: '20px' }}>\n        <Outlet />\n      </main>\n      <footer style={{ background: '#eee', padding: '10px' }}>App Footer</footer>\n    </div>\n  );\n}\n\n// DashboardLayout component\nfunction DashboardLayout() {\n  return (\n    <div style={{ display: 'flex', border: '1px solid #ccc', marginTop: '20px' }}>\n      <aside style={{ width: '150px', background: '#f9f9f9', padding: '10px' }}>\n        <h4>Dashboard Navigation</h4>\n        <nav>\n          <Link to=\"/dashboard\">Overview</Link> | \n          <Link to=\"settings\">Settings</Link> | \n          <Link to=\"reports\">Reports</Link>\n        </nav>\n      </aside>\n      <section style={{ flex: 1, padding: '10px' }}>\n        <Outlet />\n      </section>\n    </div>\n  );\n}\n\nfunction App() {\n  return (\n    <Routes>\n      <Route path=\"/\" element={<MainLayout />}>\n        {/* Home page as index route for MainLayout */}\n        <Route index element={<HomePage />} />\n        <Route path=\"about\" element={<AboutPage />} />\n        \n        {/* Nested Dashboard routes with DashboardLayout */}\n        <Route path=\"dashboard\" element={<DashboardLayout />}>\n          {/* Dashboard Overview as index route for DashboardLayout */}\n          <Route index element={<DashboardOverviewPage />} />\n          <Route path=\"settings\" element={<DashboardSettingsPage />} />\n          <Route path=\"reports\" element={<DashboardReportsPage />} />\n        </Route>\n        \n        {/* Fallback route for unmatched paths */}\n        <Route path=\"*\" element={<h2>404 - Page Not Found</h2>} />\n      </Route>\n    </Routes>\n  );\n}\n",
+          "testCases": [
+            "Navigating to '/' should render `HomePage` inside `MainLayout`.",
+            "Navigating to '/about' should render `AboutPage` inside `MainLayout`.",
+            "Navigating to '/dashboard' should render `DashboardOverviewPage` inside `DashboardLayout`, which is inside `MainLayout`.",
+            "Navigating to '/dashboard/settings' should render `DashboardSettingsPage` inside `DashboardLayout`.",
+            "Navigating to '/dashboard/reports' should render `DashboardReportsPage` inside `DashboardLayout`.",
+            "Clicking on 'Home', 'Dashboard', 'About' links in `MainLayout` should navigate correctly.",
+            "Clicking on 'Overview', 'Settings', 'Reports' links in `DashboardLayout` should navigate correctly to respective dashboard sub-pages."
+          ],
+          "hints": [
+            "Remember that `<Outlet />` is where child routes will be rendered within their parent component.",
+            "An `index` route is crucial for defining the default component to render when a parent path is matched exactly, without additional segments.",
+            "Pay attention to the relative paths in `<Link to=\"...\">` components, especially within nested layouts. Relative paths often work well, e.g., `to=\"settings\"` from `/dashboard`."
+          ],
+          "tags": [
+            "React Router",
+            "Nested Routes",
+            "Layouts",
+            "Outlet",
+            "Index Route",
+            "Frontend Architecture"
+          ],
+          "timeEstimate": 45,
+          "prerequisites": [
+            "react_components",
+            "jsx",
+            "react_router_basics"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 8,
+          "learningPath": "intermediate",
+          "relatedConcepts": [
+            "Shared Layouts",
+            "Route Matching",
+            "Component Hierarchy"
+          ]
+        },
+        {
+          "id": "task_implement_protected_route",
+          "title": "Implement a User Authentication Flow with Protected Routes",
+          "description": "\nImplement a simplified user authentication system using React Router DOM v6 that protects a dashboard route.\n\n**Requirements:**\n\n1.  **Authentication Context/Hook**: Create a simple `AuthContext` and a `useAuth` hook (or just a `useAuth` hook with `useState` and `useEffect` for persistence) that manages an `isAuthenticated` boolean state. Include `login` and `logout` functions to toggle this state. Persist authentication status (e.g., in `sessionStorage`) so it survives page refresh.\n2.  **`PrivateRoute` Component**: Create a `PrivateRoute` component that:\n    *   Takes `children` (the protected component) as a prop.\n    *   Checks the `isAuthenticated` status from `useAuth`.\n    *   If `isAuthenticated` is `false`, it redirects the user to `/login`, passing the current `location` in the navigation state (`state: { from: location }`).\n    *   If `isAuthenticated` is `true`, it renders `children`.\n    *   While redirecting, or if `isAuthenticated` is `null`/`undefined` (meaning auth check is pending), show a simple 'Loading...' message.\n3.  **`Login` Component**: Create a `Login` component that:\n    *   Has a 'Login' button. When clicked, it calls the `login` function from `useAuth`.\n    *   After successful login, it programmatically navigates the user back to the path they originally tried to access (retrieved from `location.state.from`), or to `/dashboard` if no `from` state exists. Use `replace: true` for this navigation.\n4.  **`Dashboard` Component**: A simple component indicating the user is logged in. It should also have a 'Logout' button that calls the `logout` function from `useAuth` and redirects to `/`.\n5.  **`PublicHome` Component**: A simple component for the root path (`/`) that is publicly accessible.\n6.  **`App` Routing**: Set up `Routes` in `App.js`:\n    *   `/`: `PublicHome`\n    *   `/login`: `Login`\n    *   `/dashboard`: Protected by `PrivateRoute`, rendering `Dashboard`.\n\n**Test Cases (Manual):**\n*   Verify that navigating to `/dashboard` directly when not logged in redirects to `/login`.\n*   Verify that after logging in from `/login`, the user is redirected to `/dashboard` if they initially tried to access it.\n*   Verify that after logging in, if no specific `from` path was present (e.g., navigating to `/login` directly), the user is redirected to `/dashboard`.\n*   Verify that the authentication status persists on page refresh for authenticated users.\n*   Verify that logging out redirects to `/` and clears authentication status.\n",
+          "difficulty": "medium",
+          "startingCode": "import React, { useEffect, useState, createContext, useContext } from 'react';\nimport { Routes, Route, Outlet, Link, useNavigate, useLocation } from 'react-router-dom';\n\n// --- Auth Context and Hook (to be implemented) ---\nconst AuthContext = createContext(null);\n\nconst useAuth = () => {\n  const [isAuthenticated, setIsAuthenticated] = useState(() => {\n    // TODO: Implement persistence (e.g., sessionStorage)\n    return false; // Default to false\n  });\n\n  const login = () => {\n    // TODO: Set authenticated state and persist\n    setIsAuthenticated(true);\n  };\n\n  const logout = () => {\n    // TODO: Clear authenticated state and persistence\n    setIsAuthenticated(false);\n  };\n\n  return { isAuthenticated, login, logout };\n};\n\n// --- Public Components ---\nfunction PublicHome() {\n  const { isAuthenticated, logout } = useAuth();\n  return (\n    <div>\n      <h2>Welcome to the Public Home Page!</h2>\n      {isAuthenticated ? (\n        <p>You are logged in. Go to <Link to=\"/dashboard\">Dashboard</Link> | <button onClick={logout}>Logout</button></p>\n      ) : (\n        <p>Please <Link to=\"/login\">Login</Link> to access protected content.</p>\n      )}\n    </div>\n  );\n}\n\n// TODO: Implement PrivateRoute component\nfunction PrivateRoute({ children }) {\n  const { isAuthenticated } = useAuth();\n  const navigate = useNavigate();\n  const location = useLocation();\n\n  useEffect(() => {\n    // TODO: Add redirection logic\n  }, [isAuthenticated, navigate, location]);\n\n  // TODO: Conditional rendering (children or loading message)\n  return children;\n}\n\n// TODO: Implement Login component\nfunction Login() {\n  const { login } = useAuth();\n  const navigate = useNavigate();\n  const location = useLocation();\n\n  const from = location.state?.from?.pathname || '/dashboard';\n\n  const handleLogin = () => {\n    // Simulate async login\n    setTimeout(() => {\n      login();\n      // TODO: Redirect after login\n    }, 500);\n  };\n\n  return (\n    <div>\n      <h2>Login Page</h2>\n      <p>Please log in to access the protected content.</p>\n      <button onClick={handleLogin}>Log In</button>\n      <p>Will redirect to: {from}</p>\n    </div>\n  );\n}\n\n// TODO: Implement Dashboard component\nfunction Dashboard() {\n  const { logout } = useAuth();\n  return (\n    <div>\n      <h1>Dashboard Content</h1>\n      <p>Welcome, authenticated user!</p>\n      <button onClick={logout}>Logout</button>\n    </div>\n  );\n}\n\nfunction App() {\n  return (\n    // TODO: Wrap with AuthContext.Provider\n    <Routes>\n      <Route path=\"/\" element={<PublicHome />} />\n      <Route path=\"/login\" element={<Login />} />\n      {/* TODO: Protect the dashboard route */}\n      <Route path=\"/dashboard\" element={<Dashboard />} />\n      <Route path=\"*\" element={<h2>404 Not Found</h2>} />\n    </Routes>\n  );\n}\n\n// Render App in your root (e.g., index.js)\n// import ReactDOM from 'react-dom/client';\n// const root = ReactDOM.createRoot(document.getElementById('root'));\n// root.render(<App />);\n",
+          "solutionCode": "import React, { useEffect, useState, createContext, useContext } from 'react';\nimport { Routes, Route, Link, useNavigate, useLocation } from 'react-router-dom';\n\n// --- Auth Context and Hook ---\nconst AuthContext = createContext(null);\n\nconst AuthProvider = ({ children }) => {\n  const [isAuthenticated, setIsAuthenticated] = useState(() => {\n    return sessionStorage.getItem('isAuthenticated') === 'true';\n  });\n\n  const login = () => {\n    setIsAuthenticated(true);\n    sessionStorage.setItem('isAuthenticated', 'true');\n  };\n\n  const logout = () => {\n    setIsAuthenticated(false);\n    sessionStorage.removeItem('isAuthenticated');\n  };\n\n  const authValue = { isAuthenticated, login, logout };\n\n  return (\n    <AuthContext.Provider value={authValue}>\n      {children}\n    </AuthContext.Provider>\n  );\n};\n\nconst useAuth = () => {\n  const context = useContext(AuthContext);\n  if (context === null) {\n    throw new Error('useAuth must be used within an AuthProvider');\n  }\n  return context;\n};\n\n// --- Public Components ---\nfunction PublicHome() {\n  const { isAuthenticated, logout } = useAuth();\n  return (\n    <div>\n      <h2>Welcome to the Public Home Page!</h2>\n      {isAuthenticated ? (\n        <p>You are logged in. Go to <Link to=\"/dashboard\">Dashboard</Link> | <button onClick={logout}>Logout</button></p>\n      ) : (\n        <p>Please <Link to=\"/login\">Login</Link> to access protected content.</p>\n      )}\n    </div>\n  );\n}\n\n// --- PrivateRoute component ---\nfunction PrivateRoute({ children }) {\n  const { isAuthenticated } = useAuth();\n  const navigate = useNavigate();\n  const location = useLocation();\n  const [checkedAuth, setCheckedAuth] = useState(false); // To manage loading state\n\n  useEffect(() => {\n    // Simulate an async auth check on mount if not already checked\n    if (isAuthenticated === null) { // If auth state is not yet determined\n        // In a real app, this would be an API call\n        setTimeout(() => {\n            // Assume auth check completes and updates isAuthenticated\n            setCheckedAuth(true);\n        }, 100); // Small delay to simulate async check\n    } else {\n        setCheckedAuth(true);\n    }\n\n    if (checkedAuth && !isAuthenticated) {\n      console.log(`Redirecting to /login from ${location.pathname}`);\n      navigate('/login', { state: { from: location } });\n    }\n  }, [isAuthenticated, navigate, location, checkedAuth]);\n\n  if (!checkedAuth || !isAuthenticated) {\n    return <div>Loading authentication...</div>; // Show loading while checking or if not authenticated (before redirect)\n  }\n\n  return children;\n}\n\n// --- Login component ---\nfunction Login() {\n  const { login } = useAuth();\n  const navigate = useNavigate();\n  const location = useLocation();\n\n  const from = location.state?.from?.pathname || '/dashboard';\n\n  const handleLogin = () => {\n    // Simulate API call for login\n    console.log('Simulating login...');\n    setTimeout(() => {\n      login(); // Set isAuthenticated to true\n      console.log(`Login successful. Navigating to: ${from}`);\n      navigate(from, { replace: true }); // Redirect to original path or dashboard\n    }, 500);\n  };\n\n  return (\n    <div>\n      <h2>Login Page</h2>\n      <p>Please log in to access the protected content.</p>\n      <button onClick={handleLogin}>Log In</button>\n      <p style={{ fontSize: '0.8em', color: '#666' }}>Will redirect to: {from}</p>\n    </div>\n  );\n}\n\n// --- Dashboard component ---\nfunction Dashboard() {\n  const { logout } = useAuth();\n  return (\n    <div>\n      <h1>Dashboard Content</h1>\n      <p>Welcome, authenticated user!</p>\n      <button onClick={logout}>Logout</button>\n      <p style={{ fontSize: '0.8em', color: '#666' }}>Try refreshing the page to see protected route persistence.</p>\n    </div>\n  );\n}\n\nfunction App() {\n  return (\n    <AuthProvider>\n      <Routes>\n        <Route path=\"/\" element={<PublicHome />} />\n        <Route path=\"/login\" element={<Login />} />\n        {/* Protected Route */}\n        <Route \n          path=\"/dashboard\" \n          element={\n            <PrivateRoute>\n              <Dashboard />\n            </PrivateRoute>\n          } \n        />\n        <Route path=\"*\" element={<h2>404 Not Found</h2>} />\n      </Routes>\n    </AuthProvider>\n  );\n}\n",
+          "testCases": [
+            "Test 1: Direct access to /dashboard when not logged in -> Should redirect to /login and show 'Will redirect to: /dashboard'.",
+            "Test 2: After Test 1, click 'Log In' -> Should redirect to /dashboard and show 'Welcome, authenticated user!'.",
+            "Test 3: Log out from Dashboard -> Should redirect to / and 'You are logged out' message, session storage should be clear.",
+            "Test 4: Refresh page on /dashboard when logged in -> Should remain on /dashboard, authentication status should persist from session storage.",
+            "Test 5: Directly navigate to /login -> Click 'Log In' -> Should redirect to /dashboard (default fallback).",
+            "Test 6: Type '/nonexistent' -> Should show '404 Not Found'."
+          ],
+          "hints": [
+            "Use `sessionStorage` or `localStorage` to persist the `isAuthenticated` status across page refreshes.",
+            "Remember that `useEffect` with an empty dependency array (`[]`) runs only once on mount, while with dependencies, it runs when those dependencies change.",
+            "The `location.state` object is typically `undefined` or `null` if no state was passed during navigation, so use optional chaining (`?.`) or a default value.",
+            "The `replace: true` option in `navigate` is important for a clean history stack after login, preventing users from going back to the login page."
+          ],
+          "tags": [
+            "React Router",
+            "Authentication",
+            "Route Guards",
+            "Hooks",
+            "State Management",
+            "Frontend Security"
+          ],
+          "timeEstimate": 60,
+          "prerequisites": [
+            "react_hooks_intermediate",
+            "react_context_api",
+            "react_router_intermediate"
+          ],
+          "complexity": 8,
+          "interviewRelevance": 9,
+          "learningPath": "intermediate",
+          "relatedConcepts": [
+            "Protected Routes",
+            "User Experience",
+            "Declarative vs Imperative Navigation"
+          ]
+        },
+        {
+          "id": "task_integrate_redux_router",
+          "title": "Set up React Router v6 with Redux (Modern Approach Simulation)",
+          "description": "\nThis task aims to demonstrate an understanding of how Redux can be integrated with React Router. While `react-router-redux` is largely legacy for direct state synchronization in v6, a modern approach involves passing a custom `history` object from the `history` library to `unstable_HistoryRouter` to allow external control, which can then be connected to Redux middleware.\n\n**Requirements:**\n\n1.  **Redux Store Setup**: Create a basic Redux store with a dummy reducer (e.g., managing a counter). Use `configureStore` from `@reduxjs/toolkit`.\n2.  **History Object**: Create a `browserHistory` object using `createBrowserHistory` from the `history` library.\n3.  **Router Integration**: Wrap your `App` component with `ReactReduxProvider` and `unstable_HistoryRouter` (from `react-router-dom`), passing your custom `history` object to the router.\n4.  **Middleware for Navigation (Optional but Recommended for demonstrating sync)**: Implement a simple Redux middleware that logs navigation actions (e.g., `locationChange`). While `connected-react-router` provided action creators, you can simulate this by dispatching custom actions from components and having middleware respond.\n5.  **Component for Navigation**: Create a `Home` component and a `Dashboard` component. In `Home`, add a button that dispatches a Redux action (e.g., `NAVIGATE_TO_DASHBOARD`). This action should then trigger a programmatic navigation to `/dashboard` (e.g., using `useNavigate` inside a `useEffect` triggered by Redux state, or a custom middleware that uses `history.push`). For this task, we will stick to `useNavigate` triggered by Redux state for simplicity.\n\n**Note**: This task highlights the *conceptual* integration for interview purposes, acknowledging that direct state syncing isn't the primary pattern for basic v6 apps.\n",
+          "difficulty": "hard",
+          "startingCode": "import React from 'react';\nimport ReactDOM from 'react-dom/client';\nimport { createBrowserHistory } from 'history';\nimport { configureStore, createSlice } from '@reduxjs/toolkit';\nimport { Provider as ReactReduxProvider } from 'react-redux';\nimport { \n  Routes, \n  Route, \n  unstable_HistoryRouter as HistoryRouter, \n  Link, \n  useNavigate,\n  useLocation\n} from 'react-router-dom';\n\n// --- 1. Redux Store Setup ---\n// Define a dummy slice\nconst counterSlice = createSlice({\n  name: 'counter',\n  initialState: { value: 0, navigateTo: null },\n  reducers: {\n    increment: (state) => { state.value += 1; },\n    navigateToDashboard: (state) => { state.navigateTo = '/dashboard'; },\n    clearNavigation: (state) => { state.navigateTo = null; }\n  },\n});\n\nexport const { increment, navigateToDashboard, clearNavigation } = counterSlice.actions;\n\n// TODO: Create history object\n// const history = ...;\n\n// TODO: Configure Redux store with dummy reducer\n// const store = configureStore({\n//   reducer: {\n//     counter: counterSlice.reducer,\n//   },\n//   // Add middleware here if needed\n// });\n\n// --- Components ---\nfunction Home() {\n  const navigate = useNavigate();\n  const dispatch = useDispatch(); // Assume useDispatch is imported\n  const navigateTo = useSelector((state) => state.counter.navigateTo); // Assume useSelector is imported\n\n  useEffect(() => {\n    if (navigateTo) {\n      navigate(navigateTo);\n      dispatch(clearNavigation()); // Clear the navigation flag\n    }\n  }, [navigateTo, navigate, dispatch]);\n\n  return (\n    <div>\n      <h2>Home Page</h2>\n      <p>Counter: {useSelector(state => state.counter.value)}</p>\n      <button onClick={() => dispatch(increment())}>Increment Counter</button>\n      <br/><br/>\n      <button onClick={() => dispatch(navigateToDashboard())}>\n        Navigate to Dashboard (via Redux)\n      </button>\n      <p><Link to=\"/dashboard\">Go to Dashboard (via Link)</Link></p>\n    </div>\n  );\n}\n\nfunction Dashboard() {\n  return (\n    <div>\n      <h2>Dashboard Page</h2>\n      <p>This is a protected dashboard.</p>\n      <p><Link to=\"/\">Go to Home</Link></p>\n    </div>\n  );\n}\n\nfunction App() {\n  return (\n    <Routes>\n      <Route path=\"/\" element={<Home />} />\n      <Route path=\"/dashboard\" element={<Dashboard />} />\n    </Routes>\n  );\n}\n\n// TODO: Render the App wrapped with Provider and HistoryRouter\n// const root = ReactDOM.createRoot(document.getElementById('root'));\n// root.render(\n//   <ReactReduxProvider store={store}>\n//     <HistoryRouter history={history}>\n//       <App />\n//     </HistoryRouter>\n//   </ReactReduxProvider>\n// );\n",
+          "solutionCode": "import React, { useEffect } from 'react';\nimport ReactDOM from 'react-dom/client';\nimport { createBrowserHistory } from 'history';\nimport { configureStore, createSlice } from '@reduxjs/toolkit';\nimport { Provider as ReactReduxProvider, useDispatch, useSelector } from 'react-redux';\nimport { \n  Routes, \n  Route, \n  unstable_HistoryRouter as HistoryRouter, \n  Link, \n  useNavigate\n} from 'react-router-dom';\n\n// --- 1. Redux Store Setup ---\n// Define a dummy slice\nconst counterSlice = createSlice({\n  name: 'counter',\n  initialState: { value: 0, navigateTo: null },\n  reducers: {\n    increment: (state) => { state.value += 1; },\n    navigateToPath: (state, action) => { state.navigateTo = action.payload; },\n    clearNavigation: (state) => { state.navigateTo = null; }\n  },\n});\n\nexport const { increment, navigateToPath, clearNavigation } = counterSlice.actions;\n\n// --- 2. Create history object ---\nconst history = createBrowserHistory();\n\n// --- Middleware for Navigation (demonstrative) ---\nconst routerMiddleware = (store) => (next) => (action) => {\n  if (action.type === 'counter/navigateToPath') {\n    // In a real connected-react-router setup, this would be an actual nav action\n    // For this example, the component will handle actual navigation via useSelector/useEffect\n    console.log(`[Router Middleware] Intercepted navigation request to: ${action.payload}`);\n  }\n  return next(action);\n};\n\n// --- 3. Configure Redux store ---\nconst store = configureStore({\n  reducer: {\n    counter: counterSlice.reducer,\n  },\n  middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(routerMiddleware),\n});\n\n// --- Components ---\nfunction Home() {\n  const navigate = useNavigate();\n  const dispatch = useDispatch();\n  const navigateTo = useSelector((state) => state.counter.navigateTo);\n\n  // Effect to perform navigation based on Redux state\n  useEffect(() => {\n    if (navigateTo) {\n      navigate(navigateTo); // Programmatically navigate\n      dispatch(clearNavigation()); // Clear the navigation flag in Redux\n    }\n  }, [navigateTo, navigate, dispatch]);\n\n  return (\n    <div>\n      <h2>Home Page</h2>\n      <p>Counter: {useSelector(state => state.counter.value)}</p>\n      <button onClick={() => dispatch(increment())}>Increment Counter</button>\n      <br/><br/>\n      <button onClick={() => dispatch(navigateToPath('/dashboard'))}>\n        Navigate to Dashboard (via Redux Action)\n      </button>\n      <p><Link to=\"/dashboard\">Go to Dashboard (via Link)</Link></p>\n    </div>\n  );\n}\n\nfunction Dashboard() {\n  return (\n    <div>\n      <h2>Dashboard Page</h2>\n      <p>You landed on the dashboard.</p>\n      <p><Link to=\"/\">Go to Home</Link></p>\n    </div>\n  );\n}\n\nfunction App() {\n  return (\n    <Routes>\n      <Route path=\"/\" element={<Home />} />\n      <Route path=\"/dashboard\" element={<Dashboard />} />\n      <Route path=\"*\" element={<h2>404 Not Found</h2>} />\n    </Routes>\n  );\n}\n\n// --- 4. Render the App wrapped with Provider and HistoryRouter ---\nconst root = ReactDOM.createRoot(document.getElementById('root'));\nroot.render(\n  <ReactReduxProvider store={store}>\n    <HistoryRouter history={history}>\n      <App />\n    </HistoryRouter>\n  </ReactReduxProvider>\n);\n",
+          "testCases": [
+            "Test 1: Click 'Increment Counter' button -> Counter value in Home should increase.",
+            "Test 2: Click 'Navigate to Dashboard (via Redux Action)' button -> Application should navigate to '/dashboard'. Check console for middleware log.",
+            "Test 3: From Dashboard, click 'Go to Home' -> Application should navigate to '/'.",
+            "Test 4: Click 'Go to Dashboard (via Link)' from Home -> Application should navigate to '/dashboard'. (Standard Link behavior)"
+          ],
+          "hints": [
+            "Remember to use `useDispatch` and `useSelector` hooks to interact with the Redux store from functional components.",
+            "`unstable_HistoryRouter` is required in React Router v6 if you want to pass a custom `history` object from the `history` package.",
+            "The Redux `navigateTo` state is acting as a flag that `useEffect` observes to trigger the `useNavigate` call.",
+            "The middleware is for observation and can be expanded to directly dispatch navigation actions using the `history` object if needed for more complex scenarios, but for this task, the `useEffect` approach is simpler and sufficient."
+          ],
+          "tags": [
+            "React Router",
+            "Redux",
+            "Integration",
+            "Hooks",
+            "Middleware",
+            "State Management",
+            "Frontend Architecture"
+          ],
+          "timeEstimate": 90,
+          "prerequisites": [
+            "redux_fundamentals",
+            "react_router_intermediate",
+            "react_hooks_intermediate"
+          ],
+          "complexity": 8,
+          "interviewRelevance": 7,
+          "learningPath": "advanced",
+          "relatedConcepts": [
+            "Time-travel Debugging",
+            "Centralized State",
+            "Imperative Navigation",
+            "History API"
+          ]
+        },
+        {
+          "id": "task_implement_programmatic_navigation",
+          "title": "Implement Programmatic Navigation with State Passing",
+          "description": "\nCreate a React application that demonstrates programmatic navigation using the `useNavigate` hook and passing state between routes.\n\n**Requirements:**\n\n1.  **Product List Component (`ProductList`)**: Create a component that displays a list of dummy products (e.g., an array of objects with `id`, `name`, `price`). Each product item should have a button like 'View Details'.\n2.  **Product Detail Component (`ProductDetail`)**: Create a component that is designed to display details of a single product. It should be able to receive and display product `name` and `price` via `location.state`.\n3.  **Navigation Logic**: When the 'View Details' button is clicked in `ProductList`, use `useNavigate` to navigate to a generic `/product-detail` route. Crucially, pass the specific product's `name` and `price` as state data within the navigation options.\n4.  **Route Setup**: Configure your `App` component with `Routes`:\n    *   `/`: Renders `ProductList`.\n    *   `/product-detail`: Renders `ProductDetail`.\n\nYour solution should clearly show how data can be passed between routes without using URL parameters, leveraging React Router's state feature.\n",
+          "difficulty": "medium",
+          "startingCode": "import React from 'react';\nimport { Routes, Route, useNavigate, useLocation } from 'react-router-dom';\n\n// Dummy product data\nconst products = [\n  { id: 'p1', name: 'Laptop', price: 1200 },\n  { id: 'p2', name: 'Mouse', price: 25 },\n  { id: 'p3', name: 'Keyboard', price: 75 },\n];\n\n// TODO: Implement ProductList component\nfunction ProductList() {\n  const navigate = useNavigate();\n\n  const handleViewDetails = (product) => {\n    // TODO: Use navigate to go to /product-detail, passing product data as state\n  };\n\n  return (\n    <div>\n      <h1>Our Products</h1>\n      <ul>\n        {products.map((product) => (\n          <li key={product.id} style={{ marginBottom: '10px' }}>\n            {product.name} - ${product.price}\n            <button \n              onClick={() => handleViewDetails(product)}\n              style={{ marginLeft: '15px', padding: '5px 10px' }}\n            >\n              View Details\n            </button>\n          </li>\n        ))}\n      </ul>\n    </div>\n  );\n}\n\n// TODO: Implement ProductDetail component\nfunction ProductDetail() {\n  const location = useLocation();\n  // TODO: Retrieve product data from location.state\n  const product = {}; // Placeholder\n\n  if (!product || !product.name) {\n    return <div>No product details found.</div>;\n  }\n\n  return (\n    <div>\n      <h2>Product Detail</h2>\n      <p>Name: {product.name}</p>\n      <p>Price: ${product.price}</p>\n      <button onClick={() => window.history.back()}>Go Back</button>\n    </div>\n  );\n}\n\nfunction App() {\n  return (\n    <Routes>\n      {/* TODO: Set up routes for ProductList and ProductDetail */}\n    </Routes>\n  );\n}\n\n// Example usage: ReactDOM.createRoot(document.getElementById('root')).render(<App />);\n",
+          "solutionCode": "import React from 'react';\nimport { Routes, Route, useNavigate, useLocation } from 'react-router-dom';\nimport ReactDOM from 'react-dom/client';\n\n// Dummy product data\nconst products = [\n  { id: 'p1', name: 'Laptop', price: 1200 },\n  { id: 'p2', name: 'Mouse', price: 25 },\n  { id: 'p3', name: 'Keyboard', price: 75 },\n];\n\n// ProductList component\nfunction ProductList() {\n  const navigate = useNavigate();\n\n  const handleViewDetails = (product) => {\n    // Navigate to /product-detail, passing product data as state\n    navigate('/product-detail', { state: { productData: product } });\n  };\n\n  return (\n    <div>\n      <h1>Our Products</h1>\n      <ul>\n        {products.map((product) => (\n          <li key={product.id} style={{ marginBottom: '10px' }}>\n            {product.name} - ${product.price}\n            <button \n              onClick={() => handleViewDetails(product)}\n              style={{ marginLeft: '15px', padding: '5px 10px' }}\n            >\n              View Details\n            </button>\n          </li>\n        ))}\n      </ul>\n    </div>\n  );\n}\n\n// ProductDetail component\nfunction ProductDetail() {\n  const location = useLocation();\n  // Retrieve product data from location.state\n  const product = location.state?.productData; \n  const navigate = useNavigate();\n\n  if (!product || !product.name || !product.price) {\n    return (\n      <div>\n        <p>No product details found or invalid data.</p>\n        <button onClick={() => navigate('/')}>Go to Product List</button>\n      </div>\n    );\n  }\n\n  return (\n    <div>\n      <h2>Product Detail</h2>\n      <p>Name: <strong>{product.name}</strong></p>\n      <p>Price: <strong>${product.price}</strong></p>\n      <button onClick={() => navigate(-1)}>Go Back</button>\n    </div>\n  );\n}\n\nfunction App() {\n  return (\n    <Routes>\n      <Route path=\"/\" element={<ProductList />} />\n      <Route path=\"/product-detail\" element={<ProductDetail />} />\n      <Route path=\"*\" element={<h2>404 - Page Not Found</h2>} />\n    </Routes>\n  );\n}\n\n// Render App\n// const root = ReactDOM.createRoot(document.getElementById('root'));\n// root.render(<App />);\n",
+          "testCases": [
+            "Test 1: Navigate to '/' -> Should see the list of products.",
+            "Test 2: Click 'View Details' for 'Laptop' -> Should navigate to '/product-detail' and display 'Name: Laptop', 'Price: $1200'. The URL should remain '/product-detail'.",
+            "Test 3: Click 'View Details' for 'Mouse' -> Should navigate to '/product-detail' and display 'Name: Mouse', 'Price: $25'.",
+            "Test 4: From '/product-detail', click 'Go Back' button -> Should navigate back to the product list.",
+            "Test 5: Directly navigate to '/product-detail' (e.g., by typing in URL bar) -> Should display 'No product details found or invalid data.' and a button to go back to product list.",
+            "Test 6: Refresh page on '/product-detail' after navigating from product list -> Product details should disappear (as `location.state` is lost on refresh). The component should handle this gracefully."
+          ],
+          "hints": [
+            "Remember that `useNavigate` returns a function, and you call it with the path and an optional second argument (an object) for options like `state`.",
+            "The `location.state` property will contain the object you passed. Use optional chaining (`?.`) when accessing it to prevent errors if no state was passed (e.g., if the user directly navigates to the URL).",
+            "For the 'Go Back' button, `navigate(-1)` is a concise way to go back one entry in the history stack.",
+            "Note that `location.state` is ephemeral; it's designed for transient data. It is not persisted across page refreshes or direct URL entries."
+          ],
+          "tags": [
+            "React Router",
+            "Navigation",
+            "Programmatic",
+            "useNavigate",
+            "useLocation",
+            "State Passing",
+            "Frontend Development"
+          ],
+          "timeEstimate": 45,
+          "prerequisites": [
+            "react_components",
+            "react_hooks_basics",
+            "react_router_basics"
+          ],
+          "complexity": 6,
+          "interviewRelevance": 8,
+          "learningPath": "intermediate",
+          "relatedConcepts": [
+            "Single Page Application",
+            "Client-side Routing",
+            "URL Parameters"
+          ]
+        }
+      ]
+    }
+  }
+]

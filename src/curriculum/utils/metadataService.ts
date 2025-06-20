@@ -364,7 +364,7 @@ export class MetadataService {
         headers[key] = value;
       });
       console.log('MetadataService: API response headers:', JSON.stringify(headers));
-      
+
       if (!response.ok) {
         const errorText = await response.text();
         console.error('MetadataService: API error response:', errorText);

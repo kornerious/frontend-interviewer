@@ -1,0 +1,979 @@
+[
+  {
+    "id": "379b2724-4a0c-425e-8037-012d98906d04",
+    "startLine": 1100,
+    "endLine": 1199,
+    "processedDate": "2025-06-17T07:32:45.844Z",
+    "content": {
+      "logicalBlockInfo": {
+        "suggestedEndLine": -1
+      },
+      "theory": [
+        {
+          "id": "theory_object_composition",
+          "title": "Object Composition in JavaScript",
+          "content": "## Introduction to Object Composition\nObject composition is a programming paradigm where complex objects are created by combining simpler objects or functionalities. Unlike classical inheritance, which focuses on \"is-a\" relationships (e.g., a `Dog` *is-a* `Animal`), composition emphasizes \"has-a\" relationships (e.g., a `Bird` *has-a* `flying` ability, *has-a* `eating` ability).\n\nThis approach promotes flexibility, reusability, and avoids common pitfalls associated with deep inheritance hierarchies, such as the \"diamond problem\" (ambiguity arising from multiple inheritance) and tight coupling.\n\n## Core Concepts\n-   **Mixins/Composers:** Functions that return objects containing specific behaviors (methods and/or properties). These functions often take the object's `state` as an argument, allowing the behaviors to interact with and modify the internal state.\n-   **Factory Functions:** Functions that create and return new objects. They typically combine various mixins to assemble the desired object with all its capabilities.\n-   **State Management:** The internal data of an object is often managed in a `state` object, which is passed to the mixins, allowing them to operate on the same shared data.\n\n## Benefits of Composition\n-   **Flexibility:** Easily combine different behaviors in various ways to create diverse objects without a rigid hierarchy.\n-   **Reusability:** Individual behaviors (mixins) can be reused across multiple types of objects.\n-   **Maintainability:** Changes to one behavior are less likely to impact unrelated parts of the system.\n-   **Testability:** Smaller, focused mixins are easier to test in isolation.\n-   **Reduced Coupling:** Objects depend on behaviors rather than concrete classes, leading to looser coupling.\n-   **Avoids Inheritance Problems:** No more super constructor calls, `this` binding issues in inherited methods, or the fragile base class problem.\n\n## Implementation Pattern\nThe common pattern involves:\n1.  Defining `state` for the core properties of the object.\n2.  Creating small functions (mixins) that accept the `state` and return an object with methods that operate on that state.\n3.  Using the spread syntax (`...`) within a factory function to merge the `state` and all the returned behaviors into a single final object.\n\nIt's important to note that directly spreading `state` (`...state`) makes the internal state properties directly accessible and mutable from the outside. For better encapsulation, one might choose to only return methods from the factory function, with state being closed over by the mixins, or by providing getter/setter methods for controlled access.",
+          "examples": [
+            {
+              "id": "example_object_composition_1",
+              "title": "Basic Object Composition with State",
+              "code": "const canEat = (state) => ({\n  eat: (food) => {\n    console.log(`${state.name} is eating ${food}`);\n    state.energy += 10; // Example: Eating increases energy\n  },\n});\n\nconst canSleep = (state) => ({\n  sleep: (hours) => {\n    console.log(`${state.name} is sleeping for ${hours} hours`);\n    state.energy += hours * 5; // Example: Sleeping increases energy\n  },\n});\n\nconst canFly = (state) => ({\n  fly: (distance) => {\n    if (state.energy >= distance * 2) {\n      console.log(`${state.name} is flying ${distance} meters`);\n      state.energy -= distance * 2;\n    } else {\n      console.log(`${state.name} is too tired to fly`);\n    }\n  },\n});\n\n// Creating objects using composition (Factory Functions)\nfunction createBird(name) {\n  const state = {\n    name,\n    energy: 100,\n  };\n  \n  return {\n    ...state, // Directly exposes name and energy. Alternative: use getters for state properties\n    ...canEat(state),\n    ...canSleep(state),\n    ...canFly(state),\n  };\n}\n\nfunction createDog(name) {\n  const state = {\n    name,\n    energy: 100,\n  };\n  \n  return {\n    ...state,\n    ...canEat(state),\n    ...canSleep(state),\n  };\n}\n\nconst bird = createBird(\"Sparrow\");\nbird.eat(\"seeds\"); \nbird.fly(20); \nconsole.log(`Sparrow's energy: ${bird.energy}`); // 100 + 10 - 40 = 70\n\nconst dog = createDog(\"Rex\");\ndog.eat(\"meat\"); \ndog.sleep(8); \nconsole.log(`Rex's energy: ${dog.energy}`); // 100 + 10 + 40 = 150\n// dog.fly(); // Error: dog.fly is not a function",
+              "explanation": "This example demonstrates how `canEat`, `canSleep`, and `canFly` are functions that return objects with specific behaviors. These 'mixin' objects are then combined using the spread operator within `createBird` and `createDog` factory functions. Each mixin takes a `state` object, allowing it to modify or access shared properties like `name` and `energy`. This allows `Bird` to have `fly` ability, while `Dog` does not, showcasing how different combinations of behaviors can be created from the same set of building blocks.",
+              "language": "javascript"
+            }
+          ],
+          "relatedQuestions": [
+            "question_composition_1",
+            "question_composition_2",
+            "question_composition_3",
+            "question_composition_4",
+            "question_composition_5",
+            "question_composition_6"
+          ],
+          "relatedTasks": [
+            "task_character_creation_composition"
+          ],
+          "tags": [
+            "object-oriented-programming",
+            "composition",
+            "javascript",
+            "design-patterns",
+            "functional-programming",
+            "factories"
+          ],
+          "technology": "JavaScript",
+          "prerequisites": [
+            "javascript_objects",
+            "javascript_functions",
+            "spread_syntax"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 8,
+          "learningPath": "intermediate",
+          "requiredFor": [
+            "advanced_js_patterns",
+            "react_component_patterns"
+          ]
+        },
+        {
+          "id": "theory_immutable_object_patterns",
+          "title": "Immutable Object Patterns in JavaScript",
+          "content": "## What is Immutability?\nImmutability refers to the principle that once an object or data structure is created, it cannot be changed. Any operation that appears to modify the data actually creates a new instance of the data with the changes, leaving the original data intact.\n\n## Why Immutability is Important\nImmutability is a cornerstone of modern frontend development, particularly in state management libraries like Redux and React. Its benefits include:\n-   **Predictability:** Data flow becomes easier to understand as objects do not change unexpectedly. This makes debugging simpler and reduces side effects.\n-   **Easier Change Detection:** When an object is immutable, you can simply compare references to determine if it has changed (`oldObject !== newObject`). This is crucial for performance optimizations in UI frameworks (e.g., React's `shouldComponentUpdate` or `React.memo`).\n-   **Concurrency:** In multi-threaded environments (less common directly in frontend JS, but relevant for Web Workers), immutable data inherently avoids race conditions.\n-   **Undo/Redo Functionality:** Maintaining a history of immutable states makes implementing undo/redo features straightforward, as you can simply revert to a previous state.\n-   **Functional Programming:** Immutability is fundamental to functional programming paradigms, where functions aim to be pure (i.e., they produce the same output for the same input and have no side effects).\n\n## Immutable Object Creation Patterns\nJavaScript objects are mutable by default. To achieve immutability, new objects are created based on existing ones with the desired modifications.\n\n### 1. `Object.assign()`\n`Object.assign(target, ...sources)` copies all enumerable own properties from one or more source objects to a target object. To create an immutable update, an empty object `{}` is typically used as the target, and the original object is spread into it, followed by the new or updated properties.\n\n**Note:** `Object.assign()` performs a shallow copy. If the original object contains nested objects or arrays, those nested structures are still shared by reference and thus remain mutable. To achieve deep immutability, each nested level must also be immutably updated.\n\n### 2. Spread Syntax (`...`)\nThe spread syntax provides a more concise and readable way to achieve the same shallow cloning and merging as `Object.assign()`. It's widely used in modern JavaScript development.\n\n**Note:** Like `Object.assign()`, the spread syntax also performs a shallow copy. For deep immutability, recursive updates or libraries like Immer (for Redux) are often used.\n\n### 3. Structured Cloning (ES2021 `structuredClone()`)\nFor deep copies of objects and arrays that include complex types like `Date`, `RegExp`, `Map`, `Set`, `ArrayBuffer`, etc., the `structuredClone()` global function can be used. This provides a true deep copy without mutation, but it is a relatively newer feature.\n\n### 4. JSON Parsing Trick (for simple deep copies)\n`JSON.parse(JSON.stringify(obj))` can be used for a quick deep copy, but it has significant limitations: it cannot handle functions, `undefined`, `Symbol` values, `Date` objects (converts to string), `RegExp` objects, or circular references.",
+          "examples": [
+            {
+              "id": "example_immutable_object_1",
+              "title": "Updating Objects Immutably with Object.assign()",
+              "code": "// Original mutable object\nconst person = {\n  name: 'John',\n  age: 28,\n  address: {\n    city: 'New York',\n    zip: '10001'\n  }\n};\n\n// Creating an updated object using Object.assign()\n// This creates a new object and copies properties from person, then applies { age: 29 }\nconst updatedPerson = Object.assign({}, person, {\n  age: 29\n});\n\nconsole.log(person);        // { name: 'John', age: 28, address: { city: 'New York', zip: '10001' } }\nconsole.log(updatedPerson); // { name: 'John', age: 29, address: { city: 'New York', zip: '10001' } }\n\n// Demonstrating shallow copy issue with Object.assign()\nupdatedPerson.address.city = 'Los Angeles';\nconsole.log(person.address.city); // Output: 'Los Angeles' (Original object was mutated!)",
+              "explanation": "`Object.assign({}, person, { age: 29 })` creates a *new* object. Properties from `person` are copied into this new object. Then, the `age` property is overridden. Crucially, primitive values (like `name`, `age`) are copied by value, but nested objects (like `address`) are copied by *reference*. This means changing a property within a nested object in `updatedPerson` will also change it in `person`.",
+              "language": "javascript"
+            },
+            {
+              "id": "example_immutable_object_2",
+              "title": "Updating Objects Immutably with Spread Operator",
+              "code": "// Original mutable object\nconst product = {\n  id: 'abc',\n  price: 100,\n  details: {\n    weight: 500,\n    color: 'red'\n  }\n};\n\n// Creating an updated object using spread operator (ES6+)\nconst updatedProduct = {\n  ...product,\n  price: 120\n};\n\nconsole.log(product);       // { id: 'abc', price: 100, details: { weight: 500, color: 'red' } }\nconsole.log(updatedProduct); // { id: 'abc', price: 120, details: { weight: 500, color: 'red' } }\n\n// Demonstrating shallow copy issue with spread operator\nupdatedProduct.details.color = 'blue';\nconsole.log(product.details.color); // Output: 'blue' (Original object was mutated!)",
+              "explanation": "The spread operator (`...product`) unpacks all enumerable properties from `product` into a new object. Then, `price: 120` overwrites the `price` property. Similar to `Object.assign()`, this is a shallow copy. Nested objects `details` are still references to the original object's nested `details` object.",
+              "language": "javascript"
+            },
+            {
+              "id": "example_immutable_object_3",
+              "title": "Achieving Deep Immutability for Nested Objects",
+              "code": "const user = {\n  id: 1,\n  profile: {\n    name: 'Alice',\n    preferences: {\n      theme: 'dark',\n      notifications: true\n    }\n  }\n};\n\n// To update notifications immutably, each nested level must be copied\nconst updatedUser = {\n  ...user,\n  profile: {\n    ...user.profile,\n    preferences: {\n      ...user.profile.preferences,\n      notifications: false\n    }\n  }\n};\n\nconsole.log(user.profile.preferences.notifications);        // true\nconsole.log(updatedUser.profile.preferences.notifications); // false\nconsole.log(user === updatedUser);                          // false\nconsole.log(user.profile === updatedUser.profile);          // false\nconsole.log(user.profile.preferences === updatedUser.profile.preferences); // false",
+              "explanation": "To achieve true deep immutability when updating nested properties, you must immutably copy *each level* of the nested structure that is being modified. This involves spreading the outer object, then spreading the nested object, and so on, until you reach the property you want to change.",
+              "language": "javascript"
+            }
+          ],
+          "relatedQuestions": [
+            "question_immutability_1",
+            "question_immutability_2",
+            "question_immutability_3",
+            "question_immutability_4",
+            "question_immutability_5",
+            "question_immutability_6"
+          ],
+          "relatedTasks": [
+            "task_immutable_state_management"
+          ],
+          "tags": [
+            "immutability",
+            "javascript",
+            "data-structures",
+            "functional-programming",
+            "react",
+            "state-management"
+          ],
+          "technology": "JavaScript",
+          "prerequisites": [
+            "javascript_objects",
+            "spread_syntax",
+            "object_assign"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 9,
+          "learningPath": "intermediate",
+          "requiredFor": [
+            "react_redux",
+            "frontend_architecture",
+            "pure_functions"
+          ]
+        },
+        {
+          "id": "theory_array_creation_methods",
+          "title": "JavaScript Array Creation Methods",
+          "content": "## Introduction to Arrays\nArrays are list-like objects whose prototype has methods to perform traversal and mutation operations. In JavaScript, arrays are resizable and can contain a mix of different data types.\n\n## Methods for Array Creation\nJavaScript provides several ways to create arrays, each with its specific use cases and nuances.\n\n### 1. Array Literal\nThis is the most common and generally preferred way to create an array. It's concise and readable.\n\n```javascript\nconst numbers = [1, 2, 3, 4, 5];\nconst mixed = [1, 'hello', true, null];\nconst empty = [];\n```\n\n### 2. Array Constructor (`new Array()`)\nThe `Array` constructor behaves differently depending on the number and type of arguments passed to it:\n-   **With a single number argument (`new Array(length)`):** Creates a new array with the specified `length`. The elements are empty slots, not `undefined`. This creates a *sparse array*, which can sometimes lead to unexpected behavior with array methods.\n-   **With multiple arguments (`new Array(element0, element1, ..., elementN)`):** Creates a new array and initializes it with the provided arguments as elements.\n\n```javascript\nconst arrayWithLength = new Array(5); // Creates [empty x 5]\nconsole.log(arrayWithLength.length); // 5\nconsole.log(arrayWithLength[0]);   // undefined\n\nconst arrayWithElements = new Array(1, 2, 3, 4, 5); // Creates [1, 2, 3, 4, 5]\nconst singleElementArray = new Array(\"hello\"); // Creates [\"hello\"]\n```\n\n### 3. `Array.from()`\n`Array.from()` creates a new, shallow-copied `Array` instance from an array-like or iterable object. This method is incredibly versatile for transforming data sources into arrays.\n\n**Use Cases:**\n-   **From Array-like objects:** Objects with a `length` property and indexed elements (e.g., `arguments` object, `NodeList` from `document.querySelectorAll()`).\n-   **From Iterables:** Objects whose elements can be iterated over (e.g., `String`, `Set`, `Map`).\n-   **With a `mapFn`:** An optional second argument that allows you to map each element of the source to a new value in the new array, similar to `Array.prototype.map()`.\n-   **Creating a sequence:** Can be combined with `Array(length)` to create an array for numerical sequences.\n\n```javascript\nconst arrayFromString = Array.from('hello'); // ['h', 'e', 'l', 'l', 'o']\nconst arrayFromSet = Array.from(new Set([1, 2, 3, 2, 1])); // [1, 2, 3]\nconst arrayFromNodeList = Array.from(document.querySelectorAll('div')); // Converts NodeList to Array\n\n// With a map function\nconst arrayWithMap = Array.from([1, 2, 3], x => x * 2); // [2, 4, 6]\n\n// Creating a sequence of numbers from 0 to 4\nconst sequence = Array.from({length: 5}, (_, i) => i); // [0, 1, 2, 3, 4]\n```\n\n### 4. `Array.of()`\n`Array.of()` creates a new `Array` instance from a variable number of arguments, regardless of the number or type of the arguments. This method is primarily useful for overcoming the inconsistent behavior of the `Array` constructor when a single numeric argument is passed.\n\n```javascript\nconst arrayOf = Array.of(1, 2, 3, 4, 5); // [1, 2, 3, 4, 5]\nconst singleItemArray = Array.of(5);     // [5] (consistent, unlike new Array(5))\nconst mixedItemsArray = Array.of('a', 1, true); // ['a', 1, true]\n```\n\n## Summary of Key Differences\n-   `new Array(length)` creates a sparse array with `length` empty slots.\n-   `Array.of(element)` creates an array containing `element`.\n-   `Array.from()` is best for converting array-like or iterable objects into true arrays, and for transforming elements during creation.",
+          "examples": [
+            {
+              "id": "example_array_creation_1",
+              "title": "Comparing Array Constructor Behaviors",
+              "code": "const arr1 = new Array(3);       // Creates [empty x 3]\nconsole.log(arr1);               // [ <3 empty items> ]\nconsole.log(arr1.length);        // 3\nconsole.log(arr1[0]);            // undefined\n\nconst arr2 = new Array(1, 2, 3); // Creates [1, 2, 3]\nconsole.log(arr2);               // [1, 2, 3]\nconsole.log(arr2.length);        // 3\n\nconst arr3 = Array.of(3);        // Creates [3]\nconsole.log(arr3);               // [3]\nconsole.log(arr3.length);        // 1\n\nconst arr4 = Array.of(1, 2, 3);  // Creates [1, 2, 3]\nconsole.log(arr4);               // [1, 2, 3]",
+              "explanation": "This example highlights the crucial difference between `new Array(singleNumber)` and `Array.of(singleNumber)`. The former creates an array with that many empty slots (a sparse array), while the latter creates an array containing that number as its single element. `Array.of` provides consistent behavior regardless of the number of arguments, making it safer for dynamic array creation than the `Array` constructor alone.",
+              "language": "javascript"
+            },
+            {
+              "id": "example_array_creation_2",
+              "title": "Using Array.from() for Transformations and Iterables",
+              "code": "// 1. Convert a string to an array of characters\nconst characters = Array.from('JavaScript');\nconsole.log(characters); // ['J', 'a', 'v', 'a', 'S', 'c', 'r', 'i', 'p', 't']\n\n// 2. Create an array from a Set (unique values)\nconst uniqueNumbers = Array.from(new Set([10, 20, 10, 30, 20]));\nconsole.log(uniqueNumbers); // [10, 20, 30]\n\n// 3. Generate a sequence of squares using a map function\nconst squares = Array.from({length: 5}, (_, index) => index * index);\nconsole.log(squares); // [0, 1, 4, 9, 16]\n\n// 4. Convert NodeList to Array (useful for DOM manipulation)\n// Assume some HTML: <div class=\"item\">1</div><div class=\"item\">2</div>\n// const divs = Array.from(document.querySelectorAll('.item'));\n// console.log(divs.map(div => div.textContent)); // ['1', '2']",
+              "explanation": "`Array.from()` is highly flexible. It can convert any iterable (like strings or Sets) into a new array. The optional mapping function allows for immediate transformation of elements during the array creation process, which is very efficient for generating sequences or derived data.",
+              "language": "javascript"
+            }
+          ],
+          "relatedQuestions": [
+            "question_array_creation_1",
+            "question_array_creation_2",
+            "question_array_creation_3",
+            "question_array_creation_4",
+            "question_array_creation_5"
+          ],
+          "relatedTasks": [
+            "task_array_utility_generator"
+          ],
+          "tags": [
+            "arrays",
+            "javascript",
+            "es6",
+            "data-structures",
+            "array-methods"
+          ],
+          "technology": "JavaScript",
+          "prerequisites": [
+            "javascript_basics",
+            "iterables",
+            "array_literals"
+          ],
+          "complexity": 6,
+          "interviewRelevance": 7,
+          "learningPath": "intermediate",
+          "requiredFor": [
+            "data_manipulation",
+            "functional_programming_js"
+          ]
+        }
+      ],
+      "questions": [
+        {
+          "id": "question_composition_1",
+          "topic": "Object Composition Basics",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "What is the primary difference between object composition and classical inheritance in terms of object relationships?",
+          "answer": "Object composition emphasizes 'has-a' relationships, while classical inheritance emphasizes 'is-a' relationships.",
+          "options": [],
+          "analysisPoints": [
+            "Distinguish between 'has-a' and 'is-a' relationships.",
+            "Understand the fundamental principle of composition (building objects from parts) versus inheritance (deriving objects from a parent)."
+          ],
+          "keyConcepts": [
+            "Object Composition",
+            "Classical Inheritance",
+            "Has-a relationship",
+            "Is-a relationship"
+          ],
+          "evaluationCriteria": [
+            "Ability to define core concepts",
+            "Understanding of fundamental design principles"
+          ],
+          "example": "",
+          "tags": [
+            "composition",
+            "inheritance",
+            "oop",
+            "design-patterns"
+          ],
+          "prerequisites": [
+            "javascript_objects"
+          ],
+          "complexity": 3,
+          "interviewFrequency": 6,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_composition_2",
+          "topic": "Benefits of Object Composition",
+          "level": "medium",
+          "type": "open",
+          "question": "List at least three benefits of using object composition over classical inheritance in JavaScript. Provide a brief explanation for each.",
+          "answer": "1.  **Flexibility:** Composition allows objects to dynamically acquire or lose behaviors by combining different mixins, without being tied to a fixed inheritance hierarchy. This makes it easier to add new capabilities or modify existing ones.\n2.  **Reusability:** Individual behaviors (mixins) are self-contained and can be reused across diverse objects, regardless of their type or class, promoting modularity.\n3.  **Avoids the 'Diamond Problem' / Multiple Inheritance Issues:** JavaScript's single inheritance model inherently avoids the diamond problem, but composition provides a cleaner way to achieve similar functionality without the complexity and ambiguity that can arise in languages supporting multiple inheritance.\n4.  **Reduced Coupling:** Objects are composed of loosely coupled behaviors rather than being tightly bound to a parent class's implementation details, making systems easier to maintain and test.",
+          "options": [],
+          "analysisPoints": [
+            "Ability to articulate core benefits of composition.",
+            "Understanding of common pitfalls of inheritance.",
+            "Capacity to explain concepts clearly and concisely."
+          ],
+          "keyConcepts": [
+            "Object Composition",
+            "Inheritance",
+            "Design Patterns",
+            "Modularity",
+            "Reusability",
+            "Flexibility"
+          ],
+          "evaluationCriteria": [
+            "Comprehensive explanation of benefits",
+            "Clarity and accuracy of reasoning"
+          ],
+          "example": "",
+          "tags": [
+            "composition",
+            "oop",
+            "design-patterns",
+            "benefits"
+          ],
+          "prerequisites": [
+            "object_composition_basics"
+          ],
+          "complexity": 6,
+          "interviewFrequency": 7,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_composition_3",
+          "topic": "Object Composition Implementation",
+          "level": "medium",
+          "type": "mcq",
+          "question": "Given the following JavaScript code, what will be the output of `console.log(dog.energy);` after the `dog.eat('kibble');` and `dog.sleep(5);` calls?\n\n```javascript\nconst canEat = (state) => ({\n  eat: (food) => {\n    console.log(`${state.name} is eating ${food}`);\n    state.energy += 10;\n  },\n});\n\nconst canSleep = (state) => ({\n  sleep: (hours) => {\n    console.log(`${state.name} is sleeping for ${hours} hours`);\n    state.energy += hours * 5;\n  },\n});\n\nfunction createDog(name) {\n  const state = {\n    name,\n    energy: 100\n  };\n  return {\n    ...state,\n    ...canEat(state),\n    ...canSleep(state)\n  };\n}\n\nconst dog = createDog(\"Buddy\");\ndog.eat('kibble');\ndog.sleep(5);\n```",
+          "answer": "135",
+          "options": [
+            "100",
+            "110",
+            "135",
+            "160"
+          ],
+          "analysisPoints": [
+            "Understand how state is shared and modified by mixins.",
+            "Perform arithmetic calculations based on method calls.",
+            "Trace the execution flow of composed objects."
+          ],
+          "keyConcepts": [
+            "Object Composition",
+            "State Management",
+            "Side Effects",
+            "Function Execution"
+          ],
+          "evaluationCriteria": [
+            "Accuracy in tracing state changes",
+            "Understanding of shared state in composition"
+          ],
+          "example": "Initial energy: 100\nAfter `dog.eat('kibble')`: `state.energy` becomes `100 + 10 = 110`.\nAfter `dog.sleep(5)`: `state.energy` becomes `110 + (5 * 5) = 110 + 25 = 135`.",
+          "tags": [
+            "composition",
+            "javascript",
+            "state",
+            "mcq"
+          ],
+          "prerequisites": [
+            "object_composition_implementation"
+          ],
+          "complexity": 5,
+          "interviewFrequency": 7,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_composition_4",
+          "topic": "Object Composition vs. Class Inheritance",
+          "level": "hard",
+          "type": "open",
+          "question": "In the context of frontend development (e.g., React components or general utility libraries), discuss a scenario where object composition would be significantly more advantageous than class-based inheritance, and explain why. How might you implement a common behavior, like 'logging', using composition?",
+          "answer": "A compelling scenario where object composition shines over class-based inheritance is when building reusable UI components or utility functions with varying combinations of features. Consider a component that needs to be 'draggable' and 'resizable'. If you used inheritance, you'd likely end up with complex hierarchies like `DraggableComponent extends BaseComponent` and `ResizableComponent extends BaseComponent`, and then struggle with a `DraggableAndResizableComponent` (the diamond problem or needing multiple inheritance, which JS classes don't support directly).\n\nWith composition, you can create simple 'mixin' functions:\n\n```javascript\nconst withDraggable = (component) => ({ ...component, drag: () => console.log('Dragging...') });\nconst withResizable = (component) => ({ ...component, resize: () => console.log('Resizing...') });\n\n// Create a component that's only draggable\nconst DraggableButton = withDraggable({ type: 'button', text: 'Click Me' });\nDraggableButton.drag();\n\n// Create a component that's draggable and resizable\nconst DraggableResizablePanel = withDraggable(withResizable({ type: 'panel', id: 'mainPanel' }));\nDraggableResizablePanel.drag();\nDraggableResizablePanel.resize();\n```\n\n**Why it's advantageous:**\n*   **Flexibility:** Easily mix and match behaviors without creating an explosion of classes or rigid hierarchies. A component can be draggable, or resizable, or both, or neither, by simply adding/omitting the appropriate composer functions.\n*   **No deep inheritance:** Avoids the 'fragile base class' problem where changes in a deeply inherited parent can unintentionally break child classes.\n*   **Clearer responsibilities:** Each mixin focuses on a single responsibility (e.g., `draggable`, `resizable`), leading to more modular and understandable code.\n\n**Implementing 'logging' using composition:**\n\n```javascript\nconst withLogging = (target) => ({ // target could be an object or a function\n  ...target,\n  log: (message) => console.log(`[LOG]: ${message}`),\n  logError: (message) => console.error(`[ERROR]: ${message}`)\n});\n\n// Example 1: Composing with an existing object\nconst myService = {\n  getData: () => 'some data'\n};\nconst loggedService = withLogging(myService);\nloggedService.log('Data fetched');\nconsole.log(loggedService.getData());\n\n// Example 2: Composing with a component (similar to the earlier UI example)\nconst MyComponent = { name: 'DashboardComponent' };\nconst LoggedComponent = withLogging(MyComponent);\nLoggedComponent.log(`Component ${LoggedComponent.name} mounted.`);\n```\nThis `withLogging` mixin can be easily added to any object or component, providing logging capabilities without modifying its original structure or forcing it into an inheritance hierarchy.",
+          "options": [],
+          "analysisPoints": [
+            "Ability to identify appropriate use cases for composition.",
+            "Understanding of the limitations of classical inheritance (e.g., diamond problem, fragile base class).",
+            "Demonstrates practical application of composition with a concrete example.",
+            "Explains the 'why' behind the advantage."
+          ],
+          "keyConcepts": [
+            "Object Composition",
+            "Design Patterns",
+            "Frontend Architecture",
+            "Reusability",
+            "Modularity",
+            "Inheritance Limitations"
+          ],
+          "evaluationCriteria": [
+            "Depth of analysis",
+            "Relevance of scenario",
+            "Clarity of explanation and code example"
+          ],
+          "example": "",
+          "tags": [
+            "composition",
+            "inheritance",
+            "design-patterns",
+            "frontend",
+            "architecture"
+          ],
+          "prerequisites": [
+            "object_composition_advanced",
+            "design_patterns"
+          ],
+          "complexity": 8,
+          "interviewFrequency": 8,
+          "learningPath": "advanced"
+        },
+        {
+          "id": "question_composition_5",
+          "topic": "Composition vs. Inheritance",
+          "level": "medium",
+          "type": "code",
+          "question": "Refactor the following class-based inheritance code to use object composition instead. Ensure the `superpower` and `greeting` methods work as expected.\n\n```javascript\nclass Character {\n  constructor(name) {\n    this.name = name;\n  }\n\n  greeting() {\n    return `Hello, I'm ${this.name}.`;\n  }\n}\n\nclass Superhero extends Character {\n  constructor(name, power) {\n    super(name);\n    this.superpower = power;\n  }\n\n  activatePower() {\n    return `${this.name} activates ${this.superpower}!`;\n  }\n}\n\nconst superman = new Superhero('Superman', 'Flight');\nconsole.log(superman.greeting());\nconsole.log(superman.activatePower());\n```",
+          "answer": "```javascript\nconst withName = (state) => ({\n  ...state,\n  greeting: () => `Hello, I'm ${state.name}.`\n});\n\nconst withSuperpower = (state) => ({\n  ...state,\n  activatePower: () => `${state.name} activates ${state.superpower}!`\n});\n\nfunction createCharacter(name) {\n  const state = { name };\n  return withName(state);\n}\n\nfunction createSuperhero(name, superpower) {\n  const state = { name, superpower };\n  return {\n    ...withName(state),\n    ...withSuperpower(state)\n  };\n}\n\nconst superman = createSuperhero('Superman', 'Flight');\nconsole.log(superman.greeting());\nconsole.log(superman.activatePower());\n```",
+          "options": [],
+          "analysisPoints": [
+            "Ability to convert class-based inheritance to functional composition.",
+            "Correctly identify and separate concerns into composable functions.",
+            "Properly manage shared state (if any) between composed parts.",
+            "Ensure equivalent functionality is maintained."
+          ],
+          "keyConcepts": [
+            "Object Composition",
+            "Inheritance",
+            "Refactoring",
+            "Factory Functions",
+            "Mixins"
+          ],
+          "evaluationCriteria": [
+            "Correct refactoring",
+            "Adherence to composition principles",
+            "Functional equivalence"
+          ],
+          "example": "",
+          "tags": [
+            "composition",
+            "inheritance",
+            "refactoring",
+            "code-challenge"
+          ],
+          "prerequisites": [
+            "object_composition_implementation"
+          ],
+          "complexity": 7,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_composition_6",
+          "topic": "Object Composition and State Encapsulation",
+          "level": "medium",
+          "type": "flashcard",
+          "question": "In the provided composition example (`createBird`), the `state` object is spread directly (`...state`). What is a potential drawback of this approach regarding encapsulation, and how could it be improved for better encapsulation?",
+          "answer": "Potential drawback: Spreading `state` directly exposes all internal state properties (`name`, `energy`) to the outside world, making them directly accessible and mutable. This breaks encapsulation, as external code can directly change the object's internal state without going through defined methods.\n\nImprovement: Instead of spreading `state`, only expose methods and controlled getters/setters in the returned object. The `state` itself would be closed over within the factory function's scope, or accessed only via the mixin functions.",
+          "options": [],
+          "analysisPoints": [
+            "Identify potential encapsulation issues in composition patterns.",
+            "Suggest solutions for better encapsulation.",
+            "Understand the difference between exposing raw state and controlled access via methods."
+          ],
+          "keyConcepts": [
+            "Object Composition",
+            "Encapsulation",
+            "State Management",
+            "Information Hiding"
+          ],
+          "evaluationCriteria": [
+            "Identification of problem",
+            "Provision of valid solution",
+            "Understanding of encapsulation"
+          ],
+          "example": "```javascript\n// Improved createBird for better encapsulation\nfunction createBirdEncapsulated(name) {\n  let energy = 100; // State variable is now private (closed over)\n  const birdName = name; // Also private\n\n  const getEnergy = () => ({ getEnergy: () => energy });\n  const canEat = () => ({\n    eat: (food) => {\n      console.log(`${birdName} is eating ${food}`);\n      energy += 10; \n    },\n  });\n  const canFly = () => ({\n    fly: (distance) => {\n      if (energy >= distance * 2) {\n        console.log(`${birdName} is flying ${distance} meters`);\n        energy -= distance * 2;\n      } else {\n        console.log(`${birdName} is too tired to fly`);\n      }\n    },\n  });\n\n  return { // Only expose methods, not raw state\n    name: birdName, // A getter for name is okay, or make a getName() method\n    ...canEat(), // Mixins no longer need to take state as arg if state is closed over\n    ...canFly(),\n    ...getEnergy() // Expose a getter if energy needs to be read externally\n  };\n}\n\nconst sparrowEnc = createBirdEncapsulated(\"Sparrow\");\nsparrowEnc.eat(\"seeds\");\nsparrowEnc.fly(20);\n// console.log(sparrowEnc.energy); // undefined - 'energy' is not exposed directly\nconsole.log(sparrowEnc.getEnergy()); // Access energy via getter\n```",
+          "tags": [
+            "composition",
+            "encapsulation",
+            "state-management",
+            "private-data"
+          ],
+          "prerequisites": [
+            "object_composition_implementation",
+            "closures"
+          ],
+          "complexity": 7,
+          "interviewFrequency": 7,
+          "learningPath": "advanced"
+        },
+        {
+          "id": "question_immutability_1",
+          "topic": "Immutability Definition",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "What does it mean for an object or data structure to be 'immutable'?",
+          "answer": "An immutable object/data structure cannot be modified after it is created. Any operation that appears to modify it will instead return a new object with the desired changes, leaving the original unchanged.",
+          "options": [],
+          "analysisPoints": [
+            "Core definition of immutability.",
+            "Understanding that 'modification' results in a new object."
+          ],
+          "keyConcepts": [
+            "Immutability",
+            "Data Structures",
+            "Side Effects"
+          ],
+          "evaluationCriteria": [
+            "Accuracy of definition"
+          ],
+          "example": "",
+          "tags": [
+            "immutability",
+            "basics"
+          ],
+          "prerequisites": [
+            "javascript_objects"
+          ],
+          "complexity": 3,
+          "interviewFrequency": 7,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_immutability_2",
+          "topic": "Benefits of Immutability",
+          "level": "medium",
+          "type": "open",
+          "question": "Explain at least two key benefits of using immutable data structures in frontend development, especially in frameworks like React. Provide a brief example for one of them.",
+          "answer": "1.  **Predictability and Easier Debugging:** Immutable data makes your application's state more predictable because data cannot change unexpectedly in different parts of your codebase. This significantly reduces side effects and makes debugging easier, as you can trust that a piece of data will remain the same unless you explicitly create a new version.\n\n2.  **Simplified Change Detection & Performance Optimization:** In UI frameworks like React, immutability greatly simplifies detecting when state has changed. Instead of performing deep comparisons (which can be expensive), you can simply compare references. If `oldObject !== newObject`, then a change has occurred, and the component might need to re-render. This is fundamental to optimizing renders using `React.memo` or `shouldComponentUpdate`.\n    \n    *Example for Change Detection:*\n    ```javascript\n    // With mutable state:\n    const arr1 = [1, 2, 3];\n    const arr2 = arr1;\n    arr2.push(4);\n    console.log(arr1 === arr2); // true (same reference, but content changed)\n    \n    // With immutable state:\n    const arr3 = [1, 2, 3];\n    const arr4 = [...arr3, 4]; // Creates a new array\n    console.log(arr3 === arr4); // false (different reference, reflects change)\n    // React can efficiently detect that arr3 and arr4 are different, triggering a re-render if needed.\n    ```\n\n3.  **Easier Undo/Redo Functionality:** Since each 'modification' creates a new version of the state, it's straightforward to keep a history of states. Implementing undo/redo simply involves navigating back and forth through this history of immutable state snapshots.",
+          "options": [],
+          "analysisPoints": [
+            "Ability to articulate the practical advantages of immutability.",
+            "Connection between immutability and performance/debugging.",
+            "Provision of a clear, relevant example."
+          ],
+          "keyConcepts": [
+            "Immutability",
+            "State Management",
+            "React",
+            "Performance Optimization",
+            "Debugging",
+            "Change Detection"
+          ],
+          "evaluationCriteria": [
+            "Comprehensive explanation",
+            "Accurate examples",
+            "Understanding of practical applications"
+          ],
+          "example": "",
+          "tags": [
+            "immutability",
+            "react",
+            "state-management",
+            "performance"
+          ],
+          "prerequisites": [
+            "immutability_definition"
+          ],
+          "complexity": 7,
+          "interviewFrequency": 9,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_immutability_3",
+          "topic": "Immutable Object Patterns - Shallow vs. Deep Copy",
+          "level": "medium",
+          "type": "mcq",
+          "question": "Consider the following JavaScript code:\n\n```javascript\nconst userProfile = {\n  id: 1,\n  name: 'Jane Doe',\n  settings: {\n    theme: 'light',\n    notifications: true\n  }\n};\n\nconst updatedProfile = {\n  ...userProfile,\n  settings: {\n    ...userProfile.settings,\n    theme: 'dark' // This is the only change intended\n  }\n};\n\nupdatedProfile.settings.notifications = false; // A. What happens here?\n```\n\nAfter executing line A, what will be the value of `userProfile.settings.notifications`?",
+          "answer": "true",
+          "options": [
+            "true",
+            "false",
+            "undefined",
+            "It will throw an error"
+          ],
+          "analysisPoints": [
+            "Understand deep immutability with spread operator.",
+            "Recognize that nested objects must also be immutably copied.",
+            "Trace the reference changes due to nested spreading."
+          ],
+          "keyConcepts": [
+            "Immutability",
+            "Spread Syntax",
+            "Shallow Copy",
+            "Deep Copy",
+            "Nested Objects"
+          ],
+          "evaluationCriteria": [
+            "Correctly identifies the state of the original object after a nested immutable update and subsequent mutable operation."
+          ],
+          "example": "In the provided code, `updatedProfile` is created by spreading `userProfile` and then creating a *new* `settings` object by spreading `userProfile.settings` and applying the `theme` change. This means `updatedProfile.settings` is a completely new object, distinct from `userProfile.settings`.\n\nTherefore, when `updatedProfile.settings.notifications = false;` is executed, it modifies the `notifications` property *on the new `updatedProfile.settings` object*, leaving the original `userProfile.settings.notifications` property untouched at `true`.",
+          "tags": [
+            "immutability",
+            "spread-syntax",
+            "shallow-copy",
+            "deep-copy",
+            "mcq"
+          ],
+          "prerequisites": [
+            "immutable_object_patterns"
+          ],
+          "complexity": 6,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_immutability_4",
+          "topic": "Immutable Object Methods",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "Name two common JavaScript methods or operators used to create new objects immutably from existing ones.",
+          "answer": "1. `Object.assign()`\n2. The spread syntax (`...`)",
+          "options": [],
+          "analysisPoints": [
+            "Recall common immutability patterns.",
+            "Understand their basic usage."
+          ],
+          "keyConcepts": [
+            "Immutability",
+            "Object.assign",
+            "Spread Syntax"
+          ],
+          "evaluationCriteria": [
+            "Ability to recall common methods"
+          ],
+          "example": "",
+          "tags": [
+            "immutability",
+            "javascript-methods"
+          ],
+          "prerequisites": [],
+          "complexity": 3,
+          "interviewFrequency": 7,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_immutability_5",
+          "topic": "Deep Cloning for Immutability",
+          "level": "medium",
+          "type": "open",
+          "question": "Describe a scenario where `Object.assign()` or the spread operator would be insufficient for achieving complete immutability, and suggest an alternative solution in modern JavaScript. What are the limitations of that alternative?",
+          "answer": "Scenario: `Object.assign()` and the spread operator (`...`) both perform a *shallow copy*. This means that while the top-level properties are copied into a new object, any nested objects or arrays within the original object are still copied by reference. If a nested object or array is modified through the new copy, the original object's nested structure will also be mutated.\n\nExample:\n```javascript\nconst data = { a: 1, b: { c: 2 } };\nconst shallowCopy = { ...data };\nshallowCopy.b.c = 3; // Mutates original data.b.c as well\nconsole.log(data.b.c); // 3\n```\n\nAlternative Solution in Modern JavaScript: `structuredClone()` (ECMAScript 2021)\n\n`structuredClone()` performs a deep copy of a given value. It can handle various data types, including nested objects, arrays, `Map`, `Set`, `Date`, `RegExp`, `ArrayBuffer`, and more, without retaining references to the original objects.\n\n```javascript\nconst data = { a: 1, b: { c: 2 }, d: new Date() };\nconst deepCopy = structuredClone(data);\ndeepCopy.b.c = 3;\nconsole.log(data.b.c); // 2 (Original is preserved)\nconsole.log(data.d === deepCopy.d); // false (Date object also deeply copied)\n```\n\nLimitations of `structuredClone()`:\n1.  **Browser/Environment Support:** While widely supported, it's newer (ES2021) and might not be available in very old environments or specific Node.js versions without polyfills.\n2.  **Cannot clone functions:** Functions, `Error` objects, `DOM` nodes, and some other native types cannot be cloned by `structuredClone()`. It will throw an error if it encounters them.\n3.  **Circular References:** It can handle circular references, but for very complex data structures, it might still have performance implications.",
+          "options": [],
+          "analysisPoints": [
+            "Identifies the shallow copy limitation of common immutability patterns.",
+            "Proposes `structuredClone()` as a modern deep cloning solution.",
+            "Discusses the limitations and use cases of `structuredClone()`.",
+            "Demonstrates understanding of deep vs. shallow immutability."
+          ],
+          "keyConcepts": [
+            "Immutability",
+            "Shallow Copy",
+            "Deep Copy",
+            "structuredClone",
+            "Object.assign",
+            "Spread Syntax"
+          ],
+          "evaluationCriteria": [
+            "Accuracy of explanation for shallow copy limitations",
+            "Correctness of alternative solution",
+            "Thoroughness of limitations discussion"
+          ],
+          "example": "",
+          "tags": [
+            "immutability",
+            "deep-copy",
+            "structured-clone",
+            "javascript"
+          ],
+          "prerequisites": [
+            "immutable_object_patterns"
+          ],
+          "complexity": 8,
+          "interviewFrequency": 7,
+          "learningPath": "advanced"
+        },
+        {
+          "id": "question_immutability_6",
+          "topic": "Immutability and Performance",
+          "level": "hard",
+          "type": "code",
+          "question": "You are given a `userList` (an array of objects) and a function `updateUserStatus` that needs to change a user's `isActive` status. Implement `updateUserStatus` such that it updates the `userList` immutably, ensuring that no original objects (neither the array nor any user object within it) are mutated.\n\n```javascript\nconst userList = [\n  { id: 1, name: 'Alice', isActive: true },\n  { id: 2, name: 'Bob', isActive: false },\n  { id: 3, name: 'Charlie', isActive: true },\n];\n\n/**\n * Updates the 'isActive' status of a user in the userList immutably.\n * @param {Array<Object>} users - The original array of user objects.\n * @param {number} userId - The ID of the user to update.\n * @param {boolean} newStatus - The new isActive status.\n * @returns {Array<Object>} A new array with the updated user object, or the original array if user not found.\n */\nfunction updateUserStatus(users, userId, newStatus) {\n  // Your implementation here\n}\n\n// Test Cases:\n// const updatedList1 = updateUserStatus(userList, 2, true);\n// console.log(userList[1].isActive);       // Expected: false (original unchanged)\n// console.log(updatedList1[1].isActive);    // Expected: true (new list updated)\n// console.log(userList === updatedList1); // Expected: false (new array created)\n// console.log(userList[0] === updatedList1[0]); // Expected: true (unaffected objects same reference)\n\n// const updatedList2 = updateUserStatus(userList, 99, true); // User not found\n// console.log(updatedList2 === userList); // Expected: true (original array returned)\n```",
+          "answer": "```javascript\nconst userList = [\n  { id: 1, name: 'Alice', isActive: true },\n  { id: 2, name: 'Bob', isActive: false },\n  { id: 3, name: 'Charlie', isActive: true },\n];\n\n/**\n * Updates the 'isActive' status of a user in the userList immutably.\n * @param {Array<Object>} users - The original array of user objects.\n * @param {number} userId - The ID of the user to update.\n * @param {boolean} newStatus - The new isActive status.\n * @returns {Array<Object>} A new array with the updated user object, or the original array if user not found.\n */\nfunction updateUserStatus(users, userId, newStatus) {\n  const userIndex = users.findIndex(user => user.id === userId);\n\n  if (userIndex === -1) {\n    return users; // User not found, return original array (immutably)\n  }\n\n  // Create a new user object with updated status (immutably)\n  const updatedUser = {\n    ...users[userIndex],\n    isActive: newStatus,\n  };\n\n  // Create a new array with the updated user at the correct index (immutably)\n  return [\n    ...users.slice(0, userIndex),\n    updatedUser,\n    ...users.slice(userIndex + 1),\n  ];\n}\n\n// Test Cases:\nconst updatedList1 = updateUserStatus(userList, 2, true);\nconsole.log(\"Original list user 2 active (should be false):\", userList[1].isActive);       // Expected: false (original unchanged)\nconsole.log(\"Updated list user 2 active (should be true):\", updatedList1[1].isActive);    // Expected: true (new list updated)\nconsole.log(\"Original array reference === new array reference (should be false):\", userList === updatedList1); // Expected: false (new array created)\nconsole.log(\"Unaffected user 1 object reference === new list user 1 object reference (should be true):\", userList[0] === updatedList1[0]); // Expected: true (unaffected objects share reference for performance)\nconsole.log(\"Unaffected user 3 object reference === new list user 3 object reference (should be true):\", userList[2] === updatedList1[2]); // Expected: true\n\nconst updatedList2 = updateUserStatus(userList, 99, true); // User not found\nconsole.log(\"User not found, array reference === original array reference (should be true):\", updatedList2 === userList); // Expected: true (original array returned)\n",
+          "options": [],
+          "analysisPoints": [
+            "Correctly identifies the user to update.",
+            "Creates a new user object for the updated user using spread syntax to maintain immutability of individual objects.",
+            "Creates a new array by slicing and spreading the original array segments and inserting the new user object, ensuring array immutability.",
+            "Handles the edge case where the user is not found by returning the original array reference.",
+            "Understands that unaffected objects can retain their original references for performance."
+          ],
+          "keyConcepts": [
+            "Immutability",
+            "Array Methods",
+            "Spread Syntax",
+            "Object Update",
+            "Functional Programming"
+          ],
+          "evaluationCriteria": [
+            "Correctly implements immutable array and object updates",
+            "Handles edge cases gracefully",
+            "Efficiency of solution (avoiding unnecessary deep copies of unchanged elements)"
+          ],
+          "example": "",
+          "tags": [
+            "immutability",
+            "arrays",
+            "javascript",
+            "code-challenge",
+            "state-management"
+          ],
+          "prerequisites": [
+            "immutable_object_patterns",
+            "array_methods",
+            "spread_syntax"
+          ],
+          "complexity": 8,
+          "interviewFrequency": 9,
+          "learningPath": "advanced"
+        },
+        {
+          "id": "question_array_creation_1",
+          "topic": "Array Creation Methods",
+          "level": "easy",
+          "type": "mcq",
+          "question": "Which of the following JavaScript code snippets will create an array `[5]` (an array containing the single number 5) and NOT an array of 5 empty slots?",
+          "answer": "Array.of(5)",
+          "options": [
+            "new Array(5)",
+            "Array.of(5)",
+            "Array.from({ length: 5 })",
+            "const arr = []; arr.length = 5;"
+          ],
+          "analysisPoints": [
+            "Distinguish between `new Array(length)` and `Array.of()`.",
+            "Understand how different array creation methods handle single numeric arguments.",
+            "Recognize sparse array creation."
+          ],
+          "keyConcepts": [
+            "Array.of",
+            "Array Constructor",
+            "Sparse Arrays",
+            "Array Creation"
+          ],
+          "evaluationCriteria": [
+            "Correctly identifies array creation method for specific outcome."
+          ],
+          "example": "`new Array(5)` creates `[empty x 5]`. `Array.from({ length: 5 })` creates `[undefined, undefined, undefined, undefined, undefined]`. `const arr = []; arr.length = 5;` creates a sparse array `[empty x 5]`. Only `Array.of(5)` explicitly creates an array `[5]` containing the number 5 as its sole element.",
+          "tags": [
+            "arrays",
+            "array-methods",
+            "mcq"
+          ],
+          "prerequisites": [
+            "array_creation_methods"
+          ],
+          "complexity": 4,
+          "interviewFrequency": 8,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_array_creation_2",
+          "topic": "Array.from() Use Cases",
+          "level": "medium",
+          "type": "open",
+          "question": "Describe two distinct use cases for `Array.from()` in JavaScript, providing a concise code example for each.",
+          "answer": "1.  **Converting Array-like Objects/Iterables to True Arrays:**\n    `Array.from()` is commonly used to convert objects that resemble arrays (like `NodeList` returned by `document.querySelectorAll()`, or the `arguments` object in functions) or other iterable objects (like `Set`, `Map`, `String`) into actual `Array` instances, allowing them to use `Array.prototype` methods (e.g., `map`, `filter`).\n    \n    *Example: Converting a string to an array of characters:*\n    ```javascript\n    const str = 'world';\n    const chars = Array.from(str); // ['w', 'o', 'r', 'l', 'd']\n    console.log(chars.map(char => char.toUpperCase())); // ['W', 'O', 'R', 'L', 'D']\n    ```\n\n2.  **Generating Arrays with Mapped Values (Sequences/Transformations):**\n    The second argument of `Array.from()` is an optional `mapFn` function, which allows you to transform each element of the new array during its creation. This is particularly useful for generating sequences of numbers or creating arrays based on a specific logic.\n    \n    *Example: Creating an array of squared numbers:*\n    ```javascript\n    const squaredNumbers = Array.from({ length: 5 }, (_, index) => index * index);\n    // The first argument { length: 5 } creates an array-like object with 5 empty slots.\n    // The map function then populates these slots with squares of their indices.\n    console.log(squaredNumbers); // [0, 1, 4, 9, 16]\n    ```",
+          "options": [],
+          "analysisPoints": [
+            "Ability to articulate core use cases for `Array.from()`.",
+            "Provide accurate and illustrative code examples.",
+            "Explain the purpose and arguments of `Array.from()`."
+          ],
+          "keyConcepts": [
+            "Array.from",
+            "Iterables",
+            "Array-like objects",
+            "Map Function",
+            "Array Generation"
+          ],
+          "evaluationCriteria": [
+            "Correct identification of use cases",
+            "Clear and accurate examples",
+            "Concise explanations"
+          ],
+          "example": "",
+          "tags": [
+            "arrays",
+            "array-methods",
+            "javascript",
+            "es6"
+          ],
+          "prerequisites": [
+            "array_creation_methods"
+          ],
+          "complexity": 6,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_array_creation_3",
+          "topic": "Sparse Arrays",
+          "level": "medium",
+          "type": "flashcard",
+          "question": "When might `new Array(length)` create a 'sparse array', and what is the characteristic behavior of a sparse array regarding its elements?",
+          "answer": "`new Array(length)` creates a sparse array when a single numeric argument is passed (e.g., `new Array(5)`). A sparse array has 'empty slots' rather than actual `undefined` values for its elements. This means iteration methods like `forEach` or `map` might skip these empty slots, or they might be treated differently by various array methods compared to arrays explicitly filled with `undefined`.",
+          "options": [],
+          "analysisPoints": [
+            "Understand the specific condition for creating a sparse array with `new Array()`.",
+            "Know the nature of 'empty slots' versus `undefined` values.",
+            "Recognize potential behavioral differences for sparse arrays."
+          ],
+          "keyConcepts": [
+            "Sparse Arrays",
+            "Array Constructor",
+            "Array Behavior"
+          ],
+          "evaluationCriteria": [
+            "Accuracy in defining sparse array creation",
+            "Correctly describes sparse array characteristics"
+          ],
+          "example": "```javascript\nconst sparseArr = new Array(3); // [empty x 3]\nconsole.log(sparseArr); // Output depends on console, might show <3 empty items>\nconsole.log(sparseArr[0]); // undefined (accessing an empty slot yields undefined)\n\nsparseArr.forEach(item => console.log(item)); // This loop will not execute at all because there are no actual elements to iterate over.\n\nconst filledArr = Array.from({length: 3}, () => undefined); // [undefined, undefined, undefined]\nfilledArr.forEach(item => console.log(item)); // This loop will execute 3 times, logging 'undefined' each time.\n```",
+          "tags": [
+            "arrays",
+            "sparse-arrays",
+            "javascript-quirks"
+          ],
+          "prerequisites": [
+            "array_creation_methods"
+          ],
+          "complexity": 5,
+          "interviewFrequency": 6,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_array_creation_4",
+          "topic": "Converting Array-like to Array",
+          "level": "medium",
+          "type": "code",
+          "question": "You have a `NodeList` obtained from `document.querySelectorAll('.item')`. Write a function `getDivContents` that takes this `NodeList` and returns an array of the `textContent` of each `div` element.\n\n```html\n<div class=\"item\">Apple</div>\n<div class=\"item\">Banana</div>\n<div class=\"item\">Cherry</div>\n```\n\n```javascript\n// Assume this NodeList is passed to your function\n// const nodeList = document.querySelectorAll('.item');\n\nfunction getDivContents(nodeList) {\n  // Implement this function\n}\n\n// Expected output: ['Apple', 'Banana', 'Cherry']\n// console.log(getDivContents(nodeList));\n```",
+          "answer": "```javascript\nfunction getDivContents(nodeList) {\n  // Method 1: Using Array.from with a map function\n  return Array.from(nodeList, div => div.textContent);\n\n  // Method 2: Using Array.from without map, then Array.prototype.map\n  // return Array.from(nodeList).map(div => div.textContent);\n\n  // Method 3: Using spread syntax (most concise for simple cases)\n  // return [...nodeList].map(div => div.textContent);\n}\n\n// Example usage (mocking NodeList for demonstration without a browser DOM):\nconst mockNodeList = [\n  { textContent: 'Apple' },\n  { textContent: 'Banana' },\n  { textContent: 'Cherry' }\n];\n// Note: A real NodeList is iterable, so Array.from and spread work directly.\n// For a true NodeList, you'd execute: document.querySelectorAll('.item')\n\nconsole.log(getDivContents(mockNodeList)); // Expected: ['Apple', 'Banana', 'Cherry']\n```",
+          "options": [],
+          "analysisPoints": [
+            "Ability to convert array-like objects (`NodeList`) to true arrays.",
+            "Application of `Array.from()` or spread syntax for conversion.",
+            "Correctly extracting `textContent` using `map`."
+          ],
+          "keyConcepts": [
+            "Array.from",
+            "NodeList",
+            "DOM Manipulation",
+            "Array Methods",
+            "Spread Syntax"
+          ],
+          "evaluationCriteria": [
+            "Correctly converts NodeList",
+            "Extracts desired data",
+            "Uses appropriate array creation/manipulation methods"
+          ],
+          "example": "",
+          "tags": [
+            "arrays",
+            "dom",
+            "array-methods",
+            "code-challenge"
+          ],
+          "prerequisites": [
+            "array_creation_methods"
+          ],
+          "complexity": 6,
+          "interviewFrequency": 7,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_array_creation_5",
+          "topic": "Array.of() vs. new Array()",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "What is the main advantage of using `Array.of()` over `new Array()` for creating arrays, particularly when dealing with a single numeric argument?",
+          "answer": "The main advantage of `Array.of()` is its consistent behavior: it always creates an array with its arguments as elements. `new Array()` has an inconsistent behavior when given a single numeric argument (it creates a sparse array of that length instead of an array containing that number as an element), which `Array.of()` avoids, making it safer and more predictable.",
+          "options": [],
+          "analysisPoints": [
+            "Identify the primary difference in behavior.",
+            "Understand the benefit of `Array.of()`'s consistency.",
+            "Recognize the potential pitfalls of `new Array(number)`."
+          ],
+          "keyConcepts": [
+            "Array.of",
+            "Array Constructor",
+            "Consistency",
+            "Predictability"
+          ],
+          "evaluationCriteria": [
+            "Clear articulation of the advantage",
+            "Correctly identifies the behavioral difference"
+          ],
+          "example": "",
+          "tags": [
+            "arrays",
+            "array-methods",
+            "best-practices"
+          ],
+          "prerequisites": [
+            "array_creation_methods"
+          ],
+          "complexity": 4,
+          "interviewFrequency": 7,
+          "learningPath": "beginner"
+        }
+      ],
+      "tasks": [
+        {
+          "id": "task_character_creation_composition",
+          "title": "Build a Flexible RPG Character System with Object Composition",
+          "description": "\nDesign and implement a system for creating RPG characters using **object composition**. Your system should allow for characters with varying sets of abilities without relying on class inheritance.\n\n**Requirements:**\n1.  **Core State:** Each character should have a `name`, `health` (starting at 100), and `attackPower` (starting at 10).\n2.  **Base Abilities (Mixins):**\n    *   `canAttack(state)`: Returns an object with an `attack` method. The `attack` method should take a `target` character and reduce their `health` by the attacker's `attackPower`.\n    *   `canTakeDamage(state)`: Returns an object with a `takeDamage` method that reduces the character's `health` by a given `amount`.\n    *   `canHeal(state)`: Returns an object with a `heal` method that increases the character's `health` by a given `amount`, up to a maximum of 100.\n3.  **Character Factories:**\n    *   `createWarrior(name)`: A character that `canAttack` and `canTakeDamage`.\n    *   `createHealer(name)`: A character that `canAttack` and `canHeal`.\n    *   `createTank(name)`: A character that `canAttack` and `canTakeDamage`. Tanks should have an initial `health` of 150 and `attackPower` of 5.\n4.  **Demonstrate Usage:** Create instances of each character type and simulate a small interaction (e.g., warrior attacks healer, healer heals self).\n5.  **Immutability (Optional but encouraged):** While the provided example mutates `state.energy`, for this task, consider how you might design mixins if you wanted to avoid direct state mutation (e.g., by returning new state objects, though for simplicity direct mutation of the internal state object is acceptable if clearly noted).\n",
+          "difficulty": "medium",
+          "startingCode": "const canAttack = (state) => ({\n  // Implement attack method\n});\n\nconst canTakeDamage = (state) => ({\n  // Implement takeDamage method\n});\n\nconst canHeal = (state) => ({\n  // Implement heal method\n});\n\nfunction createWarrior(name) {\n  const state = {\n    name,\n    health: 100,\n    attackPower: 10,\n  };\n  // Compose warrior abilities\n  return {}; // TODO: Implement composition\n}\n\nfunction createHealer(name) {\n  const state = {\n    name,\n    health: 100,\n    attackPower: 10,\n  };\n  // Compose healer abilities\n  return {}; // TODO: Implement composition\n}\n\nfunction createTank(name) {\n  const state = {\n    name,\n    health: 150, // Specific for Tank\n    attackPower: 5,  // Specific for Tank\n  };\n  // Compose tank abilities\n  return {}; // TODO: Implement composition\n}\n\n// Demonstrate usage:\n// const warrior = createWarrior(\"Arthur\");\n// const healer = createHealer(\"Elara\");\n// const tank = createTank(\"Grog\");\n\n// console.log(`${warrior.name} health: ${warrior.health}`);\n// console.log(`${healer.name} health: ${healer.health}`);\n// console.log(`${tank.name} health: ${tank.health}`);\n\n// warrior.attack(healer);\n// console.log(`${healer.name} health after attack: ${healer.health}`);\n\n// healer.heal(warrior);\n// console.log(`${warrior.name} health after heal: ${warrior.health}`);\n\n// tank.attack(warrior);\n// console.log(`${warrior.name} health after tank attack: ${warrior.health}`);\n",
+          "solutionCode": "const canAttack = (state) => ({\n  attack: (target) => {\n    if (target && target.takeDamage) {\n      console.log(`${state.name} attacks ${target.name} for ${state.attackPower} damage.`);\n      target.takeDamage(state.attackPower);\n    } else {\n      console.log(`${state.name} cannot attack this target.`);\n    }\n  },\n});\n\nconst canTakeDamage = (state) => ({\n  takeDamage: (amount) => {\n    state.health = Math.max(0, state.health - amount);\n    console.log(`${state.name} takes ${amount} damage. Health: ${state.health}`);\n  },\n});\n\nconst canHeal = (state) => ({\n  heal: (target, amount) => {\n    if (target && target.health !== undefined) { \n      const oldHealth = target.health;\n      target.health = Math.min(100, target.health + amount);\n      console.log(`${state.name} heals ${target.name} for ${amount} health. Health: ${oldHealth} -> ${target.health}`);\n    } else {\n      console.log(`${state.name} cannot heal this target.`);\n    }\n  },\n});\n\nfunction createWarrior(name) {\n  const state = {\n    name,\n    health: 100,\n    attackPower: 10,\n  };\n  return {\n    ...state,\n    ...canAttack(state),\n    ...canTakeDamage(state),\n  };\n}\n\nfunction createHealer(name) {\n  const state = {\n    name,\n    health: 100,\n    attackPower: 10,\n  };\n  return {\n    ...state,\n    ...canAttack(state),\n    ...canHeal(state),\n  };\n}\n\nfunction createTank(name) {\n  const state = {\n    name,\n    health: 150, \n    attackPower: 5,  \n  };\n  return {\n    ...state,\n    ...canAttack(state),\n    ...canTakeDamage(state),\n  };\n}\n\n// Demonstrate usage:\nconst warrior = createWarrior(\"Arthur\");\nconst healer = createHealer(\"Elara\");\nconst tank = createTank(\"Grog\");\n\nconsole.log(`Initial healths: ${warrior.name}: ${warrior.health}, ${healer.name}: ${healer.health}, ${tank.name}: ${tank.health}`);\n\nwarrior.attack(healer); \nconsole.log(`${healer.name} health after attack: ${healer.health}`); \n\nhealer.heal(warrior, 15); \nconsole.log(`${warrior.name} health after heal: ${warrior.health}`); \n\nwarrior.attack(tank); \nconsole.log(`${tank.name} health after attack: ${tank.health}`); \n\ntank.attack(warrior); \nconsole.log(`${warrior.name} health after tank attack: ${warrior.health}`); \n\nhealer.heal(healer, 30); \nconsole.log(`${healer.name} health after self-heal: ${healer.health}`); \n",
+          "testCases": [
+            "Warrior attacks Healer: Healer's health should decrease by Warrior's attack power.",
+            "Healer heals Warrior: Warrior's health should increase, capped at 100.",
+            "Tank attacks Healer: Healer's health should decrease by Tank's attack power (5).",
+            "Verify initial health and attack power for Tank.",
+            "Test healing a character that does not have a 'health' property (should not error).",
+            "Test healing beyond max health (should cap at 100)."
+          ],
+          "hints": [
+            "Remember to pass the `state` object to each mixin function so they can access and modify `health`, `name`, and `attackPower`.",
+            "Use `Math.max(0, ...)` for `takeDamage` to prevent health going below zero.",
+            "Use `Math.min(100, ...)` for `heal` to cap health at 100.",
+            "Ensure `attack` and `heal` methods check if the target has the necessary properties (e.g., `target.takeDamage` or `target.health`).",
+            "For Tank, override the default `health` and `attackPower` in its `state` object before composing abilities."
+          ],
+          "tags": [
+            "composition",
+            "design-patterns",
+            "oop",
+            "javascript",
+            "game-dev-basics"
+          ],
+          "timeEstimate": 60,
+          "prerequisites": [
+            "object_composition",
+            "javascript_functions",
+            "spread_syntax"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 8,
+          "learningPath": "intermediate",
+          "relatedConcepts": [
+            "factory_functions",
+            "mixins",
+            "state_management"
+          ]
+        },
+        {
+          "id": "task_immutable_state_management",
+          "title": "Implement an Immutable Configuration Manager",
+          "description": "\nCreate a JavaScript `ConfigManager` that handles application settings immutably. The manager should allow reading, updating, and resetting configuration, always returning new state objects for modifications.\n\n**Requirements:**\n1.  **`createConfigManager(initialConfig)`:** A factory function that takes an `initialConfig` object and returns a config manager instance.\n2.  **`getConfig()`:** A method that returns the *current* configuration object. This should return a shallow copy to prevent external mutation.\n3.  **`updateConfig(newSettings)`:** A method that takes an object of new settings. It should return a **new `ConfigManager` instance** (or an object with the same methods) with the updated configuration. The original `ConfigManager` instance should remain unchanged. Use the spread operator or `Object.assign` for updates.\n4.  **`resetConfig()`:** A method that returns a **new `ConfigManager` instance** (or an object with the same methods) reset to its original `initialConfig`. The original `ConfigManager` instance should remain unchanged.\n5.  **Immutability Verification:** Ensure that after `updateConfig` or `resetConfig`:\n    *   The returned configuration object from the new manager is a *new object* (different reference from the previous one).\n    *   The original `ConfigManager`'s internal configuration remains untouched.\n    *   For nested objects within the config, ensure `updateConfig` handles them immutably as well (deep update only for the direct level of change, shallow for unchanged branches).\n",
+          "difficulty": "medium",
+          "startingCode": "function createConfigManager(initialConfig) {\n  let currentConfig = { ...initialConfig }; // Shallow copy of initial config\n\n  return {\n    getConfig() {\n      // TODO: Return current config immutably\n      return currentConfig;\n    },\n    updateConfig(newSettings) {\n      // TODO: Return a NEW ConfigManager instance with updated config\n      // Make sure to handle nested objects immutably if they are part of newSettings\n      return null; \n    },\n    resetConfig() {\n      // TODO: Return a NEW ConfigManager instance reset to initialConfig\n      return null; \n    },\n  };\n}\n\n// Example Usage & Tests:\n// const defaultSettings = {\n//   theme: 'dark',\n//   language: 'en',\n//   notifications: { email: true, sms: false }\n// };\n\n// let manager1 = createConfigManager(defaultSettings);\n// console.log('Manager 1 initial:', manager1.getConfig());\n\n// const config1 = manager1.getConfig();\n// config1.theme = 'light'; // Attempt to mutate directly\n// console.log('Manager 1 after direct mutation attempt:', manager1.getConfig().theme); // Should still be 'dark'\n\n// let manager2 = manager1.updateConfig({ theme: 'light', notifications: { email: false } });\n// console.log('Manager 2 theme:', manager2.getConfig().theme); // Expected: 'light'\n// console.log('Manager 2 email notifications:', manager2.getConfig().notifications.email); // Expected: false\n// console.log('Manager 1 theme (should be original):', manager1.getConfig().theme); // Expected: 'dark'\n// console.log('Manager 1 === Manager 2:', manager1 === manager2); // Expected: false\n// console.log('Manager 1 notifications === Manager 2 notifications (should be false due to update):', manager1.getConfig().notifications === manager2.getConfig().notifications);\n\n// let manager3 = manager2.resetConfig();\n// console.log('Manager 3 theme (should be default):', manager3.getConfig().theme); // Expected: 'dark'\n// console.log('Manager 3 === Manager 2:', manager3 === manager2); // Expected: false\n// console.log('Manager 3 === manager1:', manager3 === manager1); // Expected: false\n// console.log('Manager 3 notifications === defaultSettings notifications:', manager3.getConfig().notifications === defaultSettings.notifications); // Expected: false (new copy)\n",
+          "solutionCode": "function createConfigManager(initialConfig) {\n  const deepClone = (obj) => {\n    try {\n      return structuredClone(obj);\n    } catch (e) {\n      return JSON.parse(JSON.stringify(obj)); \n    }\n  };\n\n  const privateInitialConfig = deepClone(initialConfig); \n  let currentConfig = deepClone(privateInitialConfig); \n\n  const createNewManager = (config) => createConfigManager(config);\n\n  return {\n    getConfig() {\n      return { ...currentConfig }; \n    },\n\n    updateConfig(newSettings) {\n      let updatedNotifications = currentConfig.notifications;\n      if (newSettings.notifications) {\n        updatedNotifications = { ...currentConfig.notifications, ...newSettings.notifications };\n      }\n      \n      const newMergedConfig = {\n        ...currentConfig,\n        ...newSettings,\n        ...(newSettings.notifications !== undefined ? { notifications: updatedNotifications } : {}),\n      };\n      \n      return createNewManager(newMergedConfig);\n    },\n\n    resetConfig() {\n      return createNewManager(privateInitialConfig);\n    },\n  };\n}\n\n// Example Usage & Tests:\nconst defaultSettings = {\n  theme: 'dark',\n  language: 'en',\n  notifications: { email: true, sms: false },\n  user: { id: 1, name: 'Guest' }\n};\n\nlet manager1 = createConfigManager(defaultSettings);\nconsole.log('Manager 1 initial:', manager1.getConfig());\n\nconst config1 = manager1.getConfig();\nconfig1.theme = 'light'; \nconsole.log('Manager 1 after direct mutation attempt (theme should be dark):', manager1.getConfig().theme); \n\nlet manager2 = manager1.updateConfig({ theme: 'light', language: 'fr' });\nconsole.log('Manager 2 theme:', manager2.getConfig().theme); \nconsole.log('Manager 2 language:', manager2.getConfig().language); \nconsole.log('Manager 1 theme (should be original):', manager1.getConfig().theme); \nconsole.log('Manager 1 === Manager 2 (should be false):', manager1 === manager2); \n\nlet manager3 = manager2.updateConfig({ notifications: { email: false, push: true } });\nconsole.log('Manager 3 email notifications:', manager3.getConfig().notifications.email); \nconsole.log('Manager 3 SMS notifications (should be original false):', manager3.getConfig().notifications.sms); \nconsole.log('Manager 3 Push notifications (new):', manager3.getConfig().notifications.push); \nconsole.log('Manager 2 notifications === Manager 3 notifications (should be false due to nested update):', manager2.getConfig().notifications === manager3.getConfig().notifications); \nconsole.log('Manager 2 user === Manager 3 user (should be true for unchanged nested object):', manager2.getConfig().user === manager3.getConfig().user); \n\nlet manager4 = manager3.resetConfig();\nconsole.log('Manager 4 theme (should be default):', manager4.getConfig().theme); \nconsole.log('Manager 4 === manager3 (should be false):', manager4 === manager3); \nconsole.log('Manager 4 notifications === defaultSettings notifications (should be false due to deep copy):', manager4.getConfig().notifications === defaultSettings.notifications); \nconsole.log('Manager 4 notifications email (should be default true):', manager4.getConfig().notifications.email); \n\nconsole.log('Manager 1 theme after all operations (should still be dark):', manager1.getConfig().theme); \nconsole.log('Manager 2 theme after all operations (should still be light):', manager2.getConfig().theme); \n",
+          "testCases": [
+            "`getConfig()` returns a shallow copy, preventing external mutation of internal state.",
+            "`updateConfig()` returns a new manager instance and the original manager is unchanged.",
+            "Updated config from `updateConfig()` reflects changes correctly.",
+            "Nested objects within `updateConfig()` are handled immutably (new nested object reference if changed, old if not).",
+            "`resetConfig()` returns a new manager instance with original default settings.",
+            "After `resetConfig()`, the original `initialConfig` object is not mutated by any subsequent operations on the new manager.",
+            "Test with complex nested objects to verify deep copy behavior for `initialConfig` reset."
+          ],
+          "hints": [
+            "To ensure `initialConfig` is truly immutable and independent for `resetConfig`, consider performing a deep copy of it when the manager is first created.",
+            "The `updateConfig` method should create a *new* configuration object by spreading the `currentConfig` and then applying `newSettings`. If `newSettings` contains nested objects, you'll need to spread those as well to achieve immutability at those levels.",
+            "Remember that each operation (`updateConfig`, `resetConfig`) must return a *new* instance of the manager, not `this`, to maintain the immutable pattern for the manager itself.",
+            "For deep cloning (especially for `initialConfig`), `structuredClone()` is the most robust modern JS solution. A simpler fallback for basic objects is `JSON.parse(JSON.stringify(obj))`.",
+            "Ensure the `getConfig` method also returns a *copy* (at least shallow) of the current configuration to prevent external modification of the manager's internal state."
+          ],
+          "tags": [
+            "immutability",
+            "state-management",
+            "javascript",
+            "design-patterns",
+            "factory-function",
+            "deep-copy"
+          ],
+          "timeEstimate": 90,
+          "prerequisites": [
+            "immutable_object_patterns",
+            "object_composition",
+            "spread_syntax",
+            "object_assign"
+          ],
+          "complexity": 8,
+          "interviewRelevance": 9,
+          "learningPath": "advanced",
+          "relatedConcepts": [
+            "redux",
+            "react_hooks",
+            "pure_functions",
+            "functional_programming"
+          ]
+        },
+        {
+          "id": "task_array_utility_generator",
+          "title": "Build a Flexible Array Utility Generator",
+          "description": "\nImplement a JavaScript utility function `createArrayGenerator` that provides different methods for creating arrays based on common use cases, leveraging `Array.from()` and `Array.of()`.\n\n**Requirements:**\n1.  **`createArrayGenerator()` function:** This function should return an object containing the following array generation methods:\n    *   **`range(start, end, step = 1)`:** Generates an array of numbers from `start` (inclusive) to `end` (inclusive), with an optional `step`. If `start > end`, return an empty array. Handle `step` being 0 or negative.\n    *   **`fromIterable(iterable, mapFn = null)`:** Takes an iterable (e.g., string, Set, NodeList) and an optional mapping function. Returns a new array. This should be a wrapper around `Array.from()`.\n    *   **`ofValues(...values)`:** Takes a variable number of arguments and returns an array containing those arguments as elements. This should be a wrapper around `Array.of()`.\n    *   **`filled(length, fillValue)`:** Creates an array of a specified `length` where each element is `fillValue`. (e.g., `filled(3, 0)` -> `[0, 0, 0]`).\n\n2.  **Edge Cases & Validation:**\n    *   `range`: If `step` is 0, return an empty array. If `start` > `end` and `step` is positive, return empty. If `start` < `end` and `step` is negative, return empty.\n    *   `fromIterable`: Handle non-iterable inputs gracefully (e.g., return empty array or throw error appropriately).\n    *   `filled`: Handle `length` being non-positive (return empty array).\n\n3.  **Demonstrate Usage:** Show examples of creating arrays using each method.\n",
+          "difficulty": "medium",
+          "startingCode": "function createArrayGenerator() {\n  return {\n    /**\n     * Generates an array of numbers from start to end (inclusive) with a step.\n     * @param {number} start\n     * @param {number} end\n     * @param {number} [step=1]\n     * @returns {number[]}\n     */\n    range(start, end, step = 1) {\n      // TODO: Implement range\n      return [];\n    },\n\n    /**\n     * Creates a new array from an iterable object, with an optional map function.\n     * @param {Iterable<any>} iterable\n     * @param {Function} [mapFn=null]\n     * @returns {Array<any>}\n     */\n    fromIterable(iterable, mapFn = null) {\n      // TODO: Implement fromIterable using Array.from\n      return [];\n    },\n\n    /**\n     * Creates an array from a variable number of arguments.\n     * @param {...any} values\n     * @returns {Array<any>}\n     */\n    ofValues(...values) {\n      // TODO: Implement ofValues using Array.of\n      return [];\n    },\n\n    /**\n     * Creates an array of a specified length, filled with a given value.\n     * @param {number} length\n     * @param {any} fillValue\n     * @returns {Array<any>}\n     */\n    filled(length, fillValue) {\n      // TODO: Implement filled\n      return [];\n    },\n  };\n}\n\n// Example Usage (uncomment and test):\n// const generator = createArrayGenerator();\n\n// console.log('Range 1-5:', generator.range(1, 5));           // Expected: [1, 2, 3, 4, 5]\n// console.log('Range 5-1, step 1:', generator.range(5, 1)); // Expected: []\n// console.log('Range 0-10, step 2:', generator.range(0, 10, 2)); // Expected: [0, 2, 4, 6, 8, 10]\n// console.log('Range 5-5:', generator.range(5, 5));           // Expected: [5]\n// console.log('Range -2 to 2:', generator.range(-2, 2));   // Expected: [-2, -1, 0, 1, 2]\n// console.log('Range 1-5, step 0:', generator.range(1, 5, 0)); // Expected: []\n\n// console.log('From String:', generator.fromIterable('hello')); // Expected: ['h', 'e', 'l', 'l', 'o']\n// console.log('From Set:', generator.fromIterable(new Set([1, 2, 3]))); // Expected: [1, 2, 3]\n// console.log('From iterable with map:', generator.fromIterable([1, 2, 3], x => x * x)); // Expected: [1, 4, 9]\n\n// console.log('Of values:', generator.ofValues(1, 'a', true)); // Expected: [1, 'a', true]\n// console.log('Of single value:', generator.ofValues(5)); // Expected: [5]\n\n// console.log('Filled 3 with 0:', generator.filled(3, 0)); // Expected: [0, 0, 0]\n// console.log('Filled 5 with null:', generator.filled(5, null)); // Expected: [null, null, null, null, null]\n// console.log('Filled 0 length:', generator.filled(0, 'x')); // Expected: []\n// console.log('Filled -2 length:', generator.filled(-2, 'y')); // Expected: []\n",
+          "solutionCode": "function createArrayGenerator() {\n  return {\n    /**\n     * Generates an array of numbers from start to end (inclusive) with a step.\n     * @param {number} start\n     * @param {number} end\n     * @param {number} [step=1]\n     * @returns {number[]}\n     */\n    range(start, end, step = 1) {\n      if (step === 0) return [];\n      if (start > end && step > 0) return [];\n      if (start < end && step < 0) return [];\n\n      const result = [];\n      if (step > 0) {\n        for (let i = start; i <= end; i += step) {\n          result.push(i);\n        }\n      } else { \n        for (let i = start; i >= end; i += step) {\n          result.push(i);\n        }\n      }\n      return result;\n    },\n\n    /**\n     * Creates a new array from an iterable object, with an optional map function.\n     * @param {Iterable<any>} iterable\n     * @param {Function} [mapFn=null]\n     * @returns {Array<any>}\n     */\n    fromIterable(iterable, mapFn = null) {\n      try {\n        if (iterable && typeof iterable[Symbol.iterator] === 'function') {\n          return Array.from(iterable, mapFn);\n        } else {\n          console.warn('Input is not iterable for fromIterable:', iterable);\n          return []; \n        }\n      } catch (e) {\n        console.error('Error creating array from iterable:', e);\n        return [];\n      }\n    },\n\n    /**\n     * Creates an array from a variable number of arguments.\n     * @param {...any} values\n     * @returns {Array<any>}\n     */\n    ofValues(...values) {\n      return Array.of(...values);\n    },\n\n    /**\n     * Creates an array of a specified length, filled with a given value.\n     * @param {number} length\n     * @param {any} fillValue\n     * @returns {Array<any>}\n     */\n    filled(length, fillValue) {\n      if (length <= 0) {\n        return [];\n      }\n      return Array.from({ length }, () => fillValue);\n    },\n  };\n}\n\n// Example Usage:\nconst generator = createArrayGenerator();\n\nconsole.log('--- Range Tests ---');\nconsole.log('Range 1-5:', generator.range(1, 5));           \nconsole.log('Range 5-1:', generator.range(5, 1));           \nconsole.log('Range 0-10, step 2:', generator.range(0, 10, 2)); \nconsole.log('Range 5-5:', generator.range(5, 5));           \nconsole.log('Range -2 to 2:', generator.range(-2, 2));   \nconsole.log('Range 1-5, step 0:', generator.range(1, 5, 0)); \nconsole.log('Range 10-0, step -2:', generator.range(10, 0, -2)); \n\nconsole.log('\\n--- FromIterable Tests ---');\nconsole.log('From String:', generator.fromIterable('hello')); \nconsole.log('From Set:', generator.fromIterable(new Set([1, 2, 3]))); \nconsole.log('From iterable with map:', generator.fromIterable([1, 2, 3], x => x * x)); \nconsole.log('From non-iterable:', generator.fromIterable(123)); \n\nconsole.log('\\n--- OfValues Tests ---');\nconsole.log('Of values:', generator.ofValues(1, 'a', true)); \nconsole.log('Of single value:', generator.ofValues(5)); \nconsole.log('Of no values:', generator.ofValues()); \n\nconsole.log('\\n--- Filled Tests ---');\nconsole.log('Filled 3 with 0:', generator.filled(3, 0)); \nconsole.log('Filled 5 with null:', generator.filled(5, null)); \nconsole.log('Filled 0 length:', generator.filled(0, 'x')); \nconsole.log('Filled -2 length:', generator.filled(-2, 'y')); \n",
+          "testCases": [
+            "`range(1, 5)`: Should return `[1, 2, 3, 4, 5]`.",
+            "`range(0, 10, 2)`: Should return `[0, 2, 4, 6, 8, 10]`.",
+            "`range(5, 1)`: Should return `[]` (start > end, positive step).",
+            "`range(10, 0, -2)`: Should return `[10, 8, 6, 4, 2, 0]`.",
+            "`range(1, 5, 0)`: Should return `[]` (zero step).",
+            "`fromIterable('test')`: Should return `['t', 'e', 's', 't']`.",
+            "`fromIterable(new Set([1, 2, 1]))`: Should return `[1, 2]`.",
+            "`fromIterable([1, 2, 3], x => x * 10)`: Should return `[10, 20, 30]`.",
+            "`fromIterable(null)`: Should return `[]` (or handle gracefully, no error).",
+            "`ofValues(true, 'hello', 10)`: Should return `[true, 'hello', 10]`.",
+            "`ofValues(7)`: Should return `[7]`.",
+            "`filled(4, 'X')`: Should return `['X', 'X', 'X', 'X']`.",
+            "`filled(0, 'Y')`: Should return `[]`.",
+            "`filled(-5, 'Z')`: Should return `[]`."
+          ],
+          "hints": [
+            "For `range`, consider using `Array.from({ length: ... }, (v, i) => ...)` to generate the sequence concisely, or a traditional `for` loop.",
+            "For `fromIterable`, directly leverage `Array.from`'s capabilities. Remember to handle cases where the input might not be a valid iterable.",
+            "`ofValues` is a direct wrapper, straightforward.",
+            "For `filled`, `Array.from` combined with a `length` property in the first argument, and `() => fillValue` in the map function, is a clean approach. Alternatively, `new Array(length).fill(fillValue)` works.",
+            "Always validate inputs for edge cases (e.g., `length <= 0`, invalid `step`)."
+          ],
+          "tags": [
+            "arrays",
+            "array-methods",
+            "javascript",
+            "utility-functions",
+            "es6"
+          ],
+          "timeEstimate": 75,
+          "prerequisites": [
+            "array_creation_methods",
+            "array_methods",
+            "es6_features"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 8,
+          "learningPath": "intermediate",
+          "relatedConcepts": [
+            "functional_programming",
+            "iterators",
+            "generators"
+          ]
+        }
+      ]
+    }
+  }
+]

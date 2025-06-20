@@ -1,0 +1,934 @@
+[
+  {
+    "id": "b3e19102-619b-40ca-9c46-a39d7f0c7bd3",
+    "startLine": 17300,
+    "endLine": 17399,
+    "processedDate": "2025-06-17T15:55:40.197Z",
+    "content": {
+      "logicalBlockInfo": {
+        "suggestedEndLine": -1
+      },
+      "theory": [
+        {
+          "id": "theory_serviceworker_caching_deduplication",
+          "title": "Service Worker: Caching and Request Deduplication",
+          "content": "Service Workers act as a programmable proxy between the browser and the network, enabling powerful features like offline experiences, push notifications, and background data synchronization. They run in a separate thread and can intercept network requests, allowing developers to control how resources are fetched and cached.\n\n## Key Concepts\n\n### Cache-First Strategy\nThe cache-first strategy is a common caching pattern where a Service Worker first checks if a requested resource is available in its cache. If found, it serves the cached version immediately. If not, it falls back to fetching the resource from the network. This approach prioritizes speed and offline availability. The example provided demonstrates a basic cache-first strategy.\n\n### Background Refetching (Stale-While-Revalidate)\nWhile not explicitly shown in the provided example, 'Background refetching' typically refers to patterns like \"Stale-While-Revalidate\". In this strategy:\n1.  The Service Worker immediately serves a cached response if available.\n2.  In the background, it fetches the latest version of the resource from the network.\n3.  Once the new version is successfully fetched, it updates the cache for future requests.\nThis provides the best of both worlds: fast loading times from cache and up-to-date content from the network.\n\n### Deduplication of Requests\nDeduplication of requests involves preventing multiple identical network requests from being sent simultaneously, especially when a resource is requested multiple times in quick succession (e.g., a user rapidly clicks a button, or a component mounts multiple times). A Service Worker can implement deduplication by holding pending promises for ongoing fetches and returning the same promise for subsequent identical requests until the initial fetch resolves.",
+          "examples": [
+            {
+              "id": "example_serviceworker_cache_first",
+              "title": "Service Worker Cache-First Strategy",
+              "code": "self.addEventListener('fetch', event => {\n  event.respondWith(\n    caches.match(event.request).then(cachedResponse => {\n      if (cachedResponse) {\n        return cachedResponse;\n      }\n      return fetch(event.request).then(response => {\n        if (!response || response.status !== 200 || response.type !== 'basic') {\n          return response;\n        }\n        \n        const responseToCache = response.clone();\n        caches.open('v1').then(cache => {\n          cache.put(event.request, responseToCache);\n        });\n        \n        return response;\n      });\n    })\n  );\n});",
+              "explanation": "This Service Worker code demonstrates a basic 'cache-first' strategy. When a fetch event occurs, it first attempts to find a matching request in the `v1` cache. If a match is found (`cachedResponse` exists), it returns the cached response immediately. If not, it proceeds to fetch the resource from the network. Upon a successful network fetch (status 200, type 'basic'), it clones the response (as a response body can only be consumed once), stores the clone in the cache, and then returns the original network response to the browser. This ensures that subsequent requests for the same resource will be served from the cache, improving performance and enabling offline capabilities.",
+              "language": "javascript"
+            },
+            {
+              "id": "example_serviceworker_deduplication_concept",
+              "title": "Conceptual Service Worker Request Deduplication",
+              "code": "const fetchPromises = new Map();\n\nself.addEventListener('fetch', event => {\n  const requestUrl = event.request.url;\n\n  // Check if a fetch for this URL is already in progress\n  if (fetchPromises.has(requestUrl)) {\n    event.respondWith(fetchPromises.get(requestUrl));\n    return;\n  }\n\n  // If not, perform the fetch and store its promise\n  const fetchPromise = fetch(event.request)\n    .then(response => {\n      // Clone response for caching if needed\n      const responseToCache = response.clone(); \n      // Cache logic here (e.g., caches.open('v1').then(cache => cache.put(event.request, responseToCache))) \n      return response;\n    })\n    .finally(() => {\n      // Remove the promise from the map once resolved or rejected\n      fetchPromises.delete(requestUrl);\n    });\n  \n  fetchPromises.set(requestUrl, fetchPromise);\n  event.respondWith(fetchPromise);\n});",
+              "explanation": "This conceptual example illustrates how a Service Worker could implement request deduplication. It uses a `Map` to store promises for ongoing fetches, keyed by their request URL. When a `fetch` event comes in, it checks if there's already a pending promise for that URL. If so, it returns the existing promise, effectively deduplicating the request. If not, it initiates a new fetch, stores its promise, and then removes it from the map once the fetch completes (successfully or with an error). This ensures that only one network request for a given URL is active at any time, preventing redundant fetches.",
+              "language": "javascript"
+            }
+          ],
+          "relatedQuestions": [
+            "question_serviceworker_purpose_1",
+            "question_serviceworker_cache_first_mcq_1",
+            "question_serviceworker_response_clone_1",
+            "question_serviceworker_deduplication_open_1",
+            "question_serviceworker_stale_revalidate_1"
+          ],
+          "relatedTasks": [
+            "task_serviceworker_offline_cache",
+            "task_serviceworker_stale_while_revalidate"
+          ],
+          "tags": [
+            "Service Worker",
+            "PWA",
+            "Caching",
+            "Offline First",
+            "Web Performance",
+            "Network Requests",
+            "Background Sync",
+            "Deduplication"
+          ],
+          "technology": "Web APIs",
+          "prerequisites": [
+            "JavaScript Async/Await",
+            "Promises",
+            "Web API Fundamentals",
+            "HTTP Basics"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 8,
+          "learningPath": "advanced",
+          "requiredFor": [
+            "Progressive Web Apps",
+            "Offline Capabilities",
+            "Performance Optimization"
+          ]
+        },
+        {
+          "id": "theory_security_cors",
+          "title": "Security: Cross-Origin Resource Sharing (CORS)",
+          "content": "Cross-Origin Resource Sharing (CORS) is a security mechanism implemented by web browsers that allows web applications running at one domain to access resources from a server at a different domain. It's a crucial part of web security, extending and relaxing the 'Same-Origin Policy' under controlled conditions.\n\n## Key Aspects\n\n### 1. Same-Origin Policy (SOP)\nBrowsers enforce the Same-Origin Policy (SOP) as a fundamental security measure. SOP restricts a web page from making requests to a different origin (defined by scheme, host, and port) than the one that served the page. This prevents malicious scripts loaded from one site from interacting with resources from another site (e.g., stealing sensitive data or performing unauthorized actions).\n\n### 2. CORS Headers\nCORS works by adding new HTTP headers that allow servers to explicitly specify which origins are permitted to access their resources. When a browser detects a cross-origin request, it checks for these headers in the server's response. If the headers indicate permission, the request is allowed; otherwise, it's blocked.\n\n*   `Access-Control-Allow-Origin`: Specifies which origins (e.g., `https://allowed-origin.com` or `*` for any origin) are allowed to access the resource. Most critical CORS header.\n*   `Access-Control-Allow-Methods`: Lists the HTTP methods (e.g., `GET`, `POST`, `PUT`, `DELETE`, `OPTIONS`) that are allowed for cross-origin requests.\n*   `Access-Control-Allow-Headers`: Indicates which custom HTTP headers (e.g., `Content-Type`, `Authorization`) can be used in the actual request.\n*   `Access-Control-Allow-Credentials`: A boolean (`true`) that indicates whether the response to the request can be exposed when the request's `credentials` mode is `include`. This is necessary for sending cookies, HTTP authentication, or client-side SSL certificates.\n*   `Access-Control-Expose-Headers`: Allows the server to whitelist response headers that the browser should make available to the client (by default, only a few simple response headers are exposed).\n*   `Access-Control-Max-Age`: Indicates how long the results of a preflight request (see below) can be cached by the browser, reducing the number of preflight requests.\n\n### 3. Types of Requests\n\n*   **Simple Requests**: These are cross-origin requests that meet certain criteria (e.g., `GET`, `HEAD`, `POST` methods with specific `Content-Type` headers like `application/x-www-form-urlencoded`, `multipart/form-data`, or `text/plain`). For simple requests, the browser sends the actual request directly, adding an `Origin` header. The server then responds with appropriate `Access-Control-Allow-Origin` (and other `Access-Control-Allow-*`) headers. If these headers permit the request, the response is exposed to the client.\n\n*   **Preflight Requests**: For non-simple requests (e.g., requests using `PUT`, `DELETE`, custom headers, or `application/json` `Content-Type` for `POST`), the browser first sends an `OPTIONS` request, known as a 'preflight' request, to the server. This preflight request checks with the server to see if the actual request is safe to send. The server responds to the `OPTIONS` request with the allowed methods, headers, and origins. If the preflight response indicates permission, the browser then sends the actual request. If not, the request is blocked before the actual data transfer, preventing potential harmful operations.\n\n### 4. Implementation on the Server\nCORS is primarily configured on the server-side, as the server is responsible for setting the `Access-Control-*` headers that browsers read. Frameworks like Express.js (Node.js) or Spring Boot (Java) provide middleware or configuration options to easily manage CORS policies.",
+          "examples": [
+            {
+              "id": "example_cors_expressjs_implementation",
+              "title": "Express.js Server-Side CORS Configuration",
+              "code": "const express = require('express');\nconst app = express();\n\napp.use((req, res, next) => {\n  // Set the allowed origin. Use '*' for any origin (less secure for production).\n  res.header('Access-Control-Allow-Origin', 'https://allowed-origin.com'); \n  \n  // Set allowed HTTP methods\n  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');\n  \n  // Set allowed request headers\n  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');\n  \n  // Handle preflight requests (OPTIONS method)\n  if (req.method === 'OPTIONS') {\n    return res.sendStatus(200); // Respond with 200 OK for preflight\n  }\n  \n  next(); // Continue to the next middleware/route handler\n});\n\n// Example route\napp.get('/data', (req, res) => {\n  res.json({ message: 'Data from server' });\n});\n\napp.listen(3000, () => {\n  console.log('Server listening on port 3000');\n});",
+              "explanation": "This Express.js snippet demonstrates how to configure CORS headers on a server. The middleware (`app.use`) intercepts all incoming requests. It sets `Access-Control-Allow-Origin` to restrict access to a specific domain (or `*` for all), `Access-Control-Allow-Methods` for permitted HTTP actions, and `Access-Control-Allow-Headers` for allowed custom headers. Crucially, it includes logic to handle `OPTIONS` requests (preflight requests) by simply sending a `200 OK` status, indicating that the server is ready to accept the actual request. This setup ensures that browsers can successfully make cross-origin requests from the specified origin.",
+              "language": "javascript"
+            },
+            {
+              "id": "example_cors_fetch_client_side",
+              "title": "Client-Side Fetch Request (Implicit CORS Handling)",
+              "code": "async function fetchData() {\n  try {\n    // This fetch request will trigger CORS if the origin of the client\n    // differs from the origin of the server (e.g., client on localhost:3001, server on localhost:3000).\n    const response = await fetch('http://localhost:3000/data', {\n      method: 'POST',\n      headers: {\n        'Content-Type': 'application/json',\n        'Authorization': 'Bearer some_token'\n      },\n      body: JSON.stringify({ item: 'new item' })\n    });\n\n    if (!response.ok) {\n      // If the server doesn't send proper CORS headers, the browser will block this.\n      // The error will often be a Network Error, not a specific CORS error.\n      throw new Error(`HTTP error! status: ${response.status}`);\n    }\n\n    const data = await response.json();\n    console.log('Data fetched successfully:', data);\n  } catch (error) {\n    console.error('Fetch error (possibly CORS issue):', error);\n  }\n}\n\nfetchData();",
+              "explanation": "This client-side JavaScript code initiates a `fetch` request. Since it's making a `POST` request with `Content-Type: application/json` and a custom `Authorization` header, it will trigger a preflight `OPTIONS` request if the client's origin (e.g., `http://localhost:3001`) is different from the server's origin (`http://localhost:3000`). The browser implicitly handles the CORS negotiation based on the server's `Access-Control-*` headers. If the server does not send the correct CORS headers, the browser will block the response, resulting in a network error on the client side, even if the server processed the request successfully.",
+              "language": "javascript"
+            }
+          ],
+          "relatedQuestions": [
+            "question_cors_definition_1",
+            "question_cors_same_origin_policy_1",
+            "question_cors_preflight_vs_simple_1",
+            "question_cors_headers_mcq_1",
+            "question_cors_troubleshooting_open_1"
+          ],
+          "relatedTasks": [
+            "task_cors_server_config",
+            "task_cors_client_test_and_fix"
+          ],
+          "tags": [
+            "Security",
+            "CORS",
+            "Same-Origin Policy",
+            "HTTP Headers",
+            "Web Security",
+            "Frontend",
+            "Backend",
+            "Networking"
+          ],
+          "technology": "Web Security, HTTP",
+          "prerequisites": [
+            "HTTP Basics",
+            "Web Browser Architecture",
+            "Client-Server Communication"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 9,
+          "learningPath": "intermediate",
+          "requiredFor": [
+            "API Integration",
+            "Secure Web Development",
+            "Troubleshooting Network Issues"
+          ]
+        },
+        {
+          "id": "theory_react_hoc",
+          "title": "React Concepts: Higher-Order Components (HOCs)",
+          "content": "Higher-Order Components (HOCs) are an advanced pattern in React for reusing component logic. An HOC is a function that takes a component as an argument and returns a new component with enhanced capabilities (e.g., additional props, state, or behavior). They are a form of component composition.\n\n## Key Characteristics\n\n### 1. Component Composition\nHOCs achieve code reuse through composition, meaning they wrap components rather than modifying them directly (inheritance is generally discouraged in React for this purpose). This allows for a clear separation of concerns, where the HOC handles the reusable logic and the wrapped component focuses on rendering its UI.\n\n### 2. Pure Function\nAn HOC should ideally be a 'pure function' in the sense that it does not modify the input component. Instead, it creates and returns a *new* component. This ensures predictability and prevents unintended side effects on the original component.\n\n### 3. Naming Convention\nBy convention, HOCs are typically named with the prefix \"with\" (e.g., `withAuth`, `withData`, `withRouter`, `withLoading`). This convention clearly indicates that the function is a Higher-Order Component that 'enhances' another component.\n\n## Use Cases for HOCs\nHOCs are useful for a variety of cross-cutting concerns:\n*   **Code Reusability**: Sharing common logic (e.g., authentication, data fetching, logging) across multiple components without duplicating code.\n*   **Logic Abstraction**: Abstracting away complex logic from presentational components.\n*   **Prop Manipulation**: Adding, modifying, or removing props passed to the wrapped component.\n*   **State Abstraction**: Managing shared state or exposing state-related methods.\n*   **Render Hijacking**: While less common and more complex, HOCs can control rendering by wrapping the `render` method of the `WrappedComponent`.\n\n## HOCs vs. Hooks\nWhile HOCs are a powerful pattern, React Hooks (introduced in React 16.8) have become the preferred way to reuse stateful logic in function components. Hooks offer a more direct and often simpler way to share logic without introducing additional component nesting or the complexities sometimes associated with HOCs (like prop name clashes or ref forwarding).\n\nHowever, HOCs still have their place, especially in older codebases or when dealing with class components, or for specific patterns like render hijacking which are harder to achieve with Hooks alone.",
+          "examples": [
+            {
+              "id": "example_react_hoc_withloading",
+              "title": "HOC for Loading State (`withLoading`)",
+              "code": "import React, { useState } from 'react';\n\n// HOC definition\nfunction withLoading(WrappedComponent) {\n  function WithLoading(props) { // This is the new component returned by the HOC\n    const [isLoading, setIsLoading] = useState(false);\n    \n    const startLoading = () => setIsLoading(true);\n    const stopLoading = () => setIsLoading(false);\n    \n    // Render the WrappedComponent, passing new props (isLoading, startLoading, stopLoading)\n    // along with any original props (spread via {...props})\n    return (\n      <WrappedComponent\n        isLoading={isLoading}\n        startLoading={startLoading}\n        stopLoading={stopLoading}\n        {...props}\n      />\n    );\n  }\n\n  // For easier debugging in React DevTools\n  WithLoading.displayName = `withLoading(${getDisplayName(WrappedComponent)})`;\n  return WithLoading;\n}\n\n// Helper to get component's display name\nfunction getDisplayName(WrappedComponent) {\n  return WrappedComponent.displayName || WrappedComponent.name || 'Component';\n}\n\n// Usage Example Component\nfunction MyDataLoader({ isLoading, startLoading, stopLoading, data }) {\n  const fetchData = async () => {\n    startLoading();\n    console.log('Fetching data...');\n    await new Promise(resolve => setTimeout(resolve, 2000)); // Simulate API call\n    // In a real app, you'd fetch data here\n    console.log('Data fetched:', data || 'No data provided');\n    stopLoading();\n  };\n\n  return (\n    <div>\n      <p>{isLoading ? 'Loading data...' : 'Data is ready.'}</p>\n      <button onClick={fetchData} disabled={isLoading}>\n        {isLoading ? 'Loading...' : 'Load Data'}\n      </button>\n      {data && !isLoading && <p>Received: {data}</p>}\n    </div>\n  );\n}\n\n// Apply the HOC\nconst MyEnhancedDataLoader = withLoading(MyDataLoader);\n\n// How it would be used in a parent component:\n// <MyEnhancedDataLoader data=\"Sample HOC Data\" />",
+              "explanation": "This example demonstrates a `withLoading` HOC. It takes `WrappedComponent` as an argument and returns a new functional component, `WithLoading`. `WithLoading` manages its own `isLoading` state and provides `startLoading` and `stopLoading` functions. These state and functions are then passed as props to the `WrappedComponent` along with any original props. The `MyDataLoader` component then consumes these props, allowing it to display a loading message and disable its button during a simulated data fetch. The `displayName` helper is a best practice for better debugging in React DevTools.",
+              "language": "typescript"
+            },
+            {
+              "id": "example_react_hoc_withauth_concept",
+              "title": "Conceptual HOC for Authentication (`withAuth`)",
+              "code": "import React, { useEffect, useState } from 'react';\n\nfunction withAuth(WrappedComponent) {\n  return function WithAuth(props) {\n    const [isAuthenticated, setIsAuthenticated] = useState(false);\n    const [user, setUser] = useState(null);\n\n    useEffect(() => {\n      // Simulate auth check, e.g., token validation, API call\n      const token = localStorage.getItem('authToken');\n      if (token) {\n        // In a real app, validate token on server\n        setIsAuthenticated(true);\n        setUser({ name: 'John Doe', role: 'admin' });\n      } else {\n        setIsAuthenticated(false);\n        setUser(null);\n      }\n    }, []);\n\n    if (!isAuthenticated) {\n      // Redirect to login or render a login message\n      return <p>Please log in to view this content.</p>;\n    }\n\n    // Pass auth status and user info to the wrapped component\n    return (\n      <WrappedComponent\n        isAuthenticated={isAuthenticated}\n        user={user}\n        {...props}\n      />\n    );\n  };\n}\n\n// Usage Example:\n// function AdminDashboard({ isAuthenticated, user }) {\n//   if (!isAuthenticated) return null; // Should be handled by HOC, but good for type safety\n//   return (\n//     <div>\n//       <h1>Welcome, {user.name} ({user.role})!</h1>\n//       <p>This is your admin dashboard content.</p>\n//     </div>\n//   );\n// }\n\n// const ProtectedAdminDashboard = withAuth(AdminDashboard);\n",
+              "explanation": "This conceptual `withAuth` HOC demonstrates how to wrap a component to add authentication logic. It manages an `isAuthenticated` state and `user` data. Inside a `useEffect`, it simulates an authentication check (e.g., looking for a token in `localStorage`). If the user is not authenticated, it can render a fallback UI (like a login message or redirect). Otherwise, it renders the `WrappedComponent`, injecting `isAuthenticated` and `user` as props. This pattern centralizes authentication logic and allows multiple components to easily become 'protected' by simply wrapping them with `withAuth`.",
+              "language": "typescript"
+            }
+          ],
+          "relatedQuestions": [
+            "question_react_hoc_definition_1",
+            "question_react_hoc_benefits_open_1",
+            "question_react_hoc_drawbacks_1",
+            "question_react_hoc_vs_hooks_1",
+            "question_react_hoc_naming_convention_1"
+          ],
+          "relatedTasks": [
+            "task_react_hoc_withlogger",
+            "task_react_hoc_withformvalidation"
+          ],
+          "tags": [
+            "React",
+            "Higher-Order Components",
+            "HOC",
+            "Component Patterns",
+            "Code Reusability",
+            "Composition",
+            "Frontend Architecture",
+            "React Hooks"
+          ],
+          "technology": "React",
+          "prerequisites": [
+            "React Components (functional and class)",
+            "React Props",
+            "React State",
+            "JavaScript Functions as First-Class Citizens"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 8,
+          "learningPath": "intermediate",
+          "requiredFor": [
+            "Advanced React Patterns",
+            "Legacy React Codebases",
+            "Understanding React Evolution"
+          ]
+        }
+      ],
+      "questions": [
+        {
+          "id": "question_serviceworker_purpose_1",
+          "topic": "Service Workers",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "What is the primary role of a Service Worker in a web application?",
+          "answer": "To act as a programmable network proxy, intercepting and managing network requests, enabling offline capabilities and performance enhancements.",
+          "analysisPoints": [
+            "Understanding of Service Worker's core function.",
+            "Ability to articulate its primary benefit (offline, performance)."
+          ],
+          "keyConcepts": [
+            "Service Worker",
+            "Network Proxy",
+            "Offline Capabilities"
+          ],
+          "evaluationCriteria": [
+            "Accuracy",
+            "Conciseness"
+          ],
+          "example": "",
+          "tags": [
+            "Service Worker",
+            "PWA",
+            "Fundamentals"
+          ],
+          "prerequisites": [
+            "Web API Basics"
+          ],
+          "complexity": 3,
+          "interviewFrequency": 7,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_serviceworker_cache_first_mcq_1",
+          "topic": "Service Worker Caching",
+          "level": "medium",
+          "type": "mcq",
+          "question": "Consider the following Service Worker fetch event listener. What is the primary caching strategy implemented here?",
+          "answer": "Cache-First, then Network",
+          "options": [
+            "Network-First, then Cache",
+            "Cache-First, then Network",
+            "Stale-While-Revalidate",
+            "Cache-Only"
+          ],
+          "analysisPoints": [
+            "Ability to interpret Service Worker caching logic.",
+            "Distinguishing between different caching strategies."
+          ],
+          "keyConcepts": [
+            "Service Worker",
+            "Cache-First",
+            "Fetch Event",
+            "Caching Strategies"
+          ],
+          "evaluationCriteria": [
+            "Understanding of Service Worker event flow",
+            "Correct identification of caching pattern"
+          ],
+          "example": "```javascript\nself.addEventListener('fetch', event => {\n  event.respondWith(\n    caches.match(event.request).then(cachedResponse => {\n      if (cachedResponse) {\n        return cachedResponse; // Cache-First: returns cached response if found\n      }\n      return fetch(event.request).then(response => {\n        // Network fallback: fetches from network if not in cache\n        if (!response || response.status !== 200 || response.type !== 'basic') {\n          return response;\n        }\n        const responseToCache = response.clone();\n        caches.open('v1').then(cache => {\n          cache.put(event.request, responseToCache);\n        });\n        return response;\n      });\n    })\n  );\n});\n```\n\nExplanation: The code first attempts `caches.match(event.request)`. If `cachedResponse` is found, it's returned immediately. This is the hallmark of a Cache-First strategy. Only if the cache miss occurs does it proceed to `fetch(event.request)` from the network.",
+          "tags": [
+            "Service Worker",
+            "Caching",
+            "MCQ",
+            "Web Performance"
+          ],
+          "prerequisites": [
+            "Service Worker Basics",
+            "Promises"
+          ],
+          "complexity": 6,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_serviceworker_response_clone_1",
+          "topic": "Service Worker: Response Object",
+          "level": "medium",
+          "type": "open",
+          "question": "In the provided Service Worker example, why is `response.clone()` called before putting the response into the cache?",
+          "answer": "The `Response` object streams its body, meaning it can only be consumed once. To use the response for both sending back to the browser and caching, it must be cloned. One copy is sent to the browser, and the cloned copy is used for caching.",
+          "analysisPoints": [
+            "Understanding of the `Response` object's stream nature.",
+            "Recognizing the necessity of cloning for dual consumption (browser + cache).",
+            "Implications of not cloning (e.g., fetch body already consumed error)."
+          ],
+          "keyConcepts": [
+            "Service Worker",
+            "Response Object",
+            "Streams",
+            "Caching",
+            "Cloning"
+          ],
+          "evaluationCriteria": [
+            "Clarity of explanation",
+            "Completeness of reasoning",
+            "Technical accuracy"
+          ],
+          "example": "",
+          "tags": [
+            "Service Worker",
+            "Web APIs",
+            "HTTP",
+            "Performance"
+          ],
+          "prerequisites": [
+            "JavaScript Streams",
+            "HTTP Response Body"
+          ],
+          "complexity": 6,
+          "interviewFrequency": 7,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_serviceworker_deduplication_open_1",
+          "topic": "Service Worker: Deduplication",
+          "level": "hard",
+          "type": "open",
+          "question": "Explain how a Service Worker can implement request deduplication and why this is beneficial for web performance.",
+          "answer": "A Service Worker can implement request deduplication by maintaining a map or object of pending network requests, typically using the request URL as a key and the `Promise` of the fetch operation as the value. When a `fetch` event occurs, the Service Worker first checks this map. If a promise for that URL already exists, it returns the existing promise, preventing a new network request for the same resource. Once the initial promise resolves or rejects, it's removed from the map. This is beneficial for web performance because it avoids redundant network fetches, reducing bandwidth usage, server load, and improving perceived load times, especially in scenarios with rapid, identical requests.",
+          "analysisPoints": [
+            "Ability to describe the mechanism (using a map/promise cache).",
+            "Understanding the benefits (reduced network traffic, server load, improved performance).",
+            "Consideration of edge cases (e.g., removing promise after resolution/rejection)."
+          ],
+          "keyConcepts": [
+            "Service Worker",
+            "Deduplication",
+            "Promises",
+            "Caching",
+            "Web Performance"
+          ],
+          "evaluationCriteria": [
+            "Detail of technical explanation",
+            "Clear articulation of benefits",
+            "Demonstration of practical understanding"
+          ],
+          "example": "",
+          "tags": [
+            "Service Worker",
+            "Performance Optimization",
+            "Advanced"
+          ],
+          "prerequisites": [
+            "Service Worker Lifecycle",
+            "Promises",
+            "Maps in JS"
+          ],
+          "complexity": 8,
+          "interviewFrequency": 6,
+          "learningPath": "advanced"
+        },
+        {
+          "id": "question_serviceworker_stale_revalidate_1",
+          "topic": "Service Worker Caching",
+          "level": "medium",
+          "type": "flashcard",
+          "question": "Briefly describe the 'Stale-While-Revalidate' caching strategy in the context of Service Workers.",
+          "answer": "Serve content immediately from cache (stale), and then asynchronously fetch an updated version from the network to update the cache for future requests (revalidate).",
+          "analysisPoints": [
+            "Understanding of the two-phase nature (serve stale, then revalidate).",
+            "Recognition of its balance between speed and freshness."
+          ],
+          "keyConcepts": [
+            "Service Worker",
+            "Stale-While-Revalidate",
+            "Caching Strategy"
+          ],
+          "evaluationCriteria": [
+            "Accuracy",
+            "Conciseness"
+          ],
+          "example": "",
+          "tags": [
+            "Service Worker",
+            "Caching",
+            "Performance"
+          ],
+          "prerequisites": [
+            "Service Worker Basics"
+          ],
+          "complexity": 5,
+          "interviewFrequency": 7,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_cors_definition_1",
+          "topic": "CORS",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "What does CORS stand for, and what is its fundamental purpose?",
+          "answer": "CORS stands for Cross-Origin Resource Sharing. Its fundamental purpose is a security mechanism that allows or restricts web applications from making requests to a different domain than the one that served the application, overriding the Same-Origin Policy under controlled conditions.",
+          "analysisPoints": [
+            "Correct expansion of CORS.",
+            "Understanding of its role in cross-origin communication."
+          ],
+          "keyConcepts": [
+            "CORS",
+            "Security",
+            "Same-Origin Policy"
+          ],
+          "evaluationCriteria": [
+            "Accuracy",
+            "Clarity"
+          ],
+          "example": "",
+          "tags": [
+            "CORS",
+            "Security",
+            "Networking"
+          ],
+          "prerequisites": [
+            "HTTP Basics"
+          ],
+          "complexity": 3,
+          "interviewFrequency": 9,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_cors_same_origin_policy_1",
+          "topic": "CORS / Same-Origin Policy",
+          "level": "medium",
+          "type": "open",
+          "question": "Explain the Same-Origin Policy (SOP) and how CORS relates to it.",
+          "answer": "The Same-Origin Policy (SOP) is a critical browser security mechanism that restricts a web page from making requests to a different 'origin' (defined by scheme, host, and port) than its own. This prevents malicious scripts from accessing sensitive data on other sites. CORS (Cross-Origin Resource Sharing) is a mechanism that _relaxes_ the SOP by allowing servers to explicitly specify which origins are permitted to access their resources through a set of HTTP headers. Without CORS, almost all cross-origin requests would be blocked by SOP.",
+          "analysisPoints": [
+            "Accurate definition of SOP and its purpose.",
+            "Clear explanation of CORS as an extension/relaxation of SOP.",
+            "Understanding of the security implications."
+          ],
+          "keyConcepts": [
+            "Same-Origin Policy",
+            "CORS",
+            "Web Security",
+            "Origin"
+          ],
+          "evaluationCriteria": [
+            "Completeness of explanation",
+            "Understanding of security implications",
+            "Clarity of relationship between SOP and CORS"
+          ],
+          "example": "",
+          "tags": [
+            "CORS",
+            "Security",
+            "SOP"
+          ],
+          "prerequisites": [
+            "HTTP Basics",
+            "Web Browser Architecture"
+          ],
+          "complexity": 6,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_cors_preflight_vs_simple_1",
+          "topic": "CORS Request Types",
+          "level": "medium",
+          "type": "mcq",
+          "question": "Which of the following HTTP requests would typically trigger a CORS preflight request?",
+          "answer": "A POST request with `Content-Type: application/json`",
+          "options": [
+            "A GET request to `http://api.example.com/data`",
+            "A POST request with `Content-Type: application/x-www-form-urlencoded`",
+            "A POST request with `Content-Type: application/json`",
+            "A GET request with no custom headers"
+          ],
+          "analysisPoints": [
+            "Knowledge of what constitutes a 'simple' CORS request.",
+            "Identification of factors that trigger preflight requests (e.g., non-standard methods, custom headers, certain `Content-Type`)."
+          ],
+          "keyConcepts": [
+            "CORS",
+            "Preflight Request",
+            "Simple Request",
+            "HTTP Methods",
+            "Content-Type"
+          ],
+          "evaluationCriteria": [
+            "Correct identification of preflight trigger",
+            "Understanding of HTTP request characteristics"
+          ],
+          "example": "Explanation: Simple requests are limited to `GET`, `HEAD`, `POST` with `Content-Type` being `application/x-www-form-urlencoded`, `multipart/form-data`, or `text/plain`. A `POST` request with `Content-Type: application/json` is NOT a simple request and thus requires a preflight `OPTIONS` request to check server permissions before the actual request is sent.",
+          "tags": [
+            "CORS",
+            "Security",
+            "HTTP",
+            "MCQ"
+          ],
+          "prerequisites": [
+            "HTTP Methods",
+            "HTTP Headers"
+          ],
+          "complexity": 6,
+          "interviewFrequency": 7,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_cors_headers_mcq_1",
+          "topic": "CORS Headers",
+          "level": "medium",
+          "type": "mcq",
+          "question": "Which HTTP response header is primarily used by a server to indicate which origins are permitted to access its resources in a CORS context?",
+          "answer": "`Access-Control-Allow-Origin`",
+          "options": [
+            "`Content-Security-Policy`",
+            "`Access-Control-Allow-Methods`",
+            "`Access-Control-Allow-Origin`",
+            "`X-Content-Type-Options`"
+          ],
+          "analysisPoints": [
+            "Correct identification of the core CORS header.",
+            "Distinguishing CORS headers from other security headers."
+          ],
+          "keyConcepts": [
+            "CORS",
+            "HTTP Headers",
+            "Access-Control-Allow-Origin"
+          ],
+          "evaluationCriteria": [
+            "Knowledge of essential CORS headers",
+            "Accuracy in identifying header purpose"
+          ],
+          "example": "Explanation: `Access-Control-Allow-Origin` is the most crucial CORS header, explicitly stating which origins are allowed to make cross-origin requests to the resource. `Access-Control-Allow-Methods` specifies allowed HTTP methods, and `Content-Security-Policy` is a different security header related to preventing XSS and data injection attacks.",
+          "tags": [
+            "CORS",
+            "HTTP Headers",
+            "MCQ"
+          ],
+          "prerequisites": [
+            "HTTP Headers"
+          ],
+          "complexity": 5,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_cors_troubleshooting_open_1",
+          "topic": "CORS Troubleshooting",
+          "level": "hard",
+          "type": "open",
+          "question": "You are developing a frontend application on `http://localhost:3000` and trying to fetch data from an API on `http://localhost:8080`. You get a CORS error in the browser console. Describe common reasons for this error and how you would troubleshoot and fix it.",
+          "answer": "Common reasons for a CORS error in this scenario include:\n1.  **Missing `Access-Control-Allow-Origin` header:** The API server at `http://localhost:8080` is not sending this header, or it's not configured to include `http://localhost:3000`.\n2.  **Incorrect `Access-Control-Allow-Methods` or `Access-Control-Allow-Headers`:** If the request is a preflight request (e.g., `PUT`, `DELETE`, or a `POST` with `application/json`), the server might not be explicitly allowing the method or headers used.\n3.  **No handling for `OPTIONS` preflight requests:** The server might not be correctly responding to the `OPTIONS` request with a `200 OK` status and the necessary `Access-Control-*` headers.\n4.  **`Access-Control-Allow-Credentials` not set:** If the client is sending cookies or authorization headers (`withCredentials`), and the server doesn't respond with `Access-Control-Allow-Credentials: true` along with a specific (non-wildcard) `Access-Control-Allow-Origin`.\n\n**Troubleshooting steps:**\n1.  **Check Browser Developer Tools:** Look at the 'Network' tab. Examine the preflight `OPTIONS` request (if any) and the actual request. Check their response headers for `Access-Control-Allow-Origin`, `Access-Control-Allow-Methods`, etc. The console error message often provides clues.\n2.  **Verify Server-Side Configuration:** On the API server, ensure CORS middleware or configuration is correctly set up to allow requests from `http://localhost:3000`. This involves setting `res.header('Access-Control-Allow-Origin', 'http://localhost:3000')`, appropriate methods and headers, and handling `OPTIONS` requests.\n3.  **Test with Tools:** Use `curl` or Postman to mimic the browser's request and inspect headers, verifying server responses independently of the browser's CORS enforcement.\n\n**Fixing the error:** The most common fix is to configure the backend API to include the necessary `Access-Control-Allow-Origin` header (e.g., `http://localhost:3000` or `*` for development) and other `Access-Control-*` headers (`Methods`, `Headers`, `Credentials`) as required by the client request, and ensure `OPTIONS` requests are handled.",
+          "analysisPoints": [
+            "Comprehensive understanding of CORS error causes.",
+            "Systematic approach to troubleshooting using browser tools and server configuration.",
+            "Knowledge of specific server-side fixes."
+          ],
+          "keyConcepts": [
+            "CORS",
+            "Troubleshooting",
+            "HTTP Headers",
+            "Preflight Requests",
+            "Server Configuration"
+          ],
+          "evaluationCriteria": [
+            "Depth of knowledge about CORS issues",
+            "Practical troubleshooting skills",
+            "Ability to propose effective solutions"
+          ],
+          "example": "",
+          "tags": [
+            "CORS",
+            "Security",
+            "Troubleshooting",
+            "Networking",
+            "Debugging"
+          ],
+          "prerequisites": [
+            "HTTP Basics",
+            "Client-Server Architecture"
+          ],
+          "complexity": 8,
+          "interviewFrequency": 9,
+          "learningPath": "advanced"
+        },
+        {
+          "id": "question_react_hoc_definition_1",
+          "topic": "React HOCs",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "What is a Higher-Order Component (HOC) in React?",
+          "answer": "A Higher-Order Component (HOC) is a function that takes a component and returns a new component with enhanced props or behavior, serving as a pattern for reusing component logic.",
+          "analysisPoints": [
+            "Correct definition of HOC.",
+            "Understanding its role as a function that transforms components."
+          ],
+          "keyConcepts": [
+            "HOC",
+            "React",
+            "Component Pattern",
+            "Code Reusability"
+          ],
+          "evaluationCriteria": [
+            "Accuracy",
+            "Conciseness"
+          ],
+          "example": "",
+          "tags": [
+            "React",
+            "HOC",
+            "Fundamentals"
+          ],
+          "prerequisites": [
+            "React Components"
+          ],
+          "complexity": 4,
+          "interviewFrequency": 7,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_react_hoc_benefits_open_1",
+          "topic": "React HOCs",
+          "level": "medium",
+          "type": "open",
+          "question": "List and explain at least three benefits of using Higher-Order Components in React applications.",
+          "answer": "Three benefits of using Higher-Order Components (HOCs) in React are:\n1.  **Code Reusability:** HOCs allow you to extract and share common component logic (e.g., data fetching, authentication, logging, state management) across multiple components without duplicating code. This promotes the DRY (Don't Repeat Yourself) principle.\n2.  **Separation of Concerns:** They help separate presentational logic (what a component renders) from behavioral logic (how a component works or fetches data). The HOC handles the shared behavior, and the wrapped component focuses solely on UI rendering, leading to cleaner and more maintainable code.\n3.  **Prop Manipulation and Injection:** HOCs can easily add, modify, or remove props that are passed to the wrapped component. This allows injecting common data, functions, or state derived from the HOC's logic directly into the components that need them, simplifying their interface.",
+          "analysisPoints": [
+            "Ability to identify core advantages.",
+            "Clear explanation of each benefit.",
+            "Demonstration of practical use cases."
+          ],
+          "keyConcepts": [
+            "HOC",
+            "Code Reusability",
+            "Separation of Concerns",
+            "Prop Injection",
+            "React Patterns"
+          ],
+          "evaluationCriteria": [
+            "Completeness and accuracy of benefits listed",
+            "Quality of explanation for each benefit",
+            "Relevance to real-world React development"
+          ],
+          "example": "",
+          "tags": [
+            "React",
+            "HOC",
+            "Architecture"
+          ],
+          "prerequisites": [
+            "React Component Basics"
+          ],
+          "complexity": 6,
+          "interviewFrequency": 7,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_react_hoc_drawbacks_1",
+          "topic": "React HOCs",
+          "level": "medium",
+          "type": "flashcard",
+          "question": "What are some common drawbacks or challenges when using Higher-Order Components?",
+          "answer": "Common drawbacks include: prop name collisions, ref forwarding issues (requires `React.forwardRef`), increased component tree nesting (leading to 'wrapper hell' in DevTools), and difficulties in explicitly knowing what props an HOC injects.",
+          "analysisPoints": [
+            "Knowledge of HOC limitations.",
+            "Ability to quickly recall common problems.",
+            "Awareness of solutions (e.g., `forwardRef`)."
+          ],
+          "keyConcepts": [
+            "HOC",
+            "Drawbacks",
+            "Ref Forwarding",
+            "Prop Collisions",
+            "Wrapper Hell"
+          ],
+          "evaluationCriteria": [
+            "Accuracy",
+            "Conciseness"
+          ],
+          "example": "",
+          "tags": [
+            "React",
+            "HOC",
+            "Challenges"
+          ],
+          "prerequisites": [
+            "React Props",
+            "React Refs"
+          ],
+          "complexity": 6,
+          "interviewFrequency": 6,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_react_hoc_vs_hooks_1",
+          "topic": "React HOCs vs. Hooks",
+          "level": "hard",
+          "type": "open",
+          "question": "Compare and contrast Higher-Order Components (HOCs) with React Hooks for reusing stateful logic. When might you still prefer an HOC?",
+          "answer": "HOCs and Hooks both address the problem of reusing stateful logic in React, but they do so differently:\n\n**HOCs:**\n*   **Composition:** Wrap a component, taking it as an argument and returning a new, enhanced component.\n*   **Mechanism:** Rely on prop injection and component wrapping.\n*   **Drawbacks:** Can lead to 'wrapper hell' (nested components in DevTools), prop name collisions, ref forwarding complexities, and less intuitive prop flow.\n*   **Applicability:** Work with both class and functional components (though typically seen with class components).\n\n**Hooks:**\n*   **Composition:** Use pure JavaScript functions that 'hook into' React state and lifecycle features.\n*   **Mechanism:** Allow direct access to state and lifecycle from functional components without introducing new component layers.\n*   **Benefits:** Avoid wrapper hell, more explicit data flow, simpler to compose multiple pieces of logic, better TypeScript inference.\n*   **Applicability:** Exclusively for functional components.\n\n**When to prefer an HOC:**\nDespite Hooks being the modern preferred approach, you might still prefer an HOC in specific scenarios:\n1.  **Legacy Codebases:** When working with existing class components where refactoring to hooks might be too disruptive.\n2.  **Render Hijacking:** For advanced use cases where you need to completely control or replace the wrapped component's rendering logic, which is more complex to achieve directly with Hooks.\n3.  **Strict Component Control:** When you want to ensure a component strictly receives certain props, as HOCs explicitly pass props down.",
+          "analysisPoints": [
+            "Clear differentiation based on mechanics and advantages/disadvantages.",
+            "Understanding of the core problem each solves.",
+            "Identification of niche scenarios where HOCs still make sense.",
+            "Awareness of React's evolution (Hooks being newer/preferred)."
+          ],
+          "keyConcepts": [
+            "HOC",
+            "React Hooks",
+            "Code Reusability",
+            "Component Composition",
+            "Stateful Logic",
+            "Render Hijacking"
+          ],
+          "evaluationCriteria": [
+            "Thorough comparison with accurate details",
+            "Insightful discussion of when to choose one over the other",
+            "Demonstration of deep React architectural understanding"
+          ],
+          "example": "",
+          "tags": [
+            "React",
+            "HOC",
+            "React Hooks",
+            "Architecture",
+            "Advanced"
+          ],
+          "prerequisites": [
+            "React Hooks",
+            "React Components",
+            "Component Lifecycle"
+          ],
+          "complexity": 8,
+          "interviewFrequency": 9,
+          "learningPath": "advanced"
+        },
+        {
+          "id": "question_react_hoc_naming_convention_1",
+          "topic": "React HOCs",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "What is the common naming convention for Higher-Order Components in React?",
+          "answer": "HOCs are typically prefixed with \"with\" (e.g., `withAuth`, `withData`, `withLoading`) to indicate they enhance a component.",
+          "analysisPoints": [
+            "Knowledge of common React community practices.",
+            "Ability to recall the naming convention."
+          ],
+          "keyConcepts": [
+            "HOC",
+            "Naming Convention",
+            "React Best Practices"
+          ],
+          "evaluationCriteria": [
+            "Accuracy",
+            "Conciseness"
+          ],
+          "example": "",
+          "tags": [
+            "React",
+            "HOC",
+            "Best Practices"
+          ],
+          "prerequisites": [
+            "React Basics"
+          ],
+          "complexity": 3,
+          "interviewFrequency": 6,
+          "learningPath": "beginner"
+        }
+      ],
+      "tasks": [
+        {
+          "id": "task_serviceworker_offline_cache",
+          "title": "Implement a Service Worker for Offline Caching",
+          "description": "\nImplement a Service Worker that applies a 'cache-first' strategy for static assets (like HTML, CSS, JS, and images) and a 'network-first' strategy for API calls. Ensure basic offline capability for your application shell.\n\n**Requirements:**\n1.  **Service Worker Registration:** Register the Service Worker in `index.html` or a main JS file.\n2.  **Caching Static Assets:** On `install` event, cache an application shell (e.g., `index.html`, `style.css`, `app.js`, `image.png`). On `fetch` events, use a 'cache-first' strategy for these assets.\n3.  **API Caching (Network-First):** For requests to `/api/data`, implement a 'network-first, then cache' strategy. If the network is unavailable, fall back to the cache.\n4.  **Cache Management:** Include a basic `activate` event listener to clean up old caches.\n5.  **Offline Message:** The `index.html` should initially show an 'Online' message, which changes to 'Offline' if the Service Worker serves content from cache due to network unavailability.\n",
+          "difficulty": "medium",
+          "startingCode": "// index.html (client-side):\n<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n    <meta charset=\"UTF-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <title>Offline App</title>\n    <link rel=\"stylesheet\" href=\"style.css\">\n</head>\n<body>\n    <h1>Welcome to Offline First App!</h1>\n    <p id=\"status\">Online</p>\n    <img src=\"image.png\" alt=\"Placeholder Image\" width=\"100\">\n    <button id=\"fetchData\">Fetch API Data</button>\n    <pre id=\"apiOutput\"></pre>\n\n    <script src=\"app.js\"></script>\n    <script>\n        if ('serviceWorker' in navigator) {\n            window.addEventListener('load', () => {\n                navigator.serviceWorker.register('/sw.js')\n                    .then(registration => {\n                        console.log('Service Worker registered:', registration);\n                    })\n                    .catch(error => {\n                        console.error('Service Worker registration failed:', error);\n                    });\n            });\n        }\n    </script>\n</body>\n</html>\n\n// style.css:\nbody { font-family: sans-serif; margin: 20px; }\nh1 { color: #333; }\n#status { font-weight: bold; }\n\n// app.js (client-side):\ndocument.getElementById('fetchData').addEventListener('click', async () => {\n    const apiOutput = document.getElementById('apiOutput');\n    apiOutput.textContent = 'Fetching data...';\n    try {\n        const response = await fetch('/api/data');\n        const data = await response.json();\n        apiOutput.textContent = JSON.stringify(data, null, 2);\n    } catch (error) {\n        apiOutput.textContent = 'Failed to fetch API data: ' + error.message;\n        document.getElementById('status').textContent = 'Offline (API fallback)';\n    }\n});\n\n// sw.js (Service Worker file):\nconst CACHE_STATIC_NAME = 'static-v1';\nconst CACHE_API_NAME = 'api-v1';\nconst STATIC_ASSETS = [\n  '/',\n  'index.html',\n  'style.css',\n  'app.js',\n  'image.png' // Assume this image exists\n];\n\nself.addEventListener('install', event => {\n  console.log('[Service Worker] Installing Service Worker ...', event);\n  event.waitUntil(\n    caches.open(CACHE_STATIC_NAME)\n      .then(cache => {\n        console.log('[Service Worker] Pre-caching App Shell');\n        return cache.addAll(STATIC_ASSETS);\n      })\n  );\n});\n\nself.addEventListener('activate', event => {\n  console.log('[Service Worker] Activating Service Worker ....', event);\n  // TODO: Clean up old caches here\n  return self.clients.claim();\n});\n\nself.addEventListener('fetch', event => {\n  const url = new URL(event.request.url);\n\n  // TODO: Implement cache-first for static assets\n\n  // TODO: Implement network-first, then cache for /api/data\n\n});\n",
+          "solutionCode": "// sw.js (Service Worker file):\nconst CACHE_STATIC_NAME = 'static-v1';\nconst CACHE_API_NAME = 'api-v1';\nconst STATIC_ASSETS = [\n  '/',\n  'index.html',\n  'style.css',\n  'app.js',\n  'image.png' \n];\n\nself.addEventListener('install', event => {\n  console.log('[Service Worker] Installing Service Worker ...', event);\n  event.waitUntil(\n    caches.open(CACHE_STATIC_NAME)\n      .then(cache => {\n        console.log('[Service Worker] Pre-caching App Shell');\n        return cache.addAll(STATIC_ASSETS);\n      })\n  );\n});\n\nself.addEventListener('activate', event => {\n  console.log('[Service Worker] Activating Service Worker ....', event);\n  event.waitUntil(\n    caches.keys().then(keyList => {\n      return Promise.all(keyList.map(key => {\n        if (key !== CACHE_STATIC_NAME && key !== CACHE_API_NAME) {\n          console.log('[Service Worker] Removing old cache:', key);\n          return caches.delete(key);\n        }\n      }))\n    })\n  );\n  return self.clients.claim();\n});\n\nself.addEventListener('fetch', event => {\n  const url = new URL(event.request.url);\n\n  if (STATIC_ASSETS.includes(url.pathname) || url.origin === location.origin) {\n    // Cache-First for static assets (and same-origin navigation/assets)\n    event.respondWith(\n      caches.match(event.request)\n        .then(cachedResponse => {\n          if (cachedResponse) {\n            // Update status message on client if served from cache\n            event.request.mode === 'navigate' && self.clients.matchAll().then(clients => {\n                clients.forEach(client => client.postMessage('offline'));\n            });\n            return cachedResponse;\n          }\n          return fetch(event.request)\n            .then(response => {\n              if (!response || response.status !== 200 || response.type !== 'basic') {\n                return response;\n              }\n              const responseToCache = response.clone();\n              caches.open(CACHE_STATIC_NAME)\n                .then(cache => {\n                  cache.put(event.request, responseToCache);\n                });\n              return response;\n            })\n            .catch(err => {\n              // Fallback for network issues even for static assets\n              // For real apps, you'd serve an offline page here\n              console.log('[Service Worker] Fetch failed for static asset, trying cache:', err);\n              return caches.match(event.request);\n            });\n        })\n    );\n  } else if (url.pathname.startsWith('/api/data')) {\n    // Network-First, then Cache for API calls\n    event.respondWith(\n      fetch(event.request)\n        .then(response => {\n          // If fetch successful, cache it and return\n          if (!response || response.status !== 200 || response.type !== 'basic') {\n            return response;\n          }\n          const responseToCache = response.clone();\n          caches.open(CACHE_API_NAME)\n            .then(cache => {\n              cache.put(event.request, responseToCache);\n            });\n          return response;\n        })\n        .catch(err => {\n          // If network fails, try to return from cache\n          console.log('[Service Worker] API Fetch failed, falling back to cache:', err);\n          self.clients.matchAll().then(clients => {\n              clients.forEach(client => client.postMessage('offline'));\n          });\n          return caches.match(event.request);\n        })\n    );\n  } else {\n    // Default: network-only for other requests (e.g., third-party)\n    return;\n  }\n});\n\n// app.js (client-side - updated to listen for SW messages):\ndocument.getElementById('fetchData').addEventListener('click', async () => {\n    const apiOutput = document.getElementById('apiOutput');\n    apiOutput.textContent = 'Fetching data...';\n    try {\n        const response = await fetch('/api/data');\n        const data = await response.json();\n        apiOutput.textContent = JSON.stringify(data, null, 2);\n        document.getElementById('status').textContent = 'Online'; // Reset status if successful\n    } catch (error) {\n        apiOutput.textContent = 'Failed to fetch API data: ' + error.message;\n        document.getElementById('status').textContent = 'Offline (API fallback)';\n    }\n});\n\n// Listen for messages from the Service Worker\nif ('serviceWorker' in navigator) {\n    navigator.serviceWorker.addEventListener('message', event => {\n        if (event.data === 'offline') {\n            document.getElementById('status').textContent = 'Offline (Served from Cache)';\n        }\n    });\n}\n\n// Simulate an API endpoint (e.g., in a simple Node.js server or mock API)\n// const express = require('express');\n// const app = express();\n// app.get('/api/data', (req, res) => {\n//   setTimeout(() => {\n//     res.json({ message: 'Dynamic data from server', timestamp: new Date().toISOString() });\n//   }, 500);\n// });\n// app.listen(8080, () => console.log('Mock API listening on port 8080'));\n",
+          "testCases": [
+            "1. Initial Load (Online): Clear cache, start server. App shell loads from network, API fetches live data. Status: 'Online'.",
+            "2. Offline Static Assets: Go offline (DevTools -> Application -> Service Workers -> Offline). Reload. App shell loads instantly from cache. Status: 'Offline (Served from Cache)' after SW message.",
+            "3. Offline API Call: Stay offline. Click 'Fetch API Data'. API call should fail network-wise but return cached data if previously fetched successfully. Status: 'Offline (API fallback)'.",
+            "4. Online API Fetch (After Offline): Go online. Click 'Fetch API Data'. New data should be fetched from network, cache updated. Status: 'Online'.",
+            "5. Cache Cleanup: Change `CACHE_STATIC_NAME` or `CACHE_API_NAME` in `sw.js` (e.g., to `static-v2`). Reload the page twice. Check DevTools -> Application -> Cache Storage to ensure the old `v1` caches are removed by the `activate` event.",
+            "6. Image Loading: Verify `image.png` loads correctly both online (initially) and offline (from cache)."
+          ],
+          "hints": [
+            "Remember to use `event.waitUntil()` for asynchronous operations in install/activate events.",
+            "The `response.clone()` method is crucial when you need to consume a `Response` body more than once (e.g., sending to browser and caching).",
+            "For the 'network-first' strategy, wrap `fetch(event.request)` in a `try...catch` or `.then().catch()` block to handle network failures and fall back to `caches.match()`.",
+            "To update the client-side UI based on Service Worker's behavior (like offline status), use `self.clients.matchAll().then(clients => clients.forEach(client => client.postMessage('message')))` in the SW and `navigator.serviceWorker.addEventListener('message', ...)` on the client.",
+            "To simulate an API, you can either create a simple Node.js Express server or use a mock server library/tool."
+          ],
+          "tags": [
+            "Service Worker",
+            "Caching",
+            "Offline First",
+            "PWA",
+            "Web Performance",
+            "JavaScript",
+            "Front-end"
+          ],
+          "timeEstimate": 90,
+          "prerequisites": [
+            "HTML",
+            "CSS",
+            "JavaScript Promises",
+            "Fetch API"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 9,
+          "learningPath": "advanced",
+          "relatedConcepts": [
+            "Cache API",
+            "Service Worker Lifecycle",
+            "Network Strategies"
+          ]
+        },
+        {
+          "id": "task_cors_server_config",
+          "title": "Configure CORS on a Node.js Express Server",
+          "description": "\nCreate a simple Node.js Express server that correctly handles Cross-Origin Resource Sharing (CORS) for a frontend application.\n\n**Requirements:**\n1.  **Server Setup:** Create an Express.js server listening on port `8080`.\n2.  **CORS Middleware:** Implement a custom middleware or use the `cors` npm package to enable CORS.\n3.  **Specific Origin:** Configure the server to allow requests ONLY from `http://localhost:3000`.\n4.  **Allowed Methods:** Allow `GET`, `POST`, `PUT`, `DELETE`, and `OPTIONS` methods.\n5.  **Allowed Headers:** Allow `Content-Type` and `Authorization` headers.\n6.  **Preflight Handling:** Ensure `OPTIONS` requests (preflight) are handled correctly (respond with `200 OK`).\n7.  **Example Endpoints:** Create a `GET /data` endpoint and a `POST /submit` endpoint to test CORS functionality.\n",
+          "difficulty": "medium",
+          "startingCode": "// server.js\nconst express = require('express');\nconst app = express();\nconst PORT = 8080;\n\n// Middleware to parse JSON body\napp.use(express.json());\n\n// TODO: Implement CORS middleware here\n\n// Example GET route\napp.get('/data', (req, res) => {\n  res.json({ message: 'Data from server!', timestamp: new Date().toISOString() });\n});\n\n// Example POST route\napp.post('/submit', (req, res) => {\n  console.log('Received data:', req.body);\n  res.status(200).json({ message: 'Data received successfully!', yourData: req.body });\n});\n\napp.listen(PORT, () => {\n  console.log(`Server running on http://localhost:${PORT}`);\n});\n\n// Optional: client-side test in client.html (served by a separate server, e.g., on port 3000)\n/*\n<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n    <meta charset=\"UTF-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <title>CORS Test Client</title>\n</head>\n<body>\n    <h1>CORS Test Client (Port 3000)</h1>\n    <button id=\"getData\">GET Data</button>\n    <button id=\"postData\">POST Data</button>\n    <pre id=\"output\"></pre>\n\n    <script>\n        const apiBaseUrl = 'http://localhost:8080';\n        const outputDiv = document.getElementById('output');\n\n        document.getElementById('getData').addEventListener('click', async () => {\n            outputDiv.textContent = 'Fetching GET data...';\n            try {\n                const response = await fetch(`${apiBaseUrl}/data`);\n                const data = await response.json();\n                outputDiv.textContent = JSON.stringify(data, null, 2);\n            } catch (error) {\n                outputDiv.textContent = 'Error fetching GET data: ' + error.message;\n                console.error(error);\n            }\n        });\n\n        document.getElementById('postData').addEventListener('click', async () => {\n            outputDiv.textContent = 'Posting data...';\n            try {\n                const response = await fetch(`${apiBaseUrl}/submit`, {\n                    method: 'POST',\n                    headers: {\n                        'Content-Type': 'application/json',\n                        'Authorization': 'Bearer some_token_123'\n                    },\n                    body: JSON.stringify({ name: 'Test User', value: 123 })\n                });\n                const data = await response.json();\n                outputDiv.textContent = JSON.stringify(data, null, 2);\n            } catch (error) {\n                outputDiv.textContent = 'Error posting data: ' + error.message;\n                console.error(error);\n            }\n        });\n    </script>\n</body>\n</html>\n*/\n",
+          "solutionCode": "// server.js\nconst express = require('express');\nconst app = express();\nconst PORT = 8080;\n\n// Middleware to parse JSON body\napp.use(express.json());\n\n// Custom CORS Middleware\napp.use((req, res, next) => {\n  // Set the allowed origin\n  res.header('Access-Control-Allow-Origin', 'http://localhost:3000');\n  \n  // Set allowed HTTP methods\n  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');\n  \n  // Set allowed request headers (includes Content-Type and Authorization)\n  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');\n  \n  // Handle preflight requests\n  if (req.method === 'OPTIONS') {\n    // For preflight, immediately respond with 200 OK\n    return res.sendStatus(200);\n  }\n  \n  // Continue to the next middleware/route handler for actual requests\n  next();\n});\n\n// Example GET route\napp.get('/data', (req, res) => {\n  res.json({ message: 'Data from server!', timestamp: new Date().toISOString() });\n});\n\n// Example POST route\napp.post('/submit', (req, res) => {\n  console.log('Received data:', req.body);\n  res.status(200).json({ message: 'Data received successfully!', yourData: req.body });\n});\n\napp.listen(PORT, () => {\n  console.log(`Server running on http://localhost:${PORT}`);\n});\n\n// To run the client.html, you'd need another simple HTTP server.\n// For example, using 'serve' npm package: npm install -g serve\n// Then, navigate to your client.html directory and run: serve -p 3000\n",
+          "testCases": [
+            "1. Valid GET Request: Client (http://localhost:3000) makes a GET request to http://localhost:8080/data. Expect success.",
+            "2. Valid POST Request: Client (http://localhost:3000) makes a POST request to http://localhost:8080/submit with `Content-Type: application/json` and `Authorization` header. Expect preflight OPTIONS request followed by successful POST.",
+            "3. Invalid Origin: Attempt a request from a different origin (e.g., http://localhost:4000 or a file:// URL). Expect CORS error in browser console.",
+            "4. Invalid Method: From http://localhost:3000, attempt a `PATCH` request (not explicitly allowed). Expect CORS error for method.",
+            "5. Invalid Header: From http://localhost:3000, attempt a request with an unallowed custom header (e.g., `X-Custom-Header`). Expect CORS error for header."
+          ],
+          "hints": [
+            "Remember that the `OPTIONS` request is a separate, preflight check and needs to be handled before the actual request.",
+            "Ensure `Access-Control-Allow-Origin` exactly matches the client's origin, or use `*` for development (but not production).",
+            "The `cors` npm package is a popular alternative for simpler CORS configuration, but implementing it manually helps understand the underlying headers.",
+            "Use your browser's developer tools (Network tab) to inspect the request and response headers, especially the `Origin` and `Access-Control-*` headers."
+          ],
+          "tags": [
+            "CORS",
+            "Node.js",
+            "Express.js",
+            "Security",
+            "HTTP",
+            "Backend",
+            "Frontend"
+          ],
+          "timeEstimate": 60,
+          "prerequisites": [
+            "Node.js Basics",
+            "Express.js Fundamentals",
+            "HTTP Headers"
+          ],
+          "complexity": 6,
+          "interviewRelevance": 9,
+          "learningPath": "intermediate",
+          "relatedConcepts": [
+            "Same-Origin Policy",
+            "Preflight Request",
+            "HTTP Methods",
+            "Middleware"
+          ]
+        },
+        {
+          "id": "task_react_hoc_withlogger",
+          "title": "Implement a Higher-Order Component for Logging",
+          "description": "\nCreate a React Higher-Order Component (HOC) named `withLogger` that logs component lifecycle events (mount, unmount, update) to the console. Apply this HOC to a simple functional component.\n\n**Requirements:**\n1.  **`withLogger` HOC:** Define a function `withLogger` that takes a `WrappedComponent` as an argument and returns a new functional component.\n2.  **Lifecycle Logging:** Inside the returned component, use `useEffect` hooks to log when the `WrappedComponent`:\n    *   Mounts (e.g., \"[Component Name] mounted\")\n    *   Updates (e.g., \"[Component Name] updated with props: ...\") - only if relevant props change.\n    *   Unmounts (e.g., \"[Component Name] unmounted\")\n3.  **Display Name:** Ensure the returned HOC component has a descriptive `displayName` for easier debugging in React DevTools.\n4.  **Application:** Apply `withLogger` to a simple functional component that receives and displays some props (e.g., a counter or a user detail component).\n5.  **Testing:** Demonstrate the logging by rendering the enhanced component, updating its props, and unmounting it (e.g., conditionally rendering or navigating away).\n",
+          "difficulty": "medium",
+          "startingCode": "import React, { useEffect, useState } from 'react';\n\n// TODO: Define the withLogger HOC here\n\n\n// Example Wrapped Component\nfunction Counter({ initialValue, incrementBy }) {\n  const [count, setCount] = useState(initialValue);\n\n  const handleClick = () => {\n    setCount(prevCount => prevCount + incrementBy);\n  };\n\n  return (\n    <div>\n      <p>Count: {count}</p>\n      <button onClick={handleClick}>Increment</button>\n      <p>Increment By: {incrementBy}</p>\n    </div>\n  );\n}\n\n// TODO: Apply the HOC to the Counter component and export it\n// const EnhancedCounter = withLogger(Counter);\n// export default EnhancedCounter;\n\n// App.js (for testing):\n/*\nimport React, { useState } from 'react';\n// import EnhancedCounter from './EnhancedCounter'; // Assuming component is in EnhancedCounter.js\n\nfunction App() {\n  const [showCounter, setShowCounter] = useState(true);\n  const [incrementStep, setIncrementStep] = useState(1);\n\n  return (\n    <div>\n      <h1>HOC Logger Test</h1>\n      <button onClick={() => setIncrementStep(prev => prev + 1)}>Change Increment Step</button>\n      <button onClick={() => setShowCounter(!showCounter)}>Toggle Counter</button>\n      {showCounter && <EnhancedCounter initialValue={0} incrementBy={incrementStep} />}\n    </div>\n  );\n}\n\nexport default App;\n*/\n",
+          "solutionCode": "import React, { useEffect, useState, useRef } from 'react';\n\n// Helper to get component's display name for HOC\nfunction getDisplayName(WrappedComponent) {\n  return WrappedComponent.displayName || WrappedComponent.name || 'Component';\n}\n\n// Define the withLogger HOC\nfunction withLogger(WrappedComponent) {\n  const WithLoggerComponent = (props) => {\n    const initialRender = useRef(true);\n    const prevProps = useRef({});\n\n    // Log on Mount\n    useEffect(() => {\n      console.log(`[HOC Logger] ${getDisplayName(WrappedComponent)} mounted.`);\n      initialRender.current = false;\n\n      // Log on Unmount\n      return () => {\n        console.log(`[HOC Logger] ${getDisplayName(WrappedComponent)} unmounted.`);\n      };\n    }, []); // Empty dependency array means this runs once on mount and cleanup on unmount\n\n    // Log on Update (only if props change significantly)\n    useEffect(() => {\n      if (!initialRender.current) { // Prevent logging on initial mount as an update\n        const changedProps = Object.keys(props).filter(\n          (key) => props[key] !== prevProps.current[key]\n        );\n        if (changedProps.length > 0) {\n          console.log(\n            `[HOC Logger] ${getDisplayName(WrappedComponent)} updated. Changed props:`, \n            changedProps.reduce((acc, key) => ({ ...acc, [key]: props[key] }), {})\n          );\n        } else {\n          console.log(`[HOC Logger] ${getDisplayName(WrappedComponent)} updated (no prop changes).`);\n        }\n      }\n      prevProps.current = props;\n    }); // No dependency array: runs on every render after initial\n\n    return <WrappedComponent {...props} />;\n  };\n\n  WithLoggerComponent.displayName = `withLogger(${getDisplayName(WrappedComponent)})`;\n  return WithLoggerComponent;\n}\n\n// Example Wrapped Component\nfunction Counter({ initialValue, incrementBy }) {\n  const [count, setCount] = useState(initialValue);\n\n  const handleClick = () => {\n    setCount(prevCount => prevCount + incrementBy);\n  };\n\n  return (\n    <div>\n      <p>Count: {count}</p>\n      <button onClick={handleClick}>Increment</button>\n      <p>Increment By: {incrementBy}</p>\n    </div>\n  );\n}\n\n// Apply the HOC to the Counter component\nconst EnhancedCounter = withLogger(Counter);\nexport default EnhancedCounter;\n\n// App.js (for testing):\n/*\nimport React, { useState } from 'react';\nimport EnhancedCounter from './EnhancedCounter'; // Adjust path as needed\n\nfunction App() {\n  const [showCounter, setShowCounter] = useState(true);\n  const [incrementStep, setIncrementStep] = useState(1);\n\n  return (\n    <div>\n      <h1>HOC Logger Test</h1>\n      <button onClick={() => setIncrementStep(prev => prev + 1)}>Change Increment Step (Current: {incrementStep})</button>\n      <button onClick={() => setShowCounter(!showCounter)}>Toggle Counter (Current: {showCounter ? 'Visible' : 'Hidden'})</button>\n      {showCounter && <EnhancedCounter initialValue={0} incrementBy={incrementStep} />}\n    </div>\n  );\n}\n\nexport default App;\n*/\n",
+          "testCases": [
+            "1. Component Mount: Render `EnhancedCounter`. Expect a \"[Counter] mounted\" log in the console.",
+            "2. Prop Update: Click 'Change Increment Step' button. Expect a \"[Counter] updated. Changed props: { incrementBy: X }\" log.",
+            "3. Internal State Change (no prop change): Click 'Increment' button on the counter. The HOC should log an update, but ideally specify 'no prop changes' if only internal state caused a re-render of the wrapped component (as implemented in the solution).",
+            "4. Component Unmount: Click 'Toggle Counter' to hide it. Expect a \"[Counter] unmounted\" log.",
+            "5. Re-mount: Click 'Toggle Counter' again to show it. Expect a new \"[Counter] mounted\" log.",
+            "6. DevTools Display Name: Inspect the component tree in React DevTools. The `EnhancedCounter` component should appear as `withLogger(Counter)`."
+          ],
+          "hints": [
+            "Remember that `useEffect` with an empty dependency array (`[]`) runs only on mount and cleans up on unmount.",
+            "For logging updates, an `useEffect` without a dependency array will run on every render. You might want to use `useRef` to store previous props and compare them to only log when actual props *change*.",
+            "The `displayName` property is a static property on the component returned by the HOC, e.g., `WithLoggerComponent.displayName = `withLogger(${getDisplayName(WrappedComponent)})`;`",
+            "To easily get the wrapped component's name for logging, you can define a helper function like `getDisplayName` as shown in the solution."
+          ],
+          "tags": [
+            "React",
+            "HOC",
+            "Component Lifecycle",
+            "Debugging",
+            "JavaScript",
+            "Front-end"
+          ],
+          "timeEstimate": 45,
+          "prerequisites": [
+            "React Functional Components",
+            "React Hooks (useState, useEffect, useRef)",
+            "JavaScript Closures"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 8,
+          "learningPath": "intermediate",
+          "relatedConcepts": [
+            "Component Composition",
+            "Debugging Tools",
+            "Side Effects in React"
+          ]
+        },
+        {
+          "id": "task_react_hoc_withformvalidation",
+          "title": "Build a `withFormValidation` HOC",
+          "description": "\nDevelop a Higher-Order Component (HOC) called `withFormValidation` that adds basic form validation logic to any component that renders a form and handles its submission. The HOC should manage validation state and pass validation-related props to the wrapped component.\n\n**Requirements:**\n1.  **`withFormValidation` HOC:** Create an HOC that takes a `WrappedComponent` (expected to be a form component) and returns an enhanced component.\n2.  **Validation Logic:** The HOC should maintain validation errors (e.g., an object `{ fieldName: 'Error message' }`). For simplicity, assume two fields: `username` (required) and `email` (required, valid format).\n3.  **Passed Props:** The HOC should pass the following props to `WrappedComponent`:\n    *   `errors`: An object containing validation error messages.\n    *   `validateField`: A function `(fieldName, value)` to trigger validation for a specific field.\n    *   `validateForm`: A function `()` to trigger validation for the entire form and return `true` if valid, `false` otherwise.\n    *   `clearErrors`: A function `()` to clear all validation errors.\n4.  **Wrapped Component:** Create a simple `ContactForm` component that uses input fields for `username` and `email` and a submit button. It should display error messages using the `errors` prop and call `validateField` on blur, and `validateForm` on submit.\n5.  **State Management:** The `ContactForm` should manage its own input field values (e.g., using `useState`).\n6.  **Full Submission Flow:** When the form is submitted, `validateForm` should be called. If valid, log a success message; otherwise, log validation errors.\n",
+          "difficulty": "hard",
+          "startingCode": "import React, { useState } from 'react';\n\n// TODO: Implement the withFormValidation HOC here\n\n\n// ContactForm Component (to be wrapped by HOC)\nfunction ContactForm({ errors, validateField, validateForm, clearErrors }) {\n  const [formData, setFormData] = useState({\n    username: '',\n    email: '',\n  });\n\n  const handleChange = (e) => {\n    const { name, value } = e.target;\n    setFormData(prev => ({ ...prev, [name]: value }));\n  };\n\n  const handleBlur = (e) => {\n    const { name, value } = e.target;\n    validateField(name, value); // Validate on blur\n  };\n\n  const handleSubmit = (e) => {\n    e.preventDefault();\n    clearErrors(); // Clear errors before re-validating whole form\n    const isValid = validateForm(); // Validate entire form\n    if (isValid) {\n      console.log('Form is valid! Submitting:', formData);\n      alert('Form submitted successfully!');\n      // In a real app, you'd send data to server here\n    } else {\n      console.log('Form has errors:', errors);\n      alert('Please fix the errors in the form.');\n    }\n  };\n\n  return (\n    <form onSubmit={handleSubmit}>\n      <div>\n        <label htmlFor=\"username\">Username:</label>\n        <input\n          type=\"text\"\n          id=\"username\"\n          name=\"username\"\n          value={formData.username}\n          onChange={handleChange}\n          onBlur={handleBlur}\n        />\n        {errors.username && <p style={{ color: 'red' }}>{errors.username}</p>}\n      </div>\n      <div>\n        <label htmlFor=\"email\">Email:</label>\n        <input\n          type=\"email\"\n          id=\"email\"\n          name=\"email\"\n          value={formData.email}\n          onChange={handleChange}\n          onBlur={handleBlur}\n        />\n        {errors.email && <p style={{ color: 'red' }}>{errors.email}</p>}\n      </div>\n      <button type=\"submit\">Submit</button>\n    </form>\n  );\n}\n\n// TODO: Apply the HOC and export\n// const EnhancedContactForm = withFormValidation(ContactForm);\n// export default EnhancedContactForm;\n\n// App.js (for testing):\n/*\nimport React from 'react';\n// import EnhancedContactForm from './EnhancedContactForm'; // Adjust path\n\nfunction App() {\n  return (\n    <div>\n      <h1>Contact Form</h1>\n      <EnhancedContactForm />\n    </div>\n  );\n}\n\nexport default App;\n*/\n",
+          "solutionCode": "import React, { useState } from 'react';\n\n// Helper to get component's display name for HOC\nfunction getDisplayName(WrappedComponent) {\n  return WrappedComponent.displayName || WrappedComponent.name || 'Component';\n}\n\n// Implement the withFormValidation HOC\nfunction withFormValidation(WrappedComponent) {\n  const WithFormValidationComponent = (props) => {\n    const [errors, setErrors] = useState({});\n\n    const validateField = (fieldName, value) => {\n      let error = '';\n      switch (fieldName) {\n        case 'username':\n          if (!value) {\n            error = 'Username is required.';\n          }\n          break;\n        case 'email':\n          if (!value) {\n            error = 'Email is required.';\n          } else if (!/^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$/.test(value)) {\n            error = 'Invalid email format.';\n          }\n          break;\n        default:\n          break;\n      }\n      setErrors(prevErrors => ({\n        ...prevErrors,\n        [fieldName]: error,\n      }));\n      return !error; // Return true if no error, false otherwise\n    };\n\n    const validateForm = (formDataToCheck) => {\n      const newErrors = {};\n      let isValid = true;\n\n      // For simplicity, validate all fields that are expected to be in the form\n      // In a real app, formDataToCheck would be passed from the wrapped component.\n      // Here, we assume a simple structure or access values from context/props if needed.\n      // For this example, we'll re-validate based on a dummy structure or expected fields.\n      \n      // Re-validate based on fields we know the form has\n      if (!formDataToCheck.username) {\n        newErrors.username = 'Username is required.';\n        isValid = false;\n      }\n      if (!formDataToCheck.email) {\n        newErrors.email = 'Email is required.';\n        isValid = false;\n      } else if (!/^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$/.test(formDataToCheck.email)) {\n        newErrors.email = 'Invalid email format.';\n        isValid = false;\n      }\n\n      setErrors(newErrors);\n      return isValid;\n    };\n    \n    // Clear all errors\n    const clearErrors = () => {\n      setErrors({});\n    };\n\n    return (\n      <WrappedComponent\n        {...props}\n        errors={errors}\n        validateField={validateField}\n        validateForm={(data) => validateForm(data || props.formData)} // Pass data from wrapped component's state if available\n        clearErrors={clearErrors}\n      />\n    );\n  };\n\n  WithFormValidationComponent.displayName = `withFormValidation(${getDisplayName(WrappedComponent)})`;\n  return WithFormValidationComponent;\n}\n\n// ContactForm Component (to be wrapped by HOC)\nfunction ContactForm({ errors, validateField, validateForm, clearErrors }) {\n  const [formData, setFormData] = useState({\n    username: '',\n    email: '',\n  });\n\n  const handleChange = (e) => {\n    const { name, value } = e.target;\n    setFormData(prev => ({ ...prev, [name]: value }));\n    // Optional: Validate on change too, or just on blur\n    // validateField(name, value);\n  };\n\n  const handleBlur = (e) => {\n    const { name, value } = e.target;\n    validateField(name, value);\n  };\n\n  const handleSubmit = (e) => {\n    e.preventDefault();\n    clearErrors(); // Clear errors before re-validating whole form\n    const isValid = validateForm(formData); // Pass current form data to HOC for full validation\n    if (isValid) {\n      console.log('Form is valid! Submitting:', formData);\n      alert('Form submitted successfully!');\n      // In a real app, you'd send data to server here\n    } else {\n      console.log('Form has errors:', errors);\n      alert('Please fix the errors in the form.');\n    }\n  };\n\n  return (\n    <form onSubmit={handleSubmit}>\n      <div>\n        <label htmlFor=\"username\">Username:</label>\n        <input\n          type=\"text\"\n          id=\"username\"\n          name=\"username\"\n          value={formData.username}\n          onChange={handleChange}\n          onBlur={handleBlur}\n        />\n        {errors.username && <p style={{ color: 'red' }}>{errors.username}</p>}\n      </div>\n      <div>\n        <label htmlFor=\"email\">Email:</label>\n        <input\n          type=\"email\"\n          id=\"email\"\n          name=\"email\"\n          value={formData.email}\n          onChange={handleChange}\n          onBlur={handleBlur}\n        />\n        {errors.email && <p style={{ color: 'red' }}>{errors.email}</p>}\n      </div>\n      <button type=\"submit\">Submit</button>\n    </form>\n  );\n}\n\n// Apply the HOC and export\nconst EnhancedContactForm = withFormValidation(ContactForm);\nexport default EnhancedContactForm;\n\n// App.js (for testing):\n/*\nimport React from 'react';\nimport EnhancedContactForm from './EnhancedContactForm'; // Adjust path\n\nfunction App() {\n  return (\n    <div>\n      <h1>Contact Form</h1>\n      <EnhancedContactForm />\n    </div>\n  );\n}\n\nexport default App;\n*/\n",
+          "testCases": [
+            "1. Initial Load: Form should display with no errors.",
+            "2. Empty Submission: Click 'Submit' without entering any data. Expect error messages for both 'username' and 'email'.",
+            "3. Individual Field Validation (Blur): Type something in 'username', then click outside. If left empty, expect 'Username is required.' error. If valid, error should clear.",
+            "4. Invalid Email Format: Enter text like 'abc' into 'email' field and blur. Expect 'Invalid email format.' error.",
+            "5. Correct Email Format: Enter a valid email (e.g., 'test@example.com') and blur. Error for email should clear.",
+            "6. Valid Submission: Fill both fields correctly. Click 'Submit'. Expect a success alert and 'Form is valid!' in console.",
+            "7. Errors Clear on Re-submit Attempt: If errors are present, try to submit again. Ensure old errors are cleared before new validation results are shown (e.g., by making a valid change and re-submitting)."
+          ],
+          "hints": [
+            "The HOC should manage the `errors` state. The `validateField` and `validateForm` functions will modify this state.",
+            "Remember to pass `formData` (the current state of the form fields from the `ContactForm` component) to the `validateForm` function in the HOC when submitting, so the HOC can access all field values for overall validation.",
+            "For email validation, a simple regex like `/^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$/` can be used. (Note: for robust email validation, server-side validation is always best, but a client-side regex is fine for this task).",
+            "Ensure `clearErrors` is called by the `ContactForm` before a full form submission to reset the error state.",
+            "The `validateField` function in the HOC should update *only* the error for the specific field, without clearing other field errors."
+          ],
+          "tags": [
+            "React",
+            "HOC",
+            "Form Validation",
+            "State Management",
+            "Code Reusability",
+            "Frontend"
+          ],
+          "timeEstimate": 90,
+          "prerequisites": [
+            "React Functional Components",
+            "React Hooks (useState)",
+            "JavaScript Form Handling"
+          ],
+          "complexity": 8,
+          "interviewRelevance": 8,
+          "learningPath": "advanced",
+          "relatedConcepts": [
+            "Controlled Components",
+            "Higher-Order Functions",
+            "Input Handling",
+            "Client-side Validation"
+          ]
+        }
+      ]
+    }
+  }
+]

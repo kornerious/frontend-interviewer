@@ -1,0 +1,2021 @@
+[
+  {
+    "id": "ca0a4a2b-e6c2-490f-95bd-053e03016a43",
+    "startLine": 12500,
+    "endLine": 12599,
+    "processedDate": "2025-06-17T12:56:10.111Z",
+    "content": {
+      "logicalBlockInfo": {
+        "suggestedEndLine": -1
+      },
+      "theory": [
+        {
+          "id": "theory_react_code_splitting",
+          "title": "React Code Splitting with React.lazy and Suspense",
+          "content": "Code splitting is a technique that helps to reduce the bundle size of a web application, leading to faster initial page loads. Instead of loading all the JavaScript code at once, code splitting allows you to split your code into smaller 'chunks' that can be loaded on demand. This is particularly useful for large applications with many routes or features that might not be used immediately.\n\nReact provides built-in tools for code splitting: `React.lazy` and `Suspense`. \n\n## Key Concepts\n-   **React.lazy**: This function lets you render a dynamic import as a regular component. It automatically loads the bundle containing the `About` component when it's rendered for the first time. The `import()` syntax is a dynamic import, which means the module will be loaded on demand.\n-   **Suspense**: This component allows you to display a fallback UI (like a loading indicator) while the dynamic component is being loaded. If the component takes too long to load, or if there's a network error, `Suspense` will handle it. It can wrap multiple `lazy` components.\n-   **Integration with React Router**: `React.lazy` and `Suspense` work seamlessly with routing libraries like React Router. You wrap your route components that use `React.lazy` within a `Suspense` boundary, ensuring a loading state is shown while the route's component chunk is fetched.\n\n## Benefits\n-   **Faster Initial Load Times**: Users only download the code they need for the current view.\n-   **Improved User Experience**: Loading indicators prevent blank screens and provide feedback.\n-   **Better Resource Utilization**: Reduces the amount of data transferred over the network.\n-   **Better Cacheability**: Smaller, more specific chunks can be cached independently, improving subsequent loads.",
+          "examples": [
+            {
+              "id": "example_react_code_splitting_1",
+              "title": "Basic React.lazy and Suspense Usage with React Router",
+              "code": "import React, { lazy, Suspense } from 'react';\nimport { BrowserRouter as Router, Route, Switch } from 'react-router-dom';\n\nconst Home = () => <div>Home Page</div>;\nconst About = lazy(() => import('./routes/About')); // Dynamically imported component\n\nconst App = () => (\n  <Router>\n    <Suspense fallback={<div>Loading...</div>}> {/* Fallback UI while 'About' loads */}\n      <Switch>\n        <Route exact path=\"/\" component={Home}/>\n        <Route path=\"/about\" component={About}/>\n      </Switch>\n    </Suspense>\n  </Router>\n);\n\nexport default App;",
+              "explanation": "This example demonstrates how to use `React.lazy` to defer the loading of the `About` component until it's actually needed (i.e., when the `/about` route is accessed). The `Suspense` component provides a 'Loading...' message while the `About` component's bundle is being fetched over the network. This ensures that the initial bundle size for the application is smaller, as the `About` component's code is not included until it's requested.",
+              "language": "typescript"
+            }
+          ],
+          "relatedQuestions": [
+            "question_react_code_splitting_1",
+            "question_react_code_splitting_2",
+            "question_react_code_splitting_3",
+            "question_react_code_splitting_4",
+            "question_react_code_splitting_5"
+          ],
+          "relatedTasks": [
+            "task_react_code_splitting_1"
+          ],
+          "tags": [
+            "React",
+            "Performance",
+            "Code Splitting",
+            "Lazy Loading",
+            "Webpack",
+            "Frontend Optimization"
+          ],
+          "technology": "React",
+          "prerequisites": [
+            "react_basics",
+            "react_router"
+          ],
+          "complexity": 6,
+          "interviewRelevance": 8,
+          "learningPath": "intermediate",
+          "requiredFor": [
+            "large_scale_react_apps",
+            "performance_optimization"
+          ]
+        },
+        {
+          "id": "theory_bundle_size_optimization",
+          "title": "Bundle Size Optimization: Tree Shaking, Minification, and Code Splitting",
+          "content": "Optimizing the size of your JavaScript bundles is crucial for improving application performance, especially for users on slower networks or devices. Smaller bundles lead to faster download times, parsing, and execution. Key techniques include Tree Shaking, Minification, and more advanced Code Splitting configurations.\n\n## Key Concepts\n-   **Tree Shaking (Dead Code Elimination)**: This is a form of dead code elimination that removes unused JavaScript code from your final bundle. It relies on ES module `import` and `export` statements to detect which code is actually being used. Modern bundlers like Webpack and Rollup can perform tree shaking.\n    *   **How it works**: If you `import { functionA }` from a module, but never use `functionB` from that same module, tree shaking will remove `functionB` from the final bundle, provided `functionB` is side-effect free and correctly exported.\n    *   **Requirements**: Relies on static module structure (ESM) and a bundler configured for production mode (which often enables tree shaking by default).\n\n-   **Minification**: This process removes unnecessary characters (like whitespace, comments, and redundant semicolons) from code without changing its functionality. It also often renames variables and functions to shorter names (uglification) to further reduce file size. Tools like Terser (for JavaScript) and CSSNano (for CSS) are commonly used for minification.\n\n-   **Code Splitting (Webpack's `splitChunks`)**: While `React.lazy` provides component-level code splitting, Webpack's `splitChunks` optimization allows for more granular control over how chunks are created. It can automatically extract common dependencies (like vendor libraries) into separate chunks or split code based on specific criteria (e.g., node_modules, initial, async).\n    *   **`chunks: 'all'`**: A common configuration that tells Webpack to consider all chunks (sync and async) for optimization. This can lead to better sharing of modules between chunks, reducing overall bundle size and improving caching.\n\n## Benefits\n-   **Reduced Download Size**: Directly impacts initial load time.\n-   **Faster Parsing and Execution**: Smaller files are parsed and executed more quickly by the browser.\n-   **Improved Caching**: Smaller, more granular chunks can be cached independently, leading to better cache hit ratios on subsequent visits.",
+          "examples": [
+            {
+              "id": "example_bundle_size_tree_shaking",
+              "title": "Tree Shaking Example",
+              "code": "// math.ts\nexport function sum(a: number, b: number): number {\n  return a + b;\n}\n\nexport function subtract(a: number, b: number): number {\n  return a - b;\n}\n\n// main.ts\nimport { sum } from './math'; // Only 'sum' is imported and used\n\nconsole.log(sum(2, 3)); // 'subtract' function will be removed by tree shaking in production build",
+              "explanation": "In this example, only the `sum` function is imported and used from the `math` module. During a production build with a properly configured bundler like Webpack, the `subtract` function will be 'tree-shaken' (removed) from the final bundle because it's never referenced, thus reducing the bundle size.",
+              "language": "typescript"
+            },
+            {
+              "id": "example_bundle_size_webpack_config",
+              "title": "Webpack Configuration for Bundle Optimization",
+              "code": "const TerserPlugin = require('terser-webpack-plugin');\n\nmodule.exports = {\n  mode: 'production', // Enables production optimizations including tree shaking and minification\n  optimization: {\n    minimizer: [new TerserPlugin({ // Minifies JavaScript files\n      terserOptions: {\n        compress: {\n          drop_console: true, // Optional: Remove console.log statements\n        },\n      },\n    })],\n    splitChunks: {\n      chunks: 'all', // Optimize chunks for all types (initial, async)\n      minSize: 20000, // Minimum size of a chunk to be considered for splitting (in bytes)\n      maxInitialRequests: 3, // Maximum number of parallel requests on initial load\n      maxAsyncRequests: 5, // Maximum number of parallel requests for on-demand loading\n      cacheGroups: {\n        vendors: {\n          test: /[\\\\/]node_modules[\\\\/]/,\n          name: 'vendors',\n          chunks: 'all',\n        },\n        // You can add custom cache groups here\n      },\n    },\n  },\n  // Other webpack configurations...\n};",
+              "explanation": "This Webpack configuration snippet demonstrates how to enable production optimizations. `mode: 'production'` automatically enables tree shaking and other performance improvements. `TerserPlugin` is explicitly used for JavaScript minification. The `splitChunks` configuration with `chunks: 'all'` is crucial for automatically extracting shared code and vendor libraries into separate chunks, which can significantly improve caching and reduce the initial load size by allowing parallel downloads.",
+              "language": "javascript"
+            }
+          ],
+          "relatedQuestions": [
+            "question_bundle_size_1",
+            "question_bundle_size_2",
+            "question_bundle_size_3",
+            "question_bundle_size_4",
+            "question_bundle_size_5",
+            "question_bundle_size_6"
+          ],
+          "relatedTasks": [
+            "task_bundle_size_1"
+          ],
+          "tags": [
+            "Webpack",
+            "Bundle Optimization",
+            "Performance",
+            "JavaScript",
+            "Build Tools",
+            "Tree Shaking",
+            "Minification",
+            "Code Splitting"
+          ],
+          "technology": "Webpack",
+          "prerequisites": [
+            "javascript_modules",
+            "webpack_basics"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 9,
+          "learningPath": "intermediate",
+          "requiredFor": [
+            "performance_optimization",
+            "large_scale_frontend_development"
+          ]
+        },
+        {
+          "id": "theory_image_optimization",
+          "title": "Image Optimization Techniques",
+          "content": "Images often constitute a significant portion of a webpage's total size, directly impacting load times and user experience. Optimizing images is a critical aspect of web performance. This involves serving appropriately sized images, using efficient formats, and employing lazy loading.\n\n## Key Concepts\n-   **Responsive Images (`srcset` and `sizes`)**: These HTML attributes allow browsers to choose the most appropriate image from a set based on the user's device characteristics (screen resolution, pixel density, viewport size).\n    *   `srcset`: Defines a list of image candidates along with their intrinsic widths (`1000w`) or pixel densities (`2x`).\n    *   `sizes`: Describes the intended display size of the image relative to the viewport. The browser uses this information, combined with `srcset`, to pick the best image. For example, `(max-width: 500px) 100vw` means 'if the viewport is up to 500px wide, the image will take up 100% of the viewport width'.\n    *   **Benefit**: Delivers smaller image files to devices that don't need larger ones, saving bandwidth and improving load times.\n\n-   **Lazy Loading (`loading='lazy'`)**: This attribute tells the browser to defer loading of images that are not immediately visible in the viewport (i.e., 'below the fold') until the user scrolls near them. This reduces the initial load time of the page and conserves system resources.\n    *   Native lazy loading is supported by most modern browsers.\n    *   **Benefit**: Improves initial page load performance, reduces bandwidth consumption for users who don't scroll down.\n\n-   **Modern Image Formats (`<picture>`, WebP/AVIF)**: Using modern image formats can drastically reduce file sizes while maintaining high visual quality. \n    *   **WebP**: A modern image format developed by Google that provides superior lossless and lossy compression for images on the web. It's often 25-35% smaller than JPEG or PNG for comparable quality.\n    *   **AVIF**: An even newer, highly efficient image format based on the AV1 video codec. It offers even better compression than WebP.\n    *   **`<picture>` element**: Allows you to provide multiple `source` elements with different image formats or media conditions. The browser will choose the first `source` it supports. This enables serving modern formats like WebP or AVIF to compatible browsers while providing a JPEG/PNG fallback for older browsers.\n\n## Additional Optimization Tips\n-   **Image Compression**: Compress images without significant loss of quality using tools like TinyPNG, ImageOptim, or build tools with image minification plugins.\n-   **CDN**: Use a Content Delivery Network to serve images from servers geographically closer to your users.\n-   **Vector Graphics (SVG)**: For icons and simple illustrations, use SVG as they are resolution-independent and typically very small in size.",
+          "examples": [
+            {
+              "id": "example_image_optimization_responsive",
+              "title": "Responsive Images with srcset and sizes",
+              "code": "<!-- Responsive image example -->\n<img \n  src=\"small.jpg\" \n  srcset=\"medium.jpg 1000w, large.jpg 2000w\" \n  sizes=\"(max-width: 500px) 100vw, (max-width: 1000px) 50vw, 800px\" \n  alt=\"A beautiful landscape\"\n  loading=\"lazy\" <!-- Native lazy loading -->\n>",
+              "explanation": "This `<img>` tag demonstrates responsive images. The `srcset` attribute provides two larger image versions (`medium.jpg` at 1000 pixels wide and `large.jpg` at 2000 pixels wide) in addition to the default `small.jpg`. The `sizes` attribute tells the browser how wide the image will be displayed at different viewport sizes: 100% of viewport width up to 500px, 50% of viewport width up to 1000px, and fixed 800px otherwise. The browser uses this information to pick the most appropriate image from `srcset`. `loading=\"lazy\"` ensures the image is only loaded when it enters or is about to enter the viewport.",
+              "language": "html"
+            },
+            {
+              "id": "example_image_optimization_modern_formats",
+              "title": "Modern Image Formats with picture element",
+              "code": "<!-- Modern image formats with fallback -->\n<picture>\n  <source type=\"image/webp\" srcset=\"image.webp\">\n  <source type=\"image/jpeg\" srcset=\"image.jpg\">\n  <img src=\"image.jpg\" alt=\"Optimized image\">\n</picture>",
+              "explanation": "The `<picture>` element allows browsers to choose the optimal image format. It first tries to load `image.webp`. If the browser does not support WebP, it falls back to `image.jpg`. The `<img>` tag acts as a final fallback for browsers that don't support `<picture>` or any of the specified `source` types. This ensures broad compatibility while delivering smaller, more efficient `WebP` images to supporting browsers.",
+              "language": "html"
+            }
+          ],
+          "relatedQuestions": [
+            "question_image_opt_1",
+            "question_image_opt_2",
+            "question_image_opt_3",
+            "question_image_opt_4",
+            "question_image_opt_5",
+            "question_image_opt_6"
+          ],
+          "relatedTasks": [
+            "task_image_optimization_1"
+          ],
+          "tags": [
+            "Images",
+            "Performance",
+            "HTML",
+            "Responsive Design",
+            "Lazy Loading",
+            "WebP",
+            "Optimization"
+          ],
+          "technology": "HTML",
+          "prerequisites": [
+            "html_basics",
+            "css_media_queries"
+          ],
+          "complexity": 6,
+          "interviewRelevance": 8,
+          "learningPath": "intermediate",
+          "requiredFor": [
+            "web_performance_optimization",
+            "responsive_web_design"
+          ]
+        },
+        {
+          "id": "theory_critical_css",
+          "title": "Critical CSS Optimization",
+          "content": "Critical CSS is the minimum amount of CSS required to render the 'above-the-fold' content of a webpage as quickly as possible. 'Above-the-fold' refers to the content visible to the user without scrolling. Optimizing critical CSS significantly improves the First Contentful Paint (FCP) and Largest Contentful Paint (LCP) metrics, as the browser can render meaningful content faster without waiting for all external stylesheets to download and parse.\n\n## Key Concepts\n-   **Inlining Critical CSS**: The essential CSS rules for the initial view are directly embedded within a `<style>` block in the `<head>` of the HTML document. This makes the CSS immediately available to the browser without an additional network request, allowing it to start rendering the visible content almost instantly.\n-   **Asynchronous Loading of Non-Critical CSS**: The rest of the CSS (for 'below-the-fold' content or less critical styles) is loaded asynchronously. This means it doesn't block the initial rendering of the page.\n    *   **`rel='preload'` and `as='style'`**: This tells the browser to fetch the stylesheet with a high priority but without blocking rendering. It's a hint for the browser to pre-fetch the resource.\n    *   **`onload='this.onload=null;this.rel='stylesheet''`**: After the stylesheet is loaded (signified by the `onload` event firing), its `rel` attribute is changed from `preload` to `stylesheet`. This activates the stylesheet, applying its styles to the document. The `this.onload=null` prevents the event from firing multiple times.\n    *   **`<noscript>` fallback**: Provides a fallback for browsers that do not support JavaScript or for users who have JavaScript disabled, ensuring the stylesheet is still loaded, albeit synchronously.\n\n## Benefits\n-   **Improved First Contentful Paint (FCP)**: Users see content much faster.\n-   **Improved Largest Contentful Paint (LCP)**: Critical above-the-fold elements are styled quickly.\n-   **Reduced Render-Blocking Resources**: Prevents the browser from pausing rendering while waiting for external CSS files.\n-   **Better User Experience**: Faster perceived performance and a more immediate display of content.",
+          "examples": [
+            {
+              "id": "example_critical_css_inline_async",
+              "title": "Inlining Critical CSS and Asynchronous Loading",
+              "code": "<head>\n  <meta charset=\"UTF-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n  <title>Critical CSS Example</title>\n\n  <style>\n    /* Critical CSS for above-the-fold content */\n    body { margin: 0; font-family: sans-serif; line-height: 1.6; color: #333; }\n    header { background: #f0f0f0; padding: 20px; text-align: center; border-bottom: 1px solid #ccc; }\n    h1 { color: #0056b3; margin-bottom: 10px; }\n  </style>\n  \n  <!-- Asynchronously load non-critical CSS -->\n  <link rel=\"preload\" href=\"styles.css\" as=\"style\" onload=\"this.onload=null;this.rel='stylesheet'\">\n  <noscript><link rel=\"stylesheet\" href=\"styles.css\"></noscript>\n</head>\n<body>\n  <header>\n    <h1>Welcome to Our Site</h1>\n  </header>\n  <main>\n    <p>This is some content that will be styled by both critical and non-critical CSS.</p>\n    <div class=\"below-the-fold\">\n      <p>This content is below the fold and its styles are loaded asynchronously.</p>\n    </div>\n  </main>\n</body>",
+              "explanation": "This example demonstrates critical CSS optimization. The essential styles for the `body`, `header`, and `h1` (which are likely visible immediately) are inlined directly within a `<style>` tag in the `<head>`. This ensures they are available without a network request. The main stylesheet (`styles.css`), containing less critical styles, is preloaded asynchronously. It's fetched in the background (`rel=\"preload\"`), and once loaded, its `rel` attribute is changed to `stylesheet` to apply the styles. A `<noscript>` tag provides a synchronous fallback for environments where JavaScript is disabled.",
+              "language": "html"
+            }
+          ],
+          "relatedQuestions": [
+            "question_critical_css_1",
+            "question_critical_css_2",
+            "question_critical_css_3",
+            "question_critical_css_4",
+            "question_critical_css_5"
+          ],
+          "relatedTasks": [
+            "task_critical_css_1"
+          ],
+          "tags": [
+            "CSS",
+            "Performance",
+            "FCP",
+            "LCP",
+            "Rendering",
+            "Optimization",
+            "HTML"
+          ],
+          "technology": "HTML/CSS",
+          "prerequisites": [
+            "html_basics",
+            "css_basics"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 8,
+          "learningPath": "intermediate",
+          "requiredFor": [
+            "web_performance_optimization",
+            "frontend_architecture"
+          ]
+        },
+        {
+          "id": "theory_caching_strategies",
+          "title": "Caching Strategies: HTTP Caching and Service Workers",
+          "content": "Caching is a fundamental web performance optimization technique that stores copies of files (like HTML, CSS, JavaScript, images) closer to the user, either on the user's browser, a proxy server, or a Content Delivery Network (CDN). This reduces the need to re-download resources, significantly speeding up subsequent page loads.\n\n## Key Concepts\n-   **HTTP Caching (Browser Caching)**: Controlled by HTTP headers sent by the server. The browser stores these resources locally according to the rules defined in the headers.\n    *   **`Cache-Control` header**: The most important header for defining caching policies.\n        *   `public`: Indicates that the response can be cached by any cache (e.g., browser, CDN, proxy).\n        *   `private`: Indicates that the response is for a single user and cannot be cached by shared caches.\n        *   `no-cache`: The browser must revalidate with the server before using a cached copy (e.g., via `If-None-Match` or `If-Modified-Since`). It doesn't mean 'no caching', but 'revalidate before using'.\n        *   `no-store`: Absolutely no caching. The response should not be stored in any cache.\n        *   `max-age=<seconds>`: Specifies the maximum amount of time a resource is considered fresh. After this time, the browser must revalidate or re-download.\n        *   `immutable`: Indicates that the resource will not change during its lifetime. Once cached, it won't be revalidated for the `max-age` duration, even on page reloads. Useful for assets with content-hashed filenames (e.g., `bundle.abc123.js`).\n    *   **`Expires` header**: An older header providing a fixed expiry date/time. Less flexible than `Cache-Control`.\n    *   **`ETag` and `Last-Modified`**: Used for revalidation. If a resource is stale, the browser sends these in a request to the server. If the resource hasn't changed, the server responds with a `304 Not Modified`, saving bandwidth.\n\n-   **Service Workers**: A JavaScript file that runs in the background, separate from the main browser thread. It acts as a programmable proxy between the browser and the network. Service Workers can intercept network requests, cache responses, and serve content even when offline.\n    *   **Event-driven**: Responds to events like `install`, `activate`, and `fetch`.\n    *   **`install` event**: Typically used to pre-cache essential assets (App Shell).\n    *   **`activate` event**: Used for cleaning up old caches.\n    *   **`fetch` event**: The core of service worker caching. It allows you to intercept network requests and decide how to respond (e.g., 'Cache First, then Network', 'Network First', 'Stale While Revalidate').\n    *   **`caches` API**: Provides access to a `CacheStorage` object, which manages named `Cache` objects. Used to `put` (store), `match` (retrieve), and `delete` (remove) responses.\n\n## Common Caching Strategies with Service Workers\n-   **Cache First, then Network**: Serve from cache if available, otherwise fetch from network. Update cache in the background.\n-   **Network First, then Cache**: Try to fetch from network. If successful, update cache. If network fails, serve from cache.\n-   **Stale While Revalidate**: Serve from cache immediately, and in parallel, fetch from the network to update the cache for future requests.\n-   **Cache Only**: Serve only from cache (useful for static assets pre-cached during install).\n-   **Network Only**: Always go to the network (useful for non-cacheable requests).\n\n## Benefits\n-   **Improved Performance**: Faster load times, especially for repeat visitors.\n-   **Offline Capabilities**: Service Workers enable Progressive Web Apps (PWAs) to work offline.\n-   **Reduced Server Load**: Fewer requests hitting the origin server.\n-   **Bandwidth Saving**: Less data transferred.",
+          "examples": [
+            {
+              "id": "example_caching_http_headers",
+              "title": "HTTP Cache-Control Headers",
+              "code": "// Node.js Express example for setting Cache-Control headers\nconst express = require('express');\nconst app = express();\n\napp.get('/static-asset.js', (req, res) => {\n  // Cache for 1 year (31536000 seconds) and mark as immutable\n  res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');\n  res.send('console.log(\"This asset is cached for a year!\");');\n});\n\napp.get('/dynamic-data', (req, res) => {\n  // Do not cache this response at all\n  res.setHeader('Cache-Control', 'no-store, must-revalidate');\n  res.setHeader('Pragma', 'no-cache'); // For HTTP/1.0 compatibility\n  res.setHeader('Expires', '0'); // For HTTP/1.0 compatibility\n  res.json({ message: 'This data is always fresh.' });\n});\n\n// Start server...\napp.listen(3000, () => console.log('Server running on port 3000'));",
+              "explanation": "This Node.js Express example demonstrates setting HTTP `Cache-Control` headers. For a static asset, `public, max-age=31536000, immutable` tells browsers and proxy servers to cache the asset for one year without revalidating. For dynamic data, `no-store, must-revalidate` (along with `Pragma` and `Expires` for older clients) explicitly prevents any caching, forcing the browser to always fetch a fresh copy from the server.",
+              "language": "javascript"
+            },
+            {
+              "id": "example_caching_service_worker",
+              "title": "Service Worker Cache-First Strategy",
+              "code": "// service-worker.js\nconst CACHE_NAME = 'v1';\nconst urlsToCache = [\n  '/',\n  '/index.html',\n  '/styles.css',\n  '/script.js'\n];\n\n// Install event: pre-cache static assets\nself.addEventListener('install', event => {\n  event.waitUntil(\n    caches.open(CACHE_NAME)\n      .then(cache => {\n        console.log('Opened cache');\n        return cache.addAll(urlsToCache);\n      })\n  );\n});\n\n// Fetch event: intercept network requests and serve from cache if available\nself.addEventListener('fetch', event => {\n  event.respondWith(\n    caches.match(event.request).then(cachedResponse => {\n      // Return cached response if available\n      if (cachedResponse) {\n        console.log('Serving from cache:', event.request.url);\n        return cachedResponse;\n      }\n\n      // Otherwise, fetch from network\n      return fetch(event.request).then(response => {\n        // Check if we received a valid response\n        if (!response || response.status !== 200 || response.type !== 'basic') {\n          return response;\n        }\n\n        // Clone the response because it's a stream and can only be consumed once\n        const responseToCache = response.clone();\n\n        caches.open(CACHE_NAME).then(cache => {\n          cache.put(event.request, responseToCache);\n        });\n\n        return response;\n      });\n    })\n  );\n});\n\n// Activate event: clean up old caches\nself.addEventListener('activate', event => {\n  const cacheWhitelist = [CACHE_NAME];\n  event.waitUntil(\n    caches.keys().then(cacheNames => {\n      return Promise.all(\n        cacheNames.map(cacheName => {\n          if (cacheWhitelist.indexOf(cacheName) === -1) {\n            return caches.delete(cacheName);\n          }\n        })\n      );\n    })\n  );\n});",
+              "explanation": "This Service Worker implements a 'Cache First, then Network' strategy. During the `install` phase, essential static assets are pre-cached. In the `fetch` event listener, every network request is intercepted. The Service Worker first checks if a matching response exists in its cache (`caches.match`). If found, it returns the cached version immediately. If not, it fetches the resource from the network, caches a clone of the response for future use, and then returns the network response. The `activate` event handles cleaning up old cache versions.",
+              "language": "javascript"
+            }
+          ],
+          "relatedQuestions": [
+            "question_caching_1",
+            "question_caching_2",
+            "question_caching_3",
+            "question_caching_4",
+            "question_caching_5",
+            "question_caching_6",
+            "question_caching_7",
+            "question_caching_8"
+          ],
+          "relatedTasks": [
+            "task_caching_1"
+          ],
+          "tags": [
+            "Caching",
+            "HTTP",
+            "Service Worker",
+            "Performance",
+            "Web Development",
+            "PWA",
+            "Offline",
+            "Network"
+          ],
+          "technology": "Web APIs",
+          "prerequisites": [
+            "http_basics",
+            "javascript_async_programming"
+          ],
+          "complexity": 8,
+          "interviewRelevance": 9,
+          "learningPath": "advanced",
+          "requiredFor": [
+            "pwa_development",
+            "advanced_web_performance"
+          ]
+        },
+        {
+          "id": "theory_react_memoization",
+          "title": "React Performance Optimization: Memoization with React.memo, useCallback, and useMemo",
+          "content": "In React, component re-renders are a common cause of performance bottlenecks, especially in large applications. Memoization is an optimization technique that helps prevent unnecessary re-renders of components or recalculations of values and functions by caching their results. If the inputs (props or dependencies) remain the same, the cached result is returned instead of re-executing the logic or re-rendering.\n\n## Key Concepts\n-   **Why Memoization?**: React re-renders components when their state or props change. However, sometimes parent components re-render, causing their children to re-render even if the children's props haven't *logically* changed (e.g., if an object prop is recreated on every parent render, leading to a new reference). Memoization helps by performing a shallow comparison of props/dependencies and skipping re-renders/re-calculations if they are identical.\n\n-   **`React.memo` (for functional components)**:\n    *   A higher-order component (HOC) that memoizes a functional component. It prevents the component from re-rendering if its props have not changed (via a shallow comparison).\n    *   Use when your component renders the same result given the same props, and it re-renders frequently due to parent re-renders without its own props truly changing.\n    *   Syntax: `const MemoizedComponent = React.memo(MyFunctionalComponent, [arePropsEqual])`.\n\n-   **`useCallback` (for memoizing functions)**:\n    *   A React Hook that returns a memoized version of a callback function. This is particularly useful when passing callbacks to optimized child components that rely on reference equality to prevent unnecessary re-renders (e.g., `React.memo` components).\n    *   Syntax: `const memoizedCallback = useCallback(() => { doSomething(); }, [dependencies]);`\n    *   The callback will only change if one of its `dependencies` has changed.\n\n-   **`useMemo` (for memoizing values)**:\n    *   A React Hook that returns a memoized value. It only recomputes the memoized value when one of the `dependencies` has changed.\n    *   Syntax: `const memoizedValue = useMemo(() => computeExpensiveValue(a, b), [a, b]);`\n    *   Useful for expensive calculations or for memoizing objects/arrays that are passed as props to child components, preventing unnecessary re-renders of those children.\n\n## When to Use Memoization\n-   **Large, frequently re-rendering components**: If a component has complex UI or expensive rendering logic and re-renders often.\n-   **Passing props to memoized children**: When a parent component renders, it re-creates function/object props, which can cause `React.memo` children to re-render. `useCallback` and `useMemo` help stabilize these references.\n-   **Expensive computations**: For calculations that take a significant amount of time and whose results are only dependent on a few inputs.\n\n## Potential Pitfalls / When Not to Use\n-   **Over-optimization**: Memoization itself has a cost (comparison of props/dependencies, memory for caching). If the rendering is cheap, the overhead of memoization might be greater than the benefit.\n-   **Mutable Objects**: Memoization relies on shallow comparison. If you mutate an object or array passed as a prop, memoization might not detect the change, leading to stale UI.\n-   **Incorrect Dependencies**: Forgetting to include a dependency in `useCallback` or `useMemo` will lead to stale closures or values. Including too many dependencies can negate the benefits.",
+          "examples": [
+            {
+              "id": "example_react_memo_component",
+              "title": "React.memo for Component Memoization",
+              "code": "import React, { useState, useCallback, useMemo } from 'react';\n\n// Child component that is expensive to render or re-render\nconst ExpensiveChild = React.memo(({ data, onClick }) => {\n  console.log('ExpensiveChild rendered', data);\n  return (\n    <div style={{ border: '1px solid blue', padding: '10px', margin: '10px' }}>\n      <h3>Memoized Child Component</h3>\n      <p>Data: {data}</p>\n      <button onClick={onClick}>Click me</button>\n    </div>\n  );\n});\n\n// Parent Component\nconst ParentComponent = () => {\n  const [count, setCount] = useState(0);\n  const [text, setText] = useState('');\n\n  // Memoize the callback function using useCallback\n  // This function will only be recreated if `count` changes.\n  const handleClick = useCallback(() => {\n    setCount(prevCount => prevCount + 1);\n  }, []); // Empty dependency array means it's created once\n\n  // Memoize a value using useMemo\n  // This value will only be recomputed if `count` changes.\n  const processedData = useMemo(() => {\n    console.log('Recalculating processedData...');\n    return `Count: ${count * 2}`;\n  }, [count]);\n\n  return (\n    <div style={{ border: '1px solid green', padding: '20px' }}>\n      <h2>Parent Component</h2>\n      <p>Parent Count: {count}</p>\n      <input type=\"text\" value={text} onChange={(e) => setText(e.target.value)} placeholder=\"Type something\"/>\n      \n      {/* ExpensiveChild will only re-render if processedData or handleClick change their references */}\n      <ExpensiveChild data={processedData} onClick={handleClick} />\n    </div>\n  );\n};\n\nexport default ParentComponent;",
+              "explanation": "This example demonstrates `React.memo`, `useCallback`, and `useMemo` working together. `ExpensiveChild` is wrapped with `React.memo`, meaning it will only re-render if its `data` or `onClick` props change (by shallow comparison). \n\n-   `processedData` is memoized with `useMemo`. It only recalculates when `count` changes. If `text` changes, `ParentComponent` re-renders, but `processedData` does not recompute, and its reference remains stable, preventing `ExpensiveChild` from re-rendering.\n-   `handleClick` is memoized with `useCallback`. With an empty dependency array `[]`, its reference is stable across parent renders. This is crucial for `ExpensiveChild` (a `React.memo` component) as it prevents unnecessary re-renders when the parent re-renders due to `text` state changes.",
+              "language": "typescript"
+            }
+          ],
+          "relatedQuestions": [
+            "question_react_memoization_1",
+            "question_react_memoization_2",
+            "question_react_memoization_3",
+            "question_react_memoization_4",
+            "question_react_memoization_5",
+            "question_react_memoization_6",
+            "question_react_memoization_7"
+          ],
+          "relatedTasks": [
+            "task_react_memoization_1"
+          ],
+          "tags": [
+            "React",
+            "Performance",
+            "Memoization",
+            "Hooks",
+            "Optimization",
+            "useCallback",
+            "useMemo",
+            "React.memo"
+          ],
+          "technology": "React",
+          "prerequisites": [
+            "react_functional_components",
+            "react_hooks_useState"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 9,
+          "learningPath": "advanced",
+          "requiredFor": [
+            "react_performance_optimization",
+            "large_scale_react_apps"
+          ]
+        }
+      ],
+      "questions": [
+        {
+          "id": "question_react_code_splitting_1",
+          "topic": "React Code Splitting",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "What is the primary purpose of `React.lazy` in a React application?",
+          "answer": "`React.lazy` allows you to load React components dynamically, only when they are needed, which helps in code splitting and reducing the initial bundle size of the application.",
+          "analysisPoints": [
+            "Understanding of code splitting concept.",
+            "Role of `React.lazy` in dynamic imports.",
+            "Impact on initial load performance."
+          ],
+          "keyConcepts": [
+            "React.lazy",
+            "Code Splitting",
+            "Performance Optimization"
+          ],
+          "evaluationCriteria": [
+            "Recall of `React.lazy` functionality"
+          ],
+          "example": null,
+          "tags": [
+            "React",
+            "Code Splitting",
+            "Performance",
+            "Lazy Loading"
+          ],
+          "prerequisites": [
+            "react_basics"
+          ],
+          "complexity": 3,
+          "interviewFrequency": 7,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_react_code_splitting_2",
+          "topic": "React Code Splitting",
+          "level": "medium",
+          "type": "mcq",
+          "question": "Given the following React code snippet, what will happen when a user navigates to the `/about` path for the first time?\n\n```jsx\nimport React, { lazy, Suspense } from 'react';\nimport { BrowserRouter as Router, Route, Switch } from 'react-router-dom';\n\nconst Home = () => <div>Home Page</div>;\nconst About = lazy(() => import('./routes/About'));\n\nconst App = () => (\n  <Router>\n    <Suspense fallback={<div>Loading...</div>}>\n      <Switch>\n        <Route exact path=\"/\" component={Home}/>\n        <Route path=\"/about\" component={About}/>\n      </Switch>\n    </Suspense>\n  </Router>\n);\n```",
+          "answer": "The browser will display 'Loading...' and then render the `About` component after its code chunk has been downloaded.",
+          "options": [
+            "The browser will immediately navigate to `/about` and display the `About` component.",
+            "The browser will display 'Loading...' and then render the `About` component after its code chunk has been downloaded.",
+            "An error will occur because `Suspense` is not properly configured.",
+            "The `About` component's code will be loaded with the initial bundle, and it will render immediately."
+          ],
+          "analysisPoints": [
+            "Understanding the interaction between `React.lazy` and `Suspense`.",
+            "Knowledge of dynamic imports and network requests.",
+            "Correctly identifying the fallback UI behavior."
+          ],
+          "keyConcepts": [
+            "React.lazy",
+            "Suspense",
+            "Dynamic Import",
+            "Code Splitting",
+            "React Router"
+          ],
+          "evaluationCriteria": [
+            "Ability to predict runtime behavior of lazy-loaded components"
+          ],
+          "example": "When the user navigates to `/about`, `React.lazy` initiates the dynamic import of `./routes/About`. While this import is in progress (downloading the JavaScript chunk), `Suspense` catches the loading state and renders its `fallback` prop (`<div>Loading...</div>`). Once the `About` component's code is downloaded and parsed, `Suspense` resolves, and the `About` component is rendered.",
+          "tags": [
+            "React",
+            "Code Splitting",
+            "Suspense",
+            "Performance"
+          ],
+          "prerequisites": [
+            "react_lazy",
+            "react_suspense",
+            "react_router"
+          ],
+          "complexity": 6,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_react_code_splitting_3",
+          "topic": "React Code Splitting",
+          "level": "hard",
+          "type": "open",
+          "question": "Explain the benefits of implementing code splitting in a large-scale React application. Discuss potential drawbacks or considerations when deciding whether to apply code splitting.",
+          "answer": "Benefits of code splitting in large-scale React applications include:\n1.  **Reduced Initial Load Time**: Only necessary code chunks are loaded initially, making the first page view much faster. This directly impacts core web vitals like FCP (First Contentful Paint) and LCP (Largest Contentful Paint).\n2.  **Improved User Experience**: Users perceive the application as faster and more responsive, especially on slower networks. The use of `Suspense` provides visual feedback (loading indicators) instead of blank screens.\n3.  **Efficient Resource Utilization**: Less data is transferred over the network initially, saving bandwidth for users.\n4.  **Better Caching**: Smaller, distinct code chunks can be cached independently. If only one part of the application changes, only its corresponding chunk needs to be re-downloaded, leading to better cache invalidation and hit ratios for subsequent visits.\n\nPotential drawbacks or considerations:\n1.  **Increased Network Requests**: While initial bundle size is smaller, the total number of network requests might increase as chunks are fetched on demand. This could be problematic on high-latency networks if not managed carefully (e.g., prefetching).\n2.  **Configuration Complexity**: Setting up optimal code splitting with bundlers like Webpack can add complexity to the build configuration.\n3.  **Loading States Management**: Proper use of `Suspense` and fallback UIs is crucial. Poorly managed loading states can lead to awkward UI flashes or 'jumps'.\n4.  **Waterfall Effect**: If a lazy-loaded component itself depends on other large, non-lazy-loaded modules, it might still create a loading bottleneck.\n5.  **SEO Considerations**: Historically, search engine crawlers might have issues with JavaScript-dependent content if not rendered properly (e.g., server-side rendering or pre-rendering can mitigate this). However, modern crawlers are much better at executing JavaScript.\n6.  **Bundle Cohesion**: Over-splitting can lead to many small chunks, which might increase the overhead of network requests and connection setup. It's about finding the right balance.",
+          "analysisPoints": [
+            "Comprehensive understanding of code splitting's advantages.",
+            "Awareness of practical challenges and trade-offs.",
+            "Ability to articulate the impact on user experience and technical debt.",
+            "Consideration of network performance and build tooling."
+          ],
+          "keyConcepts": [
+            "Code Splitting",
+            "React.lazy",
+            "Suspense",
+            "Performance Optimization",
+            "Webpack",
+            "User Experience",
+            "Network Performance"
+          ],
+          "evaluationCriteria": [
+            "Depth of explanation",
+            "Identification of pros and cons",
+            "Practical considerations"
+          ],
+          "example": null,
+          "tags": [
+            "React",
+            "Code Splitting",
+            "Performance",
+            "Architecture",
+            "Advanced"
+          ],
+          "prerequisites": [
+            "react_lazy",
+            "react_suspense",
+            "webpack_basics"
+          ],
+          "complexity": 8,
+          "interviewFrequency": 9,
+          "learningPath": "advanced"
+        },
+        {
+          "id": "question_react_code_splitting_4",
+          "topic": "React Code Splitting",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "What component is used in React to display a fallback UI while a lazy-loaded component is being downloaded?",
+          "answer": "`Suspense`",
+          "analysisPoints": [
+            "Direct recall of `Suspense` component's purpose."
+          ],
+          "keyConcepts": [
+            "Suspense",
+            "React.lazy"
+          ],
+          "evaluationCriteria": [
+            "Recall of React components"
+          ],
+          "example": null,
+          "tags": [
+            "React",
+            "Suspense",
+            "Lazy Loading"
+          ],
+          "prerequisites": [
+            "react_basics"
+          ],
+          "complexity": 2,
+          "interviewFrequency": 6,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_react_code_splitting_5",
+          "topic": "React Code Splitting",
+          "level": "medium",
+          "type": "code",
+          "question": "Refactor the following React component to use `React.lazy` and `Suspense` for the `Dashboard` component. Assume `Dashboard` is a large component that should only load when the user navigates to `/dashboard`.\n\n```jsx\nimport React from 'react';\nimport { BrowserRouter as Router, Route, Switch, Link } from 'react-router-dom';\n\nconst Home = () => <div><h1>Welcome Home!</h1><Link to=\"/dashboard\">Go to Dashboard</Link></div>;\nconst Dashboard = () => <div><h2>Dashboard Content</h2><p>Lots of widgets here...</p></div>;\n\nconst App = () => (\n  <Router>\n    <Switch>\n      <Route exact path=\"/\" component={Home}/>\n      <Route path=\"/dashboard\" component={Dashboard}/>\n    </Switch>\n  </Router>\n);\n\nexport default App;\n```",
+          "answer": "```jsx\nimport React, { lazy, Suspense } from 'react';\nimport { BrowserRouter as Router, Route, Switch, Link } from 'react-router-dom';\n\nconst Home = () => <div><h1>Welcome Home!</h1><Link to=\"/dashboard\">Go to Dashboard</Link></div>;\n\n// Lazily load the Dashboard component\nconst Dashboard = lazy(() => import('./Dashboard'));\n\nconst App = () => (\n  <Router>\n    <Suspense fallback={<div>Loading Dashboard...</div>}> {/* Wrap routes using lazy with Suspense */}\n      <Switch>\n        <Route exact path=\"/\" component={Home}/>\n        <Route path=\"/dashboard\" component={Dashboard}/> {/* Use the lazy-loaded component */}\n      </Switch>\n    </Suspense>\n  </Router>\n);\n\nexport default App;\n\n// Assuming Dashboard.js would contain:\n// // Dashboard.js\n// import React from 'react';\n// const Dashboard = () => <div><h2>Dashboard Content</h2><p>Lots of widgets here...</p></div>;\n// export default Dashboard;\n```",
+          "options": [],
+          "analysisPoints": [
+            "Correct application of `React.lazy` syntax for dynamic imports.",
+            "Proper wrapping of routes or components with `Suspense`.",
+            "Understanding of the `fallback` prop."
+          ],
+          "keyConcepts": [
+            "React.lazy",
+            "Suspense",
+            "Code Splitting",
+            "React Router"
+          ],
+          "evaluationCriteria": [
+            "Syntactic correctness",
+            "Functional implementation of code splitting"
+          ],
+          "example": null,
+          "tags": [
+            "React",
+            "Code Splitting",
+            "Suspense",
+            "Coding",
+            "Performance"
+          ],
+          "prerequisites": [
+            "react_lazy",
+            "react_suspense",
+            "react_router"
+          ],
+          "complexity": 7,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_bundle_size_1",
+          "topic": "Bundle Size Optimization",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "What is 'Tree Shaking' in the context of JavaScript bundle optimization?",
+          "answer": "Tree Shaking, also known as 'dead code elimination', is a process that removes unused code from your final JavaScript bundle. It relies on ES module import/export statements.",
+          "analysisPoints": [
+            "Definition of Tree Shaking.",
+            "Mechanism (dead code elimination).",
+            "Prerequisite (ES Modules)."
+          ],
+          "keyConcepts": [
+            "Tree Shaking",
+            "Bundle Optimization",
+            "Webpack",
+            "ES Modules"
+          ],
+          "evaluationCriteria": [
+            "Recall of definition and mechanism"
+          ],
+          "example": null,
+          "tags": [
+            "Webpack",
+            "Performance",
+            "Tree Shaking"
+          ],
+          "prerequisites": [
+            "javascript_modules"
+          ],
+          "complexity": 3,
+          "interviewFrequency": 7,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_bundle_size_2",
+          "topic": "Bundle Size Optimization",
+          "level": "medium",
+          "type": "mcq",
+          "question": "Which of the following Webpack configurations is most likely to enable or enhance Tree Shaking and general bundle size optimization?\n\n```javascript\n// Option A\nmodule.exports = {\n  mode: 'development',\n  optimization: {\n    minimize: false\n  }\n};\n\n// Option B\nmodule.exports = {\n  mode: 'production',\n  optimization: {\n    minimizer: [],\n    splitChunks: { chunks: 'async' }\n  }\n};\n\n// Option C\nmodule.exports = {\n  mode: 'production',\n  optimization: {\n    minimizer: [new (require('terser-webpack-plugin'))()],\n    splitChunks: { chunks: 'all' }\n  }\n};\n\n// Option D\nmodule.exports = {\n  mode: 'none',\n  optimization: {\n    minimize: true\n  }\n};\n```",
+          "answer": "Option C",
+          "options": [
+            "Option A",
+            "Option B",
+            "Option C",
+            "Option D"
+          ],
+          "analysisPoints": [
+            "Understanding that `mode: 'production'` enables many optimizations by default, including tree shaking.",
+            "Recognizing `TerserPlugin` for minification.",
+            "Understanding `splitChunks: { chunks: 'all' }` for comprehensive code splitting."
+          ],
+          "keyConcepts": [
+            "Webpack",
+            "Tree Shaking",
+            "Minification",
+            "Code Splitting",
+            "TerserPlugin"
+          ],
+          "evaluationCriteria": [
+            "Ability to interpret Webpack configurations",
+            "Knowledge of optimization options"
+          ],
+          "example": "Option C is correct because:\n-   `mode: 'production'` automatically enables many optimizations, including tree shaking and scope hoisting.\n-   `minimizer: [new TerserPlugin()]` explicitly configures JavaScript minification.\n-   `splitChunks: { chunks: 'all' }` is a powerful setting that ensures Webpack analyzes all module types (synchronous and asynchronous) for optimal chunking, leading to better cacheability and smaller initial downloads.\n\nOption A uses 'development' mode, which prioritizes speed and debugging over size. Option B uses 'production' but lacks a minimizer and uses a less comprehensive `splitChunks` configuration. Option D uses 'none' mode, which means no default optimizations are applied.",
+          "tags": [
+            "Webpack",
+            "Bundle Size",
+            "Optimization",
+            "MCQ"
+          ],
+          "prerequisites": [
+            "webpack_basics",
+            "bundle_size_optimization"
+          ],
+          "complexity": 7,
+          "interviewFrequency": 9,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_bundle_size_3",
+          "topic": "Bundle Size Optimization",
+          "level": "medium",
+          "type": "open",
+          "question": "Beyond `mode: 'production'`, `TerserPlugin`, and `splitChunks`, what other techniques or considerations can contribute to effective JavaScript bundle size optimization?",
+          "answer": "Beyond the core techniques mentioned, several other approaches can significantly contribute to JavaScript bundle size optimization:\n1.  **Scope Hoisting (Module Concatenation)**: Webpack can flatten the scope of modules into a single scope, reducing wrapper function overhead and potentially making minification more effective. It's often enabled by default in `production` mode.\n2.  **Externalizing Libraries**: For libraries consumed via CDN (e.g., React, ReactDOM), you can configure Webpack to treat them as external, preventing them from being bundled into your application's code.\n3.  **Lazy Loading (Dynamic Imports)**: As discussed, loading components or modules only when they are needed via `import()` syntax. This is particularly effective for routes or features not accessed on initial load.\n4.  **Analyze Bundle Content**: Tools like Webpack Bundle Analyzer help visualize the contents of your bundle, identifying large dependencies or duplicated code that can be optimized.\n5.  **Code Splitting by Route/Feature**: Manually defining split points (e.g., using `import()` in React Router) to ensure that code for specific routes or features is loaded on demand.\n6.  **Removing Unused Dependencies**: Regularly review `package.json` to remove libraries that are no longer used or are redundant.\n7.  **Replacing Large Libraries with Lighter Alternatives**: Evaluate if a smaller, more focused library can replace a large, general-purpose one (e.g., Moment.js vs. date-fns).\n8.  **Server-Side Rendering (SSR) / Static Site Generation (SSG)**: While primarily for initial load performance and SEO, these can reduce the amount of JavaScript needed for initial render by pre-rendering HTML on the server.\n9.  **Brotli/Gzip Compression**: Ensure your server is configured to serve compressed assets (Brotli offers better compression than Gzip). This reduces the transfer size, even if the uncompressed bundle size remains the same.\n10. **Monorepo Structure**: If using a monorepo, ensure proper dependency management to avoid bundling shared libraries multiple times across different packages.",
+          "analysisPoints": [
+            "Identification of various advanced optimization techniques.",
+            "Understanding of how each technique contributes to bundle reduction.",
+            "Knowledge of debugging/analysis tools."
+          ],
+          "keyConcepts": [
+            "Bundle Size",
+            "Webpack",
+            "Performance",
+            "Code Optimization",
+            "Lazy Loading",
+            "SSR",
+            "Compression"
+          ],
+          "evaluationCriteria": [
+            "Breadth of knowledge",
+            "Practical applicability of suggestions"
+          ],
+          "example": null,
+          "tags": [
+            "Webpack",
+            "Performance",
+            "Optimization",
+            "Advanced"
+          ],
+          "prerequisites": [
+            "bundle_size_optimization"
+          ],
+          "complexity": 8,
+          "interviewFrequency": 8,
+          "learningPath": "advanced"
+        },
+        {
+          "id": "question_bundle_size_4",
+          "topic": "Bundle Size Optimization",
+          "level": "medium",
+          "type": "flashcard",
+          "question": "What is the role of `TerserPlugin` in Webpack's optimization process?",
+          "answer": "`TerserPlugin` is Webpack's JavaScript minimizer. Its role is to minify JavaScript code by removing whitespace, comments, and shortening variable names (uglification), thereby reducing the final bundle size.",
+          "analysisPoints": [
+            "Identify `TerserPlugin`'s function.",
+            "Explain minification concept."
+          ],
+          "keyConcepts": [
+            "TerserPlugin",
+            "Minification",
+            "Webpack",
+            "Bundle Size"
+          ],
+          "evaluationCriteria": [
+            "Recall of specific Webpack plugin"
+          ],
+          "example": null,
+          "tags": [
+            "Webpack",
+            "Performance",
+            "Minification"
+          ],
+          "prerequisites": [
+            "webpack_basics"
+          ],
+          "complexity": 5,
+          "interviewFrequency": 7,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_bundle_size_5",
+          "topic": "Bundle Size Optimization",
+          "level": "easy",
+          "type": "mcq",
+          "question": "Consider the following JavaScript module structure:\n\n```javascript\n// utils.js\nexport function calculateSum(a, b) { return a + b; }\nexport function calculateProduct(a, b) { return a * b; }\n\n// main.js\nimport { calculateSum } from './utils';\n\nconsole.log(calculateSum(5, 3));\n```\n\nIf this code is bundled with Webpack in `production` mode, what is the most likely outcome regarding the `calculateProduct` function?",
+          "answer": "It will be removed from the final bundle due to tree shaking.",
+          "options": [
+            "It will be included in the bundle, but its name will be minified.",
+            "It will cause a runtime error because it's not used.",
+            "It will be removed from the final bundle due to tree shaking.",
+            "It will be loaded asynchronously when `calculateProduct` is eventually called."
+          ],
+          "analysisPoints": [
+            "Understanding of tree shaking's mechanism.",
+            "Distinguishing between minification and dead code elimination.",
+            "Recognizing that unused exported functions are removed in production."
+          ],
+          "keyConcepts": [
+            "Tree Shaking",
+            "Webpack",
+            "Bundle Size",
+            "ES Modules"
+          ],
+          "evaluationCriteria": [
+            "Application of tree shaking concept to code"
+          ],
+          "example": "Because `calculateProduct` is exported but never imported or used in `main.js`, a bundler configured for production mode (like Webpack) will perform tree shaking and omit this unused function from the final JavaScript bundle. This helps reduce the overall file size.",
+          "tags": [
+            "Webpack",
+            "Tree Shaking",
+            "Bundle Size",
+            "MCQ"
+          ],
+          "prerequisites": [
+            "javascript_modules",
+            "webpack_basics"
+          ],
+          "complexity": 5,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_bundle_size_6",
+          "topic": "Bundle Size Optimization",
+          "level": "hard",
+          "type": "code",
+          "question": "You are given a `webpack.config.js` file for a React application. Your goal is to optimize the bundle size. Specifically, you need to:\n1.  Ensure JavaScript files are aggressively minified.\n2.  Optimize chunk splitting to extract vendor libraries and common modules into separate chunks for better caching.\n3.  Ensure tree shaking is enabled.\n\nModify the provided Webpack configuration to achieve these goals.\n\n```javascript\nconst path = require('path');\n\nmodule.exports = {\n  entry: './src/index.js',\n  output: {\n    filename: 'bundle.js',\n    path: path.resolve(__dirname, 'dist'),\n  },\n  // Missing optimization settings here\n};\n```",
+          "answer": "```javascript\nconst path = require('path');\nconst TerserPlugin = require('terser-webpack-plugin');\n\nmodule.exports = {\n  entry: './src/index.js',\n  output: {\n    filename: '[name].[contenthash].js',\n    path: path.resolve(__dirname, 'dist'),\n    clean: true, // Clean the dist folder before each build\n  },\n  mode: 'production', // Enables tree shaking, minification, and other production optimizations\n  optimization: {\n    minimize: true, // Explicitly enable minimization\n    minimizer: [\n      new TerserPlugin({ // Configure TerserPlugin for JS minification\n        terserOptions: {\n          compress: {\n            drop_console: true, // Drop console.log statements in production\n          },\n        },\n      }),\n      // new CssMinimizerPlugin(), // Add for CSS minification if you have CSS in your bundles\n    ],\n    splitChunks: {\n      chunks: 'all', // Apply splitting to all chunks (initial and async)\n      minSize: 20000, // Minimum size of a chunk before it's considered for splitting\n      maxInitialRequests: 20, // Max requests for initial load (to prevent too many small chunks)\n      maxAsyncRequests: 20,   // Max requests for on-demand chunks\n      cacheGroups: {\n        vendor: {\n          test: /[\\\\/]node_modules[\\\\/]/,\n          name: 'vendors',\n          chunks: 'all',\n        },\n        common: {\n          minChunks: 2, // Modules shared by at least 2 chunks\n          priority: -10,\n          reuseExistingChunk: true,\n        },\n      },\n    },\n  },\n  // Add other necessary loaders (e.g., babel-loader for React/ES6+)\n  module: {\n    rules: [\n      {\n        test: /\\.(js|jsx)$/,\n        exclude: /node_modules/,\n        use: {\n          loader: 'babel-loader',\n          options: {\n            presets: ['@babel/preset-env', '@babel/preset-react'],\n          },\n        },\n      },\n    ],\n  },\n};\n```",
+          "options": [],
+          "analysisPoints": [
+            "Correctly setting `mode` to 'production'.",
+            "Implementing `TerserPlugin` for JavaScript minification.",
+            "Configuring `splitChunks` with `chunks: 'all'` and appropriate `cacheGroups`.",
+            "Understanding `contenthash` for better caching invalidation.",
+            "Adding `clean: true` for output management."
+          ],
+          "keyConcepts": [
+            "Webpack",
+            "Bundle Optimization",
+            "Minification",
+            "Tree Shaking",
+            "Code Splitting",
+            "TerserPlugin",
+            "Caching"
+          ],
+          "evaluationCriteria": [
+            "Correct Webpack configuration syntax",
+            "Effective application of optimization techniques",
+            "Completeness of solution for stated goals"
+          ],
+          "example": null,
+          "tags": [
+            "Webpack",
+            "Performance",
+            "Optimization",
+            "Coding"
+          ],
+          "prerequisites": [
+            "webpack_basics",
+            "bundle_size_optimization"
+          ],
+          "complexity": 8,
+          "interviewFrequency": 9,
+          "learningPath": "advanced"
+        },
+        {
+          "id": "question_image_opt_1",
+          "topic": "Image Optimization",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "What is the purpose of the `loading=\"lazy\"` attribute on an `<img>` tag?",
+          "answer": "The `loading=\"lazy\"` attribute enables native lazy loading for images, deferring the loading of off-screen images until they are about to enter the viewport, thus improving initial page load performance.",
+          "analysisPoints": [
+            "Purpose of lazy loading.",
+            "Impact on performance.",
+            "Mechanism (off-screen images)."
+          ],
+          "keyConcepts": [
+            "Lazy Loading",
+            "Image Optimization",
+            "Performance"
+          ],
+          "evaluationCriteria": [
+            "Recall of attribute functionality"
+          ],
+          "example": null,
+          "tags": [
+            "HTML",
+            "Images",
+            "Performance",
+            "Lazy Loading"
+          ],
+          "prerequisites": [
+            "html_basics"
+          ],
+          "complexity": 3,
+          "interviewFrequency": 7,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_image_opt_2",
+          "topic": "Image Optimization",
+          "level": "medium",
+          "type": "mcq",
+          "question": "Which of the following HTML structures effectively leverages modern image formats with a fallback for older browsers?",
+          "answer": "Option A",
+          "options": [
+            "Option A: \n```html\n<picture>\n  <source type=\"image/webp\" srcset=\"image.webp\">\n  <img src=\"image.jpg\" alt=\"Optimized image\">\n</picture>\n```",
+            "Option B: \n```html\n<img src=\"image.webp\" alt=\"Optimized image\">\n<img src=\"image.jpg\" alt=\"Fallback image\">\n```",
+            "Option C: \n```html\n<source type=\"image/webp\" srcset=\"image.webp\">\n<img src=\"image.jpg\" alt=\"Optimized image\">\n```",
+            "Option D: \n```html\n<picture src=\"image.webp\" fallback=\"image.jpg\" alt=\"Optimized image\"></picture>\n```"
+          ],
+          "analysisPoints": [
+            "Correct use of the `<picture>` element for multiple sources.",
+            "Understanding the role of `<source>` tags with `type` and `srcset`.",
+            "Recognizing the `<img>` tag as the final fallback within `<picture>`."
+          ],
+          "keyConcepts": [
+            "Picture Element",
+            "Image Formats",
+            "WebP",
+            "HTML5",
+            "Responsive Images"
+          ],
+          "evaluationCriteria": [
+            "Syntactic correctness of HTML for responsive images",
+            "Understanding of browser fallback behavior"
+          ],
+          "example": "Option A correctly uses the `<picture>` element. The browser will check `source` tags in order and use the first one it supports (e.g., WebP). If no `source` is supported, it falls back to the `<img>` tag. This ensures that modern browsers get the optimized WebP format, while older browsers or those not supporting WebP still display the JPEG image.",
+          "tags": [
+            "HTML",
+            "Images",
+            "WebP",
+            "Optimization",
+            "MCQ"
+          ],
+          "prerequisites": [
+            "html_basics"
+          ],
+          "complexity": 6,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_image_opt_3",
+          "topic": "Image Optimization",
+          "level": "hard",
+          "type": "open",
+          "question": "You are tasked with optimizing image delivery for a highly visual e-commerce website. Describe a comprehensive strategy for image optimization, considering different device types, network conditions, and content management. Include specific HTML attributes, image formats, and any other relevant technologies.",
+          "answer": "A comprehensive image optimization strategy for an e-commerce website should cover the entire image lifecycle, from upload to delivery:\n\n1.  **Image Formats**: \n    *   **Modern Formats**: Prioritize `WebP` and `AVIF` for all primary images (product photos, banners) due to their superior compression and quality. Use the `<picture>` element with multiple `<source>` tags to provide fallbacks (`image/jpeg`, `image/png`) for browsers that don't support these newer formats.\n    *   **Vector Graphics**: Use `SVG` for logos, icons, and simple illustrations as they are resolution-independent and typically very small in file size.\n\n2.  **Responsive Images**: \n    *   Use `srcset` with `w` descriptors to provide multiple versions of an image at different widths (e.g., `image-400w.jpg`, `image-800w.jpg`, `image-1200w.jpg`).\n    *   Combine with `sizes` attribute to inform the browser about the rendered size of the image at various viewport widths (e.g., `sizes=\"(max-width: 600px) 100vw, (max-width: 1200px) 50vw, 800px\"`). This allows the browser to fetch the most appropriately sized image for the user's device and screen.\n\n3.  **Lazy Loading**: \n    *   Implement `loading=\"lazy\"` for all images that are 'below the fold' (not immediately visible on page load). This defers the download of these images until the user scrolls near them, significantly improving initial page load time and FCP/LCP.\n    *   Consider using Intersection Observer API for custom lazy loading solutions if native lazy loading is not sufficient or for non-image content.\n\n4.  **Image Compression**: \n    *   Apply aggressive but visually lossless compression to all images during the build process or upon upload. Use tools like `TinyPNG`, `ImageOptim`, or build-time plugins (`imagemin-webpack-plugin`).\n    *   Strip metadata (EXIF data) from images.\n\n5.  **Content Delivery Network (CDN)**: \n    *   Serve all images via a CDN. CDNs store copies of your images on servers geographically distributed around the world, delivering them from the closest server to the user, reducing latency.\n    *   Many CDNs offer built-in image optimization features (resizing, format conversion, compression) on the fly.\n\n6.  **Server-Side Optimizations**: \n    *   Ensure the server sends appropriate `Cache-Control` headers for images (`max-age`, `immutable`) to maximize browser caching.\n    *   Implement `ETag` or `Last-Modified` headers for efficient revalidation.\n    *   Enable Gzip or Brotli compression for image types that benefit from it (e.g., SVGs, but not already compressed formats like JPEG/WebP).\n\n7.  **Content Management System (CMS) / Image Service Integration**: \n    *   If using a CMS, integrate with an image optimization service (e.g., Cloudinary, Imgix, Cloudflare Images) that can automate many of these steps: responsive variants, format conversion, compression, and CDN delivery, often via URL parameters.",
+          "analysisPoints": [
+            "Comprehensive coverage of image optimization techniques.",
+            "Ability to integrate multiple technologies and concepts.",
+            "Understanding of the full image lifecycle (from upload to delivery).",
+            "Consideration of different user scenarios (device, network)."
+          ],
+          "keyConcepts": [
+            "Image Optimization",
+            "Responsive Images",
+            "Lazy Loading",
+            "WebP",
+            "Picture Element",
+            "CDN",
+            "HTTP Caching",
+            "Compression"
+          ],
+          "evaluationCriteria": [
+            "Depth and breadth of strategy",
+            "Practical relevance",
+            "Clarity of explanation"
+          ],
+          "example": null,
+          "tags": [
+            "Images",
+            "Performance",
+            "HTML",
+            "Advanced",
+            "Architecture"
+          ],
+          "prerequisites": [
+            "html_basics",
+            "css_media_queries",
+            "http_basics"
+          ],
+          "complexity": 9,
+          "interviewFrequency": 9,
+          "learningPath": "expert"
+        },
+        {
+          "id": "question_image_opt_4",
+          "topic": "Image Optimization",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "When using `srcset` and `sizes` attributes for responsive images, what does the `w` descriptor in `srcset` (e.g., `image.jpg 1000w`) indicate?",
+          "answer": "The `w` descriptor indicates the intrinsic width of the image file in pixels (e.g., `1000w` means the image file is 1000 pixels wide).",
+          "analysisPoints": [
+            "Recall of `srcset` descriptor meaning."
+          ],
+          "keyConcepts": [
+            "srcset",
+            "Responsive Images",
+            "HTML"
+          ],
+          "evaluationCriteria": [
+            "Recall of HTML attribute details"
+          ],
+          "example": null,
+          "tags": [
+            "HTML",
+            "Images",
+            "Responsive Design"
+          ],
+          "prerequisites": [
+            "html_basics"
+          ],
+          "complexity": 3,
+          "interviewFrequency": 6,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_image_opt_5",
+          "topic": "Image Optimization",
+          "level": "medium",
+          "type": "code",
+          "question": "Create an `<img>` tag that displays `product_small.jpg` by default, but should load `product_medium.jpg` (600px wide) when the viewport is at least 600px wide, and `product_large.jpg` (1200px wide) when the viewport is at least 1200px wide. The image should take up 100% of the viewport width on small screens (up to 599px), 50% on medium screens (600px to 1199px), and a fixed 800px on large screens (1200px and above). Also, ensure it's lazy-loaded and has appropriate alt text.",
+          "answer": "```html\n<img \n  src=\"product_small.jpg\" \n  srcset=\"product_small.jpg 300w, product_medium.jpg 600w, product_large.jpg 1200w\" \n  sizes=\"(max-width: 599px) 100vw, (max-width: 1199px) 50vw, 800px\" \n  alt=\"A detailed image of the product for sale\"\n  loading=\"lazy\"\n>\n```",
+          "options": [],
+          "analysisPoints": [
+            "Correctly using `src` for fallback.",
+            "Accurately mapping image files to their widths in `srcset`.",
+            "Precisely defining `sizes` media queries and corresponding display widths.",
+            "Including `loading='lazy'` and `alt` attributes."
+          ],
+          "keyConcepts": [
+            "Responsive Images",
+            "srcset",
+            "sizes",
+            "Lazy Loading",
+            "HTML"
+          ],
+          "evaluationCriteria": [
+            "Syntactic correctness",
+            "Logical application of responsive image attributes",
+            "Completeness"
+          ],
+          "example": null,
+          "tags": [
+            "HTML",
+            "Images",
+            "Responsive Design",
+            "Coding"
+          ],
+          "prerequisites": [
+            "html_basics",
+            "css_media_queries"
+          ],
+          "complexity": 7,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_image_opt_6",
+          "topic": "Image Optimization",
+          "level": "medium",
+          "type": "open",
+          "question": "What is the difference between the `srcset` and `sizes` attributes on an `<img>` tag?",
+          "answer": "-   **`srcset`**: This attribute provides a list of image source candidates for the browser to choose from. Each candidate specifies an image URL followed by either its intrinsic width in pixels (e.g., `image.jpg 1000w`) or its pixel density (e.g., `image@2x.jpg 2x`). The `srcset` tells the browser *what images are available* and their respective resolutions.\n\n-   **`sizes`**: This attribute defines how wide the image will be displayed on the page at different viewport sizes, using media conditions (similar to CSS media queries) and corresponding width values (e.g., `(max-width: 600px) 100vw, 50vw`). The `sizes` attribute tells the browser *how much space the image will take up* on the layout.\n\n**How they work together**: The browser uses the information from `sizes` to determine the effective display width of the image for the current viewport. Then, it uses this calculated width, along with the device's pixel density, to select the most appropriate image URL from the `srcset` list. Without `sizes`, the browser assumes the image will take up 100% of the available width, and it might not pick the most efficient image from `srcset` for complex layouts.",
+          "analysisPoints": [
+            "Clear differentiation between `srcset` and `sizes`.",
+            "Explanation of what each attribute conveys to the browser.",
+            "Description of their combined functionality in responsive image selection."
+          ],
+          "keyConcepts": [
+            "srcset",
+            "sizes",
+            "Responsive Images",
+            "HTML"
+          ],
+          "evaluationCriteria": [
+            "Accuracy of definitions",
+            "Clarity of relationship between attributes"
+          ],
+          "example": null,
+          "tags": [
+            "HTML",
+            "Images",
+            "Responsive Design",
+            "Theory"
+          ],
+          "prerequisites": [
+            "html_basics",
+            "css_media_queries"
+          ],
+          "complexity": 6,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_critical_css_1",
+          "topic": "Critical CSS",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "What is 'Critical CSS'?",
+          "answer": "Critical CSS is the minimum amount of CSS required to render the 'above-the-fold' content (visible without scrolling) of a webpage, designed to improve initial loading performance.",
+          "analysisPoints": [
+            "Definition of Critical CSS.",
+            "Concept of 'above-the-fold'.",
+            "Primary goal (performance)."
+          ],
+          "keyConcepts": [
+            "Critical CSS",
+            "Performance",
+            "FCP",
+            "LCP"
+          ],
+          "evaluationCriteria": [
+            "Recall of definition and purpose"
+          ],
+          "example": null,
+          "tags": [
+            "CSS",
+            "Performance",
+            "FCP"
+          ],
+          "prerequisites": [
+            "css_basics"
+          ],
+          "complexity": 3,
+          "interviewFrequency": 7,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_critical_css_2",
+          "topic": "Critical CSS",
+          "level": "medium",
+          "type": "mcq",
+          "question": "Consider the following HTML `<head>` section:\n\n```html\n<head>\n  <style>\n    /* Critical styles */\n    body { font-family: sans-serif; }\n    header { background: #f0f0f0; }\n  </style>\n  \n  <link rel=\"preload\" href=\"styles.css\" as=\"style\" onload=\"this.onload=null;this.rel='stylesheet'\">\n  <noscript><link rel=\"stylesheet\" href=\"styles.css\"></noscript>\n</head>\n```\n\nWhat is the main benefit of loading `styles.css` using `rel=\"preload\"` and the `onload` trick, rather than just `rel=\"stylesheet\"`?",
+          "answer": "It allows the browser to download `styles.css` without blocking the initial rendering of the page.",
+          "options": [
+            "It forces the browser to cache `styles.css` indefinitely.",
+            "It prevents `styles.css` from ever being downloaded.",
+            "It allows the browser to download `styles.css` without blocking the initial rendering of the page.",
+            "It ensures `styles.css` is only loaded if JavaScript is disabled."
+          ],
+          "analysisPoints": [
+            "Understanding of render-blocking resources.",
+            "Mechanism of `preload` and `onload` trick.",
+            "Impact on FCP."
+          ],
+          "keyConcepts": [
+            "Critical CSS",
+            "Render Blocking",
+            "Preload",
+            "Performance",
+            "FCP"
+          ],
+          "evaluationCriteria": [
+            "Knowledge of asynchronous CSS loading",
+            "Understanding of its performance implications"
+          ],
+          "example": "When a stylesheet is linked with `rel=\"stylesheet\"`, the browser typically pauses rendering until the CSS file is downloaded and parsed. Using `rel=\"preload\"` with `as=\"style\"` tells the browser to fetch the CSS file with high priority but without blocking the initial render. The `onload` event then switches `rel` to `stylesheet` once the file is loaded, applying the styles. This ensures the browser can paint the critical content faster, leading to a better First Contentful Paint.",
+          "tags": [
+            "HTML",
+            "CSS",
+            "Performance",
+            "Preload",
+            "MCQ"
+          ],
+          "prerequisites": [
+            "html_basics",
+            "css_basics"
+          ],
+          "complexity": 6,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_critical_css_3",
+          "topic": "Critical CSS",
+          "level": "hard",
+          "type": "open",
+          "question": "Describe the process of extracting and implementing critical CSS for a web application. Discuss the tools and considerations involved, and how it contributes to Core Web Vitals.",
+          "answer": "The process of extracting and implementing critical CSS involves identifying, inlining, and asynchronously loading styles to optimize rendering:\n\n**Process:**\n1.  **Identify Above-the-Fold Content**: Determine which HTML elements and their corresponding styles are essential for the initial view of the page without scrolling.\n2.  **Extract Critical CSS**: Use specialized tools to analyze the rendered DOM and extract only the CSS rules that apply to the above-the-fold content. These tools typically simulate various viewport sizes.\n3.  **Inline Critical CSS**: Embed the extracted critical CSS directly within a `<style>` block in the `<head>` of the HTML document. This makes the styles available immediately without an extra network request, allowing the browser to render the critical content as soon as the HTML is parsed.\n4.  **Asynchronously Load Remaining CSS**: Load the full (non-critical) stylesheet asynchronously. A common technique is to use `<link rel=\"preload\" href=\"styles.css\" as=\"style\" onload=\"this.onload=null;this.rel='stylesheet'\">` combined with a `<noscript>` fallback. This fetches the main CSS in the background, without blocking initial rendering, and applies it once downloaded.\n\n**Tools Involved:**\n*   **Critical CSS Generators**: Libraries like `critical` (Node.js), `penthouse`, or online services. These tools often integrate with build pipelines (e.g., Webpack plugins like `critical-css-webpack-plugin`).\n*   **Headless Browsers**: Tools use headless Chrome (e.g., Puppeteer) to render the page and identify visible styles.\n*   **Build Tools**: Webpack, Gulp, Grunt for automating the extraction and inlining process.\n\n**Considerations:**\n*   **Automation**: Manual extraction is tedious and error-prone; automation is crucial, especially for dynamic content.\n*   **Dynamic Content/User Interaction**: Critical CSS might vary for different pages or states. A robust solution might need to generate critical CSS per route or for common layouts.\n*   **Maintaining Freshness**: Critical CSS needs to be regenerated whenever styles or page layouts change.\n*   **Cache Invalidation**: Inlining CSS means it's part of the HTML, so HTML caching needs to be considered. If critical CSS changes frequently, it can affect HTML caching efficiency.\n*   **HTML Size**: Inlining increases the size of the initial HTML payload. It's a trade-off; the benefit of immediate rendering usually outweighs the increased HTML size for critical styles.\n\n**Contribution to Core Web Vitals:**\n*   **First Contentful Paint (FCP)**: Directly improved. By inlining critical CSS, the browser can render the first pixel of content on the screen much faster, as it doesn't have to wait for external CSS files to be fetched and parsed.\n*   **Largest Contentful Paint (LCP)**: Directly improved. Critical CSS ensures that the largest visual element above the fold is styled and rendered quickly, contributing to a lower LCP score.\n*   **Cumulative Layout Shift (CLS)**: Indirectly improved. If the non-critical CSS loads later and causes layout shifts (e.g., unstyled content flashes and then reflows), CLS can be negatively impacted. However, by loading *all* CSS (critical and non-critical) more efficiently, the potential for layout shifts is reduced, as elements are styled sooner.",
+          "analysisPoints": [
+            "Detailed explanation of the critical CSS workflow.",
+            "Identification of relevant tools and technologies.",
+            "Discussion of practical challenges and considerations.",
+            "Clear articulation of impact on Core Web Vitals (FCP, LCP, CLS)."
+          ],
+          "keyConcepts": [
+            "Critical CSS",
+            "Core Web Vitals",
+            "FCP",
+            "LCP",
+            "Render Blocking",
+            "Automation",
+            "Performance Optimization"
+          ],
+          "evaluationCriteria": [
+            "Comprehensive process description",
+            "Tool knowledge",
+            "Understanding of performance metrics"
+          ],
+          "example": null,
+          "tags": [
+            "CSS",
+            "Performance",
+            "Core Web Vitals",
+            "Advanced",
+            "Architecture"
+          ],
+          "prerequisites": [
+            "html_basics",
+            "css_basics",
+            "web_performance_metrics"
+          ],
+          "complexity": 9,
+          "interviewFrequency": 9,
+          "learningPath": "expert"
+        },
+        {
+          "id": "question_critical_css_4",
+          "topic": "Critical CSS",
+          "level": "medium",
+          "type": "code",
+          "question": "You have an external stylesheet `main.css` that contains all your website's styles. Refactor the HTML `<head>` section to ensure that only the styles for the header (e.g., `h1` and `nav` elements) are immediately available for rendering, while the rest of `main.css` loads asynchronously. Assume critical styles for header are:\n\n```css\nh1 { color: #333; font-size: 2em; }\nnav ul { list-style: none; padding: 0; display: flex; }\nnav li { margin-right: 15px; }\n```\n",
+          "answer": "```html\n<head>\n  <meta charset=\"UTF-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n  <title>Optimized Page</title>\n\n  <style>\n    /* Critical CSS for above-the-fold header content */\n    h1 { color: #333; font-size: 2em; }\n    nav ul { list-style: none; padding: 0; display: flex; }\n    nav li { margin-right: 15px; }\n  </style>\n  \n  <!-- Asynchronously load the full stylesheet -->\n  <link rel=\"preload\" href=\"main.css\" as=\"style\" onload=\"this.onload=null;this.rel='stylesheet'\">\n  <noscript><link rel=\"stylesheet\" href=\"main.css\"></noscript>\n</head>\n<body>\n  <header>\n    <h1>My Website Title</h1>\n    <nav>\n      <ul>\n        <li>Home</li>\n        <li>About</li>\n        <li>Contact</li>\n      </ul>\n    </nav>\n  </header>\n  <main>\n    <!-- Other page content -->\n  </main>\n</body>\n```",
+          "options": [],
+          "analysisPoints": [
+            "Correctly identifying and inlining critical CSS within a `<style>` tag.",
+            "Using `rel='preload'` with `as='style'` for asynchronous loading.",
+            "Implementing the `onload` trick to activate the stylesheet.",
+            "Providing a `<noscript>` fallback."
+          ],
+          "keyConcepts": [
+            "Critical CSS",
+            "Inlining CSS",
+            "Asynchronous Loading",
+            "Preload",
+            "HTML"
+          ],
+          "evaluationCriteria": [
+            "Correct HTML structure and attributes",
+            "Logical separation of critical and non-critical CSS"
+          ],
+          "example": null,
+          "tags": [
+            "HTML",
+            "CSS",
+            "Performance",
+            "Coding"
+          ],
+          "prerequisites": [
+            "html_basics",
+            "css_basics"
+          ],
+          "complexity": 7,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_critical_css_5",
+          "topic": "Critical CSS",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "What two Core Web Vitals metrics are most directly improved by implementing Critical CSS?",
+          "answer": "First Contentful Paint (FCP) and Largest Contentful Paint (LCP).",
+          "analysisPoints": [
+            "Recall of relevant Core Web Vitals."
+          ],
+          "keyConcepts": [
+            "FCP",
+            "LCP",
+            "Core Web Vitals",
+            "Critical CSS"
+          ],
+          "evaluationCriteria": [
+            "Recall of performance metrics"
+          ],
+          "example": null,
+          "tags": [
+            "Performance",
+            "Core Web Vitals",
+            "FCP",
+            "LCP"
+          ],
+          "prerequisites": [
+            "web_performance_metrics"
+          ],
+          "complexity": 4,
+          "interviewFrequency": 7,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_caching_1",
+          "topic": "Caching Strategies",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "What does the HTTP `Cache-Control: no-store` header mean?",
+          "answer": "It means that the response should not be stored in any cache, neither by the browser nor by any intermediate proxies. It ensures the content is always fetched from the origin server.",
+          "analysisPoints": [
+            "Definition of `no-store`.",
+            "Impact on caching behavior.",
+            "Scope (browser and proxies)."
+          ],
+          "keyConcepts": [
+            "HTTP Caching",
+            "Cache-Control",
+            "no-store"
+          ],
+          "evaluationCriteria": [
+            "Recall of specific HTTP header directive"
+          ],
+          "example": null,
+          "tags": [
+            "HTTP",
+            "Caching",
+            "Performance"
+          ],
+          "prerequisites": [
+            "http_basics"
+          ],
+          "complexity": 3,
+          "interviewFrequency": 7,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_caching_2",
+          "topic": "Caching Strategies",
+          "level": "medium",
+          "type": "mcq",
+          "question": "You have a JavaScript bundle (`bundle.abc123.js`) where `abc123` is a content hash that changes whenever the file content changes. Which `Cache-Control` header combination would be most appropriate to maximize caching efficiency for this asset, assuming you want it cached for one year and avoid revalidation for that period?",
+          "answer": "Cache-Control: public, max-age=31536000, immutable",
+          "options": [
+            "Cache-Control: no-cache, max-age=31536000",
+            "Cache-Control: no-store",
+            "Cache-Control: public, max-age=31536000, immutable",
+            "Cache-Control: private, max-age=31536000"
+          ],
+          "analysisPoints": [
+            "Understanding of `max-age` for expiry duration.",
+            "Understanding `public` for shared caches.",
+            "Crucial role of `immutable` with content-hashed URLs for avoiding revalidation.",
+            "Distinguishing `no-cache` and `no-store` from long-term caching."
+          ],
+          "keyConcepts": [
+            "HTTP Caching",
+            "Cache-Control",
+            "max-age",
+            "immutable",
+            "Content Hashing",
+            "Performance"
+          ],
+          "evaluationCriteria": [
+            "Application of caching headers for specific use cases",
+            "Understanding of content-hashed URLs benefits"
+          ],
+          "example": "`public` allows the asset to be cached by any cache. `max-age=31536000` sets the cache duration to one year. `immutable` is key here: because the filename includes a content hash, the file's content will never change. `immutable` tells the browser that once this file is cached, it can be used for the entire `max-age` period without revalidation, even on subsequent page loads or browser restarts, drastically reducing network requests.",
+          "tags": [
+            "HTTP",
+            "Caching",
+            "Performance",
+            "MCQ"
+          ],
+          "prerequisites": [
+            "http_basics"
+          ],
+          "complexity": 7,
+          "interviewFrequency": 9,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_caching_3",
+          "topic": "Caching Strategies",
+          "level": "hard",
+          "type": "open",
+          "question": "Compare and contrast HTTP caching (`Cache-Control` headers) with Service Worker caching. Discuss scenarios where each is preferred or how they can complement each other.",
+          "answer": "**HTTP Caching (`Cache-Control` Headers)**:\n*   **Mechanism**: Controlled by server-sent HTTP headers (e.g., `Cache-Control`, `Expires`, `ETag`, `Last-Modified`). The browser's built-in HTTP cache stores resources locally based on these directives.\n*   **Control**: Primarily controlled by the server. Clients have limited control over *how* things are cached, only whether to use a cached version or revalidate.\n*   **Flexibility**: Less flexible. Directives are 'all or nothing' for a given resource. Cannot intercept requests or implement complex routing logic.\n*   **Scope**: Applies to individual HTTP responses. Cached items are typically cleared by browser cache clearing, or when `max-age` expires, or when revalidation fails.\n*   **Offline Support**: No inherent offline support. If a cached resource expires or is not available and there's no network, the resource cannot be served.\n*   **Ease of Use**: Relatively simple to implement by configuring web servers or application frameworks.\n\n**Service Worker Caching (Cache API)**:\n*   **Mechanism**: A JavaScript file that runs in the background, acting as a programmable network proxy. It intercepts requests via the `fetch` event and uses the `Cache` API to store and retrieve responses.\n*   **Control**: Fully controlled by the client-side JavaScript. Developers can programmatically decide which requests to cache, when to cache them, and what strategy to use (e.g., Cache First, Network First, Stale While Revalidate).\n*   **Flexibility**: Highly flexible. Can intercept any network request originating from the client, implement complex caching strategies, handle network failures, and even serve synthetic responses.\n*   **Scope**: Manages its own `CacheStorage`. Cached items persist even after the browser tab is closed and are independent of the browser's HTTP cache. Allows fine-grained control over cache invalidation.\n*   **Offline Support**: Core feature. Can serve content even when the network is unavailable, enabling Progressive Web Apps (PWAs).\n*   **Ease of Use**: More complex to implement due to the asynchronous and event-driven nature of Service Workers, requiring careful error handling and cache management logic.\n\n**Scenarios and Complementarity**: \n*   **HTTP Caching Preferred**: \n    *   For **static assets with content-hashed filenames** (e.g., `bundle.abc.js`, `style.xyz.css`): `Cache-Control: public, max-age=31536000, immutable` is ideal. This is highly efficient because the browser knows the file will never change and won't even revalidate it for a year, drastically reducing server load and network traffic for these unchanging resources.\n    *   For **small, frequently updated assets that need quick invalidation**: `Cache-Control: no-cache` with `ETag` or `Last-Modified` allows revalidation without re-downloading if content hasn't changed.\n    *   When **offline support or complex caching logic is not required**.\n\n*   **Service Worker Caching Preferred**: \n    *   For **offline capabilities (PWAs)**: Essential for providing a reliable offline experience.\n    *   For **custom caching strategies**: e.g., 'Stale While Revalidate' for dynamic API data, ensuring fast display while also updating content in the background.\n    *   For **app shell caching**: Pre-caching core UI assets during the `install` phase to ensure immediate load on subsequent visits.\n    *   For **complex routing/resource handling**: When you need to intercept specific requests, fallback to a cached version on network failure, or serve different content based on network conditions.\n\n*   **Complementary Use**: \n    *   HTTP caching should always be the **first line of defense** for static assets. It's handled by the browser and often optimized by CDNs. This offloads a lot of the work.\n    *   Service Workers then act as the **second layer of caching**, providing a programmatic, more resilient, and offline-capable caching layer for everything else. They can intercept requests that bypass HTTP cache (e.g., `no-cache` requests or expired content) and apply custom logic. For instance, a Service Worker could implement 'stale-while-validate' for an API response that *would not* be cached by HTTP headers (due to `no-cache`), but is desired to be served quickly from SW cache while refreshing in background.",
+          "analysisPoints": [
+            "In-depth understanding of both caching mechanisms.",
+            "Clear articulation of strengths and weaknesses of each.",
+            "Specific examples of use cases where one is preferred over the other.",
+            "Explanation of how they work synergistically."
+          ],
+          "keyConcepts": [
+            "HTTP Caching",
+            "Service Worker",
+            "Cache-Control",
+            "Cache API",
+            "Offline",
+            "PWA",
+            "Performance",
+            "Network"
+          ],
+          "evaluationCriteria": [
+            "Comprehensive comparison",
+            "Contextual application of knowledge",
+            "Strategic understanding"
+          ],
+          "example": null,
+          "tags": [
+            "Caching",
+            "HTTP",
+            "Service Worker",
+            "Advanced",
+            "Architecture"
+          ],
+          "prerequisites": [
+            "http_basics",
+            "javascript_async_programming"
+          ],
+          "complexity": 9,
+          "interviewFrequency": 10,
+          "learningPath": "expert"
+        },
+        {
+          "id": "question_caching_4",
+          "topic": "Caching Strategies",
+          "level": "medium",
+          "type": "code",
+          "question": "Implement a simple Service Worker `fetch` event listener that uses a 'Network First, then Cache' strategy. If the network request fails or returns an invalid response (not 200 OK), it should attempt to serve the response from the cache. Ensure the cache is updated with the fresh network response if successful.\n\n```javascript\n// service-worker.js\nconst CACHE_NAME = 'dynamic-v1';\n\nself.addEventListener('fetch', event => {\n  // Implement network-first strategy here\n});\n```",
+          "answer": "```javascript\n// service-worker.js\nconst CACHE_NAME = 'dynamic-v1';\n\nself.addEventListener('fetch', event => {\n  event.respondWith(\n    fetch(event.request) // Try fetching from the network first\n      .then(response => {\n        // Check if we received a valid response (e.g., 200 OK)\n        if (!response || response.status !== 200 || response.type !== 'basic') {\n          // If network response is invalid, try cache (or throw error/return network error)\n          return caches.match(event.request); \n        }\n\n        // If valid network response, clone it to put in cache and return it\n        const responseToCache = response.clone();\n        caches.open(CACHE_NAME)\n          .then(cache => {\n            cache.put(event.request, responseToCache); // Update cache with fresh response\n          });\n\n        return response; // Return the network response\n      })\n      .catch(() => {\n        // Network request failed (e.g., offline), serve from cache\n        console.log('Network request failed, serving from cache:', event.request.url);\n        return caches.match(event.request);\n      })\n  );\n});\n\n// You would typically also have 'install' and 'activate' events\n// to pre-cache static assets and clean up old caches.\n```",
+          "options": [],
+          "analysisPoints": [
+            "Correctly using `fetch` first in the promise chain.",
+            "Handling network errors gracefully by falling back to cache.",
+            "Cloning the network response before caching it.",
+            "Updating the cache with the fresh network response."
+          ],
+          "keyConcepts": [
+            "Service Worker",
+            "Caching Strategy",
+            "Network First",
+            "Fetch API",
+            "Cache API",
+            "Offline"
+          ],
+          "evaluationCriteria": [
+            "Correct implementation of caching strategy",
+            "Error handling for network failures",
+            "Efficient use of Cache API"
+          ],
+          "example": null,
+          "tags": [
+            "Service Worker",
+            "Caching",
+            "Coding",
+            "PWA"
+          ],
+          "prerequisites": [
+            "javascript_promises",
+            "fetch_api",
+            "service_worker_basics"
+          ],
+          "complexity": 8,
+          "interviewFrequency": 9,
+          "learningPath": "advanced"
+        },
+        {
+          "id": "question_caching_5",
+          "topic": "Caching Strategies",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "Name two common HTTP caching headers.",
+          "answer": "`Cache-Control` and `Expires` (or `ETag`, `Last-Modified`).",
+          "analysisPoints": [
+            "Recall of common HTTP caching headers."
+          ],
+          "keyConcepts": [
+            "HTTP Caching",
+            "Cache-Control",
+            "Expires",
+            "ETag",
+            "Last-Modified"
+          ],
+          "evaluationCriteria": [
+            "Recall of specific terminology"
+          ],
+          "example": null,
+          "tags": [
+            "HTTP",
+            "Caching"
+          ],
+          "prerequisites": [
+            "http_basics"
+          ],
+          "complexity": 2,
+          "interviewFrequency": 6,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_caching_6",
+          "topic": "Caching Strategies",
+          "level": "medium",
+          "type": "open",
+          "question": "Explain the 'Stale-While-Revalidate' caching strategy in the context of Service Workers. When would you choose this strategy?",
+          "answer": "**Stale-While-Revalidate** is a Service Worker caching strategy where:\n1.  The Service Worker immediately returns a cached response if one is available for the requested resource (providing a fast user experience).\n2.  In parallel, it makes a network request to fetch an updated version of the resource.\n3.  Once the network request completes, the Service Worker updates its cache with the fresh response for future requests.\n\n**When to choose this strategy**: \n*   This strategy is ideal for content that needs to be **displayed quickly but also needs to be reasonably fresh**. \n*   It's a good choice for **frequently accessed content that doesn't need to be absolutely real-time**, such as: \n    *   News feed articles (showing slightly older content immediately is better than waiting).\n    *   Social media feeds.\n    *   User profiles.\n    *   Product listings (where a few minutes' staleness is acceptable).\n    *   Any content where displaying *something* quickly is more important than always displaying the *absolute latest* data, but where eventually updating to the latest data is still desired.",
+          "analysisPoints": [
+            "Clear explanation of the 'Stale-While-Revalidate' mechanism.",
+            "Identification of its primary benefit (speed + freshness).",
+            "Providing relevant use cases/scenarios."
+          ],
+          "keyConcepts": [
+            "Service Worker",
+            "Caching Strategy",
+            "Stale-While-Revalidate",
+            "Performance",
+            "User Experience"
+          ],
+          "evaluationCriteria": [
+            "Understanding of caching strategy",
+            "Ability to apply to real-world scenarios"
+          ],
+          "example": null,
+          "tags": [
+            "Service Worker",
+            "Caching",
+            "Performance"
+          ],
+          "prerequisites": [
+            "service_worker_basics"
+          ],
+          "complexity": 7,
+          "interviewFrequency": 8,
+          "learningPath": "advanced"
+        },
+        {
+          "id": "question_caching_7",
+          "topic": "Caching Strategies",
+          "level": "hard",
+          "type": "code",
+          "question": "You need to register a Service Worker for your application. The Service Worker (`sw.js`) should pre-cache the `index.html` and `app.js` files during the `install` phase. On subsequent `fetch` requests, it should always try to serve from the cache first; if not found in cache, it should then go to the network. Implement the registration code and the Service Worker logic.\n\n**Main application (e.g., `index.js`):**\n```javascript\n// Your main application entry point\n// Register the service worker here\n```\n\n**Service Worker (`sw.js`):**\n```javascript\n// Service Worker logic\nconst CACHE_NAME = 'my-app-cache-v1';\nconst ASSETS_TO_CACHE = [\n  '/index.html',\n  '/app.js',\n  // Add other static assets here\n];\n\n// Add event listeners for install and fetch\n```",
+          "answer": "**Main application (`index.js` or equivalent):**\n```javascript\n// index.js (or equivalent application entry point)\nif ('serviceWorker' in navigator) {\n  window.addEventListener('load', () => {\n    navigator.serviceWorker.register('/sw.js') // Register the service worker\n      .then(registration => {\n        console.log('Service Worker registered with scope:', registration.scope);\n      })\n      .catch(error => {\n        console.error('Service Worker registration failed:', error);\n      });\n  });\n}\n```\n\n**Service Worker (`sw.js`):**\n```javascript\n// sw.js\nconst CACHE_NAME = 'my-app-cache-v1';\nconst ASSETS_TO_CACHE = [\n  '/', // Often important for root path\n  '/index.html',\n  '/app.js'\n];\n\n// Install event: Pre-cache assets\nself.addEventListener('install', event => {\n  console.log('[Service Worker] Installing...');\n  event.waitUntil(\n    caches.open(CACHE_NAME)\n      .then(cache => {\n        console.log('[Service Worker] Pre-caching assets:', ASSETS_TO_CACHE);\n        return cache.addAll(ASSETS_TO_CACHE);\n      })\n      .catch(error => {\n        console.error('[Service Worker] Pre-caching failed:', error);\n      })\n  );\n});\n\n// Fetch event: Cache First, then Network strategy\nself.addEventListener('fetch', event => {\n  event.respondWith(\n    caches.match(event.request) // Try to find a match in the cache\n      .then(cachedResponse => {\n        if (cachedResponse) {\n          console.log('[Service Worker] Serving from cache:', event.request.url);\n          return cachedResponse;\n        }\n        // If not found in cache, go to network\n        console.log('[Service Worker] Fetching from network:', event.request.url);\n        return fetch(event.request) // Fetch from network\n          .then(networkResponse => {\n            // Check if response is valid before caching\n            if (!networkResponse || networkResponse.status !== 200 || networkResponse.type !== 'basic') {\n              return networkResponse;\n            }\n            // Clone the response because it's a stream and can only be consumed once\n            const responseToCache = networkResponse.clone();\n            caches.open(CACHE_NAME)\n              .then(cache => {\n                cache.put(event.request, responseToCache);\n              });\n            return networkResponse;\n          });\n      })\n      .catch(error => {\n        console.error('[Service Worker] Fetch failed, and no cache match:', error);\n        // You might want to return a fallback page/asset here\n      })\n  );\n});\n\n// Activate event (optional but good practice for cleanup)\nself.addEventListener('activate', event => {\n  console.log('[Service Worker] Activating...');\n  const cacheWhitelist = [CACHE_NAME];\n  event.waitUntil(\n    caches.keys().then(cacheNames => {\n      return Promise.all(\n        cacheNames.map(cacheName => {\n          if (cacheWhitelist.indexOf(cacheName) === -1) {\n            console.log('[Service Worker] Deleting old cache:', cacheName);\n            return caches.delete(cacheName);\n          }\n        })\n      );\n    })\n  );\n});\n```",
+          "options": [],
+          "analysisPoints": [
+            "Correct Service Worker registration using `navigator.serviceWorker.register`.",
+            "Implementing the `install` event to `caches.addAll` pre-defined assets.",
+            "Implementing the `fetch` event with a 'Cache First, then Network' strategy.",
+            "Handling response cloning for caching.",
+            "Including an `activate` event for cache management (cleanup)."
+          ],
+          "keyConcepts": [
+            "Service Worker",
+            "Registration",
+            "Cache API",
+            "Install Event",
+            "Fetch Event",
+            "Cache First Strategy",
+            "PWA"
+          ],
+          "evaluationCriteria": [
+            "Functional Service Worker implementation",
+            "Correct caching logic",
+            "Adherence to best practices"
+          ],
+          "example": null,
+          "tags": [
+            "Service Worker",
+            "Caching",
+            "Coding",
+            "PWA",
+            "Offline"
+          ],
+          "prerequisites": [
+            "javascript_promises",
+            "fetch_api"
+          ],
+          "complexity": 8,
+          "interviewFrequency": 9,
+          "learningPath": "advanced"
+        },
+        {
+          "id": "question_caching_8",
+          "topic": "Caching Strategies",
+          "level": "medium",
+          "type": "mcq",
+          "question": "Which of the following statements about HTTP `Cache-Control` header directives is FALSE?",
+          "answer": "`no-cache` means the browser should never store a copy of the resource.",
+          "options": [
+            "`max-age` specifies the maximum time a resource is considered fresh.",
+            "`public` allows the response to be cached by any cache.",
+            "`immutable` tells the browser that the resource will not change during its lifetime.",
+            "`no-cache` means the browser should never store a copy of the resource."
+          ],
+          "analysisPoints": [
+            "Precise understanding of each `Cache-Control` directive.",
+            "Common misconception about `no-cache` vs. `no-store`."
+          ],
+          "keyConcepts": [
+            "HTTP Caching",
+            "Cache-Control",
+            "no-cache",
+            "no-store",
+            "max-age",
+            "immutable"
+          ],
+          "evaluationCriteria": [
+            "Accurate recall of HTTP header directives"
+          ],
+          "example": "The statement '`no-cache` means the browser should never store a copy of the resource' is FALSE. `no-cache` means that the browser *can* store a copy, but it *must revalidate* that copy with the server before using it for subsequent requests. The directive that prevents any caching whatsoever is `no-store`.",
+          "tags": [
+            "HTTP",
+            "Caching",
+            "Performance",
+            "MCQ"
+          ],
+          "prerequisites": [
+            "http_basics"
+          ],
+          "complexity": 6,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_react_memoization_1",
+          "topic": "React Memoization",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "What is the primary goal of memoization in React?",
+          "answer": "To prevent unnecessary re-renders of components or re-calculations of expensive values/functions by caching results and returning them if inputs haven't changed.",
+          "analysisPoints": [
+            "Core purpose of memoization.",
+            "Mechanism (caching and input comparison).",
+            "Target (re-renders, re-calculations)."
+          ],
+          "keyConcepts": [
+            "Memoization",
+            "React",
+            "Performance Optimization"
+          ],
+          "evaluationCriteria": [
+            "Recall of fundamental concept"
+          ],
+          "example": null,
+          "tags": [
+            "React",
+            "Performance",
+            "Memoization"
+          ],
+          "prerequisites": [
+            "react_basics"
+          ],
+          "complexity": 3,
+          "interviewFrequency": 7,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_react_memoization_2",
+          "topic": "React Memoization",
+          "level": "medium",
+          "type": "mcq",
+          "question": "Consider the following React components:\n\n```jsx\nimport React, { useState } from 'react';\n\nconst DisplayCount = React.memo(({ count }) => {\n  console.log('DisplayCount rendered');\n  return <div>Count: {count}</div>;\n});\n\nconst Parent = () => {\n  const [value, setValue] = useState(0);\n  const [text, setText] = useState('');\n\n  return (\n    <div>\n      <input type=\"number\" value={value} onChange={e => setValue(Number(e.target.value))} />\n      <input type=\"text\" value={text} onChange={e => setText(e.target.value)} />\n      <DisplayCount count={value} />\n    </div>\n  );\n};\n```\n\nHow many times will 'DisplayCount rendered' be logged if the user types '123' into the *text* input field (starting from an empty input)?",
+          "answer": "1 time (initial render)",
+          "options": [
+            "1 time (initial render)",
+            "2 times (initial render + first character typed)",
+            "4 times (initial render + one for each character)",
+            "It will log indefinitely due to an infinite loop."
+          ],
+          "analysisPoints": [
+            "Understanding of `React.memo`'s shallow comparison.",
+            "Recognizing that `DisplayCount`'s `count` prop (which is `value`) does not change when `text` state changes.",
+            "Distinguishing between parent and child component re-renders."
+          ],
+          "keyConcepts": [
+            "React.memo",
+            "Re-renders",
+            "Props Comparison",
+            "Shallow Equality"
+          ],
+          "evaluationCriteria": [
+            "Ability to predict React rendering behavior with memoization"
+          ],
+          "example": "The `DisplayCount` component is wrapped with `React.memo`. This means it will only re-render if its `props` change. In this scenario, `DisplayCount` receives only one prop: `count`, which is tied to the `value` state. When the `text` input changes, the `Parent` component re-renders, but the `value` state (and thus the `count` prop passed to `DisplayCount`) remains unchanged. Therefore, `React.memo` prevents `DisplayCount` from re-rendering, and 'DisplayCount rendered' will only be logged during the initial mount.",
+          "tags": [
+            "React",
+            "Memoization",
+            "Performance",
+            "MCQ"
+          ],
+          "prerequisites": [
+            "react_memo",
+            "react_hooks_useState"
+          ],
+          "complexity": 7,
+          "interviewFrequency": 9,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_react_memoization_3",
+          "topic": "React Memoization",
+          "level": "hard",
+          "type": "open",
+          "question": "Explain the use cases for `useCallback` and `useMemo` in React. Provide examples of common pitfalls when using these hooks, particularly related to dependency arrays.",
+          "answer": "**`useCallback` (for Memoizing Functions)**:\n*   **Use Case**: Returns a memoized version of a callback function. It's primarily used when passing callbacks down to optimized child components (e.g., components wrapped with `React.memo`) that rely on reference equality to prevent unnecessary re-renders. If a parent component re-renders, JavaScript functions are re-created. This creates a new reference, causing `React.memo` children to re-render even if the function's logic hasn't changed. `useCallback` ensures the function reference remains stable across renders unless its dependencies change.\n*   **Example Scenario**: A parent component passes an `onClick` handler to a `React.memo`-wrapped button child. Without `useCallback`, the `onClick` prop's reference would change on every parent render, forcing the button to re-render. With `useCallback`, the button only re-renders if the dependencies of the `onClick` handler change.\n\n**`useMemo` (for Memoizing Values)**:\n*   **Use Case**: Returns a memoized value. It only recomputes the memoized value when one of its dependencies has changed. This is useful for:\n    1.  **Expensive Calculations**: To avoid re-running computationally intensive functions on every render (e.g., heavy data transformations, filtering large arrays).\n    2.  **Memoizing Object/Array References**: When passing objects or arrays as props to optimized child components (`React.memo`). If an object/array is recreated on every render (e.g., `{ a: value }` or `[item1, item2]`), its reference changes, forcing the child to re-render. `useMemo` keeps the reference stable.\n*   **Example Scenario**: A component filters a large list based on a search term. The filtered list can be memoized with `useMemo`, so the filtering operation only runs when the original list or the search term changes, not on every render of the parent.\n\n**Common Pitfalls with Dependency Arrays:**\n1.  **Omitting Dependencies**: This is the most common pitfall. If you forget to include a variable, state, or prop used inside `useCallback` or `useMemo` in its dependency array, the memoized function/value will 'capture' an outdated value (a stale closure or value) from the render it was first created in. This can lead to bugs where the function operates on stale data.\n    *   *Example*: `const handleClick = useCallback(() => { console.log(count); }, []);` If `count` changes, `handleClick` will always log the initial `count` value because `count` was not in the dependency array.\n2.  **Including Too Many Dependencies**: If you include dependencies that change on every render (e.g., an object created inline `useMemo(() => ..., [{}, []])`), it defeats the purpose of memoization, as the memoized value/function will be re-created just as often as if it weren't memoized, adding overhead without benefit.\n3.  **Mutable Objects as Dependencies**: `useCallback` and `useMemo` perform a shallow comparison of dependencies. If a dependency is a mutable object and its properties change without the object's reference changing, the hook won't detect the change, leading to stale memoized values.\n    *   *Example*: `const data = { value: 1 }; // data object is mutated elsewhere` and `useMemo(() => expensiveOp(data), [data]);`. If `data.value` changes but `data`'s reference stays the same, `expensiveOp` won't re-run.\n4.  **Circular Dependencies**: Less common, but can happen if dependencies are not carefully managed, leading to confusing re-renders or unexpected behavior.",
+          "analysisPoints": [
+            "Clear differentiation of `useCallback` and `useMemo` use cases.",
+            "Understanding of their respective mechanisms (function vs. value memoization).",
+            "Detailed explanation of dependency array importance.",
+            "Specific examples of pitfalls (stale closures, over-memoization, mutable objects)."
+          ],
+          "keyConcepts": [
+            "React.memo",
+            "useCallback",
+            "useMemo",
+            "Memoization",
+            "Performance Optimization",
+            "Dependency Array",
+            "Stale Closures",
+            "Shallow Equality"
+          ],
+          "evaluationCriteria": [
+            "Depth of explanation",
+            "Accuracy of use cases and pitfalls",
+            "Clarity of examples"
+          ],
+          "example": null,
+          "tags": [
+            "React",
+            "Memoization",
+            "Hooks",
+            "Performance",
+            "Advanced"
+          ],
+          "prerequisites": [
+            "react_hooks_useState",
+            "react_functional_components"
+          ],
+          "complexity": 9,
+          "interviewFrequency": 10,
+          "learningPath": "advanced"
+        },
+        {
+          "id": "question_react_memoization_4",
+          "topic": "React Memoization",
+          "level": "medium",
+          "type": "code",
+          "question": "The following `ItemList` component receives a `data` prop (an array of objects) and an `onSelectItem` callback. The `data` array can be large, and `onSelectItem` is passed down from a parent. Optimize `ItemList` to prevent unnecessary re-renders when its parent re-renders, but only if `data` or `onSelectItem` haven't shallowly changed.\n\n```jsx\nimport React from 'react';\n\nconst ItemList = ({ data, onSelectItem }) => {\n  console.log('ItemList rendered');\n  return (\n    <ul>\n      {data.map(item => (\n        <li key={item.id} onClick={() => onSelectItem(item.id)}>\n          {item.name}\n        </li>\n      ))}\n    </ul>\n  );\n};\n\n// Assume a parent component is passing data and onSelectItem\n// const Parent = () => {\n//   const [items, setItems] = useState([{ id: 1, name: 'Item 1' }, { id: 2, name: 'Item 2' }]);\n//   const handleSelect = (id) => console.log('Selected:', id);\n//   return <ItemList data={items} onSelectItem={handleSelect} />;\n// };\n```",
+          "answer": "```jsx\nimport React from 'react';\n\nconst ItemList = React.memo(({ data, onSelectItem }) => {\n  console.log('ItemList rendered');\n  return (\n    <ul>\n      {data.map(item => (\n        <li key={item.id} onClick={() => onSelectItem(item.id)}>\n          {item.name}\n        </li>\n      ))}\n    </ul>\n  );\n});\n\n// To ensure onSelectItem reference is stable for React.memo in parent:\n// import React, { useState, useCallback } from 'react';\n// \n// const Parent = () => {\n//   const [items, setItems] = useState([{ id: 1, name: 'Item 1' }, { id: 2, name: 'Item 2' }]);\n//   const [counter, setCounter] = useState(0); // Dummy state to cause parent re-renders\n// \n//   // Memoize onSelectItem using useCallback to keep its reference stable\n//   const handleSelect = useCallback((id) => {\n//     console.log('Selected:', id, 'Counter:', counter); \n//   }, [counter]); // Dependency: counter, so it updates if counter changes\n// \n//   return (\n//     <div>\n//       <button onClick={() => setCounter(c => c + 1)}>Increment Parent Counter: {counter}</button>\n//       <ItemList data={items} onSelectItem={handleSelect} />\n//     </div>\n//   );\n// };\n// export default Parent;\n```",
+          "options": [],
+          "analysisPoints": [
+            "Correctly applying `React.memo` to the functional component.",
+            "Understanding that `React.memo` performs a shallow comparison of props by default.",
+            "Implicitly understanding that parent components also need to memoize functions/objects passed as props using `useCallback`/`useMemo` for `React.memo` to be effective."
+          ],
+          "keyConcepts": [
+            "React.memo",
+            "Memoization",
+            "Performance",
+            "React Hooks"
+          ],
+          "evaluationCriteria": [
+            "Correct use of `React.memo`",
+            "Understanding of shallow prop comparison"
+          ],
+          "example": null,
+          "tags": [
+            "React",
+            "Performance",
+            "Memoization",
+            "Coding"
+          ],
+          "prerequisites": [
+            "react_functional_components"
+          ],
+          "complexity": 6,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_react_memoization_5",
+          "topic": "React Memoization",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "Which React Hook is used to memoize the result of an expensive calculation?",
+          "answer": "`useMemo`",
+          "analysisPoints": [
+            "Recall of specific hook for value memoization."
+          ],
+          "keyConcepts": [
+            "useMemo",
+            "Memoization",
+            "React Hooks"
+          ],
+          "evaluationCriteria": [
+            "Recall of React Hook functionality"
+          ],
+          "example": null,
+          "tags": [
+            "React",
+            "Hooks",
+            "Memoization"
+          ],
+          "prerequisites": [
+            "react_hooks_useState"
+          ],
+          "complexity": 3,
+          "interviewFrequency": 7,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_react_memoization_6",
+          "topic": "React Memoization",
+          "level": "medium",
+          "type": "mcq",
+          "question": "Which of the following scenarios is LEAST likely to benefit significantly from using `React.memo`, `useCallback`, or `useMemo`?",
+          "answer": "A small, frequently re-rendering component with very simple rendering logic.",
+          "options": [
+            "A large, complex component that frequently re-renders due to parent updates.",
+            "Passing a callback function to a child component optimized with `React.memo`.",
+            "An expensive data transformation operation that runs on every render.",
+            "A small, frequently re-rendering component with very simple rendering logic."
+          ],
+          "analysisPoints": [
+            "Understanding the trade-off of memoization (cost vs. benefit).",
+            "Identifying cases where overhead outweighs gains.",
+            "Recognizing scenarios where memoization is highly beneficial."
+          ],
+          "keyConcepts": [
+            "Memoization",
+            "Performance Optimization",
+            "React.memo",
+            "useCallback",
+            "useMemo"
+          ],
+          "evaluationCriteria": [
+            "Ability to identify appropriate use cases for memoization"
+          ],
+          "example": "Memoization adds a small overhead (memory for caching, time for dependency comparison). For a small component with simple rendering logic, the cost of re-rendering might be less than or equal to the cost of memoization. In such cases, the performance gains are negligible, or memoization might even slightly degrade performance due to the added overhead. The other options all represent scenarios where memoization can provide significant performance improvements.",
+          "tags": [
+            "React",
+            "Performance",
+            "Memoization",
+            "MCQ"
+          ],
+          "prerequisites": [
+            "react_memoization"
+          ],
+          "complexity": 6,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_react_memoization_7",
+          "topic": "React Memoization",
+          "level": "hard",
+          "type": "code",
+          "question": "You have a component `ProductList` that receives `products` (an array of objects) and a `filterText` string. The component should display only products whose `name` includes `filterText`. Implement `ProductList` and its parent component `App` such that the expensive filtering operation is memoized, and `ProductList` itself is memoized to prevent unnecessary re-renders when only `App`'s unrelated state changes. `App` also has a `theme` state that causes it to re-render.\n\n```jsx\n// ProductList.jsx\nimport React from 'react';\n\nconst ProductList = ({ products, filterText }) => {\n  // Implement memoized filtering here\n  // console.log('ProductList (component) rendered');\n  // console.log('Filtering products...');\n  // const filteredProducts = products.filter(p => p.name.includes(filterText));\n\n  return (\n    <div>\n      <h3>Filtered Products</h3>\n      {/* Render filtered products */}\n    </div>\n  );\n};\n\n// App.jsx\nimport React, { useState } from 'react';\n// import ProductList from './ProductList';\n\nconst App = () => {\n  const [filter, setFilter] = useState('');\n  const [theme, setTheme] = useState('light'); // Unrelated state\n\n  const allProducts = [\n    { id: 1, name: 'Laptop Pro' },\n    { id: 2, name: 'Mouse Ergonomic' },\n    { id: 3, name: 'Keyboard Mechanical' },\n    { id: 4, name: 'Monitor UltraWide' }\n  ];\n\n  return (\n    <div style={{ background: theme === 'light' ? '#fff' : '#333', color: theme === 'light' ? '#333' : '#fff' }}>\n      <h1>My Store</h1>\n      <input \n        type=\"text\" \n        placeholder=\"Filter products...\" \n        value={filter} \n        onChange={e => setFilter(e.target.value)}\n      />\n      <button onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}>\n        Toggle Theme ({theme})\n      </button>\n      {/* Render ProductList */}\n    </div>\n  );\n};\n\nexport default App;\n```",
+          "answer": "**ProductList.jsx**\n```jsx\nimport React, { useMemo } from 'react';\n\nconst ProductList = React.memo(({ products, filterText }) => {\n  console.log('ProductList (component) rendered');\n\n  // Memoize the filtering operation using useMemo\n  const filteredProducts = useMemo(() => {\n    console.log('Filtering products...'); // This should only log when products or filterText changes\n    return products.filter(p => \n      p.name.toLowerCase().includes(filterText.toLowerCase())\n    );\n  }, [products, filterText]); // Dependencies: products array and filterText string\n\n  return (\n    <div>\n      <h3>Filtered Products ({filteredProducts.length})</h3>\n      {filteredProducts.length === 0 ? (\n        <p>No products found.</p>\n      ) : (\n        <ul>\n          {filteredProducts.map(product => (\n            <li key={product.id}>{product.name}</li>\n          ))}\n        </ul>\n      )}\n    </div>\n  );\n});\n\nexport default ProductList;\n```\n\n**App.jsx**\n```jsx\nimport React, { useState } from 'react';\nimport ProductList from './ProductList'; // Import the optimized ProductList\n\nconst App = () => {\n  const [filter, setFilter] = useState('');\n  const [theme, setTheme] = useState('light'); // Unrelated state\n\n  const allProducts = [\n    { id: 1, name: 'Laptop Pro' },\n    { id: 2, name: 'Mouse Ergonomic' },\n    { id: 3, name: 'Keyboard Mechanical' },\n    { id: 4, name: 'Monitor UltraWide' }\n  ];\n\n  console.log('App (component) rendered');\n\n  return (\n    <div style={{ background: theme === 'light' ? '#fff' : '#333', color: theme === 'light' ? '#333' : '#fff' }}>\n      <h1>My Store</h1>\n      <input \n        type=\"text\" \n        placeholder=\"Filter products...\" \n        value={filter} \n        onChange={e => setFilter(e.target.value)}\n      />\n      <button onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}>\n        Toggle Theme ({theme})\n      </button>\n      {/* Render ProductList - allProducts is stable, filter is primitive string */}\n      <ProductList products={allProducts} filterText={filter} />\n    </div>\n  );\n};\n\nexport default App;\n```",
+          "options": [],
+          "analysisPoints": [
+            "Correctly applying `React.memo` to `ProductList` to prevent re-renders when `App`'s `theme` changes.",
+            "Using `useMemo` inside `ProductList` to memoize the `filteredProducts` array.",
+            "Specifying the correct dependency array for `useMemo` (`products`, `filterText`).",
+            "Understanding that `allProducts` (if declared outside or as a stable reference) and `filter` (primitive) are suitable props for `React.memo`'s shallow comparison.",
+            "Using `toLowerCase()` for case-insensitive filtering."
+          ],
+          "keyConcepts": [
+            "React.memo",
+            "useMemo",
+            "Memoization",
+            "Performance",
+            "React Hooks",
+            "Filtering"
+          ],
+          "evaluationCriteria": [
+            "Functional memoization implementation",
+            "Correct use of `React.memo` and `useMemo`",
+            "Logical dependency array handling"
+          ],
+          "example": "When the `App` component's `theme` state changes, `App` re-renders. However, `ProductList` is wrapped with `React.memo`. Since its `products` prop (`allProducts`) is a stable array reference and `filterText` is a primitive string, their shallow comparison will indicate no change, and `ProductList` will *not* re-render. Inside `ProductList`, the `useMemo` hook ensures that the `filteredProducts` array is only recomputed when either the `products` array reference or the `filterText` value actually changes. This prevents the potentially expensive filtering operation from running unnecessarily.",
+          "tags": [
+            "React",
+            "Performance",
+            "Memoization",
+            "Coding",
+            "Hooks"
+          ],
+          "prerequisites": [
+            "react_memo",
+            "useMemo",
+            "react_hooks_useState"
+          ],
+          "complexity": 8,
+          "interviewFrequency": 9,
+          "learningPath": "advanced"
+        }
+      ],
+      "tasks": [
+        {
+          "id": "task_react_code_splitting_1",
+          "title": "Implement a Lazy-Loaded Modal with React.lazy and Suspense",
+          "description": "\nYour task is to implement a React application that features a main page and a modal. The modal component (`SettingsModal`) should be lazy-loaded using `React.lazy` and `Suspense`, only when the 'Open Settings' button is clicked. This will demonstrate code splitting for a feature that is not immediately visible.\n\n**Requirements:**\n1.  Create a main `App` component that renders a button to open the modal.\n2.  Create a separate `SettingsModal.jsx` file for the modal component. This component should simply display a title and a 'Close' button.\n3.  Use `React.lazy` to dynamically import `SettingsModal`.\n4.  Wrap the lazy-loaded modal with `Suspense` and provide a loading fallback UI.\n5.  The modal should only render (and thus its chunk load) when a state variable (`showModal`) is true.\n6.  Ensure the 'Close' button within the modal also sets `showModal` to false.\n\nYour solution should simulate a small delay in loading the modal to better observe the `Suspense` fallback.",
+          "difficulty": "medium",
+          "startingCode": "import React, { useState } from 'react';\n\n// Create a placeholder for SettingsModal.jsx\n// import SettingsModal from './SettingsModal'; // This will be lazy-loaded\n\nconst App = () => {\n  const [showModal, setShowModal] = useState(false);\n\n  const handleOpenModal = () => {\n    setShowModal(true);\n  };\n\n  const handleCloseModal = () => {\n    setShowModal(false);\n  };\n\n  return (\n    <div>\n      <h1>Welcome to My App</h1>\n      <button onClick={handleOpenModal}>Open Settings</button>\n\n      {/* Render the modal conditionally */}\n      {/* Your lazy loading and Suspense implementation goes here */}\n    </div>\n  );\n};\n\nexport default App;\n\n// --- Create this file as SettingsModal.jsx ---\n// import React from 'react';\n// const SettingsModal = ({ onClose }) => {\n//   return (\n//     <div style={{\n//       position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%, -50%)',\n//       backgroundColor: 'white', padding: '20px', border: '1px solid #ccc', zIndex: 1000\n//     }}>\n//       <h2>Settings Modal</h2>\n//       <p>These are your application settings.</p>\n//       <button onClick={onClose}>Close</button>\n//     </div>\n//   );\n// };\n// export default SettingsModal;\n",
+          "solutionCode": "import React, { useState, lazy, Suspense } from 'react';\n\n// Create the lazy-loaded component\nconst LazySettingsModal = lazy(() => \n  new Promise(resolve => setTimeout(resolve, 1000)) // Simulate network delay\n  .then(() => import('./SettingsModal'))\n);\n\nconst App = () => {\n  const [showModal, setShowModal] = useState(false);\n\n  const handleOpenModal = () => {\n    setShowModal(true);\n  };\n\n  const handleCloseModal = () => {\n    setShowModal(false);\n  };\n\n  return (\n    <div>\n      <h1>Welcome to My App</h1>\n      <button onClick={handleOpenModal}>Open Settings</button>\n\n      {showModal && (\n        <Suspense fallback={<div>Loading Settings Modal...</div>}> \n          <LazySettingsModal onClose={handleCloseModal} />\n        </Suspense>\n      )}\n    </div>\n  );\n};\n\nexport default App;\n\n// --- SettingsModal.jsx ---\n// import React from 'react';\n//\n// const SettingsModal = ({ onClose }) => {\n//   return (\n//     <div style={{\n//       position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%, -50%)',\n//       backgroundColor: 'white', padding: '20px', border: '1px solid #ccc', zIndex: 1000,\n//       boxShadow: '0 4px 8px rgba(0,0,0,0.2)'\n//     }}>\n//       <h2>Settings Modal</h2>\n//       <p>These are your application settings.</p>\n//       <button onClick={onClose}>Close</button>\n//     </div>\n//   );\n// };\n//\n// export default SettingsModal;\n",
+          "testCases": [
+            "Initial load: Modal should not be present.",
+            "Click 'Open Settings': 'Loading Settings Modal...' text should appear briefly.",
+            "After delay: `SettingsModal` content should appear.",
+            "Click 'Close' in modal: Modal should disappear."
+          ],
+          "hints": [
+            "Remember to import `lazy` and `Suspense` from 'react'.",
+            "The `fallback` prop of `Suspense` is crucial for user experience.",
+            "You can simulate a network delay within the `import()` promise for testing purposes.",
+            "The lazy-loaded component should be imported in its own separate file."
+          ],
+          "tags": [
+            "React",
+            "Code Splitting",
+            "Lazy Loading",
+            "Suspense",
+            "Performance",
+            "Modal"
+          ],
+          "timeEstimate": 45,
+          "prerequisites": [
+            "react_basics",
+            "react_hooks_useState"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 8,
+          "learningPath": "intermediate",
+          "relatedConcepts": [
+            "react_lazy",
+            "react_suspense"
+          ]
+        },
+        {
+          "id": "task_bundle_size_1",
+          "title": "Configure Webpack for Optimal Production Bundle",
+          "description": "\nYour goal is to configure a Webpack setup for a production React application to minimize bundle size and improve caching. You need to implement features like JavaScript minification, code splitting for vendors and common modules, and ensure tree shaking is effective.\n\n**Requirements:**\n1.  Set Webpack's `mode` to 'production'.\n2.  Configure a `TerserPlugin` for JavaScript minification.\n3.  Implement `splitChunks` optimization to:\n    *   Create a separate chunk for `node_modules` (named 'vendors').\n    *   Create a 'common' chunk for modules shared across at least two application chunks.\n    *   Ensure all chunks (synchronous and asynchronous) are considered for splitting.\n4.  Ensure output filenames include a `[contenthash]` for effective long-term caching.\n5.  Add a rule to handle `.js` and `.jsx` files with `babel-loader` (assuming React setup).\n\n**Provided Structure:**\n```\nmy-app/\n├── src/\n│   ├── index.js\n│   ├── components/\n│   │   ├── ComponentA.jsx\n│   │   └── ComponentB.jsx\n│   └── utils/\n│       └── math.js\n└── webpack.config.js\n```",
+          "difficulty": "hard",
+          "startingCode": "const path = require('path');\n\nmodule.exports = {\n  entry: './src/index.js',\n  output: {\n    filename: 'bundle.js',\n    path: path.resolve(__dirname, 'dist'),\n  },\n  // Add mode, optimization, and module rules here\n  module: {\n    rules: [\n      // Babel loader for React/JS\n      {\n        test: /\\\\.(js|jsx)$/,\n        exclude: /node_modules/,\n        use: {\n          loader: 'babel-loader',\n          options: {\n            presets: ['@babel/preset-env', '@babel/preset-react'],\n          },\n        },\n      },\n    ],\n  },\n};\n",
+          "solutionCode": "const path = require('path');\nconst TerserPlugin = require('terser-webpack-plugin');\n// const CssMinimizerPlugin = require('css-minimizer-webpack-plugin'); // Uncomment if you have CSS in JS bundles\n\nmodule.exports = {\n  entry: './src/index.js',\n  output: {\n    filename: '[name].[contenthash].js', // Use contenthash for long-term caching\n    path: path.resolve(__dirname, 'dist'),\n    clean: true, // Clean the dist folder before each build\n  },\n  mode: 'production', // Enables tree shaking, minification, and other production optimizations\n  optimization: {\n    minimize: true, // Explicitly enable minimization\n    minimizer: [\n      new TerserPlugin({ // Configure TerserPlugin for JS minification\n        terserOptions: {\n          compress: {\n            drop_console: true, // Drop console.log statements in production\n          },\n        },\n        extractComments: false, // Prevents creating a separate file for comments\n      }),\n      // Uncomment the following if you have CSS in your bundles and want to minify it\n      // new CssMinimizerPlugin(), \n    ],\n    splitChunks: {\n      chunks: 'all', // Apply splitting to all chunks (initial and async)\n      minSize: 20000, // Minimum size of a chunk before it's considered for splitting\n      maxInitialRequests: 20, // Max requests for initial load (to prevent too many small chunks)\n      maxAsyncRequests: 20,   // Max requests for on-demand chunks\n      cacheGroups: {\n        vendor: {\n          test: /[\\\\/]node_modules[\\\\/]/, // Target modules in node_modules\n          name: 'vendors', // Name of the vendor chunk\n          chunks: 'all', // Apply to all types of chunks\n          priority: -10, // Higher priority for vendors\n        },\n        common: {\n          minChunks: 2, // Modules shared by at least 2 chunks\n          name: 'common', // Name of the common chunk\n          chunks: 'all',\n          priority: -20, // Lower priority than vendors\n          reuseExistingChunk: true, // Reuse chunks if possible\n        },\n      },\n    },\n  },\n  module: {\n    rules: [\n      {\n        test: /\\\\.(js|jsx)$/,\n        exclude: /node_modules/,\n        use: {\n          loader: 'babel-loader',\n          options: {\n            presets: ['@babel/preset-env', '@babel/preset-react'],\n          },\n        },\n      },\n    ],\n  },\n  // Consider adding a devtool: 'source-map' for production debugging, but ensure it's external\n  // devtool: 'source-map',\n};\n",
+          "testCases": [
+            "Verify `mode` is 'production'.",
+            "Check `output.filename` uses `[contenthash]` (e.g., `main.a1b2c3d4.js`, `vendors.e5f6g7h8.js`).",
+            "Build the project and inspect the `dist` folder: `vendors.js` chunk should exist containing node_modules code.",
+            "Build the project and inspect the `dist` folder: `common.js` chunk should exist if there are shared modules (requires some application code to share modules).",
+            "Verify that `console.log` statements are removed from the production bundle (if `drop_console` is set in Terser options).",
+            "Check bundle sizes are significantly smaller than a non-optimized build."
+          ],
+          "hints": [
+            "The `mode: 'production'` setting enables many optimizations by default, but you still need to configure `minimizer` and `splitChunks` for fine-grained control.",
+            "Remember to install `terser-webpack-plugin` if you haven't (`npm install terser-webpack-plugin --save-dev`).",
+            "For `splitChunks`, `chunks: 'all'` is often the most effective setting for general-purpose optimization.",
+            "Ensure your `output.filename` uses `[contenthash]` for proper caching.",
+            "The `clean` option in `output` is useful for preventing stale files in your `dist` directory."
+          ],
+          "tags": [
+            "Webpack",
+            "Bundle Optimization",
+            "Performance",
+            "Build Tools",
+            "JavaScript",
+            "React"
+          ],
+          "timeEstimate": 60,
+          "prerequisites": [
+            "webpack_basics",
+            "bundle_size_optimization"
+          ],
+          "complexity": 8,
+          "interviewRelevance": 9,
+          "learningPath": "advanced",
+          "relatedConcepts": [
+            "tree_shaking",
+            "minification",
+            "code_splitting_webpack"
+          ]
+        },
+        {
+          "id": "task_image_optimization_1",
+          "title": "Implement a Responsive, Lazy-Loaded Product Image Gallery",
+          "description": "\nYour task is to create an HTML page with a product image gallery. Each image in the gallery needs to be optimized for responsiveness, use modern image formats with fallbacks, and be lazy-loaded to improve initial page performance.\n\n**Requirements:**\n1.  Create an HTML structure for a simple image gallery (e.g., a `div` containing multiple `figure` or `div` elements, each with an image).\n2.  For each image:\n    *   Use the `<picture>` element to provide a `WebP` version and a `JPEG` fallback.\n    *   Use `srcset` and `sizes` attributes within the `<img>` tag (or `source` tags if appropriate for more complex scenarios, but for this task, primarily `<img>` within `<picture>` is sufficient) to serve different image resolutions based on viewport size. Assume three sizes: `small.webp/jpg` (300w), `medium.webp/jpg` (600w), `large.webp/jpg` (1200w).\n    *   Implement native lazy loading using `loading=\"lazy\"`.\n    *   Provide meaningful `alt` text.\n3.  Demonstrate the responsiveness with `sizes` attributes that specify:\n    *   100% viewport width on screens up to 480px.\n    *   50% viewport width on screens between 481px and 960px.\n    *   33.3vw on screens above 960px.\n\n**Image Placeholder Structure (you don't need actual image files, just use these names):\n`product-1-small.webp`, `product-1-medium.webp`, `product-1-large.webp`\n`product-1-small.jpg`, `product-1-medium.jpg`, `product-1-large.jpg` (and similar for product-2, product-3 etc.)**",
+          "difficulty": "medium",
+          "startingCode": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n    <meta charset=\"UTF-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <title>Product Gallery</title>\n    <style>\n        body { font-family: Arial, sans-serif; margin: 20px; }\n        .gallery {\n            display: grid;\n            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));\n            gap: 20px;\n        }\n        .gallery-item img { max-width: 100%; height: auto; display: block; }\n    </style>\n</head>\n<body>\n    <h1>Our Products</h1>\n    <div class=\"gallery\">\n        <!-- Add your optimized image elements here -->\n    </div>\n</body>\n</html>\n",
+          "solutionCode": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n    <meta charset=\"UTF-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <title>Product Gallery</title>\n    <style>\n        body { font-family: Arial, sans-serif; margin: 20px; }\n        .gallery {\n            display: grid;\n            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));\n            gap: 20px;\n        }\n        .gallery-item img { max-width: 100%; height: auto; display: block; }\n    </style>\n</head>\n<body>\n    <h1>Our Products</h1>\n    <div class=\"gallery\">\n        <div class=\"gallery-item\">\n            <picture>\n                <source \n                    type=\"image/webp\" \n                    srcset=\"product-1-small.webp 300w, product-1-medium.webp 600w, product-1-large.webp 1200w\" \n                    sizes=\"(max-width: 480px) 100vw, (max-width: 960px) 50vw, 33.3vw\">\n                <img \n                    src=\"product-1-small.jpg\" \n                    srcset=\"product-1-small.jpg 300w, product-1-medium.jpg 600w, product-1-large.jpg 1200w\" \n                    sizes=\"(max-width: 480px) 100vw, (max-width: 960px) 50vw, 33.3vw\"\n                    alt=\"Product 1: Ergonomic Gaming Mouse\"\n                    loading=\"lazy\">\n            </picture>\n        </div>\n        <div class=\"gallery-item\">\n            <picture>\n                <source \n                    type=\"image/webp\" \n                    srcset=\"product-2-small.webp 300w, product-2-medium.webp 600w, product-2-large.webp 1200w\" \n                    sizes=\"(max-width: 480px) 100vw, (max-width: 960px) 50vw, 33.3vw\">\n                <img \n                    src=\"product-2-small.jpg\" \n                    srcset=\"product-2-small.jpg 300w, product-2-medium.jpg 600w, product-2-large.jpg 1200w\" \n                    sizes=\"(max-width: 480px) 100vw, (max-width: 960px) 50vw, 33.3vw\"\n                    alt=\"Product 2: Mechanical Keyboard with RGB\"\n                    loading=\"lazy\">\n            </picture>\n        </div>\n        <div class=\"gallery-item\">\n            <picture>\n                <source \n                    type=\"image/webp\" \n                    srcset=\"product-3-small.webp 300w, product-3-medium.webp 600w, product-3-large.webp 1200w\" \n                    sizes=\"(max-width: 480px) 100vw, (max-width: 960px) 50vw, 33.3vw\">\n                <img \n                    src=\"product-3-small.jpg\" \n                    srcset=\"product-3-small.jpg 300w, product-3-medium.jpg 600w, product-3-large.jpg 1200w\" \n                    sizes=\"(max-width: 480px) 100vw, (max-width: 960px) 50vw, 33.3vw\"\n                    alt=\"Product 3: 4K UltraWide Monitor\"\n                    loading=\"lazy\">\n            </picture>\n        </div>\n        <!-- Add more images following the same pattern -->\n    </div>\n</body>\n</html>\n",
+          "testCases": [
+            "Open in a browser: Only images visible in the initial viewport should load (verify in network tab).",
+            "Scroll down: Remaining images should load as they come into view.",
+            "Resize browser window (small viewport < 480px): Browser should request the 'small' image variants (e.g., product-1-small.webp).",
+            "Resize browser window (medium viewport 481px-960px): Browser should request the 'medium' image variants (e.g., product-1-medium.webp).",
+            "Resize browser window (large viewport > 960px): Browser should request the 'large' image variants (e.g., product-1-large.webp).",
+            "Test with a browser that doesn't support WebP (e.g., by changing `type=\"image/webp\"` to a non-existent type): Browser should load JPEG fallbacks.",
+            "Inspect element: Verify `loading='lazy'`, `srcset`, `sizes`, and `alt` attributes are present."
+          ],
+          "hints": [
+            "Remember that the `<img>` tag inside `<picture>` serves as the ultimate fallback.",
+            "The `srcset` on the `<img>` tag inside `<picture>` is also crucial for browsers that support `<picture>` but might not choose a `source` for various reasons, or for handling pixel density with the fallback format.",
+            "Pay close attention to the `sizes` attribute syntax for different breakpoints.",
+            "Use your browser's developer tools (Network tab) to verify which image files are actually loaded."
+          ],
+          "tags": [
+            "HTML",
+            "Images",
+            "Responsive Design",
+            "Lazy Loading",
+            "WebP",
+            "Optimization"
+          ],
+          "timeEstimate": 60,
+          "prerequisites": [
+            "html_basics",
+            "css_media_queries"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 8,
+          "learningPath": "intermediate",
+          "relatedConcepts": [
+            "srcset_sizes",
+            "picture_element",
+            "loading_lazy"
+          ]
+        },
+        {
+          "id": "task_critical_css_1",
+          "title": "Optimize Critical CSS for a Blog Post Page",
+          "description": "\nYour task is to optimize the CSS delivery for a simple blog post page. The goal is to ensure the 'above-the-fold' content (header, main title, and initial paragraph) renders as quickly as possible by inlining its critical CSS, while the rest of the styles are loaded asynchronously.\n\n**Requirements:**\n1.  Identify the critical CSS for the `header`, `h1` (post title), and the first `p` (introduction).\n2.  Inline this critical CSS directly into a `<style>` block within the `<head>` section of the HTML document.\n3.  Ensure the main `styles.css` file (containing all other styles) is loaded asynchronously using `rel=\"preload\"`, `as=\"style\"`, and the `onload` trick.\n4.  Include a `noscript` fallback for `styles.css`.\n5.  Add some non-critical styles to `styles.css` that would apply to 'below-the-fold' content (e.g., footer, sidebars, or subsequent paragraphs).\n\n**Assumed Critical Styles:**\n```css\nbody { font-family: sans-serif; margin: 0; line-height: 1.6; color: #333; }\nheader { background: #f4f4f4; padding: 20px; text-align: center; border-bottom: 1px solid #ccc; }\nh1 { color: #2c3e50; font-size: 2.5em; margin-bottom: 10px; }\n.post-intro { font-size: 1.1em; color: #555; }\n```\n\n**Assumed Non-Critical Styles (for `styles.css`):**\n```css\n.post-content { padding: 20px; max-width: 800px; margin: 0 auto; }\n.post-content p { margin-bottom: 1em; }\nfooter { background: #eee; padding: 10px; text-align: center; margin-top: 40px; }\n.sidebar { width: 200px; float: right; margin-left: 20px; }\n```",
+          "difficulty": "medium",
+          "startingCode": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n    <meta charset=\"UTF-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <title>My Awesome Blog Post</title>\n    <!-- Stylesheets will go here -->\n</head>\n<body>\n    <header>\n        <h1>The Importance of Web Performance</h1>\n    </header>\n    <main>\n        <p class=\"post-intro\">Web performance is crucial for user experience and SEO. A fast-loading website keeps users engaged and improves conversion rates.</p>\n        \n        <div class=\"post-content\">\n            <p>This paragraph and subsequent content are considered 'below-the-fold'. Optimizing their loading won't impact initial paint time as much.</p>\n            <p>Further details about performance techniques...</p>\n        </div>\n    </main>\n    <footer>\n        &copy; 2023 My Blog\n    </footer>\n</body>\n</html>\n\n<!-- You will also need to create a `styles.css` file in the same directory -->\n",
+          "solutionCode": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n    <meta charset=\"UTF-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <title>My Awesome Blog Post</title>\n\n    <!-- Inlined Critical CSS -->\n    <style>\n        body { font-family: sans-serif; margin: 0; line-height: 1.6; color: #333; }\n        header { background: #f4f4f4; padding: 20px; text-align: center; border-bottom: 1px solid #ccc; }\n        h1 { color: #2c3e50; font-size: 2.5em; margin-bottom: 10px; }\n        .post-intro { font-size: 1.1em; color: #555; }\n    </style>\n    \n    <!-- Asynchronously load non-critical CSS -->\n    <link rel=\"preload\" href=\"styles.css\" as=\"style\" onload=\"this.onload=null;this.rel='stylesheet'\">\n    <noscript><link rel=\"stylesheet\" href=\"styles.css\"></noscript>\n</head>\n<body>\n    <header>\n        <h1>The Importance of Web Performance</h1>\n    </header>\n    <main>\n        <p class=\"post-intro\">Web performance is crucial for user experience and SEO. A fast-loading website keeps users engaged and improves conversion rates.</p>\n        \n        <div class=\"post-content\">\n            <p>This paragraph and subsequent content are considered 'below-the-fold'. Optimizing their loading won't impact initial paint time as much.</p>\n            <p>Further details about performance techniques...</p>\n        </div>\n    </main>\n    <footer>\n        &copy; 2023 My Blog\n    </footer>\n</body>\n</html>\n\n\n/* --- Create this file as `styles.css` in the same directory --- */\n/* Non-critical CSS */\n.post-content { padding: 20px; max-width: 800px; margin: 0 auto; }\n.post-content p { margin-bottom: 1em; }\nfooter { background: #eee; padding: 10px; text-align: center; margin-top: 40px; }\n.sidebar { width: 200px; float: right; margin-left: 20px; border: 1px dashed #ccc; padding: 10px;}\n\n/* Example of styles that would cause layout shift if not carefully managed */\n/* body { overflow-x: hidden; } */\n",
+          "testCases": [
+            "Open the HTML file in a browser.",
+            "Verify that the header, H1, and the introductory paragraph are immediately styled correctly.",
+            "Observe the network tab: `styles.css` should be requested, but it should not block the initial rendering (e.g., FCP should be fast).",
+            "Disable JavaScript in the browser settings and reload the page: All styles from `styles.css` should still apply, demonstrating the `noscript` fallback."
+          ],
+          "hints": [
+            "Place the `<style>` block containing critical CSS as early as possible in the `<head>`.",
+            "The `onload` attribute is crucial to switch `rel='preload'` to `rel='stylesheet'` after the CSS file is fetched.",
+            "Make sure to correctly define the `href` and `as='style'` attributes for the preload link.",
+            "The `noscript` tag provides accessibility and fallback for users without JavaScript."
+          ],
+          "tags": [
+            "CSS",
+            "Performance",
+            "FCP",
+            "LCP",
+            "Optimization",
+            "HTML"
+          ],
+          "timeEstimate": 45,
+          "prerequisites": [
+            "html_basics",
+            "css_basics"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 8,
+          "learningPath": "intermediate",
+          "relatedConcepts": [
+            "critical_css_optimization",
+            "render_blocking_resources"
+          ]
+        },
+        {
+          "id": "task_caching_1",
+          "title": "Implement a Service Worker with Cache-First and Cache Busting",
+          "description": "\nYour task is to create a Service Worker that implements a 'Cache First, then Network' strategy for static assets and demonstrates cache busting for new versions. The application consists of `index.html`, `app.js`, and `style.css`.\n\n**Requirements:**\n1.  **Service Worker Registration**: Register the Service Worker (`sw.js`) from your main `index.html`.\n2.  **Installation**: In `sw.js`, pre-cache `index.html`, `app.js`, and `style.css` during the `install` event.\n3.  **Fetch Strategy**: Implement a 'Cache First, then Network' strategy in the `fetch` event listener for all requests. If a request is found in cache, serve it immediately. Otherwise, fetch from the network, cache the response, and then return it.\n4.  **Activation/Cleanup**: In the `activate` event, clean up any old caches to ensure only the latest version (`V2` in the initial setup, but adaptable) is active.\n5.  **Cache Busting**: Demonstrate how to update the Service Worker and its cache. When you change the `CACHE_VERSION`, the Service Worker should update and clear old caches.\n\n**Provided Files:**\n-   `index.html` (minimal HTML)\n-   `app.js` (simple script)\n-   `style.css` (simple styles)",
+          "difficulty": "hard",
+          "startingCode": "<!-- index.html -->\n<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n    <meta charset=\"UTF-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <title>Service Worker Demo</title>\n    <link rel=\"stylesheet\" href=\"style.css\">\n</head>\n<body>\n    <h1>Service Worker Caching Demo</h1>\n    <p>Check the network tab to see caching in action.</p>\n    <script src=\"app.js\"></script>\n    <script>\n        // Service Worker registration logic goes here\n    </script>\n</body>\n</html>\n\n\n/* style.css */\nbody { font-family: sans-serif; background-color: #f0f0f0; margin: 20px; }\nh1 { color: #333; }\np { color: #555; }\n\n\n// app.js\nconsole.log('App.js loaded!');\n",
+          "solutionCode": "<!-- index.html -->\n<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n    <meta charset=\"UTF-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <title>Service Worker Demo</title>\n    <link rel=\"stylesheet\" href=\"style.css\">\n</head>\n<body>\n    <h1>Service Worker Caching Demo</h1>\n    <p>Check the network tab to see caching in action. Current Version: <span id=\"version\"></span></p>\n    <script src=\"app.js\"></script>\n    <script>\n        document.getElementById('version').textContent = 'V2'; // Update this to match your CACHE_VERSION\n        if ('serviceWorker' in navigator) {\n            window.addEventListener('load', () => {\n                navigator.serviceWorker.register('/sw.js')\n                    .then(registration => {\n                        console.log('Service Worker registered with scope:', registration.scope);\n                    })\n                    .catch(error => {\n                        console.error('Service Worker registration failed:', error);\n                    });\n            });\n        }\n    </script>\n</body>\n</html>\n\n\n/* style.css */\nbody { font-family: sans-serif; background-color: #e0f7fa; margin: 20px; }\nh1 { color: #00796b; }\np { color: #263238; }\n\n\n// app.js\nconsole.log('App.js loaded! (V2)'); // Update content to demonstrate cache busting\n\n\n// sw.js\nconst CACHE_VERSION = 'v2'; // Increment this version number to bust cache\nconst CACHE_NAME = `my-app-cache-${CACHE_VERSION}`;\nconst ASSETS_TO_CACHE = [\n  '/', // The root path is important for offline capabilities\n  '/index.html',\n  '/app.js',\n  '/style.css'\n];\n\n// Install event: pre-cache static assets\nself.addEventListener('install', event => {\n  console.log(`[SW] Installing Service Worker ${CACHE_VERSION}...`);\n  event.waitUntil(\n    caches.open(CACHE_NAME)\n      .then(cache => {\n        console.log('[SW] Pre-caching assets...');\n        return cache.addAll(ASSETS_TO_CACHE);\n      })\n      .catch(error => {\n        console.error('[SW] Pre-caching failed:', error);\n      })\n  );\n  self.skipWaiting(); // Forces the waiting service worker to become the active service worker.\n});\n\n// Activate event: clean up old caches\nself.addEventListener('activate', event => {\n  console.log(`[SW] Activating new Service Worker ${CACHE_VERSION}...`);\n  event.waitUntil(\n    caches.keys().then(cacheNames => {\n      return Promise.all(\n        cacheNames.map(cacheName => {\n          if (cacheName !== CACHE_NAME && cacheName.startsWith('my-app-cache-')) {\n            console.log('[SW] Deleting old cache:', cacheName);\n            return caches.delete(cacheName);\n          }\n        })\n      );\n    })\n  );\n  self.clients.claim(); // Immediately takes control of clients\n});\n\n// Fetch event: Cache First, then Network strategy\nself.addEventListener('fetch', event => {\n  event.respondWith(\n    caches.match(event.request) // Try to find a match in the cache\n      .then(cachedResponse => {\n        if (cachedResponse) {\n          console.log('[SW] Serving from cache:', event.request.url);\n          return cachedResponse;\n        }\n\n        // If not found in cache, go to network\n        console.log('[SW] Fetching from network:', event.request.url);\n        return fetch(event.request)\n          .then(networkResponse => {\n            // Check if response is valid before caching\n            if (!networkResponse || networkResponse.status !== 200 || networkResponse.type !== 'basic') {\n              return networkResponse;\n            }\n            \n            // Clone the response because it's a stream and can only be consumed once\n            const responseToCache = networkResponse.clone();\n            caches.open(CACHE_NAME)\n              .then(cache => {\n                cache.put(event.request, responseToCache);\n              });\n            return networkResponse;\n          })\n          .catch(error => {\n            console.error('[SW] Fetch failed, and no cache match:', event.request.url, error);\n            // This catch is for network failures. You might return an offline fallback here.\n            // For this basic example, we'll just let the original error propagate if no cache.\n          });\n      })\n  );\n});\n",
+          "testCases": [
+            "1.  **Initial Load (V1 -> V1)**:\n    *   Open `index.html` for the first time.\n    *   Verify `sw.js` is registered.\n    *   Network tab: `index.html`, `app.js`, `style.css` should show 'ServiceWorker' in the Size/Transfer column (or similar indication they are served by SW after first network fetch and caching).\n    *   Application Console: Should log '[SW] Installing...', '[SW] Pre-caching assets...'.\n2.  **Subsequent Load (V1 -> V1)**:\n    *   Close and reopen the browser tab (or hard refresh if needed).\n    *   Network tab: `index.html`, `app.js`, `style.css` should show 'ServiceWorker' or 'disk cache', indicating they are served from cache without network request.\n3.  **Cache Busting (V1 -> V2)**:\n    *   Modify `app.js` (e.g., change `console.log('App.js loaded!');` to `console.log('App.js loaded! (V2)');`).\n    *   Modify `style.css` (e.g., change `background-color` to `e0f7fa`).\n    *   **Crucially, increment `CACHE_VERSION` in `sw.js` (e.g., `const CACHE_VERSION = 'v2';`)**.\n    *   Open `index.html`.\n    *   Initially, the old content might be served from `V1` cache (due to Service Worker update cycle).\n    *   Perform a *second* refresh or close/reopen tab.\n    *   Verify that `app.js` and `style.css` now reflect the V2 changes (new console log, new background color).\n    *   Network tab: Verify the new `V2` assets are loaded (either from network then cached, or directly from new SW cache).\n    *   Application Console: Should log '[SW] Activating new Service Worker v2...' and '[SW] Deleting old cache: my-app-cache-v1'."
+          ],
+          "hints": [
+            "Make sure your Service Worker file (`sw.js`) is at the root of your project or served from a path that allows it to control the desired scope (e.g., `/` for the entire app).",
+            "The `self.skipWaiting()` in `install` and `self.clients.claim()` in `activate` are useful for immediate updates but can be tricky in production. For this exercise, they help demonstrate the update cycle.",
+            "Remember to `clone()` the network response before `put()`ting it into the cache because responses are streams and can only be consumed once.",
+            "To test cache busting, you must increment the `CACHE_VERSION` variable in `sw.js` and then refresh the page twice (or close/reopen the tab) to ensure the new Service Worker takes control and cleans up the old cache."
+          ],
+          "tags": [
+            "Service Worker",
+            "Caching",
+            "PWA",
+            "Offline",
+            "JavaScript",
+            "Performance"
+          ],
+          "timeEstimate": 90,
+          "prerequisites": [
+            "javascript_promises",
+            "fetch_api",
+            "service_worker_basics"
+          ],
+          "complexity": 9,
+          "interviewRelevance": 10,
+          "learningPath": "advanced",
+          "relatedConcepts": [
+            "http_caching",
+            "service_worker_lifecycle",
+            "cache_first_strategy",
+            "cache_busting"
+          ]
+        },
+        {
+          "id": "task_react_memoization_1",
+          "title": "Optimize a React Data Table with Memoization",
+          "description": "\nYour task is to optimize a React component that renders a large data table. The table receives `data` (an array of items) and `columns` (an array of column definitions). It also has a `filterText` state to filter the data and a `sortOrder` state to sort it. The table component (`DataTable`) should be optimized to prevent unnecessary re-renders, and any expensive data processing (filtering, sorting) should also be memoized.\n\n**Requirements:**\n1.  Wrap the `DataTable` component with `React.memo`.\n2.  Inside `DataTable`, use `useMemo` to memoize the `filteredAndSortedData` array. This array should only be recomputed if `data`, `filterText`, or `sortOrder` change.\n3.  Ensure the `filterText` and `sortOrder` states are managed in a parent component (`App`).\n4.  Add a dummy state to the parent (`App`) that causes it to re-render without affecting the table's props, to verify `React.memo`'s effectiveness (e.g., a simple counter).\n5.  Include `console.log` statements to observe when `App` renders, `DataTable` renders, and when the data filtering/sorting logic re-executes.\n\n**Data Structure Example:**\n`[{ id: 1, name: 'Apple', category: 'Fruit', price: 1.0 }, ...]`",
+          "difficulty": "hard",
+          "startingCode": "import React, { useState } from 'react';\n\nconst DataTable = ({ data, filterText, sortOrder }) => {\n  console.log('DataTable (component) rendered');\n\n  // Unoptimized filtering and sorting (should be memoized)\n  let processedData = [...data];\n  if (filterText) {\n    processedData = processedData.filter(item => \n      item.name.toLowerCase().includes(filterText.toLowerCase())\n    );\n  }\n  processedData.sort((a, b) => {\n    if (sortOrder === 'asc') return a.name.localeCompare(b.name);\n    if (sortOrder === 'desc') return b.name.localeCompare(a.name);\n    return 0;\n  });\n  console.log('Filtering and sorting data...');\n\n  return (\n    <div style={{ margin: '20px', border: '1px solid #ccc', padding: '10px' }}>\n      <h2>Data Table ({processedData.length} items)</h2>\n      <input \n        type=\"text\" \n        placeholder=\"Filter by name...\" \n        value={filterText}\n        onChange={() => {}}\n      />\n      <select value={sortOrder} onChange={() => {}}>\n        <option value=\"\">No Sort</option>\n        <option value=\"asc\">Name A-Z</option>\n        <option value=\"desc\">Name Z-A</option>\n      </select>\n      <table>\n        <thead>\n          <tr>\n            <th>ID</th>\n            <th>Name</th>\n            <th>Category</th>\n            <th>Price</th>\n          </tr>\n        </thead>\n        <tbody>\n          {processedData.map(item => (\n            <tr key={item.id}>\n              <td>{item.id}</td>\n              <td>{item.name}</td>\n              <td>{item.category}</td>\n              <td>{item.price}</td>\n            </tr>\n          ))}\n        </tbody>\n      </table>\n    </div>\n  );\n};\n\nconst App = () => {\n  const [filter, setFilter] = useState('');\n  const [sort, setSort] = useState('');\n  // Add dummy state here\n\n  const mockData = [\n    { id: 1, name: 'Apple', category: 'Fruit', price: 1.0 },\n    { id: 2, name: 'Banana', category: 'Fruit', price: 0.5 },\n    { id: 3, name: 'Carrot', category: 'Vegetable', price: 0.75 },\n    { id: 4, name: 'Dates', category: 'Fruit', price: 2.0 },\n    { id: 5, name: 'Eggplant', category: 'Vegetable', price: 1.25 }\n  ];\n\n  console.log('App (component) rendered');\n\n  return (\n    <div>\n      {/* Render DataTable here */}\n    </div>\n  );\n};\n\nexport default App;\n",
+          "solutionCode": "import React, { useState, useMemo, useCallback } from 'react';\n\n// DataTable component wrapped with React.memo\nconst DataTable = React.memo(({ data, filterText, sortOrder, onFilterChange, onSortChange }) => {\n  console.log('DataTable (component) rendered');\n\n  // Memoize the filtering and sorting operation\n  const filteredAndSortedData = useMemo(() => {\n    console.log('Filtering and sorting data...'); // This should only log when data, filterText, or sortOrder changes\n    let processedData = [...data];\n    if (filterText) {\n      processedData = processedData.filter(item => \n        item.name.toLowerCase().includes(filterText.toLowerCase())\n      );\n    }\n    processedData.sort((a, b) => {\n      if (sortOrder === 'asc') return a.name.localeCompare(b.name);\n      if (sortOrder === 'desc') return b.name.localeCompare(a.name);\n      return 0;\n    });\n    return processedData;\n  }, [data, filterText, sortOrder]); // Dependencies for useMemo\n\n  return (\n    <div style={{ margin: '20px', border: '1px solid #ccc', padding: '10px' }}>\n      <h2>Data Table ({filteredAndSortedData.length} items)</h2>\n      <input \n        type=\"text\" \n        placeholder=\"Filter by name...\" \n        value={filterText}\n        onChange={onFilterChange} // Use memoized callback from parent\n      />\n      <select value={sortOrder} onChange={onSortChange}> {/* Use memoized callback from parent */}\n        <option value=\"\">No Sort</option>\n        <option value=\"asc\">Name A-Z</option>\n        <option value=\"desc\">Name Z-A</option>\n      </select>\n      <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: '15px' }}>\n        <thead>\n          <tr style={{ background: '#f0f0f0' }}>\n            <th style={{ padding: '8px', border: '1px solid #ddd', textAlign: 'left' }}>ID</th>\n            <th style={{ padding: '8px', border: '1px solid #ddd', textAlign: 'left' }}>Name</th>\n            <th style={{ padding: '8px', border: '1px solid #ddd', textAlign: 'left' }}>Category</th>\n            <th style={{ padding: '8px', border: '1px solid #ddd', textAlign: 'left' }}>Price</th>\n          </tr>\n        </thead>\n        <tbody>\n          {filteredAndSortedData.map(item => (\n            <tr key={item.id}>\n              <td style={{ padding: '8px', border: '1px solid #ddd' }}>{item.id}</td>\n              <td style={{ padding: '8px', border: '1px solid #ddd' }}>{item.name}</td>\n              <td style={{ padding: '8px', border: '1px solid #ddd' }}>{item.category}</td>\n              <td style={{ padding: '8px', border: '1px solid #ddd' }}>{item.price.toFixed(2)}</td>\n            </tr>\n          ))}\n          {filteredAndSortedData.length === 0 && (\n            <tr><td colSpan=\"4\" style={{ textAlign: 'center', padding: '10px' }}>No items found</td></tr>\n          )}\n        </tbody>\n      </table>\n    </div>\n  );\n});\n\nconst App = () => {\n  const [filter, setFilter] = useState('');\n  const [sort, setSort] = useState('');\n  const [dummyCounter, setDummyCounter] = useState(0); // Dummy state for parent re-renders\n\n  const mockData = useMemo(() => [\n    { id: 1, name: 'Apple', category: 'Fruit', price: 1.0 },\n    { id: 2, name: 'Banana', category: 'Fruit', price: 0.5 },\n    { id: 3, name: 'Carrot', category: 'Vegetable', price: 0.75 },\n    { id: 4, name: 'Dates', category: 'Fruit', price: 2.0 },\n    { id: 5, name: 'Eggplant', category: 'Vegetable', price: 1.25 },\n    { id: 6, name: 'Fig', category: 'Fruit', price: 1.5 },\n    { id: 7, name: 'Grape', category: 'Fruit', price: 3.0 },\n    { id: 8, name: 'Honey', category: 'Sweetener', price: 5.0 },\n  ], []); // Memoize mockData so its reference is stable\n\n  // Memoize event handlers for DataTable props\n  const handleFilterChange = useCallback((e) => {\n    setFilter(e.target.value);\n  }, []); // No dependencies, as setFilter is stable\n\n  const handleSortChange = useCallback((e) => {\n    setSort(e.target.value);\n  }, []); // No dependencies, as setSort is stable\n\n  console.log('App (component) rendered. Dummy Counter:', dummyCounter);\n\n  return (\n    <div style={{ padding: '20px' }}>\n      <h1>My Product Dashboard</h1>\n      <button onClick={() => setDummyCounter(prev => prev + 1)}>\n        Increment Dummy Counter ({dummyCounter})\n      </button>\n      <DataTable \n        data={mockData} \n        filterText={filter} \n        sortOrder={sort}\n        onFilterChange={handleFilterChange}\n        onSortChange={handleSortChange}\n      />\n    </div>\n  );\n};\n\nexport default App;\n",
+          "testCases": [
+            "1.  **Initial Render**: `App (component) rendered` and `DataTable (component) rendered` should log once. `Filtering and sorting data...` should log once.",
+            "2.  **Change Filter Text**: Typing in the filter input should cause `App` to re-render, `DataTable` to re-render, and `Filtering and sorting data...` to log *only when the filter text changes* (not on every keystroke if the component re-renders for other reasons, assuming memoization works as intended for the calculation).",
+            "3.  **Change Sort Order**: Changing the sort dropdown should cause `App` to re-render, `DataTable` to re-render, and `Filtering and sorting data...` to log *only when the sort order changes*.",
+            "4.  **Increment Dummy Counter**: Clicking 'Increment Dummy Counter' button:\n    *   `App (component) rendered` should log.\n    *   `DataTable (component) rendered` should *NOT* log (due to `React.memo`).\n    *   `Filtering and sorting data...` should *NOT* log (due to `useMemo`).\n    This is the key test for effective memoization."
+          ],
+          "hints": [
+            "Remember that `React.memo` is a HOC that wraps your functional component.",
+            "The `useMemo` hook takes a function that returns the value to be memoized, and a dependency array.",
+            "For event handlers passed as props to a memoized child, you'll likely need to use `useCallback` in the parent component to ensure their references are stable.",
+            "Always define precise dependency arrays for `useMemo` and `useCallback` to avoid stale closures or over-memoization.",
+            "For the `mockData` array, declaring it inside `App` would cause a new array reference on every render. Consider memoizing it with `useMemo` or defining it outside the component if it's truly static."
+          ],
+          "tags": [
+            "React",
+            "Memoization",
+            "Hooks",
+            "Performance",
+            "Data Table",
+            "Optimization"
+          ],
+          "timeEstimate": 75,
+          "prerequisites": [
+            "react_functional_components",
+            "react_hooks_useState",
+            "react_memo",
+            "useMemo",
+            "useCallback"
+          ],
+          "complexity": 8,
+          "interviewRelevance": 9,
+          "learningPath": "advanced",
+          "relatedConcepts": [
+            "react_memoization",
+            "react_re_renders"
+          ]
+        }
+      ]
+    }
+  }
+]

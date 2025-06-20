@@ -1,0 +1,1568 @@
+[
+  {
+    "id": "c7a239e2-4465-46c6-bde9-1837b3d335a7",
+    "startLine": 5800,
+    "endLine": 5899,
+    "processedDate": "2025-06-17T09:46:54.622Z",
+    "content": {
+      "logicalBlockInfo": {
+        "suggestedEndLine": -1
+      },
+      "theory": [
+        {
+          "id": "theory_debouncing_and_useeffect",
+          "title": "React `useEffect` for Side Effects and Debouncing",
+          "content": "## Understanding `useEffect` Hook\n\nThe `useEffect` hook in React allows you to perform side effects in functional components. Side effects are operations that interact with the outside world or affect things outside the React component tree, such as data fetching, subscriptions, or manually changing the DOM. `useEffect` runs after every render, but you can control when it runs using its dependency array.\n\n### `useEffect` Signature\n\n```typescript\nuseEffect(() => {\n  // Side effect logic\n  return () => {\n    // Cleanup function (optional)\n  };\n}, [dependencies]); // Dependency array (optional)\n```\n\n-   **Callback Function**: Contains the side effect logic. This function runs after every render where the dependencies have changed.\n-   **Cleanup Function (Return Value)**: An optional function returned by the callback. This function runs before the component unmounts and before the effect runs again (if dependencies change). It's crucial for cleaning up resources to prevent memory leaks (e.g., clearing timers, unsubscribing).\n-   **Dependency Array**: An optional array of values. The effect will only re-run if one of the values in this array changes between renders. If omitted, the effect runs after every render. An empty array `[]` means the effect runs only once after the initial render (and cleanup runs on unmount).\n\n### Debouncing with `useEffect`\n\nDebouncing is a technique used to limit the rate at which a function is called. When applied to an input field, it ensures that a function (e.g., an API call for search results) is not executed until a certain amount of time has passed since the user stopped typing. This is crucial for performance and reducing unnecessary network requests.\n\n`useEffect` is ideal for implementing debouncing because it allows you to:\n1.  **Trigger on Change**: Re-run the effect whenever the input value changes.\n2.  **Delay Execution**: Use `setTimeout` to delay the execution of the actual search logic.\n3.  **Cancel Previous Execution**: Use `clearTimeout` in the cleanup function to cancel any pending delayed executions from previous input changes. This ensures that the search function only runs *after* the user has stopped typing for the specified delay.\n\n**Typical Debouncing Flow:**\n1.  User types a character in the input.\n2.  `searchTerm` state updates.\n3.  `useEffect` detects `searchTerm` change.\n4.  The cleanup function from the *previous* `useEffect` run (if any) clears the old timer.\n5.  A new `setTimeout` is set for the `debouncedSearchTerm` update.\n6.  If the user types again before the timeout, steps 3-5 repeat, resetting the timer.\n7.  If the user stops typing, the timeout eventually completes, updating `debouncedSearchTerm`.\n8.  The `useEffect` watching `debouncedSearchTerm` then triggers the actual search API call.",
+          "examples": [
+            {
+              "id": "example_useeffect_basic",
+              "title": "Basic `useEffect` for Logging",
+              "code": "import React, { useState, useEffect } from 'react';\n\nfunction MyComponent() {\n  const [count, setCount] = useState(0);\n\n  useEffect(() => {\n    console.log('Component rendered or count changed:', count);\n    // This runs after every render where 'count' has changed.\n\n    return () => {\n      console.log('Cleanup for count:', count);\n      // This runs before the next effect or on unmount.\n    };\n  }, [count]); // Dependency array\n\n  return (\n    <div>\n      <p>Count: {count}</p>\n      <button onClick={() => setCount(count + 1)}>Increment</button>\n    </div>\n  );\n}",
+              "explanation": "This example demonstrates a basic `useEffect` hook. It logs a message whenever the component renders or the `count` state changes. The cleanup function logs before the effect re-runs or when the component unmounts, showing how resources can be managed.",
+              "language": "typescript"
+            },
+            {
+              "id": "example_useeffect_debouncing",
+              "title": "Debouncing Search Input with `useEffect`",
+              "code": "import React, { useState, useEffect } from 'react';\n\n// Simulate an API call\nconst fetchSearchResults = async (query: string) => {\n  console.log(`Fetching results for: \"${query}\"...`);\n  return new Promise(resolve => {\n    setTimeout(() => {\n      resolve([{ id: 1, name: `Result for ${query}` }]);\n    }, 500);\n  });\n};\n\nfunction SearchBar() {\n  const [searchTerm, setSearchTerm] = useState('');\n  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');\n  const [results, setResults] = useState<{ id: number; name: string }[]>([]);\n\n  // Effect to debounce searchTerm\n  useEffect(() => {\n    const handler = setTimeout(() => {\n      setDebouncedSearchTerm(searchTerm);\n    }, 500); // 500ms debounce delay\n\n    // Cleanup function: clear timeout if searchTerm changes before delay\n    return () => {\n      clearTimeout(handler);\n    };\n  }, [searchTerm]); // Re-run effect whenever searchTerm changes\n\n  // Effect to fetch results when debouncedSearchTerm changes\n  useEffect(() => {\n    if (debouncedSearchTerm) {\n      fetchSearchResults(debouncedSearchTerm).then(results => {\n        setResults(results);\n      });\n    } else {\n      setResults([]);\n    }\n  }, [debouncedSearchTerm]); // Re-run effect whenever debouncedSearchTerm changes\n\n  return (\n    <div>\n      <input\n        value={searchTerm}\n        onChange={e => setSearchTerm(e.target.value)}\n        placeholder=\"Search...\"\n      />\n      <ul>\n        {results.map(result => (\n          <li key={result.id}>{result.name}</li>\n        ))}\n      </ul>\n    </div>\n  );\n}",
+              "explanation": "This example showcases a common pattern for debouncing user input using two `useEffect` hooks. The first `useEffect` manages the `searchTerm` and updates `debouncedSearchTerm` after a delay, ensuring that rapid typing doesn't trigger intermediate updates. Its cleanup function `clearTimeout(handler)` is critical to cancel pending debounces. The second `useEffect` then watches the `debouncedSearchTerm` and triggers the actual (simulated) API call only when the debounced value changes, significantly reducing unnecessary network requests.",
+              "language": "typescript"
+            }
+          ],
+          "relatedQuestions": [
+            "question_debouncing_1",
+            "question_debouncing_2",
+            "question_useeffect_1",
+            "question_useeffect_2",
+            "question_useeffect_3",
+            "question_useeffect_4",
+            "question_useeffect_5"
+          ],
+          "relatedTasks": [
+            "task_debounced_search_input"
+          ],
+          "tags": [
+            "React",
+            "useEffect",
+            "Hooks",
+            "Debouncing",
+            "Performance",
+            "Side Effects",
+            "Frontend Optimization",
+            "Cleanup Function"
+          ],
+          "technology": "React",
+          "prerequisites": [
+            "react_functional_components",
+            "react_state_management"
+          ],
+          "complexity": 6,
+          "interviewRelevance": 8,
+          "learningPath": "intermediate",
+          "requiredFor": [
+            "advanced_form_handling",
+            "realtime_search",
+            "performance_optimization"
+          ]
+        },
+        {
+          "id": "theory_usereducer_usecontext",
+          "title": "Centralized State Management with `useReducer` and `useContext`",
+          "content": "## `useReducer` Hook for Complex State Logic\n\n`useReducer` is a React Hook that is an alternative to `useState` for managing state. It's often preferred for more complex state logic, especially when the next state depends on the previous one, or when state updates involve multiple sub-values. It's inspired by the Redux pattern.\n\n### `useReducer` Signature\n\n```typescript\nconst [state, dispatch] = useReducer(reducer, initialState, init?);\n```\n\n-   **`reducer`**: A pure function that takes the current `state` and an `action` as arguments, and returns the *new* state. It's typically a `switch` statement based on `action.type`.\n-   **`initialState`**: The initial value of the state.\n-   **`init` (optional)**: An optional function to lazily initialize the state. If provided, `initialState` is passed to `init`, and `init`'s return value becomes the initial state.\n-   **`state`**: The current state managed by the reducer.\n-   **`dispatch`**: A function that you call to dispatch an `action`. An `action` is typically an object with a `type` property describing what happened, and often a `payload` with any necessary data.\n\n### `useContext` Hook for Global State Sharing\n\n`useContext` is a React Hook that lets you read and subscribe to a context. Context provides a way to pass data through the component tree without having to pass props down manually at every level (prop drilling).\n\n### `useContext` Flow:\n1.  **Create Context**: `const MyContext = createContext(defaultValue);` creates a Context object.\n2.  **Provide Context**: `<MyContext.Provider value={/* some value */}>` wraps the part of the component tree that needs access to the context. The `value` prop is the data that will be available to consuming components.\n3.  **Consume Context**: `const value = useContext(MyContext);` is used inside a functional component to subscribe to context changes and read its current value.\n\n### Combining `useReducer` and `useContext`\n\nThis combination is a powerful pattern for managing global or complex application state without external libraries like Redux, especially when the state needs to be updated by multiple, deeply nested components.\n\n-   `useReducer` is used in a parent component (often a `Provider` component) to manage the actual state logic.\n-   `useContext` is used to make the `state` and the `dispatch` function available to any descendant component without prop drilling.\n\n### Custom Hooks for Encapsulation\n\nA custom hook (like `useTodo` in the example) is a JavaScript function whose name starts with 'use' and that can call other Hooks. They are a powerful way to reuse stateful logic between components. When combining `useReducer` and `useContext`, a custom hook can abstract away the `useContext` call and provide a more focused API, making components cleaner and more readable.\n\n**Benefits of this pattern:**\n-   **Centralized State Logic**: All state transitions are handled in a single `reducer` function, making it easier to understand and debug.\n-   **Avoids Prop Drilling**: Data and dispatch functions can be accessed by any component within the `Provider`'s scope without explicit prop passing.\n-   **Performance**: `useContext` consumers only re-render when the context `value` changes.\n-   **Scalability**: Well-suited for medium to large applications where state management becomes complex.\n-   **Testability**: Reducer functions are pure and easy to test in isolation.",
+          "examples": [
+            {
+              "id": "example_reducer_context_todo",
+              "title": "Todo App with `useReducer` and `useContext`",
+              "code": "import React, { createContext, useReducer, useContext } from 'react';\n\n// 1. Create Context\nconst TodoContext = createContext<{\n  todos: { id: number; text: string; completed: boolean }[];\n  dispatch: React.Dispatch<any>;\n} | undefined>(undefined);\n\n// 2. Action Types (constants to avoid typos)\nconst ADD_TODO = 'ADD_TODO';\nconst TOGGLE_TODO = 'TOGGLE_TODO';\nconst DELETE_TODO = 'DELETE_TODO';\n\n// 3. Reducer Function\ninterface TodoState { id: number; text: string; completed: boolean }[];\ninterface TodoAction { type: string; payload?: any; }\n\nfunction todoReducer(state: TodoState, action: TodoAction): TodoState {\n  switch (action.type) {\n    case ADD_TODO:\n      return [...state, { id: Date.now(), text: action.payload, completed: false }];\n    case TOGGLE_TODO:\n      return state.map(todo =>\n        todo.id === action.payload ? { ...todo, completed: !todo.completed } : todo\n      );\n    case DELETE_TODO:\n      return state.filter(todo => todo.id !== action.payload);\n    default:\n      return state;\n  }\n}\n\n// 4. Provider Component\nfunction TodoProvider({ children }: { children: React.ReactNode }) {\n  const [todos, dispatch] = useReducer(todoReducer, []); // Initialize with an empty array\n  \n  return (\n    <TodoContext.Provider value={{ todos, dispatch }}>\n      {children}\n    </TodoContext.Provider>\n  );\n}\n\n// 5. Custom Hook to Consume Context\nfunction useTodo() {\n  const context = useContext(TodoContext);\n  if (context === undefined) {\n    throw new Error('useTodo must be used within a TodoProvider');\n  }\n  return context;\n}\n\n// 6. Components that use the context\nfunction TodoList() {\n  const { todos, dispatch } = useTodo();\n  \n  return (\n    <ul>\n      {todos.map(todo => (\n        <li\n          key={todo.id}\n          style={{ textDecoration: todo.completed ? 'line-through' : 'none' }}\n        >\n          <span onClick={() => dispatch({ type: TOGGLE_TODO, payload: todo.id })}>\n            {todo.text}\n          </span>\n          <button\n            onClick={() => dispatch({ type: DELETE_TODO, payload: todo.id })}>\n            Delete\n          </button>\n        </li>\n      ))}\n    </ul>\n  );\n}\n\nfunction AddTodo() {\n  const { dispatch } = useTodo();\n  const [text, setText] = React.useState('');\n\n  const handleSubmit = (e: React.FormEvent) => {\n    e.preventDefault();\n    if (text.trim()) {\n      dispatch({ type: ADD_TODO, payload: text });\n      setText('');\n    }\n  };\n\n  return (\n    <form onSubmit={handleSubmit}>\n      <input\n        type=\"text\"\n        value={text}\n        onChange={(e) => setText(e.target.value)}\n        placeholder=\"Add new todo\"\n      />\n      <button type=\"submit\">Add</button>\n    </form>\n  );\n}\n\n// App component to render everything\nfunction App() {\n  return (\n    <TodoProvider>\n      <h1>My Todo List</h1>\n      <AddTodo />\n      <TodoList />\n    </TodoProvider>\n  );\n}",
+              "explanation": "This comprehensive example demonstrates how `useReducer` and `useContext` are used together to manage a global state for a Todo application. It shows the full lifecycle:\n1.  **`createContext`**: Initializes the context.\n2.  **Action Types**: Defines constant strings for action types.\n3.  **`todoReducer`**: A pure function that dictates how the state changes based on dispatched actions.\n4.  **`TodoProvider`**: A component that uses `useReducer` to manage the `todos` state and then provides both `todos` (state) and `dispatch` (updater) via `TodoContext.Provider` to its children.\n5.  **`useTodo` (Custom Hook)**: A custom hook that simplifies consuming the context, abstracting `useContext(TodoContext)` and providing a helpful error message if used outside the provider.\n6.  **Components (`TodoList`, `AddTodo`)**: These components use `useTodo` to access the global state and dispatch actions without needing to pass props down. The `TodoList` maps over `todos` and dispatches `TOGGLE_TODO` and `DELETE_TODO` actions, while `AddTodo` dispatches `ADD_TODO`.",
+              "language": "typescript"
+            }
+          ],
+          "relatedQuestions": [
+            "question_usereducer_1",
+            "question_usereducer_2",
+            "question_usereducer_3",
+            "question_usecontext_1",
+            "question_usecontext_2",
+            "question_usecontext_3",
+            "question_custom_hook_1",
+            "question_reducer_context_1",
+            "question_reducer_context_2",
+            "question_reducer_context_3",
+            "question_reducer_context_4",
+            "question_reducer_context_5"
+          ],
+          "relatedTasks": [
+            "task_shopping_cart_reducer_context"
+          ],
+          "tags": [
+            "React",
+            "Hooks",
+            "useReducer",
+            "useContext",
+            "State Management",
+            "Global State",
+            "Context API",
+            "Custom Hooks",
+            "Reducer Pattern",
+            "Prop Drilling",
+            "Architecture"
+          ],
+          "technology": "React",
+          "prerequisites": [
+            "react_functional_components",
+            "react_state_management",
+            "javascript_functions"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 9,
+          "learningPath": "advanced",
+          "requiredFor": [
+            "complex_state_management",
+            "large_scale_react_apps",
+            "application_architecture"
+          ]
+        }
+      ],
+      "questions": [
+        {
+          "id": "question_useeffect_1",
+          "topic": "React `useEffect` Hook",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "What is the primary purpose of the `useEffect` hook in React?",
+          "answer": "`useEffect` allows you to perform side effects in functional components, such as data fetching, subscriptions, or manually changing the DOM.",
+          "options": [],
+          "analysisPoints": [],
+          "keyConcepts": [
+            "useEffect",
+            "Side Effects"
+          ],
+          "evaluationCriteria": [
+            "Understanding of fundamental principles"
+          ],
+          "example": "",
+          "tags": [
+            "React",
+            "useEffect",
+            "Hooks"
+          ],
+          "prerequisites": [],
+          "complexity": 2,
+          "interviewFrequency": 7,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_useeffect_2",
+          "topic": "React `useEffect` Cleanup",
+          "level": "medium",
+          "type": "mcq",
+          "question": "What is the purpose of the return function within a `useEffect` hook, and when is it executed?\n\n```javascript\nuseEffect(() => {\n  // Effect logic\n  return () => {\n    // Cleanup logic\n  };\n}, [dependencies]);\n```",
+          "answer": "The return function is a cleanup function that runs before the component unmounts and before the effect runs again due to dependency changes.",
+          "options": [
+            "It's a function that returns the state to be updated, executed after the effect completes.",
+            "It's a cleanup function that runs only when the component unmounts.",
+            "The return function is a cleanup function that runs before the component unmounts and before the effect runs again due to dependency changes.",
+            "It's an optional function for error handling, executed if the effect encounters an error."
+          ],
+          "analysisPoints": [
+            "Tests understanding of `useEffect`'s lifecycle.",
+            "Distinguishes between unmount and re-run cleanup.",
+            "Highlights the importance of resource management."
+          ],
+          "keyConcepts": [
+            "useEffect",
+            "Cleanup Function",
+            "Side Effects",
+            "Component Lifecycle"
+          ],
+          "evaluationCriteria": [
+            "Understanding of `useEffect` lifecycle",
+            "Ability to distinguish between similar concepts"
+          ],
+          "example": "The cleanup function is vital for preventing memory leaks. For instance, if `useEffect` sets up a timer (`setTimeout`) or an event listener, the cleanup function `clearTimeout` or `removeEventListener` ensures that these resources are released when the component is no longer needed or the effect is re-executed with new dependencies. Without proper cleanup, previous timers or listeners might continue to run, consuming resources or causing unexpected behavior.",
+          "tags": [
+            "React",
+            "useEffect",
+            "Hooks",
+            "Cleanup"
+          ],
+          "prerequisites": [
+            "react_functional_components"
+          ],
+          "complexity": 5,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_useeffect_3",
+          "topic": "React `useEffect` Dependency Array",
+          "level": "medium",
+          "type": "mcq",
+          "question": "Consider the following `useEffect` usage:\n\n```javascript\nfunction MyComponent({ propValue }) {\n  const [count, setCount] = useState(0);\n\n  useEffect(() => {\n    console.log('Effect ran with count:', count, 'and propValue:', propValue);\n  }, [propValue]);\n\n  return (\n    <div>\n      <button onClick={() => setCount(count + 1)}>Increment Count</button>\n      <p>Count: {count}</p>\n      <p>Prop: {propValue}</p>\n    </div>\n  );\n}\n```\n\nWhen will the `console.log` inside `useEffect` be executed?",
+          "answer": "Only when `propValue` changes, or on the initial mount.",
+          "options": [
+            "After every render of `MyComponent`.",
+            "Only when `count` changes.",
+            "Only when `propValue` changes, or on the initial mount.",
+            "Only once, after the initial mount."
+          ],
+          "analysisPoints": [
+            "Tests understanding of the `useEffect` dependency array.",
+            "Highlights that `useEffect` only re-runs if dependencies change.",
+            "Emphasizes that variables *not* in the dependency array but used in the effect might be stale if `eslint-plugin-react-hooks` is not used."
+          ],
+          "keyConcepts": [
+            "useEffect",
+            "Dependency Array",
+            "Side Effects"
+          ],
+          "evaluationCriteria": [
+            "Understanding of `useEffect`'s re-render logic",
+            "Ability to interpret code snippets"
+          ],
+          "example": "The `useEffect` hook with a dependency array `[propValue]` means the effect callback will only re-execute if `propValue` has a different value between renders, in addition to running after the initial mount. Changes to `count` will *not* trigger this specific effect, although `count`'s value *inside* the effect will reflect its initial value from the render when the effect was last run, not its current value if `count` changes without `propValue` changing. This is a common source of bugs if `count` were intended to be part of the dependencies but omitted.",
+          "tags": [
+            "React",
+            "useEffect",
+            "Hooks",
+            "Dependencies"
+          ],
+          "prerequisites": [
+            "react_functional_components"
+          ],
+          "complexity": 6,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_debouncing_1",
+          "topic": "Debouncing",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "What is debouncing in the context of user input?",
+          "answer": "Debouncing is a technique to limit how often a function is called. For user input, it delays the execution of a function until a certain amount of time has passed since the user last performed an action (e.g., typed a character).",
+          "options": [],
+          "analysisPoints": [],
+          "keyConcepts": [
+            "Debouncing",
+            "Performance Optimization"
+          ],
+          "evaluationCriteria": [
+            "Understanding of core concept"
+          ],
+          "example": "",
+          "tags": [
+            "Debouncing",
+            "Performance"
+          ],
+          "prerequisites": [],
+          "complexity": 3,
+          "interviewFrequency": 7,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_debouncing_2",
+          "topic": "Debouncing Implementation",
+          "level": "medium",
+          "type": "open",
+          "question": "Explain how `setTimeout` and `clearTimeout` are used together within `useEffect` to implement a debouncing mechanism for a search input.",
+          "answer": "To implement debouncing with `useEffect`, you typically use two state variables: one for the immediate input value (`searchTerm`) and one for the debounced value (`debouncedSearchTerm`).\n\n1.  **`setTimeout`**: Inside a `useEffect` that depends on `searchTerm`, you set a `setTimeout` to update `debouncedSearchTerm` after a specified delay (e.g., 500ms). This delays the actual search logic.\n2.  **`clearTimeout`**: The crucial part is the cleanup function returned by `useEffect`. This cleanup function calls `clearTimeout` on the timer ID obtained from `setTimeout`. If the `searchTerm` changes again before the delay completes, the previous `setTimeout` is cleared, effectively resetting the debounce timer. The `debouncedSearchTerm` is only updated when the user *stops* typing for the duration of the delay, and thus the `useEffect` watching `debouncedSearchTerm` triggers the search API call.",
+          "options": [],
+          "analysisPoints": [
+            "Ability to articulate the debouncing logic.",
+            "Understanding of the role of `setTimeout` for delay.",
+            "Understanding of the role of `clearTimeout` for cancellation and resetting the timer.",
+            "Connecting `useEffect`'s dependency array and cleanup to the debouncing pattern."
+          ],
+          "keyConcepts": [
+            "Debouncing",
+            "useEffect",
+            "setTimeout",
+            "clearTimeout",
+            "Cleanup Function"
+          ],
+          "evaluationCriteria": [
+            "Detailed explanation",
+            "Correct usage of relevant APIs",
+            "Understanding of the interplay between `setTimeout`, `clearTimeout`, and `useEffect` lifecycle"
+          ],
+          "example": "See `example_useeffect_debouncing` in theory for code. The key is that `return () => clearTimeout(handler)` ensures that if `searchTerm` changes rapidly, the `setDebouncedSearchTerm` for the previous `searchTerm` is cancelled before it can execute. Only the `setDebouncedSearchTerm` associated with the *last* `searchTerm` after the user stops typing will successfully run.",
+          "tags": [
+            "Debouncing",
+            "useEffect",
+            "Performance",
+            "Interview Question"
+          ],
+          "prerequisites": [
+            "javascript_timers",
+            "react_useeffect"
+          ],
+          "complexity": 7,
+          "interviewFrequency": 9,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_useeffect_4",
+          "topic": "Debouncing Code Challenge",
+          "level": "medium",
+          "type": "code",
+          "question": "Implement a custom React hook `useDebounce` that takes a value and a delay, and returns a debounced version of that value. This hook should be reusable for any value, not just search terms.",
+          "answer": "See `tasks_debounced_search_input` solution, specifically the `useDebounce` hook.",
+          "options": [],
+          "analysisPoints": [
+            "Correctly using `useState` and `useEffect`.",
+            "Properly setting and clearing timers (`setTimeout`, `clearTimeout`).",
+            "Understanding how to encapsulate logic in a custom hook.",
+            "Handling edge cases like initial render or delay changes."
+          ],
+          "keyConcepts": [
+            "Custom Hooks",
+            "Debouncing",
+            "useEffect",
+            "setTimeout",
+            "clearTimeout"
+          ],
+          "evaluationCriteria": [
+            "Functional correctness",
+            "Code readability",
+            "Reusability",
+            "Proper hook usage"
+          ],
+          "example": "```typescript\nimport React, { useState, useEffect } from 'react';\n\nfunction useDebounce<T>(value: T, delay: number): T {\n  const [debouncedValue, setDebouncedValue] = useState<T>(value);\n\n  useEffect(() => {\n    const handler = setTimeout(() => {\n      setDebouncedValue(value);\n    }, delay);\n\n    return () => {\n      clearTimeout(handler);\n    };\n  }, [value, delay]);\n\n  return debouncedValue;\n}\n\n// Example usage:\nfunction DebouncedInput() {\n  const [inputValue, setInputValue] = useState('');\n  const debouncedInputValue = useDebounce(inputValue, 500);\n\n  useEffect(() => {\n    // This effect runs only when debouncedInputValue changes\n    console.log('Debounced value:', debouncedInputValue);\n    // e.g., fetch data based on debouncedInputValue\n  }, [debouncedInputValue]);\n\n  return (\n    <input\n      type=\"text\"\n      value={inputValue}\n      onChange={(e) => setInputValue(e.target.value)}\n      placeholder=\"Type to debounce...\"\n    />\n  );\n}\n```",
+          "tags": [
+            "React",
+            "Custom Hooks",
+            "Debouncing",
+            "Coding Challenge"
+          ],
+          "prerequisites": [
+            "react_useeffect",
+            "react_usestate",
+            "javascript_closures"
+          ],
+          "complexity": 7,
+          "interviewFrequency": 9,
+          "learningPath": "advanced"
+        },
+        {
+          "id": "question_useeffect_5",
+          "topic": "UseEffect Lifecycle",
+          "level": "hard",
+          "type": "open",
+          "question": "Describe the lifecycle of `useEffect` with dependencies and a cleanup function. Provide a scenario where incorrectly omitting a dependency from the dependency array could lead to a bug.",
+          "answer": "The lifecycle of `useEffect` with dependencies and a cleanup function is as follows:\n1.  **Initial Render**: After the component mounts for the first time, `useEffect`'s callback function is executed.\n2.  **Dependency Change**: On subsequent renders, React compares the current values in the dependency array with their values from the previous render. If any dependency has changed:\n    a.  The *cleanup function* from the *previous* effect run (if one was returned) is executed.\n    b.  The new `useEffect` callback function is then executed.\n3.  **Component Unmount**: When the component unmounts, the *cleanup function* from the *last* effect run is executed.\n\n**Scenario for omitted dependency bug (Stale Closures):**\nConsider a chat application where `useEffect` subscribes to a chat room. You want to display a message count from a `count` state variable.\n\n```javascript\nfunction ChatRoom({ roomId }) {\n  const [count, setCount] = useState(0);\n\n  useEffect(() => {\n    const handleMessage = (message) => {\n      // This 'count' will be stale if not in dependencies\n      setCount(prevCount => prevCount + 1);\n      console.log(`New message in ${roomId}. Total messages: ${count}`); \n    };\n\n    const subscription = subscribeToChat(roomId, handleMessage);\n    \n    return () => {\n      unsubscribeFromChat(subscription);\n    };\n  }, [roomId]); // 'count' is omitted from dependencies\n\n  return (\n    <div>\n      <p>Messages in {roomId}: {count}</p>\n      {/* ... */}\n    </div>\n  );\n}\n```\n\n**Bug**: If `count` is omitted from the dependency array `[roomId]`, the `handleMessage` function (which forms a closure over `count`) will always capture the `count` value from the render when `useEffect` *last* ran. So, if `roomId` never changes, `useEffect` only runs once on mount. When `handleMessage` is called multiple times, `console.log(count)` will always print `0` (or whatever `count` was initially) because the closure around `handleMessage` captured that initial `count` value. While `setCount(prevCount => prevCount + 1)` correctly updates the state using the functional update, the `console.log` would reflect the stale `count` from the closure.\n\n**Solution**: Include `count` in the dependency array if you intend to use its current value, or more commonly, use a functional update for `setCount` (`setCount(prevCount => prevCount + 1)`) to avoid needing `count` in dependencies for state updates, but be mindful of any other variables used within the effect's closure that need to be up-to-date. In this `console.log` scenario, the `count` in the log would still be stale without including it or making it a ref, or simply removing it if its up-to-date value isn't critical for the side effect itself. The ESLint rule `exhaustive-deps` helps catch such issues.",
+          "options": [],
+          "analysisPoints": [
+            "Comprehensive understanding of `useEffect` lifecycle including initial run, dependency change, and unmount.",
+            "Ability to explain the concept of stale closures in `useEffect`.",
+            "Provide a concrete, realistic example of a bug caused by missing dependencies.",
+            "Demonstrate knowledge of how to mitigate such bugs (e.g., functional updates, `useRef`, `exhaustive-deps` ESLint rule)."
+          ],
+          "keyConcepts": [
+            "useEffect Lifecycle",
+            "Dependencies",
+            "Cleanup Function",
+            "Stale Closures",
+            "Bugs in React",
+            "ESLint"
+          ],
+          "evaluationCriteria": [
+            "Depth of explanation",
+            "Accuracy of lifecycle steps",
+            "Clarity of bug example",
+            "Proposed solutions"
+          ],
+          "example": "",
+          "tags": [
+            "React",
+            "useEffect",
+            "Hooks",
+            "Advanced",
+            "Interview Question",
+            "Bugs",
+            "Performance"
+          ],
+          "prerequisites": [
+            "react_useeffect",
+            "javascript_closures"
+          ],
+          "complexity": 8,
+          "interviewFrequency": 7,
+          "learningPath": "advanced"
+        },
+        {
+          "id": "question_usereducer_1",
+          "topic": "React `useReducer` Hook",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "When is `useReducer` generally preferred over `useState` for managing component state?",
+          "answer": "`useReducer` is preferred for more complex state logic, when the next state depends on the previous one, or when state updates involve multiple sub-values (e.g., multiple related fields in a form, or complex transitions).",
+          "options": [],
+          "analysisPoints": [],
+          "keyConcepts": [
+            "useReducer",
+            "useState",
+            "State Management"
+          ],
+          "evaluationCriteria": [
+            "Understanding of hook choice criteria"
+          ],
+          "example": "",
+          "tags": [
+            "React",
+            "useReducer",
+            "Hooks"
+          ],
+          "prerequisites": [],
+          "complexity": 3,
+          "interviewFrequency": 7,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_usereducer_2",
+          "topic": "React `useReducer` Action Types",
+          "level": "medium",
+          "type": "mcq",
+          "question": "In the `todoReducer` function provided previously:\n\n```javascript\nfunction todoReducer(state, action) {\n  switch (action.type) {\n    case ADD_TODO:\n      return [...state, { id: Date.now(), text: action.payload, completed: false }];\n    case TOGGLE_TODO:\n      return state.map(todo =>\n        todo.id === action.payload ? { ...todo, completed: !todo.completed } : todo\n      );\n    case DELETE_TODO:\n      return state.filter(todo => todo.id !== action.payload);\n    default:\n      return state;\n  }\n}\n```\n\nWhat is the role of `action.payload` and what would happen if `action.payload` was missing when dispatching a `TOGGLE_TODO` action?",
+          "answer": "The `action.payload` carries the data necessary for the reducer to perform the state update. If it's missing for `TOGGLE_TODO`, the reducer wouldn't know which todo item to toggle, leading to an incorrect state or an error.",
+          "options": [
+            "It specifies the reducer function to be called; the reducer would still work if it's missing.",
+            "It's an optional message for debugging; the action would still process normally.",
+            "The `action.payload` carries the data necessary for the reducer to perform the state update. If it's missing for `TOGGLE_TODO`, the reducer wouldn't know which todo item to toggle, leading to an incorrect state or an error.",
+            "It indicates the urgency of the action; the action would default to low urgency."
+          ],
+          "analysisPoints": [
+            "Tests understanding of action structure in `useReducer`.",
+            "Highlights the importance of `payload` for data transfer.",
+            "Predicting consequences of missing data."
+          ],
+          "keyConcepts": [
+            "useReducer",
+            "Actions",
+            "Payload",
+            "Reducer Pattern"
+          ],
+          "evaluationCriteria": [
+            "Understanding of action structure",
+            "Ability to reason about code behavior"
+          ],
+          "example": "In Redux or `useReducer` patterns, actions are objects that describe 'what happened'. The `type` property describes the event, and `payload` typically holds any relevant data needed to update the state. For `TOGGLE_TODO`, the `payload` is crucial because it provides the `id` of the specific todo item that needs to be toggled. Without it, the `state.map` operation's condition (`todo.id === action.payload`) would fail to find a match, leading to no item being toggled.",
+          "tags": [
+            "React",
+            "useReducer",
+            "Actions",
+            "State Management"
+          ],
+          "prerequisites": [
+            "react_use_reducer"
+          ],
+          "complexity": 6,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_usereducer_3",
+          "topic": "React `useReducer` vs `useState`",
+          "level": "medium",
+          "type": "open",
+          "question": "Compare and contrast `useState` and `useReducer` in React. Provide scenarios where each would be the more appropriate choice.",
+          "answer": "**`useState`**\n*   **Purpose**: Simpler state management for individual primitive values or simple objects/arrays.\n*   **API**: Returns the current state and a setter function (`[state, setState] = useState(initialState)`).\n*   **Updates**: Direct updates, e.g., `setCount(count + 1)` or `setObject({ ...object, key: value })`.\n*   **Scenarios**: Toggling boolean flags, managing input field values, simple counters, or any state that doesn't have complex transitions or depend heavily on previous states.\n\n**`useReducer`**\n*   **Purpose**: More powerful state management for complex state logic, especially when state transitions are explicit and involve multiple sub-values, or when the next state depends on the previous one in a non-trivial way.\n*   **API**: Returns the current state and a `dispatch` function (`[state, dispatch] = useReducer(reducer, initialState)`).\n*   **Updates**: Updates are performed by dispatching 'actions' (objects describing 'what happened') to a separate `reducer` function, which then computes the new state.\n*   **Scenarios**: Shopping carts, complex forms with interdependencies, managing multiple related pieces of state (e.g., loading, error, data states for an API call), or when you prefer a Redux-like state management pattern.\n\n**Comparison:**\n*   **Simplicity**: `useState` is simpler for basic cases. `useReducer` has a steeper learning curve due to the reducer pattern.\n*   **Logic Separation**: `useReducer` cleanly separates state logic (in the reducer function) from component rendering logic. `useState` often leads to state logic being intertwined with component logic.\n*   **Predictability**: `useReducer` can lead to more predictable state updates, especially with complex transitions, as all state changes go through the reducer.\n*   **Performance**: For deeply nested updates, `useReducer` can sometimes be more performant as React can optimize re-renders if the `dispatch` function (which is stable) is passed down instead of multiple `setState` functions.\n*   **Bundle Size**: `useReducer` has a slightly larger footprint than `useState` due to the additional logic involved.\n\n**When to choose:**\n*   **`useState`**: For simple, independent state variables (e.g., `const [isOpen, setIsOpen] = useState(false);`).\n*   **`useReducer`**: For complex state that has multiple, interconnected updates, or when you want to centralize state transition logic (e.g., a multi-step form, a game state, a shopping cart). It's also great when state updates are dispatched from deeply nested components, as `dispatch` is stable and doesn't need to be in dependency arrays.\n\nIn summary, `useState` is great for simple, localized state, while `useReducer` excels at managing more elaborate, predictable state transitions, especially when combined with `useContext` for global state.",
+          "options": [],
+          "analysisPoints": [
+            "Clear distinction between `useState` and `useReducer` APIs.",
+            "Accurate identification of use cases for each hook.",
+            "Discussion of pros and cons (simplicity, logic separation, predictability, performance).",
+            "Structured comparison with concrete examples."
+          ],
+          "keyConcepts": [
+            "useState",
+            "useReducer",
+            "State Management",
+            "React Hooks",
+            "Reducer Pattern"
+          ],
+          "evaluationCriteria": [
+            "Comprehensive comparison",
+            "Contextual understanding",
+            "Clarity and organization"
+          ],
+          "example": "",
+          "tags": [
+            "React",
+            "Hooks",
+            "State Management",
+            "Interview Question"
+          ],
+          "prerequisites": [
+            "react_functional_components"
+          ],
+          "complexity": 7,
+          "interviewFrequency": 9,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_usecontext_1",
+          "topic": "React `useContext` Hook",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "What problem does `useContext` primarily solve in React applications?",
+          "answer": "`useContext` primarily solves 'prop drilling', allowing data to be passed deeply through the component tree without manually passing props at every level.",
+          "options": [],
+          "analysisPoints": [],
+          "keyConcepts": [
+            "useContext",
+            "Prop Drilling",
+            "Context API"
+          ],
+          "evaluationCriteria": [
+            "Understanding of core problem solved"
+          ],
+          "example": "",
+          "tags": [
+            "React",
+            "useContext",
+            "Hooks"
+          ],
+          "prerequisites": [],
+          "complexity": 3,
+          "interviewFrequency": 7,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_usecontext_2",
+          "topic": "React `useContext` Usage",
+          "level": "medium",
+          "type": "mcq",
+          "question": "Given the following React Context setup:\n\n```javascript\nimport React, { createContext, useContext } from 'react';\n\nconst ThemeContext = createContext('light');\n\nfunction ThemeProvider({ children }) {\n  const [theme, setTheme] = React.useState('light');\n  return (\n    <ThemeContext.Provider value={theme}>\n      {children}\n    </ThemeContext.Provider>\n  );\n}\n\nfunction ThemedComponent() {\n  // Line A: How to access the theme value here?\n  return <p>Current Theme: {themeValue}</p>;\n}\n\nfunction App() {\n  return (\n    <ThemeProvider>\n      <ThemedComponent />\n    </ThemeProvider>\n  );\n}\n```\n\nWhich line correctly accesses the `theme` value within `ThemedComponent`?",
+          "answer": "```javascript\nconst themeValue = useContext(ThemeContext);\n```",
+          "options": [
+            "```javascript\nconst themeValue = ThemeContext.value;\n```",
+            "```javascript\nconst themeValue = this.context.theme;\n```",
+            "```javascript\nconst themeValue = useContext(ThemeContext);\n```",
+            "```javascript\nconst themeValue = ThemeProvider.theme;\n```"
+          ],
+          "analysisPoints": [
+            "Tests the correct usage of the `useContext` hook.",
+            "Distinguishes `useContext` from other incorrect ways of accessing context.",
+            "Reinforces that `useContext` is a hook used within functional components."
+          ],
+          "keyConcepts": [
+            "useContext",
+            "Context API",
+            "Provider",
+            "Consumer"
+          ],
+          "evaluationCriteria": [
+            "Correct application of `useContext`",
+            "Understanding of React Hooks syntax"
+          ],
+          "example": "The `useContext` hook is the standard way to consume context in functional components. It takes the `Context` object (e.g., `ThemeContext`) as an argument and returns the current context `value` as provided by the nearest `Provider` up the component tree. Other options represent incorrect or outdated ways (e.g., `this.context` is for class components).",
+          "tags": [
+            "React",
+            "useContext",
+            "Hooks",
+            "MCQ"
+          ],
+          "prerequisites": [
+            "react_functional_components"
+          ],
+          "complexity": 5,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_usecontext_3",
+          "topic": "Context API Limitations",
+          "level": "hard",
+          "type": "open",
+          "question": "While `useContext` is powerful for global state, what are some of its limitations or potential downsides, especially when used for highly-frequently updated state?",
+          "answer": "While `useContext` is excellent for avoiding prop drilling and sharing static or infrequently updated data, it has some limitations when used for highly-frequently updated state:\n\n1.  **Re-renders All Consumers**: When the `value` prop passed to a `Context.Provider` changes, *all* components that consume that context (using `useContext`) will re-render, regardless of whether the specific part of the context they use has changed. This can lead to unnecessary re-renders and performance issues if the context value is an object or array that's frequently recreated.\n2.  **No Selectors/Memoization Built-in**: Unlike state management libraries (e.g., Redux with `mapStateToProps` or Zustand with selectors), `useContext` doesn't provide a built-in mechanism to 'select' only specific parts of the context value and prevent re-renders if other parts change. Developers often have to implement their own memoization (e.g., `useMemo` for the `value` object, or custom hooks with internal state/`useRef` and `useCallback`) to mitigate this.\n3.  **Single Value Limitation**: A single context can only hold one `value`. If you want to provide multiple, unrelated pieces of global state, you often end up creating many separate contexts and nesting multiple `Provider` components, which can make the component tree verbose.\n4.  **Performance with Object/Array Values**: If the `value` prop is an object or array, and it's created inline in the provider component, it will be a new object/array on every render, even if its contents are shallowly the same. This causes `useContext` consumers to re-render unnecessarily because `value` changes by reference. You need to `useMemo` the `value` object to prevent this.\n\n**Example of Re-render issue:**\nIf you have a `UserContext.Provider` providing `{ user: { name, email }, isAuthenticated: true }` and `isAuthenticated` changes frequently, even components only interested in `user.name` will re-render because the entire `value` object reference changes.",
+          "options": [],
+          "analysisPoints": [
+            "Identification of re-rendering all consumers.",
+            "Lack of built-in selector mechanism.",
+            "Limitation to a single value.",
+            "Performance issues with frequently changing object/array values.",
+            "Explanation of why performance issues occur (reference equality)."
+          ],
+          "keyConcepts": [
+            "useContext",
+            "Context API",
+            "Performance",
+            "Re-renders",
+            "Prop Drilling",
+            "State Management",
+            "Memoization"
+          ],
+          "evaluationCriteria": [
+            "Depth of understanding of limitations",
+            "Ability to explain technical reasons (e.g., reference equality)",
+            "Suggesting mitigation strategies"
+          ],
+          "example": "",
+          "tags": [
+            "React",
+            "useContext",
+            "Performance",
+            "Advanced",
+            "Interview Question"
+          ],
+          "prerequisites": [
+            "react_usecontext",
+            "javascript_objects_references"
+          ],
+          "complexity": 8,
+          "interviewFrequency": 7,
+          "learningPath": "advanced"
+        },
+        {
+          "id": "question_custom_hook_1",
+          "topic": "Custom Hooks",
+          "level": "medium",
+          "type": "flashcard",
+          "question": "What is the primary benefit of creating a custom hook like `useTodo` for `useReducer` and `useContext`?",
+          "answer": "The primary benefit is to encapsulate and reuse stateful logic (like accessing context and its dispatch function), making components cleaner, more readable, and promoting separation of concerns.",
+          "options": [],
+          "analysisPoints": [],
+          "keyConcepts": [
+            "Custom Hooks",
+            "Reusability",
+            "Separation of Concerns"
+          ],
+          "evaluationCriteria": [
+            "Understanding of custom hook benefits"
+          ],
+          "example": "",
+          "tags": [
+            "React",
+            "Custom Hooks",
+            "Hooks"
+          ],
+          "prerequisites": [],
+          "complexity": 4,
+          "interviewFrequency": 7,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_reducer_context_1",
+          "topic": "Combining `useReducer` and `useContext`",
+          "level": "medium",
+          "type": "open",
+          "question": "Describe the architectural pattern of combining `useReducer` and `useContext` for state management in a React application. What are its advantages over simply passing state and setState down via props?",
+          "answer": "The pattern involves using `useReducer` within a parent component (typically a 'Provider' component) to manage complex state logic, and then using `useContext` to make both the current state and the `dispatch` function available to any descendant component without passing them as props.\n\n**Architectural Pattern:**\n1.  **Reducer**: A pure function (`reducer(state, action)`) defines all possible state transitions.\n2.  **Context**: A React Context object is created (`createContext`).\n3.  **Provider Component**: A dedicated component (e.g., `TodoProvider`) uses `useReducer` to manage the actual state. It then renders `Context.Provider` and passes the `state` and `dispatch` function as the `value` prop to its children.\n4.  **Custom Hook (Optional but Recommended)**: A custom hook (e.g., `useTodo`) is created to abstract the `useContext` call, providing a cleaner, type-safe, and often more robust way to consume the context.\n5.  **Consumers**: Any component within the `Provider`'s subtree can use the custom hook (or `useContext` directly) to access the global state and dispatch actions.\n\n**Advantages over passing state/setState via props (Prop Drilling):**\n1.  **Avoids Prop Drilling**: This is the primary advantage. You don't need to manually pass state and updater functions through many intermediate components that don't actually use that data. This significantly simplifies component signatures and the overall component tree structure.\n2.  **Cleaner Components**: Consumer components only need to `useContext` (or the custom hook) to get what they need, without worrying about how the state flows from the top. Their props remain focused on their immediate data needs.\n3.  **Centralized Logic**: All complex state mutation logic is isolated within the `reducer` function, making it easier to understand, test, and debug. Components only dispatch 'actions' without knowing the implementation details of state updates.\n4.  **Performance (Dispatch Function Stability)**: The `dispatch` function returned by `useReducer` is guaranteed to be stable across re-renders. This means you can pass `dispatch` down without causing unnecessary re-renders in child components that receive it as a prop or include it in their `useEffect`/`useCallback` dependency arrays.",
+          "options": [],
+          "analysisPoints": [
+            "Clear explanation of the roles of `useReducer`, `useContext`, and the Provider/Consumer pattern.",
+            "Detailed comparison with prop drilling.",
+            "Highlighting benefits like centralized logic and `dispatch` stability.",
+            "Discussion of custom hooks as an enhancement."
+          ],
+          "keyConcepts": [
+            "useReducer",
+            "useContext",
+            "State Management",
+            "Context API",
+            "Prop Drilling",
+            "Reducer Pattern",
+            "Custom Hooks"
+          ],
+          "evaluationCriteria": [
+            "Comprehensive explanation of pattern",
+            "Accurate comparison of benefits",
+            "Clarity and structure"
+          ],
+          "example": "",
+          "tags": [
+            "React",
+            "State Management",
+            "Hooks",
+            "Architecture",
+            "Interview Question"
+          ],
+          "prerequisites": [
+            "react_use_reducer",
+            "react_use_context"
+          ],
+          "complexity": 7,
+          "interviewFrequency": 9,
+          "learningPath": "advanced"
+        },
+        {
+          "id": "question_reducer_context_2",
+          "topic": "Combining `useReducer` and `useContext`",
+          "level": "hard",
+          "type": "code",
+          "question": "Refactor a simple counter application to use `useReducer` and `useContext`. The application should have an `App` component that renders a `CounterProvider`, and within it, a `CounterDisplay` component showing the current count, and `IncrementButton` and `DecrementButton` components that update the count.",
+          "answer": "```typescript\nimport React, { createContext, useReducer, useContext } from 'react';\n\n// 1. Define Action Types\nconst INCREMENT = 'INCREMENT';\nconst DECREMENT = 'DECREMENT';\nconst RESET = 'RESET';\n\ninterface CounterState {\n  count: number;\n}\n\ninterface CounterAction {\n  type: string;\n  payload?: number;\n}\n\n// 2. Reducer Function\nfunction counterReducer(state: CounterState, action: CounterAction): CounterState {\n  switch (action.type) {\n    case INCREMENT:\n      return { ...state, count: state.count + (action.payload || 1) };\n    case DECREMENT:\n      return { ...state, count: state.count - (action.payload || 1) };\n    case RESET:\n      return { ...state, count: 0 };\n    default:\n      return state;\n  }\n}\n\n// 3. Create Context\nconst CounterContext = createContext<{\n  state: CounterState;\n  dispatch: React.Dispatch<CounterAction>;\n} | undefined>(undefined);\n\n// 4. Provider Component\nfunction CounterProvider({ children }: { children: React.ReactNode }) {\n  const [state, dispatch] = useReducer(counterReducer, { count: 0 });\n\n  return (\n    <CounterContext.Provider value={{ state, dispatch }}>\n      {children}\n    </CounterContext.Provider>\n  );\n}\n\n// 5. Custom Hook to Consume Context\nfunction useCounter() {\n  const context = useContext(CounterContext);\n  if (context === undefined) {\n    throw new Error('useCounter must be used within a CounterProvider');\n  }\n  return context;\n}\n\n// 6. Components that use the context\nfunction CounterDisplay() {\n  const { state } = useCounter();\n  return <p>Current Count: {state.count}</p>;\n}\n\nfunction IncrementButton() {\n  const { dispatch } = useCounter();\n  return <button onClick={() => dispatch({ type: INCREMENT })}>Increment</button>;\n}\n\nfunction DecrementButton() {\n  const { dispatch } = useCounter();\n  return <button onClick={() => dispatch({ type: DECREMENT })}>Decrement</button>;\n}\n\nfunction ResetButton() {\n  const { dispatch } = useCounter();\n  return <button onClick={() => dispatch({ type: RESET })}>Reset</button>;\n}\n\n// App component\nfunction App() {\n  return (\n    <CounterProvider>\n      <h1>Global Counter</h1>\n      <CounterDisplay />\n      <IncrementButton />\n      <DecrementButton />\n      <ResetButton />\n    </CounterProvider>\n  );\n}\n\nexport default App;\n```",
+          "options": [],
+          "analysisPoints": [
+            "Correct implementation of `useReducer` and `useContext`.",
+            "Proper separation of concerns into reducer, provider, and consumer components.",
+            "Definition of action types and reducer logic.",
+            "Effective use of a custom hook for context consumption.",
+            "Demonstrates understanding of TypeScript types for state and actions."
+          ],
+          "keyConcepts": [
+            "useReducer",
+            "useContext",
+            "Context API",
+            "State Management",
+            "Custom Hooks",
+            "Reducer Pattern",
+            "TypeScript"
+          ],
+          "evaluationCriteria": [
+            "Functional correctness",
+            "Adherence to architectural pattern",
+            "Code clarity and structure",
+            "Appropriate use of hooks"
+          ],
+          "example": "",
+          "tags": [
+            "React",
+            "Hooks",
+            "Coding Challenge",
+            "State Management"
+          ],
+          "prerequisites": [
+            "react_use_reducer",
+            "react_use_context"
+          ],
+          "complexity": 7,
+          "interviewFrequency": 8,
+          "learningPath": "advanced"
+        },
+        {
+          "id": "question_reducer_context_3",
+          "topic": "State Immutability with `useReducer`",
+          "level": "medium",
+          "type": "flashcard",
+          "question": "Why is it crucial for a `useReducer` function to return a new state object/array rather than mutating the existing state directly?",
+          "answer": "Returning a new state object/array is crucial for immutability. React relies on reference equality checks to detect state changes and trigger re-renders. If you mutate the original state directly, React won't detect a change (because the reference remains the same) and your components won't re-render, leading to UI inconsistencies.",
+          "options": [],
+          "analysisPoints": [],
+          "keyConcepts": [
+            "useReducer",
+            "Immutability",
+            "State Management",
+            "React Re-renders"
+          ],
+          "evaluationCriteria": [
+            "Understanding of immutability importance"
+          ],
+          "example": "",
+          "tags": [
+            "React",
+            "useReducer",
+            "Immutability"
+          ],
+          "prerequisites": [],
+          "complexity": 5,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_reducer_context_4",
+          "topic": "Error Handling with `useContext`",
+          "level": "medium",
+          "type": "open",
+          "question": "The `useTodo` custom hook includes an error check: `if (!context) { throw new Error('useTodo must be used within a TodoProvider'); }`. Why is this check important, and what problem does it prevent?",
+          "answer": "This check is crucial because `useContext` will return `undefined` (or the `defaultValue` provided to `createContext`, which is `undefined` in this case) if it's called outside of its corresponding `Provider`. \n\n**Why it's important:**\n1.  **Prevents Runtime Errors**: Without this check, if a component using `useTodo` is rendered outside the `TodoProvider`'s scope, `context` would be `undefined`. Any attempt to access properties like `context.todos` or `context.dispatch` would result in a `TypeError: Cannot read properties of undefined (reading 'todos')` or similar, causing a crash that can be hard to trace.\n2.  **Provides Clearer Debugging**: The `throw new Error` provides an explicit, descriptive error message that immediately tells the developer exactly what went wrong and how to fix it (by wrapping the component in `TodoProvider`). This is much more helpful than a generic `TypeError`.\n3.  **Enforces Correct Usage**: It ensures that consumers of the context are always within the intended context provider's hierarchy, upholding the architectural pattern.",
+          "options": [],
+          "analysisPoints": [
+            "Explains what `useContext` returns when used outside a Provider.",
+            "Identifies the specific runtime error it prevents.",
+            "Highlights the benefit of clear error messages for debugging.",
+            "Emphasizes enforcing correct usage of the context API pattern."
+          ],
+          "keyConcepts": [
+            "useContext",
+            "Custom Hooks",
+            "Error Handling",
+            "Context API",
+            "Debugging"
+          ],
+          "evaluationCriteria": [
+            "Clear explanation of problem prevented",
+            "Understanding of error message benefits",
+            "Demonstrates practical coding wisdom"
+          ],
+          "example": "",
+          "tags": [
+            "React",
+            "useContext",
+            "Custom Hooks",
+            "Error Handling",
+            "Interview Question"
+          ],
+          "prerequisites": [
+            "react_use_context",
+            "javascript_error_handling"
+          ],
+          "complexity": 6,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_reducer_context_5",
+          "topic": "React Hooks Performance",
+          "level": "hard",
+          "type": "mcq",
+          "question": "When using `useReducer` and `useContext` together, what is a key performance consideration related to the `value` prop of `Context.Provider`?\n\n```typescript\nfunction MyProvider({ children }) {\n  const [state, dispatch] = useReducer(myReducer, initialState);\n  \n  // Line A: Potentially problematic value\n  const contextValue = { state, dispatch }; \n  \n  return (\n    <MyContext.Provider value={contextValue}>\n      {children}\n    </MyContext.Provider>\n  );\n}\n```",
+          "answer": "If `contextValue` is an object created inline on every render (as in Line A), all consumers of `MyContext` will re-render even if `state` or `dispatch` haven't functionally changed, because the object reference changes.",
+          "options": [
+            "The `dispatch` function changes on every render, causing re-renders in consumers unless memoized.",
+            "If `contextValue` is an object created inline on every render (as in Line A), all consumers of `MyContext` will re-render even if `state` or `dispatch` haven't functionally changed, because the object reference changes.",
+            "Only components directly consuming `dispatch` will re-render when `state` changes.",
+            "React automatically memoizes the `value` prop, so no manual optimization is needed."
+          ],
+          "analysisPoints": [
+            "Tests understanding of reference equality in JavaScript and React's re-render mechanism.",
+            "Highlights the specific performance pitfall of inline object creation for `Context.Provider`'s `value`.",
+            "Correctly identifies that `dispatch` is stable, debunking a common misconception."
+          ],
+          "keyConcepts": [
+            "Context API",
+            "useReducer",
+            "Performance",
+            "Re-renders",
+            "Reference Equality",
+            "useMemo"
+          ],
+          "evaluationCriteria": [
+            "Accuracy of performance analysis",
+            "Understanding of object references",
+            "Identification of correct solution (though not explicitly asked, it implies `useMemo`)"
+          ],
+          "example": "In the provided code, `contextValue = { state, dispatch }` creates a *new object* on every render of `MyProvider`. Even if `state` remains the same (by content), the `contextValue` object itself has a new memory address. Since React's context API triggers re-renders for consumers when the `value` prop's *reference* changes, all components using `useContext(MyContext)` will re-render unnecessarily. To fix this, `contextValue` should be memoized using `useMemo`:\n\n```typescript\nconst contextValue = React.useMemo(() => ({ state, dispatch }), [state, dispatch]);\n```\n\nThis ensures `contextValue` only changes its reference when `state` or `dispatch` (which is stable) actually change, preventing unnecessary re-renders. (Note: `dispatch` itself is stable and doesn't need to be in the `useMemo` dependency array, but including it causes no harm).",
+          "tags": [
+            "React",
+            "Context API",
+            "Performance",
+            "Hooks",
+            "MCQ"
+          ],
+          "prerequisites": [
+            "react_functional_components",
+            "javascript_objects_references",
+            "react_usememo"
+          ],
+          "complexity": 8,
+          "interviewFrequency": 7,
+          "learningPath": "advanced"
+        }
+      ],
+      "tasks": [
+        {
+          "id": "task_debounced_search_input",
+          "title": "Implement a Debounced Search Input Component",
+          "description": "\nCreate a React component `DebouncedSearch` that includes an input field. As the user types, the component should not immediately perform a 'search' (e.g., console log the search term). Instead, it should wait for a specified delay after the user stops typing before displaying the final search term. This demonstrates the debouncing pattern.\n\n**Requirements:**\n1.  Render an input field and a display area for the debounced search term.\n2.  Implement a debouncing mechanism with a configurable delay (e.g., 500ms).\n3.  The debounced term should only update after the user pauses typing for the specified delay.\n4.  The component should be robust against rapid successive key presses (i.e., previous timeouts should be cleared).\n5.  (Optional but Recommended): Extract the debouncing logic into a reusable custom hook named `useDebounce`.\n",
+          "difficulty": "medium",
+          "startingCode": "import React, { useState, useEffect } from 'react';\n\n// Optional: Create a reusable useDebounce hook here\n// function useDebounce<T>(value: T, delay: number): T {\n//   // Implement debounce logic\n//   return debouncedValue;\n// }\n\nfunction DebouncedSearch() {\n  const [searchTerm, setSearchTerm] = useState('');\n  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');\n\n  // TODO: Implement the debouncing logic using useEffect\n  // - Set a timeout to update debouncedSearchTerm based on searchTerm\n  // - Return a cleanup function to clear the timeout\n\n  return (\n    <div>\n      <h2>Debounced Search</h2>\n      <input\n        type=\"text\"\n        value={searchTerm}\n        onChange={e => setSearchTerm(e.target.value)}\n        placeholder=\"Type to search...\"\n        style={{ padding: '8px', width: '300px' }}\n      />\n      <p>Current Input: <strong>{searchTerm}</strong></p>\n      <p>Debounced Search Term (after 500ms pause): <strong>{debouncedSearchTerm}</strong></p>\n    </div>\n  );\n}\n\nexport default DebouncedSearch;\n",
+          "solutionCode": "import React, { useState, useEffect } from 'react';\n\n// Reusable custom hook for debouncing any value\nfunction useDebounce<T>(value: T, delay: number): T {\n  const [debouncedValue, setDebouncedValue] = useState<T>(value);\n\n  useEffect(() => {\n    // Set a timeout to update the debounced value\n    const handler = setTimeout(() => {\n      setDebouncedValue(value);\n    }, delay);\n\n    // Cleanup function: clear timeout if value or delay changes before timeout fires\n    return () => {\n      clearTimeout(handler);\n    };\n  }, [value, delay]); // Re-run effect only if value or delay changes\n\n  return debouncedValue;\n}\n\nfunction DebouncedSearch() {\n  const [searchTerm, setSearchTerm] = useState('');\n  \n  // Use the custom useDebounce hook\n  const debouncedSearchTerm = useDebounce(searchTerm, 500);\n\n  // Optional: Effect to simulate fetching results when debounced term changes\n  useEffect(() => {\n    if (debouncedSearchTerm) {\n      console.log(`Performing search for: \"${debouncedSearchTerm}\"`);\n      // In a real app: fetchSearchResults(debouncedSearchTerm).then(results => ...);\n    } else {\n      console.log('Debounced search term is empty, clearing results.');\n    }\n  }, [debouncedSearchTerm]); // This effect runs only when debouncedSearchTerm changes\n\n  return (\n    <div style={{ padding: '20px', border: '1px solid #ccc', borderRadius: '5px' }}>\n      <h2>Debounced Search Input</h2>\n      <input\n        type=\"text\"\n        value={searchTerm}\n        onChange={e => setSearchTerm(e.target.value)}\n        placeholder=\"Type to search...\"\n        style={{ padding: '10px', fontSize: '16px', width: '100%', boxSizing: 'border-box' }}\n      />\n      <p style={{ marginTop: '15px' }}>\n        <strong>Current Input:</strong> <span style={{ color: '#007bff' }}>{searchTerm}</span>\n      </p>\n      <p>\n        <strong>Debounced Value (after 500ms pause):</strong> <span style={{ color: '#28a745' }}>{debouncedSearchTerm}</span>\n      </p>\n      <p style={{ fontSize: '0.9em', color: '#666' }}>\n        Check console for simulated API calls.\n      </p>\n    </div>\n  );\n}\n\nexport default DebouncedSearch;\n",
+          "testCases": [
+            "Type 'a', wait 500ms: Debounced term should become 'a'.",
+            "Type 'ap', then 'app' quickly: Debounced term should become 'app' only after 500ms pause from the last 'p'. Intermediate 'ap' should not appear as debounced.",
+            "Type 'test', then clear input immediately: Debounced term should become empty (or previous value) after 500ms pause.",
+            "Rapidly type 'hello world': The debounced term should only update once with 'hello world' after a 500ms pause from the last character.",
+            "Start typing, then navigate away (component unmounts): Ensure no errors occur and timers are properly cleared."
+          ],
+          "hints": [
+            "You'll need `useState` for both the immediate input value and the debounced value.",
+            "The `useEffect` hook will be essential for setting and clearing timers.",
+            "Remember that `useEffect` can return a cleanup function, which is perfect for `clearTimeout`.",
+            "The dependency array for `useEffect` should include the `searchTerm` to trigger a new debounce when the input changes.",
+            "Consider extracting the `useEffect` logic into a custom `useDebounce` hook for reusability across your application."
+          ],
+          "tags": [
+            "React",
+            "Hooks",
+            "Debouncing",
+            "Performance",
+            "useEffect",
+            "Custom Hooks"
+          ],
+          "timeEstimate": 45,
+          "prerequisites": [
+            "react_useeffect",
+            "react_usestate",
+            "javascript_timers"
+          ],
+          "complexity": 6,
+          "interviewRelevance": 9,
+          "learningPath": "intermediate",
+          "relatedConcepts": [
+            "Side Effects",
+            "Cleanup Function",
+            "Performance Optimization"
+          ]
+        },
+        {
+          "id": "task_shopping_cart_reducer_context",
+          "title": "Build a Simple Shopping Cart with `useReducer` and `useContext`",
+          "description": "\nImplement a basic shopping cart functionality in a React application using the `useReducer` and `useContext` hooks. The application should allow users to add items, remove items, and view the current items in the cart.\n\n**Requirements:**\n1.  **Context Setup**: Create a `CartContext` using `createContext`.\n2.  **Reducer**: Implement a `cartReducer` function that handles actions for `ADD_ITEM`, `REMOVE_ITEM`, and potentially `CLEAR_CART`.\n3.  **Provider**: Create a `CartProvider` component that wraps the main application, initializes the `cartReducer`, and provides the `cartState` and `dispatch` function via `CartContext.Provider`.\n4.  **Custom Hook**: Implement a `useCart` custom hook to simplify accessing the cart context (state and dispatch).\n5.  **Components**: \n    *   `ProductList`: Displays a list of products, each with an 'Add to Cart' button.\n    *   `ShoppingCart`: Displays the items currently in the cart, with 'Remove' buttons for each item.\n    *   Ensure all components correctly interact with the global cart state using the `useCart` hook.\n",
+          "difficulty": "hard",
+          "startingCode": "import React, { createContext, useReducer, useContext } from 'react';\n\n// Define types for item, state, and actions\ninterface CartItem {\n  id: number;\n  name: string;\n  price: number;\n  quantity: number;\n}\n\ninterface CartState {\n  items: CartItem[];\n}\n\ninterface CartAction {\n  type: string;\n  payload: any;\n}\n\n// 1. Create Context (with a default value that matches the structure)\nconst CartContext = createContext<{\n  state: CartState;\n  dispatch: React.Dispatch<CartAction>;\n} | undefined>(undefined);\n\n// 2. Action Types (Constants)\nconst ADD_ITEM = 'ADD_ITEM';\nconst REMOVE_ITEM = 'REMOVE_ITEM';\nconst CLEAR_CART = 'CLEAR_CART';\n\n// 3. Reducer Function\nfunction cartReducer(state: CartState, action: CartAction): CartState {\n  switch (action.type) {\n    case ADD_ITEM:\n      // TODO: Implement logic to add item. If item exists, increment quantity.\n      return state;\n    case REMOVE_ITEM:\n      // TODO: Implement logic to remove item. If quantity > 1, decrement. Else, remove fully.\n      return state;\n    case CLEAR_CART:\n      // TODO: Implement logic to clear all items.\n      return state;\n    default:\n      return state;\n  }\n}\n\n// 4. Provider Component\nfunction CartProvider({ children }: { children: React.ReactNode }) {\n  const [state, dispatch] = useReducer(cartReducer, { items: [] });\n\n  return (\n    <CartContext.Provider value={{ state, dispatch }}>\n      {children}\n    </CartContext.Provider>\n  );\n}\n\n// 5. Custom Hook to consume context\nfunction useCart() {\n  const context = useContext(CartContext);\n  if (context === undefined) {\n    throw new Error('useCart must be used within a CartProvider');\n  }\n  return context;\n}\n\n// Example Product Data\nconst products = [\n  { id: 1, name: 'Laptop', price: 1200 },\n  { id: 2, name: 'Mouse', price: 25 },\n  { id: 3, name: 'Keyboard', price: 75 },\n];\n\n// 6. ProductList Component\nfunction ProductList() {\n  const { dispatch } = useCart();\n\n  return (\n    <div style={{ border: '1px solid #eee', padding: '15px', borderRadius: '5px' }}>\n      <h3>Available Products</h3>\n      {products.map(product => (\n        <div key={product.id} style={{ marginBottom: '10px' }}>\n          {product.name} - ${product.price} \n          <button onClick={() => dispatch({ type: ADD_ITEM, payload: product })} style={{ marginLeft: '10px' }}>\n            Add to Cart\n          </button>\n        </div>\n      ))}\n    </div>\n  );\n}\n\n// 7. ShoppingCart Component\nfunction ShoppingCart() {\n  const { state, dispatch } = useCart();\n\n  const total = state.items.reduce((sum, item) => sum + item.price * item.quantity, 0);\n\n  return (\n    <div style={{ border: '1px solid #eee', padding: '15px', borderRadius: '5px', marginTop: '20px' }}>\n      <h3>Shopping Cart</h3>\n      {state.items.length === 0 ? (\n        <p>Cart is empty.</p>\n      ) : (\n        <ul>\n          {state.items.map(item => (\n            <li key={item.id}>\n              {item.name} (x{item.quantity}) - ${item.price * item.quantity}\n              <button onClick={() => dispatch({ type: REMOVE_ITEM, payload: item.id })} style={{ marginLeft: '10px' }}>\n                Remove\n              </button>\n            </li>\n          ))}\n        </ul>\n      )}\n      <p><strong>Total: ${total.toFixed(2)}</strong></p>\n      {state.items.length > 0 && (\n        <button onClick={() => dispatch({ type: CLEAR_CART })}>Clear Cart</button>\n      )}\n    </div>\n  );\n}\n\n// App component to render everything\nfunction App() {\n  return (\n    <CartProvider>\n      <div style={{ fontFamily: 'Arial, sans-serif', maxWidth: '800px', margin: '20px auto', padding: '20px', border: '1px solid #ddd', borderRadius: '8px', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}>\n        <h1>My Online Store</h1>\n        <ProductList />\n        <ShoppingCart />\n      </div>\n    </CartProvider>\n  );\n}\n\nexport default App;\n",
+          "solutionCode": "import React, { createContext, useReducer, useContext, useMemo } from 'react';\n\n// Define types for item, state, and actions\ninterface CartItem {\n  id: number;\n  name: string;\n  price: number;\n  quantity: number;\n}\n\ninterface CartState {\n  items: CartItem[];\n}\n\ninterface AddItemPayload {\n  id: number;\n  name: string;\n  price: number;\n}\n\ninterface RemoveItemPayload {\n  id: number;\n}\n\ntype CartAction = \n  | { type: 'ADD_ITEM', payload: AddItemPayload }\n  | { type: 'REMOVE_ITEM', payload: RemoveItemPayload }\n  | { type: 'CLEAR_CART' };\n\n// 1. Create Context (with a default value that matches the structure)\nconst CartContext = createContext<{\n  state: CartState;\n  dispatch: React.Dispatch<CartAction>;\n} | undefined>(undefined);\n\n// 2. Action Types (Constants)\nconst ADD_ITEM = 'ADD_ITEM';\nconst REMOVE_ITEM = 'REMOVE_ITEM';\nconst CLEAR_CART = 'CLEAR_CART';\n\n// 3. Reducer Function\nfunction cartReducer(state: CartState, action: CartAction): CartState {\n  switch (action.type) {\n    case ADD_ITEM:\n      const existingItem = state.items.find(item => item.id === action.payload.id);\n      if (existingItem) {\n        return {\n          ...state,\n          items: state.items.map(item =>\n            item.id === action.payload.id\n              ? { ...item, quantity: item.quantity + 1 }\n              : item\n          ),\n        };\n      } else {\n        return {\n          ...state,\n          items: [...state.items, { ...action.payload, quantity: 1 }],\n        };\n      }\n    case REMOVE_ITEM:\n      const itemToRemove = state.items.find(item => item.id === action.payload.id);\n      if (itemToRemove && itemToRemove.quantity > 1) {\n        return {\n          ...state,\n          items: state.items.map(item =>\n            item.id === action.payload.id\n              ? { ...item, quantity: item.quantity - 1 }\n              : item\n          ),\n        };\n      } else {\n        return {\n          ...state,\n          items: state.items.filter(item => item.id !== action.payload.id),\n        };\n      }\n    case CLEAR_CART:\n      return { ...state, items: [] };\n    default:\n      return state;\n  }\n}\n\n// 4. Provider Component\nfunction CartProvider({ children }: { children: React.ReactNode }) {\n  const [state, dispatch] = useReducer(cartReducer, { items: [] });\n\n  // Memoize the value to prevent unnecessary re-renders of consumers\n  const contextValue = useMemo(() => ({ state, dispatch }), [state]);\n\n  return (\n    <CartContext.Provider value={contextValue}>\n      {children}\n    </CartContext.Provider>\n  );\n}\n\n// 5. Custom Hook to consume context\nfunction useCart() {\n  const context = useContext(CartContext);\n  if (context === undefined) {\n    throw new Error('useCart must be used within a CartProvider');\n  }\n  return context;\n}\n\n// Example Product Data\nconst products = [\n  { id: 1, name: 'Laptop', price: 1200 },\n  { id: 2, name: 'Mouse', price: 25 },\n  { id: 3, name: 'Keyboard', price: 75 },\n];\n\n// 6. ProductList Component\nfunction ProductList() {\n  const { dispatch } = useCart();\n\n  return (\n    <div style={{ border: '1px solid #eee', padding: '15px', borderRadius: '5px' }}>\n      <h3>Available Products</h3>\n      {products.map(product => (\n        <div key={product.id} style={{ marginBottom: '10px' }}>\n          {product.name} - ${product.price} \n          <button onClick={() => dispatch({ type: ADD_ITEM, payload: product })} style={{ marginLeft: '10px' }}>\n            Add to Cart\n          </button>\n        </div>\n      ))}\n    </div>\n  );\n}\n\n// 7. ShoppingCart Component\nfunction ShoppingCart() {\n  const { state, dispatch } = useCart();\n\n  const total = state.items.reduce((sum, item) => sum + item.price * item.quantity, 0);\n\n  return (\n    <div style={{ border: '1px solid #eee', padding: '15px', borderRadius: '5px', marginTop: '20px' }}>\n      <h3>Shopping Cart</h3>\n      {state.items.length === 0 ? (\n        <p>Cart is empty.</p>\n      ) : (\n        <ul>\n          {state.items.map(item => (\n            <li key={item.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>\n              <span>{item.name} (x{item.quantity}) - ${item.price * item.quantity}</span>\n              <button onClick={() => dispatch({ type: REMOVE_ITEM, payload: { id: item.id } })} style={{ marginLeft: '10px' }}>\n                Remove\n              </button>\n            </li>\n          ))}\n        </ul>\n      )}\n      <p><strong>Total: ${total.toFixed(2)}</strong></p>\n      {state.items.length > 0 && (\n        <button onClick={() => dispatch({ type: CLEAR_CART })}>Clear Cart</button>\n      )}\n    </div>\n  );\n}\n\n// App component to render everything\nfunction App() {\n  return (\n    <CartProvider>\n      <div style={{ fontFamily: 'Arial, sans-serif', maxWidth: '800px', margin: '20px auto', padding: '20px', border: '1px solid #ddd', borderRadius: '8px', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}>\n        <h1>My Online Store</h1>\n        <ProductList />\n        <ShoppingCart />\n      </div>\n    </CartProvider>\n  );\n}\n\nexport default App;\n",
+          "testCases": [
+            "Add 'Laptop' once: Cart should show 'Laptop (x1)'.",
+            "Add 'Laptop' again: Cart should show 'Laptop (x2)'.",
+            "Add 'Mouse' then 'Keyboard': Cart should show 'Laptop (x2)', 'Mouse (x1)', 'Keyboard (x1)'.",
+            "Remove 'Laptop' when quantity is 2: Cart should show 'Laptop (x1)'.",
+            "Remove 'Laptop' when quantity is 1: 'Laptop' should be completely removed from cart.",
+            "Remove 'Mouse' when quantity is 1: 'Mouse' should be completely removed from cart.",
+            "Clear Cart: Cart should become empty.",
+            "Check total calculation: Ensure total price accurately reflects item quantities and prices.",
+            "Add multiple distinct items, then remove one. Check if others remain correct.",
+            "Verify type safety: Ensure TypeScript definitions for state and actions are correct and prevent common errors."
+          ],
+          "hints": [
+            "For `ADD_ITEM` in the reducer, check if the item already exists in `state.items`. If it does, increment its `quantity`; otherwise, add the new item with `quantity: 1`. Remember to create new arrays/objects for immutability.",
+            "For `REMOVE_ITEM`, if the item's `quantity` is greater than 1, decrement it. If it's 1, filter it out of the array entirely.",
+            "Ensure your reducer always returns a *new* state object/array, do not mutate the `state` directly.",
+            "Use `useMemo` for the `value` prop in `CartContext.Provider` to prevent unnecessary re-renders of consuming components when only the `dispatch` function (which is stable) is present, or `state` remains reference-equal.",
+            "Think about the `payload` for each action type: what data does the reducer need to perform that specific action?"
+          ],
+          "tags": [
+            "React",
+            "Hooks",
+            "useReducer",
+            "useContext",
+            "State Management",
+            "Global State",
+            "E-commerce",
+            "TypeScript",
+            "Coding Challenge"
+          ],
+          "timeEstimate": 90,
+          "prerequisites": [
+            "react_use_reducer",
+            "react_use_context",
+            "javascript_array_methods",
+            "javascript_immutability"
+          ],
+          "complexity": 8,
+          "interviewRelevance": 9,
+          "learningPath": "advanced",
+          "relatedConcepts": [
+            "Reducer Pattern",
+            "Context API",
+            "Prop Drilling",
+            "Data Flow",
+            "Immutability"
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "4902befb-a321-47ad-97f8-8baff6e7b398",
+    "startLine": 5900,
+    "endLine": 5999,
+    "processedDate": "2025-06-17T09:49:00.532Z",
+    "content": {
+      "logicalBlockInfo": {
+        "suggestedEndLine": -1
+      },
+      "theory": [
+        {
+          "id": "theory_react_context_reducer_hooks",
+          "title": "State Management with React Context, useReducer, and Custom Hooks",
+          "content": "This section explores a common and powerful pattern for managing state in React applications using a combination of the Context API, the `useReducer` hook, and custom hooks. This pattern is particularly useful for global or shared state that needs to be accessed by multiple components without prop drilling.\n\n## React Context API\nReact's Context API provides a way to pass data through the component tree without having to pass props down manually at every level. It's designed to share data that can be considered 'global' for a tree of React components, such as the current authenticated user, theme, or preferred language.\n\n-   **`React.createContext(defaultValue)`**: Creates a Context object. When React renders a component that subscribes to this Context object, it will read the current context value from the closest matching Provider above it in the tree.\n-   **`Context.Provider`**: A React component that allows consuming components to subscribe to context changes. It accepts a `value` prop to be passed to consuming components that are descendants of this Provider.\n-   **`useContext(ContextObject)`**: A React Hook that accepts a context object (the value returned from `React.createContext`) and returns the current context value for that context. It subscribes the component to context changes.\n\n## `useReducer` Hook\nThe `useReducer` hook is an alternative to `useState` for more complex state logic, especially when the state logic involves multiple sub-values or when the next state depends on the previous one. It's conceptually similar to Redux.\n\n-   **`const [state, dispatch] = useReducer(reducer, initialArg, init?)`**: Returns the current state and a `dispatch` function. `useReducer` is often preferred over `useState` when you have complex state transitions, or when the next state depends on the previous one.\n-   **`reducer(state, action)`**: A pure function that takes the current `state` and an `action` object, and returns the `newState`.\n-   **`action`**: An object, conventionally with a `type` property (a string) indicating the type of action performed, and an optional `payload` property containing any data needed for the state update.\n-   **`dispatch`**: A function returned by `useReducer` that you call to dispatch actions. Dispatching an action causes the reducer function to be executed with the current state and the given action, and the component re-renders with the new state.\n\n## Custom Hooks\nCustom hooks are JavaScript functions whose names start with 'use' and that can call other hooks. They allow you to extract reusable stateful logic from components. This promotes code reusability, testability, and better organization.\n\nWhen `Context`, `useReducer`, and custom hooks are combined, you can create a robust and scalable state management solution:\n1.  **Define Reducer**: Create a `reducer` function that defines how the state changes based on different actions.\n2.  **Create Context**: Create a `Context` object using `React.createContext`.\n3.  **Implement Provider**: Create a `Provider` component that wraps its children with `Context.Provider` and manages the state using `useReducer`. It passes the `state` and `dispatch` function down through the context `value`.\n4.  **Create Custom Hook**: Create a custom hook (e.g., `useTodo`) that uses `useContext` to consume the `state` and `dispatch` from the `Provider`, making it easy for any component to access the shared state and dispatch actions.\n\nThis pattern centralizes state logic, avoids prop drilling, and provides a clean API for components to interact with the global state.",
+          "examples": [
+            {
+              "id": "example_todo_reducer",
+              "title": "Todo Reducer Function",
+              "code": "const ADD_TODO = 'ADD_TODO';\nconst TOGGLE_TODO = 'TOGGLE_TODO';\nconst REMOVE_TODO = 'REMOVE_TODO';\n\nfunction todoReducer(state, action) {\n  switch (action.type) {\n    case ADD_TODO:\n      return [\n        ...state,\n        {\n          id: Date.now(), // Simple unique ID\n          text: action.payload,\n          completed: false,\n        },\n      ];\n    case TOGGLE_TODO:\n      return state.map(todo =>\n        todo.id === action.payload ? { ...todo, completed: !todo.completed } : todo\n      );\n    case REMOVE_TODO:\n      return state.filter(todo => todo.id !== action.payload);\n    default:\n      return state;\n  }\n}",
+              "explanation": "This `todoReducer` function defines the state transitions for our todo application. It takes the current `state` (an array of todo objects) and an `action` object. Based on the `action.type`, it returns a new state array. For `ADD_TODO`, it adds a new todo item. For `TOGGLE_TODO`, it flips the `completed` status of a specific todo. For `REMOVE_TODO`, it filters out a todo by its ID. It's crucial that the reducer always returns a new state object/array, not mutates the existing one.",
+              "language": "javascript"
+            },
+            {
+              "id": "example_todo_context_provider_hook",
+              "title": "Todo Context, Provider, and Custom Hook",
+              "code": "import React, { createContext, useReducer, useContext } from 'react';\n\n// 1. Define Context\nconst TodoContext = createContext(null);\n\n// 2. Define Reducer (as shown in previous example)\nconst ADD_TODO = 'ADD_TODO';\nconst TOGGLE_TODO = 'TOGGLE_TODO';\nconst REMOVE_TODO = 'REMOVE_TODO';\n\nfunction todoReducer(state, action) {\n  switch (action.type) {\n    case ADD_TODO:\n      return [\n        ...state,\n        {\n          id: Date.now(),\n          text: action.payload,\n          completed: false,\n        },\n      ];\n    case TOGGLE_TODO:\n      return state.map(todo =>\n        todo.id === action.payload ? { ...todo, completed: !todo.completed } : todo\n      );\n    case REMOVE_TODO:\n      return state.filter(todo => todo.id !== action.payload);\n    default:\n      return state;\n  }\n}\n\n// 3. Implement Provider Component\nexport function TodoProvider({ children }) {\n  const [todos, dispatch] = useReducer(todoReducer, []); // Initial state is an empty array\n\n  return (\n    <TodoContext.Provider value={{ todos, dispatch }}>\n      {children}\n    </TodoContext.Provider>\n  );\n}\n\n// 4. Create Custom Hook to consume context\nexport function useTodo() {\n  const context = useContext(TodoContext);\n  if (context === null) {\n    throw new Error('useTodo must be used within a TodoProvider');\n  }\n  return context;\n}\n",
+              "explanation": "This example showcases the full setup: `TodoContext` is created. `TodoProvider` uses `useReducer` to manage the `todos` state and `dispatch` function, then passes them down via `TodoContext.Provider`. The `useTodo` custom hook simplifies consuming this context from any child component, abstracting away the `useContext` call and adding a useful error check for incorrect usage.",
+              "language": "javascript"
+            },
+            {
+              "id": "example_todo_components",
+              "title": "Components Using the Todo State",
+              "code": "import React from 'react';\nimport { useTodo, ADD_TODO, TOGGLE_TODO, REMOVE_TODO } from './TodoContext'; // Assuming previous file is TodoContext.js\n\n// TodoItem component\nfunction TodoItem({ todo }) {\n  const { dispatch } = useTodo();\n  \n  return (\n    <li>\n      <span\n        style={{ textDecoration: todo.completed ? 'line-through' : 'none', cursor: 'pointer' }}\n        onClick={() => dispatch({ type: TOGGLE_TODO, payload: todo.id })}\n      >\n        {todo.text}\n      </span>\n      <button onClick={() => dispatch({ type: REMOVE_TODO, payload: todo.id })}>Remove</button>\n    </li>\n  );\n}\n\n// TodoList component\nfunction TodoList() {\n  const { todos } = useTodo();\n\n  return (\n    <ul>\n      {todos.map(todo => (\n        <TodoItem key={todo.id} todo={todo} />\n      ))}\n    </ul>\n  );\n}\n\n// AddTodo component\nfunction AddTodo() {\n  const { dispatch } = useTodo();\n  const [text, setText] = React.useState('');\n  \n  const handleSubmit = e => {\n    e.preventDefault();\n    if (text.trim()) {\n      dispatch({ type: ADD_TODO, payload: text });\n      setText('');\n    }\n  };\n  \n  return (\n    <form onSubmit={handleSubmit}>\n      <input\n        value={text}\n        onChange={e => setText(e.target.value)}\n        placeholder=\"Add todo...\"\n      />\n      <button type=\"submit\">Add</button>\n    </form>\n  );\n}\n\n// App component using the custom hook pattern\nfunction TodoApp() {\n  return (\n    <TodoProvider>\n      <h1>Todo App</h1>\n      <AddTodo />\n      <TodoList />\n    </TodoProvider>\n  );\n}\n",
+              "explanation": "These components demonstrate how to consume the shared state and dispatch actions using the `useTodo` custom hook. `TodoList` simply displays todos, `AddTodo` dispatches `ADD_TODO` actions, and `TodoItem` dispatches `TOGGLE_TODO` and `REMOVE_TODO` actions. `TodoApp` wraps the entire application with `TodoProvider`, making the todo state available to all its descendants.",
+              "language": "javascript"
+            }
+          ],
+          "relatedQuestions": [],
+          "relatedTasks": [],
+          "tags": [
+            "React",
+            "Hooks",
+            "Context API",
+            "useReducer",
+            "State Management",
+            "Custom Hooks",
+            "Redux Pattern"
+          ],
+          "technology": "React",
+          "prerequisites": [
+            "react_functional_components",
+            "react_hooks_useState_useEffect"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 9,
+          "learningPath": "intermediate",
+          "requiredFor": [
+            "large_scale_react_apps",
+            "state_management_patterns"
+          ]
+        },
+        {
+          "id": "theory_react_portals",
+          "title": "React Portals",
+          "content": "React Portals provide a first-class way to render children into a DOM node that exists outside the DOM hierarchy of the parent component. This means you can render a component's content into an entirely different part of the HTML `document.body` or any other DOM element, while still maintaining its logical position and event bubbling behavior within the React component tree.\n\n## Syntax\n```javascript\nReactDOM.createPortal(child, container)\n```\n-   `child`: Any renderable React child (e.g., an element, string, fragment, or array of elements).\n-   `container`: A DOM element. This is the actual DOM node where the portal's children will be mounted.\n\n## When to Use Portals\nPortals are exceptionally useful in scenarios where the visual rendering of a component needs to 'break out' of its parent's DOM constraints, while still being managed by React's declarative rendering:\n\n-   **CSS Clipping Issues**: A parent component has `overflow: hidden`, `z-index`, or `position` styles that would visually 'clip' or obscure the child component if it were rendered directly within the parent's DOM subtree.\n-   **Breaking Stacking Context**: When a child needs to visually appear above all other content on the page, regardless of its parent's stacking context. This is common for overlays.\n-   **Maintaining React Component Tree Logic**: The child component maintains its position in the React component tree, meaning it receives context from its logical parents, and events (like clicks) will bubble up through the React tree to its logical ancestors, even though its DOM representation is elsewhere.\n\n## Common Use Cases\n-   **Modals and Dialogs**: To ensure they appear above all page content and are not constrained by parent `overflow` styles.\n-   **Tooltips and Popovers**: Which often need to position themselves relative to an element but escape its clipping boundaries.\n-   **Floating Menus**: Similar to popovers, where the menu should appear on top of other content.\n-   **Global Notification Systems**: Like toast messages, which need to be rendered at the top level of the DOM to be always visible.\n-   **Widgets that appear above other content**: Any component that requires a 'top-layer' rendering.\n\n## How it Works\nWhen you use `ReactDOM.createPortal`, React effectively moves the DOM nodes of the `child` to the specified `container` DOM node. However, React's internal component tree (the 'virtual DOM') still considers the `child` to be a descendant of its logical React parent. This is why event bubbling works as expected: an event triggered on a portal's child will bubble up through the DOM to the `container` element, then up through the React component tree (virtual DOM) to its logical React parent, and so on.",
+          "examples": [
+            {
+              "id": "example_modal_with_portal_structure",
+              "title": "HTML Structure for Portal Root",
+              "code": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"UTF-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n  <title>React Portal Example</title>\n  <style>\n    /* Basic styling for modal overlay */\n    #modal-root {\n      position: fixed;\n      top: 0;\n      left: 0;\n      right: 0;\n      bottom: 0;\n      display: flex;\n      justify-content: center;\n      align-items: center;\n      background-color: rgba(0, 0, 0, 0.5);\n      z-index: 1000;\n    }\n    .modal-content {\n      background: white;\n      padding: 20px;\n      border-radius: 8px;\n      box-shadow: 0 4px 6px rgba(0,0,0,0.1);\n      z-index: 1001;\n    }\n  </style>\n</head>\n<body>\n  <div id=\"root\"></div> <!-- Your main React app mounts here -->\n  <div id=\"modal-root\"></div> <!-- Portal target -->\n  <script src=\"index.js\"></script> <!-- Your compiled React app -->\n</body>\n</html>",
+              "explanation": "To use a portal, you typically need a specific DOM element outside of your main React app's `root` element to serve as the portal's target. In this HTML structure, `modal-root` is designated for this purpose. It's often placed directly inside the `<body>` tag to ensure it's at the highest level of the DOM, making it suitable for modals, tooltips, etc., that need to appear above all other content. The CSS provides basic styling for a modal overlay.",
+              "language": "html"
+            },
+            {
+              "id": "example_modal_component_with_portal",
+              "title": "Modal Component Using ReactDOM.createPortal",
+              "code": "// Modal.js\nimport React from 'react';\nimport ReactDOM from 'react-dom';\n\nfunction Modal({ children }) {\n  const modalRoot = document.getElementById('modal-root');\n  if (!modalRoot) return null; // Or throw an error if modal-root is not found\n\n  // Create a portal that renders children into 'modal-root'\n  return ReactDOM.createPortal(\n    <div className=\"modal\">\n      <div className=\"modal-content\">\n        {children}\n      </div>\n    </div>,\n    modalRoot // The target DOM node\n  );\n}",
+              "explanation": "This `Modal` component demonstrates the core usage of `ReactDOM.createPortal`. Inside the component, `document.getElementById('modal-root')` retrieves the target DOM node. The children passed to the `Modal` component (which typically include the modal's content) are then rendered into this `modal-root` element, rather than being rendered as direct children of `Modal`'s parent in the React tree. This ensures the modal visually breaks out of any CSS constraints of its parent.",
+              "language": "javascript"
+            },
+            {
+              "id": "example_app_using_modal_portal",
+              "title": "App Component Using the Modal Portal",
+              "code": "import React from 'react';\nimport Modal from './Modal'; // Assuming Modal.js is in the same directory\n\nfunction App() {\n  const [showModal, setShowModal] = React.useState(false);\n\n  return (\n    <div style={{ padding: '20px', border: '1px solid grey', height: '200px', overflow: 'auto' }}>\n      <h1>My App Content</h1>\n      <p>This is some content within the main app container. \n         It has overflow: auto, which would clip a normal modal.</p>\n      <button onClick={() => setShowModal(true)}>Open Modal</button>\n\n      {showModal && (\n        <Modal>\n          <h2>Hello from Modal!</h2>\n          <p>I am rendered using a Portal, so I can escape parent CSS.</p>\n          <button onClick={() => setShowModal(false)}>Close Modal</button>\n        </Modal>\n      )}\n    </div>\n  );\n}",
+              "explanation": "The `App` component demonstrates how to use the `Modal` component. Even though `Modal` is logically rendered inside `App` (and therefore `App`'s `div` with `overflow: auto`), the `Modal` content visually appears at the `modal-root` element in the HTML. This effectively 'breaks out' of the `App`'s CSS context, proving the utility of portals for overlays like modals. The `showModal` state controls the visibility of the modal.",
+              "language": "javascript"
+            }
+          ],
+          "relatedQuestions": [],
+          "relatedTasks": [],
+          "tags": [
+            "React",
+            "DOM",
+            "Portals",
+            "Modals",
+            "Tooltips",
+            "UI",
+            "Advanced React"
+          ],
+          "technology": "React",
+          "prerequisites": [
+            "react_basics",
+            "react_dom_manipulation"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 8,
+          "learningPath": "advanced",
+          "requiredFor": [
+            "complex_ui_components",
+            "global_ui_patterns"
+          ]
+        }
+      ],
+      "questions": [
+        {
+          "id": "question_context_reducer_1",
+          "topic": "React Context and useReducer",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "What is the primary purpose of React Context API?",
+          "answer": "To provide a way to pass data through the component tree without manually passing props at every level (prop drilling).",
+          "analysisPoints": [
+            "Focus on 'prop drilling' as the problem Context solves.",
+            "Emphasize 'global' or 'shared' data."
+          ],
+          "keyConcepts": [
+            "React Context",
+            "Prop Drilling"
+          ],
+          "evaluationCriteria": [
+            "Understanding of core Context purpose"
+          ],
+          "example": "",
+          "tags": [
+            "React",
+            "Context API",
+            "Fundamentals"
+          ],
+          "prerequisites": [
+            "react_props"
+          ],
+          "complexity": 3,
+          "interviewFrequency": 7,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_context_reducer_2",
+          "topic": "React `useReducer` Hook",
+          "level": "medium",
+          "type": "mcq",
+          "question": "Which of the following best describes when to use `useReducer` instead of `useState`?",
+          "answer": "When state logic is complex, involves multiple sub-values, or the next state depends on the previous one.",
+          "options": [
+            "When managing a single boolean value.",
+            "When state updates are always synchronous.",
+            "When state logic is complex, involves multiple sub-values, or the next state depends on the previous one.",
+            "Only when integrating with external libraries like Redux."
+          ],
+          "analysisPoints": [
+            "Recognize `useReducer`'s suitability for complex state transitions.",
+            "Understand that `useState` is simpler for basic state.",
+            "Clarify that `useReducer` is a built-in Hook, not just for Redux integration."
+          ],
+          "keyConcepts": [
+            "useReducer",
+            "useState",
+            "State Management"
+          ],
+          "evaluationCriteria": [
+            "Differentiating state management hooks",
+            "Understanding useReducer's benefits"
+          ],
+          "example": "```javascript\n// Simple state with useState\nconst [count, setCount] = useState(0);\n\n// Complex state with useReducer\nconst initialState = { count: 0, showText: true };\nfunction reducer(state, action) {\n  switch (action.type) {\n    case 'increment': return { ...state, count: state.count + 1 };\n    case 'toggleText': return { ...state, showText: !state.showText };\n    default: throw new Error();\n  }\n}\nconst [state, dispatch] = useReducer(reducer, initialState);\n```",
+          "tags": [
+            "React",
+            "Hooks",
+            "useReducer",
+            "useState"
+          ],
+          "prerequisites": [
+            "react_hooks_useState_useEffect"
+          ],
+          "complexity": 5,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_context_reducer_3",
+          "topic": "Custom Hooks",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "What is a custom hook in React, and what is its primary benefit?",
+          "answer": "A custom hook is a JavaScript function whose name starts with 'use' and that can call other hooks. Its primary benefit is to extract reusable stateful logic from components, promoting code reusability, testability, and better organization.",
+          "analysisPoints": [
+            "The naming convention `useSomething`.",
+            "Ability to call other hooks within them.",
+            "Focus on 'reusable stateful logic'."
+          ],
+          "keyConcepts": [
+            "Custom Hooks",
+            "Reusability",
+            "Stateful Logic"
+          ],
+          "evaluationCriteria": [
+            "Definition of custom hook",
+            "Understanding of its purpose"
+          ],
+          "example": "",
+          "tags": [
+            "React",
+            "Hooks",
+            "Custom Hooks",
+            "Reusability"
+          ],
+          "prerequisites": [
+            "react_hooks_basics"
+          ],
+          "complexity": 3,
+          "interviewFrequency": 7,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_context_reducer_4",
+          "topic": "Combining Context, useReducer, and Custom Hooks",
+          "level": "medium",
+          "type": "open",
+          "question": "Explain the advantages of combining React Context API, `useReducer`, and custom hooks for state management in a large-scale application, as demonstrated by the TodoApp example.",
+          "answer": "N/A",
+          "analysisPoints": [
+            "**Centralized State Logic**: `useReducer` centralizes state update logic within a single `reducer` function, making it predictable and easier to debug than scattered `useState` calls.",
+            "**Avoids Prop Drilling**: Context API allows direct access to state and dispatch function to any deeply nested component, eliminating the need to pass props down through many levels of the component tree.",
+            "**Reusability & Abstraction**: Custom hooks (e.g., `useTodo`) abstract away the `useContext` call and the specific context object, providing a clean, reusable API for components to interact with the global state without knowing the underlying Context implementation details.",
+            "**Scalability**: This pattern scales well for complex global states, as new actions and state slices can be easily added to the reducer.",
+            "**Performance (Selective Re-renders)**: While Context API can cause re-renders for all consuming components when the context value changes, strategic splitting of contexts or using `React.memo` can mitigate this. `useReducer` combined with Context allows `dispatch` to be stable, which helps prevent unnecessary re-renders of components that only receive `dispatch`.",
+            "**Testability**: The `reducer` function is a pure function, making it easy to test independently. Custom hooks can also be tested in isolation."
+          ],
+          "keyConcepts": [
+            "Context API",
+            "useReducer",
+            "Custom Hooks",
+            "Prop Drilling",
+            "Scalability",
+            "Reusability",
+            "State Management Patterns"
+          ],
+          "evaluationCriteria": [
+            "Comprehensive understanding of each technology's role.",
+            "Ability to articulate synergy and benefits of the combination.",
+            "Awareness of potential performance considerations (though minor in this context)."
+          ],
+          "example": "",
+          "tags": [
+            "React",
+            "State Management",
+            "Architecture",
+            "Design Patterns",
+            "Hooks"
+          ],
+          "prerequisites": [
+            "theory_react_context_reducer_hooks"
+          ],
+          "complexity": 7,
+          "interviewFrequency": 9,
+          "learningPath": "advanced"
+        },
+        {
+          "id": "question_context_reducer_5",
+          "topic": "Dispatching Actions",
+          "level": "medium",
+          "type": "code",
+          "question": "Consider the `todoReducer` and the `AddTodo` component from the example. Write the `handleSubmit` function within `AddTodo` to correctly dispatch an `ADD_TODO` action with the input text.",
+          "answer": "```javascript\n// Inside AddTodo component\nconst handleSubmit = e => {\n  e.preventDefault();\n  if (text.trim()) {\n    dispatch({ type: ADD_TODO, payload: text });\n    setText('');\n  }\n};\n```",
+          "options": [],
+          "analysisPoints": [
+            "Correct use of `e.preventDefault()` for form submission.",
+            "Understanding of `dispatch` function call.",
+            "Correct `action` object structure (`type` and `payload`).",
+            "Handling empty input (`text.trim()`).",
+            "Clearing input field after submission (`setText('')`)."
+          ],
+          "keyConcepts": [
+            "useReducer",
+            "dispatch",
+            "Action Object",
+            "Event Handling",
+            "Form Submission"
+          ],
+          "evaluationCriteria": [
+            "Correct implementation of event handler.",
+            "Accurate action dispatching.",
+            "Handling basic input validation and cleanup."
+          ],
+          "example": "```javascript\n// Provided AddTodo component structure\nfunction AddTodo() {\n  const { dispatch } = useTodo();\n  const [text, setText] = React.useState('');\n  \n  const handleSubmit = e => {\n    // Your code here\n  };\n  \n  return (\n    <form onSubmit={handleSubmit}>\n      <input\n        value={text}\n        onChange={e => setText(e.target.value)}\n        placeholder=\"Add todo...\"\n      />\n      <button type=\"submit\">Add</button>\n    </form>\n  );\n}\n```",
+          "tags": [
+            "React",
+            "Hooks",
+            "Forms",
+            "State Management",
+            "Coding Challenge"
+          ],
+          "prerequisites": [
+            "theory_react_context_reducer_hooks",
+            "react_forms"
+          ],
+          "complexity": 6,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_context_reducer_6",
+          "topic": "State Immutability in Reducers",
+          "level": "hard",
+          "type": "mcq",
+          "question": "Given the following reducer, what will be the state after dispatching `{ type: 'INCREMENT' }` if the current state is `[1, 2, 3]`?\n```javascript\nfunction faultyReducer(state, action) {\n  if (action.type === 'INCREMENT') {\n    state.push(state.length + 1);\n  }\n  return state;\n}\n```",
+          "answer": "Mutation of the original state array.",
+          "options": [
+            "The new state will be `[1, 2, 3, 4]` and React will correctly re-render.",
+            "The new state will be `[1, 2, 3, 4]` but React might not re-render or might behave unpredictably due to state mutation.",
+            "The reducer will throw an error because `push` is not allowed.",
+            "Mutation of the original state array."
+          ],
+          "analysisPoints": [
+            "Identify that `push` mutates the original array.",
+            "Explain that React relies on reference equality to detect state changes.",
+            "Consequence of mutation: no re-render, unpredictable behavior, difficult debugging.",
+            "Emphasize that reducers MUST return a new state object/array, not modify the existing one."
+          ],
+          "keyConcepts": [
+            "Reducer",
+            "State Immutability",
+            "React Re-rendering",
+            "Pure Functions"
+          ],
+          "evaluationCriteria": [
+            "Understanding of immutability principle in React/Redux.",
+            "Ability to spot state mutation.",
+            "Knowledge of re-render mechanisms."
+          ],
+          "example": "```javascript\n// Correct way to add an item immutably\nfunction correctReducer(state, action) {\n  if (action.type === 'INCREMENT') {\n    return [...state, state.length + 1]; // Returns a new array\n  }\n  return state;\n}\n```",
+          "tags": [
+            "React",
+            "useReducer",
+            "Immutability",
+            "Best Practices",
+            "Debugging"
+          ],
+          "prerequisites": [
+            "theory_react_context_reducer_hooks"
+          ],
+          "complexity": 8,
+          "interviewFrequency": 7,
+          "learningPath": "advanced"
+        },
+        {
+          "id": "question_portals_1",
+          "topic": "React Portals",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "What is the primary function of `ReactDOM.createPortal`?",
+          "answer": "To render children into a DOM node that exists outside the DOM hierarchy of the parent component.",
+          "analysisPoints": [
+            "Focus on 'outside the DOM hierarchy' but 'within the React component tree'."
+          ],
+          "keyConcepts": [
+            "React Portals",
+            "DOM Hierarchy",
+            "React Component Tree"
+          ],
+          "evaluationCriteria": [
+            "Basic definition of Portals"
+          ],
+          "example": "",
+          "tags": [
+            "React",
+            "Portals",
+            "Fundamentals"
+          ],
+          "prerequisites": [
+            "react_basics"
+          ],
+          "complexity": 3,
+          "interviewFrequency": 6,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_portals_2",
+          "topic": "React Portals Use Cases",
+          "level": "medium",
+          "type": "open",
+          "question": "List and briefly explain three common use cases where React Portals are particularly useful.",
+          "answer": "N/A",
+          "analysisPoints": [
+            "**Modals/Dialogs**: They need to appear on top of all page content and break free from any `overflow: hidden` or `z-index` properties of parent components. Portals ensure they render directly under `body` or a dedicated `modal-root`.",
+            "**Tooltips/Popovers**: While they are logically tied to an element, their visual placement often requires them to escape the parent's layout constraints to avoid clipping or being hidden by sibling elements' `z-index`.",
+            "**Global Notification Systems (Toasts)**: Notifications need to appear consistently at a fixed position on the screen, unaffected by the scroll or layout of the main application content. Portals allow them to mount directly to the document body.",
+            "**Floating Menus**: Similar to popovers, they might need to appear above other content and be free of parent styling."
+          ],
+          "keyConcepts": [
+            "React Portals",
+            "Modals",
+            "Tooltips",
+            "Z-index",
+            "Overflow"
+          ],
+          "evaluationCriteria": [
+            "Knowledge of practical applications of Portals.",
+            "Ability to explain *why* portals are needed in these scenarios (e.g., CSS clipping, stacking context)."
+          ],
+          "example": "",
+          "tags": [
+            "React",
+            "Portals",
+            "UI/UX",
+            "Design Patterns"
+          ],
+          "prerequisites": [
+            "theory_react_portals"
+          ],
+          "complexity": 6,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_portals_3",
+          "topic": "Event Bubbling with Portals",
+          "level": "medium",
+          "type": "mcq",
+          "question": "If an event (e.g., a click) occurs on a child element rendered within a React Portal, how does event bubbling behave?",
+          "answer": "The event bubbles up through the actual DOM tree to the portal's container, then continues bubbling up through the logical React component tree to the portal's logical parent.",
+          "options": [
+            "The event only bubbles up through the actual DOM tree until it reaches the portal's container, and stops there.",
+            "The event only bubbles up through the logical React component tree, completely ignoring the physical DOM structure.",
+            "The event bubbles up through the actual DOM tree to the portal's container, then continues bubbling up through the logical React component tree to the portal's logical parent.",
+            "Portals prevent event bubbling entirely for their children."
+          ],
+          "analysisPoints": [
+            "Crucial understanding that React maintains its own 'virtual' event system on top of the browser's native one.",
+            "Portals only change the *physical* DOM location, not the *logical* React component parent-child relationship for event propagation.",
+            "Events first bubble up the physical DOM to the portal's target, then bridge back into the React component tree for further bubbling."
+          ],
+          "keyConcepts": [
+            "React Portals",
+            "Event Bubbling",
+            "DOM Events",
+            "Virtual DOM"
+          ],
+          "evaluationCriteria": [
+            "Understanding of advanced React concepts like event delegation and virtual DOM interaction with Portals."
+          ],
+          "example": "```javascript\nfunction ParentComponent() {\n  const handleClick = () => console.log('Parent clicked!');\n  return (\n    <div onClick={handleClick}>\n      <MyModalButton /> {/* MyModalButton renders button in a portal */}\n    </div>\n  );\n}\n\nfunction MyModalButton() {\n  return ReactDOM.createPortal(\n    <button onClick={() => console.log('Button clicked!')}>Click Me</button>,\n    document.getElementById('modal-root')\n  );\n}\n// When 'Click Me' is clicked, both 'Button clicked!' and 'Parent clicked!' will log.\n```",
+          "tags": [
+            "React",
+            "Portals",
+            "Events",
+            "Advanced"
+          ],
+          "prerequisites": [
+            "theory_react_portals",
+            "react_event_handling"
+          ],
+          "complexity": 7,
+          "interviewFrequency": 7,
+          "learningPath": "advanced"
+        },
+        {
+          "id": "question_portals_4",
+          "topic": "Portal Implementation",
+          "level": "hard",
+          "type": "code",
+          "question": "Implement a simple `Tooltip` component that uses `ReactDOM.createPortal`. The tooltip should display `children` when hovered over its `targetElement` prop. The `targetElement` should be a ref to the DOM element to which the tooltip is conceptually attached. Ensure the tooltip is hidden when not hovered.\n\nAssume there's a `<div id=\"tooltip-root\"></div>` in the `<body>`.",
+          "answer": "```javascript\nimport React, { useState, useRef, useEffect } from 'react';\nimport ReactDOM from 'react-dom';\n\nconst Tooltip = ({ children, targetElement }) => {\n  const [isVisible, setIsVisible] = useState(false);\n  const tooltipRoot = useRef(null);\n\n  useEffect(() => {\n    tooltipRoot.current = document.getElementById('tooltip-root');\n  }, []);\n\n  useEffect(() => {\n    const target = targetElement?.current;\n    if (!target) return;\n\n    const showTooltip = () => setIsVisible(true);\n    const hideTooltip = () => setIsVisible(false);\n\n    target.addEventListener('mouseenter', showTooltip);\n    target.addEventListener('mouseleave', hideTooltip);\n\n    return () => {\n      target.removeEventListener('mouseenter', showTooltip);\n      target.removeEventListener('mouseleave', hideTooltip);\n    };\n  }, [targetElement]);\n\n  if (!tooltipRoot.current || !isVisible) {\n    return null;\n  }\n\n  // Basic positioning - in a real app, this would be more complex\n  const targetRect = targetElement.current.getBoundingClientRect();\n  const style = {\n    position: 'absolute',\n    top: `${targetRect.bottom + window.scrollY + 5}px`,\n    left: `${targetRect.left + window.scrollX}px`,\n    backgroundColor: 'black',\n    color: 'white',\n    padding: '5px 10px',\n    borderRadius: '4px',\n    zIndex: 9999,\n  };\n\n  return ReactDOM.createPortal(\n    <div style={style}>{children}</div>,\n    tooltipRoot.current\n  );\n};\n\n// Usage Example:\n// function App() {\n//   const buttonRef = useRef(null);\n//   return (\n//     <div>\n//       <button ref={buttonRef}>Hover Me</button>\n//       <Tooltip targetElement={buttonRef}>This is a helpful tooltip!</Tooltip>\n//     </div>\n//   );\n// }\n```",
+          "options": [],
+          "analysisPoints": [
+            "Correctly uses `ReactDOM.createPortal`.",
+            "Manages visibility state (`isVisible`).",
+            "Uses `useEffect` to attach/detach event listeners to the `targetElement` (passed as a ref).",
+            "Handles the `tooltip-root` DOM node lookup (e.g., in `useEffect` or `useRef`).",
+            "Basic positioning logic (acknowledging that robust positioning is complex).",
+            "Cleans up event listeners on unmount."
+          ],
+          "keyConcepts": [
+            "React Portals",
+            "Refs",
+            "useEffect",
+            "Event Listeners",
+            "DOM Manipulation",
+            "Tooltip"
+          ],
+          "evaluationCriteria": [
+            "Ability to implement a practical use case for Portals.",
+            "Correct use of hooks for DOM interaction and state management.",
+            "Understanding of event handling and cleanup."
+          ],
+          "example": "```javascript\n// Starting template\nimport React, { useState, useRef, useEffect } from 'react';\nimport ReactDOM from 'react-dom';\n\nconst Tooltip = ({ children, targetElement }) => {\n  const [isVisible, setIsVisible] = useState(false);\n  // You might need a ref for the portal target node as well\n  const portalNode = useRef(null);\n\n  useEffect(() => {\n    // Initialize portalNode.current to document.getElementById('tooltip-root')\n    // and add/remove event listeners on targetElement\n  }, [targetElement]);\n\n  if (!portalNode.current || !isVisible) {\n    return null;\n  }\n\n  // Implement basic positioning logic\n  const style = {}; // Calculate position based on targetElement's bounding rect\n\n  return ReactDOM.createPortal(\n    <div style={style}>{children}</div>,\n    portalNode.current\n  );\n};\n\n// How to use it in App.js:\n// function App() {\n//   const myButtonRef = useRef(null);\n//   return (\n//     <div>\n//       <button ref={myButtonRef}>Hover Me</button>\n//       <Tooltip targetElement={myButtonRef}>I'm a portal tooltip!</Tooltip>\n//     </div>\n//   );\n// }\n```",
+          "tags": [
+            "React",
+            "Portals",
+            "Hooks",
+            "Coding Challenge",
+            "UI Components",
+            "Hard"
+          ],
+          "prerequisites": [
+            "theory_react_portals",
+            "react_refs",
+            "react_hooks_useEffect"
+          ],
+          "complexity": 9,
+          "interviewFrequency": 8,
+          "learningPath": "expert"
+        }
+      ],
+      "tasks": [
+        {
+          "id": "task_todo_app_extend",
+          "title": "Extend Todo App with Delete and Edit Functionality",
+          "description": "\nExtend the existing Todo application to include delete and edit functionalities for individual todo items. This task will reinforce your understanding of `useReducer`, Context API, and how to dispatch actions for complex state updates.\n\n**Requirements:**\n1.  **Delete Todo**: Add a 'Delete' button next to each todo item. Clicking it should remove the todo from the list.\n2.  **Edit Todo**: Allow users to edit the text of an existing todo. This could involve:\n    *   Displaying an 'Edit' button or making the todo text clickable.\n    *   When editing, the text should turn into an input field pre-filled with the current todo text.\n    *   The user should be able to save changes (e.g., by pressing Enter or clicking a 'Save' button).\n    *   The edit action should update the `text` property of the corresponding todo item in the state.\n3.  **Update Reducer**: Modify the `todoReducer` to handle new actions for deleting and editing todos.\n4.  **Update Components**: Modify `TodoItem` to include the delete button and handle the edit state (displaying text vs. input field).\n5.  **Maintain Immutability**: Ensure all state updates in the reducer are immutable.\n",
+          "difficulty": "medium",
+          "startingCode": "import React, { createContext, useReducer, useContext, useState } from 'react';\n\n// Action Types\nconst ADD_TODO = 'ADD_TODO';\nconst TOGGLE_TODO = 'TOGGLE_TODO';\n// Add new action types here for DELETE and EDIT\nconst REMOVE_TODO = 'REMOVE_TODO'; // Already present, rename to DELETE_TODO for clarity?\n\n// Reducer\nfunction todoReducer(state, action) {\n  switch (action.type) {\n    case ADD_TODO:\n      return [\n        ...state,\n        {\n          id: Date.now(),\n          text: action.payload,\n          completed: false,\n        },\n      ];\n    case TOGGLE_TODO:\n      return state.map(todo =>\n        todo.id === action.payload ? { ...todo, completed: !todo.completed } : todo\n      );\n    case REMOVE_TODO: // Use this for delete, or create DELETE_TODO\n      return state.filter(todo => todo.id !== action.payload);\n    // Add cases for DELETE and EDIT actions here\n    default:\n      return state;\n  }\n}\n\n// Context & Provider\nconst TodoContext = createContext(null);\n\nexport function TodoProvider({ children }) {\n  const [todos, dispatch] = useReducer(todoReducer, []);\n  return (\n    <TodoContext.Provider value={{ todos, dispatch }}>\n      {children}\n    </TodoContext.Provider>\n  );\n}\n\n// Custom Hook\nexport function useTodo() {\n  const context = useContext(TodoContext);\n  if (context === null) {\n    throw new Error('useTodo must be used within a TodoProvider');\n  }\n  return context;\n}\n\n// TodoItem Component (needs modification)\nfunction TodoItem({ todo }) {\n  const { dispatch } = useTodo();\n  // Add state for editing mode and current edit text\n\n  return (\n    <li>\n      <span\n        style={{ textDecoration: todo.completed ? 'line-through' : 'none', cursor: 'pointer' }}\n        onClick={() => dispatch({ type: TOGGLE_TODO, payload: todo.id })}\n      >\n        {todo.text}\n      </span>\n      {/* Add Delete and Edit buttons/logic here */}\n    </li>\n  );\n}\n\n// TodoList Component (should be fine as is)\nfunction TodoList() {\n  const { todos } = useTodo();\n  return (\n    <ul>\n      {todos.map(todo => (\n        <TodoItem key={todo.id} todo={todo} />\n      ))}\n    </ul>\n  );\n}\n\n// AddTodo Component (should be fine as is)\nfunction AddTodo() {\n  const { dispatch } = useTodo();\n  const [text, setText] = useState('');\n  \n  const handleSubmit = e => {\n    e.preventDefault();\n    if (text.trim()) {\n      dispatch({ type: ADD_TODO, payload: text });\n      setText('');\n    }\n  };\n  \n  return (\n    <form onSubmit={handleSubmit}>\n      <input\n        value={text}\n        onChange={e => setText(e.target.value)}\n        placeholder=\"Add todo...\"\n      />\n      <button type=\"submit\">Add</button>\n    </form>\n  );\n}\n\n// App Component\nexport default function TodoApp() {\n  return (\n    <TodoProvider>\n      <h1>Todo App</h1>\n      <AddTodo />\n      <TodoList />\n    </TodoProvider>\n  );\n}",
+          "solutionCode": "import React, { createContext, useReducer, useContext, useState, useRef, useEffect } from 'react';\n\n// Action Types\nconst ADD_TODO = 'ADD_TODO';\nconst TOGGLE_TODO = 'TOGGLE_TODO';\nconst DELETE_TODO = 'DELETE_TODO'; // Renamed from REMOVE_TODO for clarity\nconst EDIT_TODO = 'EDIT_TODO';\n\n// Reducer\nfunction todoReducer(state, action) {\n  switch (action.type) {\n    case ADD_TODO:\n      return [\n        ...state,\n        {\n          id: Date.now(),\n          text: action.payload,\n          completed: false,\n        },\n      ];\n    case TOGGLE_TODO:\n      return state.map(todo =>\n        todo.id === action.payload ? { ...todo, completed: !todo.completed } : todo\n      );\n    case DELETE_TODO:\n      return state.filter(todo => todo.id !== action.payload);\n    case EDIT_TODO:\n      return state.map(todo =>\n        todo.id === action.payload.id ? { ...todo, text: action.payload.newText } : todo\n      );\n    default:\n      return state;\n  }\n}\n\n// Context & Provider\nconst TodoContext = createContext(null);\n\nexport function TodoProvider({ children }) {\n  const [todos, dispatch] = useReducer(todoReducer, []);\n  return (\n    <TodoContext.Provider value={{ todos, dispatch }}>\n      {children}\n    </TodoContext.Provider>\n  );\n}\n\n// Custom Hook\nexport function useTodo() {\n  const context = useContext(TodoContext);\n  if (context === null) {\n    throw new Error('useTodo must be used within a TodoProvider');\n  }\n  return context;\n}\n\n// TodoItem Component (modified)\nfunction TodoItem({ todo }) {\n  const { dispatch } = useTodo();\n  const [isEditing, setIsEditing] = useState(false);\n  const [editText, setEditText] = useState(todo.text);\n  const inputRef = useRef(null);\n\n  useEffect(() => {\n    if (isEditing) {\n      inputRef.current?.focus();\n    }\n  }, [isEditing]);\n\n  const handleSaveEdit = () => {\n    if (editText.trim() && editText !== todo.text) {\n      dispatch({ type: EDIT_TODO, payload: { id: todo.id, newText: editText.trim() } });\n    }\n    setIsEditing(false);\n  };\n\n  const handleEditKeyDown = (e) => {\n    if (e.key === 'Enter') {\n      handleSaveEdit();\n    } else if (e.key === 'Escape') {\n      setEditText(todo.text); // Revert changes\n      setIsEditing(false);\n    }\n  };\n\n  return (\n    <li>\n      {isEditing ? (\n        <input\n          ref={inputRef}\n          type=\"text\"\n          value={editText}\n          onChange={e => setEditText(e.target.value)}\n          onBlur={handleSaveEdit} // Save on blur\n          onKeyDown={handleEditKeyDown}\n        />\n      ) : (\n        <span\n          style={{ textDecoration: todo.completed ? 'line-through' : 'none', cursor: 'pointer' }}\n          onClick={() => dispatch({ type: TOGGLE_TODO, payload: todo.id })}\n        >\n          {todo.text}\n        </span>\n      )}\n      \n      {!isEditing && <button onClick={() => setIsEditing(true)}>Edit</button>}\n      <button onClick={() => dispatch({ type: DELETE_TODO, payload: todo.id })}>Delete</button>\n    </li>\n  );\n}\n\n// TodoList Component (fine as is)\nfunction TodoList() {\n  const { todos } = useTodo();\n  return (\n    <ul>\n      {todos.map(todo => (\n        <TodoItem key={todo.id} todo={todo} />\n      ))}\n    </ul>\n  );\n}\n\n// AddTodo Component (fine as is)\nfunction AddTodo() {\n  const { dispatch } = useTodo();\n  const [text, setText] = useState('');\n  \n  const handleSubmit = e => {\n    e.preventDefault();\n    if (text.trim()) {\n      dispatch({ type: ADD_TODO, payload: text });\n      setText('');\n    }\n  };\n  \n  return (\n    <form onSubmit={handleSubmit}>\n      <input\n        value={text}\n        onChange={e => setText(e.target.value)}\n        placeholder=\"Add todo...\"\n      />\n      <button type=\"submit\">Add</button>\n    </form>\n  );\n}\n\n// App Component\nexport default function TodoApp() {\n  return (\n    <TodoProvider>\n      <h1>Todo App</h1>\n      <AddTodo />\n      <TodoList />\n    </TodoProvider>\n  );\n}",
+          "testCases": [
+            "**Delete Functionality**: Add 3 todos, click delete on the middle one. Verify only 2 remain and correct ones.",
+            "**Edit Functionality**: Add a todo 'Buy groceries'. Click edit, change to 'Buy milk & eggs', save. Verify text updates.",
+            "**Edit Cancel**: Add a todo. Click edit, type something, then press 'Escape'. Verify text reverts to original and edit mode exits.",
+            "**Empty Edit Save**: Add a todo 'Test'. Click edit, clear the input, then save. Verify the todo is not updated or potentially deleted (depending on how you handle it, usually not updated).",
+            "**Toggle & Delete**: Toggle a todo as complete, then delete it. Verify no errors occur.",
+            "**Multiple Todos**: Add 10+ todos and perform various operations (add, toggle, edit, delete) to ensure stability."
+          ],
+          "hints": [
+            "Define new action types (e.g., `DELETE_TODO`, `EDIT_TODO`) and add corresponding cases to your `todoReducer`.",
+            "For editing, the `TodoItem` component will need its own local state (e.g., `isEditing`, `editText`) to control the input field visibility and value.",
+            "Remember to use immutable updates in your reducer when handling `EDIT_TODO`.",
+            "Consider using an `onBlur` event on the edit input field to save changes when the input loses focus, in addition to an 'Enter' key press.",
+            "You might need a `useRef` to focus the input field when entering edit mode."
+          ],
+          "tags": [
+            "React",
+            "State Management",
+            "useReducer",
+            "Context API",
+            "Custom Hooks",
+            "CRUD",
+            "Forms"
+          ],
+          "timeEstimate": 60,
+          "prerequisites": [
+            "theory_react_context_reducer_hooks"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 9,
+          "learningPath": "intermediate",
+          "relatedConcepts": [
+            "controlled_components",
+            "event_handling",
+            "immutable_updates",
+            "local_component_state"
+          ]
+        },
+        {
+          "id": "task_reusable_portal_modal",
+          "title": "Build a Reusable Modal Component with React Portals",
+          "description": "\nCreate a robust and reusable `Modal` component using React Portals. This modal should be flexible enough to display any content and include common modal features like an overlay, a close button, and optional closing on outside clicks.\n\n**Requirements:**\n1.  **Portal Integration**: The modal content must be rendered using `ReactDOM.createPortal` into a dedicated DOM node (e.g., `<div id=\"modal-root\"></div>` which you assume exists in `index.html`).\n2.  **Open/Close Control**: The modal should accept a `isOpen` prop (boolean) to control its visibility and an `onClose` prop (function) to notify the parent when it should close.\n3.  **Overlay**: Implement a semi-transparent overlay that covers the rest of the page when the modal is open.\n4.  **Close Button**: Include a visible close button (e.g., an 'X' icon or a 'Close' button) inside the modal content.\n5.  **Click Outside Close**: The modal should close if the user clicks on the overlay (outside the modal content itself).\n6.  **Escape Key Close**: The modal should close when the 'Escape' key is pressed.\n7.  **Focus Management (Optional, but good for accessibility)**: When the modal opens, focus should be trapped within the modal, and restored to the element that triggered the modal when it closes. (This is a hard bonus point).\n",
+          "difficulty": "hard",
+          "startingCode": "import React, { useEffect, useRef } from 'react';\nimport ReactDOM from 'react-dom';\n\n// Assume 'modal-root' exists in your index.html:\n// <div id=\"root\"></div>\n// <div id=\"modal-root\"></div>\n\nfunction Modal({ isOpen, onClose, children }) {\n  const modalRef = useRef(null); // Ref for the modal content div\n\n  useEffect(() => {\n    if (isOpen) {\n      // Add event listeners for escape key and outside clicks\n      // Focus management (optional)\n    } else {\n      // Clean up event listeners\n    }\n    return () => {\n      // Cleanup on unmount\n    };\n  }, [isOpen, onClose]);\n\n  if (!isOpen) {\n    return null;\n  }\n\n  const portalRoot = document.getElementById('modal-root');\n  if (!portalRoot) return null; // Handle case where root doesn't exist\n\n  // Basic structure for modal and overlay\n  const modalContent = (\n    <div className=\"modal-overlay\" onClick={/* handle click outside */}>\n      <div className=\"modal-content\" ref={modalRef} onClick={e => e.stopPropagation()}> {/* Prevent click inside from closing */}\n        {children}\n        <button className=\"modal-close-button\" onClick={onClose}>&times;</button>\n      </div>\n    </div>\n  );\n\n  return ReactDOM.createPortal(modalContent, portalRoot);\n}\n\n// Basic CSS (add this to your index.css or a style tag)\n/*\n.modal-overlay {\n  position: fixed;\n  top: 0;\n  left: 0;\n  right: 0;\n  bottom: 0;\n  background-color: rgba(0, 0, 0, 0.6);\n  display: flex;\n  justify-content: center;\n  align-items: center;\n  z-index: 1000;\n}\n\n.modal-content {\n  background: white;\n  padding: 20px;\n  border-radius: 8px;\n  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);\n  position: relative; // For close button positioning\n  min-width: 300px;\n  max-width: 80%;\n  max-height: 80%;\n  overflow-y: auto;\n}\n\n.modal-close-button {\n  position: absolute;\n  top: 10px;\n  right: 10px;\n  background: none;\n  border: none;\n  font-size: 1.5em;\n  cursor: pointer;\n}\n*/\n\n// Example Usage in App.js:\n// import React, { useState } from 'react';\n// import Modal from './Modal';\n\n// function App() {\n//   const [isModalOpen, setIsModalOpen] = useState(false);\n\n//   return (\n//     <div>\n//       <h1>My App</h1>\n//       <button onClick={() => setIsModalOpen(true)}>Open Modal</button>\n//       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>\n//         <h2>This is a Portal Modal</h2>\n//         <p>You can put any content here.</p>\n//       </Modal>\n//     </div>\n//   );\n// }\n",
+          "solutionCode": "import React, { useEffect, useRef, useCallback } from 'react';\nimport ReactDOM from 'react-dom';\n\nfunction Modal({ isOpen, onClose, children }) {\n  const modalRef = useRef(null); // Ref for the modal content div itself\n  const previouslyActiveElement = useRef(null); // For focus management\n\n  // Store the portal root element in a ref to avoid re-querying DOM\n  const portalRoot = useRef(null);\n  useEffect(() => {\n    portalRoot.current = document.getElementById('modal-root');\n  }, []);\n\n  // Function to handle escape key press\n  const handleEscapeKey = useCallback((event) => {\n    if (event.key === 'Escape' && isOpen) {\n      onClose();\n    }\n  }, [isOpen, onClose]);\n\n  // Function to handle click outside modal content\n  const handleOverlayClick = useCallback((event) => {\n    if (modalRef.current && !modalRef.current.contains(event.target)) {\n      onClose();\n    }\n  }, [onClose]);\n\n  useEffect(() => {\n    if (isOpen) {\n      // Save reference to the element that was focused before modal opened\n      previouslyActiveElement.current = document.activeElement;\n      document.addEventListener('keydown', handleEscapeKey);\n      // Focus the modal content for accessibility\n      modalRef.current?.focus(); \n    } else {\n      document.removeEventListener('keydown', handleEscapeKey);\n      // Restore focus to the previously active element when modal closes\n      if (previouslyActiveElement.current) {\n        previouslyActiveElement.current.focus();\n      }\n    }\n    // Cleanup event listeners on component unmount or when isOpen changes\n    return () => {\n      document.removeEventListener('keydown', handleEscapeKey);\n    };\n  }, [isOpen, handleEscapeKey]);\n\n  if (!isOpen || !portalRoot.current) {\n    return null;\n  }\n\n  return ReactDOM.createPortal(\n    <div className=\"modal-overlay\" onClick={handleOverlayClick} tabIndex=\"-1\">\n      <div\n        className=\"modal-content\"\n        ref={modalRef}\n        role=\"dialog\"\n        aria-modal=\"true\"\n        tabIndex=\"0\" // Make content focusable for initial focus\n        onClick={e => e.stopPropagation()} // Prevent clicks inside content from closing modal\n      >\n        {children}\n        <button className=\"modal-close-button\" onClick={onClose} aria-label=\"Close modal\">&times;</button>\n      </div>\n    </div>,\n    portalRoot.current\n  );\n}\n\n// Basic CSS (add this to your index.css or a style tag)\n/*\n.modal-overlay {\n  position: fixed;\n  top: 0;\n  left: 0;\n  right: 0;\n  bottom: 0;\n  background-color: rgba(0, 0, 0, 0.6);\n  display: flex;\n  justify-content: center;\n  align-items: center;\n  z-index: 1000;\n}\n\n.modal-content {\n  background: white;\n  padding: 20px;\n  border-radius: 8px;\n  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);\n  position: relative; /* For close button positioning */\n  min-width: 300px;\n  max-width: 80%;\n  max-height: 80%;\n  overflow-y: auto;\n  outline: none; /* Remove focus outline */\n}\n\n.modal-close-button {\n  position: absolute;\n  top: 10px;\n  right: 10px;\n  background: none;\n  border: none;\n  font-size: 1.5em;\n  cursor: pointer;\n  padding: 5px;\n}\n*/\n\n// Example Usage in App.js:\n// import React, { useState } from 'react';\n// import Modal from './Modal';\n\n// function App() {\n//   const [isModalOpen, setIsModalOpen] = useState(false);\n\n//   return (\n//     <div>\n//       <h1>My App</h1>\n//       <button onClick={() => setIsModalOpen(true)}>Open Modal</button>\n//       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>\n//         <h2>This is a Portal Modal</h2>\n//         <p>You can put any content here.</p>\n//       </Modal>\n//     </div>\n//   );\n// }\n",
+          "testCases": [
+            "**Basic Open/Close**: Click a button to open the modal, then click its internal close button. Verify it opens and closes correctly.",
+            "**Click Outside**: Open the modal, click on the semi-transparent overlay. Verify the modal closes.",
+            "**Escape Key**: Open the modal, press the 'Escape' key. Verify the modal closes.",
+            "**No Modal Open**: Verify that no modal elements are present in the DOM when `isOpen` is false.",
+            "**Content Rendering**: Pass various types of children (text, other components) to the Modal and ensure they render correctly within the modal content area.",
+            "**Focus Management (if implemented)**: After opening and closing the modal, verify that focus returns to the button that triggered it. Test tabbing through elements inside the modal."
+          ],
+          "hints": [
+            "Use `useEffect` to manage event listeners for the 'Escape' key and clicks outside the modal. Remember to clean up these listeners when the component unmounts or `isOpen` changes.",
+            "For clicking outside the modal, attach the `onClick` listener to the overlay, and then use `event.stopPropagation()` on the modal's inner content div to prevent clicks within the modal from bubbling up and closing it.",
+            "Store the `modal-root` DOM node in a `useRef` to avoid repeatedly querying the DOM.",
+            "For focus management, you'll need to capture `document.activeElement` when the modal opens and restore focus to it when the modal closes. You might also need to make the modal content focusable (e.g., `tabIndex=\"0\"`).",
+            "Utilize `useCallback` for event handlers that are passed to `useEffect` dependencies to prevent unnecessary re-creations and re-attachments of listeners."
+          ],
+          "tags": [
+            "React",
+            "Portals",
+            "UI Components",
+            "Modals",
+            "Accessibility",
+            "Hooks",
+            "Event Handling"
+          ],
+          "timeEstimate": 90,
+          "prerequisites": [
+            "theory_react_portals",
+            "react_hooks_useEffect",
+            "react_refs",
+            "event_handling"
+          ],
+          "complexity": 8,
+          "interviewRelevance": 9,
+          "learningPath": "advanced",
+          "relatedConcepts": [
+            "controlled_components",
+            "event_delegation",
+            "css_positioning",
+            "a11y"
+          ]
+        }
+      ]
+    }
+  }
+]

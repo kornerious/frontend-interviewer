@@ -1,0 +1,2086 @@
+[
+  {
+    "id": "5732f524-f1a9-45c6-89c2-b6fa9a99a40c",
+    "startLine": 15500,
+    "endLine": 15599,
+    "processedDate": "2025-06-17T15:00:39.357Z",
+    "content": {
+      "logicalBlockInfo": {
+        "suggestedEndLine": -1
+      },
+      "theory": [
+        {
+          "id": "theory_custom_array_methods",
+          "title": "Custom Array Methods (Polyfills)",
+          "content": "JavaScript array methods like `reduce`, `map`, `filter`, etc., are powerful tools for data manipulation. In some scenarios, especially when dealing with older environments or custom logic, one might need to implement a 'polyfill' or a custom version of these methods. A polyfill is a piece of code (or a plugin) that provides the functionality that is natively not available in a web browser, but that you want to use.\n\nImplementing a custom `reduce` function, for instance, involves iterating through the array and accumulating a single value based on a provided callback function. This process demonstrates a fundamental understanding of how array iteration and aggregation work under the hood.\n\n### Array.prototype.reduce Explained\n\nThe `reduce()` method executes a user-supplied 'reducer' callback function on each element of the array, in order, passing in the return value from the calculation on the preceding element. The final result of running the reducer across all elements of the array is a single value.\n\n**Syntax:**\n`arr.reduce(callback(accumulator, currentValue, currentIndex, array), initialValue)`\n\n- `callback`: A function to execute on each element in the array. It takes four arguments:\n    - `accumulator`: The accumulated value previously returned in the last invocation of the callback, or `initialValue`, if supplied.\n    - `currentValue`: The current element being processed in the array.\n    - `currentIndex` (Optional): The index of the current element being processed in the array. Starts from 0 if an `initialValue` is provided, and from 1 if not.\n    - `array` (Optional): The array `reduce()` was called upon.\n- `initialValue` (Optional): A value to use as the first argument to the first call of the `callback`. If no `initialValue` is supplied, the first element in the array will be used as the `accumulator` initial value and `currentValue` will start from the second element.",
+          "examples": [
+            {
+              "id": "example_custom_reduce_1",
+              "title": "Basic Custom Reduce Implementation",
+              "code": "Array.prototype.customReduce = function(callback, initialValue) {\n  const arr = this;\n  let accumulator = initialValue;\n  let startIndex = 0;\n\n  if (initialValue === undefined) {\n    if (arr.length === 0) {\n      throw new TypeError('Reduce of empty array with no initial value');\n    }\n    accumulator = arr[0];\n    startIndex = 1;\n  }\n\n  for (let i = startIndex; i < arr.length; i++) {\n    accumulator = callback(accumulator, arr[i], i, arr);\n  }\n\n  return accumulator;\n};\n\n// Usage Example 1: Summing numbers\nconst numbers = [1, 2, 3, 4];\nconst sum = numbers.customReduce((acc, current) => acc + current, 0);\nconsole.log(sum); // 10\n\n// Usage Example 2: Flattening an array of arrays\nconst arrays = [[1, 2], [3, 4], [5, 6]];\nconst flattened = arrays.customReduce((acc, current) => acc.concat(current), []);\nconsole.log(flattened); // [1, 2, 3, 4, 5, 6]\n",
+              "explanation": "This code block demonstrates a simple polyfill for `Array.prototype.reduce`. It correctly handles cases with and without an `initialValue`, and throws an error for an empty array without an `initialValue`, mimicking the native behavior. The `sum` example from the prompt is included here as a direct demonstration.",
+              "language": "javascript"
+            }
+          ],
+          "relatedQuestions": [
+            "question_custom_reduce_1",
+            "question_custom_reduce_2",
+            "question_custom_reduce_3"
+          ],
+          "relatedTasks": [
+            "task_custom_reduce_polyfill"
+          ],
+          "tags": [
+            "JavaScript",
+            "Array Methods",
+            "Polyfill",
+            "Functional Programming",
+            "Higher-Order Functions"
+          ],
+          "technology": "JavaScript",
+          "prerequisites": [
+            "javascript_basics",
+            "functions",
+            "arrays",
+            "prototypes"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 8,
+          "learningPath": "intermediate",
+          "requiredFor": [
+            "data_transformation",
+            "custom_utilities"
+          ]
+        },
+        {
+          "id": "theory_debounce",
+          "title": "Debounce Function for Performance Optimization",
+          "content": "Debouncing is a technique used to improve performance by limiting the rate at which a function can fire. When an event (like a keystroke in a search bar or window resizing) fires rapidly, the associated event handler can be called many times in a short period, leading to performance issues if the handler performs expensive operations (e.g., API calls, heavy DOM manipulation).\n\nA debounce function wraps the original function and delays its execution until a specified time has passed since the *last* time it was invoked. This means that if the event fires multiple times within the delay period, the timer is reset, and the function only executes once the user has stopped triggering the event for the specified duration.\n\n### How Debouncing Works\n\n1.  **Timer Management**: A `timerId` (usually from `setTimeout`) is used to schedule the execution of the original function.\n2.  **Reset on Re-invocation**: Every time the debounced function is called, any existing timer is cleared using `clearTimeout()`. This effectively cancels the previously scheduled execution.\n3.  **Delayed Execution**: A new timer is then set with `setTimeout()`, scheduling the function to run after the specified `delay`.\n4.  **Context and Arguments**: The debounced function needs to ensure that the original function (`func`) is called with the correct `this` context and `arguments` that were passed to the debounced function itself.\n\n### Common Use Cases\n\n*   **Search bar input**: Delaying API calls until the user stops typing.\n*   **Window resizing**: Performing layout recalculations only after the user has finished resizing the window.\n*   **Button clicks**: Preventing multiple rapid clicks from triggering an action multiple times.",
+          "examples": [
+            {
+              "id": "example_debounce_1",
+              "title": "Debounce Implementation and Usage",
+              "code": "function debounce(func, delay) {\n  let timerId;\n  return function(...args) {\n    clearTimeout(timerId);\n    timerId = setTimeout(() => {\n      func.apply(this, args);\n    }, delay);\n  };\n}\n\n// Usage Example: Search Input\nconst handleSearch = debounce((searchTerm) => {\n  console.log(`Searching for: ${searchTerm}`);\n  // In a real application, this would be an API call or heavy operation\n}, 500);\n\n// Simulate an input element and event listener\n// In a browser, you'd do: document.getElementById('search').addEventListener('input', (e) => handleSearch(e.target.value));\n\nconsole.log('--- Simulating search input ---');\nhandleSearch('a');   // Timer set\nhandleSearch('ap');  // Timer cleared, new timer set\nhandleSearch('app'); // Timer cleared, new timer set\n\n// Wait for 600ms (more than 500ms delay) to see the last call execute\nsetTimeout(() => {\n  console.log('--- After debounce delay ---');\n  // No further calls, so 'Searching for: app' will be logged.\n}, 600);\n\n// Another example where only the last call fires after a pause\nsetTimeout(() => {\n  console.log('--- Simulating another sequence ---');\n  handleSearch('apple'); // Timer set\n  setTimeout(() => handleSearch('apple s'), 100); // Timer cleared, new timer set\n  setTimeout(() => handleSearch('apple se'), 200); // Timer cleared, new timer set\n  setTimeout(() => handleSearch('apple see'), 700); // Timer cleared, new timer set\n  // The 'apple see' search will fire after 500ms from its call (700ms total from start)\n}, 1500);\n",
+              "explanation": "This example provides the canonical implementation of a debounce function. It shows how `clearTimeout` and `setTimeout` work together to ensure the function is only called after a period of inactivity. The usage section simulates rapid input changes and demonstrates that `handleSearch` is only executed once the typing has stopped for the specified `delay` (500ms in this case).",
+              "language": "javascript"
+            }
+          ],
+          "relatedQuestions": [
+            "question_debounce_1",
+            "question_debounce_2",
+            "question_debounce_3",
+            "question_debounce_4"
+          ],
+          "relatedTasks": [
+            "task_implement_debounce"
+          ],
+          "tags": [
+            "JavaScript",
+            "Performance",
+            "Frontend",
+            "Optimization",
+            "Functions",
+            "Debounce"
+          ],
+          "technology": "JavaScript",
+          "prerequisites": [
+            "javascript_basics",
+            "closures",
+            "timers"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 9,
+          "learningPath": "intermediate",
+          "requiredFor": [
+            "ui_performance",
+            "event_handling"
+          ]
+        },
+        {
+          "id": "theory_throttle",
+          "title": "Throttle Function for Performance Optimization",
+          "content": "Throttling is a technique used to limit the rate at which a function can be called. Unlike debouncing, which waits for a pause in events, throttling ensures that a function executes at most once within a specified time period, regardless of how many times the event fires.\n\nThis is particularly useful for events that fire continuously, such as scrolling, mouse movement, or drag-and-drop operations, where you want to perform an action periodically, but not on every single event trigger.\n\n### How Throttling Works\n\n1.  **State Management**: A flag, typically `isThrottled`, is used to track whether the function is currently in a 'throttled' state.\n2.  **Initial Execution**: When the throttled function is called and `isThrottled` is `false`, the original function (`callback`) is executed immediately.\n3.  **Set Throttled State**: Immediately after execution, `isThrottled` is set to `true` to prevent further executions within the interval.\n4.  **Reset Timer**: A `setTimeout` is set to reset `isThrottled` to `false` after the `interval` has passed. This allows the function to be called again.\n5.  **Ignore During Throttled State**: If the throttled function is called while `isThrottled` is `true`, the call is simply ignored.\n\n### Common Use Cases\n\n*   **Scroll events**: Updating UI elements (e.g., sticky headers, lazy loading) only a few times per second.\n*   **Mousemove events**: Tracking mouse position or performing drag operations.\n*   **API rate limiting**: Ensuring a minimum delay between successive API requests.\n*   **Progress bars**: Updating a progress bar during a long operation.",
+          "examples": [
+            {
+              "id": "example_throttle_1",
+              "title": "Throttle Implementation and Usage",
+              "code": "function throttle(callback, interval) {\n  let isThrottled = false;\n  \n  return function(...args) {\n    if (!isThrottled) {\n      callback.apply(this, args);\n      isThrottled = true;\n      \n      setTimeout(() => {\n        isThrottled = false;\n      }, interval);\n    }\n  };\n}\n\n// Usage Example: Scroll Event\nconst handleScroll = throttle(() => {\n  console.log('Scroll event handled');\n  // In a real application, this would be an expensive calculation or DOM operation\n}, 300);\n\n// Simulate scroll events\nconsole.log('--- Simulating scroll events ---');\nhandleScroll(); // Logs: 'Scroll event handled' (isThrottled = true)\nhandleScroll(); // Ignored (isThrottled = true)\nhandleScroll(); // Ignored (isThrottled = true)\n\nsetTimeout(() => {\n  console.log('--- After 300ms interval ---');\n  handleScroll(); // Logs: 'Scroll event handled' (isThrottled = false, now true again)\n  handleScroll(); // Ignored\n}, 301);\n\nsetTimeout(() => {\n  console.log('--- After another 300ms interval ---');\n  handleScroll(); // Logs: 'Scroll event handled'\n}, 602);\n",
+              "explanation": "This example demonstrates the standard implementation of a throttle function. It uses an `isThrottled` flag and `setTimeout` to ensure the `callback` is invoked at most once within the specified `interval`. The simulation shows that even if `handleScroll` is called multiple times rapidly, it only executes once per 300ms window.",
+              "language": "javascript"
+            }
+          ],
+          "relatedQuestions": [
+            "question_throttle_1",
+            "question_throttle_2",
+            "question_throttle_3",
+            "question_throttle_4",
+            "question_throttle_debounce_comparison_1"
+          ],
+          "relatedTasks": [
+            "task_implement_throttle"
+          ],
+          "tags": [
+            "JavaScript",
+            "Performance",
+            "Frontend",
+            "Optimization",
+            "Functions",
+            "Throttle"
+          ],
+          "technology": "JavaScript",
+          "prerequisites": [
+            "javascript_basics",
+            "closures",
+            "timers"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 9,
+          "learningPath": "intermediate",
+          "requiredFor": [
+            "ui_performance",
+            "event_handling"
+          ]
+        },
+        {
+          "id": "theory_polling_mechanisms",
+          "title": "Polling Mechanisms for API Data Handling",
+          "content": "Polling is a common technique used in web applications to periodically fetch updated data from a server. This is often necessary when real-time updates are desired but a persistent connection (like WebSockets) is not feasible or overkill. For example, fetching stock market data, chat messages, or notification counts at regular intervals.\n\nThere are two primary approaches to implement polling in JavaScript:\n\n### 1. Using `setInterval`\n\n`setInterval()` is a widely used method for executing a function or code snippet repeatedly at a fixed time delay. It's straightforward to implement but comes with a potential pitfall: it schedules the next execution without waiting for the current execution (e.g., an `fetch` request) to complete. If the API request takes longer than the `interval`, multiple requests can overlap, leading to an increasing queue of requests, potential server overload, and inconsistent data.\n\n### 2. Using Recursive `setTimeout`\n\nRecursive `setTimeout()` involves calling `setTimeout()` again within the callback of the previous `setTimeout()` call. This approach is generally preferred for polling because it ensures that the next API call is only scheduled *after* the previous one has completed (or failed). This prevents request queuing and ensures a more controlled and predictable polling cycle, especially important for long-running or potentially unreliable API calls.\n\n### Key Considerations for Polling\n\n*   **Interval Selection**: Choose an appropriate interval based on data criticality and server load capacity.\n*   **Error Handling**: Implement robust error handling (e.g., retries, back-off strategies) for API failures.\n*   **Stopping Polling**: Provide a mechanism to stop polling when it's no longer needed (e.g., user navigates away, component unmounts).\n*   **Resource Management**: Be mindful of network and CPU usage. Over-polling can drain battery life and consume server resources unnecessarily.\n*   **Alternatives**: Consider WebSockets or Server-Sent Events (SSE) for true real-time needs, as they are generally more efficient for frequent, unsolicited updates.",
+          "examples": [
+            {
+              "id": "example_polling_interval_1",
+              "title": "Polling with setInterval",
+              "code": "// Helper function (simulates fetching data and updating UI)\nasync function fetchAndUpdateUI(endpoint) {\n  console.log(`Fetching data from ${endpoint}...`);\n  try {\n    // Simulate API call delay and data update\n    const response = await new Promise(resolve => setTimeout(() => resolve(`Data from ${endpoint} at ${new Date().toLocaleTimeString()}`), 200));\n    console.log(`Updated UI with: ${response}`);\n    return response;\n  } catch (error) {\n    console.error(`Error fetching from ${endpoint}:`, error);\n    throw error;\n  }\n}\n\n// Approach 1: Using setInterval\nfunction pollWithInterval(endpoint, interval) {\n  console.log(`Starting polling with setInterval for ${endpoint} every ${interval}ms`);\n  // Initial fetch\n  fetchAndUpdateUI(endpoint);\n  \n  // Set up polling\n  const pollId = setInterval(() => {\n    fetchAndUpdateUI(endpoint);\n  }, interval);\n\n  return pollId; // Return ID to allow clearing\n}\n\n// Usage\nconst intervalId = pollWithInterval('/api/stock-data', 1000); // Poll every 1 second\n\n// To stop polling after some time (e.g., 5 seconds):\n// setTimeout(() => {\n//   clearInterval(intervalId);\n//   console.log('Stopped polling with setInterval.');\n// }, 5000);\n",
+              "explanation": "This example demonstrates polling using `setInterval`. It's concise but highlights the potential issue: if `fetchAndUpdateUI` takes longer than the `interval`, new `fetchAndUpdateUI` calls will be scheduled before the previous ones complete, leading to overlapping requests. The `fetchAndUpdateUI` function is a simulated asynchronous operation.",
+              "language": "javascript"
+            },
+            {
+              "id": "example_polling_timeout_1",
+              "title": "Polling with Recursive setTimeout",
+              "code": "// Helper function (same as above, simulates fetching data and updating UI)\nasync function fetchAndUpdateUI(endpoint) {\n  console.log(`Fetching data from ${endpoint}...`);\n  try {\n    const response = await new Promise(resolve => setTimeout(() => resolve(`Data from ${endpoint} at ${new Date().toLocaleTimeString()}`), 200));\n    console.log(`Updated UI with: ${response}`);\n    return response;\n  } catch (error) {\n    console.error(`Error fetching from ${endpoint}:`, error);\n    throw error;\n  }\n}\n\n// Approach 2: Using recursive setTimeout (more flexible)\nfunction pollWithTimeout(endpoint, interval) {\n  console.log(`Starting polling with recursive setTimeout for ${endpoint} every ${interval}ms`);\n  let timeoutId = null;\n\n  function poll() {\n    fetchAndUpdateUI(endpoint)\n      .finally(() => {\n        // Only schedule the next poll AFTER the current fetch is complete (resolved or rejected)\n        timeoutId = setTimeout(poll, interval);\n      });\n  }\n  \n  // Start polling immediately\n  poll();\n\n  return () => {\n    if (timeoutId) {\n      clearTimeout(timeoutId);\n      console.log('Stopped polling with recursive setTimeout.');\n    }\n  }; // Return a cleanup function\n}\n\n// Usage\nconst stopPolling = pollWithTimeout('/api/market-data', 1000); // Poll every 1 second\n\n// To stop polling after some time (e.g., 5 seconds):\n// setTimeout(() => {\n//   stopPolling();\n// }, 5000);\n",
+              "explanation": "This example showcases the preferred method for polling using recursive `setTimeout`. The key difference is that `setTimeout(poll, interval)` is called within the `.finally()` block of the `fetchAndUpdateUI` promise. This ensures that the next polling request only starts `interval` milliseconds *after* the previous request has completed, preventing overlap and resource exhaustion. A cleanup function is returned to allow stopping the polling.",
+              "language": "javascript"
+            }
+          ],
+          "relatedQuestions": [
+            "question_polling_1",
+            "question_polling_2",
+            "question_polling_3",
+            "question_polling_4",
+            "question_polling_5"
+          ],
+          "relatedTasks": [
+            "task_implement_polling_with_timeout"
+          ],
+          "tags": [
+            "JavaScript",
+            "API",
+            "Data Handling",
+            "Polling",
+            "Async",
+            "Frontend"
+          ],
+          "technology": "JavaScript",
+          "prerequisites": [
+            "promises",
+            "async_await",
+            "timers",
+            "fetch_api"
+          ],
+          "complexity": 8,
+          "interviewRelevance": 9,
+          "learningPath": "intermediate",
+          "requiredFor": [
+            "realtime_updates",
+            "api_integration"
+          ]
+        }
+      ],
+      "questions": [
+        {
+          "id": "question_custom_reduce_1",
+          "topic": "Custom Array Methods",
+          "level": "medium",
+          "type": "code",
+          "question": "Implement a `customReduce` method as a polyfill for `Array.prototype.reduce`. Your implementation should mimic the behavior of the native `reduce` method, including handling the optional `initialValue` and throwing an error for an empty array without an `initialValue`.",
+          "answer": "```javascript\nArray.prototype.customReduce = function(callback, initialValue) {\n  const arr = this;\n  let accumulator = initialValue;\n  let startIndex = 0;\n\n  if (initialValue === undefined) {\n    if (arr.length === 0) {\n      throw new TypeError('Reduce of empty array with no initial value');\n    }\n    accumulator = arr[0];\n    startIndex = 1;\n  }\n\n  for (let i = startIndex; i < arr.length; i++) {\n    accumulator = callback(accumulator, arr[i], i, arr);\n  }\n\n  return accumulator;\n};\n```",
+          "options": [],
+          "analysisPoints": [
+            "Correctly handling the `initialValue` parameter (or its absence).",
+            "Throwing `TypeError` for an empty array without `initialValue`.",
+            "Passing correct arguments (accumulator, currentValue, currentIndex, array) to the callback.",
+            "Ensuring the `this` context within the polyfill refers to the array.",
+            "Iterating through the array elements correctly."
+          ],
+          "keyConcepts": [
+            "Array.prototype",
+            "Polyfills",
+            "Array.prototype.reduce",
+            "Callbacks",
+            "Context (`this`)",
+            "Error Handling"
+          ],
+          "evaluationCriteria": [
+            "Functional correctness for various inputs (empty, single element, multiple elements)",
+            "Adherence to native `reduce` behavior for `initialValue` and errors",
+            "Code readability and efficiency"
+          ],
+          "example": "```javascript\nconst numbers = [1, 2, 3, 4];\nconst sum = numbers.customReduce((acc, current) => acc + current, 0);\nconsole.log(sum); // 10\n\nconst product = numbers.customReduce((acc, current) => acc * current); // No initial value\nconsole.log(product); // 24\n\nconst emptyArr = [];\ntry {\n  emptyArr.customReduce((acc, current) => acc + current);\n} catch (e) {\n  console.log(e.message); // Reduce of empty array with no initial value\n}\n```",
+          "tags": [
+            "JavaScript",
+            "Array Methods",
+            "Polyfill",
+            "Higher-Order Functions",
+            "Coding Challenge"
+          ],
+          "prerequisites": [
+            "javascript_functions",
+            "javascript_arrays",
+            "javascript_prototypes"
+          ],
+          "complexity": 8,
+          "interviewFrequency": 7,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_custom_reduce_2",
+          "topic": "Custom Array Methods",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "What is the primary purpose of the `reduce` array method in JavaScript?",
+          "answer": "The `reduce` method executes a callback function on each element of an array, resulting in a single output value. It's used to 'reduce' an array to a single value by accumulating the results.",
+          "options": [],
+          "analysisPoints": [],
+          "keyConcepts": [
+            "Array.prototype.reduce",
+            "Aggregation",
+            "Single Value"
+          ],
+          "evaluationCriteria": [
+            "Recall of fundamental array methods"
+          ],
+          "example": "",
+          "tags": [
+            "JavaScript",
+            "Array Methods",
+            "Flashcard"
+          ],
+          "prerequisites": [],
+          "complexity": 3,
+          "interviewFrequency": 6,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_custom_reduce_3",
+          "topic": "Custom Array Methods",
+          "level": "medium",
+          "type": "mcq",
+          "question": "Given the following custom `reduce` implementation:\n\n```javascript\nArray.prototype.myReduce = function(callback, initialValue) {\n  let accumulator = initialValue;\n  let startIndex = 0;\n\n  if (initialValue === undefined) {\n    accumulator = this[0];\n    startIndex = 1;\n  }\n\n  for (let i = startIndex; i < this.length; i++) {\n    accumulator = callback(accumulator, this[i], i, this);\n  }\n\n  return accumulator;\n};\n\nconst data = [1, 2, 3];\nconst result = data.myReduce((acc, val) => acc + val);\n```\n\nWhat will be the value of `result` and why?",
+          "answer": "6, because when `initialValue` is not provided, `myReduce` uses the first element (1) as the initial accumulator, and starts iteration from the second element (2).",
+          "options": [
+            "6, because when `initialValue` is not provided, `myReduce` uses the first element (1) as the initial accumulator, and starts iteration from the second element (2).",
+            "0, because the `initialValue` is implicitly 0 if not provided.",
+            "Error, because `initialValue` is mandatory for `reduce`.",
+            "Undefined, because `myReduce` does not correctly handle missing `initialValue`."
+          ],
+          "analysisPoints": [
+            "Tests understanding of `reduce` behavior when `initialValue` is omitted.",
+            "Checks knowledge of how the accumulator is initialized in such cases.",
+            "Verifies understanding of the loop's starting index.",
+            "Distinguishes between native `reduce` behavior and potential polyfill errors."
+          ],
+          "keyConcepts": [
+            "Array.prototype.reduce",
+            "initialValue",
+            "Accumulator",
+            "Iteration"
+          ],
+          "evaluationCriteria": [
+            "Accurate prediction of `reduce` output",
+            "Correct reasoning for the output"
+          ],
+          "example": "When `initialValue` is not provided for `myReduce` on `[1, 2, 3]`, `accumulator` is initialized to `1`. The loop starts from index `1` (value `2`).\n1. `acc = 1`, `val = 2` -> `acc = 1 + 2 = 3`\n2. `acc = 3`, `val = 3` -> `acc = 3 + 3 = 6`\nFinally, `6` is returned.",
+          "tags": [
+            "JavaScript",
+            "Array Methods",
+            "MCQ"
+          ],
+          "prerequisites": [
+            "javascript_functions",
+            "javascript_arrays"
+          ],
+          "complexity": 6,
+          "interviewFrequency": 7,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_debounce_1",
+          "topic": "Performance Optimization: Debounce",
+          "level": "open",
+          "type": "open",
+          "question": "How would you implement a debounce function in JavaScript? Explain the key components and their roles in preventing excessive function calls.",
+          "answer": "A debounce function limits how often a function can be called, delaying its execution until after a specified time has passed since it was last invoked. The core implementation involves:\n\n1.  **`timerId`**: A variable (often within the closure of the returned function) to store the `setTimeout` identifier. This allows us to cancel pending executions.\n2.  **`clearTimeout(timerId)`**: Called at the beginning of the debounced function's execution. This clears any previously set timer, effectively resetting the 'delay' period if the function is called again before the previous timer expires.\n3.  **`setTimeout(() => { ... }, delay)`**: Sets a new timer. The original function (`func`) is executed inside this `setTimeout` callback. The delay specifies the period of inactivity required before the function fires.\n4.  **Closure**: The `timerId` needs to be retained across multiple invocations of the debounced function, which is achieved by making it part of the closure formed by the returned function.\n5.  **Context and Arguments**: `func.apply(this, args)` is used to ensure the original function `func` is executed with the correct `this` context and all arguments (`args`) that were passed to the debounced function.",
+          "options": [],
+          "analysisPoints": [
+            "Understanding of `setTimeout` and `clearTimeout`.",
+            "Correct use of closures to maintain `timerId`.",
+            "Proper handling of `this` context and arguments.",
+            "Ability to explain the *purpose* (delaying until inactivity) and *mechanism* (resetting timer).",
+            "Identification of common use cases."
+          ],
+          "keyConcepts": [
+            "Debounce",
+            "Performance Optimization",
+            "setTimeout",
+            "clearTimeout",
+            "Closures",
+            "Event Handling",
+            "Function Context"
+          ],
+          "evaluationCriteria": [
+            "Correctness of the implementation logic",
+            "Clarity of explanation for each component",
+            "Identification of appropriate use cases",
+            "Demonstration of understanding of JavaScript fundamentals (closures, `this`)"
+          ],
+          "example": "```javascript\nfunction debounce(func, delay) {\n  let timerId; // Stored in closure\n  return function(...args) { // Returned function is the debounced version\n    clearTimeout(timerId); // Clear any existing timer\n    timerId = setTimeout(() => { // Set a new timer\n      func.apply(this, args); // Execute original function with correct context and arguments\n    }, delay);\n  };\n}\n\n// Usage\nconst logInput = debounce((value) => console.log('Searching for:', value), 300);\nlogInput('a');\nlogInput('ab');\nlogInput('abc'); // Only 'Searching for: abc' will log after 300ms of inactivity\n```",
+          "tags": [
+            "JavaScript",
+            "Performance",
+            "Functions",
+            "Open-Ended",
+            "Debounce"
+          ],
+          "prerequisites": [
+            "javascript_closures",
+            "javascript_timers"
+          ],
+          "complexity": 7,
+          "interviewFrequency": 9,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_debounce_2",
+          "topic": "Performance Optimization: Debounce",
+          "level": "medium",
+          "type": "mcq",
+          "question": "Which of the following scenarios is *best* suited for using a debounce function?",
+          "answer": "An input field where a search API call should be made only after the user stops typing for a short period.",
+          "options": [
+            "Updating a scroll position indicator as a user continuously scrolls down a long page.",
+            "An input field where a search API call should be made only after the user stops typing for a short period.",
+            "Triggering an animation on every single mouse movement over a large canvas.",
+            "Calling a function exactly once every second, regardless of how often an event fires."
+          ],
+          "analysisPoints": [
+            "Distinguishes between debounce and throttle use cases.",
+            "Identifies the key characteristic of debounce: waiting for inactivity.",
+            "Recognizes scenarios where continuous events need rate limiting vs. delayed execution."
+          ],
+          "keyConcepts": [
+            "Debounce Use Cases",
+            "Throttle Use Cases",
+            "Event Handling",
+            "Performance"
+          ],
+          "evaluationCriteria": [
+            "Correct application of debounce concept to real-world scenarios",
+            "Ability to differentiate debounce from other optimization techniques"
+          ],
+          "example": "Debounce is ideal for 'wait until X stops' scenarios. For a search input, you don't want to hit the API with every single keystroke, only when the user has finished typing their query. This is a classic debounce use case.",
+          "tags": [
+            "JavaScript",
+            "Performance",
+            "MCQ",
+            "Debounce",
+            "Use Cases"
+          ],
+          "prerequisites": [
+            "debounce_concept"
+          ],
+          "complexity": 6,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_debounce_3",
+          "topic": "Performance Optimization: Debounce",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "What is the primary goal of a debounce function?",
+          "answer": "To limit the rate at which a function is called by delaying its execution until a specified time has passed since its last invocation.",
+          "options": [],
+          "analysisPoints": [],
+          "keyConcepts": [
+            "Debounce",
+            "Rate Limiting",
+            "Delay"
+          ],
+          "evaluationCriteria": [
+            "Recall of debounce definition"
+          ],
+          "example": "",
+          "tags": [
+            "JavaScript",
+            "Performance",
+            "Flashcard",
+            "Debounce"
+          ],
+          "prerequisites": [],
+          "complexity": 3,
+          "interviewFrequency": 7,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_debounce_4",
+          "topic": "Performance Optimization: Debounce",
+          "level": "hard",
+          "type": "code",
+          "question": "Implement a debounce function that allows an immediate invocation on the first call, and then debounces subsequent calls within the delay period. This is sometimes referred to as `leading` or `immediate` debounce.",
+          "answer": "```javascript\nfunction debounceLeading(func, delay, immediate = false) {\n  let timerId;\n  let lastArgs;\n  let lastThis;\n  let result;\n\n  return function(...args) {\n    lastArgs = args;\n    lastThis = this;\n\n    const isInvoked = timerId != null;\n\n    if (!isInvoked && immediate) {\n      result = func.apply(lastThis, lastArgs);\n    }\n\n    clearTimeout(timerId);\n    timerId = setTimeout(() => {\n      if (!immediate) {\n        result = func.apply(lastThis, lastArgs);\n      }\n      timerId = null; // Clear the timer ID after execution\n    }, delay);\n\n    return result; // Return the result of the *last* invocation\n  };\n}\n\n// Usage Example:\nconst logImmediate = debounceLeading((value) => {\n  console.log('Immediate search for:', value);\n  return `Result for ${value}`;\n}, 500, true);\n\nconsole.log(logImmediate('first'));  // Logs 'Immediate search for: first', returns 'Result for first'\nconsole.log(logImmediate('second')); // No immediate log, timer reset\nconsole.log(logImmediate('third'));  // No immediate log, timer reset\n\nsetTimeout(() => {\n  console.log('After delay (should not log from timeout if immediate is true)');\n}, 600);\n\n// Test without immediate (standard debounce)\nconst logStandard = debounceLeading((value) => {\n  console.log('Standard search for:', value);\n}, 500, false);\n\nsetTimeout(() => logStandard('a'), 1000);\nsetTimeout(() => logStandard('ab'), 1100);\nsetTimeout(() => logStandard('abc'), 1200); // 'Standard search for: abc' logs after 1700ms\n\n```",
+          "options": [],
+          "analysisPoints": [
+            "Correctly handling the `immediate` flag.",
+            "Executing the function on the leading edge (first call) when `immediate` is true.",
+            "Ensuring subsequent calls within the delay period are still debounced.",
+            "Clearing the timer correctly after it fires or is reset.",
+            "Maintaining `this` context and arguments."
+          ],
+          "keyConcepts": [
+            "Debounce Leading Edge",
+            "Debounce Trailing Edge",
+            "Flags",
+            "Timers",
+            "Conditional Logic"
+          ],
+          "evaluationCriteria": [
+            "Correct implementation of leading-edge debounce logic",
+            "Robustness across different call patterns",
+            "Edge case handling (e.g., immediate set to false, rapid calls)"
+          ],
+          "example": "The example demonstrates how `debounceLeading` behaves differently based on the `immediate` flag, executing on the first call then debouncing subsequent calls within the delay.",
+          "tags": [
+            "JavaScript",
+            "Performance",
+            "Coding Challenge",
+            "Debounce",
+            "Advanced"
+          ],
+          "prerequisites": [
+            "debounce_concept",
+            "javascript_closures",
+            "javascript_timers"
+          ],
+          "complexity": 8,
+          "interviewFrequency": 7,
+          "learningPath": "advanced"
+        },
+        {
+          "id": "question_throttle_1",
+          "topic": "Performance Optimization: Throttle",
+          "level": "open",
+          "type": "open",
+          "question": "How would you implement a throttle function in JavaScript? Explain its mechanism and common use cases where it's preferred over debounce.",
+          "answer": "A throttle function ensures that a function is called at most once within a specified time period (`interval`), regardless of how many times the event triggering it actually fires. Its mechanism involves:\n\n1.  **`isThrottled` flag**: A boolean variable (within the closure) to track if the function is currently in a 'throttled' state. Initially `false`.\n2.  **Conditional Execution**: When the throttled function is called:\n    *   If `isThrottled` is `false`, the original `callback` is executed immediately.\n    *   `isThrottled` is then set to `true` to prevent further immediate executions.\n    *   A `setTimeout` is scheduled to reset `isThrottled` back to `false` after the `interval` has passed.\n    *   If `isThrottled` is `true`, the call is simply ignored.\n3.  **Context and Arguments**: Similar to debounce, `callback.apply(this, args)` is used to maintain the correct execution context and arguments.\n\n**Preference over Debounce**: Throttle is preferred when you want to ensure a function is called *regularly* but not *excessively* during a continuous event. For example:\n*   **Scroll events**: You might want to update a UI element (like a sticky header) every 100ms during a scroll, but not on every pixel scroll. Debounce would only fire *after* scrolling stops, which is not desired here.\n*   **Mousemove events**: If tracking mouse coordinates for a drawing application, you might want to record points periodically rather than on every single pixel movement.\n*   **Button clicks**: To prevent rapid double-clicks on a submission button, allowing the button to be clicked again after a short delay, but not immediately.",
+          "options": [],
+          "analysisPoints": [
+            "Understanding of `setTimeout` and a state flag (`isThrottled`).",
+            "Correct use of closures to maintain state.",
+            "Proper handling of `this` context and arguments.",
+            "Ability to explain the *purpose* (rate limiting) and *mechanism* (periodic execution).",
+            "Clear differentiation from debounce and identification of appropriate use cases."
+          ],
+          "keyConcepts": [
+            "Throttle",
+            "Performance Optimization",
+            "setTimeout",
+            "State Management",
+            "Closures",
+            "Event Handling",
+            "Function Context"
+          ],
+          "evaluationCriteria": [
+            "Correctness of the implementation logic",
+            "Clarity of explanation for each component",
+            "Identification of appropriate use cases and distinction from debounce",
+            "Demonstration of understanding of JavaScript fundamentals"
+          ],
+          "example": "```javascript\nfunction throttle(callback, interval) {\n  let isThrottled = false;\n  return function(...args) {\n    if (!isThrottled) {\n      callback.apply(this, args);\n      isThrottled = true;\n      setTimeout(() => {\n        isThrottled = false;\n      }, interval);\n    }\n  };\n}\n\n// Usage\nconst handleScroll = throttle(() => console.log('Scroll event throttled!'), 500);\n\nconsole.log('--- Simulating rapid scrolls ---');\nhandlerScroll(); // Logs: 'Scroll event throttled!'\nhandlerScroll(); // Ignored\nhandlerScroll(); // Ignored\n\nsetTimeout(() => {\n  handleScroll(); // Logs: 'Scroll event throttled!' (after 500ms)\n}, 501);\n```",
+          "tags": [
+            "JavaScript",
+            "Performance",
+            "Functions",
+            "Open-Ended",
+            "Throttle"
+          ],
+          "prerequisites": [
+            "javascript_closures",
+            "javascript_timers"
+          ],
+          "complexity": 7,
+          "interviewFrequency": 9,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_throttle_2",
+          "topic": "Performance Optimization: Throttle",
+          "level": "medium",
+          "type": "mcq",
+          "question": "When implementing a throttle function, what is the primary role of the `isThrottled` flag?",
+          "answer": "To prevent the original function from executing if it has already been called within the current throttling interval.",
+          "options": [
+            "To store the timer ID for `setTimeout`.",
+            "To prevent the original function from executing if it has already been called within the current throttling interval.",
+            "To ensure the function executes only once after all rapid events have stopped.",
+            "To count how many times the throttled function has been invoked."
+          ],
+          "analysisPoints": [
+            "Tests understanding of the state management in throttling.",
+            "Distinguishes `isThrottled` from `timerId` (used in debounce).",
+            "Reinforces the core principle of throttling: rate limiting per interval."
+          ],
+          "keyConcepts": [
+            "Throttle",
+            "State Management",
+            "Rate Limiting",
+            "isThrottled Flag"
+          ],
+          "evaluationCriteria": [
+            "Correct identification of `isThrottled` purpose",
+            "Ability to differentiate from debounce mechanics"
+          ],
+          "example": "The `isThrottled` flag acts as a gate. Once the function executes, the gate closes (`isThrottled = true`) for a set `interval`. Any calls while the gate is closed are ignored. After the `interval`, the gate reopens (`isThrottled = false`), allowing the next call.",
+          "tags": [
+            "JavaScript",
+            "Performance",
+            "MCQ",
+            "Throttle"
+          ],
+          "prerequisites": [
+            "throttle_concept"
+          ],
+          "complexity": 6,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_throttle_3",
+          "topic": "Performance Optimization: Throttle",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "What is the primary goal of a throttle function?",
+          "answer": "To ensure a function is called at most once within a specified time period, limiting its execution rate during continuous events.",
+          "options": [],
+          "analysisPoints": [],
+          "keyConcepts": [
+            "Throttle",
+            "Rate Limiting",
+            "Interval"
+          ],
+          "evaluationCriteria": [
+            "Recall of throttle definition"
+          ],
+          "example": "",
+          "tags": [
+            "JavaScript",
+            "Performance",
+            "Flashcard",
+            "Throttle"
+          ],
+          "prerequisites": [],
+          "complexity": 3,
+          "interviewFrequency": 7,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_throttle_4",
+          "topic": "Performance Optimization: Throttle",
+          "level": "hard",
+          "type": "code",
+          "question": "Implement a throttle function that ensures the function is called on the *leading* edge (immediately) and also on the *trailing* edge (after the interval if there were calls during the interval).",
+          "answer": "```javascript\nfunction throttleLeadingAndTrailing(func, interval) {\n  let timeoutId = null;\n  let lastArgs;\n  let lastThis;\n  let lastResult;\n  let lastRan = 0;\n\n  const throttled = function(...args) {\n    lastArgs = args;\n    lastThis = this;\n\n    const now = Date.now();\n    const remaining = interval - (now - lastRan);\n\n    if (remaining <= 0 || remaining > interval) {\n      if (timeoutId) {\n        clearTimeout(timeoutId);\n        timeoutId = null;\n      }\n      lastRan = now;\n      lastResult = func.apply(lastThis, lastArgs);\n    } else if (!timeoutId) {\n      timeoutId = setTimeout(() => {\n        lastRan = Date.now();\n        timeoutId = null;\n        lastResult = func.apply(lastThis, lastArgs);\n      }, remaining);\n    }\n    return lastResult;\n  };\n\n  return throttled;\n}\n\n// Usage Example:\nconst logActivity = throttleLeadingAndTrailing((message) => {\n  console.log(`Activity logged: ${message} at ${new Date().toLocaleTimeString()}`);\n}, 1000);\n\nconsole.log('--- Simulating rapid activity ---');\nlogActivity('event 1'); // Immediate log\nlogActivity('event 2'); // Ignored\nlogActivity('event 3'); // Ignored\nlogActivity('event 4'); // Ignored\n\nsetTimeout(() => {\n  console.log('--- After 1.1s ---');\n  logActivity('event 5'); // Will cause a trailing log for 'event 4' (or 'event 5' if no trailing occurred yet) + immediate log for 'event 5' \n}, 1100);\n\nsetTimeout(() => {\n  console.log('--- After 2.2s ---');\n  logActivity('event 6'); // Immediate log\n}, 2200);\n\n// To see the trailing call, make sure calls continue during the interval\nsetTimeout(() => {\n    logActivity('event X');\n}, 2500);\nsetTimeout(() => {\n    logActivity('event Y');\n}, 2700);\nsetTimeout(() => {\n    logActivity('event Z'); // This will be the one logged after 3.5s approx\n}, 3000);\n\n```",
+          "options": [],
+          "analysisPoints": [
+            "Correctly handling both leading and trailing edge invocations.",
+            "Using `Date.now()` to calculate remaining time.",
+            "Clearing and setting timeouts appropriately.",
+            "Maintaining `this` context and arguments for both leading and trailing calls."
+          ],
+          "keyConcepts": [
+            "Throttle Leading/Trailing Edge",
+            "Timers",
+            "Time Calculation",
+            "Function Context"
+          ],
+          "evaluationCriteria": [
+            "Functional correctness for leading and trailing calls",
+            "Robustness under various rapid invocation patterns",
+            "Efficient timer management"
+          ],
+          "example": "The example demonstrates how the `throttleLeadingAndTrailing` function executes immediately on the first call and then ensures a final call occurs after the interval if there were calls within that period.",
+          "tags": [
+            "JavaScript",
+            "Performance",
+            "Coding Challenge",
+            "Throttle",
+            "Advanced"
+          ],
+          "prerequisites": [
+            "throttle_concept",
+            "javascript_closures",
+            "javascript_timers"
+          ],
+          "complexity": 9,
+          "interviewFrequency": 6,
+          "learningPath": "advanced"
+        },
+        {
+          "id": "question_throttle_debounce_comparison_1",
+          "topic": "Performance Optimization",
+          "level": "medium",
+          "type": "open",
+          "question": "Compare and contrast `debounce` and `throttle`. Provide an example use case for each where the other would be a less suitable choice.",
+          "answer": "**Debounce**\n*   **Purpose**: Limits how often a function can fire, delaying its execution until after a specified time has passed since it was last invoked. It's about 'waiting for a pause'.\n*   **Mechanism**: Uses `setTimeout` and `clearTimeout`. Each new invocation resets the timer, ensuring the function only fires once after a period of inactivity.\n*   **Use Case Example**: A search bar where an API call is made to fetch results. You want to make the call only when the user has *finished typing* for a moment, not on every keystroke. If you used throttle, you'd get intermediate search results while typing, which is usually not desired.\n\n**Throttle**\n*   **Purpose**: Ensures a function is called at most once in a specified time period. It's about 'rate limiting' to a fixed frequency.\n*   **Mechanism**: Uses a flag (e.g., `isThrottled`) and `setTimeout`. The function executes immediately if not throttled, then sets the flag and a timer to reset the flag after the interval. Subsequent calls within the interval are ignored.\n*   **Use Case Example**: Handling a `scroll` event to update a 'back to top' button visibility. You want the button's visibility to update *periodically* as the user scrolls, not just when they stop scrolling. If you used debounce, the button would only appear/disappear after the user stopped scrolling, which could feel unresponsive.\n\n**Key Differences**: Debounce waits for a *break* in events; throttle *forces a maximum execution rate* over time.",
+          "options": [],
+          "analysisPoints": [
+            "Clear definitions for both `debounce` and `throttle`.",
+            "Accurate description of their underlying mechanisms.",
+            "Relevant and distinct use cases for each.",
+            "Articulate comparison highlighting when one is preferred over the other."
+          ],
+          "keyConcepts": [
+            "Debounce",
+            "Throttle",
+            "Performance Optimization",
+            "Event Handling",
+            "Rate Limiting",
+            "Delay"
+          ],
+          "evaluationCriteria": [
+            "Thorough understanding of both concepts",
+            "Ability to distinguish and provide clear examples",
+            "Explanations of why one is better than the other in specific contexts"
+          ],
+          "example": "",
+          "tags": [
+            "JavaScript",
+            "Performance",
+            "Open-Ended",
+            "Comparison",
+            "Debounce",
+            "Throttle"
+          ],
+          "prerequisites": [
+            "debounce_concept",
+            "throttle_concept"
+          ],
+          "complexity": 8,
+          "interviewFrequency": 9,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_polling_1",
+          "topic": "API and Data Handling: Polling",
+          "level": "open",
+          "type": "open",
+          "question": "What's the best approach to implement a polling mechanism for stock market API data in a frontend application? Discuss the trade-offs between `setInterval` and recursive `setTimeout` for this purpose.",
+          "answer": "For implementing a polling mechanism for dynamic data like stock market updates, the **recursive `setTimeout` approach is generally considered superior** to `setInterval`.\n\n**1. `setInterval` Approach:**\n*   **Mechanism**: Executes a function repeatedly at fixed time intervals. `setInterval(() => fetchAndUpdate(), interval);`\n*   **Pros**: Simple to set up.\n*   **Cons**: If the `fetchAndUpdate` operation takes longer than the `interval`, subsequent calls will start before previous ones finish. This can lead to an accumulation of pending requests, potential network congestion, server overload, and inconsistent data if responses arrive out of order.\n\n**2. Recursive `setTimeout` Approach:**\n*   **Mechanism**: Schedules the next execution of a function *after* the current execution has completed (or failed). `function poll() { fetchAndUpdate().finally(() => setTimeout(poll, interval)); } poll();`\n*   **Pros**: Prevents overlapping requests. The next fetch only begins after the previous one has resolved (either successfully or with an error). This makes the polling more robust and less prone to resource exhaustion or data inconsistencies, especially with unreliable or slow APIs.\n*   **Cons**: Slightly more complex to write initially than `setInterval`.\n\n**Trade-offs Summary:**\n*   **`setInterval`**: Good for simple, fast, non-blocking tasks where execution time is negligible compared to the interval. Risk of overlapping requests for asynchronous operations.\n*   **Recursive `setTimeout`**: Preferred for asynchronous operations (like API calls) as it guarantees that a new request doesn't start until the previous one has finished, preventing request queueing and providing more control over the polling cycle. This ensures data freshness while respecting API rate limits and preventing client/server overload.\n\nFor stock market data, where API calls are asynchronous and can vary in latency, the recursive `setTimeout` is the safer and more reliable choice.",
+          "options": [],
+          "analysisPoints": [
+            "Clear explanation of both `setInterval` and `setTimeout` polling methods.",
+            "Accurate identification of pros and cons for each, especially concerning overlapping requests.",
+            "Justification for preferring recursive `setTimeout` for API polling.",
+            "Mention of error handling and stopping mechanisms."
+          ],
+          "keyConcepts": [
+            "Polling",
+            "setInterval",
+            "setTimeout",
+            "API Data",
+            "Asynchronous Operations",
+            "Performance",
+            "Error Handling"
+          ],
+          "evaluationCriteria": [
+            "Comprehensive comparison of the two polling methods",
+            "Sound reasoning for preferred approach in context",
+            "Awareness of potential pitfalls and best practices"
+          ],
+          "example": "",
+          "tags": [
+            "JavaScript",
+            "API",
+            "Polling",
+            "Async",
+            "Open-Ended"
+          ],
+          "prerequisites": [
+            "javascript_timers",
+            "promises",
+            "fetch_api"
+          ],
+          "complexity": 8,
+          "interviewFrequency": 9,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_polling_2",
+          "topic": "API and Data Handling: Polling",
+          "level": "medium",
+          "type": "mcq",
+          "question": "Consider a scenario where you need to fetch updates from a slow API every 2 seconds. Which polling mechanism is generally more robust for this situation, and why?\n\nA: Using `setInterval(fetchData, 2000)`\nB: Using recursive `setTimeout` where `setTimeout(poll, 2000)` is called inside the `finally` block of the `fetchData` promise.\n\nWhich option is better?",
+          "answer": "B, because it ensures that the next API call only starts after the previous one has completed, preventing overlapping requests.",
+          "options": [
+            "A, because `setInterval` is simpler to implement and provides a constant polling rate.",
+            "B, because it ensures that the next API call only starts after the previous one has completed, preventing overlapping requests.",
+            "A, because `setTimeout` can lead to an accumulation of unhandled errors.",
+            "Neither, WebSockets are always the best solution for real-time data."
+          ],
+          "analysisPoints": [
+            "Tests understanding of the core difference between `setInterval` and `setTimeout` for asynchronous tasks.",
+            "Highlights the risk of overlapping requests with `setInterval`.",
+            "Emphasizes the reliability of `setTimeout` waiting for promise resolution.",
+            "Distinguishes polling from true real-time solutions like WebSockets."
+          ],
+          "keyConcepts": [
+            "Polling",
+            "setInterval",
+            "setTimeout",
+            "Asynchronous Operations",
+            "Promise.finally"
+          ],
+          "evaluationCriteria": [
+            "Correct choice and reasoning for robust API polling",
+            "Awareness of potential performance and data integrity issues"
+          ],
+          "example": "If `fetchData` takes 3 seconds, `setInterval` would try to start a new request at 2 seconds, while the first one is still running. This would lead to concurrent requests, potentially overloading the server or causing data inconsistencies. Recursive `setTimeout` ensures the 3-second `fetchData` completes before the next 2-second delay even begins, so the next request would start at `3 + 2 = 5` seconds.",
+          "tags": [
+            "JavaScript",
+            "API",
+            "Polling",
+            "MCQ",
+            "Async"
+          ],
+          "prerequisites": [
+            "promises",
+            "javascript_timers"
+          ],
+          "complexity": 7,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_polling_3",
+          "topic": "API and Data Handling: Polling",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "What is 'polling' in the context of fetching data from an API?",
+          "answer": "Polling is a technique where a client periodically sends requests to a server to check for new data or updates, typically at regular intervals.",
+          "options": [],
+          "analysisPoints": [],
+          "keyConcepts": [
+            "Polling",
+            "API",
+            "Data Fetching"
+          ],
+          "evaluationCriteria": [
+            "Recall of polling definition"
+          ],
+          "example": "",
+          "tags": [
+            "JavaScript",
+            "API",
+            "Flashcard",
+            "Polling"
+          ],
+          "prerequisites": [],
+          "complexity": 3,
+          "interviewFrequency": 6,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_polling_4",
+          "topic": "API and Data Handling: Polling",
+          "level": "medium",
+          "type": "code",
+          "question": "Given the following asynchronous `fetchData` function, write a function `startPolling` that uses recursive `setTimeout` to poll `fetchData` every 1500 milliseconds. The `startPolling` function should also return a cleanup function to stop the polling.",
+          "answer": "```javascript\nasync function fetchData(id) {\n  console.log(`Fetching data for ID: ${id}...`);\n  return new Promise(resolve => {\n    setTimeout(() => {\n      const data = `Data for ${id} @ ${new Date().toLocaleTimeString()}`;\n      console.log(`Received: ${data}`);\n      resolve(data);\n    }, Math.random() * 500 + 200); // Simulate variable network delay\n  });\n}\n\nfunction startPolling(dataId, interval) {\n  let timeoutId = null;\n\n  async function poll() {\n    try {\n      await fetchData(dataId);\n    } catch (error) {\n      console.error('Polling error:', error);\n      // Implement error handling logic here, e.g., retry count, back-off\n    } finally {\n      // Schedule the next poll only after the current one completes (success or failure)\n      timeoutId = setTimeout(poll, interval);\n    }\n  }\n\n  // Start the first poll immediately\n  poll();\n\n  // Return a cleanup function to stop polling\n  return () => {\n    if (timeoutId) {\n      clearTimeout(timeoutId);\n      timeoutId = null;\n      console.log(`Polling for ID ${dataId} stopped.`);\n    }\n  };\n}\n\n// Usage Example:\n// const stopMarketPolling = startPolling('stock_A', 1500);\n// setTimeout(() => {\n//   stopMarketPolling();\n// }, 7000); // Stop after 7 seconds\n```",
+          "options": [],
+          "analysisPoints": [
+            "Correctly using `setTimeout` recursively within the `finally` block of a Promise.",
+            "Ensuring the `async` nature of `fetchData` is handled with `await`.",
+            "Returning a function to clean up the `setTimeout` to prevent memory leaks.",
+            "Basic error handling within the polling loop."
+          ],
+          "keyConcepts": [
+            "Polling",
+            "Recursive setTimeout",
+            "Async/Await",
+            "Promises",
+            "Error Handling",
+            "Cleanup Functions"
+          ],
+          "evaluationCriteria": [
+            "Functional correctness of polling with `setTimeout`",
+            "Proper cleanup mechanism",
+            "Adherence to asynchronous best practices"
+          ],
+          "example": "The solution demonstrates how `startPolling` schedules `fetchData` and then recursively calls itself within the `.finally()` block, ensuring a new fetch only begins after the previous one is done. The returned function `stopPolling` provides a way to gracefully end the polling cycle.",
+          "tags": [
+            "JavaScript",
+            "API",
+            "Polling",
+            "Coding Challenge",
+            "Async"
+          ],
+          "prerequisites": [
+            "promises",
+            "async_await",
+            "javascript_timers"
+          ],
+          "complexity": 8,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_polling_5",
+          "topic": "API and Data Handling: Polling",
+          "level": "easy",
+          "type": "mcq",
+          "question": "You are implementing a UI component that needs to fetch a list of unread messages every 5 seconds. Which of the following is a potential problem if you use `setInterval` for this task, especially if the network is slow?",
+          "answer": "If an API call takes longer than 5 seconds, multiple concurrent requests might be initiated, leading to a queue of pending requests.",
+          "options": [
+            "The component will stop fetching messages automatically after 10 requests.",
+            "The browser might block `setInterval` calls for security reasons.",
+            "If an API call takes longer than 5 seconds, multiple concurrent requests might be initiated, leading to a queue of pending requests.",
+            "The `setInterval` function will automatically switch to `setTimeout` if performance issues are detected."
+          ],
+          "analysisPoints": [
+            "Tests understanding of `setInterval`'s synchronous scheduling.",
+            "Highlights the consequence of API call duration exceeding interval.",
+            "Compares `setInterval` behavior to recursive `setTimeout` implications."
+          ],
+          "keyConcepts": [
+            "setInterval",
+            "Polling Pitfalls",
+            "Asynchronous Operations",
+            "Concurrency"
+          ],
+          "evaluationCriteria": [
+            "Correct identification of `setInterval`'s weakness in asynchronous polling",
+            "Understanding of potential performance and network issues"
+          ],
+          "example": "If your `fetchMessages` API call takes 7 seconds and you use `setInterval(fetchMessages, 5000)`, the first call starts at 0s, the second at 5s (while the first is still running), the third at 10s (while the first two might still be running). This leads to a build-up of uncompleted requests, increasing network load and potentially causing the server to reject requests or the client to run out of resources.",
+          "tags": [
+            "JavaScript",
+            "API",
+            "Polling",
+            "MCQ",
+            "Performance"
+          ],
+          "prerequisites": [
+            "javascript_timers",
+            "async_programming"
+          ],
+          "complexity": 6,
+          "interviewFrequency": 7,
+          "learningPath": "intermediate"
+        }
+      ],
+      "tasks": [
+        {
+          "id": "task_custom_reduce_polyfill",
+          "title": "Implement `Array.prototype.customReduce`",
+          "description": "\nYour task is to implement a polyfill for the `Array.prototype.reduce` method, named `Array.prototype.customReduce`.\n\n**Requirements:**\n1.  The `customReduce` method should be available on all array instances.\n2.  It must accept a `callback` function and an optional `initialValue`.\n3.  The `callback` function should receive `(accumulator, currentValue, currentIndex, array)` arguments, mimicking the native `reduce`.\n4.  If `initialValue` is provided, the accumulation should start with it, and iteration from the first element.\n5.  If `initialValue` is *not* provided, the first element of the array should be used as the `accumulator`, and iteration should start from the second element.\n6.  If the array is empty and `initialValue` is *not* provided, it should throw a `TypeError` (e.g., 'Reduce of empty array with no initial value').\n7.  Ensure the `this` context inside `customReduce` refers to the array itself.\n\n**Hints:**\n*   Use `Array.prototype` to add the method.\n*   Pay close attention to the `initialValue` parameter and its impact on the starting index of your loop.\n*   Consider edge cases like empty arrays.\n",
+          "difficulty": "medium",
+          "startingCode": "Array.prototype.customReduce = function(callback, initialValue) {\n  // TODO: Implement the required functionality\n  const arr = this;\n  let accumulator;\n  let startIndex;\n\n  // Your implementation here\n\n  // Example of usage inside the function for context:\n  // accumulator = callback(accumulator, arr[i], i, arr);\n\n  // return accumulator;\n};\n\n// Example usage:\n// const numbers = [1, 2, 3, 4];\n// const sum = numbers.customReduce((acc, current) => acc + current, 0);\n// console.log(sum); // 10\n",
+          "solutionCode": "Array.prototype.customReduce = function(callback, initialValue) {\n  const arr = this;\n  let accumulator = initialValue;\n  let startIndex = 0;\n\n  if (initialValue === undefined) {\n    if (arr.length === 0) {\n      throw new TypeError('Reduce of empty array with no initial value');\n    }\n    accumulator = arr[0];\n    startIndex = 1;\n  }\n\n  for (let i = startIndex; i < arr.length; i++) {\n    if (i in arr) { // Ensures it only processes existing indices (like native reduce)\n      accumulator = callback(accumulator, arr[i], i, arr);\n    }\n  }\n\n  return accumulator;\n};\n",
+          "testCases": [
+            "Test with sum of numbers with initial value: `[1,2,3].customReduce((acc,v)=>acc+v, 0)` should be `6`.",
+            "Test with sum of numbers without initial value: `[1,2,3].customReduce((acc,v)=>acc+v)` should be `6`.",
+            "Test with empty array and no initial value: `[].customReduce((acc,v)=>acc+v)` should throw `TypeError`.",
+            "Test with empty array and initial value: `[].customReduce((acc,v)=>acc+v, 10)` should be `10`.",
+            "Test with single element array and no initial value: `[5].customReduce((acc,v)=>acc+v)` should be `5`.",
+            "Test with object transformation: `[{a:1},{a:2}].customReduce((acc,v)=>{acc[v.a]=v; return acc;}, {})` should transform correctly.",
+            "Test with sparse array: `[1, , 3].customReduce((acc,v)=>acc+v, 0)` should handle missing elements like native `reduce` (skipping them).",
+            "Test `this` context and arguments: `['a','b'].customReduce(function(acc,v,i,arr){ console.log(this === window); return acc+v; }, '')` (in browser) or `console.log(this === global)` (Node) should indicate `this` is not global object inside callback, `i` and `arr` should be correct."
+          ],
+          "hints": [
+            "The `this` keyword inside `customReduce` will correctly refer to the array when called as `arr.customReduce(...)`.",
+            "Remember to check `arr.length` when `initialValue` is `undefined`."
+          ],
+          "tags": [
+            "JavaScript",
+            "Array Methods",
+            "Polyfill",
+            "Functional Programming"
+          ],
+          "timeEstimate": 45,
+          "prerequisites": [
+            "javascript_functions",
+            "javascript_arrays",
+            "javascript_prototypes",
+            "javascript_closures"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 8,
+          "learningPath": "intermediate",
+          "relatedConcepts": [
+            "Array.prototype.map",
+            "Array.prototype.filter",
+            "Higher-Order Functions"
+          ]
+        },
+        {
+          "id": "task_implement_debounce",
+          "title": "Implement a Debounce Utility for Search Input",
+          "description": "\nImplement a `debounce` function that delays the execution of a given function until a specified time (`delay`) has passed since the last time it was invoked. Then, apply this `debounce` function to simulate a search input field where an API call (represented by a `console.log`) should only happen after the user stops typing for 500 milliseconds.\n\n**Requirements:**\n1.  Create a `debounce(func, delay)` function.\n2.  The `debounce` function should return a new function that, when called, will manage the debouncing logic.\n3.  Ensure the original function (`func`) is called with the correct `this` context and arguments.\n4.  Simulate a search input by calling the debounced function multiple times in quick succession, followed by a pause, to demonstrate its effect.\n\n**Hints:**\n*   You'll need `setTimeout` and `clearTimeout`.\n*   Use a closure to keep track of the `timerId`.\n*   The `apply` method can help with context and arguments.",
+          "difficulty": "medium",
+          "startingCode": "function debounce(func, delay) {\n  let timerId;\n  // TODO: Implement debounce logic here\n  return function(...args) {\n    // Your implementation\n  };\n}\n\n// Simulate an API call / heavy operation\nconst performSearch = (query) => {\n  console.log(`Performing search for: \"${query}\"`);\n  // In a real app, this would be an actual API call (e.g., fetch(`/api/search?q=${query}`)))\n};\n\n// TODO: Apply debounce and simulate input\n// const debouncedSearch = debounce(performSearch, 500);\n// debouncedSearch('apple');\n// debouncedSearch('apple pie');\n// (wait 500ms) -> Only 'Performing search for: \"apple pie\"' should log\n",
+          "solutionCode": "function debounce(func, delay) {\n  let timerId;\n  return function(...args) {\n    const context = this;\n    clearTimeout(timerId);\n    timerId = setTimeout(() => {\n      func.apply(context, args);\n    }, delay);\n  };\n}\n\nconst performSearch = (query) => {\n  console.log(`Performing search for: \"${query}\"`);\n};\n\nconst debouncedSearch = debounce(performSearch, 500);\n\nconsole.log('--- Simulating rapid typing: ---');\ndebouncedSearch('a');\ndebouncedSearch('ap');\ndebouncedSearch('app');\ndebouncedSearch('appl');\ndebouncedSearch('apple'); // This is the call that will eventually trigger\n\nconsole.log('--- Waiting for debounce delay... ---');\n// Introduce a pause, so 'apple' is the last one called within the delay period\nsetTimeout(() => {\n  console.log('--- After debounce period (500ms + buffer) ---');\n  // If nothing else is called after 'apple' for 500ms, it will fire.\n}, 700); \n\n// Another set of rapid calls, then a longer pause\nsetTimeout(() => {\n  console.log('\\n--- Simulating another rapid typing set: ---');\n  debouncedSearch('banana');\n  setTimeout(() => debouncedSearch('banana split'), 100); // Resets timer\n  setTimeout(() => debouncedSearch('banana split bread'), 200); // Resets timer\n  setTimeout(() => debouncedSearch('banana split bread pudding'), 300); // Resets timer\n\n  console.log('--- Waiting for debounce delay (for final typing)... ---');\n  setTimeout(() => {\n    console.log('--- After final debounce period ---');\n  }, 800); // 300ms (last call) + 500ms (delay) + buffer\n}, 1500); // Start this simulation after the first one is likely done\n",
+          "testCases": [
+            "Rapid calls: `debouncedSearch('a'); debouncedSearch('b'); debouncedSearch('c');` followed by a pause should only trigger `performSearch` once with `'c'`.",
+            "Single call: `debouncedSearch('test')` followed by a pause should trigger `performSearch` once with `'test'`.",
+            "No calls after initial setup: Ensure `performSearch` is not called if `debouncedSearch` is never invoked.",
+            "Verify `this` context: If `performSearch` is a method of an object, ensure `this` inside `performSearch` correctly refers to that object.",
+            "Verify arguments: Ensure `performSearch` receives the correct arguments from the last call.",
+            "Zero delay: `debounce(func, 0)` should effectively behave like a next-tick debounce or immediate call."
+          ],
+          "hints": [
+            "The `timerId` variable must be accessible to both `setTimeout` and `clearTimeout` calls, which can be achieved through closure.",
+            "Remember that `setTimeout` returns a numerical `timerId` that `clearTimeout` uses.",
+            "To ensure the correct `this` context for `func`, use `func.apply(this, args)` or `func.call(this, ...args)`."
+          ],
+          "tags": [
+            "JavaScript",
+            "Performance",
+            "Functions",
+            "Debounce",
+            "Event Handling"
+          ],
+          "timeEstimate": 60,
+          "prerequisites": [
+            "javascript_closures",
+            "javascript_timers",
+            "functions_apply_call"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 9,
+          "learningPath": "intermediate",
+          "relatedConcepts": [
+            "throttle",
+            "event_listeners",
+            "ui_optimization"
+          ]
+        },
+        {
+          "id": "task_implement_throttle",
+          "title": "Implement a Throttle Utility for Scroll Events",
+          "description": "\nImplement a `throttle` function that limits the rate at which a function can be called to at most once within a specified `interval`. Then, apply this `throttle` function to simulate a scroll event handler where a heavy operation (represented by a `console.log`) should only occur every 300 milliseconds, regardless of how frequently the scroll event fires.\n\n**Requirements:**\n1.  Create a `throttle(func, interval)` function.\n2.  The `throttle` function should return a new function that, when called, will manage the throttling logic.\n3.  Ensure the original function (`func`) is called with the correct `this` context and arguments.\n4.  Simulate rapid scroll events to demonstrate that `func` is only called once per `interval`.\n\n**Hints:**\n*   You'll need a flag (e.g., `isThrottled`) and `setTimeout`.\n*   The flag should be set to `true` when the function executes and reset to `false` after the `interval`.",
+          "difficulty": "medium",
+          "startingCode": "function throttle(func, interval) {\n  let isThrottled = false;\n  // TODO: Implement throttle logic here\n  return function(...args) {\n    // Your implementation\n  };\n}\n\n// Simulate a heavy scroll handling operation\nconst handleScrollLogic = () => {\n  console.log(`Scroll event handled at ${new Date().toLocaleTimeString()}`);\n  // In a real app, this might involve complex DOM reads/writes or calculations\n};\n\n// TODO: Apply throttle and simulate scroll events\n// const throttledScroll = throttle(handleScrollLogic, 300);\n// throttledScroll();\n// throttledScroll();\n// throttledScroll();\n// (wait 300ms) -> Only the first call should log immediately, then another after 300ms if called again\n",
+          "solutionCode": "function throttle(func, interval) {\n  let isThrottled = false;\n  \n  return function(...args) {\n    const context = this;\n    if (!isThrottled) {\n      func.apply(context, args);\n      isThrottled = true;\n      \n      setTimeout(() => {\n        isThrottled = false;\n      }, interval);\n    }\n  };\n}\n\nconst handleScrollLogic = () => {\n  console.log(`Scroll event handled at ${new Date().toLocaleTimeString()}`);\n};\n\nconst throttledScroll = throttle(handleScrollLogic, 300);\n\nconsole.log('--- Simulating rapid scroll events: ---');\nthrottledScroll(); // Call 1: Logs immediately, isThrottled = true\nthrottledScroll(); // Call 2: Ignored\nthrottledScroll(); // Call 3: Ignored\n\n// After 300ms, isThrottled becomes false, allowing the next call\nsetTimeout(() => {\n  console.log('\\n--- After 300ms interval: ---');\n  throttledScroll(); // Call 4: Logs immediately, isThrottled = true\n  throttledScroll(); // Call 5: Ignored\n}, 301);\n\n// Another set of rapid calls after another interval\nsetTimeout(() => {\n  console.log('\\n--- After another 300ms interval: ---');\n  throttledScroll(); // Call 6: Logs immediately, isThrottled = true\n  throttledScroll(); // Call 7: Ignored\n  setTimeout(() => throttledScroll(), 100); // Call 8: Ignored (still within initial 300ms window)\n}, 602);\n",
+          "testCases": [
+            "Rapid calls: `throttledScroll(); throttledScroll(); throttledScroll();` should only trigger `handleScrollLogic` once initially, then again after the interval if called again.",
+            "Single call: `throttledScroll()` should trigger `handleScrollLogic` once.",
+            "Verify interval: Ensure the function does not fire before the `interval` has passed since the last execution.",
+            "Verify `this` context: If `handleScrollLogic` is a method of an object, ensure `this` inside `handleScrollLogic` correctly refers to that object.",
+            "Verify arguments: Ensure `handleScrollLogic` receives the correct arguments from the first call in a given interval.",
+            "Zero interval: `throttle(func, 0)` should effectively behave like a normal function call."
+          ],
+          "hints": [
+            "Use a boolean flag (e.g., `isThrottled`) to control whether the function can execute.",
+            "The `setTimeout` is crucial for resetting the `isThrottled` flag after the `interval`.",
+            "The `this` context and arguments must be passed correctly using `apply`."
+          ],
+          "tags": [
+            "JavaScript",
+            "Performance",
+            "Functions",
+            "Throttle",
+            "Event Handling"
+          ],
+          "timeEstimate": 60,
+          "prerequisites": [
+            "javascript_closures",
+            "javascript_timers",
+            "functions_apply_call"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 9,
+          "learningPath": "intermediate",
+          "relatedConcepts": [
+            "debounce",
+            "event_listeners",
+            "ui_optimization"
+          ]
+        },
+        {
+          "id": "task_implement_polling_with_timeout",
+          "title": "Implement a Robust API Polling Mechanism",
+          "description": "\nImplement a flexible and robust API polling mechanism using recursive `setTimeout`. This mechanism should periodically fetch data from a simulated API endpoint, update a `console.log` (representing UI update), and provide a way to stop the polling.\n\n**Requirements:**\n1.  Create an `async` function `fetchSimulatedStockData(symbol)` that simulates an API call. It should:\n    *   Take a `symbol` (e.g., 'AAPL', 'GOOG') as input.\n    *   Return a Promise that resolves after a random delay (e.g., 200-800ms) with a simulated stock price and timestamp.\n    *   Log `Fetching data for [symbol]...` when called and `Received data for [symbol]: [price] at [time]` on success.\n    *   Randomly `reject` the promise sometimes (e.g., 10% chance) to simulate network errors.\n2.  Create a `startPolling(symbol, interval)` function.\n    *   This function should use recursive `setTimeout` to call `fetchSimulatedStockData` for the given `symbol` at the specified `interval` (in milliseconds).\n    *   Crucially, the next `setTimeout` call must be scheduled *only after* the current `fetchSimulatedStockData` Promise has settled (either resolved or rejected).\n    *   Implement basic error handling for `fetchSimulatedStockData` errors (log the error, but continue polling).\n    *   The `startPolling` function must return a cleanup function (`stopPolling`) that, when called, stops the polling process.\n3.  Demonstrate usage: Start polling for a symbol, and then stop it after a few seconds.\n\n**Hints:**\n*   Use `Promise.prototype.finally()` to schedule the next `setTimeout` call, ensuring it runs regardless of promise resolution or rejection.\n*   Store the `setTimeout` ID to enable cancellation with `clearTimeout`.",
+          "difficulty": "hard",
+          "startingCode": "async function fetchSimulatedStockData(symbol) {\n  console.log(`Fetching data for ${symbol}...`);\n  return new Promise((resolve, reject) => {\n    const delay = Math.random() * 600 + 200; // 200-800ms delay\n    setTimeout(() => {\n      if (Math.random() < 0.1) { // 10% chance of error\n        reject(new Error(`Network error for ${symbol}`));\n      } else {\n        const price = (Math.random() * 100 + 100).toFixed(2); // Price between 100-200\n        console.log(`Received data for ${symbol}: $${price} at ${new Date().toLocaleTimeString()}`);\n        resolve({ symbol, price, timestamp: new Date().toISOString() });\n      }\n    }, delay);\n  });\n}\n\nfunction startPolling(symbol, interval) {\n  let timeoutId = null;\n\n  // TODO: Implement recursive setTimeout polling logic here\n\n  // Make sure to return a function to stop polling\n  return () => {\n    // Cleanup logic\n  };\n}\n\n// Example Usage (uncomment to test):\n// const stopAAPLPolling = startPolling('AAPL', 1500); // Poll every 1.5 seconds\n\n// setTimeout(() => {\n//   console.log('\\nStopping AAPL polling after 6 seconds.');\n//   stopAAPLPolling();\n// }, 6000);\n\n// const stopGOOGPolling = startPolling('GOOG', 2000);\n\n// setTimeout(() => {\n//   console.log('\\nStopping GOOG polling after 8 seconds.');\n//   stopGOOGPolling();\n// }, 8000);\n",
+          "solutionCode": "async function fetchSimulatedStockData(symbol) {\n  console.log(`Fetching data for ${symbol}...`);\n  return new Promise((resolve, reject) => {\n    const delay = Math.random() * 600 + 200; // 200-800ms delay\n    setTimeout(() => {\n      if (Math.random() < 0.1) { // 10% chance of error\n        reject(new Error(`Network error for ${symbol}`));\n      } else {\n        const price = (Math.random() * 100 + 100).toFixed(2); // Price between 100-200\n        console.log(`Received data for ${symbol}: $${price} at ${new Date().toLocaleTimeString()}`);\n        resolve({ symbol, price, timestamp: new Date().toISOString() });\n      }\n    }, delay);\n  });\n}\n\nfunction startPolling(symbol, interval) {\n  let timeoutId = null;\n\n  async function poll() {\n    try {\n      await fetchSimulatedStockData(symbol);\n    } catch (error) {\n      console.error(`Polling for ${symbol} failed:`, error.message);\n      // Decide whether to stop or continue polling on error\n      // For this task, we continue polling.\n    } finally {\n      // Schedule the next poll only after the current fetch (and its processing) is complete\n      timeoutId = setTimeout(poll, interval);\n    }\n  }\n\n  // Start the first poll immediately\n  poll();\n\n  // Return a cleanup function to stop polling\n  return () => {\n    if (timeoutId) {\n      clearTimeout(timeoutId);\n      timeoutId = null;\n      console.log(`Polling for ${symbol} stopped.`);\n    }\n  };\n}\n\n// Example Usage:\nconst stopAAPLPolling = startPolling('AAPL', 1500); // Poll every 1.5 seconds\n\nsetTimeout(() => {\n  console.log('\\nStopping AAPL polling after 6 seconds.');\n  stopAAPLPolling();\n}, 6000);\n\nconst stopGOOGPolling = startPolling('GOOG', 2000);\n\nsetTimeout(() => {\n  console.log('\\nStopping GOOG polling after 8 seconds.');\n  stopGOOGPolling();\n}, 8000);\n",
+          "testCases": [
+            "Polling starts and fetches data: Verify `fetchSimulatedStockData` logs appear at regular intervals (approx `interval + fetch_delay`).",
+            "Polling handles errors: Verify `Network error` logs appear without stopping the polling when simulated.",
+            "Polling stops correctly: Verify that calling the returned `stopPolling` function prevents further `fetchSimulatedStockData` calls.",
+            "Concurrent polling for different symbols: Ensure multiple `startPolling` calls run independently.",
+            "Timing: Ensure the `interval` is respected *after* the fetch completes, not concurrently."
+          ],
+          "hints": [
+            "The `async` keyword for `poll` is important to allow `await`ing `fetchSimulatedStockData`.",
+            "The `.finally()` block on a Promise ensures a piece of code runs whether the Promise resolves or rejects.",
+            "Remember that `setTimeout` returns an ID that `clearTimeout` can use to cancel it."
+          ],
+          "tags": [
+            "JavaScript",
+            "API",
+            "Polling",
+            "Async",
+            "Promises",
+            "Error Handling"
+          ],
+          "timeEstimate": 75,
+          "prerequisites": [
+            "promises",
+            "async_await",
+            "javascript_timers",
+            "fetch_api_basics"
+          ],
+          "complexity": 8,
+          "interviewRelevance": 9,
+          "learningPath": "intermediate",
+          "relatedConcepts": [
+            "WebSockets",
+            "Server-Sent Events",
+            "Resource Management"
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "03f49844-e9cf-44db-867e-2550f5e64414",
+    "startLine": 15600,
+    "endLine": 15699,
+    "processedDate": "2025-06-17T15:06:14.749Z",
+    "content": {
+      "logicalBlockInfo": {
+        "suggestedEndLine": -1
+      },
+      "theory": [
+        {
+          "id": "theory_fetch_api_promises",
+          "title": "Asynchronous Operations: Fetch API and Promises",
+          "content": "Asynchronous operations are fundamental in modern web development, allowing applications to perform long-running tasks (like network requests) without blocking the main thread, thus maintaining a responsive user interface. The `Fetch API` provides a modern, flexible way to make network requests, replacing older methods like `XMLHttpRequest`.\n\n## The Fetch API\n`fetch()` is a global method that initiates a network request. It returns a `Promise` that resolves to the `Response` object representing the response to your request. A `Response` object is not directly the JSON data; it's an HTTP response. To extract the actual data (e.g., JSON, text, blob), you use methods like `response.json()`, `response.text()`, etc., which themselves return promises.\n\n## Promises\nPromises are objects representing the eventual completion or failure of an asynchronous operation and its resulting value. A Promise can be in one of three states:\n*   **Pending:** Initial state, neither fulfilled nor rejected.\n*   **Fulfilled (Resolved):** Meaning the operation completed successfully.\n*   **Rejected:** Meaning the operation failed.\n\n## Promise Chaining\nPromises allow for chaining `then()` calls to handle sequential asynchronous operations. Each `.then()` call returns a new promise, allowing you to chain subsequent operations. The `catch()` method is used to handle errors that occur anywhere in the promise chain.\n\n### Key Concepts\n-   `fetch(url, options)`: Initiates a network request.\n-   `Response` object: Represents the HTTP response. Contains methods to parse the body (`.json()`, `.text()`, etc.).\n-   `.then(onFulfilled, onRejected)`: Handles successful completion or rejection of a promise.\n-   `.catch(onRejected)`: A shorthand for `.then(null, onRejected)` for error handling.\n-   `.finally(onFinally)`: Executes a callback when the promise is settled (either fulfilled or rejected), regardless of the outcome.\n\n### Error Handling\n`fetch()` only rejects a promise if a network error occurs or if the request is aborted. It does **not** reject for HTTP error statuses (like 404 Not Found or 500 Internal Server Error). For these, you must check `response.ok` property (which is `true` for 2xx status codes) within the `.then()` block.\n",
+          "examples": [
+            {
+              "id": "example_fetch_api_promises_1",
+              "title": "Basic Fetch Request with Promise Chaining",
+              "code": "async function fetchStockData(endpoint) {\n  try {\n    const response = await fetch(endpoint);\n    // Check if the response was successful (e.g., status 200-299)\n    if (!response.ok) {\n      throw new Error(`HTTP error! status: ${response.status}`);\n    }\n    const data = await response.json();\n    // Update UI with new stock data\n    console.log('Updated stock data:', data);\n    return data;\n  } catch (error) {\n    console.error('Error fetching stock data:', error);\n    // Handle error in UI, e.g., display error message\n    throw error; // Re-throw to propagate the error if needed\n  }\n}\n\n// Original example from markdown (using .then/.catch)\nfunction fetchStockDataLegacy(endpoint) {\n  return fetch(endpoint)\n    .then(response => {\n      if (!response.ok) {\n        // Handle HTTP errors specifically\n        throw new Error(`HTTP error! status: ${response.status}`);\n      }\n      return response.json();\n    })\n    .then(data => {\n      // Update UI with new stock data\n      console.log('Updated stock data:', data);\n      return data;\n    })\n    .catch(error => {\n      console.error('Error fetching stock data:', error);\n      // Handle error in UI\n    });\n}\n\n// Example Usage:\n// fetchStockData('/api/stocks');\n// fetchStockDataLegacy('/api/stocks');",
+              "explanation": "This example demonstrates how to use the Fetch API with Promise chaining (`.then()`, `.catch()`) and also with modern `async/await` syntax for better readability. It highlights the importance of checking `response.ok` for HTTP error statuses, as `fetch` itself only rejects on network errors. The console logs show how to access and use the fetched data.",
+              "language": "typescript"
+            }
+          ],
+          "relatedQuestions": [
+            "question_fetch_api_1",
+            "question_promise_states_2",
+            "question_fetch_error_handling_3",
+            "question_async_await_vs_promises_4"
+          ],
+          "relatedTasks": [
+            "task_implement_fetch_display"
+          ],
+          "tags": [
+            "asynchronous-javascript",
+            "fetch-api",
+            "promises",
+            "error-handling",
+            "web-apis"
+          ],
+          "technology": "JavaScript",
+          "prerequisites": [
+            "javascript_basics",
+            "callbacks"
+          ],
+          "complexity": 6,
+          "interviewRelevance": 9,
+          "learningPath": "intermediate",
+          "requiredFor": [
+            "single_page_applications",
+            "api_integration",
+            "state_management"
+          ]
+        },
+        {
+          "id": "theory_es6_vs_es5_inheritance",
+          "title": "ES6 Classes vs. ES5 Prototype Inheritance",
+          "content": "JavaScript is a prototype-based language, meaning objects inherit properties and methods from other objects. Before ES6, inheritance was primarily implemented using constructor functions and modifying the `prototype` chain. ES6 introduced `class` syntax, which is syntactic sugar over this existing prototype-based inheritance model, providing a more familiar object-oriented programming (OOP) style.\n\n## ES5 Prototype Inheritance\nIn ES5, you define 'classes' using constructor functions. Methods intended for inheritance are added to the constructor's `prototype` object. Inheritance between 'classes' is achieved by setting the `prototype` of the child constructor to an instance of the parent's prototype, often using `Object.create()`. The `call()` or `apply()` methods are used within the child constructor to invoke the parent constructor, ensuring that parent properties are initialized on the child instance. A common pitfall is the `constructor` property on the child's prototype, which needs to be explicitly reset.\n\n### Key Concepts (ES5)\n-   **Constructor Function:** A regular JavaScript function used with `new` keyword to create objects.\n-   `prototype` Property: An object associated with every function, where inherited properties and methods are stored.\n-   `__proto__` Property: An internal property on an object that points to its prototype (i.e., the object it inherits from).\n-   `Object.create(proto)`: Creates a new object with the specified prototype object.\n-   `Parent.call(this, ...args)`: Invokes the `Parent` constructor function with `this` bound to the child instance, allowing property inheritance.\n\n## ES6 Class Syntax\nES6 classes provide a cleaner, more intuitive syntax for creating constructor functions and managing inheritance. They are not true classes in the traditional OOP sense (like Java or C++) but rather a different way to write prototype-based inheritance.\n\n### Key Concepts (ES6)\n-   `class MyClass { ... }`: Defines a class.\n-   `constructor(...)`: A special method for creating and initializing an object created with a class.\n-   `extends OtherClass`: Used in a class declaration or class expression to create a class that is a child of another class.\n-   `super()`: Used to call the constructor of the parent class. Must be called before `this` is accessed in a derived class's constructor.\n\nDespite the different syntax, the underlying mechanism remains prototype-based. Understanding the ES5 equivalent helps in debugging and comprehending advanced JavaScript concepts.\n",
+          "examples": [
+            {
+              "id": "example_es6_vs_es5_inheritance_1",
+              "title": "Converting ES6 Class Inheritance to ES5 Prototype Inheritance",
+              "code": "// ES6 Class Inheritance\nclass ParentES6 {\n  constructor(name) {\n    this.name = name;\n  }\n\n  getName() {\n    return this.name;\n  }\n\n  static greet() {\n    return \"Hello from Parent!\";\n  }\n}\n\nclass ChildES6 extends ParentES6 {\n  constructor(name, age) {\n    super(name); // Calls ParentES6's constructor\n    this.age = age;\n  }\n\n  getDetails() {\n    return `${this.getName()} is ${this.age} years old.`;\n  }\n}\n\n// Converted to ES5 Prototype Inheritance\nfunction ParentES5(name) {\n  this.name = name;\n}\n\nParentES5.prototype.getName = function() {\n  return this.name;\n};\n\n// Static method equivalent in ES5\nParentES5.greet = function() {\n  return \"Hello from Parent!\";\n};\n\nfunction ChildES5(name, age) {\n  // Call parent constructor with current context to inherit properties\n  ParentES5.call(this, name);\n  this.age = age;\n}\n\n// Set up prototype chain: ChildES5's prototype inherits from ParentES5's prototype\nChildES5.prototype = Object.create(ParentES5.prototype);\n// Fix constructor property, as Object.create sets it to ParentES5\nChildES5.prototype.constructor = ChildES5;\n\nChildES5.prototype.getDetails = function() {\n  // Access parent method via prototype chain\n  return `${this.getName()} is ${this.age} years old.`;\n};\n\n// Example Usage:\nconst parentES6 = new ParentES6('Alice');\nconsole.log(parentES6.getName()); // Alice\n\nconst childES6 = new ChildES6('Bob', 30);\nconsole.log(childES6.getDetails()); // Bob is 30 years old.\nconsole.log(ParentES6.greet()); // Hello from Parent!\n\nconst parentES5 = new ParentES5('Charlie');\nconsole.log(parentES5.getName()); // Charlie\n\nconst childES5 = new ChildES5('David', 25);\nconsole.log(childES5.getDetails()); // David is 25 years old.\nconsole.log(ParentES5.greet()); // Hello from Parent!\n\n// Check inheritance chain:\nconsole.log(childES6 instanceof ChildES6); // true\nconsole.log(childES6 instanceof ParentES6); // true\nconsole.log(childES5 instanceof ChildES5); // true\nconsole.log(childES5 instanceof ParentES5); // true",
+              "explanation": "This example provides a side-by-side comparison of ES6 class inheritance and its equivalent ES5 prototype-based implementation. It demonstrates how to handle constructors (`super()` vs. `Parent.call(this)`), prototype methods, and the crucial step of setting up the prototype chain (`Object.create()`) and fixing the `constructor` property in ES5. It also includes an example of a static method equivalent.",
+              "language": "typescript"
+            }
+          ],
+          "relatedQuestions": [
+            "question_es6_to_es5_inheritance_1",
+            "question_prototype_chain_2",
+            "question_super_keyword_3",
+            "question_this_in_constructors_4",
+            "question_instanceof_5"
+          ],
+          "relatedTasks": [
+            "task_inheritance_conversion"
+          ],
+          "tags": [
+            "javascript",
+            "oop",
+            "inheritance",
+            "es6",
+            "es5",
+            "prototypes",
+            "classes"
+          ],
+          "technology": "JavaScript",
+          "prerequisites": [
+            "javascript_objects",
+            "functions_as_first_class_citizens"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 9,
+          "learningPath": "intermediate",
+          "requiredFor": [
+            "framework_understanding",
+            "library_development",
+            "advanced_javascript"
+          ]
+        },
+        {
+          "id": "theory_array_processing_hash_maps",
+          "title": "Array Processing and Hash Maps (Two Sum Problem)",
+          "content": "Array processing is a fundamental skill in algorithm design. Many problems involve iterating through arrays to find specific elements, pairs, or patterns. One common challenge is optimizing these operations for better time complexity.\n\n## Hash Maps (Map/Set in JavaScript)\nHash maps (also known as hash tables, dictionaries, or objects/Maps in JavaScript) are data structures that store key-value pairs and allow for extremely fast (average O(1) time) lookups, insertions, and deletions. This efficiency makes them invaluable for problems requiring quick checks for the existence of an element or its complement.\n\n## The Two Sum Problem\nThe 'Two Sum' problem is a classic algorithm question: given an array of integers `nums` and a target integer `target`, return indices of the two numbers such that they add up to `target`. If there are multiple pairs, any one valid pair is acceptable. If no such pair exists, indicate that.\n\n### Hash Map Approach for Two Sum\nA highly efficient approach to solve the Two Sum problem is using a hash map. The strategy is to iterate through the array once. For each number `num` we encounter, we calculate its `complement` (i.e., `target - num`). We then check if this `complement` already exists in our hash map. If it does, we've found a pair. If not, we add the current `num` (and its index) to the hash map for future lookups.\n\n### Time and Space Complexity\n-   **Time Complexity: O(n)**. We iterate through the array once. Each hash map operation (insertion, lookup) takes average O(1) time.\n-   **Space Complexity: O(n)**. In the worst case, we might store all elements of the array in the hash map.\n\nThis approach significantly improves upon a naive O(n^2) nested loop solution.",
+          "examples": [
+            {
+              "id": "example_two_sum_hash_map_1",
+              "title": "Finding Pairs with a Target Sum using a Hash Map",
+              "code": "/**\n * Finds pairs of numbers in an array that sum to a specific target.\n * @param {number[]} nums The input array of numbers.\n * @param {number} target The target sum.\n * @returns {Array<[number, number]>} An array of pairs that sum to the target.\n */\nfunction findPairsWithSum(nums, target) {\n  const pairs = [];\n  // Use a Map to store numbers encountered and their indices (or just their presence).\n  // For this problem, we just need presence, so a Set or Map with boolean value works.\n  const numMap = new Map(); \n  \n  for (const num of nums) {\n    const complement = target - num;\n    \n    // Check if the complement has been seen before\n    if (numMap.has(complement)) {\n      pairs.push([complement, num]); // Store the pair\n    }\n    \n    // Add the current number to the map\n    // We set a value (e.g., true) just to indicate presence.\n    // If we needed indices, we'd store numMap.set(num, index);\n    numMap.set(num, true);\n  }\n  \n  return pairs;\n}\n\n// Example 1: Basic usage\nconst numbers1 = [2, 7, 10, 1, 11, 15, 9];\nconst targetSum1 = 11;\nconst result1 = findPairsWithSum(numbers1, targetSum1);\nconsole.log(`Pairs for target ${targetSum1}:`, result1); // Expected: [[1, 10], [2, 9]] (order might vary)\n\n// Example 2: No pairs\nconst numbers2 = [1, 2, 3, 4];\nconst targetSum2 = 10;\nconst result2 = findPairsWithSum(numbers2, targetSum2);\nconsole.log(`Pairs for target ${targetSum2}:`, result2); // Expected: []\n\n// Example 3: Duplicate numbers and multiple pairs\nconst numbers3 = [3, 3, 6, 2, 8, 4];\nconst targetSum3 = 6;\nconst result3 = findPairsWithSum(numbers3, targetSum3);\nconsole.log(`Pairs for target ${targetSum3}:`, result3); // Expected: [[3,3], [2,4]] (order might vary)",
+              "explanation": "This example demonstrates the hash map approach for finding pairs that sum to a target. It iterates through the `nums` array, calculates the `complement` for each `num`, and efficiently checks if the `complement` already exists in the `numMap`. If it does, a pair is found. The `numMap` stores previously encountered numbers, allowing for O(1) average time lookups. The complexity analysis highlights the efficiency gains over brute-force methods.",
+              "language": "typescript"
+            }
+          ],
+          "relatedQuestions": [
+            "question_two_sum_algorithm_1",
+            "question_two_sum_complexity_2",
+            "question_hash_map_usage_3",
+            "question_two_sum_variations_4"
+          ],
+          "relatedTasks": [
+            "task_two_sum_implementation"
+          ],
+          "tags": [
+            "algorithms",
+            "data-structures",
+            "arrays",
+            "hash-map",
+            "time-complexity",
+            "space-complexity"
+          ],
+          "technology": "JavaScript",
+          "prerequisites": [
+            "javascript_arrays",
+            "basic_data_structures"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 9,
+          "learningPath": "intermediate",
+          "requiredFor": [
+            "algorithmic_thinking",
+            "technical_interviews"
+          ]
+        },
+        {
+          "id": "theory_local_maximum",
+          "title": "Finding a Local Maximum in an Array",
+          "content": "A local maximum (also known as a peak element) in an array is an element that is greater than or equal to its immediate neighbors. For elements at the boundaries of the array, only one neighbor needs to be considered. If an array has multiple local maxima, the goal is typically to find any one of them.\n\n## Definition of Local Maximum\nAn element `arr[i]` is a local maximum if:\n*   `arr[i] >= arr[i-1]` (if `i > 0`) AND\n*   `arr[i] >= arr[i+1]` (if `i < arr.length - 1`)\n\n### Edge Cases:\n*   **Single element array:** The single element is always a local maximum.\n*   **First element:** `arr[0]` is a local maximum if `arr[0] >= arr[1]` (if `arr.length > 1`).\n*   **Last element:** `arr[arr.length - 1]` is a local maximum if `arr[arr.length - 1] >= arr[arr.length - 2]` (if `arr.length > 1`).\n\n## Algorithm: Linear Scan\nThe simplest approach to find a local maximum in an unsorted array is to perform a linear scan. Iterate through the array and for each element, check if it satisfies the local maximum condition. Since we only need *any* local maximum, we can return the first one found.\n\n### Time and Space Complexity\n*   **Time Complexity: O(n)** in the worst case, as we might need to iterate through the entire array.\n*   **Space Complexity: O(1)**, as we only use a few variables for iteration.\n\n## Optimized Approach (for specific cases): Binary Search\nIf the array is guaranteed to have a specific structure (e.g., unimodal array where elements strictly increase then strictly decrease), a more efficient binary search approach can find a peak in O(log n) time. However, for a general unsorted array where any local maximum is acceptable, the linear scan is straightforward and efficient enough.",
+          "examples": [
+            {
+              "id": "example_local_maximum_1",
+              "title": "Finding a Local Maximum using Linear Scan",
+              "code": "/**\n * Finds a local maximum in an array.\n * A local maximum is an element that is greater than or equal to its neighbors.\n * @param {number[]} nums The input array of numbers.\n * @returns {number | null} The value of a local maximum, or null if the array is empty.\n */\nfunction findLocalMaximum(nums) {\n  if (!nums || nums.length === 0) {\n    return null; // Handle empty array\n  }\n  if (nums.length === 1) {\n    return nums[0]; // Single element is always a local maximum\n  }\n\n  // Check first element\n  if (nums[0] >= nums[1]) {\n    return nums[0];\n  }\n\n  // Check elements from index 1 to second-to-last\n  for (let i = 1; i < nums.length - 1; i++) {\n    if (nums[i] >= nums[i - 1] && nums[i] >= nums[i + 1]) {\n      return nums[i]; // Found a local maximum\n    }\n  }\n\n  // Check last element\n  if (nums[nums.length - 1] >= nums[nums.length - 2]) {\n    return nums[nums.length - 1];\n  }\n\n  return null; // Should ideally not be reached if a local maximum always exists (e.g., in a non-empty array)\n}\n\n// Example Usage:\nconsole.log('Local max in [1, 2, 3, 4, 5]:', findLocalMaximum([1, 2, 3, 4, 5])); // Expected: 5\nconsole.log('Local max in [5, 4, 3, 2, 1]:', findLocalMaximum([5, 4, 3, 2, 1])); // Expected: 5\nconsole.log('Local max in [1, 2, 1, 3, 5, 6, 4]:', findLocalMaximum([1, 2, 1, 3, 5, 6, 4])); // Expected: 2 or 6\nconsole.log('Local max in [1]:', findLocalMaximum([1])); // Expected: 1\nconsole.log('Local max in []:', findLocalMaximum([])); // Expected: null\nconsole.log('Local max in [7, 6, 5, 8, 9, 10]:', findLocalMaximum([7, 6, 5, 8, 9, 10])); // Expected: 7 or 10\nconsole.log('Local max in [3, 2, 1, 2, 3]:', findLocalMaximum([3, 2, 1, 2, 3])); // Expected: 3 (first or last)\n",
+              "explanation": "This function implements a linear scan to find a local maximum. It handles edge cases for arrays with zero or one element, and specifically checks the first and last elements as they only have one neighbor. For elements in the middle, it checks both left and right neighbors. It returns the first local maximum found, satisfying the requirement of finding 'a' local maximum.",
+              "language": "typescript"
+            }
+          ],
+          "relatedQuestions": [
+            "question_local_maximum_definition_1",
+            "question_find_local_maximum_algorithm_2",
+            "question_local_maximum_edge_cases_3",
+            "question_local_maximum_binary_search_4"
+          ],
+          "relatedTasks": [
+            "task_find_local_maximum"
+          ],
+          "tags": [
+            "algorithms",
+            "arrays",
+            "searching",
+            "linear-scan",
+            "time-complexity"
+          ],
+          "technology": "JavaScript",
+          "prerequisites": [
+            "javascript_arrays",
+            "conditional_logic"
+          ],
+          "complexity": 5,
+          "interviewRelevance": 7,
+          "learningPath": "intermediate",
+          "requiredFor": [
+            "algorithmic_thinking",
+            "technical_interviews"
+          ]
+        }
+      ],
+      "questions": [
+        {
+          "id": "question_fetch_api_1",
+          "topic": "Fetch API",
+          "level": "easy",
+          "type": "mcq",
+          "question": "Which of the following best describes what the `fetch()` function returns immediately?",
+          "answer": "A Promise that resolves to a Response object",
+          "options": [
+            "The JSON data directly",
+            "A JavaScript object containing the parsed data",
+            "A Promise that resolves to a Response object",
+            "An XMLHttpRequest object"
+          ],
+          "analysisPoints": [
+            "Understanding that `fetch` is asynchronous and returns a Promise.",
+            "Knowing that the initial Promise resolves to a `Response` object, not the final data.",
+            "Distinguishing `fetch` from older AJAX methods like `XMLHttpRequest`."
+          ],
+          "keyConcepts": [
+            "Fetch API",
+            "Promises",
+            "Response object"
+          ],
+          "evaluationCriteria": [
+            "Correct identification of Fetch API's return value.",
+            "Basic understanding of asynchronous operations."
+          ],
+          "example": "The `fetch()` function returns a `Promise`. This promise will eventually resolve to a `Response` object, from which you then need to call `.json()` or `.text()` to get the actual data, which itself returns another promise.\n\n```javascript\nfetch('/api/data')\n  .then(response => { // response is a Response object\n    console.log(response.status); // e.g., 200\n    return response.json(); // returns a new promise for the JSON data\n  })\n  .then(data => { // data is the parsed JSON object\n    console.log(data);\n  })\n  .catch(error => console.error(error));\n```",
+          "tags": [
+            "fetch",
+            "promises",
+            "api",
+            "async"
+          ],
+          "prerequisites": [
+            "javascript_basics"
+          ],
+          "complexity": 3,
+          "interviewFrequency": 7,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_promise_states_2",
+          "topic": "Promises",
+          "level": "medium",
+          "type": "flashcard",
+          "question": "What are the three possible states of a JavaScript Promise?",
+          "answer": "Pending, Fulfilled (Resolved), and Rejected.",
+          "analysisPoints": [
+            "Recall of promise lifecycle states."
+          ],
+          "keyConcepts": [
+            "Promises",
+            "Promise states"
+          ],
+          "evaluationCriteria": [
+            "Ability to recall core promise concepts."
+          ],
+          "example": "A Promise starts in a `pending` state. If the operation completes successfully, it becomes `fulfilled` (or `resolved`). If it fails, it becomes `rejected`. Once a promise is fulfilled or rejected, it is `settled` and its state cannot change again.",
+          "tags": [
+            "promises",
+            "async",
+            "javascript"
+          ],
+          "prerequisites": [
+            "javascript_basics"
+          ],
+          "complexity": 4,
+          "interviewFrequency": 8,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_fetch_error_handling_3",
+          "topic": "Fetch API Error Handling",
+          "level": "medium",
+          "type": "open",
+          "question": "When using `fetch()`, how do you differentiate between a network error (e.g., no internet connection) and an HTTP error status (e.g., 404 Not Found)? Provide a code example.",
+          "answer": "The `fetch()` API behaves differently for network errors versus HTTP error statuses.\n\n1.  **Network Errors:** `fetch()` will only `reject` its promise if a network error occurs (e.g., DNS lookup failure, offline, CORS issues preventing the request). In this case, the `.catch()` block will be executed.\n2.  **HTTP Error Statuses:** `fetch()` will *not* reject its promise for HTTP error status codes (like 404, 500, 401, etc.). The promise will still `resolve`, but the `response.ok` property of the `Response` object will be `false`. You must explicitly check `response.ok` (or `response.status`) within the first `.then()` block to handle these cases.\n\nExample:\n```javascript\nasync function safeFetch(url) {\n  try {\n    const response = await fetch(url);\n\n    // Check for HTTP error statuses (e.g., 404, 500)\n    if (!response.ok) {\n      const errorText = await response.text(); // Or response.json() if API returns JSON errors\n      throw new Error(`HTTP error! Status: ${response.status}, Message: ${errorText}`);\n    }\n\n    const data = await response.json();\n    console.log('Data fetched successfully:', data);\n    return data;\n  } catch (error) {\n    // This catch block handles both network errors and errors thrown from `if (!response.ok)`\n    console.error('Fetch operation failed:', error.message);\n    // You can differentiate here if needed, e.g., by checking `error.name` or `error.message`\n    if (error.message.includes('NetworkError') || error.message.includes('Failed to fetch')) {\n      console.log('This was likely a network-related issue.');\n    } else if (error.message.includes('HTTP error!')) {\n      console.log('This was an HTTP status error.');\n    }\n    throw error; // Re-throw to propagate or handle further\n  }\n}\n\n// Example Usage:\n// safeFetch('https://api.example.com/data'); // Success\n// safeFetch('https://api.example.com/nonexistent'); // 404 HTTP Error\n// safeFetch('http://invalid-domain-nonexistent-xyz.com'); // Network Error\n```",
+          "analysisPoints": [
+            "Understanding `fetch()`'s error-handling philosophy.",
+            "Knowledge of `response.ok` property.",
+            "Ability to implement robust error handling for both network and HTTP status errors."
+          ],
+          "keyConcepts": [
+            "Fetch API",
+            "Error Handling",
+            "Promises",
+            "HTTP Status Codes"
+          ],
+          "evaluationCriteria": [
+            "Correctly identifies the difference in error handling for network vs. HTTP errors.",
+            "Provides a clear and correct code example.",
+            "Demonstrates comprehensive error handling strategy."
+          ],
+          "example": "",
+          "tags": [
+            "fetch",
+            "error-handling",
+            "promises",
+            "http",
+            "async"
+          ],
+          "prerequisites": [
+            "fetch_api_basics",
+            "promises"
+          ],
+          "complexity": 7,
+          "interviewFrequency": 9,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_async_await_vs_promises_4",
+          "topic": "Async/Await",
+          "level": "medium",
+          "type": "mcq",
+          "question": "Consider the following code snippets for handling asynchronous operations:\n\n**Snippet A:**\n```javascript\nfunction getDataA(url) {\n  return fetch(url)\n    .then(response => response.json())\n    .then(data => data)\n    .catch(error => console.error(error));\n}\n```\n\n**Snippet B:**\n```javascript\nasync function getDataB(url) {\n  try {\n    const response = await fetch(url);\n    const data = await response.json();\n    return data;\n  } catch (error) {\n    console.error(error);\n  }\n}\n```\n\nWhich statement accurately describes a key difference or advantage of Snippet B over Snippet A for typical use cases?",
+          "answer": "Snippet B often leads to more readable and maintainable code, especially with multiple asynchronous steps, by making asynchronous code look like synchronous code.",
+          "options": [
+            "Snippet B automatically handles HTTP error statuses (like 404) without explicit checks, unlike Snippet A.",
+            "Snippet B uses less memory because `await` is more efficient than chained `.then()` calls.",
+            "Snippet B can execute `fetch(url)` and `response.json()` in parallel, improving performance.",
+            "Snippet B often leads to more readable and maintainable code, especially with multiple asynchronous steps, by making asynchronous code look like synchronous code."
+          ],
+          "analysisPoints": [
+            "Understanding the primary benefit of `async/await` (readability).",
+            "Correctly identifying that `await` pauses execution, not parallelizes.",
+            "Knowing that `fetch` still requires explicit `response.ok` checks regardless of `async/await`."
+          ],
+          "keyConcepts": [
+            "Async/Await",
+            "Promises",
+            "Readability",
+            "Error Handling"
+          ],
+          "evaluationCriteria": [
+            "Understands the syntactic sugar nature and readability benefits of `async/await`.",
+            "Distinguishes between sequential and parallel execution.",
+            "Recognizes `fetch` error handling requirements."
+          ],
+          "example": "Snippet B, using `async/await`, provides a more linear, synchronous-like flow, which can greatly improve the readability and maintainability of code involving multiple asynchronous operations. Each `await` keyword effectively pauses the execution of the `async` function until the awaited promise resolves. This eliminates the need for deeply nested `.then()` chains, often referred to as 'callback hell'. However, it does not inherently make network calls more performant or automatically handle HTTP error statuses without manual checks like `response.ok`.\n\n```javascript\n// Consider multiple sequential fetches\nasync function getSequentialData(url1, url2) {\n  const data1 = await fetch(url1).then(res => res.json());\n  const data2 = await fetch(url2).then(res => res.json());\n  return { data1, data2 };\n}\n\n// Compared to deeply nested .then() chains, async/await is much cleaner.\n```",
+          "tags": [
+            "async-await",
+            "promises",
+            "readability",
+            "javascript"
+          ],
+          "prerequisites": [
+            "promises"
+          ],
+          "complexity": 6,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_es6_to_es5_inheritance_1",
+          "topic": "ES6 Classes and ES5 Prototypes",
+          "level": "hard",
+          "type": "open",
+          "question": "You are given an ES6 class structure with inheritance. Explain and demonstrate how you would refactor this into an ES5 prototype-based inheritance model. Highlight the key differences and challenges, especially regarding constructor invocation and prototype chain establishment.",
+          "answer": "ES6 classes are syntactic sugar over JavaScript's existing prototype-based inheritance. Refactoring an ES6 class structure to ES5 involves understanding how constructor functions, prototype properties, and the prototype chain work.\n\n**Key Differences and Challenges:**\n\n1.  **Constructor Invocation (`super()` vs. `Parent.call(this)`):**\n    *   **ES6:** The `super()` keyword in a child class's constructor is mandatory when using `extends`. It calls the parent class's constructor and binds `this` correctly before the child's `this` is accessible.\n    *   **ES5:** To inherit properties from the parent, the child's constructor must explicitly invoke the parent's constructor using `Parent.call(this, ...args)`. This ensures that the parent's `this.property` assignments are applied to the child's instance.\n\n2.  **Prototype Chain Establishment (`extends` vs. `Object.create()`):**\n    *   **ES6:** The `extends` keyword automatically sets up the prototype chain. `Child.prototype` will correctly inherit from `Parent.prototype`.\n    *   **ES5:** You must manually set up the prototype chain. The most robust way is `Child.prototype = Object.create(Parent.prototype);`. `Object.create()` creates a new object with the specified prototype, effectively linking the child's prototype to the parent's.\n\n3.  **`constructor` Property Fix:**\n    *   **ES6:** The `constructor` property on `Child.prototype` is automatically set correctly to `Child`.\n    *   **ES5:** When `Child.prototype` is set to `Object.create(Parent.prototype)`, the `constructor` property of `Child.prototype` will point to `ParentES5`. It is crucial to manually reset it to `ChildES5` (`ChildES5.prototype.constructor = ChildES5;`) to ensure correct `instanceof` checks and reflection.\n\n4.  **Static Methods:**\n    *   **ES6:** `static` keyword on class methods directly attaches them to the class constructor itself, not its prototype.\n    *   **ES5:** Static methods are simply properties added directly to the constructor function (e.g., `ParentES5.staticMethod = function() { ... };`).\n\n**Demonstration:**\n(See `example_es6_vs_es5_inheritance_1` in `theory_es6_vs_es5_inheritance` for a comprehensive code example.)",
+          "analysisPoints": [
+            "In-depth understanding of JavaScript's prototype chain.",
+            "Ability to translate modern ES6 syntax to its foundational ES5 equivalent.",
+            "Knowledge of `Object.create()`, `Function.prototype.call()`, and the `constructor` property."
+          ],
+          "keyConcepts": [
+            "ES6 Classes",
+            "ES5 Prototypes",
+            "Inheritance",
+            "Prototype Chain",
+            "Constructor Functions",
+            "super",
+            "Object.create",
+            "call"
+          ],
+          "evaluationCriteria": [
+            "Accurate explanation of key differences.",
+            "Correct and clear code demonstration.",
+            "Identification and explanation of common pitfalls like `constructor` property."
+          ],
+          "example": "",
+          "tags": [
+            "javascript",
+            "oop",
+            "inheritance",
+            "es6",
+            "es5",
+            "prototypes"
+          ],
+          "prerequisites": [
+            "javascript_objects",
+            "functions_as_first_class_citizens"
+          ],
+          "complexity": 8,
+          "interviewFrequency": 9,
+          "learningPath": "advanced"
+        },
+        {
+          "id": "question_prototype_chain_2",
+          "topic": "JavaScript Prototypes",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "What is the purpose of the `prototype` property on a JavaScript constructor function, and the `__proto__` property on an object instance?",
+          "answer": "The `prototype` property on a constructor function is an object where inherited properties and methods are stored. The `__proto__` property (or `Object.getPrototypeOf()`) on an object instance points to the object's prototype, establishing the prototype chain for inheritance.",
+          "analysisPoints": [
+            "Distinguishing `prototype` from `__proto__`.",
+            "Understanding their roles in inheritance."
+          ],
+          "keyConcepts": [
+            "Prototypes",
+            "Inheritance",
+            "Constructor Functions",
+            "__proto__"
+          ],
+          "evaluationCriteria": [
+            "Ability to quickly define key prototype concepts."
+          ],
+          "example": "```javascript\nfunction Person(name) {\n  this.name = name;\n}\nPerson.prototype.sayHello = function() {\n  console.log(`Hello, my name is ${this.name}`);\n};\n\nconst john = new Person('John');\n\nconsole.log(john.__proto__ === Person.prototype); // true\nconsole.log(Object.getPrototypeOf(john) === Person.prototype); // true (preferred way)\n\n// When john.sayHello() is called, JavaScript looks for sayHello on john itself.\n// If not found, it looks on john.__proto__ (which is Person.prototype).\n// If still not found, it continues up the chain (e.g., Object.prototype).\njohn.sayHello();\n```",
+          "tags": [
+            "javascript",
+            "prototypes",
+            "oop",
+            "inheritance"
+          ],
+          "prerequisites": [
+            "javascript_objects"
+          ],
+          "complexity": 4,
+          "interviewFrequency": 7,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_super_keyword_3",
+          "topic": "ES6 Classes",
+          "level": "medium",
+          "type": "mcq",
+          "question": "Consider the following ES6 class structure:\n\n```javascript\nclass Animal {\n  constructor(name) {\n    this.name = name;\n  }\n}\n\nclass Dog extends Animal {\n  constructor(name, breed) {\n    // Point A\n    this.breed = breed;\n    // Point B\n    super(name);\n    // Point C\n  }\n}\n```\n\nAt which point(s) would calling `super(name)` result in an error or unexpected behavior, and why?",
+          "answer": "Calling `super(name)` at Point A would cause an error because `super()` must be called before `this` is accessed in a derived class's constructor.",
+          "options": [
+            "Calling `super(name)` at Point B would cause an error because `super()` must be the very first statement in the constructor.",
+            "Calling `super(name)` at Point A would cause an error because `super()` must be called before `this` is accessed in a derived class's constructor.",
+            "Calling `super(name)` at Point C would cause an error because it's too late; `this` would already be defined by the time `super()` is called.",
+            "It would not cause an error at any of the points, as the order of `super()` and `this` assignment does not matter in ES6 classes."
+          ],
+          "analysisPoints": [
+            "Understanding the strict rule for `super()` in derived class constructors.",
+            "Knowing that `super()` initializes `this` for the derived class.",
+            "Distinguishing between ES6 class constructor behavior and ES5 constructor functions."
+          ],
+          "keyConcepts": [
+            "ES6 Classes",
+            "Inheritance",
+            "super keyword",
+            "this binding"
+          ],
+          "evaluationCriteria": [
+            "Correctly identifies the `super()` call order rule.",
+            "Explains the reason for the error related to `this` access."
+          ],
+          "example": "In ES6 derived class constructors, `super()` *must* be called before any `this` reference is made. This is because `super()` is responsible for initializing `this` for the derived class by invoking the parent class's constructor. Until `super()` is called, `this` is not yet defined in the child's constructor, leading to a `ReferenceError` if accessed.\n\nCorrect usage:\n```javascript\nclass Dog extends Animal {\n  constructor(name, breed) {\n    super(name); // Call super first\n    this.breed = breed; // Then access this\n  }\n}\n```",
+          "tags": [
+            "es6",
+            "classes",
+            "inheritance",
+            "super",
+            "this"
+          ],
+          "prerequisites": [
+            "es6_classes_basics"
+          ],
+          "complexity": 7,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_this_in_constructors_4",
+          "topic": "`this` Context",
+          "level": "medium",
+          "type": "open",
+          "question": "Explain how the `this` keyword behaves differently in an ES5 constructor function compared to an ES6 class constructor, especially when dealing with inheritance.",
+          "answer": "**ES5 Constructor Function (`function MyConstructor() { ... }`):**\nWhen an ES5 constructor function is called with the `new` keyword, `this` inside the constructor refers to the newly created object instance. For inheritance, the child constructor explicitly calls the parent constructor using `Parent.call(this, ...args)`. This `call()` method explicitly sets the `this` context for the parent constructor to be the child's newly created instance. This allows the parent constructor to add properties directly to the child's instance.\n\n**ES6 Class Constructor (`class MyClass { constructor() { ... } }`):**\nIn an ES6 class, particularly a *derived* class (one that `extends` another), `this` behaves differently. Before `super()` is called in a derived class's constructor, `this` is *uninitialized*. Attempting to access `this` before `super()` results in a `ReferenceError`. The `super()` call is responsible for initializing `this` for the derived class by calling the parent's constructor. After `super()` is called, `this` refers to the new instance of the derived class, allowing you to add properties specific to the child.\n\n**Summary of Difference:**\n*   **ES5:** `this` is available immediately and points to the new instance. Inheritance uses `Parent.call(this)` to explicitly bind the parent's context to the child's `this`.\n*   **ES6 (derived class):** `this` is not available until `super()` is called. `super()` takes care of the `this` binding and initialization from the parent's side. This ensures proper construction order and prevents `this` from being used before it's ready.\n",
+          "analysisPoints": [
+            "Understanding `this` binding with `new` keyword in ES5.",
+            "Understanding the role of `call()` in ES5 inheritance.",
+            "Understanding the pre-`super()` `this` behavior in ES6 derived constructors.",
+            "Explaining why `super()` is essential for `this` initialization in ES6 derived classes."
+          ],
+          "keyConcepts": [
+            "this keyword",
+            "Constructor Functions",
+            "ES6 Classes",
+            "Inheritance",
+            "super",
+            "call method"
+          ],
+          "evaluationCriteria": [
+            "Clear and accurate explanation of `this` context in both paradigms.",
+            "Highlights the critical role of `super()` in ES6 derived constructors.",
+            "Demonstrates understanding of implicit vs. explicit `this` binding."
+          ],
+          "example": "```javascript\n// ES5 Example\nfunction ParentES5(name) {\n  this.name = name; // 'this' refers to the new instance\n}\n\nfunction ChildES5(name, age) {\n  ParentES5.call(this, name); // Explicitly sets 'this' of ParentES5 to ChildES5's instance\n  this.age = age;\n}\n\n// ES6 Example\nclass ParentES6 {\n  constructor(name) {\n    this.name = name;\n  }\n}\n\nclass ChildES6 extends ParentES6 {\n  constructor(name, age) {\n    // console.log(this); // Would cause ReferenceError here\n    super(name); // 'this' is initialized after this call\n    // console.log(this); // 'this' is now available\n    this.age = age;\n  }\n}\n```",
+          "tags": [
+            "javascript",
+            "this",
+            "oop",
+            "inheritance",
+            "es5",
+            "es6"
+          ],
+          "prerequisites": [
+            "javascript_objects",
+            "functions_context"
+          ],
+          "complexity": 7,
+          "interviewFrequency": 8,
+          "learningPath": "advanced"
+        },
+        {
+          "id": "question_instanceof_5",
+          "topic": "JavaScript Inheritance",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "In the context of JavaScript inheritance, what does the `instanceof` operator check?",
+          "answer": "The `instanceof` operator checks if an object is an instance of a particular constructor function or class by testing if the `prototype` property of the constructor appears anywhere in the prototype chain of the object.",
+          "analysisPoints": [
+            "Recall of `instanceof` functionality.",
+            "Understanding its relation to the prototype chain."
+          ],
+          "keyConcepts": [
+            "instanceof",
+            "Prototype Chain",
+            "Inheritance"
+          ],
+          "evaluationCriteria": [
+            "Ability to define `instanceof` correctly."
+          ],
+          "example": "```javascript\nfunction Parent() {}\nfunction Child() {}\nChild.prototype = Object.create(Parent.prototype);\nChild.prototype.constructor = Child; // Important for correct instanceof behavior\n\nconst child = new Child();\n\nconsole.log(child instanceof Child); // true\nconsole.log(child instanceof Parent); // true\nconsole.log(child instanceof Object); // true\nconsole.log(child instanceof Array); // false\n\nclass MyClass {}\nclass MyDerivedClass extends MyClass {}\nconst derived = new MyDerivedClass();\nconsole.log(derived instanceof MyDerivedClass); // true\nconsole.log(derived instanceof MyClass); // true\n```",
+          "tags": [
+            "javascript",
+            "inheritance",
+            "instanceof",
+            "prototypes"
+          ],
+          "prerequisites": [
+            "javascript_objects"
+          ],
+          "complexity": 3,
+          "interviewFrequency": 6,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_two_sum_algorithm_1",
+          "topic": "Array Processing (Two Sum)",
+          "level": "medium",
+          "type": "open",
+          "question": "You are given an array of integers `nums` and an integer `target`. Describe an algorithm to find two numbers in the array that sum up to `target`. Your solution should be more efficient than a brute-force O(n^2) approach. Provide pseudocode or a high-level explanation of your chosen algorithm and analyze its time and space complexity.",
+          "answer": "### Algorithm: Hash Map Approach\n\nTo find two numbers that sum up to `target` more efficiently than O(n^2), we can use a hash map (or JavaScript `Map`/`Set`).\n\n**High-Level Explanation:**\n\n1.  Initialize an empty hash map (e.g., `Map` in JavaScript) to store numbers we have encountered so far.\n2.  Iterate through the `nums` array from left to right.\n3.  For each `num` in the array:\n    a.  Calculate its `complement`: `complement = target - num`.\n    b.  Check if this `complement` already exists as a key in the hash map.\n        i.  If it does, we have found a pair (`complement`, `num`) that sums to `target`. We can return this pair (or their indices).\n    c.  If the `complement` is not found, add the current `num` to the hash map. (If indices are needed, store `(num, index)`).\n4.  If the loop completes without finding such a pair, it means no such pair exists.\n\n**Pseudocode:**\n\n```\nfunction findTwoSum(nums, target):\n  seenNumbers = new Map()\n\n  for each number num in nums with its index i:\n    complement = target - num\n\n    if seenNumbers contains complement:\n      // Found a pair: (complement, num)\n      // If required, retrieve index of complement: seenNumbers.get(complement)\n      return [seenNumbers.get(complement), i] // Or return [complement, num] if values are needed\n\n    seenNumbers.set(num, i) // Store the number and its index\n\n  return null // No pair found\n```\n\n### Time and Space Complexity Analysis:\n\n*   **Time Complexity: O(n)**\n    *   We iterate through the array `nums` exactly once, which takes O(n) time.\n    *   Inside the loop, hash map operations (checking for existence (`has`) and insertion (`set`)) take, on average, O(1) time. In the worst case (due to hash collisions, though rare with good hash functions), they can degrade to O(n), but average case is O(1).\n    *   Therefore, the total time complexity is dominated by the single pass through the array, resulting in O(n).\n\n*   **Space Complexity: O(n)**\n    *   In the worst case, if no pairs sum to the target until the very last element (or no pairs at all), we might end up storing almost all `n` elements in the hash map.\n    *   Each entry in the hash map consumes constant space.\n    *   Thus, the space complexity is proportional to the number of elements stored, which is O(n).\n",
+          "analysisPoints": [
+            "Correctly identifies the hash map approach as efficient.",
+            "Clearly explains the logic of using `complement`.",
+            "Accurately analyzes both time and space complexity, including average vs. worst-case for hash maps."
+          ],
+          "keyConcepts": [
+            "Two Sum Problem",
+            "Hash Map",
+            "Time Complexity",
+            "Space Complexity",
+            "Algorithms",
+            "Array Processing"
+          ],
+          "evaluationCriteria": [
+            "Demonstrates knowledge of efficient algorithms for array problems.",
+            "Ability to analyze algorithm complexity.",
+            "Clear and concise explanation."
+          ],
+          "example": "",
+          "tags": [
+            "algorithms",
+            "arrays",
+            "hash-map",
+            "time-complexity",
+            "interview-question"
+          ],
+          "prerequisites": [
+            "javascript_arrays",
+            "basic_data_structures"
+          ],
+          "complexity": 7,
+          "interviewFrequency": 9,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_two_sum_complexity_2",
+          "topic": "Two Sum Problem",
+          "level": "medium",
+          "type": "mcq",
+          "question": "You are implementing the `findPairsWithSum` function as described, using a `Map` (hash map). If the input array `nums` has `N` elements, what are the typical time and space complexities for this approach?\n\n```javascript\nfunction findPairsWithSum(nums, target) {\n  const pairs = [];\n  const numMap = new Map();\n  \n  for (const num of nums) {\n    const complement = target - num;\n    \n    if (numMap.has(complement)) {\n      pairs.push([complement, num]);\n    }\n    \n    numMap.set(num, true);\n  }\n  \n  return pairs;\n}\n```",
+          "answer": "Time: O(N), Space: O(N)",
+          "options": [
+            "Time: O(N^2), Space: O(1)",
+            "Time: O(N log N), Space: O(N)",
+            "Time: O(N), Space: O(N)",
+            "Time: O(1), Space: O(1)"
+          ],
+          "analysisPoints": [
+            "Understanding that a single loop implies O(N) time if inner operations are constant time.",
+            "Knowing that hash map operations (get, set, has) are average O(1).",
+            "Recognizing that the hash map stores up to N elements, leading to O(N) space."
+          ],
+          "keyConcepts": [
+            "Time Complexity",
+            "Space Complexity",
+            "Hash Map",
+            "Two Sum"
+          ],
+          "evaluationCriteria": [
+            "Correctly identifies the complexities of the hash map approach.",
+            "Demonstrates understanding of big O notation for common operations."
+          ],
+          "example": "The `for...of` loop iterates `N` times (once for each element in `nums`). Inside the loop, `numMap.has()` and `numMap.set()` operations on a `Map` (which is a hash map) typically have an average time complexity of O(1). Therefore, the overall time complexity is O(N * 1) = O(N).\n\nIn the worst case, if no pairs are found or if the last element completes a pair, the `numMap` could end up storing almost all `N` elements. Each element stored consumes constant space. Thus, the space complexity is O(N).",
+          "tags": [
+            "algorithms",
+            "arrays",
+            "hash-map",
+            "complexity",
+            "mcq"
+          ],
+          "prerequisites": [
+            "big_o_notation"
+          ],
+          "complexity": 5,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_hash_map_usage_3",
+          "topic": "Hash Maps",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "What is the primary advantage of using a hash map (like JavaScript's `Map` or `Object`) for lookups in an array processing algorithm?",
+          "answer": "The primary advantage is highly efficient (average O(1) time) lookups, insertions, and deletions, which allows for significantly faster processing compared to linear search (O(n)) in large datasets.",
+          "analysisPoints": [
+            "Recall of hash map properties.",
+            "Understanding its performance benefits for lookups."
+          ],
+          "keyConcepts": [
+            "Hash Map",
+            "Map",
+            "Time Complexity",
+            "Lookups"
+          ],
+          "evaluationCriteria": [
+            "Ability to state the main benefit of hash maps."
+          ],
+          "example": "```javascript\nconst myMap = new Map();\nmyMap.set('apple', 1);\nmyMap.set('banana', 2);\n\n// Checking for existence is very fast\nconsole.log(myMap.has('apple')); // true (O(1) on average)\nconsole.log(myMap.get('banana')); // 2 (O(1) on average)\n\n// Compared to iterating through an array to find an item (O(N) in worst case)\nconst myArray = [{ key: 'apple' }, { key: 'banana' }];\nconst found = myArray.find(item => item.key === 'apple'); // O(N)\n```",
+          "tags": [
+            "data-structures",
+            "hash-map",
+            "map",
+            "performance",
+            "flashcard"
+          ],
+          "prerequisites": [
+            "basic_data_structures"
+          ],
+          "complexity": 3,
+          "interviewFrequency": 7,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_two_sum_variations_4",
+          "topic": "Two Sum Problem",
+          "level": "hard",
+          "type": "code",
+          "question": "Modify the `findPairsWithSum` function to return only *unique* pairs of numbers, even if the input array contains duplicates that could form non-unique pairs. For example, if `nums = [1, 1, 2, 3]` and `target = 4`, the output should be `[[1, 3], [2, 2]]` (or `[[2,2], [1,3]]`), not `[[1,3], [1,3], [2,2]]`.\n\nYour function should take `nums` and `target` and return an array of unique pairs. The order of pairs or numbers within a pair does not matter for uniqueness.",
+          "answer": "```javascript\nfunction findUniquePairsWithSum(nums, target) {\n  const uniquePairs = [];\n  const seenNums = new Map(); // Stores num -> count of occurrences\n  const addedPairs = new Set(); // Stores stringified pairs to track uniqueness\n\n  // First, count occurrences of each number\n  for (const num of nums) {\n    seenNums.set(num, (seenNums.get(num) || 0) + 1);\n  }\n\n  // Then iterate through the unique numbers in the map\n  for (const [num, count] of seenNums.entries()) {\n    const complement = target - num;\n\n    // Case 1: num is the complement of itself (e.g., target = 6, num = 3)\n    if (num === complement) {\n      // Need at least two occurrences of this number\n      if (count >= 2) {\n        const pair = [num, num].sort((a, b) => a - b).join(',');\n        if (!addedPairs.has(pair)) {\n          uniquePairs.push([num, num]);\n          addedPairs.add(pair);\n        }\n      }\n    } \n    // Case 2: num and complement are different numbers\n    else if (seenNums.has(complement)) {\n      const pair = [num, complement].sort((a, b) => a - b).join(',');\n      if (!addedPairs.has(pair)) {\n        uniquePairs.push([num, complement].sort((a, b) => a - b));\n        addedPairs.add(pair);\n      }\n    }\n  }\n\n  return uniquePairs;\n}\n\n// Test Cases\nconsole.log(JSON.stringify(findUniquePairsWithSum([1, 1, 2, 3], 4))); // Expected: [[1,3],[2,2]] (order may vary)\nconsole.log(JSON.stringify(findUniquePairsWithSum([2, 2, 2, 2], 4))); // Expected: [[2,2]]\nconsole.log(JSON.stringify(findUniquePairsWithSum([1, 2, 3, 4, 5], 6))); // Expected: [[1,5],[2,4]]\nconsole.log(JSON.stringify(findUniquePairsWithSum([0, 0, 0, 0], 0))); // Expected: [[0,0]]\nconsole.log(JSON.stringify(findUniquePairsWithSum([1, 2, 3, 4, 5, 6], 7))); // Expected: [[1,6],[2,5],[3,4]]\nconsole.log(JSON.stringify(findUniquePairsWithSum([7, 2, 4, 8, 3, 1, 10], 11))); // Expected: [[1,10],[2,9],[3,8],[4,7]] (9 is missing from input)\n\n```",
+          "analysisPoints": [
+            "Correctly handles duplicate numbers in the input array.",
+            "Ensures uniqueness of *pairs* in the output, not just unique numbers within the pair.",
+            "Uses appropriate data structures (`Map` for counts, `Set` for tracking added pairs) for efficiency.",
+            "Manages cases where `num` equals `complement` (e.g., finding two 3s for target 6)."
+          ],
+          "keyConcepts": [
+            "Two Sum Problem",
+            "Duplicates",
+            "Unique Pairs",
+            "Hash Map",
+            "Set",
+            "Edge Cases"
+          ],
+          "evaluationCriteria": [
+            "Solution correctly identifies unique pairs.",
+            "Handles duplicate numbers effectively.",
+            "Code is efficient (ideally O(N) or O(N log N) if sorting within loop).",
+            "Proper use of auxiliary data structures."
+          ],
+          "example": "",
+          "tags": [
+            "algorithms",
+            "arrays",
+            "hash-map",
+            "duplicates",
+            "unique",
+            "hard",
+            "coding-challenge"
+          ],
+          "prerequisites": [
+            "two_sum_algorithm_basic",
+            "javascript_map_set"
+          ],
+          "complexity": 8,
+          "interviewFrequency": 7,
+          "learningPath": "advanced"
+        },
+        {
+          "id": "question_local_maximum_definition_1",
+          "topic": "Local Maximum",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "What defines a 'local maximum' in an array?",
+          "answer": "A local maximum in an array is an element that is greater than or equal to its immediate neighbors. For elements at the boundaries, only the existing neighbor(s) need to be considered.",
+          "analysisPoints": [
+            "Recall of the definition of local maximum.",
+            "Consideration of boundary conditions."
+          ],
+          "keyConcepts": [
+            "Local Maximum",
+            "Peak Element",
+            "Array",
+            "Algorithms"
+          ],
+          "evaluationCriteria": [
+            "Ability to define local maximum correctly."
+          ],
+          "example": "In the array `[1, 5, 2, 6, 3]`: \n*   `5` is a local maximum because `5 >= 1` and `5 >= 2`.\n*   `6` is a local maximum because `6 >= 2` and `6 >= 3`.\n*   If the array was `[5, 1, 2]`: `5` is a local maximum because `5 >= 1` (only one neighbor).",
+          "tags": [
+            "algorithms",
+            "arrays",
+            "flashcard"
+          ],
+          "prerequisites": [
+            "array_basics"
+          ],
+          "complexity": 3,
+          "interviewFrequency": 6,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_find_local_maximum_algorithm_2",
+          "topic": "Local Maximum",
+          "level": "medium",
+          "type": "open",
+          "question": "Describe an algorithm to find *any* local maximum in a given array of integers. What are the edge cases you need to consider? Analyze the time and space complexity of your algorithm.",
+          "answer": "### Algorithm: Linear Scan\n\nTo find any local maximum in a general array, a linear scan is a straightforward and efficient approach.\n\n**Algorithm Steps:**\n\n1.  **Handle Edge Cases:**\n    *   If the array is empty, there's no local maximum. Return null or throw an error.\n    *   If the array has only one element, that element is always a local maximum. Return it.\n2.  **Check First Element:** If `nums[0] >= nums[1]`, then `nums[0]` is a local maximum. Return `nums[0]`.\n3.  **Iterate Through Middle Elements:** Loop from the second element (`i = 1`) up to the second-to-last element (`i < nums.length - 1`). For each `nums[i]`:\n    *   Check if `nums[i] >= nums[i-1]` (left neighbor) AND `nums[i] >= nums[i+1]` (right neighbor).\n    *   If both conditions are true, `nums[i]` is a local maximum. Return `nums[i]` immediately as we only need *any* one.\n4.  **Check Last Element:** If the loop finishes without finding a local maximum, it means the last element `nums[nums.length - 1]` must be a local maximum if `nums[nums.length - 1] >= nums[nums.length - 2]` (if `nums.length > 1`). Return it.\n\n**Edge Cases to Consider:**\n\n*   **Empty array:** `[]` - No local maximum.\n*   **Single element array:** `[5]` - The element itself is the local maximum.\n*   **Monotonically increasing:** `[1, 2, 3, 4, 5]` - The last element (`5`) is the local maximum.\n*   **Monotonically decreasing:** `[5, 4, 3, 2, 1]` - The first element (`5`) is the local maximum.\n*   **Plateaus:** `[1, 5, 5, 2]` - `5` at index 1 is a local max. (`5 >= 1` and `5 >= 5`).\n\n### Time and Space Complexity Analysis:\n\n*   **Time Complexity: O(n)**\n    *   In the worst case (e.g., a strictly increasing array like `[1, 2, 3, 4, 5]`), we might have to iterate through almost the entire array to find the local maximum at the end.\n    *   Each comparison inside the loop takes constant time.\n    *   Therefore, the total time complexity is linear with respect to the number of elements `n` in the array.\n\n*   **Space Complexity: O(1)**\n    *   The algorithm uses a fixed amount of extra space regardless of the input array size (a few variables for loop index and comparisons).\n    *   No auxiliary data structures (like hash maps) are used that would grow with input size.\n",
+          "analysisPoints": [
+            "Provides a clear and correct linear scan algorithm.",
+            "Identifies and correctly handles all major edge cases (empty, single, boundaries, monotonic).",
+            "Accurately analyzes time and space complexity.",
+            "Understands that 'any' local maximum is sufficient."
+          ],
+          "keyConcepts": [
+            "Local Maximum",
+            "Algorithms",
+            "Linear Scan",
+            "Edge Cases",
+            "Time Complexity",
+            "Space Complexity"
+          ],
+          "evaluationCriteria": [
+            "Algorithmic correctness.",
+            "Completeness of edge case handling.",
+            "Accuracy of complexity analysis."
+          ],
+          "example": "",
+          "tags": [
+            "algorithms",
+            "arrays",
+            "searching",
+            "linear-scan",
+            "interview-question"
+          ],
+          "prerequisites": [
+            "array_basics",
+            "conditional_logic"
+          ],
+          "complexity": 6,
+          "interviewFrequency": 7,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_local_maximum_edge_cases_3",
+          "topic": "Local Maximum",
+          "level": "medium",
+          "type": "mcq",
+          "question": "Which of the following arrays would have its *last* element as a local maximum according to the definition (greater than or equal to its neighbors)?",
+          "answer": "`[1, 2, 3, 4, 5]`",
+          "options": [
+            "`[5, 4, 3, 2, 1]`",
+            "`[1, 5, 2, 6, 3]`",
+            "`[1, 2, 3, 4, 5]`",
+            "`[7]`"
+          ],
+          "analysisPoints": [
+            "Applying the definition of local maximum to array boundaries.",
+            "Understanding monotonic sequences."
+          ],
+          "keyConcepts": [
+            "Local Maximum",
+            "Edge Cases",
+            "Array"
+          ],
+          "evaluationCriteria": [
+            "Correctly identifies local maximum at the end of an array.",
+            "Understands the boundary condition for local maximum."
+          ],
+          "example": "For an array of length `N`, the last element `arr[N-1]` is a local maximum if `arr[N-1] >= arr[N-2]` (assuming `N > 1`).\n\n*   `[5, 4, 3, 2, 1]`: The first element `5` is a local maximum (`5 >= 4`).\n*   `[1, 5, 2, 6, 3]`: `5` and `6` are local maxima. The last element `3` is not (`3 < 6`).\n*   `[1, 2, 3, 4, 5]`: The last element `5` is a local maximum (`5 >= 4`). This is a monotonically increasing array.\n*   `[7]`: The single element is *always* a local maximum, but it's not the 'last' in comparison to other elements, it's just the only element.",
+          "tags": [
+            "algorithms",
+            "arrays",
+            "local-maximum",
+            "edge-cases"
+          ],
+          "prerequisites": [
+            "local_maximum_definition"
+          ],
+          "complexity": 5,
+          "interviewFrequency": 6,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_local_maximum_binary_search_4",
+          "topic": "Local Maximum (Advanced)",
+          "level": "hard",
+          "type": "open",
+          "question": "For a strictly unimodal array (an array that first strictly increases and then strictly decreases, for example, `[1, 2, 3, 4, 3, 2, 1]`), describe how you would find the unique global maximum (which is also a local maximum) using a binary search approach. Analyze its time and space complexity.",
+          "answer": "### Algorithm: Binary Search for Peak in Unimodal Array\n\nIn a strictly unimodal array, there's exactly one global maximum, which is also a local maximum. A binary search approach can find this peak in `O(log n)` time.\n\n**Algorithm Steps:**\n\n1.  **Initialize Search Range:** Set `low = 0` and `high = nums.length - 1`.\n2.  **Binary Search Loop:** Continue while `low < high`:\n    a.  Calculate `mid = low + Math.floor((high - low) / 2)`.\n    b.  **Compare `nums[mid]` with `nums[mid + 1]`:**\n        i.  If `nums[mid] < nums[mid + 1]`: This means we are on the increasing slope (or `mid` is to the left of the peak). The peak must be to the right of `mid`. So, set `low = mid + 1`.\n        ii. If `nums[mid] >= nums[mid + 1]`: This means we are on the decreasing slope (or `mid` is the peak itself, or to the right of it). The peak must be at `mid` or to its left. So, set `high = mid`.\n3.  **Return `nums[low]`:** When the loop terminates (`low === high`), `low` (or `high`) will point to the index of the peak element.\n\n**Example Trace (for `[1, 2, 3, 4, 3, 2, 1]`):\n\n*   Initial: `low=0`, `high=6`\n*   Iteration 1:\n    *   `mid = 3` (`nums[3] = 4`)\n    *   `nums[3] (4) >= nums[4] (3)` is true. `high = 3`.\n    *   `low=0`, `high=3`\n*   Iteration 2:\n    *   `mid = 1` (`nums[1] = 2`)\n    *   `nums[1] (2) < nums[2] (3)` is true. `low = 2`.\n    *   `low=2`, `high=3`\n*   Iteration 3:\n    *   `mid = 2` (`nums[2] = 3`)\n    *   `nums[2] (3) < nums[3] (4)` is true. `low = 3`.\n    *   `low=3`, `high=3`\n*   Loop ends. Return `nums[low]` (which is `nums[3] = 4`).\n\n### Time and Space Complexity Analysis:\n\n*   **Time Complexity: O(log n)**\n    *   In each step of the binary search, the search space (`high - low`) is roughly halved.\n    *   This logarithmic reduction in search space is characteristic of binary search.\n*   **Space Complexity: O(1)**\n    *   The algorithm uses a constant amount of extra space for variables like `low`, `high`, `mid`.\n    *   No additional data structures are used that grow with the input size.\n",
+          "analysisPoints": [
+            "Correctly applies binary search principles to find a peak.",
+            "Understands how `nums[mid]` vs `nums[mid+1]` comparison guides the search direction.",
+            "Accurately analyzes the O(log n) time complexity.",
+            "Differentiates this optimized approach from a linear scan, specifying the unimodal array prerequisite."
+          ],
+          "keyConcepts": [
+            "Local Maximum",
+            "Global Maximum",
+            "Binary Search",
+            "Unimodal Array",
+            "Time Complexity",
+            "Space Complexity"
+          ],
+          "evaluationCriteria": [
+            "Correct algorithm for binary search on unimodal array.",
+            "Clear explanation of why it works.",
+            "Accurate complexity analysis.",
+            "Understanding of the specific conditions required for this optimization."
+          ],
+          "example": "",
+          "tags": [
+            "algorithms",
+            "arrays",
+            "binary-search",
+            "optimization",
+            "hard"
+          ],
+          "prerequisites": [
+            "local_maximum_definition",
+            "binary_search_basics"
+          ],
+          "complexity": 8,
+          "interviewFrequency": 7,
+          "learningPath": "advanced"
+        }
+      ],
+      "tasks": [
+        {
+          "id": "task_implement_fetch_display",
+          "title": "Implement a Data Fetching and Display Component",
+          "description": "\nCreate a JavaScript function `fetchAndDisplayData` that simulates fetching user data from a given API endpoint and displaying it on a (simulated) webpage. \n\n**Requirements:**\n1.  The function should accept a `url` string as an argument.\n2.  It should use the `Fetch API` to make a GET request.\n3.  Implement proper error handling:\n    *   Catch network errors (e.g., connection refused, CORS issues).\n    *   Handle HTTP error statuses (e.g., 404, 500) by checking `response.ok`.\n4.  Simulate UI updates:\n    *   Log `Fetching data...` before the request.\n    *   Log `Data fetched successfully:` followed by the parsed data on success.\n    *   Log `Error fetching data:` followed by the error message on failure.\n    *   Log `Request finished.` regardless of success or failure.\n5.  The function should return a Promise that resolves with the fetched data, or rejects with an error.\n",
+          "difficulty": "medium",
+          "startingCode": "async function fetchAndDisplayData(url) {\n  console.log('Fetching data...');\n  try {\n    // TODO: Implement fetch request\n    // TODO: Check for response.ok for HTTP errors\n    // TODO: Parse JSON data\n    // TODO: Log success message and data\n  } catch (error) {\n    // TODO: Log error message\n  } finally {\n    // TODO: Log request finished message\n  }\n}\n\n// Example usage (uncomment to test):\n// fetchAndDisplayData('https://jsonplaceholder.typicode.com/users/1'); // Valid URL\n// fetchAndDisplayData('https://jsonplaceholder.typicode.com/nonexistent'); // 404 error\n// fetchAndDisplayData('http://invalid-domain.com'); // Network error (will fail in browser, might time out/error in Node)\n",
+          "solutionCode": "async function fetchAndDisplayData(url) {\n  console.log('Fetching data...');\n  try {\n    const response = await fetch(url);\n\n    if (!response.ok) {\n      const errorDetail = await response.text();\n      throw new Error(`HTTP error! Status: ${response.status}, Details: ${errorDetail}`);\n    }\n\n    const data = await response.json();\n    console.log('Data fetched successfully:', data);\n    return data;\n  } catch (error) {\n    console.error('Error fetching data:', error.message);\n    throw error; // Re-throw to allow further handling if needed\n  } finally {\n    console.log('Request finished.');\n  }\n}\n",
+          "testCases": [
+            "Call with a valid JSON API endpoint (e.g., `https://jsonplaceholder.typicode.com/posts/1`) and verify 'Fetching data...', 'Data fetched successfully:', and 'Request finished.' are logged, and the function resolves with data.",
+            "Call with an invalid API endpoint that returns a 404 status (e.g., `https://jsonplaceholder.typicode.com/nonexistent`) and verify 'Fetching data...', 'Error fetching data:', and 'Request finished.' are logged, and the function rejects.",
+            "Call with a URL that causes a network error (e.g., a completely invalid domain like `http://nonexistent-domain-12345.com`) and verify 'Fetching data...', 'Error fetching data:', and 'Request finished.' are logged, and the function rejects.",
+            "Verify the function returns a Promise and that its resolution/rejection can be handled externally (e.g., by chaining .then().catch())."
+          ],
+          "hints": [
+            "Remember that `fetch` only rejects for network errors, not HTTP status errors.",
+            "Use `response.ok` to check for successful HTTP status codes (200-299).",
+            "The `finally` block is useful for cleanup or logging operations that must run regardless of success or failure."
+          ],
+          "tags": [
+            "fetch-api",
+            "promises",
+            "async-await",
+            "error-handling",
+            "frontend",
+            "api-integration"
+          ],
+          "timeEstimate": 45,
+          "prerequisites": [
+            "fetch_api_promises"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 9,
+          "learningPath": "intermediate",
+          "relatedConcepts": [
+            "api_integration",
+            "user_interface_updates",
+            "asynchronous_javascript"
+          ]
+        },
+        {
+          "id": "task_inheritance_conversion",
+          "title": "Refactor JavaScript Inheritance: ES6 to ES5 and Vice Versa",
+          "description": "\nYou are tasked with refactoring a pair of related classes between ES6 and ES5 inheritance models. This exercise tests your understanding of prototype chains, constructor invocation, and method inheritance in both paradigms.\n\n**Part 1: ES6 to ES5 Conversion**\nGiven the following ES6 class structure, rewrite `EmployeeES5` and `ManagerES5` using ES5 constructor functions and prototype-based inheritance. Ensure all methods and properties are correctly inherited.\n\n```javascript\n// ES6 Base Class\nclass EmployeeES6 {\n  constructor(name, id) {\n    this.name = name;\n    this.id = id;\n  }\n\n  getDetails() {\n    return `Name: ${this.name}, ID: ${this.id}`;\n  }\n\n  static companyName() {\n    return 'Tech Solutions Inc.';\n  }\n}\n\n// ES6 Derived Class\nclass ManagerES6 extends EmployeeES6 {\n  constructor(name, id, department) {\n    super(name, id);\n    this.department = department;\n  }\n\n  getManagerDetails() {\n    return `${this.getDetails()}, Department: ${this.department}`;\n  }\n}\n```\n\n**Part 2: ES5 to ES6 Conversion**\nGiven the following ES5 prototype-based structure, rewrite `VehicleES6` and `CarES6` using ES6 class syntax. Ensure all methods and properties are correctly inherited and `super` is used appropriately.\n\n```javascript\n// ES5 Base Constructor\nfunction VehicleES5(make, model) {\n  this.make = make;\n  this.model = model;\n}\n\nVehicleES5.prototype.getVehicleInfo = function() {\n  return `Make: ${this.make}, Model: ${this.model}`;\n};\n\nVehicleES5.totalVehicles = 0; // Static property\nVehicleES5.incrementTotal = function() { // Static method\n  this.totalVehicles++;\n};\n\n// ES5 Derived Constructor\nfunction CarES5(make, model, doors) {\n  VehicleES5.call(this, make, model);\n  this.doors = doors;\n}\n\nCarES5.prototype = Object.create(VehicleES5.prototype);\nCarES5.prototype.constructor = CarES5; // Fix constructor\n\nCarES5.prototype.getCarInfo = function() {\n  return `${this.getVehicleInfo()}, Doors: ${this.doors}`;\n};\n```\n\n**Testing:**\nInclude small test cases for both conversions to demonstrate that instances behave as expected and `instanceof` checks work correctly for both parent and child classes.",
+          "difficulty": "hard",
+          "startingCode": "// Part 1: ES6 to ES5 Conversion\n// Your ES5 code for EmployeeES5 and ManagerES5 here\n\n// function EmployeeES5(name, id) {\n//   // ...\n// }\n// EmployeeES5.prototype.getDetails = function() { /* ... */ };\n// EmployeeES5.companyName = function() { /* ... */ };\n\n// function ManagerES5(name, id, department) {\n//   // ...\n// }\n// ManagerES5.prototype = Object.create(EmployeeES5.prototype);\n// ManagerES5.prototype.constructor = ManagerES5;\n// ManagerES5.prototype.getManagerDetails = function() { /* ... */ };\n\n// Part 2: ES5 to ES6 Conversion\n// Your ES6 code for VehicleES6 and CarES6 here\n\n// class VehicleES6 { /* ... */ }\n// class CarES6 extends VehicleES6 { /* ... */ }\n",
+          "solutionCode": "// Part 1: ES6 to ES5 Conversion\n// ES5 Base Constructor\nfunction EmployeeES5(name, id) {\n  this.name = name;\n  this.id = id;\n}\n\nEmployeeES5.prototype.getDetails = function() {\n  return `Name: ${this.name}, ID: ${this.id}`;\n};\n\nEmployeeES5.companyName = function() {\n  return 'Tech Solutions Inc.';\n};\n\n// ES5 Derived Constructor\nfunction ManagerES5(name, id, department) {\n  EmployeeES5.call(this, name, id); // Call parent constructor\n  this.department = department;\n}\n\nManagerES5.prototype = Object.create(EmployeeES5.prototype); // Set up prototype chain\nManagerES5.prototype.constructor = ManagerES5; // Fix constructor property\n\nManagerES5.prototype.getManagerDetails = function() {\n  return `${this.getDetails()}, Department: ${this.department}`;\n};\n\n// Part 1 Tests\nconst empES5 = new EmployeeES5('Alice', 'E001');\nconsole.log('ES5 Employee Details:', empES5.getDetails()); // Name: Alice, ID: E001\nconsole.log('ES5 Employee Company:', EmployeeES5.companyName()); // Tech Solutions Inc.\nconsole.log('empES5 instanceof EmployeeES5:', empES5 instanceof EmployeeES5); // true\n\nconst mgrES5 = new ManagerES5('Bob', 'M001', 'Sales');\nconsole.log('ES5 Manager Details:', mgrES5.getManagerDetails()); // Name: Bob, ID: M001, Department: Sales\nconsole.log('mgrES5 instanceof ManagerES5:', mgrES5 instanceof ManagerES5); // true\nconsole.log('mgrES5 instanceof EmployeeES5:', mgrES5 instanceof EmployeeES5); // true\n\n\n// Part 2: ES5 to ES6 Conversion\n// ES6 Base Class\nclass VehicleES6 {\n  constructor(make, model) {\n    this.make = make;\n    this.model = model;\n  }\n\n  getVehicleInfo() {\n    return `Make: ${this.make}, Model: ${this.model}`;\n  }\n\n  static totalVehicles = 0; // Class field for static property\n  static incrementTotal() {\n    VehicleES6.totalVehicles++;\n  }\n}\n\n// ES6 Derived Class\nclass CarES6 extends VehicleES6 {\n  constructor(make, model, doors) {\n    super(make, model); // Call parent constructor\n    this.doors = doors;\n  }\n\n  getCarInfo() {\n    return `${super.getVehicleInfo()}, Doors: ${this.doors}`; // Using super.method\n  }\n}\n\n// Part 2 Tests\nconst vehES6 = new VehicleES6('Ford', 'F-150');\nconsole.log('ES6 Vehicle Info:', vehES6.getVehicleInfo()); // Make: Ford, Model: F-150\nVehicleES6.incrementTotal();\nconsole.log('ES6 Total Vehicles (static):', VehicleES6.totalVehicles); // 1\nconsole.log('vehES6 instanceof VehicleES6:', vehES6 instanceof VehicleES6); // true\n\nconst carES6 = new CarES6('Tesla', 'Model 3', 4);\nconsole.log('ES6 Car Info:', carES6.getCarInfo()); // Make: Tesla, Model: Model 3, Doors: 4\nVehicleES6.incrementTotal();\nconsole.log('ES6 Total Vehicles (static):', VehicleES6.totalVehicles); // 2\nconsole.log('carES6 instanceof CarES6:', carES6 instanceof CarES6); // true\nconsole.log('carES6 instanceof VehicleES6:', carES6 instanceof VehicleES6); // true\n",
+          "testCases": [
+            "**Part 1: ES6 to ES5**\n-   Create `EmployeeES5` and `ManagerES5` instances.\n-   Verify `getDetails()` and `getManagerDetails()` methods work correctly.\n-   Verify `EmployeeES5.companyName()` static method works.\n-   Check `instanceof` relationships: `mgrES5 instanceof ManagerES5` and `mgrES5 instanceof EmployeeES5` should both be `true`.",
+            "**Part 2: ES5 to ES6**\n-   Create `VehicleES6` and `CarES6` instances.\n-   Verify `getVehicleInfo()` and `getCarInfo()` methods work correctly.\n-   Verify `VehicleES6.totalVehicles` static property and `VehicleES6.incrementTotal()` static method work.\n-   Check `instanceof` relationships: `carES6 instanceof CarES6` and `carES6 instanceof VehicleES6` should both be `true`."
+          ],
+          "hints": [
+            "For ES6 to ES5: Remember to use `Parent.call(this, ...args)` in the child constructor and `Child.prototype = Object.create(Parent.prototype); Child.prototype.constructor = Child;` for the prototype chain.",
+            "For ES5 to ES6: Use `super(...args)` in the derived class constructor. Static properties and methods are directly attached to the class itself (e.g., `static myStaticProp = 0;` or `static myStaticMethod() { ... }`).",
+            "Pay attention to the `this` context and how it's handled differently by `call` vs. `super`."
+          ],
+          "tags": [
+            "javascript",
+            "oop",
+            "inheritance",
+            "es5",
+            "es6",
+            "refactoring",
+            "classes",
+            "prototypes"
+          ],
+          "timeEstimate": 60,
+          "prerequisites": [
+            "es6_vs_es5_inheritance"
+          ],
+          "complexity": 8,
+          "interviewRelevance": 9,
+          "learningPath": "advanced",
+          "relatedConcepts": [
+            "prototype_chain",
+            "constructor_functions",
+            "super_keyword",
+            "static_members"
+          ]
+        },
+        {
+          "id": "task_two_sum_implementation",
+          "title": "Implement Two Sum with Specific Output Requirements",
+          "description": "\nImplement the `twoSum` function that finds two numbers in an array `nums` that add up to a `target`. This time, instead of just values, return the *indices* of the two numbers. Assume each input has exactly one solution, and you may not use the same element twice.\n\n**Requirements:**\n1.  Function signature: `function twoSum(nums, target): number[]`.\n2.  Input: `nums` (array of integers), `target` (integer).\n3.  Output: An array of two integers, `[index1, index2]`, representing the 0-based indices of the two numbers in `nums` that sum to `target`.\n4.  Constraints: Each input has exactly one solution. You may not use the same element twice.\n5.  Efficiency: Your solution should run in O(n) time complexity.\n",
+          "difficulty": "medium",
+          "startingCode": "/**\n * @param {number[]} nums\n * @param {number} target\n * @return {number[]}\n */\nfunction twoSum(nums, target) {\n  // TODO: Implement using a hash map (Map in JavaScript)\n  // Store number and its index\n\n  // For each number, calculate complement\n  // Check if complement exists in map\n  // If yes, return indices\n  // If no, add current number and its index to map\n\n  return []; // Placeholder\n}\n\n// Example Test Cases:\n// console.log(twoSum([2, 7, 11, 15], 9)); // Expected: [0, 1] (because nums[0] + nums[1] == 9)\n// console.log(twoSum([3, 2, 4], 6));    // Expected: [1, 2]\n// console.log(twoSum([3, 3], 6));      // Expected: [0, 1]\n",
+          "solutionCode": "/**\n * @param {number[]} nums\n * @param {number} target\n * @return {number[]}\n */\nfunction twoSum(nums, target) {\n  const numMap = new Map(); // Map to store number -> its index\n\n  for (let i = 0; i < nums.length; i++) {\n    const num = nums[i];\n    const complement = target - num;\n\n    // Check if the complement exists in our map\n    // If it does, we found the pair\n    if (numMap.has(complement)) {\n      return [numMap.get(complement), i];\n    }\n\n    // If not, add the current number and its index to the map\n    numMap.set(num, i);\n  }\n\n  // According to problem constraints, there's always exactly one solution.\n  // So, this line should technically not be reached in a valid input scenario.\n  return []; \n}\n",
+          "testCases": [
+            "Test Case 1: `nums = [2, 7, 11, 15]`, `target = 9` => Expected: `[0, 1]`",
+            "Test Case 2: `nums = [3, 2, 4]`, `target = 6` => Expected: `[1, 2]`",
+            "Test Case 3: `nums = [3, 3]`, `target = 6` => Expected: `[0, 1]`",
+            "Test Case 4: `nums = [-1, -2, -3, -4, -5]`, `target = -8` => Expected: `[2, 4]` (for -3 and -5)",
+            "Test Case 5: `nums = [0, 4, 3, 0]`, `target = 0` => Expected: `[0, 3]` (for 0 and 0)"
+          ],
+          "hints": [
+            "A `Map` (or a plain JavaScript object) can efficiently store key-value pairs.",
+            "Think about what information you need to store for each number you iterate over to find its complement later.",
+            "The problem states 'you may not use the same element twice', which is naturally handled by the hash map approach if you store the *index*."
+          ],
+          "tags": [
+            "algorithms",
+            "arrays",
+            "hash-map",
+            "two-sum",
+            "coding-challenge",
+            "leetcode"
+          ],
+          "timeEstimate": 30,
+          "prerequisites": [
+            "array_processing_hash_maps"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 9,
+          "learningPath": "intermediate",
+          "relatedConcepts": [
+            "time_complexity",
+            "space_complexity",
+            "map_data_structure"
+          ]
+        },
+        {
+          "id": "task_find_local_maximum",
+          "title": "Find a Local Maximum in an Array",
+          "description": "\nImplement a function `findAnyLocalMaximum` that identifies and returns any single local maximum from a given array of numbers. A local maximum is defined as an element that is greater than or equal to its immediate neighbors. For elements at the array boundaries, only the existing neighbor(s) should be considered.\n\n**Requirements:**\n1.  Function signature: `function findAnyLocalMaximum(nums): number | null`.\n2.  Input: `nums` (array of numbers).\n3.  Output: The value of any local maximum found in the array. Return `null` if the array is empty.\n4.  Consider edge cases: empty array, single-element array, monotonically increasing/decreasing arrays.\n5.  Your solution should be efficient for general cases.\n",
+          "difficulty": "medium",
+          "startingCode": "/**\n * Finds a local maximum in an array.\n * @param {number[]} nums The input array of numbers.\n * @returns {number | null} The value of a local maximum, or null if the array is empty.\n */\nfunction findAnyLocalMaximum(nums) {\n  if (!nums || nums.length === 0) {\n    return null;\n  }\n  if (nums.length === 1) {\n    return nums[0];\n  }\n\n  // TODO: Check first element\n\n  // TODO: Iterate through middle elements and check neighbors\n\n  // TODO: Check last element\n\n  return null; // Should ideally not be reached for non-empty arrays\n}\n\n// Example Test Cases:\n// console.log(findAnyLocalMaximum([1, 2, 3, 4, 5]));\n// console.log(findAnyLocalMaximum([5, 4, 3, 2, 1]));\n// console.log(findAnyLocalMaximum([1, 2, 1, 3, 5, 6, 4]));\n// console.log(findAnyLocalMaximum([7]));\n// console.log(findAnyLocalMaximum([]));\n",
+          "solutionCode": "/**\n * Finds a local maximum in an array.\n * @param {number[]} nums The input array of numbers.\n * @returns {number | null} The value of a local maximum, or null if the array is empty.\n */\nfunction findAnyLocalMaximum(nums) {\n  if (!nums || nums.length === 0) {\n    return null; // Handle empty array\n  }\n  if (nums.length === 1) {\n    return nums[0]; // Single element is always a local maximum\n  }\n\n  // Check first element\n  // It's a local max if it's greater than or equal to its only neighbor (nums[1])\n  if (nums[0] >= nums[1]) {\n    return nums[0];\n  }\n\n  // Check elements from index 1 to second-to-last\n  for (let i = 1; i < nums.length - 1; i++) {\n    // An element is a local max if it's >= both its left and right neighbors\n    if (nums[i] >= nums[i - 1] && nums[i] >= nums[i + 1]) {\n      return nums[i]; // Found a local maximum, return it\n    }\n  }\n\n  // Check last element\n  // It's a local max if it's greater than or equal to its only neighbor (nums[length - 2])\n  if (nums[nums.length - 1] >= nums[nums.length - 2]) {\n    return nums[nums.length - 1];\n  }\n\n  // This return statement should theoretically not be reached if the array is non-empty\n  // as a local maximum is guaranteed to exist in any non-empty array.\n  return null; \n}\n",
+          "testCases": [
+            "Test with an empty array: `findAnyLocalMaximum([])` should return `null`.",
+            "Test with a single-element array: `findAnyLocalMaximum([10])` should return `10`.",
+            "Test with a monotonically increasing array: `findAnyLocalMaximum([1, 2, 3, 4, 5])` should return `5`.",
+            "Test with a monotonically decreasing array: `findAnyLocalMaximum([5, 4, 3, 2, 1])` should return `5`.",
+            "Test with an array containing internal peaks: `findAnyLocalMaximum([1, 2, 1, 3, 5, 6, 4])` should return `2` or `6` (any valid local max).",
+            "Test with plateaus: `findAnyLocalMaximum([1, 5, 5, 2])` should return `5` (first occurrence or the plateau itself)."
+          ],
+          "hints": [
+            "Handle edge cases (empty, single-element arrays) explicitly first.",
+            "For elements in the middle of the array, you need to compare with both the left and right neighbors.",
+            "For elements at the boundaries (first and last), remember they only have one relevant neighbor.",
+            "Since you need 'any' local maximum, you can return as soon as one is found."
+          ],
+          "tags": [
+            "algorithms",
+            "arrays",
+            "searching",
+            "local-maximum",
+            "coding-challenge"
+          ],
+          "timeEstimate": 45,
+          "prerequisites": [
+            "local_maximum_definition"
+          ],
+          "complexity": 6,
+          "interviewRelevance": 7,
+          "learningPath": "intermediate",
+          "relatedConcepts": [
+            "edge_cases",
+            "linear_scan",
+            "array_traversal"
+          ]
+        }
+      ]
+    }
+  }
+]

@@ -65,10 +65,9 @@ export class AIClient {
       console.log('AIClient: Full prompt:', prompt);
       
       const generationConfig = {
-        temperature: 0.2,
-        topK: 32,
+        temperature: 1.0,
         topP: 0.95,
-        maxOutputTokens: 8192,
+        maxOutputTokens: 60000,
       };
       
       console.log('AIClient: Generation config:', JSON.stringify(generationConfig));
@@ -93,7 +92,8 @@ export class AIClient {
       ];
       
       console.log('AIClient: Starting API request at:', new Date().toISOString());
-      
+
+      console.log("prompt: "+prompt);
       // Send the request
       const result = await this.model.generateContent({
         contents: [{ role: 'user', parts: [{ text: prompt }] }],

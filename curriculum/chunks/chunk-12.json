@@ -1,0 +1,2012 @@
+[
+  {
+    "id": "89dacb29-049f-4c79-ab08-6c3bbbe8ea1f",
+    "startLine": 2300,
+    "endLine": 2399,
+    "processedDate": "2025-06-17T08:19:53.789Z",
+    "content": {
+      "logicalBlockInfo": {
+        "suggestedEndLine": -1
+      },
+      "theory": [
+        {
+          "id": "theory_currying",
+          "title": "Currying and Partial Application",
+          "content": "Currying is a functional programming technique where a function that takes multiple arguments is transformed into a sequence of functions, each taking a single argument. This transformation allows for partial application, where you fix a certain number of arguments to a function, producing another function with fewer arguments.\n\n## Key Concepts\n-   **Transformation**: A function `f(a, b, c)` becomes `f(a)(b)(c)`. Each nested function returns another function until all arguments are received, and then the final result is computed.\n-   **Closures**: Currying heavily relies on closures. Each inner function 'remembers' the arguments passed to its outer function's scope, even after the outer function has finished execution.\n-   **Partial Application**: A specific application of currying where you fix some arguments of a function, creating a new, specialized function. For example, if you have a `sum(a, b)` function and you curry it, you can create `addFive = sum(5)` which is a new function that always adds 5 to its argument.\n\n## Benefits\n-   **Reusability**: Create specialized, reusable functions from more general ones.\n-   **Function Composition**: Curried functions are easier to compose, as each function typically expects a single argument, fitting nicely into a pipeline of operations.\n-   **Readability**: Can sometimes make code more declarative and easier to understand, especially when creating specific versions of general-purpose functions.",
+          "examples": [
+            {
+              "id": "example_currying_1",
+              "title": "Simple Currying Example",
+              "code": "function sum(a) {\n  return function(b) {\n    return a + b;\n  };\n}\n\nconsole.log(sum(1)(2)); // Output: 3\nconsole.log(sum(5)(-1)); // Output: 4",
+              "explanation": "This example shows `sum` as a curried function. `sum(a)` returns an anonymous function that captures `a` in its closure. When this inner function is called with `b`, it can access `a` and perform the addition. This demonstrates the core mechanism of currying using closures.",
+              "language": "javascript"
+            },
+            {
+              "id": "example_currying_2",
+              "title": "Practical Use Case: Partial Application for Discount Calculation",
+              "code": "function discount(price) {\n  return function(percentage) {\n    return price * (1 - percentage / 100);\n  };\n}\n\n// Create a specialized function for a specific price\nconst tenPercentDiscountOn100 = discount(100);\nconsole.log(tenPercentDiscountOn100(10)); // Output: 90 (10% off 100)\nconsole.log(tenPercentDiscountOn100(20)); // Output: 80 (20% off 100)\n\n// Or, create a specialized function for a specific percentage\nfunction calculatePriceWithDiscount(percentage) {\n  return function(price) {\n    return price * (1 - percentage / 100);\n  };\n}\n\nconst twentyPercentOff = calculatePriceWithDiscount(20);\nconsole.log(twentyPercentOff(200)); // Output: 160 (20% off 200)\nconsole.log(twentyPercentOff(50));  // Output: 40 (20% off 50)",
+              "explanation": "Here, the `discount` function is curried. By calling `discount(100)`, we create `tenPercentDiscountOn100`, which is a new function that always applies a discount to an initial price of 100. This is a clear example of partial application, allowing us to reuse the `discount` logic for a fixed `price` while varying the `percentage`. The second part of the example shows another way to partially apply, fixing the `percentage` first.",
+              "language": "javascript"
+            }
+          ],
+          "relatedQuestions": [
+            "question_currying_1",
+            "question_currying_2",
+            "question_currying_3",
+            "question_currying_4",
+            "question_currying_5"
+          ],
+          "relatedTasks": [
+            "task_currying_1",
+            "task_currying_2"
+          ],
+          "tags": [
+            "functional-programming",
+            "closures",
+            "currying",
+            "partial-application",
+            "javascript"
+          ],
+          "technology": "JavaScript",
+          "prerequisites": [
+            "closures",
+            "functions"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 8,
+          "learningPath": "intermediate",
+          "requiredFor": [
+            "advanced-functional-programming",
+            "lodash-familiarity"
+          ]
+        },
+        {
+          "id": "theory_debounce",
+          "title": "Debounce Implementation with Closures",
+          "content": "Debouncing is a widely used technique in frontend development to control how often a function is executed. It ensures that a function is not called too frequently, particularly for events that fire rapidly (e.g., `keyup` on an input field, `resize` on a window, `scroll` events). The core idea is to delay the execution of a function until a certain amount of time has passed without any new events triggering it.\n\n## How Debounce Works\n1.  **Delay Execution**: When the debounced function is called, it doesn't execute immediately.\n2.  **Timer Management**: Instead, it sets a timer (using `setTimeout`).\n3.  **Reset on Subsequent Calls**: If the debounced function is called again *before* the timer expires, the previous timer is cleared (using `clearTimeout`), and a new timer is set. This effectively 'resets' the countdown.\n4.  **Execute on Inactivity**: The actual function (`fn`) only executes if no new calls to the debounced function occur within the specified `ms` delay.\n\n## Role of Closures\nClosures are crucial for debounce implementations. The `timer` variable is declared in the outer `debounce` function's scope and is captured by the returned inner function. This allows the inner function to maintain and manage the `timer` state across multiple invocations, ensuring that `clearTimeout` can always access and clear the *correct* previous timer ID.\n\n## Handling Context and Arguments\n-   `this` context: When the debounced function is called, it might be called in a specific context (e.g., `this` referring to a DOM element). To preserve this context for the original function `fn`, `fn.apply(this, args)` is typically used. `this` inside the returned function refers to the context in which the debounced function was called.\n-   Arguments: Similarly, any arguments passed to the debounced function need to be forwarded to the original function `fn`. This is achieved using the rest parameter `...args` and spreading them with `apply`.",
+          "examples": [
+            {
+              "id": "example_debounce_1",
+              "title": "Basic Debounce Implementation",
+              "code": "function debounce(fn, ms) {\n  let timer = null; // 'timer' is captured by the closure\n  \n  return function(...args) {\n    const context = this; // Capture 'this' context\n\n    if (timer) {\n      clearTimeout(timer);\n    }\n    \n    timer = setTimeout(() => {\n      fn.apply(context, args); // Apply captured 'this' and arguments\n      timer = null; // Reset timer after execution (optional, but good practice)\n    }, ms);\n  };\n}\n\n// Usage example\nfunction handleSearch(query) {\n  console.log(`Searching for: ${query}`);\n  // Expensive API call would go here, e.g., fetch(`/api/search?q=${query}`)\n}\n\nconst debouncedSearch = debounce(handleSearch, 500);\n\nconsole.log('Typing simulation:');\ndebouncedSearch(\"a\");\ndebouncedSearch(\"ap\");\ndebouncedSearch(\"app\"); // Only this call will execute after 500ms of inactivity\n\n// To demonstrate the 500ms delay and final execution\nsetTimeout(() => {\n  debouncedSearch(\"apple\"); \n  console.log('--- 1 sec delay, then new search ---');\n}, 1000);",
+              "explanation": "This code demonstrates the standard debounce implementation. The `timer` variable is created in the outer `debounce` scope and persists via closure. Each time `debouncedSearch` is called, it clears any pending `timer` and sets a new one. The `handleSearch` function (`fn`) is only invoked if the `ms` duration passes without another call to `debouncedSearch`. `fn.apply(context, args)` ensures that `handleSearch` receives the correct `this` context and arguments.",
+              "language": "javascript"
+            }
+          ],
+          "relatedQuestions": [
+            "question_debounce_1",
+            "question_debounce_2",
+            "question_debounce_3",
+            "question_debounce_4",
+            "question_debounce_5"
+          ],
+          "relatedTasks": [
+            "task_debounce_1",
+            "task_debounce_2"
+          ],
+          "tags": [
+            "performance",
+            "event-handling",
+            "closures",
+            "debounce",
+            "javascript"
+          ],
+          "technology": "JavaScript",
+          "prerequisites": [
+            "closures",
+            "setTimeout",
+            "clearTimeout",
+            "this-keyword",
+            "function.apply"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 9,
+          "learningPath": "intermediate",
+          "requiredFor": [
+            "frontend-performance-optimization",
+            "react-hooks"
+          ]
+        },
+        {
+          "id": "theory_module_pattern",
+          "title": "Module Pattern with Closures",
+          "content": "The Module Pattern is a design pattern used in JavaScript to achieve encapsulation and create private state. It leverages closures to define private variables and functions that are not accessible from the outside, while exposing a public interface through a returned object.\n\n## Key Concepts\n-   **Immediately Invoked Function Expression (IIFE)**: The module pattern typically uses an IIFE `(function(){...})()` to create a private scope. Variables and functions defined within this IIFE are local to it.\n-   **Closures for Privacy**: Any variables or functions declared inside the IIFE but *not* returned in the public interface become private. The functions that *are* returned (the public interface) form closures over these private members, allowing them to access and modify the private state.\n-   **Public Interface**: The IIFE returns an object containing the public methods and properties that are accessible from outside the module. These public methods are the only way to interact with the module's internal (private) state.\n\n## Advantages\n-   **Encapsulation**: Hides internal implementation details and state, preventing accidental modification from external code.\n-   **Prevent Global Namespace Pollution**: All module-specific variables are contained within the IIFE's scope, avoiding the creation of global variables.\n-   **Maintainability**: Code is organized into self-contained units, making it easier to manage and debug.\n-   **Information Hiding**: Only expose what is necessary for external interaction.",
+          "examples": [
+            {
+              "id": "example_module_pattern_1",
+              "title": "Counter Module",
+              "code": "const Counter = (function() {\n  // Private variables and functions\n  let privateCounter = 0; // This variable is private\n  \n  function changeBy(val) { // This function is private\n    privateCounter += val;\n  }\n  \n  // Public interface: returned object\n  return {\n    increment: function() {\n      changeBy(1); // Public method accesses private function\n    },\n    decrement: function() {\n      changeBy(-1);\n    },\n    value: function() {\n      return privateCounter; // Public method accesses private variable\n    }\n  };\n})();\n\nCounter.increment();\nCounter.increment();\nconsole.log(Counter.value()); // Output: 2\nCounter.decrement();\nconsole.log(Counter.value()); // Output: 1\n\n// Attempting to access private members directly will fail:\n// console.log(Counter.privateCounter); // Undefined\n// Counter.changeBy(10); // Error: Counter.changeBy is not a function",
+              "explanation": "This `Counter` module showcases the module pattern. `privateCounter` and `changeBy` are defined inside an IIFE, making them private. The returned object exposes `increment`, `decrement`, and `value` as public methods. These public methods form closures over the private members, allowing them to modify and read `privateCounter` without exposing it directly to the outside world.",
+              "language": "javascript"
+            }
+          ],
+          "relatedQuestions": [
+            "question_module_pattern_1",
+            "question_module_pattern_2",
+            "question_module_pattern_3",
+            "question_module_pattern_4",
+            "question_module_pattern_5"
+          ],
+          "relatedTasks": [
+            "task_module_pattern_1",
+            "task_module_pattern_2"
+          ],
+          "tags": [
+            "design-patterns",
+            "closures",
+            "encapsulation",
+            "privacy",
+            "iife",
+            "javascript"
+          ],
+          "technology": "JavaScript",
+          "prerequisites": [
+            "closures",
+            "iife",
+            "objects"
+          ],
+          "complexity": 6,
+          "interviewRelevance": 8,
+          "learningPath": "intermediate",
+          "requiredFor": [
+            "architectural-design",
+            "javascript-design-patterns"
+          ]
+        },
+        {
+          "id": "theory_pure_functions_closures",
+          "title": "Pure Functions and Closures",
+          "content": "While closures enable many powerful patterns like currying, debouncing, and modules, it's important to understand how they relate to the concept of **pure functions**.\n\n## Pure Functions\nA pure function is a function that:\n1.  **Given the same input, always returns the same output.** (Determinism)\n2.  **Produces no side effects.** It doesn't modify any external state, nor does it perform I/O operations (like writing to console, making network requests, or modifying DOM).\n\nPure functions are highly desirable because they are:\n-   **Predictable**: Easy to reason about.\n-   **Testable**: Outputs are predictable for given inputs.\n-   **Composable**: Can be combined reliably without unexpected interactions.\n\n## Closures and Purity\nClosures can interact with pure functions in a few ways:\n\n-   **Enabling Purity**: A closure can capture *immutable* data from its lexical environment and use it to produce a new pure function. For example, a function factory that creates specialized pure functions.\n-   **Breaking Purity**: If a closure captures *mutable* state from its lexical environment and then modifies that state, the function (or the outer function that produces it) is no longer pure because it produces a side effect (modifying external state) or its output depends on mutable external state.\n\nIt's crucial to understand that a function that returns a closure can still be pure if the returned closure itself adheres to the pure function principles (no side effects, deterministic). However, often closures are used precisely to maintain state or manage side effects, which inherently makes the overall operation impure.",
+          "examples": [
+            {
+              "id": "example_pure_functions_closures_1",
+              "title": "Pure Function Returning a Closure (Pure Scenario)",
+              "code": "function createMultiplier(factor) {\n  // The outer function is pure: given a factor, it always returns the same inner function\n  return function(number) {\n    // The inner function (closure) is also pure: \n    // - depends only on its arguments (number) and captured immutable state (factor)\n    // - produces no side effects\n    return number * factor;\n  };\n}\n\nconst multiplyByTwo = createMultiplier(2);\nconsole.log(multiplyByTwo(5)); // Output: 10\nconsole.log(multiplyByTwo(5)); // Output: 10 (always same output for same input)\n\nconst multiplyByThree = createMultiplier(3);\nconsole.log(multiplyByThree(4)); // Output: 12",
+              "explanation": "In this example, `createMultiplier` is a pure function. It takes a `factor` and returns a new function (a closure). The returned inner function is also pure because it always returns the same output for the same input (`number` and captured `factor`), and it causes no side effects. The captured `factor` is treated as immutable within the closure's calculation.",
+              "language": "javascript"
+            },
+            {
+              "id": "example_pure_functions_closures_2",
+              "title": "Closure Breaking Purity (Impure Scenario)",
+              "code": "let totalSum = 0; // External, mutable state\n\nfunction createAccumulator() {\n  return function(value) {\n    totalSum += value; // Side effect: modifying external state\n    return totalSum;\n  };\n}\n\nconst accumulator = createAccumulator();\nconsole.log(accumulator(5)); // Output: 5 (totalSum is 5)\nconsole.log(accumulator(10)); // Output: 15 (totalSum is 15)\nconsole.log(accumulator(5)); // Output: 20 (not 5, because totalSum changed externally)",
+              "explanation": "Here, `createAccumulator` returns a closure. However, the returned closure is *not* pure because it modifies the `totalSum` variable, which is external state (a side effect). This means calling `accumulator(5)` twice does not always return `5`; its output depends on the accumulated `totalSum`, which changes with each call, violating the determinism principle of pure functions.",
+              "language": "javascript"
+            }
+          ],
+          "relatedQuestions": [
+            "question_pure_functions_1",
+            "question_pure_functions_2",
+            "question_pure_functions_3",
+            "question_pure_functions_4"
+          ],
+          "relatedTasks": [
+            "task_pure_functions_1"
+          ],
+          "tags": [
+            "functional-programming",
+            "closures",
+            "pure-functions",
+            "side-effects",
+            "javascript"
+          ],
+          "technology": "JavaScript",
+          "prerequisites": [
+            "closures",
+            "functional-programming-concepts"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 7,
+          "learningPath": "advanced",
+          "requiredFor": [
+            "functional-programming-patterns",
+            "react-hooks-principles"
+          ]
+        }
+      ],
+      "questions": [
+        {
+          "id": "question_currying_1",
+          "topic": "Currying Fundamentals",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "What is the primary purpose of currying a function?",
+          "answer": "To transform a function that takes multiple arguments into a sequence of functions, each taking a single argument.",
+          "options": [],
+          "analysisPoints": [
+            "Focuses on the definition of currying.",
+            "Highlights the transformation of arguments."
+          ],
+          "keyConcepts": [
+            "currying",
+            "function transformation"
+          ],
+          "evaluationCriteria": [
+            "Definition recall"
+          ],
+          "example": "",
+          "tags": [
+            "currying",
+            "functional-programming",
+            "definition"
+          ],
+          "prerequisites": [
+            "basic-functions"
+          ],
+          "complexity": 3,
+          "interviewFrequency": 6,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_currying_2",
+          "topic": "Currying vs. Partial Application",
+          "level": "medium",
+          "type": "open",
+          "question": "Explain the difference between currying and partial application. Provide a small code example to illustrate partial application.",
+          "answer": "Currying transforms a function `f(a,b,c)` into `f(a)(b)(c)`, where each call accepts exactly one argument. Partial application, on the other hand, is the process of fixing a certain number of arguments to a function, producing another function with fewer arguments. It doesn't necessarily mean each call accepts only one argument, but rather that some arguments are pre-filled.\n\nExample of Partial Application:\n```javascript\nfunction multiply(a, b, c) {\n  return a * b * c;\n}\n\n// Partial application: fix the first argument 'a'\nconst multiplyByTen = multiply.bind(null, 10); // Using bind for partial application\nconsole.log(multiplyByTen(2, 3)); // Output: 60 (10 * 2 * 3)\n\n// Another example using a factory function for partial application\nfunction add(a, b) {\n  return a + b;\n}\n\nfunction partialApplyAdd(a) {\n  return function(b) {\n    return add(a, b);\n  };\n}\n\nconst addFive = partialApplyAdd(5);\nconsole.log(addFive(3)); // Output: 8\n```",
+          "options": [],
+          "analysisPoints": [
+            "Ability to differentiate between two related functional programming concepts.",
+            "Correct use of `bind` or a factory function for partial application.",
+            "Clarity of explanation and code example."
+          ],
+          "keyConcepts": [
+            "currying",
+            "partial-application",
+            "functional-programming"
+          ],
+          "evaluationCriteria": [
+            "Conceptual understanding",
+            "Code example accuracy",
+            "Clarity of explanation"
+          ],
+          "example": "",
+          "tags": [
+            "currying",
+            "partial-application",
+            "functional-programming",
+            "javascript"
+          ],
+          "prerequisites": [
+            "closures",
+            "function-bind"
+          ],
+          "complexity": 7,
+          "interviewFrequency": 7,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_currying_3",
+          "topic": "Currying Output",
+          "level": "medium",
+          "type": "mcq",
+          "question": "Consider the following JavaScript code:\n```javascript\nfunction greet(greeting) {\n  return function(name) {\n    return `${greeting}, ${name}!`;\n  };\n}\n\nconst sayHello = greet('Hello');\nconst sayHiToJohn = sayHello('John');\n\nconsole.log(sayHiToJohn);\n```\nWhat will be the output of `console.log(sayHiToJohn)`?",
+          "answer": "Hello, John!",
+          "options": [
+            "function(name) { return `${greeting}, ${name}!` }",
+            "Hello",
+            "Hello, John!",
+            "undefined"
+          ],
+          "analysisPoints": [
+            "Tests understanding of how curried functions execute.",
+            "Checks comprehension of closure behavior and return values.",
+            "Confirms the final string interpolation."
+          ],
+          "keyConcepts": [
+            "currying",
+            "closures",
+            "function-execution",
+            "string-interpolation"
+          ],
+          "evaluationCriteria": [
+            "Correct output prediction",
+            "Understanding of closure scope"
+          ],
+          "example": "The `greet` function is curried. `greet('Hello')` returns an inner function that captures 'Hello' in its closure. When `sayHello('John')` is called, 'John' is passed as `name` to this inner function, which then accesses the captured 'Hello' and returns the concatenated string 'Hello, John!'.",
+          "tags": [
+            "currying",
+            "javascript",
+            "closure",
+            "mcq"
+          ],
+          "prerequisites": [
+            "closures",
+            "functions"
+          ],
+          "complexity": 5,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_currying_4",
+          "topic": "Benefits of Currying",
+          "level": "medium",
+          "type": "flashcard",
+          "question": "Name two key benefits of using currying in JavaScript.",
+          "answer": "1.  **Increased Reusability**: By partially applying arguments, you can create specialized functions from more general ones.\n2.  **Easier Function Composition**: Curried functions, especially those taking one argument at a time, fit well into functional composition patterns.",
+          "options": [],
+          "analysisPoints": [
+            "Tests knowledge of practical advantages of currying.",
+            "Focuses on functional programming paradigms."
+          ],
+          "keyConcepts": [
+            "currying",
+            "reusability",
+            "function-composition"
+          ],
+          "evaluationCriteria": [
+            "Recall of benefits"
+          ],
+          "example": "",
+          "tags": [
+            "currying",
+            "functional-programming",
+            "benefits"
+          ],
+          "prerequisites": [
+            "currying-basics"
+          ],
+          "complexity": 6,
+          "interviewFrequency": 7,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_currying_5",
+          "topic": "Currying Implementation Logic",
+          "level": "hard",
+          "type": "code",
+          "question": "Implement a generic `curry` function in JavaScript that can curry any given function `fn`. The `curry` function should allow calling the curried function with any number of arguments until all expected arguments are provided, at which point the original function `fn` is executed.\n\nExample:\n```javascript\nconst add = (a, b, c) => a + b + c;\nconst curriedAdd = curry(add);\n\nconsole.log(curriedAdd(1)(2)(3)); // Should output 6\nconsole.log(curriedAdd(1, 2)(3));  // Should output 6\nconsole.log(curriedAdd(1)(2, 3));  // Should output 6\nconsole.log(curriedAdd(1, 2, 3));  // Should output 6\n\nconst sumTwo = (a, b) => a + b;\nconst curriedSumTwo = curry(sumTwo);\nconsole.log(curriedSumTwo(5)(5)); // Should output 10\n```",
+          "answer": "```javascript\nfunction curry(fn) {\n  return function curried(...args) {\n    if (args.length >= fn.length) { // Check if enough arguments are gathered\n      return fn.apply(this, args);\n    } else {\n      return function(...nextArgs) {\n        return curried.apply(this, args.concat(nextArgs)); // Concatenate arguments and return new curried function\n      };\n    }\n  };\n}\n\n// Example Usage:\nconst add = (a, b, c) => a + b + c;\nconst curriedAdd = curry(add);\n\nconsole.log(curriedAdd(1)(2)(3));\nconsole.log(curriedAdd(1, 2)(3));\nconsole.log(curriedAdd(1)(2, 3));\nconsole.log(curriedAdd(1, 2, 3));\n\nconst sumTwo = (a, b) => a + b;\nconst curriedSumTwo = curry(sumTwo);\nconsole.log(curriedSumTwo(5)(5));\nconsole.log(curriedSumTwo(5, 5));\n```",
+          "options": [],
+          "analysisPoints": [
+            "Correctly identifies the base case (enough arguments).",
+            "Uses recursion or a loop to accumulate arguments.",
+            "Correctly handles `this` context and arguments using `apply` and `concat` or spread.",
+            "Understands `fn.length` to determine the arity of the original function.",
+            "Ability to return a new function that captures previous arguments."
+          ],
+          "keyConcepts": [
+            "currying",
+            "closures",
+            "recursion",
+            "function.apply",
+            "fn.length",
+            "functional-programming"
+          ],
+          "evaluationCriteria": [
+            "Correct implementation of generic curry",
+            "Handles variable argument counts",
+            "Preserves `this` context",
+            "Efficiency"
+          ],
+          "example": "",
+          "tags": [
+            "currying",
+            "functional-programming",
+            "coding-challenge",
+            "hard"
+          ],
+          "prerequisites": [
+            "closures",
+            "function.apply",
+            "recursion"
+          ],
+          "complexity": 8,
+          "interviewFrequency": 8,
+          "learningPath": "advanced"
+        },
+        {
+          "id": "question_debounce_1",
+          "topic": "Debounce Purpose",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "What is the main problem that debouncing aims to solve in frontend development?",
+          "answer": "Debouncing aims to limit the frequency of function calls, especially for expensive operations triggered by rapid events (e.g., keystrokes, window resizing, scrolling), to improve performance and prevent unnecessary resource consumption.",
+          "options": [],
+          "analysisPoints": [
+            "Focuses on the practical application and benefits.",
+            "Highlights the types of events it targets."
+          ],
+          "keyConcepts": [
+            "debounce",
+            "performance",
+            "event-handling"
+          ],
+          "evaluationCriteria": [
+            "Definition recall",
+            "Problem identification"
+          ],
+          "example": "",
+          "tags": [
+            "debounce",
+            "performance",
+            "event-handling",
+            "definition"
+          ],
+          "prerequisites": [
+            "basic-javascript"
+          ],
+          "complexity": 4,
+          "interviewFrequency": 9,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_debounce_2",
+          "topic": "Debounce Internal Mechanism",
+          "level": "medium",
+          "type": "mcq",
+          "question": "In a typical `debounce` implementation, why is `clearTimeout(timer)` called at the beginning of the returned function?",
+          "answer": "To prevent the previously set timeout from executing if the debounced function is called again before the delay expires.",
+          "options": [
+            "To immediately execute the function without any delay.",
+            "To ensure the `timer` variable is always null.",
+            "To prevent memory leaks by clearing old timers.",
+            "To prevent the previously set timeout from executing if the debounced function is called again before the delay expires."
+          ],
+          "analysisPoints": [
+            "Tests understanding of the core logic of debouncing.",
+            "Highlights the role of `clearTimeout` in resetting the timer.",
+            "Distinguishes between preventing execution and merely clearing for memory."
+          ],
+          "keyConcepts": [
+            "debounce",
+            "setTimeout",
+            "clearTimeout",
+            "timer-management"
+          ],
+          "evaluationCriteria": [
+            "Correct understanding of debounce logic",
+            "Reasoning for `clearTimeout`"
+          ],
+          "example": "The `clearTimeout(timer)` ensures that if `debounce` is called rapidly, the previous delayed execution is cancelled. This prevents the original function from firing multiple times unnecessarily and ensures it only fires *after* a period of inactivity. Without it, every call would set a new timer, leading to multiple executions.",
+          "tags": [
+            "debounce",
+            "javascript",
+            "closure",
+            "mcq",
+            "performance"
+          ],
+          "prerequisites": [
+            "setTimeout",
+            "clearTimeout"
+          ],
+          "complexity": 6,
+          "interviewFrequency": 9,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_debounce_3",
+          "topic": "Debounce Output Prediction",
+          "level": "medium",
+          "type": "code",
+          "question": "Given the following `debounce` implementation and usage, what will be logged to the console and in what order?\n\n```javascript\nfunction debounce(fn, ms) {\n  let timer = null;\n  return function(...args) {\n    if (timer) clearTimeout(timer);\n    timer = setTimeout(() => {\n      fn.apply(this, args);\n    }, ms);\n  };\n}\n\nfunction logValue(value) {\n  console.log('Value:', value);\n}\n\nconst debouncedLog = debounce(logValue, 100);\n\ndebouncedLog('A');\nsetTimeout(() => debouncedLog('B'), 50);\nsetTimeout(() => debouncedLog('C'), 200);\nsetTimeout(() => debouncedLog('D'), 280);\nsetTimeout(() => debouncedLog('E'), 400);\n```",
+          "answer": "```text\nValue: B\nValue: D\nValue: E\n```\n\n**Explanation:**\n1.  `debouncedLog('A')` is called. A timer for 'A' is set for 100ms.\n2.  After 50ms, `debouncedLog('B')` is called. The timer for 'A' is cleared, and a new timer for 'B' is set for 100ms from this point (i.e., at 150ms from start).\n3.  At 150ms, the timer for 'B' expires. `logValue('B')` is executed. Output: `Value: B`.\n4.  After 200ms (from start), `debouncedLog('C')` is called. A timer for 'C' is set for 100ms from this point (i.e., at 300ms from start).\n5.  After 280ms (from start), `debouncedLog('D')` is called. The timer for 'C' is cleared, and a new timer for 'D' is set for 100ms from this point (i.e., at 380ms from start).\n6.  At 380ms, the timer for 'D' expires. `logValue('D')` is executed. Output: `Value: D`.\n7.  After 400ms (from start), `debouncedLog('E')` is called. A timer for 'E' is set for 100ms from this point (i.e., at 500ms from start).\n8.  At 500ms, the timer for 'E' expires. `logValue('E')` is executed. Output: `Value: E`.",
+          "options": [],
+          "analysisPoints": [
+            "Ability to trace asynchronous calls and `setTimeout`/`clearTimeout` interactions.",
+            "Understanding of how `debounce` delays and cancels execution.",
+            "Correct prediction of which calls will ultimately execute."
+          ],
+          "keyConcepts": [
+            "debounce",
+            "asynchronous-javascript",
+            "setTimeout",
+            "clearTimeout",
+            "event-loop"
+          ],
+          "evaluationCriteria": [
+            "Correct sequence of outputs",
+            "Detailed explanation of execution flow"
+          ],
+          "example": "",
+          "tags": [
+            "debounce",
+            "javascript",
+            "asynchronous",
+            "coding-challenge",
+            "prediction"
+          ],
+          "prerequisites": [
+            "setTimeout",
+            "clearTimeout",
+            "event-loop-basics"
+          ],
+          "complexity": 7,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_debounce_4",
+          "topic": "Debounce `this` Context",
+          "level": "hard",
+          "type": "open",
+          "question": "In the `debounce` implementation provided, `fn.apply(this, args)` is used. Explain why `apply` is necessary and what problems might arise if it were simply `fn(...args)`.",
+          "answer": "The `this` keyword's value in JavaScript depends on how a function is called (its execution context). When a debounced function is used as an event handler (e.g., `element.onkeyup = debouncedFunction`), the `this` context inside `debouncedFunction` would typically refer to the `element` that triggered the event.\n\nIf `fn(...args)` were used instead of `fn.apply(this, args)`:\n\n1.  **Loss of `this` context**: The `setTimeout` callback, which ultimately calls `fn`, executes in the global context (or `undefined` in strict mode) by default. This means `this` inside `fn` would no longer refer to the original context (e.g., the DOM element), but rather to the global object (window) or `undefined`. This can lead to errors if `fn` relies on `this` (e.g., `this.value`, `this.style`).\n\n`fn.apply(this, args)` solves this by:\n-   `this` (the first argument to `apply`): Captures the `this` value from the context in which the debounced function was originally called (`return function(...args)`). This ensures the original `this` context is preserved.\n-   `args` (the second argument to `apply`): Forwards all arguments passed to the debounced function to the original function `fn` as an array.\n\nThis makes the `debounce` function general-purpose and correctly handles scenarios where the original function `fn` depends on its `this` context and/or variable arguments.",
+          "options": [],
+          "analysisPoints": [
+            "Demonstrates understanding of `this` binding rules in JavaScript.",
+            "Explains the role of `apply` in context preservation.",
+            "Identifies the specific problem `apply` solves in the debounce pattern.",
+            "Discusses the implications of not preserving context."
+          ],
+          "keyConcepts": [
+            "debounce",
+            "this-keyword",
+            "function.apply",
+            "execution-context",
+            "closures"
+          ],
+          "evaluationCriteria": [
+            "Comprehensive explanation of `this` context",
+            "Correctly identifies `apply`'s necessity",
+            "Articulates potential issues"
+          ],
+          "example": "",
+          "tags": [
+            "debounce",
+            "javascript",
+            "this-keyword",
+            "apply",
+            "advanced"
+          ],
+          "prerequisites": [
+            "this-keyword",
+            "function.call-apply-bind"
+          ],
+          "complexity": 8,
+          "interviewFrequency": 7,
+          "learningPath": "advanced"
+        },
+        {
+          "id": "question_debounce_5",
+          "topic": "Debounce vs. Throttle",
+          "level": "medium",
+          "type": "flashcard",
+          "question": "What is the key difference between debouncing and throttling?",
+          "answer": "Debouncing executes a function *after* a period of inactivity (e.g., 'fire once the user stops typing'). Throttling executes a function *at most once* within a specified time period (e.g., 'fire at most once every 200ms while scrolling').",
+          "options": [],
+          "analysisPoints": [
+            "Clearly distinguishes the timing behavior of each technique.",
+            "Provides clear examples for each."
+          ],
+          "keyConcepts": [
+            "debounce",
+            "throttle",
+            "event-handling",
+            "performance"
+          ],
+          "evaluationCriteria": [
+            "Accurate comparison",
+            "Understanding of practical application"
+          ],
+          "example": "",
+          "tags": [
+            "debounce",
+            "throttle",
+            "performance",
+            "comparison"
+          ],
+          "prerequisites": [
+            "debounce-basics"
+          ],
+          "complexity": 6,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_module_pattern_1",
+          "topic": "Module Pattern Core Concept",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "What is the primary goal of the JavaScript Module Pattern?",
+          "answer": "To achieve encapsulation and create private variables and methods, while exposing a public interface.",
+          "options": [],
+          "analysisPoints": [
+            "Focuses on the main purpose.",
+            "Highlights encapsulation and privacy."
+          ],
+          "keyConcepts": [
+            "module-pattern",
+            "encapsulation",
+            "privacy"
+          ],
+          "evaluationCriteria": [
+            "Definition recall"
+          ],
+          "example": "",
+          "tags": [
+            "module-pattern",
+            "design-patterns",
+            "definition"
+          ],
+          "prerequisites": [
+            "closures"
+          ],
+          "complexity": 3,
+          "interviewFrequency": 7,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_module_pattern_2",
+          "topic": "Module Pattern Privacy",
+          "level": "medium",
+          "type": "mcq",
+          "question": "Consider the `Counter` module example:\n```javascript\nconst Counter = (function() {\n  let privateCounter = 0; \n  function changeBy(val) {\n    privateCounter += val;\n  }\n  return {\n    increment: function() { changeBy(1); },\n    value: function() { return privateCounter; }\n  };\n})();\n```\nWhich of the following statements is TRUE regarding `privateCounter`?",
+          "answer": "`privateCounter` can only be accessed or modified by `increment` and `value` methods.",
+          "options": [
+            "`privateCounter` is accessible directly as `Counter.privateCounter`.",
+            "`privateCounter` can be modified by any external code.",
+            "`privateCounter` can only be accessed or modified by `increment` and `value` methods.",
+            "`privateCounter` is a global variable."
+          ],
+          "analysisPoints": [
+            "Tests understanding of privacy in the module pattern.",
+            "Confirms that private members are only accessible via the public interface.",
+            "Distinguishes between internal and external access."
+          ],
+          "keyConcepts": [
+            "module-pattern",
+            "privacy",
+            "closures",
+            "encapsulation"
+          ],
+          "evaluationCriteria": [
+            "Correct identification of access scope",
+            "Understanding of private state"
+          ],
+          "example": "The `privateCounter` is declared within the IIFE's scope. It's not returned as part of the public interface. The `increment` and `value` methods, being closures, have access to `privateCounter`, but external code cannot directly access `Counter.privateCounter`.",
+          "tags": [
+            "module-pattern",
+            "javascript",
+            "closure",
+            "mcq"
+          ],
+          "prerequisites": [
+            "closures",
+            "iife"
+          ],
+          "complexity": 6,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_module_pattern_3",
+          "topic": "Module Pattern Benefits",
+          "level": "medium",
+          "type": "open",
+          "question": "Beyond encapsulation, what are two other significant benefits of using the Module Pattern in JavaScript development?",
+          "answer": "1.  **Prevention of Global Namespace Pollution**: All variables and functions specific to the module are contained within its own scope (the IIFE), preventing them from polluting the global scope and causing naming conflicts.\n2.  **Improved Maintainability and Organization**: Code is logically grouped into self-contained units with clear public interfaces and hidden private implementations, making it easier to understand, manage, and debug specific parts of an application.",
+          "options": [],
+          "analysisPoints": [
+            "Tests knowledge of broader architectural advantages.",
+            "Focuses on practical benefits for larger codebases.",
+            "Distinguishes from mere privacy."
+          ],
+          "keyConcepts": [
+            "module-pattern",
+            "global-namespace",
+            "maintainability",
+            "organization"
+          ],
+          "evaluationCriteria": [
+            "Identification of valid benefits",
+            "Clarity of explanation"
+          ],
+          "example": "",
+          "tags": [
+            "module-pattern",
+            "design-patterns",
+            "benefits"
+          ],
+          "prerequisites": [
+            "module-pattern-basics"
+          ],
+          "complexity": 6,
+          "interviewFrequency": 7,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_module_pattern_4",
+          "topic": "Module Pattern vs. ES Modules",
+          "level": "hard",
+          "type": "flashcard",
+          "question": "How does the traditional JavaScript Module Pattern relate to modern ES Modules (`import`/`export`)?",
+          "answer": "The traditional Module Pattern achieves encapsulation and privacy using IIFEs and closures. ES Modules (`import`/`export`) provide a standardized, native way to achieve similar goals (encapsulation, no global pollution) with a clearer syntax and static analysis benefits. ES Modules are generally preferred in modern JavaScript, but the Module Pattern is a fundamental concept illustrating how module-like behavior was achieved before native support.",
+          "options": [],
+          "analysisPoints": [
+            "Compares historical pattern with modern standard.",
+            "Highlights the core similarities and differences (native vs. pattern).",
+            "Mentions preference for modern approach."
+          ],
+          "keyConcepts": [
+            "module-pattern",
+            "es-modules",
+            "encapsulation",
+            "javascript-history"
+          ],
+          "evaluationCriteria": [
+            "Accurate comparison",
+            "Contextual understanding"
+          ],
+          "example": "",
+          "tags": [
+            "module-pattern",
+            "es-modules",
+            "comparison",
+            "javascript-evolution"
+          ],
+          "prerequisites": [
+            "module-pattern-basics",
+            "es-modules-basics"
+          ],
+          "complexity": 7,
+          "interviewFrequency": 6,
+          "learningPath": "advanced"
+        },
+        {
+          "id": "question_module_pattern_5",
+          "topic": "Module Pattern Implementation",
+          "level": "medium",
+          "type": "code",
+          "question": "Create a `Logger` module using the Module Pattern. The `Logger` should have:\n-   A private variable `logCount` initialized to `0`.\n-   A private helper function `_logMessage(message)` that internally increments `logCount` and logs the message with a prefix `[LOG]: `.\n-   A public method `info(message)` that uses `_logMessage`.\n-   A public method `getLogCount()` that returns the current `logCount`.\n\nExample Usage:\n```javascript\nLogger.info('Application started.');\nLogger.info('User logged in.');\nconsole.log(Logger.getLogCount()); // Expected: 2\n// console.log(Logger.logCount); // Should be undefined\n// Logger._logMessage('Secret'); // Should throw an error or be inaccessible\n```",
+          "answer": "```javascript\nconst Logger = (function() {\n  let logCount = 0; // Private variable\n  \n  function _logMessage(message) { // Private function\n    logCount++;\n    console.log(`[LOG]: ${message}`);\n  }\n  \n  return {\n    info: function(message) {\n      _logMessage(message);\n    },\n    getLogCount: function() {\n      return logCount;\n    }\n  };\n})();\n\nLogger.info('Application started.');\nLogger.info('User logged in.');\nconsole.log(Logger.getLogCount()); // Output: 2\n\n// Demonstrating privacy:\n// console.log(Logger.logCount); // undefined\n// try {\n//   Logger._logMessage('Secret'); // TypeError: Logger._logMessage is not a function\n// } catch (e) {\n//   console.log(e.message);\n// }\n```",
+          "options": [],
+          "analysisPoints": [
+            "Correctly uses an IIFE to create a private scope.",
+            "Properly defines private variables and functions.",
+            "Exposes a public interface through the returned object.",
+            "Demonstrates how public methods access private state via closures.",
+            "Ensures private members are not directly accessible from outside."
+          ],
+          "keyConcepts": [
+            "module-pattern",
+            "closures",
+            "iife",
+            "encapsulation",
+            "privacy",
+            "javascript"
+          ],
+          "evaluationCriteria": [
+            "Correct module structure",
+            "Functionality as per requirements",
+            "Privacy enforcement"
+          ],
+          "example": "",
+          "tags": [
+            "module-pattern",
+            "design-patterns",
+            "coding-challenge"
+          ],
+          "prerequisites": [
+            "closures",
+            "iife"
+          ],
+          "complexity": 7,
+          "interviewFrequency": 7,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_pure_functions_1",
+          "topic": "Pure Functions Definition",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "What are the two main characteristics of a pure function?",
+          "answer": "1.  **Deterministic**: Given the same input, it always returns the same output.\n2.  **No Side Effects**: It does not cause any observable changes outside its own scope (e.g., modifying external variables, performing I/O).",
+          "options": [],
+          "analysisPoints": [
+            "Tests recall of fundamental functional programming principles.",
+            "Highlights the core properties."
+          ],
+          "keyConcepts": [
+            "pure-functions",
+            "functional-programming",
+            "determinism",
+            "side-effects"
+          ],
+          "evaluationCriteria": [
+            "Definition recall"
+          ],
+          "example": "",
+          "tags": [
+            "pure-functions",
+            "functional-programming",
+            "definition"
+          ],
+          "prerequisites": [
+            "functions-basics"
+          ],
+          "complexity": 4,
+          "interviewFrequency": 7,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_pure_functions_2",
+          "topic": "Pure Functions and Closures Interaction",
+          "level": "medium",
+          "type": "mcq",
+          "question": "Consider the following JavaScript code:\n```javascript\nlet counter = 0;\n\nfunction createIncrementer() {\n  return function() {\n    counter++; // Modifies external state\n    return counter;\n  };\n}\n\nconst increment = createIncrementer();\nincrement();\nconsole.log(increment());\n```\nWhy is the `increment` function (the closure) NOT considered a pure function?",
+          "answer": "It modifies external state (`counter`), thus producing a side effect.",
+          "options": [
+            "It always returns a different value, which is not allowed for pure functions.",
+            "It modifies external state (`counter`), thus producing a side effect.",
+            "It doesn't take any arguments.",
+            "It is created using a closure, and closures are inherently impure."
+          ],
+          "analysisPoints": [
+            "Tests understanding of pure function criteria, specifically side effects.",
+            "Clarifies that closures themselves aren't inherently impure, but how they use captured state determines purity.",
+            "Distinguishes between return value changing due to internal logic vs. external state."
+          ],
+          "keyConcepts": [
+            "pure-functions",
+            "closures",
+            "side-effects",
+            "functional-programming"
+          ],
+          "evaluationCriteria": [
+            "Correctly identifies violation of purity principle",
+            "Understands 'side effect' concept"
+          ],
+          "example": "The `increment` function modifies the `counter` variable, which is declared outside its own scope. This modification is a side effect, as it changes something in the external environment. Therefore, `increment` is not a pure function.",
+          "tags": [
+            "pure-functions",
+            "closures",
+            "side-effects",
+            "mcq"
+          ],
+          "prerequisites": [
+            "pure-functions-basics",
+            "closures"
+          ],
+          "complexity": 6,
+          "interviewFrequency": 7,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_pure_functions_3",
+          "topic": "Benefits of Pure Functions",
+          "level": "medium",
+          "type": "open",
+          "question": "List three advantages of writing pure functions in a codebase.",
+          "answer": "1.  **Easier Testing**: Since pure functions are deterministic and have no side effects, testing them is straightforward. You only need to provide inputs and assert the output; no complex setup or teardown of external state is required.\n2.  **Improved Readability and Reasoning**: Pure functions are predictable and self-contained. Their behavior is solely determined by their inputs, making them easier to understand and reason about without needing to inspect external factors.\n3.  **Better Composability and Cacheability**: Pure functions are modular and independent, making them excellent candidates for function composition. Also, their deterministic nature allows for memoization (caching results for given inputs) to improve performance.",
+          "options": [],
+          "analysisPoints": [
+            "Tests knowledge of practical benefits for development and maintenance.",
+            "Covers aspects like testing, reasoning, and performance."
+          ],
+          "keyConcepts": [
+            "pure-functions",
+            "benefits",
+            "testing",
+            "composability",
+            "readability",
+            "caching"
+          ],
+          "evaluationCriteria": [
+            "Identifies relevant advantages",
+            "Explains each advantage clearly"
+          ],
+          "example": "",
+          "tags": [
+            "pure-functions",
+            "functional-programming",
+            "benefits"
+          ],
+          "prerequisites": [
+            "pure-functions-basics"
+          ],
+          "complexity": 7,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_pure_functions_4",
+          "topic": "Pure Function Implementation",
+          "level": "medium",
+          "type": "code",
+          "question": "Write a pure function `getDiscountedPrice` that takes an original `price` and a `discountPercentage` and returns the discounted price. Ensure it adheres to the principles of a pure function.\n\nThen, create a function factory `createDiscountCalculator` using a closure that takes a `fixedPercentage` and returns a pure function (closure) that applies this discount to any given price. Demonstrate its purity.",
+          "answer": "```javascript\n// Pure function: getDiscountedPrice\nfunction getDiscountedPrice(price, discountPercentage) {\n  // Deterministic: same input -> same output\n  // No side effects: does not modify external state, no I/O\n  return price * (1 - discountPercentage / 100);\n}\n\nconsole.log('--- Pure Function `getDiscountedPrice` ---');\nconsole.log(getDiscountedPrice(100, 10)); // Output: 90\nconsole.log(getDiscountedPrice(200, 25)); // Output: 150\n\n\n// Function Factory using Closure (returns a pure function)\nfunction createDiscountCalculator(fixedPercentage) {\n  // Outer function is pure: returns a function based on input, no side effects\n  return function(price) {\n    // Inner function (closure) is pure:\n    // - depends only on its arguments (price) and captured immutable state (fixedPercentage)\n    // - produces no side effects\n    return price * (1 - fixedPercentage / 100);\n  };\n}\n\nconsole.log('\\n--- Pure Function Factory `createDiscountCalculator` ---');\nconst tenPercentOff = createDiscountCalculator(10);\nconsole.log(tenPercentOff(100)); // Output: 90\nconsole.log(tenPercentOff(250)); // Output: 225\n\n// Demonstrating purity of the returned function:\n// Calling with same input always yields same output\nconsole.log(tenPercentOff(100)); // Output: 90\n\nconst twentyPercentOff = createDiscountCalculator(20);\nconsole.log(twentyPercentOff(100)); // Output: 80\n```",
+          "options": [],
+          "analysisPoints": [
+            "Correctly implements a basic pure function.",
+            "Successfully uses a closure to create a function factory.",
+            "Ensures the function returned by the factory is also pure (captures immutable state).",
+            "Demonstrates understanding of determinism and lack of side effects in both functions."
+          ],
+          "keyConcepts": [
+            "pure-functions",
+            "closures",
+            "function-factory",
+            "side-effects",
+            "functional-programming"
+          ],
+          "evaluationCriteria": [
+            "Correct implementation of pure function",
+            "Correct implementation of pure function factory using closure",
+            "Demonstration of purity"
+          ],
+          "example": "",
+          "tags": [
+            "pure-functions",
+            "functional-programming",
+            "coding-challenge",
+            "closure"
+          ],
+          "prerequisites": [
+            "pure-functions-basics",
+            "closures"
+          ],
+          "complexity": 7,
+          "interviewFrequency": 7,
+          "learningPath": "intermediate"
+        }
+      ],
+      "tasks": [
+        {
+          "id": "task_currying_1",
+          "title": "Implement a Flexible Currying Utility",
+          "description": "\nImplement a `curry` utility function that takes any JavaScript function `fn` and returns a curried version of it. The curried function should be flexible, allowing arguments to be passed one by one or in groups, until all arguments specified by `fn.length` are collected. Once all arguments are collected, the original function `fn` should be invoked with the accumulated arguments.\n\n**Requirements:**\n1.  The `curry` function should accept a single function `fn`.\n2.  The returned curried function should accept arguments flexibly (e.g., `curriedFn(a)(b)(c)` or `curriedFn(a, b)(c)`).\n3.  It should use `fn.length` to determine the number of arguments expected by the original function.\n4.  It must preserve the `this` context when the final function is called.\n5.  It should correctly pass all accumulated arguments to the original function.\n\n**Example:**\n```javascript\nconst sum = (a, b, c) => a + b + c;\nconst curriedSum = curry(sum);\n\nconsole.log(curriedSum(1)(2)(3)); // 6\nconsole.log(curriedSum(1, 2)(3)); // 6\nconsole.log(curriedSum(1)(2, 3)); // 6\nconsole.log(curriedSum(1, 2, 3)); // 6\n\nconst greet = (greeting, name, punctuation) => `${greeting}, ${name}${punctuation}`;\nconst curriedGreet = curry(greet);\nconsole.log(curriedGreet('Hello')('World')('!')); // \"Hello, World!\"\nconsole.log(curriedGreet('Hi', 'Alice')('?'));     // \"Hi, Alice?\"\n```\n",
+          "difficulty": "hard",
+          "startingCode": "function curry(fn) {\n  // TODO: Implement the currying logic here\n  // Hint: You'll need to accumulate arguments and check against fn.length.\n  // Consider using closures to store accumulated arguments and a recursive approach.\n  // Don't forget to handle `this` context and pass all arguments correctly.\n  \n  return function curried(...args) {\n    // Your implementation here\n  };\n}\n\n// Test cases (provided in description, copy and paste to verify)\n// const sum = (a, b, c) => a + b + c;\n// const curriedSum = curry(sum);\n// console.log(curriedSum(1)(2)(3));\n// console.log(curriedSum(1, 2)(3));\n// console.log(curriedSum(1)(2, 3));\n// console.log(curriedSum(1, 2, 3));\n// const greet = (greeting, name, punctuation) => `${greeting}, ${name}${punctuation}`;\n// const curriedGreet = curry(greet);\n// console.log(curriedGreet('Hello')('World')('!'));\n// console.log(curriedGreet('Hi', 'Alice')('?'));",
+          "solutionCode": "function curry(fn) {\n  const expectedArgs = fn.length;\n\n  return function curried(...args) {\n    // Check if enough arguments have been collected\n    if (args.length >= expectedArgs) {\n      // If yes, execute the original function with collected arguments\n      return fn.apply(this, args);\n    } else {\n      // If not enough arguments, return a new function that will collect more\n      const self = this;\n      return function(...nextArgs) {\n        // Concatenate new arguments with previously collected ones\n        // Recursively call the curried function with all accumulated arguments\n        return curried.apply(self, args.concat(nextArgs));\n      };\n    }\n  };\n}",
+          "testCases": [
+            "curry((a, b, c) => a + b + c)(1)(2)(3) should return 6",
+            "curry((a, b, c) => a + b + c)(1, 2)(3) should return 6",
+            "curry((a, b, c) => a + b + c)(1)(2, 3) should return 6",
+            "curry((a, b, c) => a + b + c)(1, 2, 3) should return 6",
+            "curry((g, n, p) => `${g}, ${n}${p}`)('Hi')('There')('!') should return \"Hi, There!\"",
+            "curry((a) => a * 2)(5) should return 10 (function with 1 argument)",
+            "Test `this` context: `const obj = { value: 10, add: curry(function(a) { return this.value + a; }) }; console.log(obj.add(5)());` (should correctly use `obj.value`)"
+          ],
+          "hints": [
+            "The `fn.length` property can tell you the number of arguments a function expects.",
+            "You'll need a way to accumulate arguments across multiple calls. A closure can help here.",
+            "The base case for your recursive function is when the accumulated arguments count meets `fn.length`.",
+            "Remember to use `apply` to pass arguments and preserve the `this` context."
+          ],
+          "tags": [
+            "currying",
+            "functional-programming",
+            "closures",
+            "higher-order-functions",
+            "javascript"
+          ],
+          "timeEstimate": 60,
+          "prerequisites": [
+            "closures",
+            "function.apply",
+            "recursion",
+            "rest-spread-operators"
+          ],
+          "complexity": 8,
+          "interviewRelevance": 9,
+          "learningPath": "advanced",
+          "relatedConcepts": [
+            "partial-application",
+            "higher-order-functions"
+          ]
+        },
+        {
+          "id": "task_currying_2",
+          "title": "Curried Form Validator",
+          "description": "\nCreate a set of curried validation functions that can be combined to validate user input for a form field. Each validator should take a specific rule (e.g., minimum length) and return a new function that takes the actual input value to validate. Finally, demonstrate how to use these curried validators.\n\n**Requirements:**\n1.  Implement a `minLen` curried validator:\n    `minLen(length: number): (value: string) => boolean`\n    Returns `true` if `value.length` is greater than or equal to `length`, `false` otherwise.\n2.  Implement a `maxLen` curried validator:\n    `maxLen(length: number): (value: string) => boolean`\n    Returns `true` if `value.length` is less than or equal to `length`, `false` otherwise.\n3.  Implement an `isEmail` validator:\n    `isEmail(): (value: string) => boolean` (no arguments for the first call)\n    Returns `true` if the `value` is a valid email format (simple regex check, e.g., `/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/`), `false` otherwise.\n4.  Demonstrate usage by creating specific validation functions (e.g., `validateUsername`, `validateEmail`) using these curried validators and testing them with various inputs.\n\n**Example Usage:**\n```javascript\n// Using your implemented curried validators\nconst validateUsername = minLen(3);\nconsole.log(validateUsername('')); // false\nconsole.log(validateUsername('abc')); // true\n\nconst validateEmailField = isEmail();\nconsole.log(validateEmailField('test@example.com')); // true\nconsole.log(validateEmailField('invalid-email')); // false\n```\n",
+          "difficulty": "medium",
+          "startingCode": "// Your curried validator implementations here\nfunction minLen(length) {\n  // TODO: Implement minLen\n}\n\nfunction maxLen(length) {\n  // TODO: Implement maxLen\n}\n\nfunction isEmail() {\n  // TODO: Implement isEmail\n}\n\n// Demonstrate usage with examples from description\n// const validateUsername = minLen(3);\n// console.log(validateUsername('')); \n// console.log(validateUsername('abc')); \n// const validateEmailField = isEmail();\n// console.log(validateEmailField('test@example.com'));\n// console.log(validateEmailField('invalid-email'));\n",
+          "solutionCode": "function minLen(length) {\n  return function(value) {\n    return value.length >= length;\n  };\n}\n\nfunction maxLen(length) {\n  return function(value) {\n    return value.length <= length;\n  };\n}\n\nfunction isEmail() {\n  // A simple regex for demonstration. Real email validation is complex.\n  const emailRegex = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/;\n  return function(value) {\n    return emailRegex.test(value);\n  };\n}\n\n// --- Demonstration --- \nconsole.log('--- Username Validation (minLen(3)) ---');\nconst validateUsername = minLen(3);\nconsole.log(`'': ${validateUsername('')}`);     // false\nconsole.log(`'ab': ${validateUsername('ab')}`);   // false\nconsole.log(`'abc': ${validateUsername('abc')}`); // true\nconsole.log(`'abcd': ${validateUsername('abcd')}`); // true\n\nconsole.log('\\n--- Password Validation (minLen(6), maxLen(20)) ---');\nconst validatePasswordMin = minLen(6);\nconst validatePasswordMax = maxLen(20);\n\nconsole.log(`'pass': ${validatePasswordMin('pass')}`); // false\nconsole.log(`'password': ${validatePasswordMin('password')}`); // true\nconsole.log(`'passwordverylongpasswordverylong': ${validatePasswordMax('passwordverylongpasswordverylong')}`); // false\nconsole.log(`'short_password': ${validatePasswordMax('short_password')}`); // true\n\nconsole.log('\\n--- Email Validation (isEmail()) ---');\nconst validateEmailField = isEmail();\nconsole.log(`'test@example.com': ${validateEmailField('test@example.com')}`); // true\nconsole.log(`'invalid-email': ${validateEmailField('invalid-email')}`);     // false\nconsole.log(`'test@example': ${validateEmailField('test@example')}`);       // false\nconsole.log(`'user@sub.domain.co': ${validateEmailField('user@sub.domain.co')}`); // true\n",
+          "testCases": [
+            "minLen(5)('hello') should return true",
+            "minLen(5)('hi') should return false",
+            "maxLen(10)('short') should return true",
+            "maxLen(10)('veryverylongstring') should return false",
+            "isEmail()('valid@email.com') should return true",
+            "isEmail()('invalid-email') should return false",
+            "isEmail()('') should return false"
+          ],
+          "hints": [
+            "Each curried function will simply return another function that takes the actual value.",
+            "For `isEmail`, you'll capture the regex in the closure.",
+            "Think about what value needs to be configured (curried) and what value is passed at the final execution."
+          ],
+          "tags": [
+            "currying",
+            "functional-programming",
+            "validation",
+            "closures",
+            "frontend"
+          ],
+          "timeEstimate": 45,
+          "prerequisites": [
+            "closures",
+            "basic-functions"
+          ],
+          "complexity": 6,
+          "interviewRelevance": 7,
+          "learningPath": "intermediate",
+          "relatedConcepts": [
+            "higher-order-functions",
+            "form-validation"
+          ]
+        },
+        {
+          "id": "task_debounce_1",
+          "title": "Implement a Debounced Input Search",
+          "description": "\nImplement a `debounce` utility function and integrate it into a simulated search input scenario. The goal is to ensure that an expensive search function (simulated with `console.log`) is only called after the user has stopped typing for a specific delay.\n\n**Requirements:**\n1.  Implement a `debounce` function that takes a function `fn` and a `delay` (in milliseconds).\n2.  The `debounce` function should return a new function that, when called, delays the execution of `fn` until `delay` milliseconds have passed without any further calls to the debounced function.\n3.  The debounced function must correctly pass all arguments and preserve the `this` context to the original `fn`.\n4.  Simulate a series of rapid `input` events (e.g., calling `debouncedSearch` multiple times quickly) and verify that the `searchAPI` (your simulated expensive function) is called only once after the last simulated input.\n\n**Example Simulation:**\n```javascript\nconst searchAPI = (query) => console.log(`[API Call] Searching for: ${query}`);\nconst debouncedSearch = debounce(searchAPI, 300);\n\nconsole.log('--- Simulating rapid typing ---');\ndebouncedSearch('a');\ndebouncedSearch('ap');\ndebouncedSearch('app');\n// Expected: After ~300ms, only '[API Call] Searching for: app' should appear\n\nsetTimeout(() => {\n  console.log('\\n--- Simulating pause, then more typing ---');\n  debouncedSearch('apple');\n  setTimeout(() => debouncedSearch('apple pie'), 100);\n  setTimeout(() => debouncedSearch('apple pie recipe'), 200);\n  // Expected: After ~300ms from the last 'apple pie recipe' call, \n  // only '[API Call] Searching for: apple pie recipe' should appear\n}, 1000);\n```\n",
+          "difficulty": "medium",
+          "startingCode": "function debounce(fn, delay) {\n  let timerId = null; // This variable needs to be accessible by the inner function via closure\n  \n  return function(...args) {\n    const context = this; // Capture the 'this' context\n    \n    // TODO: Implement the debounce logic here\n    // 1. Clear any existing timer.\n    // 2. Set a new timer to call `fn` after `delay`.\n    // 3. Ensure `fn` is called with the correct `this` and arguments.\n\n  };\n}\n\n// Test functions (provided in description, copy and paste to verify)\n// const searchAPI = (query) => console.log(`[API Call] Searching for: ${query}`);\n// const debouncedSearch = debounce(searchAPI, 300);\n// console.log('--- Simulating rapid typing ---');\n// debouncedSearch('a');\n// debouncedSearch('ap');\n// debouncedSearch('app');\n// setTimeout(() => {\n//   console.log('\\n--- Simulating pause, then more typing ---');\n//   debouncedSearch('apple');\n//   setTimeout(() => debouncedSearch('apple pie'), 100);\n//   setTimeout(() => debouncedSearch('apple pie recipe'), 200);\n// }, 1000);",
+          "solutionCode": "function debounce(fn, delay) {\n  let timerId = null;\n  \n  return function(...args) {\n    const context = this;\n    \n    // Clear any existing timer to reset the countdown\n    if (timerId) {\n      clearTimeout(timerId);\n    }\n    \n    // Set a new timer\n    timerId = setTimeout(() => {\n      // Execute the original function with the correct 'this' context and arguments\n      fn.apply(context, args);\n      timerId = null; // Optional: clear timerId after execution for cleaner state\n    }, delay);\n  };\n}\n\n// --- Test Case Simulation --- \nconst searchAPI = (query) => console.log(`[API Call] Searching for: ${query}`);\nconst debouncedSearch = debounce(searchAPI, 300);\n\nconsole.log('--- Simulating rapid typing for \"app\" ---');\ndebouncedSearch('a');\ndebouncedSearch('ap');\ndebouncedSearch('app');\n\n// Simulate a pause and then another round of typing\nsetTimeout(() => {\n  console.log('\\n--- Simulating pause, then more typing for \"apple pie recipe\" ---');\n  debouncedSearch('apple');\n  setTimeout(() => debouncedSearch('apple pie'), 100);\n  setTimeout(() => debouncedSearch('apple pie recipe'), 200);\n}, 1000);\n\n// Simulate immediate execution after the debounced period for a single call\nsetTimeout(() => {\n  console.log('\\n--- Simulating single immediate call after a long pause ---');\n  debouncedSearch('single search');\n}, 2000);\n",
+          "testCases": [
+            "Rapid calls: `d('a'); d('b'); d('c');` (delay 100ms) -> Only `fn('c')` executes after 100ms.",
+            "Single call: `d('hello');` (delay 200ms) -> `fn('hello')` executes after 200ms.",
+            "Multiple bursts: Ensure correct function calls after each burst of activity and inactivity.",
+            "Context preservation: Verify `this` is correctly passed (e.g., `const obj = { val: 1, func: debounce(function() { console.log(this.val); }, 100) }; obj.func();` should log `1`).",
+            "Argument preservation: Verify all arguments are passed (e.g., `debounce((a, b) => console.log(a, b), 100)(1, 2)` should log `1 2`)."
+          ],
+          "hints": [
+            "The `timerId` variable needs to persist across calls to the debounced function; closures are key here.",
+            "`setTimeout` returns a timer ID that `clearTimeout` can use.",
+            "Remember to capture `this` from the invocation context of the returned function.",
+            "`Function.prototype.apply()` is useful for setting `this` and passing an array of arguments."
+          ],
+          "tags": [
+            "debounce",
+            "performance",
+            "event-handling",
+            "closures",
+            "javascript",
+            "frontend"
+          ],
+          "timeEstimate": 45,
+          "prerequisites": [
+            "closures",
+            "setTimeout",
+            "clearTimeout",
+            "this-keyword",
+            "function.apply"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 9,
+          "learningPath": "intermediate",
+          "relatedConcepts": [
+            "throttle",
+            "event-listeners"
+          ]
+        },
+        {
+          "id": "task_debounce_2",
+          "title": "Debounced Window Resize Handler",
+          "description": "\nImplement a `debounce` function and apply it to a `window.onresize` event handler. The goal is to update some UI element (simulated with `console.log`) only after the user has finished resizing the window for a specified duration, preventing excessive re-renders or calculations.\n\n**Requirements:**\n1.  Re-use or re-implement the `debounce` function from `task_debounce_1`.\n2.  Create a function `updateLayout()` that simulates an expensive layout recalculation. It should log `\"Recalculating layout... New width: [width], New height: [height]\"` using `window.innerWidth` and `window.innerHeight`.\n3.  Attach a debounced version of `updateLayout` to the `window.onresize` event. The debounce delay should be 200 milliseconds.\n4.  Include clear console logs to demonstrate when the debounced function is attached and when `updateLayout` is actually invoked.\n\n**Considerations:**\n-   In a real browser environment, you would resize the window to observe the behavior.\n-   For a node.js environment, you can only demonstrate the setup and explain the expected behavior.\n",
+          "difficulty": "medium",
+          "startingCode": "function debounce(fn, delay) {\n  let timerId = null;\n  return function(...args) {\n    const context = this;\n    if (timerId) {\n      clearTimeout(timerId);\n    }\n    timerId = setTimeout(() => {\n      fn.apply(context, args);\n      timerId = null;\n    }, delay);\n  };\n}\n\nfunction updateLayout() {\n  // TODO: Simulate expensive layout calculation.\n  // Log the current window dimensions. This function should only be called once\n  // after resizing stops for the debounce delay.\n  console.log(`Recalculating layout... New width: ${window.innerWidth}, New height: ${window.innerHeight}`);\n}\n\n// TODO: Attach the debounced updateLayout to window.onresize.\n// console.log('Debounced resize handler attached.');",
+          "solutionCode": "function debounce(fn, delay) {\n  let timerId = null;\n  return function(...args) {\n    const context = this;\n    if (timerId) {\n      clearTimeout(timerId);\n    }\n    timerId = setTimeout(() => {\n      fn.apply(context, args);\n      timerId = null;\n    }, delay);\n  };\n}\n\nfunction updateLayout() {\n  // In a real browser, window.innerWidth and window.innerHeight would reflect current dimensions.\n  // For Node.js or simulation, these values would be undefined or refer to a global mock.\n  console.log(`Recalculating layout... New width: ${typeof window !== 'undefined' ? window.innerWidth : 'N/A'}, New height: ${typeof window !== 'undefined' ? window.innerHeight : 'N/A'}`);\n}\n\nconst debouncedUpdateLayout = debounce(updateLayout, 200);\n\n// Attach to window.onresize (this part would only work in a browser environment)\nif (typeof window !== 'undefined') {\n  window.addEventListener('resize', debouncedUpdateLayout);\n  console.log('Debounced resize handler attached to window.resize. Try resizing your browser window.');\n} else {\n  console.log('Running in a non-browser environment. Cannot attach to window.resize.');\n  console.log('The debounce logic is implemented, but event triggering needs a browser.');\n  // Example of how you'd test the debounce part manually in Node for theoretical understanding:\n  console.log('\\nSimulating resize events in Node for demonstration:');\n  const mockWidths = [800, 810, 805, 820, 815];\n  let currentWidthIndex = 0;\n\n  const simulateResize = () => {\n    if (currentWidthIndex < mockWidths.length) {\n      // In a real browser, 'this' would be window, args would be event object.\n      // For simulation, we just call the debounced function directly.\n      // We'll log the 'mocked' width to show the effect.\n      console.log(`[Simulated Resize] Triggered with mock width: ${mockWidths[currentWidthIndex]}`);\n      // Temporarily mock window properties for the 'updateLayout' function if needed for full demo\n      global.window = { innerWidth: mockWidths[currentWidthIndex], innerHeight: 600 }; \n      debouncedUpdateLayout();\n      currentWidthIndex++;\n      setTimeout(simulateResize, 50); // Simulate rapid resizing\n    } else {\n      console.log('Simulated resize events finished.');\n    }\n  };\n  simulateResize();\n\n  setTimeout(() => {\n    console.log('\\nSimulating a final, delayed resize to trigger it once more:');\n    global.window = { innerWidth: 900, innerHeight: 700 }; \n    debouncedUpdateLayout();\n  }, 1000); // Trigger a single resize after a pause\n\n}\n\n\n",
+          "testCases": [
+            "In a browser: Rapidly resize the window for a few seconds, then stop. `updateLayout` should only be called once after you stop resizing for 200ms.",
+            "In a browser: Resize, pause for >200ms, resize again. `updateLayout` should be called twice.",
+            "Verify `updateLayout` receives correct `innerWidth` and `innerHeight` values (in browser).",
+            "Verify no calls to `updateLayout` if resizing is continuous within the delay."
+          ],
+          "hints": [
+            "Attach the debounced function directly to `window.onresize` or `window.addEventListener('resize', ...)`. The `debounce` function should be generic enough to handle this.",
+            "The `this` context for `window.onresize` events is typically `window` itself. Ensure your `debounce` correctly passes this through.",
+            "If you're running in a Node.js environment, you won't see actual window resizes. You'll need to mock `window.innerWidth` and `window.innerHeight` or just focus on the `debounce` logic and its console output.",
+            "Make sure your `debounce` function clears existing timers on every call to reset the delay."
+          ],
+          "tags": [
+            "debounce",
+            "event-handling",
+            "performance",
+            "frontend",
+            "javascript",
+            "browser-api"
+          ],
+          "timeEstimate": 60,
+          "prerequisites": [
+            "debounce",
+            "window.onresize",
+            "event-listeners"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 8,
+          "learningPath": "intermediate",
+          "relatedConcepts": [
+            "throttling",
+            "event-loop"
+          ]
+        },
+        {
+          "id": "task_module_pattern_1",
+          "title": "Build a Simple State Manager Module",
+          "description": "\nCreate a `StateManager` module using the Module Pattern. This module should allow you to store and retrieve a single piece of state data, but only through its public API, ensuring the internal state variable is truly private.\n\n**Requirements:**\n1.  The `StateManager` should be implemented as an IIFE returning an object.\n2.  It must have a private variable, `_stateData`, initialized to `null`.\n3.  It should expose a public method `set(data)` that updates `_stateData`.\n4.  It should expose a public method `get()` that returns the current `_stateData`.\n5.  It should expose a public method `clear()` that resets `_stateData` to `null`.\n6.  Demonstrate that `_stateData` is not directly accessible from outside the module.\n\n**Example Usage:**\n```javascript\nStateManager.set({ user: 'Alice', theme: 'dark' });\nconsole.log(StateManager.get()); // { user: 'Alice', theme: 'dark' }\n\n// Attempting to access private state directly (should be undefined/error)\n// console.log(StateManager._stateData);\n\nStateManager.clear();\nconsole.log(StateManager.get()); // null\n```\n",
+          "difficulty": "medium",
+          "startingCode": "const StateManager = (function() {\n  let _stateData = null; // Private variable\n  \n  // TODO: Implement public methods here\n  return {\n    // set, get, clear methods\n  };\n})();\n\n// Test cases (provided in description, copy and paste to verify)\n// StateManager.set({ user: 'Alice', theme: 'dark' });\n// console.log(StateManager.get()); \n// console.log(StateManager._stateData);\n// StateManager.clear();\n// console.log(StateManager.get());\n",
+          "solutionCode": "const StateManager = (function() {\n  let _stateData = null; // Private state variable\n  \n  return {\n    set: function(data) {\n      _stateData = data;\n      console.log('State set to:', _stateData);\n    },\n    get: function() {\n      console.log('Getting state:', _stateData);\n      return _stateData;\n    },\n    clear: function() {\n      _stateData = null;\n      console.log('State cleared.');\n    }\n  };\n})();\n\n// --- Demonstration --- \nconsole.log('Initial state:', StateManager.get()); // null\n\nStateManager.set({ user: 'Alice', theme: 'dark' });\nconsole.log('Current state:', StateManager.get()); // { user: 'Alice', theme: 'dark' }\n\nStateManager.set({ notifications: ['new message', 'new alert'] });\nconsole.log('Updated state:', StateManager.get()); // { notifications: ['new message', 'new alert'] }\n\n// Attempting to access private state directly\nconsole.log('Attempting to access private state directly:', StateManager._stateData); // undefined\n\nStateManager.clear();\nconsole.log('State after clearing:', StateManager.get()); // null\n",
+          "testCases": [
+            "StateManager.get() should initially return null.",
+            "StateManager.set({ key: 'value' }); StateManager.get() should return { key: 'value' }.",
+            "StateManager.set(123); StateManager.get() should return 123.",
+            "StateManager.set('hello'); StateManager.get() should return 'hello'.",
+            "StateManager.clear(); StateManager.get() should return null.",
+            "Attempting to access `StateManager._stateData` should return `undefined`."
+          ],
+          "hints": [
+            "Use an Immediately Invoked Function Expression (IIFE) `(function() { ... })();` to create the module scope.",
+            "Declare `_stateData` inside the IIFE, but outside the `return` object, to make it private.",
+            "The public methods you return will form closures over `_stateData`, allowing them to access and modify it."
+          ],
+          "tags": [
+            "module-pattern",
+            "design-patterns",
+            "encapsulation",
+            "privacy",
+            "closures",
+            "javascript"
+          ],
+          "timeEstimate": 30,
+          "prerequisites": [
+            "closures",
+            "iife",
+            "objects"
+          ],
+          "complexity": 6,
+          "interviewRelevance": 8,
+          "learningPath": "intermediate",
+          "relatedConcepts": [
+            "singleton-pattern",
+            "information-hiding"
+          ]
+        },
+        {
+          "id": "task_module_pattern_2",
+          "title": "Create a User Session Manager Module",
+          "description": "\nDevelop a `SessionManager` module using the Module Pattern. This module should manage user session data (e.g., `isLoggedIn`, `username`, `token`) and provide methods to log in, log out, and check session status, all while keeping the actual session data private.\n\n**Requirements:**\n1.  Implement `SessionManager` as an IIFE returning a public interface.\n2.  It should have private variables: `_isLoggedIn` (boolean, default `false`), `_username` (string, default `null`), `_token` (string, default `null`).\n3.  Expose a public method `login(username, token)` that sets `_isLoggedIn` to `true` and updates `_username` and `_token`.\n4.  Expose a public method `logout()` that resets all private variables to their default (logged-out) states.\n5.  Expose a public method `getStatus()` that returns an object like `{ isLoggedIn: boolean, username: string | null }`.\n6.  Ensure `_token` remains strictly private and is never returned by `getStatus()` or accessible directly.\n\n**Example Usage:**\n```javascript\nconsole.log(SessionManager.getStatus()); // { isLoggedIn: false, username: null }\n\nSessionManager.login('john.doe', 'secret-jwt-token-123');\nconsole.log(SessionManager.getStatus()); // { isLoggedIn: true, username: 'john.doe' }\n\n// console.log(SessionManager._token); // Should be undefined\n\nSessionManager.logout();\nconsole.log(SessionManager.getStatus()); // { isLoggedIn: false, username: null }\n```\n",
+          "difficulty": "medium",
+          "startingCode": "const SessionManager = (function() {\n  let _isLoggedIn = false;\n  let _username = null;\n  let _token = null; // This should remain private\n\n  // TODO: Implement public methods\n  return {\n    // login, logout, getStatus methods\n  };\n})();\n\n// Test cases (provided in description, copy and paste to verify)\n// console.log(SessionManager.getStatus());\n// SessionManager.login('john.doe', 'secret-jwt-token-123');\n// console.log(SessionManager.getStatus());\n// console.log(SessionManager._token);\n// SessionManager.logout();\n// console.log(SessionManager.getStatus());\n",
+          "solutionCode": "const SessionManager = (function() {\n  let _isLoggedIn = false; // Private\n  let _username = null;    // Private\n  let _token = null;       // Strictly private, never exposed\n\n  function _resetSession() { // Private helper for internal use\n    _isLoggedIn = false;\n    _username = null;\n    _token = null;\n  }\n  \n  return {\n    login: function(username, token) {\n      if (!username || !token) {\n        console.error('Login failed: username and token are required.');\n        return;\n      }\n      _isLoggedIn = true;\n      _username = username;\n      _token = token;\n      console.log(`User '${_username}' logged in.`);\n    },\n    logout: function() {\n      _resetSession();\n      console.log('User logged out.');\n    },\n    getStatus: function() {\n      return {\n        isLoggedIn: _isLoggedIn,\n        username: _username\n      };\n    },\n    // A method to simulate checking if a token is valid (could be used internally by other features)\n    _checkTokenValidity: function(inputToken) {\n        return inputToken === _token; // Private method for internal module use (though exposed here for testing)\n    }\n  };\n})();\n\n// --- Demonstration --- \nconsole.log('Initial Status:', SessionManager.getStatus()); // { isLoggedIn: false, username: null }\n\nSessionManager.login('alice.smith', 'my-super-secret-jwt-token');\nconsole.log('Status after login:', SessionManager.getStatus()); // { isLoggedIn: true, username: 'alice.smith' }\n\n// Attempt to access private token directly\nconsole.log('Attempting to access private token:', SessionManager._token); // undefined\n\n// Demonstrate internal usage of private helper (if made public for testing)\n// console.log('Is provided token valid (internal check):', SessionManager._checkTokenValidity('my-super-secret-jwt-token')); // true\n\nSessionManager.logout();\nconsole.log('Status after logout:', SessionManager.getStatus()); // { isLoggedIn: false, username: null }\n\n// Test invalid login\nSessionManager.login('bob', null); // Should log error and status remains logged out\nconsole.log('Status after failed login attempt:', SessionManager.getStatus());\n",
+          "testCases": [
+            "Initial `getStatus()` should return `{ isLoggedIn: false, username: null }`.",
+            "`login('testuser', '123')` should set `isLoggedIn` to `true` and `username` to 'testuser'.",
+            "`getStatus()` after login should reflect the new state correctly.",
+            "`_token` should NOT be accessible via `SessionManager._token` (returns `undefined`).",
+            "`logout()` should reset `isLoggedIn` to `false` and `username` to `null`.",
+            "`getStatus()` after logout should return the initial state.",
+            "Calling `login` with missing arguments (e.g., `login('user', null)`) should handle gracefully (e.g., log error, not change state)."
+          ],
+          "hints": [
+            "Declare `_isLoggedIn`, `_username`, and `_token` within the IIFE's scope to make them private.",
+            "Only expose `login`, `logout`, and `getStatus` in the returned object.",
+            "Ensure `getStatus` explicitly omits the `_token` variable from its return value.",
+            "Consider a private helper function for resetting state (`_resetSession`) to keep `logout` concise."
+          ],
+          "tags": [
+            "module-pattern",
+            "design-patterns",
+            "authentication",
+            "session-management",
+            "encapsulation",
+            "javascript"
+          ],
+          "timeEstimate": 45,
+          "prerequisites": [
+            "closures",
+            "iife",
+            "objects"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 9,
+          "learningPath": "intermediate",
+          "relatedConcepts": [
+            "information-hiding",
+            "frontend-security-basics"
+          ]
+        },
+        {
+          "id": "task_pure_functions_1",
+          "title": "Build a Pure Data Transformation Pipeline",
+          "description": "\nCreate a set of pure functions and demonstrate how they can be composed to form a data transformation pipeline. The goal is to process an array of numbers through multiple steps, where each step is a pure function.\n\n**Requirements:**\n1.  **`map` function**: Implement a pure `map` function (similar to `Array.prototype.map`) that takes an array and a transformation function, and returns a new array with the transformed elements. (Do not use built-in `Array.prototype.map`).\n    `map(arr: number[], transformFn: (num: number) => number): number[]`\n2.  **`filter` function**: Implement a pure `filter` function (similar to `Array.prototype.filter`) that takes an array and a predicate function, and returns a new array with elements that satisfy the predicate. (Do not use built-in `Array.prototype.filter`).\n    `filter(arr: number[], predicateFn: (num: number) => boolean): number[]`\n3.  **Transformation Functions (Pure Closures)**:\n    *   `createMultiplier(factor: number): (num: number) => number` - A function factory that returns a pure function to multiply a number by a given `factor`.\n    *   `isEven(num: number): boolean` - A pure function that returns `true` if a number is even, `false` otherwise.\n4.  **Pipeline Construction**: Use these functions to create a pipeline that:\n    *   Takes an array of numbers.\n    *   Filters out odd numbers using `isEven`.\n    *   Multiplies the remaining numbers by 5 using `createMultiplier`.\n    *   Returns the final processed array.\n\nDemonstrate the purity of each function and the overall pipeline (i.e., inputs are not mutated, outputs are consistent for same inputs).\n\n**Example Usage:**\n```javascript\nconst numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];\n\n// Expected pipeline result:\n// [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] (filter isEven) -> [2, 4, 6, 8, 10]\n// [2, 4, 6, 8, 10] (map createMultiplier(5)) -> [10, 20, 30, 40, 50]\n\nconst processNumbers = (arr) => {\n  const evenNumbers = filter(arr, isEven);\n  const multiplyByFive = createMultiplier(5);\n  const result = map(evenNumbers, multiplyByFive);\n  return result;\n};\n\nconsole.log(processNumbers(numbers)); // Expected: [10, 20, 30, 40, 50]\nconsole.log(numbers); // Expected: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] (original array unchanged)\n```\n",
+          "difficulty": "hard",
+          "startingCode": "function map(arr, transformFn) {\n  // TODO: Implement pure map function\n}\n\nfunction filter(arr, predicateFn) {\n  // TODO: Implement pure filter function\n}\n\nfunction createMultiplier(factor) {\n  // TODO: Implement pure function factory\n}\n\nfunction isEven(num) {\n  // TODO: Implement pure isEven function\n}\n\n// TODO: Construct the pipeline and demonstrate usage\n// const numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];\n// const processNumbers = (arr) => {\n//   // ... pipeline steps ...\n// };\n// console.log(processNumbers(numbers));\n// console.log(numbers); // Should be unchanged\n",
+          "solutionCode": "function map(arr, transformFn) {\n  const result = [];\n  for (let i = 0; i < arr.length; i++) {\n    result.push(transformFn(arr[i]));\n  }\n  return result; // Returns a new array, does not mutate original\n}\n\nfunction filter(arr, predicateFn) {\n  const result = [];\n  for (let i = 0; i < arr.length; i++) {\n    if (predicateFn(arr[i])) {\n      result.push(arr[i]);\n    }\n  }\n  return result; // Returns a new array, does not mutate original\n}\n\nfunction createMultiplier(factor) {\n  return function(num) {\n    return num * factor; // Pure: no side effects, deterministic\n  };\n}\n\nfunction isEven(num) {\n  return num % 2 === 0; // Pure: no side effects, deterministic\n}\n\n// --- Pipeline Construction and Demonstration ---\nconst numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];\n\nconsole.log('Original numbers:', numbers);\n\nconst processNumbers = (arr) => {\n  console.log('  Step 1: Filtering odd numbers...');\n  const evenNumbers = filter(arr, isEven); // Returns new array, original 'arr' unchanged\n  console.log('    Intermediate result (even numbers):', evenNumbers);\n\n  console.log('  Step 2: Creating multiplier function...');\n  const multiplyByFive = createMultiplier(5); // Pure function factory\n  \n  console.log('  Step 3: Multiplying even numbers by 5...');\n  const result = map(evenNumbers, multiplyByFive); // Returns new array, 'evenNumbers' unchanged\n  console.log('    Final result:', result);\n  \n  return result;\n};\n\nconsole.log('\\nRunning the pipeline:');\nconst finalResult = processNumbers(numbers);\nconsole.log('\\nFinal pipeline output:', finalResult);\n\nconsole.log('Original array after pipeline:', numbers); // Should be: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]\nconsole.log('Is original array unchanged?', JSON.stringify(numbers) === JSON.stringify([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]));\n\n// Demonstrating purity by calling with same input again\nconsole.log('\\nRunning pipeline again with same input:');\nconst finalResult2 = processNumbers(numbers);\nconsole.log('Second pipeline output (should be same):', finalResult2);\nconsole.log('Are outputs consistent?', JSON.stringify(finalResult) === JSON.stringify(finalResult2));\n",
+          "testCases": [
+            "map([1, 2, 3], num => num * 2) should return [2, 4, 6] and not mutate original array.",
+            "filter([1, 2, 3], num => num > 1) should return [2, 3] and not mutate original array.",
+            "createMultiplier(10)(5) should return 50.",
+            "isEven(4) should return true, isEven(7) should return false.",
+            "The complete pipeline with `numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]` should return `[10, 20, 30, 40, 50]`.",
+            "The original `numbers` array should remain unchanged after pipeline execution.",
+            "Running the pipeline multiple times with the same input should yield identical results."
+          ],
+          "hints": [
+            "For `map` and `filter`, ensure you create a *new* array for the result, instead of modifying the input array. This is crucial for purity.",
+            "`createMultiplier` will be a higher-order function that uses a closure to remember the `factor`.",
+            "Think about how `isEven` inherently fits the definition of a pure function.",
+            "The pipeline is simply a sequence of function calls, where the output of one becomes the input of the next."
+          ],
+          "tags": [
+            "pure-functions",
+            "functional-programming",
+            "data-transformation",
+            "closures",
+            "higher-order-functions",
+            "javascript"
+          ],
+          "timeEstimate": 60,
+          "prerequisites": [
+            "pure-functions",
+            "closures",
+            "array-methods-concept"
+          ],
+          "complexity": 8,
+          "interviewRelevance": 8,
+          "learningPath": "advanced",
+          "relatedConcepts": [
+            "function-composition",
+            "immutability",
+            "side-effects"
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "f2eb5d98-8397-4336-a544-6545b075da2b",
+    "startLine": 2400,
+    "endLine": 2499,
+    "processedDate": "2025-06-17T08:21:53.825Z",
+    "content": {
+      "logicalBlockInfo": {
+        "suggestedEndLine": -1
+      },
+      "theory": [
+        {
+          "id": "theory_pure_functions_and_side_effects",
+          "title": "Pure Functions and Side Effects",
+          "content": "## Core Principles of Pure Functions\nPure functions are a fundamental concept in functional programming, offering significant benefits in terms of predictability, testability, and maintainability. A function is considered pure if it adheres to two strict rules:\n\n1.  **Determinism (Same Input, Same Output):** Given the same input arguments, a pure function will *always* produce the exact same output. It does not depend on any external state that might change between calls.\n2.  **No Side Effects:** A pure function does not cause any observable changes outside its local scope during its execution. This means it doesn't modify external variables, mutate data structures passed as arguments, perform I/O operations (like logging to console, network requests, or DOM manipulations), or trigger any other external state changes.\n\n### Understanding Side Effects\nSide effects are any actions a function performs that affect the world outside of itself. While necessary for real-world applications (e.g., displaying data, saving to a database), minimizing and isolating side effects is a key goal of functional programming. Examples of side effects include:\n*   Modifying a global variable or an object passed by reference.\n*   Logging to the console (`console.log`).\n*   Making network requests (e.g., `fetch`, `XMLHttpRequest`).\n*   Modifying the DOM.\n*   Writing to a database or file system.\n*   Throwing exceptions (if not handled internally).\n*   Getting the current time or a random number (as they are not deterministic).\n\n### Benefits of Pure Functions\n*   **Predictability:** Easier to reason about and understand, as their behavior is entirely determined by their inputs.\n*   **Testability:** Simple to test because they only require input arguments and produce predictable output. No complex setup or mocking of external states is needed.\n*   **Maintainability:** Less prone to bugs caused by unexpected interactions or hidden dependencies.\n*   **Cacheability (Memoization):** Their deterministic nature allows for caching results based on input, leading to performance optimizations.\n*   **Parallelization:** Can be run in parallel without fear of race conditions, as they don't share or modify mutable state.",
+          "examples": [
+            {
+              "id": "example_pure_function_1",
+              "title": "Pure Function Example",
+              "code": "/**\n * A pure function that adds two numbers.\n * - Always returns the same result for the same inputs (e.g., add(2, 3) always returns 5).\n * - Has no side effects (doesn't modify external state or perform I/O).\n */\nfunction add(a, b) {\n  return a + b;\n}",
+              "explanation": "This `add` function takes two numbers, `a` and `b`, and returns their sum. It's pure because it always produces the same output for the same inputs and doesn't modify anything outside its scope. It's perfectly predictable and easy to test.",
+              "language": "javascript"
+            },
+            {
+              "id": "example_impure_function_1",
+              "title": "Impure Function Example (Relies on External State)",
+              "code": "let c = 10;\n/**\n * An impure function that adds a number to an external variable 'c'.\n * - Its output depends on the external state of 'c', which can change.\n * - Modifies an external variable 'c' if it were to increment 'c' inside.\n */\nfunction addToC(x) {\n  return x + c; // Depends on external variable 'c'\n}\n\n// Demonstrating impurity:\nconsole.log(addToC(5)); // If c is 10, returns 15\nc = 20;\nconsole.log(addToC(5)); // If c is 20, returns 25 (different output for same input '5')",
+              "explanation": "The `addToC` function is impure because its output depends on the external variable `c`. If `c` changes, the function's output will change even with the same input `x`. This violates the 'same input, same output' rule. If it were to modify `c` (e.g., `c += x;`), it would also have a side effect.",
+              "language": "javascript"
+            },
+            {
+              "id": "example_pure_function_closure_1",
+              "title": "Creating a Pure Function using Closure (Currying Concept)",
+              "code": "/**\n * A higher-order function that uses a closure to create a pure adder.\n * The returned inner function is pure because it only depends on its immediate inputs\n * and the 'a' value captured from its lexical environment, which remains constant.\n */\nfunction createPureAdder(a) {\n  // 'a' is captured in the closure. It acts as a fixed part of the inner function's context.\n  return function(b) {\n    return a + b; // 'a' is from the closure, 'b' is the explicit argument\n  };\n}\n\nconst add5 = createPureAdder(5);\nconsole.log(add5(10)); // Always returns 15 given input 10 (5 + 10)\nconsole.log(add5(20)); // Always returns 25 given input 20 (5 + 20)\n\nconst add10 = createPureAdder(10);\nconsole.log(add10(3)); // Always returns 13 given input 3 (10 + 3)",
+              "explanation": "This example demonstrates how a closure can be used to create a pure function. `createPureAdder(a)` returns an inner function that 'remembers' the value of `a`. The inner function `(b) => a + b` is pure because for any given `b`, it will always produce the same result (since `a` is fixed by the closure), and it has no side effects. This pattern is related to currying, a functional programming technique.",
+              "language": "javascript"
+            }
+          ],
+          "relatedQuestions": [],
+          "relatedTasks": [],
+          "tags": [
+            "functional-programming",
+            "pure-functions",
+            "side-effects",
+            "predictability",
+            "testability",
+            "javascript"
+          ],
+          "technology": "JavaScript",
+          "prerequisites": [
+            "basic-functions",
+            "scope",
+            "closures"
+          ],
+          "complexity": 5,
+          "interviewRelevance": 7,
+          "learningPath": "intermediate",
+          "requiredFor": [
+            "react-hooks-principles",
+            "redux-reducers",
+            "functional-patterns"
+          ]
+        },
+        {
+          "id": "theory_closures_and_scope_in_loops",
+          "title": "Closures and Scope in JavaScript: The `var` vs `let`/`const` Loop Problem",
+          "content": "## Understanding Closures and Scope in Loops\nClosures allow a function to 'remember' and access variables from its lexical scope (the environment in which it was declared), even after that scope has closed. This behavior, when combined with JavaScript's different scoping rules for `var` and `let`/`const`, can lead to common pitfalls, especially in loops.\n\n### The `var` Problem in Loops\nWhen `var` is used to declare a loop counter (e.g., `for (var i = 0; i < 3; i++)`), `i` is function-scoped (or global if declared outside a function). This means there is only *one* `i` variable shared across all iterations of the loop. When functions are created inside such a loop and capture `i` in their closures, they all refer to this *single, shared* `i`. By the time these functions are executed later, the loop has already completed, and `i` will have its final value (e.g., 3 in a `for (var i = 0; i < 3; i++)` loop).\n\nThis leads to unexpected behavior where all functions logged `3` instead of `0, 1, 2`.\n\n### The `let`/`const` Solution\n`let` and `const` introduce block-scoping. When `let` (or `const`) is used as a loop counter (e.g., `for (let i = 0; i < 3; i++)`), a *new* lexical environment (and thus a new binding for `i`) is created for each iteration of the loop. This means that each function created inside the loop's body closes over a *distinct* `i` variable specific to that iteration's scope.\n\nConsequently, when these functions are executed, they correctly log the value of `i` from their respective iteration (0, 1, 2, etc.), as each closure 'remembers' its own `i`.",
+          "examples": [
+            {
+              "id": "example_var_in_loop",
+              "title": "Problem with `var` in Loops (Shared `i`)",
+              "code": "// Problem with var in loops\nfunction createFunctions() {\n  var funcs = [];\n  \n  for (var i = 0; i < 3; i++) {\n    // Each function closes over the *same* 'i' variable.\n    // By the time these functions are called, 'i' is already 3.\n    funcs.push(function() {\n      console.log(i);\n    });\n  }\n  \n  return funcs;\n}\n\nconst functions = createFunctions();\nfunctions[0](); // Expected 0, but outputs 3\nfunctions[1](); // Expected 1, but outputs 3\nfunctions[2](); // Expected 2, but outputs 3",
+              "explanation": "In this example, `i` is declared with `var`, making it function-scoped to `createFunctions`. All three anonymous functions created in the loop share the same binding to `i`. By the time `functions[0]()`, `functions[1]()`, and `functions[2]()` are called, the loop has completed, and `i` has incremented to `3`. Therefore, all functions log `3`.",
+              "language": "javascript"
+            },
+            {
+              "id": "example_let_in_loop",
+              "title": "Solution using `let` (Block Scope per Iteration)",
+              "code": "// Solution using let (block scope)\nfunction createFunctionsFixed() {\n  const funcs = [];\n  \n  for (let i = 0; i < 3; i++) {\n    // For each iteration, a *new* 'i' binding is created due to 'let's block scope.\n    // Each function closes over its own 'i' for that specific iteration.\n    funcs.push(function() {\n      console.log(i);\n    });\n  }\n  \n  return funcs;\n}\n\nconst fixedFunctions = createFunctionsFixed();\nfixedFunctions[0](); // Outputs 0\nfixedFunctions[1](); // Outputs 1\nfixedFunctions[2](); // Outputs 2",
+              "explanation": "Here, `i` is declared with `let`, giving it block scope. Crucially, in a `for` loop, `let` creates a *new* lexical environment (and thus a new `i`) for each iteration. This means that each function in `funcs` closes over a *distinct* `i` value corresponding to its iteration (0, 1, and 2 respectively). When executed, each function logs its own captured `i`.",
+              "language": "javascript"
+            }
+          ],
+          "relatedQuestions": [],
+          "relatedTasks": [],
+          "tags": [
+            "closures",
+            "scope",
+            "var",
+            "let",
+            "const",
+            "hoisting",
+            "loops",
+            "javascript"
+          ],
+          "technology": "JavaScript",
+          "prerequisites": [
+            "scope",
+            "functions",
+            "closures-basic"
+          ],
+          "complexity": 6,
+          "interviewRelevance": 8,
+          "learningPath": "intermediate",
+          "requiredFor": [
+            "event-listeners-in-loops",
+            "advanced-javascript-patterns"
+          ]
+        },
+        {
+          "id": "theory_closures_and_module_pattern",
+          "title": "Closures: Data Privacy and the Module Pattern",
+          "content": "## Closures for Data Privacy\nClosures are incredibly powerful for creating data privacy and encapsulation in JavaScript. They allow you to associate data with a function that operates on that data, effectively creating 'private' variables and functions that are not directly accessible from the outside world. This is a common pattern in object-oriented programming where objects encapsulate their state and expose methods to interact with it.\n\nBy leveraging closures, you can define variables and functions within an outer function's scope, and then return inner functions that have access to these 'private' members. The outer function's scope persists as long as the inner functions (which form the closure) are accessible.\n\n### The Module Pattern\nThe Module Pattern is a popular design pattern in JavaScript that takes advantage of closures to implement encapsulation, mimicking classes with private and public members before native class syntax was widespread (and still relevant for various reasons). It typically involves an Immediately Invoked Function Expression (IIFE) that returns an object containing public methods. These public methods, being closures, have access to the private variables and functions defined within the IIFE's scope.\n\n#### Key characteristics of the Module Pattern:\n*   **IIFE (Immediately Invoked Function Expression):** The outer function is an IIFE, which creates a private scope for variables and functions. It runs immediately and its scope is then closed.\n*   **Private Members:** Variables and functions declared inside the IIFE are not directly accessible from outside, acting as private members.\n*   **Public Interface:** The IIFE returns an object literal that exposes selected methods (functions) or properties. These returned methods form the public interface of the module.\n*   **Encapsulation:** The public methods have access to the private members via closure, allowing them to operate on the module's internal state without exposing that state globally.\n\nThis pattern helps avoid polluting the global namespace and promotes a cleaner, more organized codebase, making it easier to manage state and dependencies.",
+          "examples": [
+            {
+              "id": "example_module_pattern_counter",
+              "title": "Module Pattern: Counter Example",
+              "code": "const Counter = (function() {\n  // privateCounter is a 'private' variable, accessible only within the IIFE's scope\n  let privateCounter = 0;\n  \n  // changeBy is a 'private' function, also only accessible within this scope\n  function changeBy(val) {\n    privateCounter += val;\n  }\n  \n  // The IIFE returns an object, which becomes the public interface of the Counter module\n  return {\n    increment: function() {\n      // This public method accesses and modifies privateCounter via the changeBy private function\n      changeBy(1);\n    },\n    decrement: function() {\n      changeBy(-1);\n    },\n    value: function() {\n      // This public method provides read-only access to privateCounter\n      return privateCounter;\n    }\n  };\n})(); // The () immediately invokes the function\n\n// Usage of the public interface:\nCounter.increment();\nCounter.increment();\nconsole.log(Counter.value()); // Outputs: 2\nCounter.decrement();\nconsole.log(Counter.value()); // Outputs: 1\n\n// Attempting to access private members directly fails:\n// console.log(Counter.privateCounter); // Undefined\n// Counter.changeBy(5); // TypeError: Counter.changeBy is not a function",
+              "explanation": "This `Counter` example showcases the module pattern. The IIFE creates a closed-off scope where `privateCounter` and `changeBy` reside, making them private. The returned object exposes `increment`, `decrement`, and `value` as public methods. These public methods form closures over the private scope, allowing them to access and manipulate `privateCounter` without `privateCounter` itself being directly exposed to the global scope. This provides excellent encapsulation.",
+              "language": "javascript"
+            }
+          ],
+          "relatedQuestions": [],
+          "relatedTasks": [],
+          "tags": [
+            "closures",
+            "module-pattern",
+            "data-privacy",
+            "IIFE",
+            "encapsulation",
+            "design-patterns",
+            "javascript",
+            "oop"
+          ],
+          "technology": "JavaScript",
+          "prerequisites": [
+            "closures-basic",
+            "IIFE",
+            "objects",
+            "scope"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 9,
+          "learningPath": "advanced",
+          "requiredFor": [
+            "javascript-design-patterns",
+            "frontend-architecture",
+            "state-management-concepts"
+          ]
+        }
+      ],
+      "questions": [
+        {
+          "id": "question_pure_functions_mcq_1",
+          "topic": "Pure Functions and Side Effects",
+          "level": "easy",
+          "type": "mcq",
+          "question": "Which of the following functions is considered a pure function?",
+          "answer": "Option A: `function sum(a, b) { return a + b; }`",
+          "options": [
+            "Option A: `function sum(a, b) { return a + b; }`",
+            "Option B: `let count = 0; function increment() { count++; return count; }`",
+            "Option C: `function logMessage(message) { console.log(message); return message; }`",
+            "Option D: `function fetchData(url) { return fetch(url); }`"
+          ],
+          "analysisPoints": [
+            "Identifies functions that always return the same output for the same input.",
+            "Recognizes functions that have no side effects (e.g., modifying external state, I/O operations)."
+          ],
+          "keyConcepts": [
+            "Pure functions",
+            "Side effects",
+            "Determinism"
+          ],
+          "evaluationCriteria": [
+            "Understanding of pure function definition.",
+            "Ability to distinguish between pure and impure functions based on side effects and determinism."
+          ],
+          "example": "Option A is a pure function because it only depends on its inputs `a` and `b` and produces a result without causing any external changes. Options B, C, and D all have side effects:\n- Option B modifies an external variable `count`.\n- Option C performs I/O by logging to the console.\n- Option D performs a network request (I/O).",
+          "tags": [
+            "pure-functions",
+            "functional-programming",
+            "side-effects",
+            "mcq"
+          ],
+          "prerequisites": [
+            "basic-functions"
+          ],
+          "complexity": 3,
+          "interviewFrequency": 6,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_pure_functions_open_1",
+          "topic": "Pure Functions and Side Effects",
+          "level": "medium",
+          "type": "open",
+          "question": "Explain the two main characteristics that define a pure function. What are the primary benefits of using pure functions in software development?",
+          "answer": "A pure function has two main characteristics:\n1.  **Determinism (Same Input, Same Output):** For the same set of input arguments, it will always produce the exact same output. It does not rely on any external, mutable state.\n2.  **No Side Effects:** It does not cause any observable changes outside its local scope. This means it doesn't modify external variables, perform I/O operations (like logging, network requests, DOM manipulation), or mutate its input arguments.\n\nPrimary benefits include:\n*   **Predictability:** Easier to reason about and understand, as their behavior is entirely determined by their inputs.\n*   **Testability:** Simple to test because they only require input arguments and produce predictable output. No complex setup or mocking of external states is needed.\n*   **Maintainability:** Less prone to bugs caused by unexpected interactions or hidden dependencies, leading to more robust and easier-to-debug code.\n*   **Cacheability (Memoization):** Their deterministic nature allows for caching results based on input, leading to performance optimizations.\n*   **Parallelization:** Can be run in parallel without fear of race conditions, as they don't share or modify mutable state.",
+          "analysisPoints": [
+            "Detailed explanation of determinism and no side effects.",
+            "Comprehensive listing of benefits (at least 3-4)."
+          ],
+          "keyConcepts": [
+            "Pure functions",
+            "Side effects",
+            "Determinism",
+            "Testability",
+            "Maintainability",
+            "Memoization"
+          ],
+          "evaluationCriteria": [
+            "Clarity and completeness of definition.",
+            "Ability to articulate practical advantages.",
+            "Use of correct terminology."
+          ],
+          "example": "This question tests a candidate's theoretical understanding of pure functions and their practical implications in software design.",
+          "tags": [
+            "pure-functions",
+            "functional-programming",
+            "side-effects",
+            "open-ended"
+          ],
+          "prerequisites": [
+            "functional-programming-concepts"
+          ],
+          "complexity": 6,
+          "interviewFrequency": 7,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_pure_functions_code_1",
+          "topic": "Pure Functions and Side Effects",
+          "level": "medium",
+          "type": "code",
+          "question": "The following function is impure. Refactor it to be a pure function. The goal is to calculate the total price including a sales tax. The original function relies on a global `taxRate` and modifies a global `totalSales` variable. Your pure function should take all necessary data as arguments and return the calculated total, without any side effects.",
+          "answer": "```javascript\n// Original impure function (for context - not part of the pure solution)\nlet taxRate = 0.05; // Global state\nlet totalSales = 0; // Global state\n\nfunction calculateImpureTotalPrice(price) {\n  const taxedPrice = price * (1 + taxRate);\n  totalSales += taxedPrice; // Side effect: modifies global state\n  return taxedPrice;\n}\n\n// Pure function refactor:\nfunction calculatePureTotalPrice(price, rate) {\n  return price * (1 + rate);\n}\n\n// Example usage:\nconst itemPrice = 100;\nconst currentTaxRate = 0.08; // Passed as argument, not global\nconst finalPrice = calculatePureTotalPrice(itemPrice, currentTaxRate);\nconsole.log(finalPrice); // 108\n\n// Original global states remain untouched\n// console.log(taxRate); // 0.05\n// console.log(totalSales); // 0\n```",
+          "options": [],
+          "analysisPoints": [
+            "Successfully identifies and removes reliance on global state.",
+            "Eliminates side effects (e.g., modifying `totalSales`).",
+            "Ensures all necessary inputs are passed as arguments.",
+            "Returns the calculated value without altering external environment."
+          ],
+          "keyConcepts": [
+            "Pure functions",
+            "Side effects",
+            "Function arguments",
+            "Immutability"
+          ],
+          "evaluationCriteria": [
+            "Correct implementation of a pure function.",
+            "Demonstrates understanding of functional programming principles.",
+            "Code cleanliness and readability."
+          ],
+          "example": "This task requires the candidate to identify sources of impurity (global state dependency, global state modification) and refactor the function to strictly adhere to pure function principles by passing all dependencies as arguments and avoiding external state changes.",
+          "tags": [
+            "pure-functions",
+            "refactoring",
+            "code-challenge",
+            "functional-programming"
+          ],
+          "prerequisites": [
+            "javascript-functions",
+            "variables"
+          ],
+          "complexity": 5,
+          "interviewFrequency": 7,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_pure_functions_flashcard_1",
+          "topic": "Pure Functions and Side Effects",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "What is a 'side effect' in the context of functions?",
+          "answer": "A 'side effect' refers to any observable change to the state of a system outside the function's local scope, or any interaction with the outside world (e.g., I/O operations).",
+          "options": [],
+          "analysisPoints": [
+            "Defines side effect concisely."
+          ],
+          "keyConcepts": [
+            "Side effects",
+            "Pure functions"
+          ],
+          "evaluationCriteria": [
+            "Accurate definition recall."
+          ],
+          "example": "Examples of side effects include modifying global variables, logging to the console, making network requests, or altering the DOM.",
+          "tags": [
+            "pure-functions",
+            "side-effects",
+            "flashcard"
+          ],
+          "prerequisites": [],
+          "complexity": 2,
+          "interviewFrequency": 5,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_closures_loops_mcq_1",
+          "topic": "Closures and Scope in Loops",
+          "level": "medium",
+          "type": "mcq",
+          "question": "Consider the following JavaScript code:\n```javascript\nfunction createGreetingFunctions() {\n  const greetings = [];\n  for (var i = 0; i < 3; i++) {\n    greetings.push(function() {\n      console.log('Hello ' + i);\n    });\n  }\n  return greetings;\n}\n\nconst myGreetings = createGreetingFunctions();\nmyGreetings[0]();\nmyGreetings[1]();\nmyGreetings[2]();\n```\nWhat will be the output when `myGreetings[0](); myGreetings[1](); myGreetings[2]();` are executed?",
+          "answer": "Option C: Three times 'Hello 3'",
+          "options": [
+            "Option A: 'Hello 0', 'Hello 1', 'Hello 2'",
+            "Option B: 'Hello undefined', 'Hello undefined', 'Hello undefined'",
+            "Option C: Three times 'Hello 3'",
+            "Option D: 'Hello 0', 'Hello 0', 'Hello 0'"
+          ],
+          "analysisPoints": [
+            "Understanding of `var`'s function scope.",
+            "Understanding of how closures capture variables by reference, not by value, in the context of `var`.",
+            "Knowledge that the loop variable `i` will have its final value when the functions are executed."
+          ],
+          "keyConcepts": [
+            "Closures",
+            "var scope",
+            "Loop behavior",
+            "Lexical environment"
+          ],
+          "evaluationCriteria": [
+            "Correctly predicts the output based on `var` scoping rules.",
+            "Demonstrates understanding of the 'common closure mistake' with `var`."
+          ],
+          "example": "The variable `i` is declared with `var`, which has function scope. There is only one `i` variable shared across all iterations. By the time `myGreetings[0]()`, `myGreetings[1]()`, and `myGreetings[2]()` are called, the loop has already completed, and `i` has been incremented to its final value of `3`. All three functions close over this same, final `i`, leading to 'Hello 3' being logged three times.",
+          "tags": [
+            "closures",
+            "var",
+            "scope",
+            "loops",
+            "javascript",
+            "mcq"
+          ],
+          "prerequisites": [
+            "scope",
+            "closures-basic"
+          ],
+          "complexity": 5,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_closures_loops_open_1",
+          "topic": "Closures and Scope in Loops",
+          "level": "medium",
+          "type": "open",
+          "question": "Explain why using `var` for the loop counter in a `for` loop, when creating functions that close over that counter, leads to unexpected results (e.g., all functions logging the final value of the counter), and how using `let` resolves this issue. Provide a conceptual example.",
+          "answer": "When `var` is used for a loop counter (e.g., `for (var i = 0; i < 3; i++)`), `i` is function-scoped (or global). This means there is only *one single instance* of `i` throughout the entire function's execution. When functions are created inside the loop and reference `i`, they form a closure over this *single shared `i` variable*. By the time these inner functions are actually called (after the loop has finished), `i` has already iterated to its final value (e.g., `3`). Consequently, all functions log this final value.\n\nUsing `let` (or `const`) resolves this because `let` has block scope. In the context of a `for` loop, `let` creates a *new lexical environment and a new binding for the loop variable for each iteration*. This means that each function created inside the loop's body closes over a *distinct, separate `i` variable* specific to its particular iteration. Therefore, when these functions are executed, they correctly access the `i` value from their own captured lexical environment, producing the expected sequence (0, 1, 2).\n\n**Conceptual Example:**\n`var`'s behavior is like handing out slips of paper to three people, all saying 'refer to the value in box X'. When box X is finally `3`, all three people will read `3`.\n`let`'s behavior is like handing out slips of paper to three people, each saying 'refer to the value in *your own personal* box X', and for each person, their box X contains a different, specific number (0, 1, or 2) from when their slip was created.",
+          "analysisPoints": [
+            "Clearly distinguishes `var` (function scope, single binding) from `let` (block scope, new binding per iteration).",
+            "Explains how closures interact with these scoping rules.",
+            "Provides a clear conceptual example to solidify understanding."
+          ],
+          "keyConcepts": [
+            "Closures",
+            "var",
+            "let",
+            "function scope",
+            "block scope",
+            "lexical environment",
+            "loop behavior"
+          ],
+          "evaluationCriteria": [
+            "Accuracy of explanation regarding scoping.",
+            "Clarity of the conceptual difference.",
+            "Completeness of the answer."
+          ],
+          "example": "This question assesses the depth of understanding of JavaScript's scoping rules and closures, particularly a common interview scenario.",
+          "tags": [
+            "closures",
+            "var",
+            "let",
+            "scope",
+            "loops",
+            "open-ended"
+          ],
+          "prerequisites": [
+            "scope",
+            "closures-basic"
+          ],
+          "complexity": 7,
+          "interviewFrequency": 9,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_closures_loops_code_1",
+          "topic": "Closures and Scope in Loops",
+          "level": "easy",
+          "type": "code",
+          "question": "Modify the following code snippet to ensure that when `funcs[0]()`, `funcs[1]()`, and `funcs[2]()` are called, they output `0`, `1`, and `2` respectively, instead of `3` three times.",
+          "answer": "```javascript\nfunction createFunctions() {\n  const funcs = [];\n  \n  for (let i = 0; i < 3; i++) { // Changed 'var' to 'let'\n    funcs.push(function() {\n      console.log(i);\n    });\n  }\n  \n  return funcs;\n}\n\nconst fixedFunctions = createFunctions();\nfixedFunctions[0](); // Expected: 0\nfixedFunctions[1](); // Expected: 1\nfixedFunctions[2](); // Expected: 2\n```",
+          "options": [],
+          "analysisPoints": [
+            "Correctly identifies `var` as the source of the problem.",
+            "Applies `let` as the solution."
+          ],
+          "keyConcepts": [
+            "Closures",
+            "let",
+            "block scope",
+            "looping"
+          ],
+          "evaluationCriteria": [
+            "Correct implementation.",
+            "Efficiency of solution."
+          ],
+          "example": "The simplest and most modern solution is to change `var i` to `let i`. `let` creates a new `i` binding for each iteration of the loop, ensuring that each function closes over its unique `i` value.",
+          "tags": [
+            "closures",
+            "let",
+            "scope",
+            "loops",
+            "code-challenge"
+          ],
+          "prerequisites": [
+            "var-let-const",
+            "closures-basic"
+          ],
+          "complexity": 3,
+          "interviewFrequency": 6,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_closures_loops_flashcard_1",
+          "topic": "Closures and Scope in Loops",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "In a `for` loop, what is the primary difference in scoping behavior between `var i` and `let i` when a function is declared inside the loop and accesses `i`?",
+          "answer": "`var i` creates a single, function-scoped `i` that all inner functions close over, leading to them all seeing the final value of `i`. `let i` creates a new, block-scoped `i` for each iteration of the loop, so each inner function closes over its own unique `i` from its specific iteration.",
+          "options": [],
+          "analysisPoints": [
+            "Highlights the key difference: single shared `var` vs. new `let` per iteration."
+          ],
+          "keyConcepts": [
+            "var",
+            "let",
+            "function scope",
+            "block scope",
+            "closures"
+          ],
+          "evaluationCriteria": [
+            "Accurate and concise explanation."
+          ],
+          "example": "This is a common interview question to quickly gauge understanding of `var` vs. `let` with closures.",
+          "tags": [
+            "closures",
+            "var",
+            "let",
+            "scope",
+            "flashcard"
+          ],
+          "prerequisites": [],
+          "complexity": 3,
+          "interviewFrequency": 7,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_module_pattern_mcq_1",
+          "topic": "Closures and the Module Pattern",
+          "level": "medium",
+          "type": "mcq",
+          "question": "Consider the following implementation of the Module Pattern:\n```javascript\nconst MyModule = (function() {\n  let secretData = 'Top Secret';\n\n  function revealSecret() {\n    return secretData;\n  }\n\n  return {\n    getSecret: function() {\n      return revealSecret();\n    },\n    changeSecret: function(newSecret) {\n      secretData = newSecret;\n    }\n  };\n})();\n\nconsole.log(MyModule.getSecret());\nMyModule.changeSecret('New Secret');\nconsole.log(MyModule.getSecret());\n// console.log(MyModule.secretData); // Will cause error or be undefined\n```\nWhich statement accurately describes `secretData` and `revealSecret` in this module?",
+          "answer": "Option A: `secretData` and `revealSecret` are private members, accessible only via the public methods `getSecret` and `changeSecret`.",
+          "options": [
+            "Option A: `secretData` and `revealSecret` are private members, accessible only via the public methods `getSecret` and `changeSecret`.",
+            "Option B: `secretData` is private, but `revealSecret` is public because it's a function.",
+            "Option C: Both `secretData` and `revealSecret` are public and can be accessed directly using `MyModule.secretData` and `MyModule.revealSecret()`.",
+            "Option D: `secretData` and `revealSecret` are global variables and functions."
+          ],
+          "analysisPoints": [
+            "Understanding of the IIFE's role in creating a private scope.",
+            "Identification of what constitutes 'private' vs. 'public' in the Module Pattern.",
+            "Recognition of how closures enable public methods to access private data."
+          ],
+          "keyConcepts": [
+            "Module Pattern",
+            "Closures",
+            "IIFE",
+            "Encapsulation",
+            "Private members",
+            "Public interface"
+          ],
+          "evaluationCriteria": [
+            "Correctly identifies private and public parts of a module.",
+            "Demonstrates understanding of data encapsulation via closures."
+          ],
+          "example": "In the Module Pattern, variables and functions defined within the IIFE (like `secretData` and `revealSecret`) are encapsulated and remain private to that scope. They are not directly exposed to the outside. Only the methods returned in the public interface (like `getSecret` and `changeSecret`) can access them, leveraging closures.",
+          "tags": [
+            "module-pattern",
+            "closures",
+            "encapsulation",
+            "design-patterns",
+            "mcq"
+          ],
+          "prerequisites": [
+            "closures-basic",
+            "IIFE"
+          ],
+          "complexity": 6,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_module_pattern_open_1",
+          "topic": "Closures and the Module Pattern",
+          "level": "hard",
+          "type": "open",
+          "question": "Describe the JavaScript Module Pattern. How does it leverage closures to achieve encapsulation and data privacy? Discuss its main advantages and disadvantages compared to ES6 Modules or JavaScript classes.",
+          "answer": "The **Module Pattern** is a JavaScript design pattern that provides a way to encapsulate 'private' variables and methods, while exposing a 'public' interface. It typically involves an Immediately Invoked Function Expression (IIFE) that returns an object containing public methods.\n\n**How it leverages Closures for Encapsulation:**\n1.  **Private Scope:** The IIFE creates a new function scope. Any variables (`let`, `const`, `var`) or functions declared inside this IIFE are private to that scope and cannot be directly accessed from outside the IIFE.\n2.  **Public Interface:** The IIFE returns an object (or a single function) that contains the methods and properties intended to be public.\n3.  **Closure:** The public methods returned by the IIFE are closures. They 'remember' and can access the variables and functions from their parent (the IIFE's) scope, even after the IIFE has finished executing. This allows the public methods to operate on the 'private' data while keeping that data hidden from external direct access, thereby achieving data privacy and encapsulation.\n\n**Advantages:**\n*   **Data Privacy/Encapsulation:** Excellent for hiding internal implementation details and preventing global namespace pollution.\n*   **Clear Separation:** Provides a clear distinction between private and public members.\n*   **No Global Variables:** Reduces the risk of naming conflicts.\n*   **Legacy Browser Support:** Works in older JavaScript environments without transpilation (unlike ES6 modules or classes).\n*   **Singletons:** Easily create a single instance of a module.\n\n**Disadvantages:**\n*   **Debugging:** Accessing private members in a debugger can be tricky.\n*   **Extensibility/Inheritance:** Not straightforward to extend or inherit from modules created this way compared to classes.\n*   **Readability (for new developers):** The IIFE syntax might be less intuitive than `class` or `import/export`.\n*   **No Private Methods (strictly):** While methods declared inside are 'private' in access, they are not strictly private in the same way `#private` fields in ES classes are.\n\n**Comparison to ES6 Modules/Classes:**\n*   **ES6 Modules (`import`/`export`):** Provide a native, standardized way for modularity. They inherently create a private scope for each module file. Unlike the Module Pattern's IIFE, ES6 modules are statically resolved (at compile time/parse time), enabling tree-shaking and better tooling. They don't require an IIFE, making syntax cleaner. The Module Pattern is primarily for browser environments without native module support or when creating a 'singleton' instance. ES6 Modules are the modern standard for modularity.\n*   **JavaScript Classes (`class` keyword):** Primarily focused on object-oriented programming with constructors, methods, and inheritance. While they provide encapsulation, their traditional private members were achieved through conventions (e.g., `_propertyName`) until recently with `#private` fields. The Module Pattern focuses on creating singleton instances or factories for related functionality, while classes are for creating multiple instances of objects with similar behavior. Classes are generally better for inheritance and defining blueprints for objects.",
+          "analysisPoints": [
+            "Comprehensive explanation of the Module Pattern and its components.",
+            "Detailed explanation of how closures enable encapsulation.",
+            "Thorough discussion of advantages and disadvantages.",
+            "Clear comparison with ES6 Modules and Classes, highlighting key differences in purpose, syntax, and benefits."
+          ],
+          "keyConcepts": [
+            "Module Pattern",
+            "Closures",
+            "IIFE",
+            "Encapsulation",
+            "Data privacy",
+            "ES6 Modules",
+            "JavaScript Classes",
+            "Design patterns"
+          ],
+          "evaluationCriteria": [
+            "Depth of understanding of all related concepts.",
+            "Ability to articulate complex relationships and comparisons.",
+            "Structure and clarity of explanation."
+          ],
+          "example": "This question tests advanced JavaScript knowledge, combining understanding of closures with design patterns and modern language features. It requires a nuanced answer.",
+          "tags": [
+            "module-pattern",
+            "closures",
+            "encapsulation",
+            "design-patterns",
+            "ES6-modules",
+            "classes",
+            "open-ended"
+          ],
+          "prerequisites": [
+            "closures-advanced",
+            "IIFE",
+            "ES6-modules",
+            "javascript-classes"
+          ],
+          "complexity": 9,
+          "interviewFrequency": 9,
+          "learningPath": "advanced"
+        },
+        {
+          "id": "question_module_pattern_code_1",
+          "topic": "Closures and the Module Pattern",
+          "level": "medium",
+          "type": "code",
+          "question": "Implement a `ShoppingCart` module using the Module Pattern. It should have:\n-   A private array `items` to store products (each product is an object `{ name: string, price: number }`).\n-   A private helper function `calculateTotal` that sums up the prices of all items.\n-   Public methods:\n    -   `addItem(product)`: Adds a product to the `items` array.\n    -   `removeItem(productName)`: Removes a product by name from the `items` array.\n    -   `getTotal()`: Returns the total price of all items using `calculateTotal`.\n    -   `getCartContents()`: Returns a copy of the `items` array to prevent external mutation.",
+          "answer": "```javascript\nconst ShoppingCart = (function() {\n  let items = []; // Private array to store items\n\n  // Private helper function\n  function calculateTotal() {\n    return items.reduce((sum, item) => sum + item.price, 0);\n  }\n\n  return { // Public interface\n    addItem: function(product) {\n      if (product && typeof product.name === 'string' && typeof product.price === 'number') {\n        items.push(product);\n        console.log(`${product.name} added.`);\n      } else {\n        console.warn('Invalid product object.');\n      }\n    },\n    removeItem: function(productName) {\n      const initialLength = items.length;\n      items = items.filter(item => item.name !== productName);\n      if (items.length < initialLength) {\n        console.log(`${productName} removed.`);\n      } else {\n        console.log(`${productName} not found in cart.`);\n      }\n    },\n    getTotal: function() {\n      return calculateTotal();\n    },\n    getCartContents: function() {\n      // Return a copy to prevent external mutation of the private 'items' array\n      return [...items]; \n    }\n  };\n})();\n\n// Example usage:\nShoppingCart.addItem({ name: 'Laptop', price: 1200 });\nShoppingCart.addItem({ name: 'Mouse', price: 25 });\nShoppingCart.addItem({ name: 'Keyboard', price: 75 });\n\nconsole.log('Current cart:', ShoppingCart.getCartContents());\nconsole.log('Total:', ShoppingCart.getTotal()); // Expected: 1300\n\nShoppingCart.removeItem('Mouse');\nconsole.log('Current cart after removal:', ShoppingCart.getCartContents());\nconsole.log('New total:', ShoppingCart.getTotal()); // Expected: 1275\n\nShoppingCart.addItem({ name: 'Monitor', price: 300 });\nconsole.log('Final total:', ShoppingCart.getTotal()); // Expected: 1575\n\n// Attempt to access private members (will fail/be undefined):\n// console.log(ShoppingCart.items);\n// console.log(ShoppingCart.calculateTotal());\n```",
+          "options": [],
+          "analysisPoints": [
+            "Correctly uses an IIFE to establish a private scope.",
+            "Defines private variables and functions within the IIFE.",
+            "Exposes public methods through the returned object.",
+            "Public methods correctly access private members via closure.",
+            "Handles data immutability for `getCartContents` by returning a copy.",
+            "Includes basic input validation for `addItem`."
+          ],
+          "keyConcepts": [
+            "Module Pattern",
+            "Closures",
+            "IIFE",
+            "Encapsulation",
+            "Data privacy",
+            "Array methods (filter, reduce, spread)",
+            "Immutability"
+          ],
+          "evaluationCriteria": [
+            "Adherence to the Module Pattern structure.",
+            "Correct implementation of all required functionalities.",
+            "Demonstrates understanding of data privacy and immutability.",
+            "Cleanliness and robustness of code."
+          ],
+          "example": "This task tests the practical application of the Module Pattern to build a common frontend component, emphasizing data encapsulation and preventing direct manipulation of internal state.",
+          "tags": [
+            "module-pattern",
+            "closures",
+            "encapsulation",
+            "data-structures",
+            "code-challenge"
+          ],
+          "prerequisites": [
+            "closures-basic",
+            "IIFE",
+            "array-methods"
+          ],
+          "complexity": 7,
+          "interviewFrequency": 8,
+          "learningPath": "advanced"
+        },
+        {
+          "id": "question_module_pattern_flashcard_1",
+          "topic": "Closures and the Module Pattern",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "What is the primary purpose of the Immediately Invoked Function Expression (IIFE) in the JavaScript Module Pattern?",
+          "answer": "The primary purpose of the IIFE in the Module Pattern is to create a private scope for variables and functions, preventing them from polluting the global namespace and ensuring they are not directly accessible from outside.",
+          "options": [],
+          "analysisPoints": [
+            "Identifies IIFE's role in creating private scope.",
+            "Mentions preventing global namespace pollution."
+          ],
+          "keyConcepts": [
+            "IIFE",
+            "Module Pattern",
+            "Scope",
+            "Global namespace"
+          ],
+          "evaluationCriteria": [
+            "Accurate recall of IIFE's role."
+          ],
+          "example": "The IIFE creates a 'sandbox' where private logic resides, exposing only what is explicitly returned.",
+          "tags": [
+            "IIFE",
+            "module-pattern",
+            "flashcard"
+          ],
+          "prerequisites": [],
+          "complexity": 3,
+          "interviewFrequency": 6,
+          "learningPath": "beginner"
+        }
+      ],
+      "tasks": [
+        {
+          "id": "task_pure_functions_1",
+          "title": "Implement a Pure Data Transformation Utility",
+          "description": "\nImplement a `transformUserData` pure function that takes an array of raw user objects and a configuration object, and returns a new array of processed user objects. The function should perform the following transformations:\n\n1.  **Filter by Active Status**: Only include users where `isActive` is `true`.\n2.  **Add `fullName`**: Create a `fullName` property by concatenating `firstName` and `lastName`.\n3.  **Anonymize Email (optional)**: If `config.anonymizeEmail` is `true`, replace the `email` property with a placeholder like `'anonymized@example.com'`.\n4.  **Select Fields**: Only include the fields specified in `config.fieldsToInclude` (e.g., `['id', 'fullName', 'email']`).\n\n**Requirements:**\n*   The function must be **pure**: it should not modify the input `users` array or `config` object, and it should not have any side effects.\n*   Return a new array of objects.\n*   Handle cases where `config.anonymizeEmail` or `config.fieldsToInclude` might be missing or invalid.\n",
+          "difficulty": "medium",
+          "startingCode": "/**\n * Transforms an array of user data based on a configuration.\n * This function must be pure.\n * \n * @param {Array<Object>} users - An array of raw user objects.\n * @param {Object} config - Configuration object.\n * @param {boolean} [config.anonymizeEmail=false] - Whether to anonymize user emails.\n * @param {Array<string>} [config.fieldsToInclude=['id', 'firstName', 'lastName', 'email', 'isActive']] - Array of fields to include in the output objects.\n * @returns {Array<Object>} A new array of transformed user objects.\n */\nfunction transformUserData(users, config = {}) {\n  // TODO: Implement the required functionality\n  // 1. Filter by isActive\n  // 2. Add fullName\n  // 3. Anonymize email (conditionally)\n  // 4. Select fields\n\n  // Ensure config has default values if properties are missing\n  const effectiveConfig = {\n    anonymizeEmail: false,\n    fieldsToInclude: ['id', 'firstName', 'lastName', 'email', 'isActive'],\n    ...config\n  };\n\n  return []; // Replace with your implementation\n}\n",
+          "solutionCode": "/**\n * Transforms an array of user data based on a configuration.\n * This function must be pure.\n * \n * @param {Array<Object>} users - An array of raw user objects.\n * @param {Object} config - Configuration object.\n * @param {boolean} [config.anonymizeEmail=false] - Whether to anonymize user emails.\n * @param {Array<string>} [config.fieldsToInclude=['id', 'firstName', 'lastName', 'email', 'isActive']] - Array of fields to include in the output objects.\n * @returns {Array<Object>} A new array of transformed user objects.\n */\nfunction transformUserData(users, config = {}) {\n  // Ensure config has default values and immutability\n  const effectiveConfig = {\n    anonymizeEmail: typeof config.anonymizeEmail === 'boolean' ? config.anonymizeEmail : false,\n    fieldsToInclude: Array.isArray(config.fieldsToInclude) ? [...config.fieldsToInclude] : ['id', 'firstName', 'lastName', 'email', 'isActive'],\n    // Deep copy other properties if needed, but for primitive config, spread is fine.\n    ...config\n  };\n\n  if (!Array.isArray(users)) {\n    return []; // Handle invalid input gracefully for purity\n  }\n\n  const processedUsers = users\n    .filter(user => user && user.isActive === true) // 1. Filter by Active Status\n    .map(user => {\n      // Create a new user object to avoid mutating the original\n      const newUser = { ...user };\n\n      // 2. Add fullName\n      if (newUser.firstName && newUser.lastName) {\n        newUser.fullName = `${newUser.firstName} ${newUser.lastName}`;\n      }\n\n      // 3. Anonymize Email (conditionally)\n      if (effectiveConfig.anonymizeEmail && newUser.email) {\n        newUser.email = 'anonymized@example.com';\n      }\n\n      return newUser;\n    })\n    .map(user => {\n      // 4. Select Fields\n      const selectedFieldsUser = {};\n      effectiveConfig.fieldsToInclude.forEach(field => {\n        if (user.hasOwnProperty(field)) {\n          selectedFieldsUser[field] = user[field];\n        }\n      });\n      return selectedFieldsUser;\n    });\n\n  return processedUsers;\n}\n\n",
+          "testCases": [
+            "Test Case 1: Basic filtering and full name generation\n   Input: `users = [{ id: 1, firstName: 'Alice', lastName: 'Smith', email: 'alice@example.com', isActive: true }, { id: 2, firstName: 'Bob', lastName: 'Johnson', email: 'bob@example.com', isActive: false }]`, `config = {}`\n   Expected: `[{ id: 1, firstName: 'Alice', lastName: 'Smith', email: 'alice@example.com', isActive: true, fullName: 'Alice Smith' }]`\n",
+            "Test Case 2: Anonymize email and specific fields\n   Input: `users = [{ id: 1, firstName: 'Alice', lastName: 'Smith', email: 'alice@example.com', isActive: true }]`, `config = { anonymizeEmail: true, fieldsToInclude: ['id', 'fullName', 'email'] }`\n   Expected: `[{ id: 1, fullName: 'Alice Smith', email: 'anonymized@example.com' }]`\n",
+            "Test Case 3: Empty users array\n   Input: `users = []`, `config = {}`\n   Expected: `[]`\n",
+            "Test Case 4: No active users\n   Input: `users = [{ id: 1, firstName: 'Alice', lastName: 'Smith', email: 'alice@example.com', isActive: false }]`, `config = {}`\n   Expected: `[]`\n",
+            "Test Case 5: Missing fields in input user objects\n   Input: `users = [{ id: 3, isActive: true, firstName: 'Charlie' }]`, `config = { fieldsToInclude: ['id', 'fullName', 'email'] }`\n   Expected: `[{ id: 3, fullName: 'Charlie undefined' }]` (or `null` for missing part of name, depending on desired robustness)\n",
+            "Test Case 6: Invalid `fieldsToInclude` in config\n   Input: `users = [{ id: 1, firstName: 'Alice', lastName: 'Smith', email: 'alice@example.com', isActive: true }]`, `config = { fieldsToInclude: null }`\n   Expected: `[{ id: 1, firstName: 'Alice', lastName: 'Smith', email: 'alice@example.com', isActive: true, fullName: 'Alice Smith' }]` (should use default fields)\n"
+          ],
+          "hints": [
+            "Remember to use non-mutating array methods like `filter` and `map`.",
+            "When transforming objects, always create new objects (`{...user}`) to avoid side effects on the original data.",
+            "Default parameter values or object destructuring with defaults can help handle missing configuration properties elegantly.",
+            "Consider chaining `filter` and `map` operations for clarity."
+          ],
+          "tags": [
+            "pure-functions",
+            "functional-programming",
+            "array-methods",
+            "data-transformation",
+            "immutability"
+          ],
+          "timeEstimate": 45,
+          "prerequisites": [
+            "pure-functions",
+            "array-methods",
+            "object-spread-syntax"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 8,
+          "learningPath": "intermediate",
+          "relatedConcepts": [
+            "functional-programming-patterns",
+            "data-immutability",
+            "higher-order-functions"
+          ]
+        },
+        {
+          "id": "task_closures_loops_1",
+          "title": "Create a Dynamic Click Handler Factory",
+          "description": "\nImplement a function `createClickHandlers` that takes an array of `items` (strings). For each item, it should generate a click handler function. When a generated handler is invoked, it should `console.log` a message indicating which specific item it corresponds to. This task explicitly tests your understanding of closures in loops.\n\n**Requirements:**\n*   The `createClickHandlers` function should return an array of functions.\n*   Each function in the returned array, when called, must `console.log` the correct item name corresponding to its position in the original array (e.g., the first function logs the first item, the second logs the second, etc.).\n*   You *must* use a loop (e.g., `for` loop).\n*   Ensure the solution correctly uses closures to capture the correct `item` for each handler, similar to how `let` fixes the `var` loop problem.\n",
+          "difficulty": "medium",
+          "startingCode": "/**\n * Creates an array of click handler functions, each logging a specific item.\n * @param {Array<string>} items - An array of item names.\n * @returns {Array<Function>} An array of functions, where each function logs a specific item.\n */\nfunction createClickHandlers(items) {\n  const handlers = [];\n\n  for (let i = 0; i < items.length; i++) {\n    // TODO: Create a function that closes over the correct item for this iteration.\n    // Push this function into the 'handlers' array.\n  }\n\n  return handlers;\n}\n\n// Example Usage (for testing):\n// const productNames = ['Apple', 'Banana', 'Cherry'];\n// const productClickHandlers = createClickHandlers(productNames);\n// productClickHandlers[0](); // Should log: 'Clicked on: Apple'\n// productClickHandlers[1](); // Should log: 'Clicked on: Banana'\n// productClickHandlers[2](); // Should log: 'Clicked on: Cherry'\n",
+          "solutionCode": "/**\n * Creates an array of click handler functions, each logging a specific item.\n * @param {Array<string>} items - An array of item names.\n * @returns {Array<Function>} An array of functions, where each function logs a specific item.\n */\nfunction createClickHandlers(items) {\n  const handlers = [];\n\n  for (let i = 0; i < items.length; i++) {\n    // Using 'let' ensures that a new 'i' (and thus a new 'item' lookup) is bound for each iteration,\n    // and the closure captures the 'item' value specific to that iteration.\n    const item = items[i]; // Explicitly capture item for clarity, though not strictly necessary with 'let i'\n    handlers.push(function() {\n      console.log(`Clicked on: ${item}`);\n    });\n  }\n\n  return handlers;\n}\n\n// Alternative using IIFE (older approach but demonstrates strong closure concept):\n/*\nfunction createClickHandlersIIFE(items) {\n  const handlers = [];\n  for (var i = 0; i < items.length; i++) {\n    (function(itemIndex) {\n      handlers.push(function() {\n        console.log(`Clicked on: ${items[itemIndex]}`);\n      });\n    })(i); // Pass 'i' into the IIFE to capture its value per iteration\n  }\n  return handlers;\n}\n*/\n",
+          "testCases": [
+            "Test Case 1: Standard usage with three items\n   Input: `items = ['Red', 'Green', 'Blue']`\n   Execution: `const handlers = createClickHandlers(items); handlers[0](); handlers[1](); handlers[2]();`\n   Expected Output: `Clicked on: Red`, `Clicked on: Green`, `Clicked on: Blue` (each on a new line)\n",
+            "Test Case 2: Empty array\n   Input: `items = []`\n   Execution: `const handlers = createClickHandlers(items); console.log(handlers.length);`\n   Expected Output: `0`\n",
+            "Test Case 3: Single item array\n   Input: `items = ['OnlyOne']`\n   Execution: `const handlers = createClickHandlers(items); handlers[0]();`\n   Expected Output: `Clicked on: OnlyOne`\n",
+            "Test Case 4: Long array to check consistency\n   Input: `items = Array.from({length: 10}, (_, i) => `Item ${i}`);`\n   Execution: `const handlers = createClickHandlers(items); handlers[5](); handlers[9]();`\n   Expected Output: `Clicked on: Item 5`, `Clicked on: Item 9`\n"
+          ],
+          "hints": [
+            "Recall the difference between `var` and `let` in loop contexts.",
+            "How can you ensure that each function 'remembers' the `item` value from its specific iteration?",
+            "Think about what variable `i` (or `item`) refers to at the moment the inner function is *defined* versus when it's *executed*."
+          ],
+          "tags": [
+            "closures",
+            "loops",
+            "javascript",
+            "event-handlers",
+            "scope"
+          ],
+          "timeEstimate": 30,
+          "prerequisites": [
+            "closures-and-scope-in-loops",
+            "arrays",
+            "functions"
+          ],
+          "complexity": 6,
+          "interviewRelevance": 7,
+          "learningPath": "intermediate",
+          "relatedConcepts": [
+            "lexical-scoping",
+            "event-listeners",
+            "dynamic-ui"
+          ]
+        },
+        {
+          "id": "task_module_pattern_1",
+          "title": "Build a Theme Manager Module",
+          "description": "\nCreate a `ThemeManager` module using the Module Pattern. This module should allow an application to manage its current theme (e.g., 'light', 'dark', 'contrast') while keeping the theme state private.\n\n**Requirements:**\n*   **Private `currentTheme`**: A private variable to store the current theme string, initialized to a default (e.g., 'light').\n*   **Private `validThemes`**: A private array of valid theme names (e.g., `['light', 'dark', 'contrast']`).\n*   **Public `getTheme()`**: A method that returns the `currentTheme`.\n*   **Public `setTheme(newTheme)`**: A method that updates `currentTheme` only if `newTheme` is present in `validThemes`. It should also `console.log` a message indicating if the theme was successfully set or if it's an invalid theme.\n*   **Public `getValidThemes()`**: A method that returns a *copy* of the `validThemes` array to prevent external mutation.\n*   **Public `toggleTheme()`**: A method that cycles through `validThemes`. If the current theme is 'light', it goes to 'dark'; if 'dark', it goes to 'contrast'; if 'contrast', it goes to 'light'. (This is a simplified toggle for a fixed set of 3 themes).\n",
+          "difficulty": "medium",
+          "startingCode": "/**\n * ThemeManager module for managing application themes.\n * Implemented using the Module Pattern.\n */\nconst ThemeManager = (function() {\n  // Private variables\n  let currentTheme = 'light'; // Default theme\n  const validThemes = ['light', 'dark', 'contrast'];\n\n  // Private helper functions (optional, but good practice)\n\n  return { // Public interface\n    // TODO: Implement getTheme, setTheme, getValidThemes, toggleTheme\n  };\n})();\n\n// Example Usage:\n// console.log(ThemeManager.getTheme()); // Should be 'light'\n// ThemeManager.setTheme('dark');\n// console.log(ThemeManager.getTheme()); // Should be 'dark'\n// ThemeManager.setTheme('invalid'); // Should log invalid message\n// console.log(ThemeManager.getValidThemes()); // Should return ['light', 'dark', 'contrast']\n// ThemeManager.toggleTheme(); // Should change to 'contrast'\n// console.log(ThemeManager.getTheme()); // Should be 'contrast'\n// ThemeManager.toggleTheme(); // Should change to 'light'\n// console.log(ThemeManager.getTheme()); // Should be 'light'\n",
+          "solutionCode": "/**\n * ThemeManager module for managing application themes.\n * Implemented using the Module Pattern.\n */\nconst ThemeManager = (function() {\n  // Private variables\n  let currentTheme = 'light'; // Default theme\n  const validThemes = ['light', 'dark', 'contrast'];\n\n  // Private helper function to find the next theme in the cycle\n  function getNextThemeInCycle() {\n    const currentIndex = validThemes.indexOf(currentTheme);\n    const nextIndex = (currentIndex + 1) % validThemes.length;\n    return validThemes[nextIndex];\n  }\n\n  return { // Public interface\n    getTheme: function() {\n      return currentTheme;\n    },\n    setTheme: function(newTheme) {\n      if (validThemes.includes(newTheme)) {\n        currentTheme = newTheme;\n        console.log(`Theme set to: ${currentTheme}`);\n        return true;\n      } else {\n        console.warn(`Invalid theme: '${newTheme}'. Valid themes are: ${validThemes.join(', ')}`);\n        return false;\n      }\n    },\n    getValidThemes: function() {\n      // Return a copy to prevent external mutation\n      return [...validThemes]; \n    },\n    toggleTheme: function() {\n      currentTheme = getNextThemeInCycle();\n      console.log(`Theme toggled to: ${currentTheme}`);\n      return currentTheme;\n    }\n  };\n})();\n",
+          "testCases": [
+            "Test Case 1: Initial state and `getTheme()`\n   Execution: `console.log(ThemeManager.getTheme());`\n   Expected Output: `light`\n",
+            "Test Case 2: `setTheme()` with valid theme\n   Execution: `ThemeManager.setTheme('dark'); console.log(ThemeManager.getTheme());`\n   Expected Output: `Theme set to: dark`, `dark`\n",
+            "Test Case 3: `setTheme()` with invalid theme\n   Execution: `ThemeManager.setTheme('ocean'); console.log(ThemeManager.getTheme());`\n   Expected Output: `Invalid theme: 'ocean'. Valid themes are: light, dark, contrast`, (theme should remain 'dark' from previous test, or 'light' if run independently)\n",
+            "Test Case 4: `getValidThemes()` returns a copy\n   Execution: `const themes = ThemeManager.getValidThemes(); themes.push('new'); console.log(ThemeManager.getValidThemes().length);`\n   Expected Output: `3` (original `validThemes` should be unaffected)\n",
+            "Test Case 5: `toggleTheme()` functionality\n   Execution: `ThemeManager.setTheme('light'); ThemeManager.toggleTheme(); console.log(ThemeManager.getTheme()); ThemeManager.toggleTheme(); console.log(ThemeManager.getTheme()); ThemeManager.toggleTheme(); console.log(ThemeManager.getTheme());`\n   Expected Output: `Theme set to: light`, `Theme toggled to: dark`, `dark`, `Theme toggled to: contrast`, `contrast`, `Theme toggled to: light`, `light`\n"
+          ],
+          "hints": [
+            "An IIFE is crucial for establishing the private scope.",
+            "Ensure public methods returned by the IIFE are closures that can access the private state.",
+            "Remember to return a *copy* of arrays or objects when exposing them publicly to maintain encapsulation.",
+            "For `toggleTheme`, consider using `indexOf` and the modulo operator (`%`) to cycle through the `validThemes` array."
+          ],
+          "tags": [
+            "module-pattern",
+            "closures",
+            "encapsulation",
+            "state-management",
+            "design-patterns",
+            "frontend-architecture"
+          ],
+          "timeEstimate": 60,
+          "prerequisites": [
+            "closures-and-module-pattern",
+            "arrays-basic",
+            "IIFE"
+          ],
+          "complexity": 8,
+          "interviewRelevance": 9,
+          "learningPath": "advanced",
+          "relatedConcepts": [
+            "singleton-pattern",
+            "factory-functions",
+            "frontend-state"
+          ]
+        }
+      ]
+    }
+  }
+]

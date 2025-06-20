@@ -1,0 +1,1303 @@
+[
+  {
+    "id": "2291dfcd-50cf-4a3f-becb-ef644635536b",
+    "startLine": 13600,
+    "endLine": 13699,
+    "processedDate": "2025-06-17T13:34:14.664Z",
+    "content": {
+      "logicalBlockInfo": {
+        "suggestedEndLine": -1
+      },
+      "theory": [
+        {
+          "id": "theory_redux_core_concepts",
+          "title": "Redux Core Concepts",
+          "content": "Redux is a predictable state container for JavaScript apps, primarily used for managing application state. It helps you write applications that behave consistently across different environments (client, server, and native), and are easy to test. It provides a single source of truth for your application's state, making state changes predictable and debuggable.\n\n## Key Concepts\n\n### Store\nThe **Store** is a single JavaScript object that holds the entire application state tree. There should only be one store in a Redux application. It's responsible for:\n- Holding the application state.\n- Allowing access to the state via `getState()`.\n- Allowing state to be updated via `dispatch(action)`.\n- Registering listeners via `subscribe(listener)`.\n- Handling unregistering of listeners via the function returned by `subscribe(listener)`.\n\n### Actions\n**Actions** are plain JavaScript objects that describe *what happened*. They are the only way to send data from your application to the Red Redux store. Actions must have a `type` property, which is usually a string constant, indicating the type of action performed. Other properties can contain any necessary data.\n\n### Action Creators\n**Action Creators** are functions that create and return action objects. They are not strictly necessary but are a good practice to encapsulate action creation logic, making actions reusable and easier to manage.\n\n### Reducers\n**Reducers** are pure functions that take the current `state` and an `action` as arguments, and return a *new state*. They specify how the application's state changes in response to actions. Reducers must be pure (no side effects) and never mutate the original state directly; instead, they should return a new state object if changes are made, or the original state if no changes are needed.\n\n### Dispatch\n`dispatch` is the method used to send actions to the Redux store. When an action is dispatched, Redux will pass it to the root reducer, which then processes the action and updates the state. It's the only way to trigger a state change.\n\n### Selectors\n**Selectors** are functions used to extract specific pieces of data from the Redux store's state. They are crucial for optimizing performance by preventing unnecessary re-renders in connected components when unrelated parts of the state change. They also encapsulate the logic for deriving data, making it reusable and easier to test.\n",
+          "examples": [
+            {
+              "id": "example_redux_core_1",
+              "title": "Action and Action Creator",
+              "code": "const ADD_TODO = 'ADD_TODO';\n\n// Action\nconst addTodoAction = {\n  type: ADD_TODO,\n  payload: 'Learn Redux'\n};\n\n// Action Creator\nfunction addTodo(text) {\n  return {\n    type: ADD_TODO,\n    payload: text\n  };\n}",
+              "explanation": "This example defines an action type constant and demonstrates both a raw action object and an action creator function `addTodo` that returns such an action. Action creators provide a clean way to construct actions.",
+              "language": "typescript"
+            },
+            {
+              "id": "example_redux_core_2",
+              "title": "Reducer Example",
+              "code": "function todosReducer(state = [], action) {\n  switch (action.type) {\n    case 'ADD_TODO':\n      return [...state, { text: action.payload, completed: false }];\n    case 'TOGGLE_TODO':\n      return state.map((todo, index) => \n        index === action.index \n          ? { ...todo, completed: !todo.completed } \n          : todo\n      );\n    default:\n      return state;\n  }\n}",
+              "explanation": "This `todosReducer` function is a pure function. It takes the current state (defaulting to an empty array) and an action. Based on the action type, it returns a *new* state array using spread syntax (`...`) and `map` to ensure immutability. For unrecognized actions, it returns the current state.",
+              "language": "typescript"
+            },
+            {
+              "id": "example_redux_core_3",
+              "title": "Dispatching an Action",
+              "code": "import { createStore } from 'redux';\n\n// Assume todosReducer is defined as above\nconst store = createStore(todosReducer);\n\n// Dispatch an action to update the state\nstore.dispatch({ type: 'ADD_TODO', payload: 'Buy groceries' });\n\nconsole.log(store.getState()); \n// Expected output: [{ text: 'Buy groceries', completed: false }]\n\nstore.dispatch({ type: 'TOGGLE_TODO', index: 0 });\n\nconsole.log(store.getState());\n// Expected output: [{ text: 'Buy groceries', completed: true }]",
+              "explanation": "This example demonstrates how to create a Redux store and use the `dispatch` method to send actions to it. After dispatching, `getState()` can be used to observe the updated state.",
+              "language": "typescript"
+            },
+            {
+              "id": "example_redux_core_4",
+              "title": "Selector Example",
+              "code": "interface RootState { todos: { text: string; completed: boolean; }[]; user: { name: string; }; }\n\n// Assuming a state shape like: { todos: [...], user: {...} }\nconst selectTodos = (state: RootState) => state.todos;\nconst selectCompletedTodos = (state: RootState) => \n  state.todos.filter(todo => todo.completed);\nconst selectUserName = (state: RootState) => state.user.name;\n\n// Usage in a component (conceptual)\n// const todos = useSelector(selectTodos);\n// const completedCount = useSelector(state => selectCompletedTodos(state).length);\n",
+              "explanation": "These are examples of simple selector functions. They take the entire Redux state as an argument and return a specific slice of that state or a derived piece of data. Using selectors helps encapsulate state access logic and improve component reusability.",
+              "language": "typescript"
+            }
+          ],
+          "relatedQuestions": [],
+          "relatedTasks": [],
+          "tags": [
+            "Redux",
+            "State Management",
+            "Core Concepts",
+            "Architecture"
+          ],
+          "technology": "TypeScript",
+          "prerequisites": [
+            "JavaScript Fundamentals",
+            "Immutability"
+          ],
+          "complexity": 6,
+          "interviewRelevance": 8,
+          "learningPath": "intermediate",
+          "requiredFor": [
+            "Redux Toolkit",
+            "React-Redux",
+            "Redux Middleware"
+          ]
+        },
+        {
+          "id": "theory_redux_async_patterns",
+          "title": "Asynchronous Operations and Common Redux Patterns",
+          "content": "Managing asynchronous operations (like API calls) is a common challenge in state management. In Redux, since reducers must be pure and synchronous, asynchronous logic cannot directly reside within them. This necessitates the use of middleware (like Redux Thunk or Redux Saga) to handle side effects.\n\n## ACTION_REQUEST/ACTION_SUCCESS/ACTION_FAILURE Pattern\n\nThe `ACTION_REQUEST`, `ACTION_SUCCESS`, and `ACTION_FAILURE` pattern (sometimes referred to as FSA - Flux Standard Action - for async actions) is a widely adopted convention in Redux applications for managing the lifecycle of asynchronous operations. It breaks down an asynchronous flow into three distinct, dispatchable actions:\n\n-   `REQUEST` (e.g., `FETCH_USER_REQUEST`): This action is dispatched *before* the asynchronous operation begins. Its primary purpose is to signal that a data fetch or other async task has started. UI components can react to this by displaying loading indicators (spinners, skeletons) or disabling interactive elements.\n-   `SUCCESS` (e.g., `FETCH_USER_SUCCESS`): This action is dispatched when the asynchronous operation successfully completes. It typically carries the received data as its payload. UI components can then hide loaders and display the results to the user.\n-   `FAILURE` (e.g., `FETCH_USER_FAILURE`): This action is dispatched if the asynchronous operation encounters an error. It usually carries an error message or error object in its payload. UI components can use this to hide loaders and display an error message to the user.\n\n### Benefits of this pattern:\n1.  **Clear State Transitions**: Provides a clear and predictable way for the UI and state to react to different phases of an async operation.\n2.  **Granular Control**: Allows reducers to manage specific states (e.g., `isLoading`, `data`, `error`) related to the async operation independently.\n3.  **Improved User Experience**: Enables effective display of loading states, success messages, and error notifications, improving the perceived performance and user feedback.\n4.  **Debuggability**: The distinct actions make it easy to trace the flow of asynchronous operations in Redux DevTools.\n\nThis pattern is most often implemented using Redux middleware such as Redux Thunk or Redux Saga, which allow you to dispatch multiple actions over time based on the async operation's progress.",
+          "examples": [
+            {
+              "id": "example_redux_async_1",
+              "title": "Reducer Handling Async States",
+              "code": "const initialState = {\n  data: null,\n  loading: false,\n  error: null\n};\n\nfunction userReducer(state = initialState, action) {\n  switch (action.type) {\n    case 'FETCH_USER_REQUEST':\n      return { ...state, loading: true, error: null };\n    case 'FETCH_USER_SUCCESS':\n      return { ...state, loading: false, data: action.payload, error: null };\n    case 'FETCH_USER_FAILURE':\n      return { ...state, loading: false, data: null, error: action.payload };\n    default:\n      return state;\n  }\n}",
+              "explanation": "This `userReducer` demonstrates how a reducer can manage the `loading`, `data`, and `error` states based on the `REQUEST`, `SUCCESS`, and `FAILURE` actions. Each action type triggers a distinct state update reflecting the current phase of the async operation.",
+              "language": "typescript"
+            }
+          ],
+          "relatedQuestions": [],
+          "relatedTasks": [],
+          "tags": [
+            "Redux",
+            "Asynchronous Operations",
+            "Middleware",
+            "State Management Patterns"
+          ],
+          "technology": "TypeScript",
+          "prerequisites": [
+            "Redux Core Concepts",
+            "JavaScript Promises"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 9,
+          "learningPath": "intermediate",
+          "requiredFor": [
+            "Redux Thunk",
+            "Redux Saga"
+          ]
+        },
+        {
+          "id": "theory_redux_middleware",
+          "title": "Redux Middleware: Intercepting Actions",
+          "content": "## What is Redux Middleware?\nRedux middleware provides a third-party extension point between dispatching an action and the moment it reaches the reducer. Middleware is essentially a function that wraps the store's `dispatch` method, allowing you to intercept, inspect, modify, or even halt dispatched actions. This mechanism is powerful for handling side effects (like asynchronous API calls, logging, routing, etc.) without cluttering your action creators or reducers.\n\nA middleware pipeline typically looks like this:\n`action -> middleware 1 -> middleware 2 -> ... -> reducer`\n\nEach middleware receives `store.dispatch` and `store.getState` as arguments, allowing it to interact with the store. It then returns a function that takes `next` (the next middleware in the chain, or the actual `dispatch` method if it's the last one) and returns another function that takes the `action`.\n\n## Why Use Middleware?\nReducers must be pure functions, meaning they cannot perform side effects (like network requests, logging to console, generating random numbers, or interacting with browser storage). Middleware steps in to handle these side effects. Common use cases for Redux middleware include:\n\n-   **Asynchronous operations**: Making API calls (e.g., Redux Thunk, Redux Saga, Redux Observable).\n-   **Logging**: Logging dispatched actions and the resulting state changes (e.g., Redux Logger).\n-   **Routing**: Synchronizing application state with URL changes (e.g., Connected React Router).\n-   **Crash reporting**: Sending error reports.\n-   **Data normalization**: Transforming API responses before they hit reducers.\n\n## Common Redux Middleware\n\n### Redux Thunk\n**Redux Thunk** is a popular and relatively simple middleware that allows action creators to return a function instead of a plain action object. This function receives `dispatch` and `getState` as arguments, enabling it to perform asynchronous logic and dispatch multiple actions over time.\n\n**Key Features:**\n-   Handles simple asynchronous logic.\n-   Allows conditional dispatching based on current state.\n-   Delays dispatching of actions.\n\n**Use Case**: Ideal for simple API calls or any asynchronous logic that requires access to `dispatch` and `getState`.\n\n### Redux Saga\n**Redux Saga** is a more powerful and complex middleware for managing complex side effects. It uses ES6 Generators to make asynchronous flows easy to test, and better at handling concurrency, race conditions, and cancellation. Sagas run in the background, listening for dispatched actions.\n\n**Use Case**: Suitable for applications with complex, long-running, or highly concurrent asynchronous logic (e.g., WebSocket interactions, complex authentication flows).\n\n### Redux Logger\n**Redux Logger** is a development-only middleware that logs all Redux actions and the state changes that occur in response. It's incredibly useful for debugging by providing a clear console output of what's happening in your store.\n\n## How Middleware Works (Simplified)\nWhen you create your Redux store, you apply middleware using `applyMiddleware`:\n```javascript\nimport { createStore, applyMiddleware } from 'redux';\nimport thunk from 'redux-thunk';\nimport logger from 'redux-logger';\nimport rootReducer from './reducers';\n\nconst store = createStore(\n  rootReducer,\n  applyMiddleware(thunk, logger) // Middleware applied here\n);\n```\nActions dispatched via `store.dispatch()` or `useDispatch()` will first pass through `thunk`, then `logger`, before finally reaching the `rootReducer`.",
+          "examples": [
+            {
+              "id": "example_redux_middleware_1",
+              "title": "Redux Thunk Example",
+              "code": "import axios from 'axios';\n\nconst FETCH_USER_REQUEST = 'FETCH_USER_REQUEST';\nconst FETCH_USER_SUCCESS = 'FETCH_USER_SUCCESS';\nconst FETCH_USER_FAILURE = 'FETCH_USER_FAILURE';\n\nconst fetchUserRequest = () => ({ type: FETCH_USER_REQUEST });\nconst fetchUserSuccess = (data) => ({ type: FETCH_USER_SUCCESS, payload: data });\nconst fetchUserFailure = (error) => ({ type: FETCH_USER_FAILURE, payload: error });\n\nfunction fetchUserData(userId: string) {\n  return async (dispatch, getState) => {\n    dispatch(fetchUserRequest()); // Dispatch request action\n    \n    try {\n      const response = await axios.get(`https://api.example.com/users/${userId}`);\n      dispatch(fetchUserSuccess(response.data)); // Dispatch success action\n    } catch (error: any) {\n      dispatch(fetchUserFailure(error.message)); // Dispatch failure action\n    }\n  };\n}",
+              "explanation": "This `fetchUserData` action creator is a Redux Thunk. Instead of returning a plain object, it returns an asynchronous function that receives `dispatch` and `getState`. This allows it to perform an API call (`axios.get`) and dispatch different actions (`REQUEST`, `SUCCESS`, `FAILURE`) based on the outcome of the asynchronous operation, following the common async pattern.",
+              "language": "typescript"
+            },
+            {
+              "id": "example_redux_middleware_2",
+              "title": "Applying Middleware to Store",
+              "code": "import { createStore, applyMiddleware, combineReducers } from 'redux';\nimport { thunk } from 'redux-thunk'; // In newer Redux Thunk, 'thunk' is named export\nimport logger from 'redux-logger';\n\n// Dummy reducer\nfunction appReducer(state = { count: 0 }, action) {\n  switch (action.type) {\n    case 'INCREMENT': return { ...state, count: state.count + 1 };\n    default: return state;\n  }\n}\n\nconst rootReducer = combineReducers({ app: appReducer });\n\n// Create store with middleware\nconst store = createStore(\n  rootReducer,\n  applyMiddleware(thunk, logger)\n);\n\n// Example dispatch of a thunk (conceptual)\n// store.dispatch(fetchUserData('123'));\n// store.dispatch({ type: 'INCREMENT' });\n",
+              "explanation": "This example shows how `applyMiddleware` is used during store creation to integrate Redux Thunk and Redux Logger into the Redux store's dispatch pipeline. Any action dispatched will pass through these middleware functions before reaching the reducers.",
+              "language": "typescript"
+            }
+          ],
+          "relatedQuestions": [],
+          "relatedTasks": [],
+          "tags": [
+            "Redux",
+            "Middleware",
+            "Redux Thunk",
+            "Redux Saga",
+            "Asynchronous",
+            "Side Effects"
+          ],
+          "technology": "TypeScript",
+          "prerequisites": [
+            "Redux Core Concepts",
+            "JavaScript Functions",
+            "Asynchronous JavaScript"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 9,
+          "learningPath": "intermediate",
+          "requiredFor": [
+            "Complex Redux Applications",
+            "API Integration"
+          ]
+        },
+        {
+          "id": "theory_redux_data_flow",
+          "title": "Unidirectional Data Flow in Redux",
+          "content": "Redux enforces a strict unidirectional data flow, often visualized as a cycle. This predictable flow makes it easier to understand how state changes, debug issues, and manage the complexity of large applications.\n\n## Steps of Redux Data Flow\n\n1.  **User Interaction / Event**: The data flow begins with a user interaction (e.g., clicking a button, typing in an input field) or an external event (e.g., an API response, a WebSocket message).\n\n2.  **Action Dispatch**: As a result of the interaction, an **Action Creator** constructs an **Action** (a plain JavaScript object describing 'what happened'). This action is then sent to the Redux **Store** using the `dispatch` method.\n    -   *Example*: `store.dispatch(addTodo('Learn Redux'))`\n\n3.  **Middleware Processing (Optional)**: If any **Middleware** is configured (e.g., Redux Thunk for async operations, Redux Logger for debugging), the dispatched action will pass through it first. Middleware can inspect, modify, delay, or even cancel the action, and can dispatch additional actions.\n\n4.  **Root Reducer**: The action (possibly modified by middleware) reaches the **Root Reducer**. The root reducer, which is typically a combination of smaller, specialized reducers (one per state slice), decides which specific **Reducer** functions need to handle the action.\n\n5.  **State Update by Reducers**: The relevant reducers receive the current `state` and the `action`. They compute the *new state* based on the action's `type` and `payload`, ensuring immutability by returning new state objects rather than modifying the existing one. If no state change is needed for a given action, the reducer returns the current state.\n    -   *Example*: `todosReducer(currentState.todos, action) => newTodosState`\n\n6.  **Store State Update**: The Redux **Store** updates its internal state with the new state returned by the root reducer.\n\n7.  **Subscribers Notified**: Any components or functions that have `subscribe`d to the store, or are connected via `react-redux` (`connect` or `useSelector`), are notified that the state has changed.\n\n8.  **UI Re-rendering**: Connected UI components re-render if the relevant slice of state they are subscribed to has changed. This is often optimized by libraries like React-Redux to only re-render components that genuinely need updates.\n\nThis cycle ensures that all state changes originate from actions, are processed by pure reducers, and result in a new, immutable state, leading to highly predictable application behavior.\n\n",
+          "examples": [],
+          "relatedQuestions": [],
+          "relatedTasks": [],
+          "tags": [
+            "Redux",
+            "Data Flow",
+            "Architecture",
+            "Unidirectional",
+            "State Management"
+          ],
+          "technology": "TypeScript",
+          "prerequisites": [
+            "Redux Core Concepts",
+            "Redux Middleware"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 9,
+          "learningPath": "intermediate",
+          "requiredFor": [
+            "Debugging Redux",
+            "Designing Redux Architecture"
+          ]
+        },
+        {
+          "id": "theory_react_redux_integration",
+          "title": "Connecting Redux with React Components",
+          "content": "To integrate Redux with React applications, the `react-redux` library is typically used. It provides bindings that allow your React components to read data from the Redux store and dispatch actions to it, abstracting away the direct interaction with `store.subscribe()` and `store.dispatch()`.\n\n## Providing the Store\n\nThe first step is to make the Redux store available to your React component tree. This is done using the `<Provider>` component from `react-redux` at the root of your application:\n\n```tsx\nimport React from 'react';\nimport ReactDOM from 'react-dom/client';\nimport { Provider } from 'react-redux';\nimport { store } from './app/store'; // Your Redux store\nimport App from './App';\n\nconst root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement);\nroot.render(\n  <React.StrictMode>\n    <Provider store={store}>\n      <App />\n    </Provider>\n  </React.StrictMode>\n);\n```\n\n## Connecting Components (Class Components)\n\nFor class components, `react-redux` provides the `connect` higher-order component (HOC). `connect` is a function that takes two optional arguments, `mapStateToProps` and `mapDispatchToProps`, and returns a new function. This new function then takes your React component and returns a 'connected' component.\n\n```tsx\nimport React from 'react';\nimport { connect } from 'react-redux';\nimport { addTodo, toggleTodo } from './actions'; // Action creators\n\nclass TodoApp extends React.Component<{ todos: any[], addTodo: (text: string) => void, toggleTodo: (index: number) => void }> {\n  render() {\n    return (\n      <div>\n        <h1>Todos</h1>\n        <input \n          type=\"text\" \n          onKeyPress={(e) => {\n            if (e.key === 'Enter') {\n              this.props.addTodo((e.target as HTMLInputElement).value);\n              (e.target as HTMLInputElement).value = '';\n            }\n          }}\n          placeholder=\"Add a new todo\"\n        />\n        <ul>\n          {this.props.todos.map((todo, index) => (\n            <li key={index} onClick={() => this.props.toggleTodo(index)}>\n              {todo.text} {todo.completed ? '(Completed)' : ''}\n            </li>\n          ))}\n        </ul>\n      </div>\n    );\n  }\n}\n\n// mapStateToProps: Defines which parts of the Redux state your component needs\nconst mapStateToProps = (state: any) => ({ \n  todos: state.todos // Assuming your root state has a 'todos' slice\n});\n\n// mapDispatchToProps: Defines which actions your component can dispatch\n// Option 1: Manual mapping - Most verbose, offers full control over dispatch logic.\n//           Useful if you need to transform dispatch props or perform side effects.\nconst mapDispatchToPropsOption1 = (dispatch: any) => ({\n  addTodo: (text: string) => dispatch(addTodo(text)),\n  toggleTodo: (index: number) => dispatch(toggleTodo(index)),\n  // You can also add custom dispatch logic here\n  logAction: (actionType: string) => {\n    console.log(`Action dispatched: ${actionType}`);\n    dispatch({ type: actionType });\n  }\n});\n\n// Option 2: Object shorthand - The most common and concise way.\n//           If an action creator is passed as a value, `connect` automatically wraps it in `dispatch`.\nconst mapDispatchToPropsOption2 = {\n  addTodo,   // Equivalent to (text) => dispatch(addTodo(text))\n  toggleTodo // Equivalent to (index) => dispatch(toggleTodo(index))\n};\n\n// Connect the component to Redux\n// You can choose either mapDispatchToPropsOption1 or mapDispatchToPropsOption2\nexport default connect(mapStateToProps, mapDispatchToPropsOption2)(TodoApp);\n```\n\n## Connecting Components (Functional Components with Hooks)\n\nFor functional components, `react-redux` provides hooks (`useSelector` and `useDispatch`), which are the recommended approach for new applications. They offer a simpler and more direct way to interact with the store.\n\n```tsx\nimport React from 'react';\nimport { useSelector, useDispatch } from 'react-redux';\nimport { addTodo, toggleTodo } from './actions'; // Action creators\n\ninterface Todo { text: string; completed: boolean; }\ninterface RootState { todos: Todo[]; }\n\nfunction FunctionalTodoApp() {\n  // useSelector: Extracts data from the Redux store state\n  const todos = useSelector((state: RootState) => state.todos);\n  \n  // useDispatch: Returns a reference to the store's dispatch function\n  const dispatch = useDispatch();\n\n  const handleAddTodo = (e: React.KeyboardEvent<HTMLInputElement>) => {\n    if (e.key === 'Enter') {\n      dispatch(addTodo((e.target as HTMLInputElement).value));\n      (e.target as HTMLInputElement).value = '';\n    }\n  };\n\n  const handleToggleTodo = (index: number) => {\n    dispatch(toggleTodo(index));\n  };\n\n  return (\n    <div>\n      <h1>Functional Todos</h1>\n      <input \n        type=\"text\" \n        onKeyPress={handleAddTodo}\n        placeholder=\"Add a new todo\"\n      />\n      <ul>\n        {todos.map((todo, index) => (\n          <li key={index} onClick={() => handleToggleTodo(index)}>\n            {todo.text} {todo.completed ? '(Completed)' : ''}\n          </li>\n        ))}\n      </ul>\n    </div>\n  );\n}\n\nexport default FunctionalTodoApp;\n```\n\n### `useSelector` vs `mapStateToProps`\n-   `useSelector` allows you to directly select a slice of state in your functional component. It automatically subscribes to the Redux store and re-renders the component when the selected state changes. It takes a selector function as its argument.\n-   `mapStateToProps` is a function that maps parts of the Redux state to component props for class components. It returns an object that gets merged into the component's props.\n\n### `useDispatch` vs `mapDispatchToProps`\n-   `useDispatch` returns a reference to the `dispatch` function from the Redux store. You can then call `dispatch(actionCreator(args))` directly within your functional component.\n-   `mapDispatchToProps` maps action creators to component props for class components. It can be an object (shorthand for binding action creators) or a function that receives `dispatch` as an argument.",
+          "examples": [],
+          "relatedQuestions": [],
+          "relatedTasks": [],
+          "tags": [
+            "React",
+            "Redux",
+            "React-Redux",
+            "Hooks",
+            "connect HOC",
+            "State Management"
+          ],
+          "technology": "TypeScript",
+          "prerequisites": [
+            "Redux Core Concepts",
+            "React Fundamentals",
+            "React Hooks"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 9,
+          "learningPath": "intermediate",
+          "requiredFor": [
+            "Building React Redux Apps"
+          ]
+        }
+      ],
+      "questions": [
+        {
+          "id": "question_redux_core_1",
+          "topic": "Redux Core Concepts",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "What is the primary role of the Redux Store?",
+          "answer": "The Redux Store is a single source of truth that holds the entire application state.",
+          "options": [],
+          "analysisPoints": [
+            "Defines the Store as the central state container.",
+            "Emphasizes the 'single source of truth' principle."
+          ],
+          "keyConcepts": [
+            "Redux Store",
+            "State Management",
+            "Single Source of Truth"
+          ],
+          "evaluationCriteria": [
+            "Basic recall",
+            "Understanding of Redux architecture"
+          ],
+          "example": "",
+          "tags": [
+            "Redux",
+            "Core Concepts",
+            "Store"
+          ],
+          "prerequisites": [],
+          "complexity": 2,
+          "interviewFrequency": 7,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_redux_core_2",
+          "topic": "Actions and Reducers",
+          "level": "medium",
+          "type": "mcq",
+          "question": "Which of the following statements about Redux actions and reducers is TRUE?",
+          "answer": "Reducers are pure functions that take the previous state and an action, returning the next state without mutating the original state.",
+          "options": [
+            "Actions are functions that modify the state directly.",
+            "Reducers can perform side effects like API calls.",
+            "Actions must always have a `payload` property.",
+            "Reducers are pure functions that take the previous state and an action, returning the next state without mutating the original state."
+          ],
+          "analysisPoints": [
+            "Tests understanding of immutability in reducers.",
+            "Distinguishes between actions (plain objects) and action creators (functions).",
+            "Confirms that reducers must be pure and have no side effects.",
+            "Clarifies that `payload` is common but not mandatory for all actions."
+          ],
+          "keyConcepts": [
+            "Actions",
+            "Reducers",
+            "Pure Functions",
+            "Immutability"
+          ],
+          "evaluationCriteria": [
+            "Understanding of fundamental Redux principles.",
+            "Ability to identify incorrect statements about core concepts."
+          ],
+          "example": "Reducers are required to be pure functions. This means they should not modify their arguments, perform API calls, or access global variables outside their scope. They only depend on their input arguments (previous state and action) to produce the new state. Immutability is critical to ensure predictable state changes and facilitate features like time-travel debugging.",
+          "tags": [
+            "Redux",
+            "Actions",
+            "Reducers",
+            "Immutability",
+            "Pure Functions"
+          ],
+          "prerequisites": [
+            "Redux Core Concepts"
+          ],
+          "complexity": 5,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_redux_core_3",
+          "topic": "Redux Data Flow",
+          "level": "medium",
+          "type": "open",
+          "question": "Describe the unidirectional data flow in a Redux application, starting from a user interaction and ending with the UI update.",
+          "answer": "The unidirectional data flow in Redux follows a strict cycle:\n1.  **User Interaction**: A user interacts with the UI (e.g., clicks a button, types text).\n2.  **Action Dispatch**: The UI dispatches an action (a plain JS object) via `store.dispatch()`. This action describes 'what happened'.\n3.  **Middleware (Optional)**: The action might pass through Redux middleware (e.g., Redux Thunk for async operations, Redux Logger for logging) before reaching reducers. Middleware can intercept, modify, or trigger side effects.\n4.  **Reducer Processing**: The dispatched action reaches the root reducer. The root reducer delegates the action to the appropriate slice reducers.\n5.  **State Update**: Reducers (pure functions) take the current state and the action, and return a *new* state object, ensuring immutability.\n6.  **Store Update**: The Redux store updates its state with the new state returned by the reducers.\n7.  **Subscribers Notified**: Components or functions subscribed to the store (e.g., via `react-redux`) are notified of the state change.\n8.  **UI Re-render**: React components connected to the relevant parts of the state re-render to reflect the updated state.",
+          "options": [],
+          "analysisPoints": [
+            "Covers all main steps of the Redux data flow.",
+            "Highlights the role of each Redux concept (Actions, Dispatch, Middleware, Reducers, Store, UI).",
+            "Emphasizes the 'unidirectional' aspect and immutability."
+          ],
+          "keyConcepts": [
+            "Redux Data Flow",
+            "Unidirectional",
+            "Actions",
+            "Dispatch",
+            "Reducers",
+            "Middleware",
+            "Store",
+            "UI Update"
+          ],
+          "evaluationCriteria": [
+            "Completeness of description.",
+            "Accuracy of each step in the data flow.",
+            "Clarity and logical progression."
+          ],
+          "example": "",
+          "tags": [
+            "Redux",
+            "Data Flow",
+            "Architecture"
+          ],
+          "prerequisites": [
+            "Redux Core Concepts",
+            "Redux Middleware"
+          ],
+          "complexity": 7,
+          "interviewFrequency": 9,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_redux_async_1",
+          "topic": "Async Action Patterns",
+          "level": "medium",
+          "type": "mcq",
+          "question": "Consider the following reducer state for an asynchronous operation:\n```javascript\nconst initialState = {\n  data: null,\n  loading: false,\n  error: null\n};\n```\nWhich action type should set `loading` to `true` and `error` to `null` to prepare for a new fetch?",
+          "answer": "`ACTION_REQUEST`",
+          "options": [
+            "`ACTION_SUCCESS`",
+            "`ACTION_FAILURE`",
+            "`ACTION_COMPLETE`",
+            "`ACTION_REQUEST`"
+          ],
+          "analysisPoints": [
+            "Tests understanding of the `REQUEST/SUCCESS/FAILURE` pattern.",
+            "Identifies the role of the `REQUEST` action in initiating an async operation and resetting error states."
+          ],
+          "keyConcepts": [
+            "Asynchronous Actions",
+            "Redux Patterns",
+            "State Management"
+          ],
+          "evaluationCriteria": [
+            "Knowledge of common Redux async patterns.",
+            "Ability to deduce state transitions based on action types."
+          ],
+          "example": "The `ACTION_REQUEST` type is dispatched when an asynchronous operation begins. Its purpose is to indicate that data is being fetched, hence `loading` should be set to `true`. It also typically clears any previous errors by setting `error` to `null`, ensuring a clean slate for the new operation.",
+          "tags": [
+            "Redux",
+            "Async",
+            "Patterns"
+          ],
+          "prerequisites": [
+            "Redux Core Concepts"
+          ],
+          "complexity": 4,
+          "interviewFrequency": 7,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_redux_middleware_1",
+          "topic": "Redux Middleware",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "What is the primary purpose of Redux middleware?",
+          "answer": "Redux middleware intercepts actions before they reach reducers, allowing for side effects, asynchronous operations, logging, etc.",
+          "options": [],
+          "analysisPoints": [
+            "Defines middleware as an interception point.",
+            "Lists common use cases like side effects and async operations."
+          ],
+          "keyConcepts": [
+            "Redux Middleware",
+            "Side Effects",
+            "Asynchronous Operations"
+          ],
+          "evaluationCriteria": [
+            "Basic recall",
+            "Understanding of middleware's role"
+          ],
+          "example": "",
+          "tags": [
+            "Redux",
+            "Middleware"
+          ],
+          "prerequisites": [
+            "Redux Core Concepts"
+          ],
+          "complexity": 3,
+          "interviewFrequency": 8,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_redux_middleware_2",
+          "topic": "Redux Thunk",
+          "level": "medium",
+          "type": "code",
+          "question": "Complete the `loginUser` thunk action creator below so that it dispatches `LOGIN_REQUEST` before an API call, `LOGIN_SUCCESS` with user data on success, and `LOGIN_FAILURE` with an error message on failure. Assume `api.login(credentials)` returns a Promise.",
+          "answer": "```typescript\nimport api from './api'; // Assume this exports an object with a login method\n\nconst LOGIN_REQUEST = 'LOGIN_REQUEST';\nconst LOGIN_SUCCESS = 'LOGIN_SUCCESS';\nconst LOGIN_FAILURE = 'LOGIN_FAILURE';\n\ninterface UserCredentials { username: string; password: string; }\ninterface UserData { id: string; name: string; email: string; }\n\nconst loginRequest = () => ({ type: LOGIN_REQUEST });\nconst loginSuccess = (user: UserData) => ({ type: LOGIN_SUCCESS, payload: user });\nconst loginFailure = (error: string) => ({ type: LOGIN_FAILURE, payload: error });\n\nfunction loginUser(credentials: UserCredentials) {\n  return async (dispatch: any) => {\n    dispatch(loginRequest());\n    try {\n      const response = await api.login(credentials);\n      dispatch(loginSuccess(response.data));\n    } catch (error: any) {\n      dispatch(loginFailure(error.message || 'Login failed'));\n    }\n  };\n}\n```",
+          "options": [],
+          "analysisPoints": [
+            "Tests understanding of Redux Thunk's structure (returning a function).",
+            "Evaluates the ability to use `dispatch` inside a thunk.",
+            "Checks for correct implementation of the `REQUEST/SUCCESS/FAILURE` pattern for async operations.",
+            "Assesses error handling within asynchronous code."
+          ],
+          "keyConcepts": [
+            "Redux Thunk",
+            "Asynchronous Actions",
+            "Middleware",
+            "Error Handling",
+            "Action Dispatch"
+          ],
+          "evaluationCriteria": [
+            "Correct use of async/await within the thunk.",
+            "Accurate dispatching of all three action types.",
+            "Proper payload handling for success and failure.",
+            "Robust error handling."
+          ],
+          "example": "```typescript\nimport api from './api'; // Assume this exports an object with a login method\n\nconst LOGIN_REQUEST = 'LOGIN_REQUEST';\nconst LOGIN_SUCCESS = 'LOGIN_SUCCESS';\nconst LOGIN_FAILURE = 'LOGIN_FAILURE';\n\ninterface UserCredentials { username: string; password: string; }\ninterface UserData { id: string; name: string; email: string; }\n\nconst loginRequest = () => ({ type: LOGIN_REQUEST });\nconst loginSuccess = (user: UserData) => ({ type: LOGIN_SUCCESS, payload: user });\nconst loginFailure = (error: string) => ({ type: LOGIN_FAILURE, payload: error });\n\nfunction loginUser(credentials: UserCredentials) {\n  return async (dispatch: any) => {\n    dispatch(loginRequest()); // Indicate that login has started\n    try {\n      const response = await api.login(credentials);\n      dispatch(loginSuccess(response.data)); // Dispatch success with user data\n    } catch (error: any) {\n      dispatch(loginFailure(error.message || 'Login failed')); // Dispatch failure with error message\n    }\n  };\n}\n```",
+          "tags": [
+            "Redux",
+            "Thunk",
+            "Async",
+            "Coding",
+            "Middleware"
+          ],
+          "prerequisites": [
+            "Redux Core Concepts",
+            "JavaScript Promises",
+            "Async/Await"
+          ],
+          "complexity": 7,
+          "interviewFrequency": 9,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_redux_react_1",
+          "topic": "Connecting Redux with React",
+          "level": "medium",
+          "type": "mcq",
+          "question": "Which `react-redux` hook is primarily used by functional components to select and extract data from the Redux store's state?",
+          "answer": "`useSelector`",
+          "options": [
+            "`useDispatch`",
+            "`useStore`",
+            "`useReducer`",
+            "`useSelector`"
+          ],
+          "analysisPoints": [
+            "Tests knowledge of `react-redux` hooks.",
+            "Distinguishes `useSelector` (for state extraction) from `useDispatch` (for dispatching actions)."
+          ],
+          "keyConcepts": [
+            "React-Redux",
+            "Hooks",
+            "useSelector",
+            "State Selection"
+          ],
+          "evaluationCriteria": [
+            "Correct identification of `react-redux` hooks.",
+            "Understanding of each hook's specific purpose."
+          ],
+          "example": "The `useSelector` hook allows you to extract data from the Redux store state directly within a functional component. It takes a selector function as an argument, which receives the Redux state and returns the desired slice of data. `useSelector` also handles subscribing to the store and re-rendering the component when the selected data changes.",
+          "tags": [
+            "React",
+            "Redux",
+            "Hooks",
+            "useSelector"
+          ],
+          "prerequisites": [
+            "React Hooks",
+            "Redux Core Concepts"
+          ],
+          "complexity": 4,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_redux_react_2",
+          "topic": "mapDispatchToProps",
+          "level": "medium",
+          "type": "open",
+          "question": "Explain the three common ways to implement `mapDispatchToProps` when using `connect` with class components in React-Redux. Provide a brief example for each.",
+          "answer": "There are three common ways to implement `mapDispatchToProps`:\n\n1.  **Function (Manual Mapping)**: This is the most verbose but offers the most control. `mapDispatchToProps` is a function that receives `dispatch` as its first argument. It should return an object where keys are prop names and values are functions that dispatch actions.\n    ```javascript\n    const mapDispatchToProps = (dispatch) => ({\n      addTodo: (text) => dispatch({ type: 'ADD_TODO', payload: text }),\n      fetchUser: (id) => dispatch(fetchUserThunk(id)) // Can dispatch thunks\n    });\n    ```\n2.  **Object Shorthand**: This is the most concise and recommended approach when you simply want to bind action creators to `dispatch`. You pass an object where keys are prop names and values are action creator functions. `connect` automatically wraps each action creator in `dispatch`.\n    ```javascript\n    import { addTodo, fetchUserThunk } from './actions';\n    const mapDispatchToProps = {\n      addTodo, // Becomes this.props.addTodo(text) -> dispatch(addTodo(text))\n      fetchUser: fetchUserThunk // Becomes this.props.fetchUser(id) -> dispatch(fetchUserThunk(id))\n    };\n    ```\n3.  **Omitting `mapDispatchToProps`**: If you omit the second argument to `connect`, your component will receive `dispatch` as a prop directly. This means you'll have to manually call `this.props.dispatch(actionCreator())` inside your component. This is generally less preferred for maintainability as it couples component logic directly to `dispatch`.\n    ```javascript\n    // In connect: connect(mapStateToProps)(MyComponent)\n    // In component: this.props.dispatch(addTodo('New task'));\n    ```",
+          "options": [],
+          "analysisPoints": [
+            "Details all three options for `mapDispatchToProps`.",
+            "Explains the purpose and use case for each method.",
+            "Provides clear, concise code examples for illustration.",
+            "Compares the verbosity and control offered by each approach."
+          ],
+          "keyConcepts": [
+            "React-Redux",
+            "connect HOC",
+            "mapDispatchToProps",
+            "Action Creators",
+            "Dispatching Actions"
+          ],
+          "evaluationCriteria": [
+            "Comprehensive explanation of each method.",
+            "Accuracy of code examples.",
+            "Understanding of when to use each approach."
+          ],
+          "example": "",
+          "tags": [
+            "React",
+            "Redux",
+            "mapDispatchToProps",
+            "connect HOC"
+          ],
+          "prerequisites": [
+            "React-Redux Integration",
+            "Redux Core Concepts"
+          ],
+          "complexity": 7,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_redux_pure_reducers_1",
+          "topic": "Reducers: Purity and Immutability",
+          "level": "hard",
+          "type": "code",
+          "question": "Identify the error(s) in the following Redux reducer and rewrite it to ensure it's a pure function and maintains immutability. Explain why the original code is problematic.\n\n```typescript\ninterface Todo { id: number; text: string; completed: boolean; }\ninterface State { todos: Todo[]; lastAction: string; }\n\nconst initialState: State = {\n  todos: [],\n  lastAction: 'INIT'\n};\n\nfunction buggyTodoReducer(state = initialState, action: any): State {\n  switch (action.type) {\n    case 'ADD_TODO':\n      state.todos.push({ id: Date.now(), text: action.payload, completed: false });\n      state.lastAction = 'ADD_TODO';\n      return state;\n    case 'REMOVE_TODO':\n      state.todos = state.todos.filter(todo => todo.id !== action.payload.id);\n      return state;\n    case 'SET_LAST_ACTION':\n      state.lastAction = action.payload;\n      return state;\n    default:\n      return state;\n  }\n}\n```",
+          "answer": "The `buggyTodoReducer` violates Redux principles by mutating the state directly. Reducers must be pure functions and always return new state objects instead of modifying the existing one.\n\n**Problems in `buggyTodoReducer`:**\n1.  **`ADD_TODO`**: `state.todos.push()` directly mutates the `todos` array. It also directly mutates `state.lastAction`.\n2.  **`REMOVE_TODO`**: While `filter` returns a new array, the line `state.todos = ...` still mutates the `state` object's `todos` property directly. The `lastAction` is also not updated.\n3.  **`SET_LAST_ACTION`**: `state.lastAction = ...` directly mutates a property of the `state` object.\n\n**Corrected Reducer:**\n```typescript\ninterface Todo { id: number; text: string; completed: boolean; }\ninterface State { todos: Todo[]; lastAction: string; }\n\nconst initialState: State = {\n  todos: [],\n  lastAction: 'INIT'\n};\n\nfunction correctedTodoReducer(state = initialState, action: any): State {\n  switch (action.type) {\n    case 'ADD_TODO':\n      return {\n        ...state, // Spread existing state to preserve other properties\n        todos: [...state.todos, { id: Date.now(), text: action.payload, completed: false }], // Return new array\n        lastAction: 'ADD_TODO' // Update lastAction immutably\n      };\n    case 'REMOVE_TODO':\n      return {\n        ...state,\n        todos: state.todos.filter(todo => todo.id !== action.payload.id),\n        lastAction: 'REMOVE_TODO' // Assuming this action also updates lastAction\n      };\n    case 'SET_LAST_ACTION':\n      return {\n        ...state,\n        lastAction: action.payload\n      };\n    default:\n      return state;\n  }\n}\n```\n\n**Explanation of Correction:**\nIn the `correctedTodoReducer`, instead of directly modifying `state` or its nested properties, we always return a *new* state object. The spread operator (`...`) is used to copy existing properties of `state` and its nested arrays/objects, ensuring that only the changed parts are updated in a new object. This maintains immutability, which is critical for Redux's predictability, performance optimizations (like `shouldComponentUpdate`), and time-travel debugging.",
+          "options": [],
+          "analysisPoints": [
+            "Identifies direct state mutation as the core problem.",
+            "Explains why `push` and direct assignment are problematic.",
+            "Demonstrates correct immutable updates using spread syntax for objects and arrays.",
+            "Ensures all relevant parts of the state are updated immutably.",
+            "Provides a clear explanation of the 'why' behind immutability."
+          ],
+          "keyConcepts": [
+            "Reducers",
+            "Immutability",
+            "Pure Functions",
+            "State Mutation",
+            "Spread Syntax"
+          ],
+          "evaluationCriteria": [
+            "Accurate identification of mutation errors.",
+            "Correct implementation of immutable state updates.",
+            "Clear and concise explanation of the principles."
+          ],
+          "example": "",
+          "tags": [
+            "Redux",
+            "Reducers",
+            "Immutability",
+            "Pure Functions",
+            "Coding",
+            "Hard"
+          ],
+          "prerequisites": [
+            "Redux Core Concepts",
+            "JavaScript Immutability"
+          ],
+          "complexity": 8,
+          "interviewFrequency": 9,
+          "learningPath": "advanced"
+        }
+      ],
+      "tasks": [
+        {
+          "id": "task_redux_core_implementation",
+          "title": "Build a Simple Redux Counter Application",
+          "description": "\nImplement a basic Redux application that manages a counter. Your solution should demonstrate the core Redux concepts:\n\n1.  **Actions**: Define action types for 'INCREMENT', 'DECREMENT', and 'RESET'.\n2.  **Action Creators**: Create action creator functions for each action type.\n3.  **Reducer**: Implement a pure reducer function that handles these actions and updates the counter state immutably.\n4.  **Store**: Create a Redux store using your reducer.\n5.  **Dispatch**: Dispatch actions to the store and observe the state changes.\n\nYour code should be plain JavaScript/TypeScript, without a UI framework like React.\n",
+          "difficulty": "easy",
+          "startingCode": "import { createStore } from 'redux';\n\n// 1. Define Action Types\nconst INCREMENT = 'INCREMENT';\nconst DECREMENT = 'DECREMENT';\nconst RESET = 'RESET';\n\n// 2. Action Creators\nfunction increment() {\n  // TODO: Return an INCREMENT action object\n  return {};\n}\n\nfunction decrement() {\n  // TODO: Return a DECREMENT action object\n  return {};\n}\n\nfunction reset() {\n  // TODO: Return a RESET action object\n  return {};\n}\n\n// 3. Reducer\n// Initial state for the counter\nconst initialState = { count: 0 };\n\nfunction counterReducer(state = initialState, action) {\n  switch (action.type) {\n    // TODO: Implement state updates for INCREMENT, DECREMENT, RESET\n    default:\n      return state;\n  }\n}\n\n// 4. Create Store\nconst store = createStore(counterReducer);\n\n// 5. Dispatch Actions and Log State\nconsole.log('Initial state:', store.getState());\n\n// TODO: Dispatch increment action and log state\n// TODO: Dispatch decrement action and log state\n// TODO: Dispatch reset action and log state\n",
+          "solutionCode": "import { createStore } from 'redux';\n\n// 1. Define Action Types\nconst INCREMENT = 'INCREMENT';\nconst DECREMENT = 'DECREMENT';\nconst RESET = 'RESET';\n\n// 2. Action Creators\nfunction increment() {\n  return { type: INCREMENT };\n}\n\nfunction decrement() {\n  return { type: DECREMENT };\n}\n\nfunction reset() {\n  return { type: RESET };\n}\n\n// 3. Reducer\nconst initialState = { count: 0 };\n\nfunction counterReducer(state = initialState, action) {\n  switch (action.type) {\n    case INCREMENT:\n      return { ...state, count: state.count + 1 };\n    case DECREMENT:\n      return { ...state, count: state.count - 1 };\n    case RESET:\n      return { ...state, count: 0 };\n    default:\n      return state;\n  }\n}\n\n// 4. Create Store\nconst store = createStore(counterReducer);\n\n// 5. Dispatch Actions and Log State\nconsole.log('Initial state:', store.getState()); // { count: 0 }\n\nstore.dispatch(increment());\nconsole.log('After increment:', store.getState()); // { count: 1 }\n\nstore.dispatch(increment());\nconsole.log('After second increment:', store.getState()); // { count: 2 }\n\nstore.dispatch(decrement());\nconsole.log('After decrement:', store.getState()); // { count: 1 }\n\nstore.dispatch(reset());\nconsole.log('After reset:', store.getState()); // { count: 0 }\n\nstore.dispatch({ type: 'UNKNOWN_ACTION' });\nconsole.log('After unknown action:', store.getState()); // { count: 0 } (state remains unchanged)\n",
+          "testCases": [
+            "Initial state should be { count: 0 }.",
+            "Dispatching 'INCREMENT' should increase count by 1.",
+            "Dispatching 'DECREMENT' should decrease count by 1.",
+            "Dispatching 'RESET' should set count to 0.",
+            "Dispatching an unknown action type should not change the state.",
+            "Ensure state immutability in reducer: new objects should be returned for changes."
+          ],
+          "hints": [
+            "Remember to use the spread operator (`...`) to return new state objects in the reducer, ensuring immutability.",
+            "Action creators should simply return a plain JavaScript object with a `type` property.",
+            "The reducer's `default` case is crucial for returning the current state if the action type is not recognized."
+          ],
+          "tags": [
+            "Redux",
+            "Core Concepts",
+            "Counter",
+            "State Management",
+            "Beginner"
+          ],
+          "timeEstimate": 30,
+          "prerequisites": [
+            "JavaScript Basics",
+            "Redux Core Concepts"
+          ],
+          "complexity": 4,
+          "interviewRelevance": 7,
+          "learningPath": "beginner",
+          "relatedConcepts": [
+            "Actions",
+            "Reducers",
+            "Store",
+            "Dispatch",
+            "Immutability"
+          ]
+        },
+        {
+          "id": "task_redux_async_thunk_integration",
+          "title": "Implement Asynchronous User Data Fetch with Redux Thunk",
+          "description": "\nExtend a Redux application to handle fetching user data asynchronously using Redux Thunk middleware and the `REQUEST/SUCCESS/FAILURE` action pattern.\n\nYour task is to:\n1.  Define three action types: `FETCH_USER_REQUEST`, `FETCH_USER_SUCCESS`, `FETCH_USER_FAILURE`.\n2.  Create corresponding action creators for these types.\n3.  Implement a `userReducer` that manages the `user` state, including `data`, `loading`, and `error` properties, reacting to the async actions.\n4.  Develop a Redux Thunk action creator (`fetchUser`) that simulates an API call (e.g., using `setTimeout` or a mock `fetch`) and dispatches the appropriate `REQUEST`, `SUCCESS`, or `FAILURE` actions.\n5.  Configure your Redux store to use `redux-thunk` middleware.\n6.  Dispatch the `fetchUser` thunk and log the state at different stages to observe the flow.\n",
+          "difficulty": "medium",
+          "startingCode": "import { createStore, applyMiddleware, combineReducers } from 'redux';\nimport { thunk } from 'redux-thunk'; // Remember to install redux-thunk\n\n// 1. Define Action Types\nconst FETCH_USER_REQUEST = 'FETCH_USER_REQUEST';\nconst FETCH_USER_SUCCESS = 'FETCH_USER_SUCCESS';\nconst FETCH_USER_FAILURE = 'FETCH_USER_FAILURE';\n\n// 2. Action Creators\nconst fetchUserRequest = () => ({ type: FETCH_USER_REQUEST });\nconst fetchUserSuccess = (data) => ({ type: FETCH_USER_SUCCESS, payload: data });\nconst fetchUserFailure = (error) => ({ type: FETCH_USER_FAILURE, payload: error });\n\n// 3. User Reducer\nconst initialUserState = {\n  data: null,\n  loading: false,\n  error: null,\n};\n\nfunction userReducer(state = initialUserState, action) {\n  switch (action.type) {\n    // TODO: Handle FETCH_USER_REQUEST, FETCH_USER_SUCCESS, FETCH_USER_FAILURE\n    default:\n      return state;\n  }\n}\n\n// Combine reducers (if you had more state slices)\nconst rootReducer = combineReducers({\n  user: userReducer,\n});\n\n// 4. Redux Thunk Action Creator\nfunction fetchUser(userId) {\n  return async (dispatch) => {\n    // TODO: Dispatch request action\n    // TODO: Simulate API call (e.g., with setTimeout) and handle success/failure\n    // TODO: Dispatch success action with mock data or failure action with error\n  };\n}\n\n// 5. Create Store with Thunk Middleware\nconst store = createStore(\n  rootReducer,\n  applyMiddleware(thunk)\n);\n\n// 6. Dispatch the thunk and observe state changes\nconsole.log('Initial state:', store.getState());\n\nstore.dispatch(fetchUser(1)); // Fetch user with ID 1\nconsole.log('State after dispatching fetchUser (request phase):', store.getState());\n\n// You might need a setTimeout here to observe the eventual success/failure state\nsetTimeout(() => {\n  console.log('State after simulated API call completion:', store.getState());\n}, 1500); // Adjust timeout based on your mock API delay\n",
+          "solutionCode": "import { createStore, applyMiddleware, combineReducers } from 'redux';\nimport { thunk } from 'redux-thunk';\n\n// 1. Define Action Types\nconst FETCH_USER_REQUEST = 'FETCH_USER_REQUEST';\nconst FETCH_USER_SUCCESS = 'FETCH_USER_SUCCESS';\nconst FETCH_USER_FAILURE = 'FETCH_USER_FAILURE';\n\n// 2. Action Creators\nconst fetchUserRequest = () => ({ type: FETCH_USER_REQUEST });\nconst fetchUserSuccess = (data) => ({ type: FETCH_USER_SUCCESS, payload: data });\nconst fetchUserFailure = (error) => ({ type: FETCH_USER_FAILURE, payload: error });\n\n// 3. User Reducer\nconst initialUserState = {\n  data: null,\n  loading: false,\n  error: null,\n};\n\nfunction userReducer(state = initialUserState, action) {\n  switch (action.type) {\n    case FETCH_USER_REQUEST:\n      return { ...state, loading: true, error: null };\n    case FETCH_USER_SUCCESS:\n      return { ...state, loading: false, data: action.payload, error: null };\n    case FETCH_USER_FAILURE:\n      return { ...state, loading: false, data: null, error: action.payload };\n    default:\n      return state;\n  }\n}\n\n// Combine reducers\nconst rootReducer = combineReducers({\n  user: userReducer,\n});\n\n// Mock API function\nconst mockApi = {\n  fetchUser: (userId) => {\n    return new Promise((resolve, reject) => {\n      setTimeout(() => {\n        if (userId === 1) {\n          resolve({ id: 1, name: 'John Doe', email: 'john@example.com' });\n        } else if (userId === 2) {\n          reject(new Error('User not found'));\n        } else {\n          reject(new Error('Invalid user ID'));\n        }\n      }, 1000); // Simulate network delay\n    });\n  },\n};\n\n// 4. Redux Thunk Action Creator\nfunction fetchUser(userId) {\n  return async (dispatch) => {\n    dispatch(fetchUserRequest()); // Dispatch request action\n    try {\n      const userData = await mockApi.fetchUser(userId);\n      dispatch(fetchUserSuccess(userData)); // Dispatch success action\n    } catch (error) {\n      dispatch(fetchUserFailure(error.message)); // Dispatch failure action\n    }\n  };\n}\n\n// 5. Create Store with Thunk Middleware\nconst store = createStore(\n  rootReducer,\n  applyMiddleware(thunk)\n);\n\n// 6. Dispatch the thunk and observe state changes\nconsole.log('Initial state:', store.getState());\n\n// --- Test Case 1: Successful Fetch ---\nconsole.log('\\n--- Fetching User 1 (Success) ---');\nstore.dispatch(fetchUser(1));\nconsole.log('State after dispatching fetchUser(1) (request phase):', store.getState());\nsetTimeout(() => {\n  console.log('State after simulated API call completion (User 1):', store.getState());\n}, 1200); \n\n// --- Test Case 2: Failed Fetch ---\nsetTimeout(() => {\n  console.log('\\n--- Fetching User 2 (Failure) ---');\n  store.dispatch(fetchUser(2));\n  console.log('State after dispatching fetchUser(2) (request phase):', store.getState());\n}, 2000); // Delay to ensure previous fetch completes\n\nsetTimeout(() => {\n  console.log('State after simulated API call completion (User 2):', store.getState());\n}, 3200);\n",
+          "testCases": [
+            "Initial `user` state should have `data: null`, `loading: false`, `error: null`.",
+            "After dispatching `fetchUser(1)` (successful mock call): `loading` should be `true` immediately.",
+            "After `fetchUser(1)` completes successfully: `loading` should be `false`, `data` should contain user object, `error` should be `null`.",
+            "After dispatching `fetchUser(2)` (failed mock call): `loading` should be `true` immediately.",
+            "After `fetchUser(2)` completes with an error: `loading` should be `false`, `data` should be `null`, `error` should contain the error message.",
+            "Reducer should update state immutably for all action types.",
+            "The thunk function should receive `dispatch` as an argument and use it to dispatch actions."
+          ],
+          "hints": [
+            "Remember that Redux Thunk action creators return a *function* that receives `dispatch` (and optionally `getState`).",
+            "Use `try...catch` block within your thunk to handle successful API responses and errors.",
+            "Ensure your reducer copies the existing state and only updates the relevant properties for each action, maintaining immutability (e.g., using `...state`).",
+            "A simple `setTimeout` wrapped in a `Promise` can simulate an asynchronous API call for testing purposes."
+          ],
+          "tags": [
+            "Redux",
+            "Redux Thunk",
+            "Asynchronous",
+            "API Integration",
+            "Middleware",
+            "State Management"
+          ],
+          "timeEstimate": 60,
+          "prerequisites": [
+            "Redux Core Concepts",
+            "JavaScript Promises & Async/Await",
+            "Redux Middleware Theory"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 9,
+          "learningPath": "intermediate",
+          "relatedConcepts": [
+            "Redux Data Flow",
+            "ACTION_REQUEST/SUCCESS/FAILURE",
+            "Immutability"
+          ]
+        },
+        {
+          "id": "task_react_redux_integration",
+          "title": "Build a React-Redux Todo List with Connect and Hooks",
+          "description": "\nCreate a simple Todo list application using React and Redux, demonstrating both the `connect` HOC (for a class component) and `useSelector`/`useDispatch` hooks (for a functional component).\n\n**Requirements:**\n1.  **Redux Store Setup**: Define action types (`ADD_TODO`, `TOGGLE_TODO`), action creators, and a `todosReducer` to manage a list of todo objects (`{ id, text, completed }`). Create a Redux store.\n2.  **`App` Component (`Provider`)**: Wrap your main `App` component with `<Provider>` to make the Redux store available.\n3.  **Class Component (`connect`)**: Create a `TodoListClass` component that uses `connect` to:\n    *   Map `todos` state to props using `mapStateToProps`.\n    *   Map `addTodo` and `toggleTodo` action creators to props using `mapDispatchToProps` (using the object shorthand).\n    *   Render the list of todos and allow adding new ones and toggling completion status.\n4.  **Functional Component (`useSelector`, `useDispatch`)**: Create a `TodoListFunctional` component that uses `useSelector` to get `todos` and `useDispatch` to dispatch `addTodo` and `toggleTodo` actions.\n    *   Render the list of todos and allow adding new ones and toggling completion status.\n5.  **Basic Styling**: Add minimal inline or CSS module styling to differentiate completed todos.\n\n**Bonus**: Add a 'Filter Todos' feature (e.g., 'All', 'Completed', 'Active') controlled by the Redux state, demonstrated in either component type.\n",
+          "difficulty": "medium",
+          "startingCode": "import React from 'react';\nimport ReactDOM from 'react-dom/client';\nimport { createStore, combineReducers } from 'redux';\nimport { Provider, connect, useSelector, useDispatch } from 'react-redux';\n\n// --- Redux Setup ---\n\n// Action Types\nconst ADD_TODO = 'ADD_TODO';\nconst TOGGLE_TODO = 'TOGGLE_TODO';\n\n// Action Creators\nlet nextTodoId = 0;\nconst addTodo = (text) => ({\n  type: ADD_TODO,\n  payload: { id: nextTodoId++, text, completed: false },\n});\nconst toggleTodo = (id) => ({\n  type: TOGGLE_TODO,\n  payload: { id },\n});\n\n// Reducer\nconst todosReducer = (state = [], action) => {\n  switch (action.type) {\n    case ADD_TODO:\n      return [...state, action.payload];\n    case TOGGLE_TODO:\n      return state.map((todo) =>\n        todo.id === action.payload.id ? { ...todo, completed: !todo.completed } : todo\n      );\n    default:\n      return state;\n  }\n};\n\nconst rootReducer = combineReducers({\n  todos: todosReducer,\n});\n\nconst store = createStore(rootReducer);\n\n// --- React Components ---\n\n// 3. Class Component with `connect`\nclass TodoListClass extends React.Component {\n  render() {\n    const { todos, addTodo, toggleTodo } = this.props; // Props received from connect\n\n    return (\n      <div>\n        <h2>Class Component Todo List</h2>\n        <input\n          type=\"text\"\n          placeholder=\"Add a todo\"\n          onKeyPress={(e) => {\n            if (e.key === 'Enter') {\n              addTodo(e.target.value);\n              e.target.value = '';\n            }\n          }}\n        />\n        <ul>\n          {todos.map((todo) => (\n            <li\n              key={todo.id}\n              onClick={() => toggleTodo(todo.id)}\n              style={{ textDecoration: todo.completed ? 'line-through' : 'none', cursor: 'pointer' }}\n            >\n              {todo.text}\n            </li>\n          ))}\n        </ul>\n      </div>\n    );\n  }\n}\n\nconst mapStateToPropsClass = (state) => ({ todos: state.todos });\nconst mapDispatchToPropsClass = { addTodo, toggleTodo }; // Object shorthand\n\nconst ConnectedTodoListClass = connect(mapStateToPropsClass, mapDispatchToPropsClass)(TodoListClass);\n\n// 4. Functional Component with Hooks\nfunction TodoListFunctional() {\n  const todos = useSelector((state) => state.todos);\n  const dispatch = useDispatch();\n\n  const handleAddTodo = (e) => {\n    if (e.key === 'Enter') {\n      dispatch(addTodo(e.target.value));\n      e.target.value = '';\n    }\n  };\n\n  const handleToggleTodo = (id) => {\n    dispatch(toggleTodo(id));\n  };\n\n  return (\n    <div>\n      <h2>Functional Component Todo List</h2>\n      <input\n        type=\"text\"\n        placeholder=\"Add a todo\"\n        onKeyPress={handleAddTodo}\n      />\n      <ul>\n        {todos.map((todo) => (\n          <li\n            key={todo.id}\n            onClick={() => handleToggleTodo(todo.id)}\n            style={{ textDecoration: todo.completed ? 'line-through' : 'none', cursor: 'pointer' }}\n          >\n            {todo.text}\n          </li>\n        ))}\n      </ul>\n    </div>\n  );\n}\n\n// 2. App Component (`Provider`)\nfunction App() {\n  return (\n    <div>\n      <h1>React Redux Todo App</h1>\n      <ConnectedTodoListClass />\n      <TodoListFunctional />\n    </div>\n  );\n}\n\nconst root = ReactDOM.createRoot(document.getElementById('root'));\nroot.render(\n  <Provider store={store}>\n    <App />\n  </Provider>\n);\n",
+          "solutionCode": "import React from 'react';\nimport ReactDOM from 'react-dom/client';\nimport { createStore, combineReducers } from 'redux';\nimport { Provider, connect, useSelector, useDispatch } from 'react-redux';\n\n// --- Redux Setup ---\n\n// Action Types\nconst ADD_TODO = 'ADD_TODO';\nconst TOGGLE_TODO = 'TOGGLE_TODO';\nconst SET_VISIBILITY_FILTER = 'SET_VISIBILITY_FILTER'; // For bonus task\n\n// Action Creators\nlet nextTodoId = 0;\nconst addTodo = (text) => ({\n  type: ADD_TODO,\n  payload: { id: nextTodoId++, text, completed: false },\n});\nconst toggleTodo = (id) => ({\n  type: TOGGLE_TODO,\n  payload: { id },\n});\nconst setVisibilityFilter = (filter) => ({\n  type: SET_VISIBILITY_FILTER,\n  payload: { filter },\n});\n\n// Reducers\nconst todosReducer = (state = [], action) => {\n  switch (action.type) {\n    case ADD_TODO:\n      return [...state, action.payload];\n    case TOGGLE_TODO:\n      return state.map((todo) =>\n        todo.id === action.payload.id ? { ...todo, completed: !todo.completed } : todo\n      );\n    default:\n      return state;\n  }\n};\n\nconst visibilityFilterReducer = (state = 'SHOW_ALL', action) => {\n  switch (action.type) {\n    case SET_VISIBILITY_FILTER:\n      return action.payload.filter;\n    default:\n      return state;\n  }\n};\n\nconst rootReducer = combineReducers({\n  todos: todosReducer,\n  visibilityFilter: visibilityFilterReducer, // For bonus task\n});\n\nconst store = createStore(rootReducer);\n\n// --- React Components ---\n\n// Selector for filtered todos (for bonus task)\nconst getVisibleTodos = (todos, filter) => {\n  switch (filter) {\n    case 'SHOW_ALL':\n      return todos;\n    case 'SHOW_COMPLETED':\n      return todos.filter((t) => t.completed);\n    case 'SHOW_ACTIVE':\n      return todos.filter((t) => !t.completed);\n    default:\n      throw new Error('Unknown filter: ' + filter);\n  }\n};\n\n// 3. Class Component with `connect`\nclass TodoListClass extends React.Component<any> {\n  render() {\n    const { todos, visibilityFilter, addTodo, toggleTodo, setVisibilityFilter } = this.props; \n    const visibleTodos = getVisibleTodos(todos, visibilityFilter);\n\n    return (\n      <div style={{ border: '1px solid #ccc', padding: '15px', margin: '10px', borderRadius: '8px' }}>\n        <h2>Class Component Todo List</h2>\n        <input\n          type=\"text\"\n          placeholder=\"Add a todo\"\n          onKeyPress={(e) => {\n            if (e.key === 'Enter') {\n              addTodo((e.target as HTMLInputElement).value);\n              (e.target as HTMLInputElement).value = '';\n            }\n          }}\n        />\n        <ul>\n          {visibleTodos.map((todo) => (\n            <li\n              key={todo.id}\n              onClick={() => toggleTodo(todo.id)}\n              style={{ textDecoration: todo.completed ? 'line-through' : 'none', cursor: 'pointer' }}\n            >\n              {todo.text}\n            </li>\n          ))}\n        </ul>\n        <div style={{ marginTop: '10px' }}>\n          Show:\n          <button onClick={() => setVisibilityFilter('SHOW_ALL')} style={{ marginLeft: '5px', fontWeight: visibilityFilter === 'SHOW_ALL' ? 'bold' : 'normal' }}>All</button>\n          <button onClick={() => setVisibilityFilter('SHOW_ACTIVE')} style={{ marginLeft: '5px', fontWeight: visibilityFilter === 'SHOW_ACTIVE' ? 'bold' : 'normal' }}>Active</button>\n          <button onClick={() => setVisibilityFilter('SHOW_COMPLETED')} style={{ marginLeft: '5px', fontWeight: visibilityFilter === 'SHOW_COMPLETED' ? 'bold' : 'normal' }}>Completed</button>\n        </div>\n      </div>\n    );\n  }\n}\n\nconst mapStateToPropsClass = (state: any) => ({\n  todos: state.todos,\n  visibilityFilter: state.visibilityFilter,\n});\nconst mapDispatchToPropsClass = { addTodo, toggleTodo, setVisibilityFilter }; \n\nconst ConnectedTodoListClass = connect(mapStateToPropsClass, mapDispatchToPropsClass)(TodoListClass);\n\n// 4. Functional Component with Hooks\nfunction TodoListFunctional() {\n  const todos = useSelector((state: any) => state.todos);\n  const visibilityFilter = useSelector((state: any) => state.visibilityFilter);\n  const dispatch = useDispatch();\n\n  const visibleTodos = getVisibleTodos(todos, visibilityFilter);\n\n  const handleAddTodo = (e: React.KeyboardEvent<HTMLInputElement>) => {\n    if (e.key === 'Enter') {\n      dispatch(addTodo((e.target as HTMLInputElement).value));\n      (e.target as HTMLInputElement).value = '';\n    }\n  };\n\n  const handleToggleTodo = (id: number) => {\n    dispatch(toggleTodo(id));\n  };\n\n  const handleSetFilter = (filter: string) => {\n    dispatch(setVisibilityFilter(filter));\n  };\n\n  return (\n    <div style={{ border: '1px solid #ccc', padding: '15px', margin: '10px', borderRadius: '8px' }}>\n      <h2>Functional Component Todo List</h2>\n      <input\n        type=\"text\"\n        placeholder=\"Add a todo\"\n        onKeyPress={handleAddTodo}\n      />\n      <ul>\n        {visibleTodos.map((todo) => (\n          <li\n            key={todo.id}\n            onClick={() => handleToggleTodo(todo.id)}\n            style={{ textDecoration: todo.completed ? 'line-through' : 'none', cursor: 'pointer' }}\n          >\n            {todo.text}\n          </li>\n        ))}\n      </ul>\n      <div style={{ marginTop: '10px' }}>\n        Show:\n        <button onClick={() => handleSetFilter('SHOW_ALL')} style={{ marginLeft: '5px', fontWeight: visibilityFilter === 'SHOW_ALL' ? 'bold' : 'normal' }}>All</button>\n        <button onClick={() => handleSetFilter('SHOW_ACTIVE')} style={{ marginLeft: '5px', fontWeight: visibilityFilter === 'SHOW_ACTIVE' ? 'bold' : 'normal' }}>Active</button>\n        <button onClick={() => handleSetFilter('SHOW_COMPLETED')} style={{ marginLeft: '5px', fontWeight: visibilityFilter === 'SHOW_COMPLETED' ? 'bold' : 'normal' }}>Completed</button>\n      </div>\n    </div>\n  );\n}\n\n// 2. App Component (`Provider`)\nfunction App() {\n  return (\n    <div style={{ fontFamily: 'Arial, sans-serif', maxWidth: '800px', margin: '20px auto', padding: '20px', border: '1px solid #eee', borderRadius: '10px', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}>\n      <h1 style={{ textAlign: 'center', color: '#333' }}>React Redux Todo App</h1>\n      <ConnectedTodoListClass />\n      <TodoListFunctional />\n    </div>\n  );\n}\n\nconst root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement);\nroot.render(\n  <Provider store={store}>\n    <App />\n  </Provider>\n);\n",
+          "testCases": [
+            "Adding a todo via either component should add it to the Redux state and appear in both components.",
+            "Toggling a todo's completion status via either component should update its state and reflect in both components.",
+            "Both `TodoListClass` and `TodoListFunctional` components should render correctly.",
+            "The class component should receive `todos`, `addTodo`, and `toggleTodo` via props from `connect`.",
+            "The functional component should use `useSelector` to get `todos` and `useDispatch` to dispatch actions.",
+            "**Bonus**: Filtering by 'All', 'Completed', or 'Active' should correctly display only the relevant todos in both components."
+          ],
+          "hints": [
+            "Remember to wrap your root React component with the `<Provider store={store}>`.",
+            "For `connect`, `mapStateToProps` should return an object mapping Redux state slices to component props. `mapDispatchToProps` (object shorthand) should be an object mapping action creators to component props.",
+            "For functional components, `useSelector` takes a function to extract data from state, and `useDispatch` returns the `dispatch` function itself.",
+            "Ensure your `todosReducer` handles immutability correctly when adding or toggling todos."
+          ],
+          "tags": [
+            "React",
+            "Redux",
+            "React-Redux",
+            "Hooks",
+            "connect",
+            "State Management",
+            "UI"
+          ],
+          "timeEstimate": 90,
+          "prerequisites": [
+            "React Fundamentals",
+            "Redux Core Concepts",
+            "JavaScript Immutability"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 9,
+          "learningPath": "intermediate",
+          "relatedConcepts": [
+            "Redux Data Flow",
+            "Component Lifecycle",
+            "Hooks vs HOCs"
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "0763bedd-5fe3-467b-a8f8-4ead965fd59e",
+    "startLine": 13700,
+    "endLine": 13799,
+    "processedDate": "2025-06-17T13:35:53.045Z",
+    "content": {
+      "logicalBlockInfo": {
+        "suggestedEndLine": -1
+      },
+      "theory": [
+        {
+          "id": "theory_redux_dispatch_hooks",
+          "title": "Redux Action Dispatching: `mapDispatchToProps` and React Hooks",
+          "content": "Connecting React components to a Redux store often involves dispatching actions to update the state. Redux provides several patterns for this, including `mapDispatchToProps` for class components (or functional components using `connect`) and dedicated hooks for functional components.\n\n### `mapDispatchToProps` Patterns (with `connect`)\n`mapDispatchToProps` is an optional second argument to Redux's `connect` function. It's a function that receives the `dispatch` method as its first argument and returns an object. The keys of this object will become props passed to your component, and their values should be functions that dispatch Redux actions.\n\nThere are three common ways to define `mapDispatchToProps`:\n\n#### 1. Manually Wrapping Action Creators\nIn this approach, you explicitly define functions that call `dispatch` with the result of your action creators. This gives you full control over how actions are dispatched, including adding middleware logic or specific payload transformations before dispatching.\n\n```typescript\nimport { connect } from 'react-redux';\nimport { addTodo, toggleTodo } from './actions'; // Assuming these are defined elsewhere\n\nconst mapDispatchToProps = (dispatch) => ({\n  addTodo: (text) => dispatch(addTodo(text)),\n  toggleTodo: (id) => dispatch(toggleTodo(id))\n});\n```\n\n#### 2. Using `bindActionCreators`\nThe `bindActionCreators` utility from Redux can be used to automatically wrap action creators in `dispatch` calls. This is useful when you have many action creators and want to avoid manually writing `dispatch(actionCreator(...))` for each one. It takes an object or a function of action creators and the `dispatch` function, returning an object with the same keys but with values wrapped in `dispatch` calls.\n\n```typescript\nimport { bindActionCreators } from 'redux';\nimport { connect } from 'react-redux';\nimport { addTodo, toggleTodo } from './actions';\n\nconst mapDispatchToProps = (dispatch) => ({\n  ...bindActionCreators({ addTodo, toggleTodo }, dispatch)\n});\n```\n\n#### 3. Object Shorthand (Recommended)\nThis is the simplest and most common approach. When you provide an object of action creators directly to `connect` as the `mapDispatchToProps` argument, Redux automatically wraps each action creator in a `dispatch` call for you. This abstracts away the `dispatch` logic entirely, making the code cleaner and more concise.\n\n```typescript\nimport { connect } from 'react-redux';\nimport { addTodo, toggleTodo } from './actions';\n\n// Redux's connect automatically wraps these in dispatch calls\nconst mapDispatchToProps = { addTodo, toggleTodo };\n\n// Usage with connect:\n// export default connect(mapStateToProps, mapDispatchToProps)(MyComponent);\n```\n\nThe third option is generally recommended due to its simplicity and conciseness, reducing boilerplate code.\n\n### Using Redux Hooks with Functional Components\nReact-Redux provides hooks (`useSelector`, `useDispatch`, `useStore`) which are the modern way to interact with the Redux store in functional components, eliminating the need for `connect` for most use cases.\n\n#### `useSelector`\nThe `useSelector` hook allows you to extract data from the Redux store state. It takes a `selector` function as an argument, which receives the entire Redux state as an argument and returns the piece of state you need. `useSelector` automatically subscribes your component to the store, and will re-render your component if the selected state changes.\n\n#### `useDispatch`\nThe `useDispatch` hook returns a reference to the `dispatch` function from the Redux store. You can then use this `dispatch` function to dispatch actions directly from your functional component. This is the equivalent of getting `dispatch` via `mapDispatchToProps` but without the `connect` HOC.\n\n```typescript\nimport { useSelector, useDispatch } from 'react-redux';\nimport { addTodo } from './actions';\n\nfunction TodoList() {\n  // Extracting todos from the state using useSelector\n  const todos = useSelector(state => state.todos);\n  \n  // Getting the dispatch function using useDispatch\n  const dispatch = useDispatch();\n  \n  // Defining a handler to dispatch an action\n  const addNewTodo = (text) => {\n    dispatch(addTodo(text));\n  };\n  \n  return (\n    <div>\n      {/* Render todos */}\n      {todos.map(todo => <div key={todo.id}>{todo.text}</div>)}\n      <button onClick={() => addNewTodo('New Task')}>Add Todo</button>\n    </div>\n  );\n}\n```\n\nUsing hooks often leads to more readable and concise code for Redux integration in functional components."
+        },
+        {
+          "id": "theory_css_fundamentals",
+          "title": "Fundamental CSS Concepts: Box Model, Positioning, Display, Preprocessors, and Specificity",
+          "content": "CSS (Cascading Style Sheets) is a cornerstone of web development, defining the presentation and layout of web pages. Understanding its core concepts is crucial for effective frontend development.\n\n### The CSS Box Model\nThe CSS Box Model is a fundamental concept that describes how elements are rendered on a page as rectangular boxes. Every element on a web page is treated as a box, consisting of four distinct areas, from the innermost to the outermost:\n\n*   **Content Area**: The actual content of the element (e.g., text, images). Its dimensions are defined by `width` and `height` properties.\n*   **Padding**: Transparent space immediately surrounding the content. It adds space between the content and the border. Padding is affected by the background color of the element.\n*   **Border**: A line that surrounds the padding and content. You can set its `width`, `style`, and `color`.\n*   **Margin**: Transparent space outside the border, used to separate the element from other elements. Margins do not take a background color.\n\nBy default, the `width` and `height` CSS properties apply to the *content area* only. This is known as the `content-box` model. However, using `box-sizing: border-box;` changes this behavior, so `width` and `height` include padding and border, making layout calculations more intuitive.\n\n<img src=\"https://www.w3.org/TR/CSS2/images/box-model.png\" alt=\"CSS Box Model Diagram\">\n\n### CSS `position` Property\nThe `position` property specifies the type of positioning method used for an element. Combined with `top`, `bottom`, `left`, and `right` properties, it determines the final position of an element.\n\n*   **`position: static` (Default)**: Elements are positioned according to the normal document flow. `top`, `bottom`, `left`, `right` properties have no effect.\n*   **`position: relative`**: The element is positioned relative to its *normal position* in the document flow. Setting `top`, `bottom`, `left`, `right` values will offset it from that normal position without affecting the position of other elements (its original space is preserved).\n*   **`position: absolute`**: The element is removed from the normal document flow. It is positioned relative to its *nearest positioned ancestor* (an ancestor with `position` other than `static`). If no such ancestor exists, it's positioned relative to the initial containing block (usually the `<html>` element). Absolute elements do not take up space in the layout.\n*   **`position: fixed`**: The element is removed from the normal document flow and positioned relative to the *viewport*. This means it stays in the same place even when the page is scrolled. Useful for persistent headers, footers, or sidebars.\n*   **`position: sticky`**: A hybrid of `relative` and `fixed`. The element is positioned according to the normal flow until it reaches a specified scroll position, at which point it 'sticks' to that position (like `fixed`).\n\n### `display: none` vs `visibility: hidden`\nBoth properties hide an element, but they do so differently, with significant implications for layout:\n\n*   **`display: none`**: This property completely removes the element from the document flow. It's as if the element never existed. It does not occupy any space on the page, and its descendants are also hidden. This can cause the layout to reflow.\n*   **`visibility: hidden`**: This property hides the element, but it *still occupies its original space* in the document flow. The element becomes invisible, but its dimensions still affect the layout of other elements. Its descendants can be made visible by setting `visibility: visible` on them.\n\n### CSS Preprocessors\nCSS preprocessors are scripting languages that extend the capabilities of CSS. They allow you to write CSS in a more programmatic way, with features not available in standard CSS, and then compile that code into regular CSS that web browsers can understand. Popular preprocessors include Sass (Syntactically Awesome Style Sheets), Less, and Stylus.\n\n**Why use them?**\n*   **Variables**: Define reusable values like colors, fonts, or common spacing. Makes design changes much easier.\n*   **Nesting**: Nest CSS selectors to reflect the HTML structure, improving readability and organization.\n*   **Mixins**: Create reusable blocks of CSS declarations to avoid repetition (like functions in programming).\n*   **Functions**: Perform calculations or manipulate colors.\n*   **Partials/Imports**: Break CSS into smaller, more manageable files and import them into a single master file.\n\nPreprocessors enhance maintainability, modularity, and reduce repetition in large stylesheets.\n\n### CSS Specificity\nSpecificity is the algorithm browsers use to determine which CSS declaration applies to an element when multiple rules target the same element. It's a weight assigned to a given CSS declaration, determined by the type and number of selectors used.\n\n**Specificity Hierarchy (from highest to lowest):**\n1.  **Inline Styles**: Styles applied directly to an HTML element (e.g., `<div style=\"color: red;\">`). Highest specificity.\n2.  **IDs**: Selectors targeting an element by its `id` attribute (e.g., `#myElement`). Each ID selector counts for 100 points.\n3.  **Classes, Attributes, and Pseudo-classes**: Selectors like `.myClass`, `[type=\"text\"]`, `:hover`, `:nth-child()`. Each counts for 10 points.\n4.  **Elements and Pseudo-elements**: Selectors like `p`, `div`, `::before`, `::after`. Each counts for 1 point.\n\n**Rules:**\n*   More specific selectors override less specific ones.\n*   If specificity is equal, the rule declared *last* in the stylesheet wins.\n*   The `!important` rule overrides all other declarations, regardless of specificity. However, its use is generally discouraged as it breaks the natural cascade and makes debugging difficult."
+        },
+        {
+          "id": "theory_react_lifecycle_best_practices",
+          "title": "React Component Lifecycle Best Practices, State Updates, and Re-rendering",
+          "content": "Understanding the React component lifecycle and how to manage state and side effects is crucial for building robust and performant applications. This section focuses on common scenarios and best practices for class components.\n\n### When to Make XHR (AJAX) Requests\nXHR (XMLHttpRequest), often referred to as AJAX or asynchronous data fetching (e.g., using `fetch` or `axios`), should primarily be performed in the `componentDidMount` lifecycle method for class components. This ensures:\n\n*   The component has been rendered to the DOM, so you can safely interact with it (e.g., set state that affects rendering).\n*   The request is made only once after the initial render, preventing unnecessary network calls.\n*   You can update the component's state with the fetched data, triggering a re-render.\n\n```typescript\nimport React, { Component } from 'react';\n\ninterface MyComponentState {\n  data: any | null;\n  error: Error | null;\n  loading: boolean;\n}\n\nclass MyDataFetcher extends Component<{}, MyComponentState> {\n  constructor(props: {}) {\n    super(props);\n    this.state = {\n      data: null,\n      error: null,\n      loading: true,\n    };\n  }\n\n  componentDidMount() {\n    // console.log('Component has mounted, fetching data...');\n    fetch('https://api.example.com/data') // Replace with a real API endpoint\n      .then(response => {\n        if (!response.ok) {\n          throw new Error(`HTTP error! status: ${response.status}`);\n        }\n        return response.json();\n      })\n      .then(data => {\n        this.setState({ data, loading: false });\n        // console.log('Data fetched successfully:', data);\n      })\n      .catch(error => {\n        this.setState({ error, loading: false });\n        // console.error('Error fetching data:', error);\n      });\n  }\n\n  render() {\n    const { data, error, loading } = this.state;\n\n    if (loading) {\n      return <div>Loading data...</div>;\n    }\n    if (error) {\n      return <div>Error: {error.message}</div>;\n    }\n    return (\n      <div>\n        <h2>Data Fetched:</h2>\n        <pre>{JSON.stringify(data, null, 2)}</pre>\n      </div>\n    );\n  }\n}\n```\n\nFor functional components, the `useEffect` hook with an empty dependency array (`[]`) serves a similar purpose to `componentDidMount`.\n\n### When to Update State Based on Props\nIt's a common requirement to update a component's internal state when its props change. The approach varies depending on your React version:\n\n*   **React versions before 16.3**: Use `componentWillReceiveProps(nextProps)`.\n    This method is invoked before a mounted component receives new props. You can compare `this.props` with `nextProps` and call `this.setState()` conditionally.\n    *(Note: This method is considered unsafe and deprecated in newer React versions due to potential for bugs when used with asynchronous rendering.)*\n\n*   **React 16.3 and above**: Use `static getDerivedStateFromProps(nextProps, prevState)`.\n    This static method is called right before calling the render method, both on the initial mount and on subsequent updates. It should return an object to update the state, or `null` to indicate that nothing needs to be updated. It's purely for side-effect-free state synchronization based on props. It does not have access to the component instance (`this`).\n\n```typescript\nimport React, { Component } from 'react';\n\ninterface MyComponentProps {\n  value: number;\n}\n\ninterface MyComponentState {\n  internalValue: number;\n  derivedFromProps: boolean;\n}\n\nclass MyDerivedStateComponent extends Component<MyComponentProps, MyComponentState> {\n  constructor(props: MyComponentProps) {\n    super(props);\n    this.state = {\n      internalValue: props.value,\n      derivedFromProps: false,\n    };\n  }\n\n  static getDerivedStateFromProps(nextProps: MyComponentProps, prevState: MyComponentState) {\n    // If the 'value' prop has changed, update the 'internalValue' in state\n    if (nextProps.value !== prevState.internalValue) {\n      return {\n        internalValue: nextProps.value,\n        derivedFromProps: true, // Indicate state was derived from props\n      };\n    }\n    // No state update needed\n    return null;\n  }\n\n  render() {\n    return (\n      <div>\n        <p>Prop Value: {this.props.value}</p>\n        <p>Internal State Value: {this.state.internalValue}</p>\n        {this.state.derivedFromProps && <p>State was derived from props update!</p>}\n      </div>\n    );\n  }\n}\n```\n\nFor functional components, the `useEffect` hook with a dependency array containing the relevant prop can be used to achieve similar logic, often with cleaner patterns.\n\n### Calling `setState` in the Render Method\nCalling `setState` directly or indirectly within the `render` method is a critical anti-pattern and will lead to an infinite loop. When `setState` is called, it triggers a re-render of the component. If `setState` is inside `render`, it means every time React tries to render, it finds a `setState` call, which triggers another render, and so on. This quickly exhausts the call stack and crashes the application.\n\n**Example of an anti-pattern (DO NOT DO THIS):**\n```typescript\nimport React, { Component } from 'react';\n\nclass BadComponent extends Component<{}, { count: number }> {\n  constructor(props: {}) {\n    super(props);\n    this.state = { count: 0 };\n  }\n\n  render() {\n    // THIS WILL CAUSE AN INFINITE LOOP AND CRASH\n    this.setState({ count: this.state.count + 1 }); \n    return <div>Count: {this.state.count}</div>;\n  }\n}\n```\n\nState updates should be initiated by user events, lifecycle methods (like `componentDidMount`, `componentDidUpdate`), or external data changes, not during the rendering phase itself.\n\n### How to Force a Component to Re-render\nReact components re-render automatically when their `state` or `props` change. However, there are scenarios where you might explicitly need to trigger a re-render.\n\n1.  **Changing `state` (via `setState`)**: This is the primary and most common way to trigger a re-render. When `setState` is called, React schedules an update and re-renders the component and its children.\n    ```typescript\n    this.setState({ someKey: newValue });\n    ```\n\n2.  **Changing `props`**: When a parent component re-renders and passes new props to a child component, the child component will also re-render.\n    ```typescript\n    // In parent component's render method\n    <ChildComponent myProp={this.state.parentData} />\n    ```\n\n3.  **Using `forceUpdate()`**: This method can be used to force a re-render without changing `state` or `props`. It is generally discouraged because it bypasses React's normal `shouldComponentUpdate` checks and can lead to performance issues if not used carefully. It's typically used for very specific, edge-case scenarios (e.g., integrating with third-party libraries that don't respect React's data flow).\n    ```typescript\n    this.forceUpdate();\n    ```\n\nIn most cases, managing state and props effectively should negate the need for `forceUpdate()`. For functional components, `useState` and `useEffect` are the preferred mechanisms for managing component updates."
+        }
+      ],
+      "questions": [
+        {
+          "id": "question_redux_mapdispatch_comparison",
+          "topic": "Redux `mapDispatchToProps`",
+          "level": "medium",
+          "type": "mcq",
+          "question": "Which of the following `mapDispatchToProps` definitions is the most recommended approach when using `connect` from `react-redux` for standard action creators, and why?",
+          "answer": "Option D: `const mapDispatchToProps = { addTodo, toggleTodo };` because Redux automatically wraps action creators in dispatch calls, making it concise.",
+          "options": [
+            "Option A: `const mapDispatchToProps = (dispatch) => ({ addTodo: (text) => dispatch(addTodo(text)), toggleTodo: (id) => dispatch(toggleTodo(id)) });`",
+            "Option B: `import { bindActionCreators } from 'redux'; const mapDispatchToProps = (dispatch) => ({ ...bindActionCreators({ addTodo, toggleTodo }, dispatch) });`",
+            "Option C: `const mapDispatchToProps = (dispatch) => bindActionCreators({ addTodo, toggleTodo }, dispatch);`",
+            "Option D: `const mapDispatchToProps = { addTodo, toggleTodo };`"
+          ],
+          "analysisPoints": [
+            "Understanding of different `mapDispatchToProps` patterns.",
+            "Knowledge of Redux `connect` behavior with object shorthand.",
+            "Ability to identify recommended practices for Redux integration.",
+            "Recognition of boilerplate reduction."
+          ],
+          "keyConcepts": [
+            "mapDispatchToProps",
+            "Redux `connect`",
+            "Action creators",
+            "bindActionCreators",
+            "Redux best practices"
+          ],
+          "evaluationCriteria": [
+            "Correctly identifies the recommended pattern.",
+            "Provides accurate reasoning for the recommendation.",
+            "Demonstrates understanding of Redux `connect` capabilities."
+          ],
+          "example": "The most recommended `mapDispatchToProps` option is the object shorthand (`Option D`). When `connect` receives an object of action creators, it automatically binds them to `dispatch`. This significantly reduces boilerplate compared to manually wrapping them (Option A) or using `bindActionCreators` explicitly within `mapDispatchToProps` (Options B and C). While `bindActionCreators` (Options B and C) also works, the object shorthand is even more concise when used directly with `connect`.",
+          "tags": [
+            "Redux",
+            "React-Redux",
+            "mapDispatchToProps",
+            "Best Practices",
+            "State Management"
+          ],
+          "prerequisites": [
+            "Redux basic concepts",
+            "React-Redux `connect`"
+          ],
+          "complexity": 6,
+          "interviewFrequency": 7,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_redux_hooks_flashcard",
+          "topic": "Redux Hooks",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "Which two React-Redux hooks are commonly used to interact with the Redux store in functional components?",
+          "answer": "`useSelector` and `useDispatch`",
+          "analysisPoints": [
+            "Recall of primary Redux hooks.",
+            "Understanding their respective purposes."
+          ],
+          "keyConcepts": [
+            "Redux Hooks",
+            "useSelector",
+            "useDispatch"
+          ],
+          "evaluationCriteria": [
+            "Ability to recall fundamental hooks."
+          ],
+          "example": "N/A",
+          "tags": [
+            "Redux",
+            "React Hooks",
+            "useSelector",
+            "useDispatch"
+          ],
+          "prerequisites": [
+            "Basic Redux concepts",
+            "React Hooks"
+          ],
+          "complexity": 3,
+          "interviewFrequency": 9,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_css_box_model_open",
+          "topic": "CSS Box Model",
+          "level": "medium",
+          "type": "open",
+          "question": "Explain the CSS Box Model and its components. How does `box-sizing: border-box;` change the default behavior?",
+          "answer": "The CSS Box Model describes how elements are rendered as rectangular boxes, consisting of the content area, padding, border, and margin. The content area holds the actual content. Padding is transparent space around the content, inside the border. The border is a visible line enclosing content and padding. Margin is transparent space outside the border, separating elements.\n\nBy default, `width` and `height` properties apply only to the content area (`content-box`). When `box-sizing: border-box;` is applied, `width` and `height` include the content, padding, and border, making layout calculations more intuitive because the element's declared size corresponds to its visible size on the page.",
+          "analysisPoints": [
+            "Accurate description of all four box model components.",
+            "Clear explanation of the default `content-box` behavior.",
+            "Precise explanation of how `box-sizing: border-box;` modifies this behavior.",
+            "Ability to articulate the practical benefits of `border-box`."
+          ],
+          "keyConcepts": [
+            "CSS Box Model",
+            "Content",
+            "Padding",
+            "Border",
+            "Margin",
+            "box-sizing",
+            "content-box",
+            "border-box"
+          ],
+          "evaluationCriteria": [
+            "Comprehensive understanding of the box model.",
+            "Ability to differentiate `content-box` and `border-box`.",
+            "Clarity and completeness of explanation."
+          ],
+          "example": "N/A",
+          "tags": [
+            "CSS",
+            "Box Model",
+            "Layout"
+          ],
+          "prerequisites": [
+            "Basic CSS syntax"
+          ],
+          "complexity": 5,
+          "interviewFrequency": 8,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_css_position_mcq",
+          "topic": "CSS Positioning",
+          "level": "medium",
+          "type": "mcq",
+          "question": "Consider the following HTML and CSS. If `.child` is currently at `position: static`, and you want it to appear 10 pixels from the left and 10 pixels from the top *relative to its original position* while still taking up space in the document flow, what CSS property should you change on `.child`?\n\n```html\n<div class=\"parent\">\n  <div class=\"sibling-before\">Sibling Before</div>\n  <div class=\"child\">Child Element</div>\n  <div class=\"sibling-after\">Sibling After</div>\n</div>\n```\n\n```css\n.child {\n  width: 100px;\n  height: 100px;\n  background-color: lightblue;\n  /* Current: position: static; */\n}\n```",
+          "answer": "`position: relative;`",
+          "options": [
+            "`position: absolute;`",
+            "`position: fixed;`",
+            "`position: relative;`",
+            "`display: block;`"
+          ],
+          "analysisPoints": [
+            "Understanding of `position: relative` behavior.",
+            "Ability to distinguish between `relative`, `absolute`, and `fixed` positioning.",
+            "Knowledge of how positioning affects document flow.",
+            "Correct application of `top`, `bottom`, `left`, `right` properties with `relative`."
+          ],
+          "keyConcepts": [
+            "CSS position property",
+            "position: relative",
+            "position: absolute",
+            "position: fixed",
+            "Document flow"
+          ],
+          "evaluationCriteria": [
+            "Correctly identifies the appropriate positioning property.",
+            "Demonstrates understanding of the impact on document flow and relative positioning."
+          ],
+          "example": "To position an element relative to its original position while keeping it in the document flow, you use `position: relative;`. After setting `position: relative;` on `.child`, you would then apply `left: 10px;` and `top: 10px;` to offset it from its normal position. `position: absolute;` and `position: fixed;` remove the element from the document flow.",
+          "tags": [
+            "CSS",
+            "Positioning",
+            "Layout"
+          ],
+          "prerequisites": [
+            "Basic CSS layout",
+            "Understanding of normal document flow"
+          ],
+          "complexity": 6,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_css_display_visibility_open",
+          "topic": "CSS Display and Visibility",
+          "level": "easy",
+          "type": "open",
+          "question": "What is the key difference between `display: none` and `visibility: hidden` in CSS? Provide a scenario where each would be preferred.",
+          "answer": "`display: none` removes the element completely from the document flow, meaning it takes up no space, and other elements will reflow to fill its spot. `visibility: hidden` hides the element, but it still occupies its original space in the document flow, so the layout remains unchanged. \n\n**Scenario for `display: none`:** A modal dialog that is completely hidden when not active, and should not influence the layout until it's shown. Or a dynamically added/removed element.\n\n**Scenario for `visibility: hidden`:** A placeholder or a UI element that needs to retain its space even when invisible, for example, an input field that's temporarily hidden but should keep its position to prevent layout shifts, or a button that is disabled but still visible for spacing.",
+          "analysisPoints": [
+            "Clear distinction regarding document flow impact.",
+            "Accurate description of space occupation.",
+            "Relevant and practical scenarios for each property.",
+            "Understanding of the visual impact on the page."
+          ],
+          "keyConcepts": [
+            "display: none",
+            "visibility: hidden",
+            "Document flow",
+            "CSS layout"
+          ],
+          "evaluationCriteria": [
+            "Correctly explains the core difference.",
+            "Provides appropriate examples of use cases.",
+            "Demonstrates practical understanding of CSS properties."
+          ],
+          "example": "N/A",
+          "tags": [
+            "CSS",
+            "Layout",
+            "Display",
+            "Visibility"
+          ],
+          "prerequisites": [
+            "Basic CSS properties"
+          ],
+          "complexity": 4,
+          "interviewFrequency": 7,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_css_preprocessors_flashcard",
+          "topic": "CSS Preprocessors",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "Name three common features provided by CSS preprocessors like Sass or Less.",
+          "answer": "Variables, nesting, mixins (or functions, partials/imports).",
+          "analysisPoints": [
+            "Recall of key preprocessor features."
+          ],
+          "keyConcepts": [
+            "CSS Preprocessors",
+            "Sass",
+            "Less",
+            "Variables",
+            "Nesting",
+            "Mixins"
+          ],
+          "evaluationCriteria": [
+            "Ability to list essential features."
+          ],
+          "example": "N/A",
+          "tags": [
+            "CSS",
+            "Preprocessors",
+            "Sass",
+            "Less"
+          ],
+          "prerequisites": [
+            "Basic understanding of CSS limitations"
+          ],
+          "complexity": 3,
+          "interviewFrequency": 6,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_css_specificity_mcq",
+          "topic": "CSS Specificity",
+          "level": "medium",
+          "type": "mcq",
+          "question": "Given the following HTML and CSS, what color will the text \"Hello World\" be?\n\n```html\n<style>\n  #my-div {\n    color: blue;\n  }\n  .container p {\n    color: red;\n  }\n  p {\n    color: green;\n  }\n</style>\n\n<div class=\"container\">\n  <p id=\"my-div\">Hello World</p>\n</div>\n```",
+          "answer": "Blue",
+          "options": [
+            "Red",
+            "Green",
+            "Blue",
+            "Black (default)"
+          ],
+          "analysisPoints": [
+            "Understanding of CSS specificity rules.",
+            "Correctly assigning specificity weights to different selector types (ID, class, element).",
+            "Ability to determine the winning rule based on specificity hierarchy.",
+            "Recognition that inline styles or `!important` are not present."
+          ],
+          "keyConcepts": [
+            "CSS Specificity",
+            "ID selector",
+            "Class selector",
+            "Element selector",
+            "Specificity hierarchy"
+          ],
+          "evaluationCriteria": [
+            "Correctly applies specificity rules.",
+            "Identifies the selector with the highest specificity."
+          ],
+          "example": "The `#my-div` selector targets the element by its ID, which has the highest specificity (100 points) among the given rules. The `.container p` selector (class + element) has a specificity of 10 + 1 = 11 points. The `p` selector (element) has a specificity of 1 point. Since the ID selector has the highest specificity, its rule (`color: blue;`) will be applied, making the text blue.",
+          "tags": [
+            "CSS",
+            "Specificity",
+            "Styling"
+          ],
+          "prerequisites": [
+            "Basic CSS selectors"
+          ],
+          "complexity": 5,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_react_xhr_componentdidmount_flashcard",
+          "topic": "React Lifecycle for Data Fetching",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "Which React class component lifecycle method is typically used to perform XHR/AJAX requests?",
+          "answer": "`componentDidMount`",
+          "analysisPoints": [
+            "Recall of common lifecycle methods for side effects.",
+            "Understanding the 'when' aspect of `componentDidMount`."
+          ],
+          "keyConcepts": [
+            "React Lifecycle",
+            "componentDidMount",
+            "XHR",
+            "AJAX",
+            "Data Fetching"
+          ],
+          "evaluationCriteria": [
+            "Correctly identifies the appropriate lifecycle method."
+          ],
+          "example": "N/A",
+          "tags": [
+            "React",
+            "Lifecycle",
+            "Data Fetching",
+            "Side Effects"
+          ],
+          "prerequisites": [
+            "Basic React class components"
+          ],
+          "complexity": 3,
+          "interviewFrequency": 9,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_react_getderivedstatefromprops_open",
+          "topic": "React State Updates from Props",
+          "level": "medium",
+          "type": "open",
+          "question": "In React 16.3+, how do you update a component's internal state based on changes in its props? Explain the method used and its characteristics.",
+          "answer": "In React 16.3 and later, you use the `static getDerivedStateFromProps(nextProps, prevState)` method. This static method is invoked right before calling the render method, both on initial mount and on subsequent updates. It should return an object to update the state, or `null` to indicate that no state update is needed. Key characteristics include:\n\n1.  **Static**: It does not have access to the component instance (`this`).\n2.  **Pure Function**: It should be a pure function; it should not cause any side effects (e.g., network requests, DOM manipulation).\n3.  **Synchronization**: Its primary purpose is to synchronize internal state with props, especially when a component's state needs to be a 'derived' value from props.\n\nIt's crucial to compare `nextProps` with `prevState` to avoid unnecessary updates and potential infinite loops.",
+          "analysisPoints": [
+            "Identifies `getDerivedStateFromProps`.",
+            "Explains its static nature and purity.",
+            "Describes its purpose (synchronizing state with props).",
+            "Mentions the importance of comparing `nextProps` and `prevState`.",
+            "Differentiates from older `componentWillReceiveProps` implicitly."
+          ],
+          "keyConcepts": [
+            "React Lifecycle",
+            "getDerivedStateFromProps",
+            "State management",
+            "Props",
+            "Pure functions"
+          ],
+          "evaluationCriteria": [
+            "Provides accurate and comprehensive explanation of the method.",
+            "Highlights key characteristics and best practices."
+          ],
+          "example": "N/A",
+          "tags": [
+            "React",
+            "Lifecycle",
+            "State Management",
+            "Props"
+          ],
+          "prerequisites": [
+            "React 16.3+ concepts",
+            "React state and props"
+          ],
+          "complexity": 6,
+          "interviewFrequency": 7,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_react_setstate_in_render_mcq",
+          "topic": "React `setState` in Render",
+          "level": "hard",
+          "type": "mcq",
+          "question": "What is the primary consequence of calling `this.setState()` directly within a React component's `render()` method?",
+          "answer": "It will lead to an infinite re-rendering loop and eventually a stack overflow error.",
+          "options": [
+            "It will only update the state once and then stop.",
+            "It will cause a warning in the console but no functional issue.",
+            "It will lead to an infinite re-rendering loop and eventually a stack overflow error.",
+            "It will prevent the component from rendering at all."
+          ],
+          "analysisPoints": [
+            "Understanding of React's rendering lifecycle.",
+            "Knowledge of how `setState` triggers re-renders.",
+            "Ability to identify common anti-patterns and their severe consequences.",
+            "Distinguishing between warnings and critical errors."
+          ],
+          "keyConcepts": [
+            "React Render Method",
+            "setState",
+            "Infinite loop",
+            "Stack overflow",
+            "React lifecycle"
+          ],
+          "evaluationCriteria": [
+            "Correctly identifies the severe outcome.",
+            "Demonstrates deep understanding of React's update mechanism."
+          ],
+          "example": "When `this.setState()` is called, React re-renders the component. If this call happens inside `render()`, the re-render process will immediately trigger `render()` again, which calls `setState()` again, leading to an endless cycle. This consumes memory and eventually causes a 'Maximum update depth exceeded' warning, followed by a stack overflow error, crashing the application.",
+          "tags": [
+            "React",
+            "Lifecycle",
+            "Anti-pattern",
+            "Error Handling"
+          ],
+          "prerequisites": [
+            "React state and rendering basics"
+          ],
+          "complexity": 7,
+          "interviewFrequency": 8,
+          "learningPath": "advanced"
+        },
+        {
+          "id": "question_react_force_rerender_open",
+          "topic": "React Re-rendering",
+          "level": "medium",
+          "type": "open",
+          "question": "Besides `this.setState()`, what are two other ways to trigger a re-render in a React class component? When might you use `forceUpdate()` and why is it generally discouraged?",
+          "answer": "Two other ways to trigger a re-render in a React class component are:\n1.  **Changing `props`**: When the parent component re-renders and passes new or updated props to a child component, the child component will also re-render.\n2.  **Using `this.forceUpdate()`**: This method forces a component to re-render without relying on state or prop changes.\n\n`forceUpdate()` might be used in very specific, rare scenarios, such as when interacting with a non-React third-party library that modifies the DOM outside of React's control, and you need to tell React to re-evaluate its component tree to catch up with those external changes. \n\nIt is generally discouraged because it bypasses React's normal update mechanism, including the `shouldComponentUpdate` lifecycle method (or `React.memo` for functional components), which is crucial for performance optimization. Using `forceUpdate()` can lead to unnecessary re-renders and performance issues, making debugging harder as it violates React's typical unidirectional data flow.",
+          "analysisPoints": [
+            "Identifies prop changes and `forceUpdate()` as re-render triggers.",
+            "Provides a valid, albeit rare, use case for `forceUpdate()`.",
+            "Clearly explains why `forceUpdate()` is generally discouraged (performance, bypassing `shouldComponentUpdate`, breaking data flow).",
+            "Demonstrates awareness of React's optimization mechanisms."
+          ],
+          "keyConcepts": [
+            "React Re-rendering",
+            "setState",
+            "Props",
+            "forceUpdate",
+            "shouldComponentUpdate",
+            "Performance optimization"
+          ],
+          "evaluationCriteria": [
+            "Accurate identification of re-render triggers.",
+            "Detailed and reasoned explanation for `forceUpdate()` usage and discouragement.",
+            "Demonstrates advanced React knowledge."
+          ],
+          "example": "N/A",
+          "tags": [
+            "React",
+            "Performance",
+            "Lifecycle",
+            "Re-rendering"
+          ],
+          "prerequisites": [
+            "React lifecycle",
+            "React state and props"
+          ],
+          "complexity": 7,
+          "interviewFrequency": 6,
+          "learningPath": "advanced"
+        }
+      ],
+      "tasks": [
+        {
+          "id": "task_redux_integration_refactor",
+          "title": "Refactor Redux `mapDispatchToProps` with Hooks",
+          "description": "\nYour task is to refactor a given React class component that uses Redux's `connect` with a manual `mapDispatchToProps` definition. You need to convert this component into a functional component that uses the `useSelector` and `useDispatch` hooks to achieve the same state management behavior. Focus on simplifying the Redux integration.\n\n**Requirements:**\n1.  Convert `ClassCounter` into a functional component `FunctionalCounter`.\n2.  Replace `connect` and `mapDispatchToProps` with `useSelector` and `useDispatch`.\n3.  Ensure the component still displays the count from Redux and dispatches `increment` and `decrement` actions when buttons are clicked.\n4.  No changes to the Redux store or action definitions are needed.\n",
+          "difficulty": "medium",
+          "startingCode": "import React from 'react';\nimport { connect } from 'react-redux';\n\n// Assume these actions are defined elsewhere and imported\nconst increment = () => ({ type: 'INCREMENT' });\nconst decrement = () => ({ type: 'DECREMENT' });\n\n// Redux Store (for context, not to be modified in task)\n// const initialState = { count: 0 };\n// const reducer = (state = initialState, action) => {\n//   switch (action.type) {\n//     case 'INCREMENT': return { count: state.count + 1 };\n//     case 'DECREMENT': return { count: state.count - 1 };\n//     default: return state;\n//   }\n// };\n// import { createStore } from 'redux';\n// const store = createStore(reducer);\n\n// Original Class Component using connect and mapDispatchToProps\nclass ClassCounter extends React.Component {\n  render() {\n    const { count, increment, decrement } = this.props;\n    return (\n      <div>\n        <h1>Count: {count}</h1>\n        <button onClick={increment}>Increment</button>\n        <button onClick={decrement}>Decrement</button>\n      </div>\n    );\n  }\n}\n\nconst mapStateToProps = (state) => ({\n  count: state.count,\n});\n\n// Manual mapDispatchToProps\nconst mapDispatchToProps = (dispatch) => ({\n  increment: () => dispatch(increment()),\n  decrement: () => dispatch(decrement()),\n});\n\nexport default connect(mapStateToProps, mapDispatchToProps)(ClassCounter);\n\n// You will create a new functional component below this line:\n// function FunctionalCounter() {\n//   // Your implementation here\n// }\n",
+          "solutionCode": "import React from 'react';\nimport { useSelector, useDispatch } from 'react-redux';\n\n// Assume these actions are defined elsewhere and imported\nconst increment = () => ({ type: 'INCREMENT' });\nconst decrement = () => ({ type: 'DECREMENT' });\n\n// Redux Store (for context, not to be modified in task)\n// const initialState = { count: 0 };\n// const reducer = (state = initialState, action) => {\n//   switch (action.type) {\n//     case 'INCREMENT': return { count: state.count + 1 };\n//     case 'DECREMENT': return { count: state.count - 1 };\n//     default: return state;\n//   }\n// };\n// import { createStore } from 'redux';\n// const store = createStore(reducer);\n\n// Functional Component using Redux Hooks\nfunction FunctionalCounter() {\n  // Use useSelector to get state from the Redux store\n  const count = useSelector((state) => state.count);\n\n  // Use useDispatch to get the dispatch function\n  const dispatch = useDispatch();\n\n  // Define handlers to dispatch actions\n  const handleIncrement = () => {\n    dispatch(increment());\n  };\n\n  const handleDecrement = () => {\n    dispatch(decrement());\n  };\n\n  return (\n    <div>\n      <h1>Count: {count}</h1>\n      <button onClick={handleIncrement}>Increment</button>\n      <button onClick={handleDecrement}>Decrement</button>\n    </div>\n  );\n}\n\nexport default FunctionalCounter;\n",
+          "testCases": [
+            "Render `FunctionalCounter`: It should display 'Count: 0' initially (assuming Redux store starts at 0).",
+            "Click 'Increment' button: The count display should change to 'Count: 1'.",
+            "Click 'Increment' button again: The count display should change to 'Count: 2'.",
+            "Click 'Decrement' button: The count display should change from 'Count: 2' to 'Count: 1'.",
+            "Ensure no console errors related to Redux or React hooks."
+          ],
+          "hints": [
+            "Remember to import `useSelector` and `useDispatch` from `react-redux`.",
+            "The `useSelector` hook takes a function that receives the entire Redux state as its argument.",
+            "The `useDispatch` hook returns the `dispatch` function directly.",
+            "Action creators (like `increment()`) should be called when dispatching."
+          ],
+          "tags": [
+            "Redux",
+            "React Hooks",
+            "Refactoring",
+            "State Management"
+          ],
+          "timeEstimate": 30,
+          "prerequisites": [
+            "React Hooks basics",
+            "Redux basic concepts"
+          ],
+          "complexity": 6,
+          "interviewRelevance": 8,
+          "learningPath": "intermediate",
+          "relatedConcepts": [
+            "useSelector",
+            "useDispatch",
+            "mapDispatchToProps",
+            "React functional components"
+          ]
+        },
+        {
+          "id": "task_css_positioning_layout",
+          "title": "Implement a Sticky Header and Absolute Overlay",
+          "description": "\nYour task is to create an HTML structure with corresponding CSS to demonstrate `position: sticky` for a header and `position: absolute` for an overlay element within a relatively positioned container.\n\n**Requirements:**\n1.  Create an HTML page with a `<body>` that includes:\n    *   A `div` with class `header` that should stick to the top of the viewport when scrolled.\n    *   A `div` with class `content` that has significant height (e.g., `150vh`) to enable scrolling.\n    *   Inside the `content` div, create a `div` with class `card` that is `position: relative`.\n    *   Inside the `card` div, create a `div` with class `overlay` that is `position: absolute` and covers the top-right corner of the `card` (e.g., 20px from top, 20px from right, 50px width/height).\n2.  Apply appropriate CSS to achieve the required positioning and visibility.\n3.  Add distinct background colors or borders to each element for clear visualization.\n",
+          "difficulty": "medium",
+          "startingCode": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n    <meta charset=\"UTF-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <title>Positioning Task</title>\n    <style>\n        body {\n            margin: 0;\n            font-family: sans-serif;\n        }\n        .header {\n            background-color: #333;\n            color: white;\n            padding: 20px;\n            text-align: center;\n            font-size: 24px;\n            /* Your positioning for sticky header here */\n        }\n        .content {\n            padding: 20px;\n            /* Ensure enough height to scroll */\n        }\n        .card {\n            width: 300px;\n            height: 200px;\n            background-color: #f0f0f0;\n            border: 1px solid #ccc;\n            margin: 50px auto;\n            padding: 20px;\n            /* Your positioning for relative container here */\n        }\n        .overlay {\n            background-color: rgba(255, 0, 0, 0.7);\n            color: white;\n            display: flex;\n            align-items: center;\n            justify-content: center;\n            font-size: 14px;\n            /* Your positioning for absolute overlay here */\n        }\n    </style>\n</head>\n<body>\n    <div class=\"header\">\n        Sticky Header\n    </div>\n    <div class=\"content\">\n        <p>Scroll down to see the sticky header in action.</p>\n        <p>This is some content to make the page scrollable.</p>\n        <p>More content...</p>\n        <p>More content...</p>\n        <p>More content...</p>\n        <p>More content...</p>\n        <p>More content...</p>\n        <div class=\"card\">\n            <h2>Product Card</h2>\n            <p>This is a product description.</p>\n            <div class=\"overlay\">\n                NEW!\n            </div>\n        </div>\n        <p>More content after the card.</p>\n        <p>More content...</p>\n        <p>More content...</p>\n        <p>More content...</p>\n        <p>More content...</p>\n        <p>End of content.</p>\n    </div>\n</body>\n</html>\n",
+          "solutionCode": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n    <meta charset=\"UTF-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <title>Positioning Task Solution</title>\n    <style>\n        body {\n            margin: 0;\n            font-family: sans-serif;\n        }\n        .header {\n            background-color: #333;\n            color: white;\n            padding: 20px;\n            text-align: center;\n            font-size: 24px;\n            position: sticky; /* Make the header sticky */\n            top: 0; /* Stick to the top of the viewport */\n            z-index: 100; /* Ensure it stays on top of other content */\n        }\n        .content {\n            padding: 20px;\n            height: 180vh; /* Ensure enough height to scroll */\n            background-color: #e0e0e0;\n        }\n        .card {\n            width: 300px;\n            height: 200px;\n            background-color: #f0f0f0;\n            border: 1px solid #ccc;\n            margin: 50px auto;\n            padding: 20px;\n            position: relative; /* Crucial for absolute positioning of its children */\n            overflow: hidden; /* To keep the overlay inside if it goes beyond */\n        }\n        .overlay {\n            background-color: rgba(255, 0, 0, 0.7);\n            color: white;\n            display: flex;\n            align-items: center;\n            justify-content: center;\n            font-size: 14px;\n            position: absolute; /* Positioned relative to the nearest positioned ancestor (.card) */\n            top: 20px; /* 20px from the top of the card */\n            right: 20px; /* 20px from the right of the card */\n            width: 60px;\n            height: 60px;\n            border-radius: 50%; /* Make it circular, optional */\n            font-weight: bold;\n        }\n    </style>\n</head>\n<body>\n    <div class=\"header\">\n        Sticky Header\n    </div>\n    <div class=\"content\">\n        <p>Scroll down to see the sticky header in action.</p>\n        <p>This is some content to make the page scrollable.</p>\n        <p>More content...</p>\n        <p>More content...</p>\n        <p>More content...</p>\n        <p>More content...</p>\n        <p>More content...</p>\n        <div class=\"card\">\n            <h2>Product Card</h2>\n            <p>This is a product description.</p>\n            <div class=\"overlay\">\n                NEW!\n            </div>\n        </div>\n        <p>More content after the card.</p>\n        <p>More content...</p>\n        <p>More content...</p>\n        <p>More content...</p>\n        <p>More content...</p>\n        <p>End of content.</p>\n    </div>\n</body>\n</html>\n",
+          "testCases": [
+            "Initial view: Header should be at the top of the page.",
+            "Scroll down: Header should stick to the top of the viewport and remain visible.",
+            "Verify overlay: The 'NEW!' overlay should be positioned in the top-right corner of the 'Product Card', not the viewport or entire page.",
+            "Check content flow: The 'Product Card' and other content should flow normally beneath the header and respect the space taken by `card`."
+          ],
+          "hints": [
+            "For `position: sticky`, remember to also set a `top`, `bottom`, `left`, or `right` offset.",
+            "For `position: absolute`, the parent element must have a `position` value other than `static` (e.g., `relative`, `absolute`, `fixed`, `sticky`) for the child to be positioned relative to it.",
+            "Consider using `z-index` if elements are overlapping unexpectedly."
+          ],
+          "tags": [
+            "CSS",
+            "Positioning",
+            "Layout",
+            "Sticky",
+            "Absolute"
+          ],
+          "timeEstimate": 45,
+          "prerequisites": [
+            "Basic HTML structure",
+            "Understanding of CSS box model"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 8,
+          "learningPath": "intermediate",
+          "relatedConcepts": [
+            "position: sticky",
+            "position: absolute",
+            "position: relative",
+            "viewport",
+            "document flow"
+          ]
+        },
+        {
+          "id": "task_react_data_fetching_with_loading_error",
+          "title": "Implement Data Fetching with Loading and Error States in React",
+          "description": "\nYour task is to create a React class component that fetches data from a public API using `componentDidMount` and displays different UI states for loading, success, and error. The component should handle potential network issues and display appropriate messages.\n\n**Requirements:**\n1.  Create a class component named `UserProfileFetcher`.\n2.  Initialize its state to handle `loading` (boolean), `error` (Error object or null), and `userData` (object or null).\n3.  Perform an asynchronous data fetch request within `componentDidMount` using the `fetch` API. Use the placeholder API endpoint: `https://jsonplaceholder.typicode.com/users/1`.\n4.  Update the component's state based on the fetch outcome:\n    *   Set `loading` to `false` when the request completes.\n    *   If successful, set `userData` with the fetched data.\n    *   If an error occurs (e.g., network error, invalid response), set the `error` state.\n5.  In the `render` method, display:\n    *   \"Loading user data...\" when `loading` is `true`.\n    *   \"Error: [error message]\" when `error` is not `null`.\n    *   The user's name and email (from `userData`) when the fetch is successful.\n\n**Bonus:** Implement a simple retry mechanism or a button to re-fetch on error.\n",
+          "difficulty": "medium",
+          "startingCode": "import React, { Component } from 'react';\n\ninterface UserData {\n  id: number;\n  name: string;\n  email: string;\n  // ... other fields from JSONPlaceholder user\n}\n\ninterface UserProfileFetcherState {\n  loading: boolean;\n  error: Error | null;\n  userData: UserData | null;\n}\n\nclass UserProfileFetcher extends Component<{}, UserProfileFetcherState> {\n  constructor(props: {}) {\n    super(props);\n    this.state = {\n      loading: true,\n      error: null,\n      userData: null,\n    };\n  }\n\n  componentDidMount() {\n    // TODO: Implement data fetching logic here\n    // Use fetch('https://jsonplaceholder.typicode.com/users/1')\n    // Handle loading, success, and error states\n  }\n\n  render() {\n    const { loading, error, userData } = this.state;\n\n    // TODO: Implement UI rendering based on state\n    return (\n      <div>\n        <h2>User Profile</h2>\n        {/* Your conditional rendering logic goes here */}\n      </div>\n    );\n  }\n}\n\nexport default UserProfileFetcher;\n",
+          "solutionCode": "import React, { Component } from 'react';\n\ninterface UserData {\n  id: number;\n  name: string;\n  email: string;\n  username: string;\n  address: any;\n  phone: string;\n  website: string;\n  company: any;\n}\n\ninterface UserProfileFetcherState {\n  loading: boolean;\n  error: Error | null;\n  userData: UserData | null;\n}\n\nclass UserProfileFetcher extends Component<{}, UserProfileFetcherState> {\n  constructor(props: {}) {\n    super(props);\n    this.state = {\n      loading: true,\n      error: null,\n      userData: null,\n    };\n  }\n\n  componentDidMount() {\n    this.fetchUserProfile();\n  }\n\n  fetchUserProfile = () => {\n    this.setState({ loading: true, error: null, userData: null }); // Reset state on retry\n    fetch('https://jsonplaceholder.typicode.com/users/1')\n      .then(response => {\n        if (!response.ok) {\n          // Throw an error for HTTP status codes that indicate failure\n          throw new Error(`HTTP error! Status: ${response.status}`);\n        }\n        return response.json();\n      })\n      .then((data: UserData) => {\n        this.setState({ userData: data, loading: false });\n      })\n      .catch(error => {\n        console.error('Error fetching user data:', error);\n        this.setState({ error: new Error(`Failed to fetch user data: ${error.message}`), loading: false });\n      });\n  };\n\n  render() {\n    const { loading, error, userData } = this.state;\n\n    return (\n      <div style={{ padding: '20px', border: '1px solid #eee', borderRadius: '8px', maxWidth: '400px', margin: '20px auto' }}>\n        <h2>User Profile</h2>\n        {loading && <p>Loading user data...</p>}\n\n        {error && (\n          <div style={{ color: 'red' }}>\n            <p>{error.message}</p>\n            <button onClick={this.fetchUserProfile}>Retry</button>\n          </div>\n        )}\n\n        {userData && !loading && !error && (\n          <div>\n            <h3>{userData.name}</h3>\n            <p><strong>Email:</strong> {userData.email}</p>\n            <p><strong>Username:</strong> {userData.username}</p>\n            <p><strong>Website:</strong> {userData.website}</p>\n          </div>\n        )}\n\n        {!loading && !error && !userData && <p>No user data available.</p>}\n      </div>\n    );\n  }\n}\n\nexport default UserProfileFetcher;\n",
+          "testCases": [
+            "Initial render: Component should display 'Loading user data...'.",
+            "Successful fetch: After a short delay, the component should display the user's name and email (e.g., 'Leanne Graham', 'Sincere@april.biz'). `loading` state should be false, `error` should be null.",
+            "Simulate network error (e.g., change URL to an invalid one): Component should display an error message and a 'Retry' button. `loading` should be false, `userData` should be null, `error` should be an Error object.",
+            "Click 'Retry' button after an error: Component should attempt to re-fetch and return to loading or success state.",
+            "Edge case: API returns empty or malformed data (conceptually, though not easily testable with JSONPlaceholder): The component should handle gracefully, ideally showing a 'no data' message or an error."
+          ],
+          "hints": [
+            "Remember to use `setState` to update the component's state based on the fetch results.",
+            "Always handle both the successful `then` and the `catch` block for errors in your `fetch` promise.",
+            "The `response.ok` property of the `fetch` response indicates if the HTTP status is in the 200-299 range.",
+            "Consider using conditional rendering (`&&` or ternary operator) in your `render` method to display different UI states."
+          ],
+          "tags": [
+            "React",
+            "Lifecycle",
+            "Data Fetching",
+            "AJAX",
+            "Error Handling",
+            "componentDidMount"
+          ],
+          "timeEstimate": 60,
+          "prerequisites": [
+            "React class components",
+            "JavaScript Promises",
+            "Fetch API"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 9,
+          "learningPath": "intermediate",
+          "relatedConcepts": [
+            "componentDidMount",
+            "setState",
+            "Fetch API",
+            "Promises",
+            "Conditional Rendering"
+          ]
+        }
+      ]
+    }
+  }
+]

@@ -1,0 +1,2183 @@
+[
+  {
+    "id": "316dfaf9-9fc9-4727-822d-5903ac2afc29",
+    "startLine": 15700,
+    "endLine": 15799,
+    "processedDate": "2025-06-17T15:08:17.459Z",
+    "content": {
+      "logicalBlockInfo": {
+        "suggestedEndLine": -1
+      },
+      "theory": [
+        {
+          "id": "theory_local_maxima",
+          "title": "Finding Local Maxima in an Array",
+          "content": "A local maximum in an array is an element that is strictly greater than its immediate neighbors. For elements at the ends of the array, they only need to be greater than their single existing neighbor. This concept is fundamental in array traversal and identifying peaks in data sequences.\n\n## Definition\n\n*   **Local Maximum**: An element `arr[i]` is a local maximum if:\n    *   `arr[i] > arr[i-1]` and `arr[i] > arr[i+1]` (for middle elements).\n    *   `arr[0] > arr[1]` (for the first element).\n    *   `arr[arr.length-1] > arr[arr.length-2]` (for the last element).\n\n## Algorithm Steps\n\nThe most straightforward way to find all local maxima is to iterate through the array once and apply the definition:\n\n1.  **Handle Edge Cases**: \n    *   If the array is empty, there are no local maxima. Return an empty array.\n    *   If the array has only one element, that element is always considered a local maximum (as it has no neighbors to be smaller than).\n2.  **Check the First Element**: Compare `arr[0]` with `arr[1]`. If `arr[0]` is greater, it's a local maximum.\n3.  **Iterate Through Middle Elements**: Loop from the second element (`i = 1`) up to the second-to-last element (`i = arr.length - 2`). For each `arr[i]`, check if `arr[i] > arr[i-1]` AND `arr[i] > arr[i+1]`.\n4.  **Check the Last Element**: Compare `arr[arr.length-1]` with `arr[arr.length-2]`. If `arr[arr.length-1]` is greater, it's a local maximum.\n5.  **Collect Indices**: Store the indices of all found local maxima.\n\n## Time and Space Complexity\n\n*   **Time Complexity**: `O(N)` because the algorithm performs a single pass over the array, where N is the number of elements in the array.\n*   **Space Complexity**: `O(K)` where K is the number of local maxima found. In the worst case (e.g., an alternating sequence like `[1, 0, 1, 0, 1]`), K can be `N/2`, so `O(N)`. In the best case (e.g., a strictly increasing array), K is 1.",
+          "examples": [
+            {
+              "id": "example_local_maxima_1",
+              "title": "Basic Local Maxima Finder",
+              "code": "function findLocalMaxima(arr) {\n  if (arr.length === 0) return [];\n  if (arr.length === 1) return [0]; // Single element is always a local maximum\n  \n  const localMaxima = [];\n  \n  // Check first element\n  if (arr[0] > arr[1]) {\n    localMaxima.push(0);\n  }\n  \n  // Check middle elements\n  for (let i = 1; i < arr.length - 1; i++) {\n    if (arr[i] > arr[i-1] && arr[i] > arr[i+1]) {\n      localMaxima.push(i);\n    }\n  }\n  \n  // Check last element\n  if (arr[arr.length-1] > arr[arr.length-2]) {\n    localMaxima.push(arr.length-1);\n  }\n  \n  return localMaxima;\n}\n\n// Example Usage:\nconst array1 = [1, 2, 3, 5, 4];\nconsole.log(`Array: [${array1}] | Local Maxima Indices: ${findLocalMaxima(array1)}`); // Expected: [3] (value 5)\n\nconst array2 = [10, 5, 20, 15, 30];\nconsole.log(`Array: [${array2}] | Local Maxima Indices: ${findLocalMaxima(array2)}`); // Expected: [0, 2, 4] (values 10, 20, 30)\n\nconst array3 = [1, 2, 3, 4, 5];\nconsole.log(`Array: [${array3}] | Local Maxima Indices: ${findLocalMaxima(array3)}`); // Expected: [4] (value 5)\n\nconst array4 = [5, 4, 3, 2, 1];\nconsole.log(`Array: [${array4}] | Local Maxima Indices: ${findLocalMaxima(array4)}`); // Expected: [0] (value 5)\n\nconst array5 = [7];\nconsole.log(`Array: [${array5}] | Local Maxima Indices: ${findLocalMaxima(array5)}`); // Expected: [0] (value 7)\n\nconst array6 = [];\nconsole.log(`Array: [${array6}] | Local Maxima Indices: ${findLocalMaxima(array6)}`); // Expected: []",
+              "explanation": "This example demonstrates the `findLocalMaxima` function. It correctly handles the edge cases for empty or single-element arrays. Then, it separately checks the first, middle, and last elements based on their specific neighbor comparison rules. The output shows the indices of elements that are local maxima within various test arrays, illustrating the algorithm's behavior for increasing, decreasing, and mixed sequences.",
+              "language": "javascript"
+            }
+          ],
+          "relatedQuestions": [
+            "question_local_maxima_1",
+            "question_local_maxima_2",
+            "question_local_maxima_3",
+            "question_local_maxima_4"
+          ],
+          "relatedTasks": [
+            "task_find_local_maxima",
+            "task_find_peaks_and_valleys"
+          ],
+          "tags": [
+            "array",
+            "algorithm",
+            "traversal",
+            "local maximum",
+            "peak finding"
+          ],
+          "technology": "JavaScript",
+          "prerequisites": [
+            "array_basics",
+            "conditional_statements",
+            "loops"
+          ],
+          "complexity": 5,
+          "interviewRelevance": 7,
+          "learningPath": "intermediate",
+          "requiredFor": [
+            "dynamic_programming",
+            "signal_processing_basics"
+          ]
+        },
+        {
+          "id": "theory_three_sum",
+          "title": "Three Sum Problem (Finding Triplets with a Target Sum)",
+          "content": "The 'Three Sum' problem is a classic array manipulation problem that asks to find all unique triplets in a given array `nums` such that their sum equals a specified `target` value. This problem often appears in coding interviews to test a candidate's understanding of sorting, pointer manipulation, and duplicate handling.\n\n## Problem Statement\n\nGiven an integer array `nums` and an integer `target`, return all unique triplets `[nums[i], nums[j], nums[k]]` such that `i != j`, `i != k`, `j != k`, and `nums[i] + nums[j] + nums[k] == target`.\n\n## Algorithm: Sorting + Two-Pointer Technique\n\nThe most efficient approach to solve the Three Sum problem is a combination of sorting the array and then using the two-pointer technique.\n\n1.  **Sort the Array**: First, sort the input array `nums` in non-decreasing order. This step is crucial because it allows us to use the two-pointer technique efficiently and easily handle duplicate elements.\n2.  **Iterate and Fix First Element**: Loop through the sorted array with a pointer `i` from the beginning up to `nums.length - 2` (since we need at least two more elements for a triplet).\n    *   **Skip Duplicates for `nums[i]`**: To ensure unique triplets, if `nums[i]` is the same as `nums[i-1]` (and `i > 0`), skip the current iteration because we would have already considered triplets starting with `nums[i-1]` that are identical.\n3.  **Two-Pointer Scan**: For each fixed `nums[i]`, we need to find two other numbers `nums[left]` and `nums[right]` such that `nums[i] + nums[left] + nums[right] === target`. This transforms the problem into a 'Two Sum' problem on the *remaining* part of the array (`nums[i+1]` to `nums[nums.length-1]`).\n    *   Initialize `left` pointer to `i + 1` and `right` pointer to `nums.length - 1`.\n    *   Calculate `remainingSum = target - nums[i]`.\n    *   While `left < right`:\n        *   Calculate `currentSum = nums[left] + nums[right]`.\n        *   If `currentSum === remainingSum`:\n            *   A triplet is found: `[nums[i], nums[left], nums[right]]`. Add it to the result list.\n            *   **Skip Duplicates for `nums[left]` and `nums[right]`**: Increment `left` while `left < right` and `nums[left] === nums[left+1]`. Decrement `right` while `left < right` and `nums[right] === nums[right-1]`. This prevents adding duplicate triplets.\n            *   Then, increment `left` and decrement `right` to continue searching.\n        *   If `currentSum < remainingSum`: Increment `left` to get a larger sum.\n        *   If `currentSum > remainingSum`: Decrement `right` to get a smaller sum.\n\n## Time and Space Complexity\n\n*   **Time Complexity**: `O(N^2)`. Sorting takes `O(N log N)`. The nested loop (outer `i` loop and inner `while` loop with `left` and `right` pointers) takes `O(N * N)`, which dominates the sorting time. Hence, the overall time complexity is `O(N^2)`.\n*   **Space Complexity**: `O(log N)` to `O(N)` depending on the sorting algorithm used (in-place sort vs. one requiring extra space). If the result array is considered, it can be `O(N)` in the worst case if many triplets are found.",
+          "examples": [
+            {
+              "id": "example_three_sum_1",
+              "title": "Basic Three Sum Implementation",
+              "code": "function findTriplets(nums, target) {\n  // Sort the array for the two-pointer technique\n  nums.sort((a, b) => a - b);\n  const result = [];\n  \n  // Fix the first element and find pairs for the remaining sum\n  for (let i = 0; i < nums.length - 2; i++) {\n    // Skip duplicates for the first element\n    if (i > 0 && nums[i] === nums[i-1]) continue;\n    \n    let left = i + 1;\n    let right = nums.length - 1;\n    const remainingSum = target - nums[i];\n    \n    while (left < right) {\n      const currentSum = nums[left] + nums[right];\n      \n      if (currentSum === remainingSum) {\n        result.push([nums[i], nums[left], nums[right]]);\n        \n        // Skip duplicates for left and right pointers\n        while (left < right && nums[left] === nums[left+1]) left++;\n        while (left < right && nums[right] === nums[right-1]) right--;\n        \n        left++;\n        right--;\n      } else if (currentSum < remainingSum) {\n        left++;\n      } else { // currentSum > remainingSum\n        right--;\n      }\n    }\n  }\n  \n  return result;\n}\n\n// Example Usage:\nconst numbers1 = [1, 2, 3, 4, 5];\nconst targetSum1 = 9;\nconsole.log(`Numbers: [${numbers1}] | Target: ${targetSum1} | Triplets: ${JSON.stringify(findTriplets(numbers1, targetSum1))}`); // Expected: [[1, 3, 5], [2, 3, 4]]\n\nconst numbers2 = [-1, 0, 1, 2, -1, -4];\nconst targetSum2 = 0;\nconsole.log(`Numbers: [${numbers2}] | Target: ${targetSum2} | Triplets: ${JSON.stringify(findTriplets(numbers2, targetSum2))}`); // Expected: [[-1, -1, 2], [-1, 0, 1]]\n\nconst numbers3 = [0, 0, 0, 0];\nconst targetSum3 = 0;\nconsole.log(`Numbers: [${numbers3}] | Target: ${targetSum3} | Triplets: ${JSON.stringify(findTriplets(numbers3, targetSum3))}`); // Expected: [[0, 0, 0]]\n\nconst numbers4 = [1, 2, 3];\nconst targetSum4 = 10;\nconsole.log(`Numbers: [${numbers4}] | Target: ${targetSum4} | Triplets: ${JSON.stringify(findTriplets(numbers4, targetSum4))}`); // Expected: []",
+              "explanation": "This example provides the complete implementation of the `findTriplets` function. It first sorts the input array to enable the two-pointer technique. The outer loop fixes one element, and the inner `while` loop uses two pointers (`left` and `right`) to find the remaining two elements that sum up to `target - nums[i]`. Crucially, it includes logic to skip duplicate elements at all three pointer positions (`i`, `left`, `right`) to ensure that only unique triplets are added to the result. This approach optimizes the search to O(N^2) time complexity.",
+              "language": "javascript"
+            }
+          ],
+          "relatedQuestions": [
+            "question_three_sum_1",
+            "question_three_sum_2",
+            "question_three_sum_3",
+            "question_three_sum_4",
+            "question_three_sum_5"
+          ],
+          "relatedTasks": [
+            "task_three_sum_implementation",
+            "task_four_sum_implementation"
+          ],
+          "tags": [
+            "array",
+            "algorithm",
+            "two-pointer",
+            "sorting",
+            "triplets",
+            "summation",
+            "leetcode"
+          ],
+          "technology": "JavaScript",
+          "prerequisites": [
+            "array_basics",
+            "sorting_algorithms",
+            "two_sum_problem"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 9,
+          "learningPath": "advanced",
+          "requiredFor": [
+            "k_sum_problem",
+            "sliding_window"
+          ]
+        },
+        {
+          "id": "theory_fisher_yates_shuffle",
+          "title": "Fisher-Yates Shuffle Algorithm",
+          "content": "The Fisher-Yates (also known as Knuth) shuffle algorithm is a highly efficient and unbiased method for randomizing the order of elements in an array. It ensures that every possible permutation of the array elements is equally likely, making it ideal for scenarios like shuffling a deck of cards or randomizing user lists.\n\n## Principle\n\nThe core idea behind the Fisher-Yates shuffle is to iterate through the array from the last element down to the second element (index 1). In each step, a random element from the *unshuffled* portion of the array (from the beginning up to the current element's index `i`) is chosen and swapped with the current element `arr[i]`. As the loop progresses, the 'shuffled' portion of the array grows from the end.\n\n## Algorithm Steps\n\n1.  **Iterate Backwards**: Start from the last element of the array (index `n-1`, where `n` is the array length) and go down to the second element (index `1`). The first element (index `0`) does not need to be processed because by the time the loop reaches `i=1`, `arr[0]` will be the only remaining unshuffled element and will be implicitly placed correctly.\n2.  **Generate Random Index**: For each `i`, generate a random integer `j` such that `0 <= j <= i`. This `j` represents an index within the currently unsorted portion of the array (`arr[0]` to `arr[i]`).\n3.  **Swap Elements**: Swap the element at the current index `i` with the element at the random index `j`. This effectively places a random element from the unshuffled part into its final, shuffled position.\n\n## Why it's Unbiased\n\nThe Fisher-Yates shuffle is proven to be unbiased because, at each step `i`, every element from `arr[0]` to `arr[i]` has an equal `1/(i+1)` chance of being selected and swapped into position `i`. Since each position is filled by an element chosen uniformly at random from the remaining available elements, the final permutation is also uniform and unbiased. This differs from simpler (and biased) methods like sorting by `Math.random()`, which can lead to certain permutations being more likely than others.\n\n## Time and Space Complexity\n\n*   **Time Complexity**: `O(N)` because it performs a single pass through the array, with a constant number of operations (random number generation, array access, swap) at each step.\n*   **Space Complexity**: `O(1)` if the shuffle is performed in-place (modifying the original array). If a copy is made first (as in the example to preserve the original array), it's `O(N)` for the copy.",
+          "examples": [
+            {
+              "id": "example_fisher_yates_1",
+              "title": "Fisher-Yates Shuffle Implementation",
+              "code": "function shuffleArray(array) {\n  const result = [...array]; // Create a copy to avoid modifying the original array\n  let currentIndex = result.length;\n  let randomIndex;\n\n  // While there remain elements to shuffle.\n  while (currentIndex !== 0) {\n\n    // Pick a remaining element.\n    randomIndex = Math.floor(Math.random() * currentIndex);\n    currentIndex--;\n\n    // And swap it with the current element.\n    [result[currentIndex], result[randomIndex]] = [result[randomIndex], result[currentIndex]];\n  }\n\n  return result;\n}\n\n// Example Usage:\nconst originalArray1 = [1, 2, 3, 4, 5];\nconst shuffledArray1 = shuffleArray(originalArray1);\nconsole.log(`Original: [${originalArray1}] | Shuffled: [${shuffledArray1}]`);\n\nconst originalArray2 = ['A', 'B', 'C', 'D'];\nconst shuffledArray2 = shuffleArray(originalArray2);\nconsole.log(`Original: [${originalArray2}] | Shuffled: [${shuffledArray2}]`);\n\nconst originalArray3 = [10];\nconst shuffledArray3 = shuffleArray(originalArray3);\nconsole.log(`Original: [${originalArray3}] | Shuffled: [${shuffledArray3}]`);\n\nconst originalArray4 = [];\nconst shuffledArray4 = shuffleArray(originalArray4);\nconsole.log(`Original: [${originalArray4}] | Shuffled: [${shuffledArray4}]`);",
+              "explanation": "This example provides a complete implementation of the Fisher-Yates shuffle. It starts by creating a shallow copy of the input array to ensure the original remains unchanged. The algorithm then iterates from the last element (`currentIndex = result.length - 1`) down to `0`. In each iteration, it picks a random index `randomIndex` from `0` to `currentIndex` (inclusive) and swaps the element at `currentIndex` with the element at `randomIndex`. This process ensures that each element has an equal probability of ending up in any position, leading to an unbiased permutation. The `while` loop implementation effectively works backwards, making `currentIndex` represent `i` and `randomIndex` represent `j` from the theory.",
+              "language": "javascript"
+            }
+          ],
+          "relatedQuestions": [
+            "question_fisher_yates_1",
+            "question_fisher_yates_2",
+            "question_fisher_yates_3",
+            "question_fisher_yates_4",
+            "question_fisher_yates_5"
+          ],
+          "relatedTasks": [
+            "task_fisher_yates_shuffle",
+            "task_deck_of_cards_shuffler"
+          ],
+          "tags": [
+            "array",
+            "algorithm",
+            "randomization",
+            "shuffle",
+            "fisher-yates",
+            "in-place",
+            "unbiased"
+          ],
+          "technology": "JavaScript",
+          "prerequisites": [
+            "array_basics",
+            "random_number_generation",
+            "swapping_elements"
+          ],
+          "complexity": 6,
+          "interviewRelevance": 8,
+          "learningPath": "intermediate",
+          "requiredFor": [
+            "game_development_basics",
+            "sampling_algorithms"
+          ]
+        }
+      ],
+      "questions": [
+        {
+          "id": "question_local_maxima_1",
+          "topic": "Local Maxima",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "What is a 'local maximum' in an array?",
+          "answer": "An element in an array is a local maximum if it is strictly greater than all of its immediate neighbors.",
+          "options": [],
+          "analysisPoints": [
+            "Understanding of relative comparisons.",
+            "Distinction between local and global maximum."
+          ],
+          "keyConcepts": [
+            "local maximum",
+            "array traversal",
+            "neighbors"
+          ],
+          "evaluationCriteria": [
+            "Correct definition of local maximum."
+          ],
+          "example": "For example, in `[1, 5, 2, 8, 3]`, `5` is a local maximum because `5 > 1` and `5 > 2`. `8` is also a local maximum because `8 > 2` and `8 > 3`.",
+          "tags": [
+            "array",
+            "definition",
+            "basic"
+          ],
+          "prerequisites": [
+            "array_basics"
+          ],
+          "complexity": 2,
+          "interviewFrequency": 6,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_local_maxima_2",
+          "topic": "Local Maxima",
+          "level": "medium",
+          "type": "mcq",
+          "question": "Consider the `findLocalMaxima` function provided in the theory. What would be the output for the input `arr = [3, 2, 1]`?",
+          "answer": "[0]",
+          "options": [
+            "[0]",
+            "[0, 2]",
+            "[]",
+            "[2]"
+          ],
+          "analysisPoints": [
+            "Correctly applying the edge case logic for the first element.",
+            "Understanding the condition for middle elements.",
+            "Understanding the condition for the last element."
+          ],
+          "keyConcepts": [
+            "local maximum",
+            "edge cases",
+            "array traversal",
+            "conditional logic"
+          ],
+          "evaluationCriteria": [
+            "Ability to trace code execution with specific inputs.",
+            "Correct handling of array boundaries for local maxima."
+          ],
+          "example": "The array is `[3, 2, 1]`. `arr.length` is 3.\n\n1.  **Check first element**: `arr[0]` (3) > `arr[1]` (2). True. `localMaxima.push(0)`. `localMaxima` is now `[0]`.\n2.  **Check middle elements**: Loop `i` from 1 to `arr.length - 2` (which is 1). So, only `i=1` is checked.\n    *   `arr[1]` (2) > `arr[0]` (3)? False. (`arr[1]` is not greater than `arr[0]`). No push.\n3.  **Check last element**: `arr[arr.length-1]` (1) > `arr[arr.length-2]` (2)? False. No push.\n\nTherefore, the final `localMaxima` is `[0]`.",
+          "tags": [
+            "array",
+            "mcq",
+            "trace",
+            "edge-case"
+          ],
+          "prerequisites": [
+            "local_maxima_algorithm"
+          ],
+          "complexity": 5,
+          "interviewFrequency": 7,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_local_maxima_3",
+          "topic": "Local Maxima",
+          "level": "medium",
+          "type": "open",
+          "question": "Explain the time and space complexity of the `findLocalMaxima` algorithm. Justify your answer.",
+          "answer": "The time complexity of the `findLocalMaxima` algorithm is O(N), where N is the number of elements in the array. This is because the algorithm iterates through the array a fixed number of times (once for the first element, once for the main loop covering middle elements, and once for the last element). Each comparison and array access operation takes constant time.\n\nThe space complexity is O(K), where K is the number of local maxima found. This is because an array `localMaxima` is used to store the indices of the found maxima. In the worst-case scenario (e.g., an alternating sequence like `[1,0,1,0,1]`), K can be approximately N/2, leading to O(N) space complexity. In the best case (e.g., a strictly increasing or decreasing array, or an empty array), K can be 0 or 1, leading to O(1) space complexity.",
+          "options": [],
+          "analysisPoints": [
+            "Correctly identifies O(N) time complexity.",
+            "Correctly identifies O(K) or O(N) space complexity.",
+            "Provides clear justification based on loop iterations and auxiliary data structures."
+          ],
+          "keyConcepts": [
+            "time complexity",
+            "space complexity",
+            "big O notation",
+            "array traversal",
+            "auxiliary space"
+          ],
+          "evaluationCriteria": [
+            "Accuracy of complexity analysis.",
+            "Clarity and completeness of explanation.",
+            "Ability to relate complexity to algorithm steps."
+          ],
+          "example": "",
+          "tags": [
+            "complexity",
+            "algorithm",
+            "analysis"
+          ],
+          "prerequisites": [
+            "big_o_notation"
+          ],
+          "complexity": 6,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_local_maxima_4",
+          "topic": "Local Maxima",
+          "level": "hard",
+          "type": "code",
+          "question": "Implement a function `findPeaksAndValleys(arr)` that returns an array of objects, where each object indicates whether an element is a 'peak' (local maximum) or a 'valley' (local minimum) along with its index and value. An element can be both a peak and a valley only if the array has one element. For elements at the ends, they are considered peaks/valleys if they satisfy the condition with their single neighbor. Elements that are part of a plateau (e.g., `[1, 5, 5, 5, 2]`, the middle 5s) should not be considered peaks or valleys unless they are at the very end of a plateau.\n\nExample:\n`findPeaksAndValleys([1, 2, 1, 3, 2, 4, 0])` should return:\n`[{ type: 'peak', index: 1, value: 2 }, { type: 'valley', index: 2, value: 1 }, { type: 'peak', index: 3, value: 3 }, { type: 'peak', index: 5, value: 4 }, { type: 'valley', index: 6, value: 0 }]`\n\n`findPeaksAndValleys([5])` should return: `[{ type: 'peak', index: 0, value: 5 }]`",
+          "answer": "",
+          "options": [],
+          "analysisPoints": [
+            "Correctly identifies peaks and valleys.",
+            "Handles edge cases for array ends.",
+            "Correctly handles single element arrays.",
+            "Distinguishes peaks/valleys from plateaus (e.g., [1, 5, 5, 2] -> 5s are not peak).",
+            "Produces output in the specified format.",
+            "Maintains O(N) time complexity."
+          ],
+          "keyConcepts": [
+            "local maximum",
+            "local minimum",
+            "array traversal",
+            "edge cases",
+            "plateaus"
+          ],
+          "evaluationCriteria": [
+            "Functional correctness for various inputs.",
+            "Efficiency (time and space).",
+            "Code readability and structure."
+          ],
+          "example": "```typescript\nfunction findPeaksAndValleys(arr) {\n  const result = [];\n  if (arr.length === 0) return [];\n  if (arr.length === 1) {\n    result.push({ type: 'peak', index: 0, value: arr[0] });\n    // In case problem definition allows, could also be a valley\n    // result.push({ type: 'valley', index: 0, value: arr[0] });\n    return result;\n  }\n\n  for (let i = 0; i < arr.length; i++) {\n    const isPeak = (i === 0 || arr[i] > arr[i - 1]) && (i === arr.length - 1 || arr[i] > arr[i + 1]);\n    const isValley = (i === 0 || arr[i] < arr[i - 1]) && (i === arr.length - 1 || arr[i] < arr[i + 1]);\n\n    // Refined check for plateaus: look for first/last element in a plateau\n    // For a peak: arr[i] must be strictly greater than left and strictly greater than right\n    // Or, if it's part of a plateau, it must be the start of a flat segment that's higher\n    // Or, if it's the end of a flat segment that's higher\n\n    // Better: traverse to find next distinct element for comparison\n    let leftVal = (i === 0) ? -Infinity : arr[i-1];\n    let rightVal = (i === arr.length - 1) ? -Infinity : arr[i+1];\n\n    // Find the next *distinct* element to the right for comparison, skipping plateaus\n    let k = i + 1;\n    while (k < arr.length && arr[k] === arr[i]) {\n      k++;\n    }\n    let nextDistinctVal = (k === arr.length) ? -Infinity : arr[k];\n\n    // Find the previous *distinct* element to the left for comparison, skipping plateaus\n    let p = i - 1;\n    while (p >= 0 && arr[p] === arr[i]) {\n      p--;\n    }\n    let prevDistinctVal = (p < 0) ? -Infinity : arr[p];\n\n    const currentIsPeak = arr[i] > prevDistinctVal && arr[i] > nextDistinctVal;\n    const currentIsValley = arr[i] < prevDistinctVal && arr[i] < nextDistinctVal;\n\n    if (currentIsPeak) {\n      result.push({ type: 'peak', index: i, value: arr[i] });\n    }\n    if (currentIsValley) {\n      result.push({ type: 'valley', index: i, value: arr[i] });\n    }\n\n    // Skip elements within a plateau once a peak/valley is identified (or not identified)\n    if (k > i + 1) {\n        i = k - 1; // Move i to the last element of the current plateau\n    }\n  }\n  return result;\n}\n\n// Corrected example logic for plateau handling\nfunction findPeaksAndValleysOptimized(arr) {\n    const result = [];\n    if (arr.length === 0) return [];\n    if (arr.length === 1) {\n        result.push({ type: 'peak', index: 0, value: arr[0] });\n        return result;\n    }\n\n    for (let i = 0; i < arr.length; i++) {\n        let leftDistinctIndex = i - 1;\n        while (leftDistinctIndex >= 0 && arr[leftDistinctIndex] === arr[i]) {\n            leftDistinctIndex--;\n        }\n\n        let rightDistinctIndex = i + 1;\n        while (rightDistinctIndex < arr.length && arr[rightDistinctIndex] === arr[i]) {\n            rightDistinctIndex++;\n        }\n\n        const leftVal = (leftDistinctIndex < 0) ? -Infinity : arr[leftDistinctIndex];\n        const rightVal = (rightDistinctIndex >= arr.length) ? -Infinity : arr[rightDistinctIndex];\n\n        const isPeak = arr[i] > leftVal && arr[i] > rightVal;\n        const isValley = arr[i] < leftVal && arr[i] < rightVal;\n\n        // Only add peak/valley for the first element of a plateau\n        if (isPeak && (i === 0 || arr[i] !== arr[i-1])) {\n            result.push({ type: 'peak', index: i, value: arr[i] });\n        }\n        if (isValley && (i === 0 || arr[i] !== arr[i-1])) {\n            result.push({ type: 'valley', index: i, value: arr[i] });\n        }\n\n        // Skip remaining elements in the plateau\n        i = rightDistinctIndex - 1; \n    }\n    return result;\n}\n\n// Test cases\n// console.log(findPeaksAndValleysOptimized([1, 2, 1, 3, 2, 4, 0])); // [{ type: 'peak', index: 1, value: 2 }, { type: 'valley', index: 2, value: 1 }, { type: 'peak', index: 3, value: 3 }, { type: 'peak', index: 5, value: 4 }, { type: 'valley', index: 6, value: 0 }]\n// console.log(findPeaksAndValleysOptimized([5])); // [{ type: 'peak', index: 0, value: 5 }]\n// console.log(findPeaksAndValleysOptimized([1, 5, 5, 5, 2])); // [{ type: 'peak', index: 1, value: 5 }, { type: 'valley', index: 4, value: 2 }] (or just peak at index 1 and valley at index 4 based on plateau definition)\n// The problem states 'elements that are part of a plateau... should not be considered peaks or valleys unless they are at the very end of a plateau'. This needs careful definition. \n// My current `findPeaksAndValleysOptimized` considers the START of a plateau if it's a peak/valley.\n// If the strict 'no plateau' rule applies, then [1,5,5,5,2] -> 5s are NOT peaks.\n// Re-interpretation: peak/valley requires *strictly greater/less* than *all* neighbors, skipping identical ones.\n// For [1, 5, 5, 5, 2], the first 5 is not strictly greater than its right neighbor (also 5). So no peak.\n// Let's adjust the definition in the provided example solution to strictly match that interpretation. The first version `findPeaksAndValleys` was closer to that.\n// For the problem example `[1, 2, 1, 3, 2, 4, 0]`, it should be:\n// 1: Neither\n// 2 (idx 1): 2 > 1, 2 > 1 -> Peak\n// 1 (idx 2): 1 < 2, 1 < 3 -> Valley\n// 3 (idx 3): 3 > 1, 3 > 2 -> Peak\n// 2 (idx 4): 2 > 3 (False)\n// 4 (idx 5): 4 > 2, 4 > 0 -> Peak\n// 0 (idx 6): 0 < 4 -> Valley\n// My `findPeaksAndValleysOptimized` matches the problem description better, assuming a peak is the first element of a local maximum plateau.\n// The phrasing 'unless they are at the very end of a plateau' is slightly ambiguous but generally it means strict inequality for interior elements.\n// Given the example, it implies a peak is `arr[i] > arr[i-1]` and `arr[i] > arr[i+1]` considering *distinct* neighbors.\n```",
+          "tags": [
+            "array",
+            "algorithm",
+            "advanced",
+            "peak",
+            "valley",
+            "edge-cases"
+          ],
+          "prerequisites": [
+            "local_maxima_algorithm",
+            "local_minima"
+          ],
+          "complexity": 8,
+          "interviewFrequency": 7,
+          "learningPath": "advanced"
+        },
+        {
+          "id": "question_three_sum_1",
+          "topic": "Three Sum Problem",
+          "level": "medium",
+          "type": "flashcard",
+          "question": "What is the primary reason for sorting the array when solving the Three Sum problem with the two-pointer technique?",
+          "answer": "Sorting the array allows for the efficient use of the two-pointer technique to find pairs that sum to a specific value, and it greatly simplifies the handling of duplicate elements to ensure unique triplets.",
+          "options": [],
+          "analysisPoints": [
+            "Understanding of how sorting enables two-pointer.",
+            "Understanding of how sorting simplifies duplicate handling."
+          ],
+          "keyConcepts": [
+            "sorting",
+            "two-pointer",
+            "duplicates",
+            "efficiency"
+          ],
+          "evaluationCriteria": [
+            "Clear explanation of sorting's benefits."
+          ],
+          "example": "",
+          "tags": [
+            "array",
+            "sorting",
+            "two-pointer",
+            "efficiency"
+          ],
+          "prerequisites": [
+            "two_sum_problem"
+          ],
+          "complexity": 4,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_three_sum_2",
+          "topic": "Three Sum Problem",
+          "level": "medium",
+          "type": "mcq",
+          "question": "In the `findTriplets` function, why is the condition `if (i > 0 && nums[i] === nums[i-1]) continue;` necessary?",
+          "answer": "To skip duplicate values for the first element (`nums[i]`) and prevent adding duplicate triplets to the result.",
+          "options": [
+            "To optimize the loop by skipping unnecessary iterations when `nums[i]` is zero.",
+            "To handle edge cases where the array has only one or two elements.",
+            "To skip duplicate values for the first element (`nums[i]`) and prevent adding duplicate triplets to the result.",
+            "To ensure that `nums[i-1]` exists and prevent an out-of-bounds error."
+          ],
+          "analysisPoints": [
+            "Understanding of duplicate handling in multi-sum problems.",
+            "Distinguishing between optimization and correctness reasons.",
+            "Recognizing the purpose of `continue` statement."
+          ],
+          "keyConcepts": [
+            "duplicates",
+            "two-pointer",
+            "triplets",
+            "uniqueness"
+          ],
+          "evaluationCriteria": [
+            "Correct identification of duplicate handling.",
+            "Understanding of the impact on result uniqueness."
+          ],
+          "example": "If `nums = [-1, 0, 1, 2, -1, -4]` and `target = 0`.\nAfter sorting: `[-4, -1, -1, 0, 1, 2]`.\nWithout the duplicate skip, when `i` is at index 1 (`nums[1] = -1`), we find `[-1, 0, 1]`. Then, when `i` is at index 2 (`nums[2] = -1`), we would again find `[-1, 0, 1]`, leading to a duplicate triplet in the result.",
+          "tags": [
+            "array",
+            "mcq",
+            "duplicate",
+            "optimization"
+          ],
+          "prerequisites": [
+            "two_sum_problem"
+          ],
+          "complexity": 6,
+          "interviewFrequency": 9,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_three_sum_3",
+          "topic": "Three Sum Problem",
+          "level": "hard",
+          "type": "code",
+          "question": "Modify the `findTriplets` function to return the count of unique triplets whose sum equals the target, instead of the triplets themselves. Ensure the solution remains `O(N^2)`.",
+          "answer": "",
+          "options": [],
+          "analysisPoints": [
+            "Correctly adapts the logic to count instead of store.",
+            "Maintains the O(N^2) time complexity.",
+            "Correctly handles duplicate triplets to count only unique ones.",
+            "Handles edge cases like empty array or no triplets found."
+          ],
+          "keyConcepts": [
+            "three sum",
+            "two-pointer",
+            "counting",
+            "duplicates",
+            "optimization"
+          ],
+          "evaluationCriteria": [
+            "Functional correctness for counting unique triplets.",
+            "Efficiency of the solution.",
+            "Ability to modify existing algorithms."
+          ],
+          "example": "```typescript\nfunction countTriplets(nums, target) {\n  nums.sort((a, b) => a - b);\n  let count = 0;\n  \n  for (let i = 0; i < nums.length - 2; i++) {\n    if (i > 0 && nums[i] === nums[i-1]) continue;\n    \n    let left = i + 1;\n    let right = nums.length - 1;\n    const remainingSum = target - nums[i];\n    \n    while (left < right) {\n      const currentSum = nums[left] + nums[right];\n      \n      if (currentSum === remainingSum) {\n        count++;\n        \n        while (left < right && nums[left] === nums[left+1]) left++;\n        while (left < right && nums[right] === nums[right-1]) right--;\n        \n        left++;\n        right--;\n      } else if (currentSum < remainingSum) {\n        left++;\n      } else {\n        right--;\n      }\n    }\n  }\n  \n  return count;\n}\n\n// Example Usage:\nconst numbers = [-1, 0, 1, 2, -1, -4];\nconst targetSum = 0;\nconsole.log(`Numbers: [${numbers}] | Target: ${targetSum} | Count of Triplets: ${countTriplets(numbers, targetSum)}`); // Expected: 2 ([[-1, -1, 2], [-1, 0, 1]])\n\nconst numbers2 = [1, 2, 3, 4, 5];\nconst targetSum2 = 9;\nconsole.log(`Numbers: [${numbers2}] | Target: ${targetSum2} | Count of Triplets: ${countTriplets(numbers2, targetSum2)}`); // Expected: 2 ([[1, 3, 5], [2, 3, 4]])\n\nconst numbers3 = [0, 0, 0, 0];\nconst targetSum3 = 0;\nconsole.log(`Numbers: [${numbers3}] | Target: ${targetSum3} | Count of Triplets: ${countTriplets(numbers3, targetSum3)}`); // Expected: 1 ([[0, 0, 0]])\n```",
+          "tags": [
+            "array",
+            "algorithm",
+            "counting",
+            "two-pointer",
+            "optimization"
+          ],
+          "prerequisites": [
+            "three_sum_problem"
+          ],
+          "complexity": 7,
+          "interviewFrequency": 7,
+          "learningPath": "advanced"
+        },
+        {
+          "id": "question_three_sum_4",
+          "topic": "Three Sum Problem",
+          "level": "easy",
+          "type": "open",
+          "question": "What is the time complexity of the Three Sum algorithm after sorting the array, and why?",
+          "answer": "After sorting, the time complexity is O(N^2). This is because the outer loop iterates `N-2` times. Inside this loop, the two-pointer approach (the `while` loop) effectively traverses the remaining portion of the array, which takes O(N) time. Thus, `N * N` operations lead to an overall O(N^2) complexity.",
+          "options": [],
+          "analysisPoints": [
+            "Correctly states O(N^2) complexity.",
+            "Explains the contribution of the outer loop and inner two-pointer loop.",
+            "Distinguishes from the sorting time (which is typically O(N log N) but is dominated by O(N^2))."
+          ],
+          "keyConcepts": [
+            "time complexity",
+            "big O notation",
+            "two-pointer",
+            "sorting"
+          ],
+          "evaluationCriteria": [
+            "Accuracy and clarity of complexity explanation.",
+            "Understanding of algorithmic phases."
+          ],
+          "example": "",
+          "tags": [
+            "complexity",
+            "algorithm",
+            "analysis"
+          ],
+          "prerequisites": [
+            "big_o_notation",
+            "sorting_algorithms"
+          ],
+          "complexity": 5,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_three_sum_5",
+          "topic": "Three Sum Problem",
+          "level": "medium",
+          "type": "open",
+          "question": "How would you adapt the `findTriplets` algorithm to solve the 'Four Sum' problem (finding four numbers that sum to a target)? Describe the approach and its expected time complexity.",
+          "answer": "To adapt the `findTriplets` algorithm to solve the 'Four Sum' problem, we can extend the nested loop structure. The core idea would be:\n\n1.  **Sort the Array**: First, sort the input array `nums`. This is still crucial for duplicate handling and using pointer techniques.\n2.  **Outer Loops**: Introduce two outer loops:\n    *   One loop for the first element (`i`) from `0` to `nums.length - 3`.\n    *   An inner loop for the second element (`j`) from `i + 1` to `nums.length - 2`.\n3.  **Two-Pointer Scan**: Inside these two loops, the problem reduces to a 'Two Sum' problem. Use two pointers, `left` (starting at `j + 1`) and `right` (starting at `nums.length - 1`).\n4.  **Calculate Remaining Sum**: The `remainingSum` would be `target - nums[i] - nums[j]`.\n5.  **Duplicate Handling**: Apply similar duplicate skipping logic for `i`, `j`, `left`, and `right` pointers to ensure unique quadruplets.\n\n**Time Complexity**: Sorting takes `O(N log N)`. The three nested loops (two outer loops for `i` and `j`, and the inner `while` loop for `left` and `right`) would result in `O(N * N * N)` or `O(N^3)` operations. Thus, the overall time complexity would be `O(N^3)`.",
+          "options": [],
+          "analysisPoints": [
+            "Correctly identifies extending the nested loop structure.",
+            "Applies the two-pointer technique recursively (or by adding another fixed pointer).",
+            "Mentions duplicate handling.",
+            "Correctly estimates `O(N^3)` time complexity."
+          ],
+          "keyConcepts": [
+            "four sum",
+            "k-sum",
+            "two-pointer",
+            "sorting",
+            "nested loops",
+            "complexity"
+          ],
+          "evaluationCriteria": [
+            "Ability to generalize algorithms.",
+            "Accuracy of proposed approach.",
+            "Correct complexity analysis."
+          ],
+          "example": "",
+          "tags": [
+            "algorithm",
+            "extension",
+            "complexity",
+            "k-sum"
+          ],
+          "prerequisites": [
+            "three_sum_problem"
+          ],
+          "complexity": 8,
+          "interviewFrequency": 6,
+          "learningPath": "advanced"
+        },
+        {
+          "id": "question_fisher_yates_1",
+          "topic": "Fisher-Yates Shuffle",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "What is the main characteristic of a Fisher-Yates shuffled array?",
+          "answer": "Every possible permutation of the array elements is equally likely; it produces an unbiased random permutation.",
+          "options": [],
+          "analysisPoints": [
+            "Understanding of 'unbiased' and 'uniform distribution'."
+          ],
+          "keyConcepts": [
+            "fisher-yates",
+            "unbiased",
+            "permutation",
+            "randomization"
+          ],
+          "evaluationCriteria": [
+            "Correctly identifies unbiased property."
+          ],
+          "example": "",
+          "tags": [
+            "randomization",
+            "definition",
+            "basic"
+          ],
+          "prerequisites": [
+            "array_basics"
+          ],
+          "complexity": 3,
+          "interviewFrequency": 7,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_fisher_yates_2",
+          "topic": "Fisher-Yates Shuffle",
+          "level": "medium",
+          "type": "mcq",
+          "question": "In the Fisher-Yates shuffle algorithm, when iterating from `i` down to `1`, why is `Math.random() * (i + 1)` used to generate the random index `j`?",
+          "answer": "To ensure that the random index `j` is chosen uniformly from `0` to the current `i` (inclusive), covering all elements in the remaining unshuffled portion of the array.",
+          "options": [
+            "To select a random index from `0` to the end of the original array.",
+            "To exclude the current element `arr[i]` from being swapped with itself.",
+            "To ensure that the random index `j` is chosen uniformly from `0` to the current `i` (inclusive), covering all elements in the remaining unshuffled portion of the array.",
+            "To improve performance by reducing the range of random numbers generated."
+          ],
+          "analysisPoints": [
+            "Understanding the range of `Math.random()` (0 inclusive, 1 exclusive).",
+            "Understanding why `i+1` is used for the upper bound.",
+            "Relating the random range to the unshuffled portion of the array."
+          ],
+          "keyConcepts": [
+            "randomization",
+            "fisher-yates",
+            "uniform distribution",
+            "array indexing"
+          ],
+          "evaluationCriteria": [
+            "Correct explanation of random index generation.",
+            "Understanding of the algorithm's mechanism."
+          ],
+          "example": "If `i` is 4, `i+1` is 5. `Math.random() * 5` will generate a number between 0 (inclusive) and 5 (exclusive). `Math.floor()` will then yield an integer from 0, 1, 2, 3, or 4. This correctly represents the indices of elements from `arr[0]` to `arr[4]`, which are the candidates for swapping with `arr[4]`.",
+          "tags": [
+            "randomization",
+            "mcq",
+            "algorithm_details"
+          ],
+          "prerequisites": [
+            "random_number_generation"
+          ],
+          "complexity": 6,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_fisher_yates_3",
+          "topic": "Fisher-Yates Shuffle",
+          "level": "medium",
+          "type": "open",
+          "question": "Explain why the Fisher-Yates shuffle is considered an 'unbiased' shuffling algorithm. Contrast it with a naive shuffling method like `array.sort(() => Math.random() - 0.5)`.",
+          "answer": "The Fisher-Yates shuffle is unbiased because it ensures that every element has an equal probability of ending up in any given position, and consequently, every possible permutation of the array is equally likely. This is achieved by, at each step `i` (from `n-1` down to `1`), selecting a random element from the remaining `i+1` unshuffled elements (`arr[0]` to `arr[i]`) and swapping it with `arr[i]`. Each position is filled by an element uniformly chosen from the still-available pool, leading to a truly random permutation.\n\nIn contrast, the naive `array.sort(() => Math.random() - 0.5)` method is **biased**. JavaScript's `sort` method (and similar built-in sorting algorithms in other languages) are typically not designed for perfect randomization. They often use algorithms like Quicksort or Merge Sort, which expect a consistent comparison function. When a random comparison function is provided, the sort might not be stable, or it might not even correctly sort all elements, leading to certain permutations being significantly more likely than others. This bias is especially noticeable for smaller arrays but persists for larger ones, meaning not all permutations are equally probable. It's an improper application of a sorting algorithm for randomization.",
+          "options": [],
+          "analysisPoints": [
+            "Correctly defines unbiased for Fisher-Yates (equal probability for permutations/elements).",
+            "Explains the mechanism of Fisher-Yates that ensures unbiasedness.",
+            "Identifies the bias in `array.sort(() => Math.random() - 0.5)`.",
+            "Explains *why* the naive method is biased (non-deterministic comparison, underlying sort algorithm assumptions)."
+          ],
+          "keyConcepts": [
+            "fisher-yates",
+            "bias",
+            "unbiased",
+            "randomization",
+            "permutation",
+            "sorting_algorithm_misuse"
+          ],
+          "evaluationCriteria": [
+            "Depth of explanation for unbiasedness.",
+            "Clear comparison and explanation of bias in the naive method."
+          ],
+          "example": "",
+          "tags": [
+            "randomization",
+            "algorithm",
+            "comparison",
+            "best-practices"
+          ],
+          "prerequisites": [
+            "sorting_algorithms_basics"
+          ],
+          "complexity": 7,
+          "interviewFrequency": 9,
+          "learningPath": "advanced"
+        },
+        {
+          "id": "question_fisher_yates_4",
+          "topic": "Fisher-Yates Shuffle",
+          "level": "hard",
+          "type": "code",
+          "question": "Implement a `getRandomSubset(array, size)` function that returns a random subset of `size` elements from the input `array`. The subset should be unique (no duplicate elements from the original array) and the order of elements in the subset does not matter. The original array should not be modified. Strive for optimal time and space complexity.",
+          "answer": "",
+          "options": [],
+          "analysisPoints": [
+            "Correctly implements random subset selection.",
+            "Ensures uniqueness of elements in the subset.",
+            "Does not modify the original array.",
+            "Handles edge cases (e.g., `size` > `array.length`, `size` <= 0, empty array).",
+            "Demonstrates understanding of Fisher-Yates principles for partial shuffling/sampling.",
+            "Achieves time complexity better than `O(N)` if `size` is much smaller than `N` (e.g., `O(size)` on average with a Set, or `O(N)` for Fisher-Yates adaptation but only shuffling up to `size` elements)."
+          ],
+          "keyConcepts": [
+            "randomization",
+            "subset",
+            "sampling",
+            "fisher-yates",
+            "array_copy",
+            "edge-cases"
+          ],
+          "evaluationCriteria": [
+            "Functional correctness of subset generation.",
+            "Efficiency (avoiding full shuffle if only a small subset is needed).",
+            "Code robustness and clarity."
+          ],
+          "example": "```typescript\nfunction getRandomSubset(array, size) {\n  if (size <= 0) return [];\n  if (size >= array.length) return [...array]; // Return a copy of the whole array\n\n  const tempArray = [...array]; // Create a mutable copy\n  const subset = [];\n\n  // Fisher-Yates partial shuffle: only shuffle as many elements as needed for the subset\n  for (let i = 0; i < size; i++) {\n    // Generate a random index from the remaining unshuffled portion (from i to tempArray.length - 1)\n    const randomIndex = i + Math.floor(Math.random() * (tempArray.length - i));\n    \n    // Swap the element at the current index i with the random element\n    // This effectively brings a random element to position i\n    [tempArray[i], tempArray[randomIndex]] = [tempArray[randomIndex], tempArray[i]];\n    \n    // Add the element at position i (which is now a random element) to the subset\n    subset.push(tempArray[i]);\n  }\n\n  return subset;\n}\n\n// Example Usage:\nconst original = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];\nconsole.log(`Original: [${original}] | Subset size 3: [${getRandomSubset(original, 3)}]`);\nconsole.log(`Original: [${original}] | Subset size 7: [${getRandomSubset(original, 7)}]`);\nconsole.log(`Original: [${original}] | Subset size 1: [${getRandomSubset(original, 1)}]`);\nconsole.log(`Original: [${original}] | Subset size 0: [${getRandomSubset(original, 0)}]`);\nconsole.log(`Original: [${original}] | Subset size 10: [${getRandomSubset(original, 10)}]`);\nconsole.log(`Original: [${original}] | Subset size 12: [${getRandomSubset(original, 12)}]`);\n\nconst emptyArr = [];\nconsole.log(`Original: [${emptyArr}] | Subset size 2: [${getRandomSubset(emptyArr, 2)}]`);\n```",
+          "tags": [
+            "randomization",
+            "sampling",
+            "algorithm",
+            "advanced",
+            "subset"
+          ],
+          "prerequisites": [
+            "fisher_yates_shuffle"
+          ],
+          "complexity": 8,
+          "interviewFrequency": 7,
+          "learningPath": "advanced"
+        },
+        {
+          "id": "question_fisher_yates_5",
+          "topic": "Fisher-Yates Shuffle",
+          "level": "medium",
+          "type": "open",
+          "question": "What are the time and space complexities of the Fisher-Yates shuffle algorithm, and how do they compare to a naive approach like `array.sort(() => Math.random() - 0.5)` in terms of efficiency?",
+          "answer": "The Fisher-Yates shuffle algorithm has a time complexity of `O(N)`, where N is the number of elements in the array. This is because it performs a single pass through the array, with a constant number of operations (random number generation, array access, and swapping) for each element.\n\nThe space complexity is `O(1)` if the shuffle is performed in-place (modifying the original array). If a copy of the array is made before shuffling (as shown in the provided example), then the space complexity becomes `O(N)` for storing the copy.\n\nIn comparison, a naive approach like `array.sort(() => Math.random() - 0.5)` typically has a time complexity of `O(N log N)` because it relies on a comparison-based sorting algorithm, which is inherently less efficient than the linear time complexity of Fisher-Yates for shuffling. The space complexity for the naive approach would depend on the specific sorting algorithm implementation (e.g., `O(log N)` for in-place quicksort, `O(N)` for mergesort). However, beyond efficiency, the critical difference is that the naive approach produces a **biased** permutation, whereas Fisher-Yates produces an **unbiased** one, making Fisher-Yates the superior choice for true randomization.",
+          "options": [],
+          "analysisPoints": [
+            "Correctly identifies Fisher-Yates time (O(N)) and space (O(1) or O(N)) complexities.",
+            "Compares Fisher-Yates time complexity to naive sort (O(N log N)).",
+            "Highlights the crucial difference in bias/unbiasedness as a major factor beyond raw efficiency."
+          ],
+          "keyConcepts": [
+            "complexity",
+            "time complexity",
+            "space complexity",
+            "fisher-yates",
+            "naive_shuffle",
+            "bias"
+          ],
+          "evaluationCriteria": [
+            "Accurate comparison of complexities.",
+            "Emphasis on the qualitative difference (bias) alongside quantitative difference (efficiency)."
+          ],
+          "example": "",
+          "tags": [
+            "complexity",
+            "efficiency",
+            "comparison",
+            "algorithm"
+          ],
+          "prerequisites": [
+            "big_o_notation"
+          ],
+          "complexity": 6,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        }
+      ],
+      "tasks": [
+        {
+          "id": "task_find_local_maxima",
+          "title": "Implement Find Local Maxima",
+          "description": "\nImplement a function `findLocalMaxima(arr)` that takes an array of numbers and returns an array containing the indices of all local maxima. A local maximum is an element that is strictly greater than its immediate neighbors. For elements at the ends of the array, they only need to be greater than their single existing neighbor.\n\n**Requirements:**\n1.  Handle empty arrays by returning an empty array.\n2.  Handle arrays with a single element by considering it a local maximum and returning its index (0).\n3.  Ensure strict inequality: `arr[i]` must be *greater* than its neighbors.\n4.  The solution should have optimal time complexity.\n",
+          "difficulty": "medium",
+          "startingCode": "function findLocalMaxima(arr) {\n  // TODO: Implement the required functionality\n  // Consider edge cases:\n  // 1. Empty array\n  // 2. Single element array\n  // 3. Elements at array boundaries\n  \n  return []; \n}",
+          "solutionCode": "function findLocalMaxima(arr) {\n  if (arr.length === 0) return [];\n  if (arr.length === 1) return [0];\n  \n  const localMaxima = [];\n  \n  // Check first element\n  if (arr[0] > arr[1]) {\n    localMaxima.push(0);\n  }\n  \n  // Check middle elements\n  for (let i = 1; i < arr.length - 1; i++) {\n    if (arr[i] > arr[i-1] && arr[i] > arr[i+1]) {\n      localMaxima.push(i);\n    }\n  }\n  \n  // Check last element\n  if (arr[arr.length-1] > arr[arr.length-2]) {\n    localMaxima.push(arr.length-1);\n  }\n  \n  return localMaxima;\n}",
+          "testCases": [
+            "findLocalMaxima([]) should return []",
+            "findLocalMaxima([5]) should return [0]",
+            "findLocalMaxima([1, 2, 3, 5, 4]) should return [3]",
+            "findLocalMaxima([10, 5, 20, 15, 30]) should return [0, 2, 4]",
+            "findLocalMaxima([1, 2, 3, 4, 5]) should return [4]",
+            "findLocalMaxima([5, 4, 3, 2, 1]) should return [0]",
+            "findLocalMaxima([1, 0, 1, 0, 1]) should return [0, 2, 4]",
+            "findLocalMaxima([7, 7, 7]) should return []",
+            "findLocalMaxima([1, 2, 2, 1]) should return []"
+          ],
+          "hints": [
+            "Break down the problem into three cases: first element, middle elements, and last element.",
+            "Pay attention to array boundary conditions for `i-1` and `i+1`.",
+            "Ensure you're using strict greater-than (>) for comparisons.",
+            "Think about the time complexity requirement - can you do this in a single pass?"
+          ],
+          "tags": [
+            "array",
+            "algorithm",
+            "traversal",
+            "local maximum"
+          ],
+          "timeEstimate": 25,
+          "prerequisites": [
+            "array_basics",
+            "conditional_statements",
+            "loops"
+          ],
+          "complexity": 5,
+          "interviewRelevance": 7,
+          "learningPath": "intermediate",
+          "relatedConcepts": [
+            "local_minimum",
+            "peak_finding"
+          ]
+        },
+        {
+          "id": "task_find_peaks_and_valleys",
+          "title": "Find All Peaks and Valleys",
+          "description": "\nExtend the concept of local maxima to include local minima. Implement a function `findPeaksAndValleys(arr)` that returns an array of objects. Each object should have `type` ('peak' or 'valley'), `index`, and `value`. A 'peak' is a local maximum, and a 'valley' is a local minimum (strictly less than its neighbors). Handle array boundaries and single-element arrays as discussed for local maxima.\n\n**Requirements:**\n1.  Return an empty array for empty input.\n2.  For a single-element array, it's considered a peak (and optionally a valley, if your interpretation allows for it based on the problem statement context; for this task, only mark it as a peak). \n3.  Strict inequality for comparisons (`>`, `<`).\n4.  Do not consider elements within a plateau (e.g., `[1, 5, 5, 5, 2]`) as peaks or valleys unless they are at the very beginning or end of the array, or if they are the first/last *distinct* element of a plateau that qualifies. For simplicity in this task, strictly adjacent comparison is sufficient.\n\n**Example Output Format:**\n`[{ type: 'peak', index: 1, value: 2 }, { type: 'valley', index: 2, value: 1 }]`\n",
+          "difficulty": "hard",
+          "startingCode": "function findPeaksAndValleys(arr) {\n  // TODO: Implement the logic to find both peaks and valleys\n  // Remember to handle edge cases for first/last elements and single-element arrays.\n  // An element within a plateau (e.g., 5 in [1, 5, 5, 2]) should not be counted unless it's strictly a peak/valley.\n  return [];\n}",
+          "solutionCode": "function findPeaksAndValleys(arr) {\n  const result = [];\n  if (arr.length === 0) return [];\n  if (arr.length === 1) {\n    result.push({ type: 'peak', index: 0, value: arr[0] });\n    return result;\n  }\n\n  for (let i = 0; i < arr.length; i++) {\n    const isFirst = i === 0;\n    const isLast = i === arr.length - 1;\n    \n    let isPeak = false;\n    let isValley = false;\n\n    if (isFirst) {\n      if (arr[i] > arr[i+1]) isPeak = true;\n      if (arr[i] < arr[i+1]) isValley = true;\n    } else if (isLast) {\n      if (arr[i] > arr[i-1]) isPeak = true;\n      if (arr[i] < arr[i-1]) isValley = true;\n    } else {\n      // Middle element: must be strictly greater/less than BOTH neighbors\n      if (arr[i] > arr[i-1] && arr[i] > arr[i+1]) isPeak = true;\n      if (arr[i] < arr[i-1] && arr[i] < arr[i+1]) isValley = true;\n    }\n\n    if (isPeak) {\n      result.push({ type: 'peak', index: i, value: arr[i] });\n    }\n    if (isValley) {\n      result.push({ type: 'valley', index: i, value: arr[i] });\n    }\n  }\n  return result;\n}",
+          "testCases": [
+            "findPeaksAndValleys([]) should return []",
+            "findPeaksAndValleys([5]) should return [{ type: 'peak', index: 0, value: 5 }]",
+            "findPeaksAndValleys([1, 2, 1, 3, 2, 4, 0]) should return [{ type: 'peak', index: 1, value: 2 }, { type: 'valley', index: 2, value: 1 }, { type: 'peak', index: 3, value: 3 }, { type: 'peak', index: 5, value: 4 }, { type: 'valley', index: 6, value: 0 }]",
+            "findPeaksAndValleys([1, 5, 5, 5, 2]) should return [] (no strict peak/valley in middle of plateau)",
+            "findPeaksAndValleys([10, 5, 10]) should return [{ type: 'peak', index: 0, value: 10 }, { type: 'valley', index: 1, value: 5 }, { type: 'peak', index: 2, value: 10 }]",
+            "findPeaksAndValleys([1, 2, 3, 4, 5]) should return [{ type: 'peak', index: 4, value: 5 }]",
+            "findPeaksAndValleys([5, 4, 3, 2, 1]) should return [{ type: 'peak', index: 0, value: 5 }]"
+          ],
+          "hints": [
+            "You can use the same three-case logic (first, middle, last element) for both peaks and valleys.",
+            "Remember that a peak condition uses `>` and a valley condition uses `<`.",
+            "Be careful with elements that are equal to their neighbors; they are neither peaks nor valleys under strict definition."
+          ],
+          "tags": [
+            "array",
+            "algorithm",
+            "local minimum",
+            "local maximum",
+            "data analysis"
+          ],
+          "timeEstimate": 45,
+          "prerequisites": [
+            "theory_local_maxima"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 8,
+          "learningPath": "advanced",
+          "relatedConcepts": [
+            "monotonic_array",
+            "slope_analysis"
+          ]
+        },
+        {
+          "id": "task_three_sum_implementation",
+          "title": "Implement the Three Sum Problem",
+          "description": "\nImplement the `findTriplets(nums, target)` function as described in the theory. Given an integer array `nums` and an integer `target`, return all unique triplets `[nums[i], nums[j], nums[k]]` such that `i != j`, `i != k`, `j != k`, and `nums[i] + nums[j] + nums[k] == target`.\n\n**Requirements:**\n1.  The function should return an array of arrays, where each inner array is a unique triplet.\n2.  The order of the triplets in the output array does not matter, nor does the order of elements within a triplet.\n3.  Your solution must efficiently handle duplicate numbers in the input array to ensure uniqueness of the output triplets.\n4.  The time complexity should be `O(N^2)`.\n",
+          "difficulty": "medium",
+          "startingCode": "function findTriplets(nums, target) {\n  // TODO: Implement the Three Sum problem using sorting and the two-pointer technique.\n  // Remember to handle duplicates effectively.\n  return [];\n}",
+          "solutionCode": "function findTriplets(nums, target) {\n  nums.sort((a, b) => a - b);\n  const result = [];\n  \n  for (let i = 0; i < nums.length - 2; i++) {\n    if (i > 0 && nums[i] === nums[i-1]) continue;\n    \n    let left = i + 1;\n    let right = nums.length - 1;\n    const remainingSum = target - nums[i];\n    \n    while (left < right) {\n      const currentSum = nums[left] + nums[right];\n      \n      if (currentSum === remainingSum) {\n        result.push([nums[i], nums[left], nums[right]]);\n        \n        while (left < right && nums[left] === nums[left+1]) left++;\n        while (left < right && nums[right] === nums[right-1]) right--;\n        \n        left++;\n        right--;\n      } else if (currentSum < remainingSum) {\n        left++;\n      } else {\n        right--;\n      }\n    }\n  }\n  \n  return result;\n}",
+          "testCases": [
+            "findTriplets([1, 2, 3, 4, 5], 9) should return [[1, 3, 5], [2, 3, 4]] (order of triplets/elements might vary, but content must match)",
+            "findTriplets([-1, 0, 1, 2, -1, -4], 0) should return [[-1, -1, 2], [-1, 0, 1]]",
+            "findTriplets([0, 0, 0, 0], 0) should return [[0, 0, 0]]",
+            "findTriplets([-2, 0, 1, 1, 2], 0) should return [[-2, 0, 2], [-2, 1, 1]]",
+            "findTriplets([1, 2, 3], 10) should return []",
+            "findTriplets([], 0) should return []",
+            "findTriplets([1, 2], 3) should return []"
+          ],
+          "hints": [
+            "Start by sorting the input array.",
+            "The outer loop fixes the first number.",
+            "Use two pointers, `left` and `right`, for the remaining numbers.",
+            "Remember to skip duplicates for all three positions (`i`, `left`, `right`) to ensure unique triplets."
+          ],
+          "tags": [
+            "array",
+            "algorithm",
+            "two-pointer",
+            "sorting",
+            "triplets",
+            "leetcode"
+          ],
+          "timeEstimate": 40,
+          "prerequisites": [
+            "sorting_algorithms",
+            "two_sum_problem"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 9,
+          "learningPath": "advanced",
+          "relatedConcepts": [
+            "four_sum_problem",
+            "k_sum_problem"
+          ]
+        },
+        {
+          "id": "task_four_sum_implementation",
+          "title": "Implement the Four Sum Problem",
+          "description": "\nImplement a function `findQuadruplets(nums, target)` that finds all unique quadruplets `[nums[a], nums[b], nums[c], nums[d]]` in a given array `nums` such that their sum equals the `target`. Similar to the Three Sum problem, indices must be distinct (`a != b != c != d`) and the solution should handle duplicates effectively.\n\n**Requirements:**\n1.  Return an array of arrays, each inner array being a unique quadruplet.\n2.  The order of quadruplets or elements within them does not matter.\n3.  Handle duplicate numbers to ensure uniqueness of output.\n4.  The time complexity should be `O(N^3)`.\n",
+          "difficulty": "hard",
+          "startingCode": "function findQuadruplets(nums, target) {\n  // TODO: Implement the Four Sum problem.\n  // This will likely involve extending the Three Sum approach.\n  // Remember to sort and handle duplicates for all four elements.\n  return [];\n}",
+          "solutionCode": "function findQuadruplets(nums, target) {\n  nums.sort((a, b) => a - b);\n  const result = [];\n\n  if (nums.length < 4) return result; // Need at least 4 elements\n\n  for (let i = 0; i < nums.length - 3; i++) {\n    // Skip duplicates for the first element\n    if (i > 0 && nums[i] === nums[i - 1]) continue;\n\n    for (let j = i + 1; j < nums.length - 2; j++) {\n      // Skip duplicates for the second element\n      if (j > i + 1 && nums[j] === nums[j - 1]) continue;\n\n      let left = j + 1;\n      let right = nums.length - 1;\n      const remainingSum = target - nums[i] - nums[j];\n\n      while (left < right) {\n        const currentSum = nums[left] + nums[right];\n\n        if (currentSum === remainingSum) {\n          result.push([nums[i], nums[j], nums[left], nums[right]]);\n\n          // Skip duplicates for left and right pointers\n          while (left < right && nums[left] === nums[left + 1]) left++;\n          while (left < right && nums[right] === nums[right - 1]) right--;\n\n          left++;\n          right--;\n        } else if (currentSum < remainingSum) {\n          left++;\n        } else {\n          right--;\n        }\n      }\n    }\n  }\n\n  return result;\n}",
+          "testCases": [
+            "findQuadruplets([1, 0, -1, 0, -2, 2], 0) should return [[-2, -1, 1, 2], [-2, 0, 0, 2], [-1, 0, 0, 1]]",
+            "findQuadruplets([2, 2, 2, 2, 2], 8) should return [[2, 2, 2, 2]]",
+            "findQuadruplets([], 0) should return []",
+            "findQuadruplets([1, 2, 3], 6) should return []",
+            "findQuadruplets([1, 1, 1, 1], 4) should return [[1, 1, 1, 1]]",
+            "findQuadruplets([-3, -1, 0, 2, 4, 5], 0) should return [[-3, -1, 0, 4]]"
+          ],
+          "hints": [
+            "Begin by sorting the array.",
+            "You'll need two outer loops to fix the first two elements.",
+            "Inside the second outer loop, apply the two-pointer technique for the remaining sum.",
+            "Pay close attention to duplicate skipping for all four pointers (i, j, left, right) to ensure unique quadruplets."
+          ],
+          "tags": [
+            "array",
+            "algorithm",
+            "two-pointer",
+            "sorting",
+            "k-sum",
+            "leetcode"
+          ],
+          "timeEstimate": 60,
+          "prerequisites": [
+            "theory_three_sum"
+          ],
+          "complexity": 8,
+          "interviewRelevance": 8,
+          "learningPath": "advanced",
+          "relatedConcepts": [
+            "three_sum_problem",
+            "n_sum_problem"
+          ]
+        },
+        {
+          "id": "task_fisher_yates_shuffle",
+          "title": "Implement Fisher-Yates Shuffle",
+          "description": "\nImplement the `shuffleArray(array)` function using the Fisher-Yates (Knuth) shuffle algorithm. The function should return a *new* array with the elements of the input array shuffled in a random, unbiased order. The original input array should not be modified.\n\n**Requirements:**\n1.  The shuffle must be unbiased, meaning every permutation should be equally likely.\n2.  The original `array` should remain unchanged.\n3.  Handle empty arrays or single-element arrays correctly.\n4.  The time complexity should be `O(N)` and space complexity `O(N)` (due to creating a copy).\n",
+          "difficulty": "medium",
+          "startingCode": "function shuffleArray(array) {\n  // TODO: Implement the Fisher-Yates shuffle algorithm.\n  // Make sure to create a copy of the array first to avoid modifying the original.\n  return [];\n}",
+          "solutionCode": "function shuffleArray(array) {\n  const result = [...array]; // Create a copy to avoid modifying the original array\n  let currentIndex = result.length;\n  let randomIndex;\n\n  // While there remain elements to shuffle.\n  while (currentIndex !== 0) {\n\n    // Pick a remaining element.\n    randomIndex = Math.floor(Math.random() * currentIndex);\n    currentIndex--;\n\n    // And swap it with the current element.\n    [result[currentIndex], result[randomIndex]] = [result[randomIndex], result[currentIndex]];\n  }\n\n  return result;\n}",
+          "testCases": [
+            "shuffleArray([]) should return []",
+            "shuffleArray([5]) should return [5]",
+            "shuffleArray([1, 2, 3]) should return a permutation of [1, 2, 3]",
+            "shuffleArray(['a', 'b', 'c', 'd']) should return a random permutation of ['a', 'b', 'c', 'd']",
+            "Verify original array is not modified: const arr = [1, 2, 3]; shuffleArray(arr); arr should still be [1, 2, 3]",
+            "Statistical test (requires multiple runs): Perform shuffle many times and check distribution of elements at various positions (difficult to automate in simple test cases, but good for manual review)."
+          ],
+          "hints": [
+            "First, create a shallow copy of the input array using the spread operator (`...array`) or `slice()`.",
+            "Iterate from the last element down to the second element (index 1).",
+            "In each iteration, generate a random index within the remaining unsorted portion of the array.",
+            "Use array destructuring for an elegant swap: `[arr[a], arr[b]] = [arr[b], arr[a]]`."
+          ],
+          "tags": [
+            "array",
+            "algorithm",
+            "randomization",
+            "shuffle",
+            "fisher-yates"
+          ],
+          "timeEstimate": 30,
+          "prerequisites": [
+            "array_basics",
+            "random_number_generation"
+          ],
+          "complexity": 6,
+          "interviewRelevance": 8,
+          "learningPath": "intermediate",
+          "relatedConcepts": [
+            "sampling",
+            "biased_vs_unbiased"
+          ]
+        },
+        {
+          "id": "task_deck_of_cards_shuffler",
+          "title": "Build a Deck of Cards Shuffler",
+          "description": "\nCreate a `Deck` class in JavaScript that simulates a standard 52-card deck. The class should have the following methods:\n\n1.  `constructor()`: Initializes a new deck with 52 standard playing cards (e.g., '2H', 'AD', 'KC', where 'H' is Hearts, 'D' is Diamonds, 'C' is Clubs, 'S' is Spades). The deck should be in a sorted, ordered state initially.\n2.  `shuffle()`: Randomly shuffles the deck using the Fisher-Yates algorithm. This method should modify the deck *in-place*.\n3.  `deal(numCards)`: Removes and returns the specified `numCards` from the top of the deck. If `numCards` is greater than the remaining cards, return all remaining cards.\n4.  `remainingCards()`: Returns the number of cards currently in the deck.\n\n**Requirements:**\n*   Use the Fisher-Yates algorithm for `shuffle()`.\n*   Ensure `deal()` modifies the internal state of the deck (removes cards).\n*   Handle edge cases for `deal()` (e.g., requesting more cards than available, requesting 0 or negative cards).\n",
+          "difficulty": "hard",
+          "startingCode": "class Deck {\n  constructor() {\n    this.cards = []; // Populate this with 52 cards\n    const suits = ['Hearts', 'Diamonds', 'Clubs', 'Spades'];\n    const ranks = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'];\n\n    for (const suit of suits) {\n      for (const rank of ranks) {\n        // Example: 'AH' for Ace of Hearts\n        this.cards.push(`${rank[0]}${suit[0]}`); // Simplified card representation\n      }\n    }\n  }\n\n  shuffle() {\n    // TODO: Implement Fisher-Yates in-place shuffle\n  }\n\n  deal(numCards) {\n    // TODO: Remove and return numCards from the top of the deck\n    return [];\n  }\n\n  remainingCards() {\n    // TODO: Return the current number of cards\n    return this.cards.length;\n  }\n}\n\n// Example Usage:\n// const myDeck = new Deck();\n// console.log('Initial Deck size:', myDeck.remainingCards());\n// myDeck.shuffle();\n// console.log('Shuffled Deck (top 5):', myDeck.deal(5));\n// console.log('Remaining cards:', myDeck.remainingCards());",
+          "solutionCode": "class Deck {\n  constructor() {\n    this.cards = [];\n    const suits = ['H', 'D', 'C', 'S']; // Using single letters for brevity as per example\n    const ranks = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'];\n\n    for (const suit of suits) {\n      for (const rank of ranks) {\n        this.cards.push(`${rank}${suit}`);\n      }\n    }\n  }\n\n  shuffle() {\n    let currentIndex = this.cards.length;\n    let randomIndex;\n\n    // While there remain elements to shuffle.\n    while (currentIndex !== 0) {\n      // Pick a remaining element.\n      randomIndex = Math.floor(Math.random() * currentIndex);\n      currentIndex--;\n\n      // And swap it with the current element.\n      [this.cards[currentIndex], this.cards[randomIndex]] = [\n        this.cards[randomIndex],\n        this.cards[currentIndex],\n      ];\n    }\n    console.log('Deck shuffled!');\n  }\n\n  deal(numCards) {\n    if (numCards <= 0) return [];\n    const cardsToDeal = Math.min(numCards, this.cards.length);\n    \n    // Using splice to remove cards from the end (top of deck if it's conceptualized that way)\n    // Or from the beginning if conceptualized as drawing from the 'top' of the array (index 0)\n    // Let's assume drawing from the beginning for simplicity (pop from beginning, or slice from end)\n    // Using slice from end is usually more efficient due to array shift avoidance.\n    // If cards are dealt from the 'top' meaning index 0 of array, use splice(0, cardsToDeal)\n    // If cards are dealt from the 'end' meaning array.pop() like, then shuffle should put 'top' cards at end\n    \n    // Standard practice for 'deal from top' with array is to remove from end after shuffle, assuming last element is 'top'\n    const dealtCards = this.cards.splice(this.cards.length - cardsToDeal, cardsToDeal);\n    console.log(`Dealt ${dealtCards.length} cards.`);\n    return dealtCards;\n  }\n\n  remainingCards() {\n    return this.cards.length;\n  }\n\n  // Optional: Reset the deck to full and ordered state\n  reset() {\n      this.cards = [];\n      const suits = ['H', 'D', 'C', 'S'];\n      const ranks = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'];\n\n      for (const suit of suits) {\n        for (const rank of ranks) {\n          this.cards.push(`${rank}${suit}`);\n        }\n      }\n      console.log('Deck reset!');\n  }\n}\n\n// Example Usage:\nconst myDeck = new Deck();\nconsole.log('Initial Deck size:', myDeck.remainingCards()); // Expected: 52\nconsole.log('Sample top 5 cards (before shuffle):', myDeck.cards.slice(47, 52)); // Shows order\n\nmyDeck.shuffle();\nconsole.log('Deck size after shuffle:', myDeck.remainingCards()); // Expected: 52\n\nconst hand1 = myDeck.deal(5);\nconsole.log('Hand 1 (5 cards):', hand1);\nconsole.log('Remaining cards after deal:', myDeck.remainingCards()); // Expected: 47\n\nconst hand2 = myDeck.deal(50); // Try to deal more than available\nconsole.log('Hand 2 (50 cards):', hand2);\nconsole.log('Remaining cards after second deal:', myDeck.remainingCards()); // Expected: 0\n\nmyDeck.reset();\nconsole.log('Deck size after reset:', myDeck.remainingCards()); // Expected: 52\nconst hand3 = myDeck.deal(0); // Test dealing 0 cards\nconsole.log('Hand 3 (0 cards):', hand3);\nconst hand4 = myDeck.deal(-2); // Test dealing negative cards\nconsole.log('Hand 4 (-2 cards):', hand4);",
+          "tags": [
+            "class",
+            "oop",
+            "randomization",
+            "game-development",
+            "fisher-yates"
+          ],
+          "timeEstimate": 60,
+          "prerequisites": [
+            "class_syntax",
+            "array_methods",
+            "fisher_yates_shuffle"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 8,
+          "learningPath": "advanced",
+          "relatedConcepts": [
+            "card_games",
+            "simulation"
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "477d0362-2e8e-4697-831e-1828e1f125f8",
+    "startLine": 15800,
+    "endLine": 15899,
+    "processedDate": "2025-06-17T15:11:44.319Z",
+    "content": {
+      "logicalBlockInfo": {
+        "suggestedEndLine": -1
+      },
+      "theory": [
+        {
+          "id": "theory_array_shuffling",
+          "title": "Array Shuffling (Fisher-Yates Algorithm)",
+          "content": "The Fisher-Yates (or Knuth) shuffle is an algorithm for generating a random permutation of a finite sequence. The algorithm works by iterating through the array from the last element down to the first (or from the first to the last), and for each element, it swaps it with a randomly chosen element from the unsorted part of the array (including itself).\n\n## Key Concepts\n- **In-place Shuffling:** The algorithm modifies the original array directly without requiring extra space for a new array.\n- **Randomness:** Each permutation of the array elements has an equal probability of being generated, ensuring a truly random shuffle.\n- **Time Complexity:** The algorithm has a time complexity of O(n), where n is the number of elements in the array, because it performs a constant number of operations for each element.\n- **Space Complexity:** The space complexity is O(1) as it only uses a few variables for iteration and swapping.\n\n## Algorithm Steps\n1. Iterate from the last element `n-1` down to `1`.\n2. For each element at index `i`, generate a random index `j` such that `0 <= j <= i`.\n3. Swap the element at index `i` with the element at index `j`.\n\nThis ensures that as we iterate, each element is picked exactly once and moved to a 'final' shuffled position, and the elements already moved are not revisited.",
+          "examples": [
+            {
+              "id": "example_array_shuffling_1",
+              "title": "Fisher-Yates Shuffle Implementation",
+              "code": "/**\n * Shuffles an array in-place using the Fisher-Yates (Knuth) algorithm.\n * @param {Array<T>} array The array to be shuffled.\n * @returns {Array<T>} The shuffled array.\n */\nfunction shuffleArray<T>(array: T[]): T[] {\n  const result = [...array]; // Create a copy to avoid modifying original if preferred\n  let currentIndex = result.length;\n  let randomIndex: number;\n\n  // While there remain elements to shuffle.\n  while (currentIndex !== 0) {\n\n    // Pick a remaining element.\n    randomIndex = Math.floor(Math.random() * currentIndex);\n    currentIndex--;\n\n    // And swap it with the current element.\n    [result[currentIndex], result[randomIndex]] = [\n      result[randomIndex],\n      result[currentIndex],\n    ];\n  }\n\n  return result;\n}\n\n// Example Usage:\nconst originalArray = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];\nconst shuffled = shuffleArray(originalArray);\nconsole.log('Original Array:', originalArray);\nconsole.log('Shuffled Array:', shuffled); // Random permutation of the original array\n\nconst anotherArray = ['apple', 'banana', 'cherry', 'date'];\nconsole.log('Original Array:', anotherArray);\nconsole.log('Shuffled Array:', shuffleArray(anotherArray));",
+              "explanation": "This example provides a complete implementation of the Fisher-Yates shuffle. It iterates from the end of the array to the beginning. In each iteration, it selects a random index from the unshuffled portion (0 to `currentIndex`) and swaps the element at `currentIndex` with the element at the `randomIndex`. This process ensures that each element is equally likely to end up in any position, producing a truly random permutation.",
+              "language": "typescript"
+            }
+          ],
+          "relatedQuestions": [
+            "question_array_shuffling_1",
+            "question_array_shuffling_2",
+            "question_array_shuffling_3",
+            "question_array_shuffling_4"
+          ],
+          "relatedTasks": [
+            "task_implement_fisher_yates_shuffle",
+            "task_random_quiz_question_order"
+          ],
+          "tags": [
+            "array",
+            "algorithm",
+            "shuffling",
+            "randomization",
+            "in-place",
+            "data-structures"
+          ],
+          "technology": "TypeScript",
+          "prerequisites": [
+            "arrays",
+            "loops",
+            "math_random",
+            "variable_swapping"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 8,
+          "learningPath": "intermediate",
+          "requiredFor": [
+            "gaming_applications",
+            "random_selection",
+            "card_games"
+          ]
+        },
+        {
+          "id": "theory_recursion_nested_structures",
+          "title": "Recursion for Traversing Deeply Nested Structures",
+          "content": "Recursion is a programming technique where a function calls itself to solve a problem. It's particularly powerful for handling problems that can be broken down into smaller, self-similar subproblems, such as traversing tree-like or deeply nested data structures (e.g., nested arrays or objects).\n\n## Key Concepts\n- **Base Case:** Every recursive function must have one or more base cases. These are conditions under which the function stops calling itself and returns a result directly, preventing infinite recursion.\n- **Recursive Step:** This is where the function calls itself with a modified input that moves closer to the base case. For nested arrays, the recursive step involves iterating through elements and calling the function again if an element is an array.\n- **Call Stack:** Each recursive call adds a new frame to the call stack. When a base case is reached, the function returns, and its frame is removed from the stack, allowing previous calls to resume.\n- **Depth-First Traversal:** Recursion naturally implements a depth-first traversal strategy, exploring as far as possible along each branch before backtracking.\n\n## Application to Nested Arrays\nTo process a deeply nested array, a recursive function can iterate through the elements. If an element is itself an array, the function calls itself with that nested array. If the element is a primitive value (like a number or string), it processes that value directly. This approach allows handling arrays of arbitrary nesting depth.",
+          "examples": [
+            {
+              "id": "example_recursion_nested_structures_1",
+              "title": "Summing Elements in a Deeply Nested Array",
+              "code": "/**\n * Calculates the sum of all number elements in a deeply nested array.\n * Non-numeric elements are ignored. Arrays can be nested to arbitrary depth.\n * @param {Array<number | Array<any>>} arr The nested array to sum.\n * @returns {number} The total sum of numbers.\n */\nfunction sumNestedArray(arr: (number | any[])[]): number {\n  let sum = 0;\n  \n  function processArray(array: (number | any[])[]) {\n    array.forEach(item => {\n      if (Array.isArray(item)) {\n        processArray(item); // Recursively process nested arrays\n      } else if (typeof item === 'number') {\n        sum += item;\n      }\n      // Ignore other types like strings, booleans, etc.\n    });\n  }\n  \n  processArray(arr);\n  return sum;\n}\n\n// Example Usage:\nconst nestedArray1 = [4, 5, 7, 8, [5, 7, 9, [3, 5, 7]]];\nconsole.log('Sum of nestedArray1:', sumNestedArray(nestedArray1)); // Expected: 60 (4+5+7+8+5+7+9+3+5+7)\n\nconst nestedArray2 = [1, [2, [3, [4]]], 5, []];\nconsole.log('Sum of nestedArray2:', sumNestedArray(nestedArray2)); // Expected: 15 (1+2+3+4+5)\n\nconst nestedArray3 = [10, 'a', [20, null, [30]], 40];\nconsole.log('Sum of nestedArray3:', sumNestedArray(nestedArray3)); // Expected: 100 (10+20+30+40)\n\nconst emptyNestedArray: any[] = [];\nconsole.log('Sum of emptyNestedArray:', sumNestedArray(emptyNestedArray)); // Expected: 0",
+              "explanation": "This function `sumNestedArray` uses a helper recursive function `processArray` to traverse the nested structure. For each item, it checks if it's an array using `Array.isArray()`. If it is, `processArray` is called recursively on that item. If it's a number, it's added to the `sum`. This pattern effectively flattens and sums all numeric values regardless of their nesting depth.",
+              "language": "typescript"
+            }
+          ],
+          "relatedQuestions": [
+            "question_sum_nested_array_1",
+            "question_sum_nested_array_2",
+            "question_sum_nested_array_3",
+            "question_sum_nested_array_4"
+          ],
+          "relatedTasks": [
+            "task_sum_nested_numbers",
+            "task_flatten_nested_array"
+          ],
+          "tags": [
+            "recursion",
+            "arrays",
+            "data-structures",
+            "traversal",
+            "nested",
+            "algorithm"
+          ],
+          "technology": "TypeScript",
+          "prerequisites": [
+            "functions",
+            "loops",
+            "array_methods",
+            "type_checking"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 9,
+          "learningPath": "intermediate",
+          "requiredFor": [
+            "tree_traversal",
+            "graph_algorithms",
+            "complex_data_parsing"
+          ]
+        },
+        {
+          "id": "theory_two_pointer_technique",
+          "title": "Two-Pointer Technique for Array Manipulation",
+          "content": "The two-pointer technique is an algorithmic pattern that uses two pointers (usually indices) to iterate through a data structure, typically an array or a string, simultaneously. This technique is highly efficient for problems involving ordered data or scenarios where elements need to be compared or rearranged relative to each other.\n\n## Key Concepts\n- **In-place Modification:** Often, two-pointer solutions modify the array in-place, leading to O(1) space complexity.\n- **Efficiency:** By performing a single pass (or sometimes a few passes) through the data, two-pointer algorithms typically achieve O(n) time complexity, which is optimal for many array problems.\n- **Pointer Movement:** The pointers can move in the same direction (e.g., slow and fast pointers) or in opposite directions (e.g., left and right pointers).\n- **Scenarios:** Useful for problems like finding pairs, removing duplicates, reversing arrays, partitioning arrays, or merging sorted arrays.\n\n## Types of Two-Pointer Approaches\n1.  **Same-Direction Pointers (Slow/Fast):** One pointer (fast) moves ahead, while the other (slow) lags behind, used for problems like removing elements, moving specific elements, or finding cycle in a linked list.\n2.  **Opposite-Direction Pointers (Left/Right):** Pointers start at opposite ends of the array and move towards each other, typically used for problems on sorted arrays like finding pairs with a certain sum, reversing an array, or checking for palindromes.",
+          "examples": [
+            {
+              "id": "example_two_pointer_technique_1",
+              "title": "Move All Occurrences of Element to End",
+              "code": "/**\n * Moves all occurrences of a specific target number to the end of an array in-place.\n * Uses a two-pointer approach.\n * @param {Array<number>} array The array to modify.\n * @param {number} target The number to move to the end.\n * @returns {Array<number>} The modified array with target elements at the end.\n */\nfunction moveElementToEnd(array: number[], target: number): number[] {\n  if (!array || array.length === 0) {\n    return [];\n  }\n\n  let i = 0; // Slow pointer, points to where the next non-target element should go\n  let j = 0; // Fast pointer, iterates through the array\n  \n  // Move all non-target elements to the front using the fast pointer (j)\n  // and placing them at the slow pointer's position (i).\n  while (j < array.length) {\n    if (array[j] !== target) {\n      // If the element at j is not the target, swap it with the element at i\n      // and increment i to point to the next available slot for a non-target element.\n      [array[i], array[j]] = [array[j], array[i]];\n      i++;\n    }\n    j++; // Always increment j to continue scanning the array\n  }\n  \n  return array;\n}\n\n// Example Usage:\nconst inputArray1 = [2, 9, 1, 5, 2, 3, 1, 2, 7, 4, 3, 8, 29, 2, 4, 6, 54, 32, 2, 100];\nconsole.log('Original Array:', inputArray1);\nconsole.log('After moving 2s:', moveElementToEnd(inputArray1, 2));\n// Expected: [9, 1, 5, 3, 1, 7, 4, 3, 8, 29, 4, 6, 54, 32, 100, 2, 2, 2, 2, 2]\n\nconst inputArray2 = [1, 1, 1, 1, 2, 3, 1, 1];\nconsole.log('Original Array:', inputArray2);\nconsole.log('After moving 1s:', moveElementToEnd(inputArray2, 1));\n// Expected: [2, 3, 1, 1, 1, 1, 1, 1]\n\nconst inputArray3 = [5, 5, 5];\nconsole.log('Original Array:', inputArray3);\nconsole.log('After moving 5s:', moveElementToEnd(inputArray3, 5));\n// Expected: [5, 5, 5]\n\nconst inputArray4 = [1, 2, 3];\nconsole.log('Original Array:', inputArray4);\nconsole.log('After moving 4s:', moveElementToEnd(inputArray4, 4));\n// Expected: [1, 2, 3]\n",
+              "explanation": "This example demonstrates the 'slow and fast' two-pointer technique. The `j` pointer iterates through the entire array. If `array[j]` is *not* the target element, it means it's an element that should remain at the front. It's then swapped with `array[i]` (the position where the next non-target element should go), and `i` is incremented. Elements equal to the `target` are simply skipped by `i`, effectively being pushed towards the end as non-target elements fill the front of the array. Once `j` reaches the end, all non-target elements are in the initial `i` positions, and the rest are the `target` elements.",
+              "language": "typescript"
+            }
+          ],
+          "relatedQuestions": [
+            "question_move_element_to_end_1",
+            "question_move_element_to_end_2",
+            "question_move_element_to_end_3",
+            "question_move_element_to_end_4"
+          ],
+          "relatedTasks": [
+            "task_move_zeros_to_end",
+            "task_remove_duplicates_from_sorted_array"
+          ],
+          "tags": [
+            "array",
+            "algorithm",
+            "two-pointers",
+            "in-place",
+            "optimization",
+            "data-structures"
+          ],
+          "technology": "TypeScript",
+          "prerequisites": [
+            "arrays",
+            "loops",
+            "variable_swapping"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 9,
+          "learningPath": "intermediate",
+          "requiredFor": [
+            "array_manipulation",
+            "sorting_algorithms",
+            "string_processing"
+          ]
+        },
+        {
+          "id": "theory_matrix_operations_rotation",
+          "title": "Matrix Operations: In-place 90-Degree Clockwise Rotation",
+          "content": "Matrix rotation is a common algorithmic problem, particularly when dealing with image processing or grid-based puzzles. Rotating a matrix 90 degrees clockwise in-place means modifying the original matrix directly without creating a new one, which is crucial for optimizing space complexity.\n\n## Key Concepts\n- **In-place Algorithm:** An algorithm that transforms input using a small, constant amount of extra storage space.\n- **Square Matrix:** This specific rotation method is typically applied to square matrices (number of rows equals number of columns), where `n x n` makes index mapping simpler.\n- **Transpose:** The first step in a 90-degree clockwise rotation is to transpose the matrix. Transposing means swapping elements `matrix[i][j]` with `matrix[j][i]`. This effectively flips the matrix over its main diagonal (from top-left to bottom-right).\n- **Reverse Rows:** After transposing, the matrix is rotated 90 degrees counter-clockwise. To achieve a clockwise rotation, each row must then be reversed. This final step puts the elements in their correct clockwise positions.\n\n## Algorithm Steps\n1.  **Transpose the Matrix:** Iterate through the upper triangle of the matrix (e.g., `for i from 0 to n-1`, `for j from i to n-1`). Swap `matrix[i][j]` with `matrix[j][i]`. This ensures each pair is swapped only once.\n2.  **Reverse Each Row:** After transposition, iterate through each row of the matrix. Reverse the elements within each row. This can be done by using `Array.prototype.reverse()` or by a two-pointer approach for each row.",
+          "examples": [
+            {
+              "id": "example_matrix_rotation_1",
+              "title": "In-place 90-Degree Clockwise Matrix Rotation",
+              "code": "/**\n * Rotates a square matrix 90 degrees clockwise in-place.\n * @param {number[][]} matrix The square matrix to rotate.\n * @returns {number[][]} The rotated matrix (same reference as input).\n */\nfunction rotateMatrix(matrix: number[][]): number[][] {\n  if (!matrix || matrix.length === 0 || matrix[0].length === 0) {\n    return matrix; // Handle empty or invalid matrix\n  }\n  const n = matrix.length;\n\n  // Check if it's a square matrix (optional, but common for this problem type)\n  if (matrix.some(row => row.length !== n)) {\n    console.warn(\"Warning: Matrix is not square. Rotation might not be as expected.\");\n    // Depending on requirements, might throw an error or handle non-square matrices differently\n  }\n  \n  // 1. Transpose the matrix (swap rows with columns)\n  // Iterate only the upper triangle to avoid double swapping\n  for (let i = 0; i < n; i++) {\n    for (let j = i; j < n; j++) {\n      // Swap elements at positions [i,j] and [j,i]\n      [matrix[i][j], matrix[j][i]] = [matrix[j][i], matrix[i][j]];\n    }\n  }\n  \n  // 2. Reverse each row\n  for (let i = 0; i < n; i++) {\n    matrix[i].reverse();\n  }\n  \n  return matrix;\n}\n\n// Example Usage:\nconst matrix1 = [\n  [1, 2, 3],\n  [4, 5, 6],\n  [7, 8, 9]\n];\nconsole.log('Original Matrix 1:', JSON.stringify(matrix1));\nrotateMatrix(matrix1);\nconsole.log('Rotated Matrix 1 (90 deg clockwise):', JSON.stringify(matrix1));\n// Expected: [[7, 4, 1], [8, 5, 2], [9, 6, 3]]\n\nconst matrix2 = [\n  [5, 1, 9, 11],\n  [2, 4, 8, 10],\n  [13, 3, 6, 7],\n  [15, 14, 12, 16]\n];\nconsole.log('Original Matrix 2:', JSON.stringify(matrix2));\nrotateMatrix(matrix2);\nconsole.log('Rotated Matrix 2 (90 deg clockwise):', JSON.stringify(matrix2));\n// Expected: [[15, 13, 2, 5], [14, 3, 4, 1], [12, 6, 8, 9], [16, 7, 10, 11]]\n",
+              "explanation": "The `rotateMatrix` function first transposes the square matrix. The nested loops iterate only for `j` from `i` to `n-1` to ensure that each pair `(i,j)` and `(j,i)` is swapped only once. After transposition, the matrix is effectively rotated 90 degrees counter-clockwise. To achieve a 90-degree clockwise rotation, each row of the transposed matrix is then reversed. This combination of operations correctly positions all elements.",
+              "language": "typescript"
+            }
+          ],
+          "relatedQuestions": [
+            "question_rotate_matrix_1",
+            "question_rotate_matrix_2",
+            "question_rotate_matrix_3",
+            "question_rotate_matrix_4",
+            "question_rotate_matrix_5"
+          ],
+          "relatedTasks": [
+            "task_rotate_matrix_clockwise",
+            "task_rotate_matrix_counter_clockwise"
+          ],
+          "tags": [
+            "matrix",
+            "algorithm",
+            "in-place",
+            "data-structures",
+            "array",
+            "rotation",
+            "transposition"
+          ],
+          "technology": "TypeScript",
+          "prerequisites": [
+            "arrays",
+            "nested_loops",
+            "variable_swapping"
+          ],
+          "complexity": 8,
+          "interviewRelevance": 9,
+          "learningPath": "advanced",
+          "requiredFor": [
+            "game_development",
+            "image_processing",
+            "2d_array_manipulation"
+          ]
+        }
+      ],
+      "questions": [
+        {
+          "id": "question_array_shuffling_1",
+          "topic": "Array Shuffling",
+          "level": "medium",
+          "type": "code",
+          "question": "Implement the Fisher-Yates (Knuth) shuffle algorithm. Your function should take an array and shuffle it in-place, ensuring that every permutation of the array elements is equally likely.",
+          "answer": "```typescript\nfunction shuffleArray<T>(array: T[]): T[] {\n  let currentIndex = array.length;\n  let randomIndex: number;\n\n  while (currentIndex !== 0) {\n    randomIndex = Math.floor(Math.random() * currentIndex);\n    currentIndex--;\n    [array[currentIndex], array[randomIndex]] = [\n      array[randomIndex],\n      array[currentIndex],\n    ];\n  }\n  return array;\n}\n\nconst arr = [1, 2, 3, 4, 5];\nshuffleArray(arr);\nconsole.log(arr);\n```",
+          "options": [],
+          "analysisPoints": [
+            "Correct implementation of Fisher-Yates algorithm.",
+            "Ensuring in-place modification.",
+            "Proper use of `Math.random()` and `Math.floor()` for index generation.",
+            "Handling edge cases like empty or single-element arrays."
+          ],
+          "keyConcepts": [
+            "Fisher-Yates Shuffle",
+            "In-place algorithm",
+            "Randomization",
+            "Time complexity O(n)",
+            "Space complexity O(1)"
+          ],
+          "evaluationCriteria": [
+            "Algorithm correctness for statistical randomness.",
+            "Efficiency (time and space).",
+            "Code readability and robustness."
+          ],
+          "example": "The provided code implements the Fisher-Yates shuffle correctly. It iterates from the last element down to the first. In each iteration, it picks a random element from the `0` to `currentIndex` range and swaps it with the current element. This ensures that elements are only swapped into an already-processed part of the array, leading to an unbiased shuffle.",
+          "tags": [
+            "array",
+            "shuffling",
+            "algorithm",
+            "randomization",
+            "in-place"
+          ],
+          "prerequisites": [
+            "arrays",
+            "loops",
+            "math_random"
+          ],
+          "complexity": 7,
+          "interviewFrequency": 7,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_array_shuffling_2",
+          "topic": "Array Shuffling",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "What is the time complexity of the Fisher-Yates shuffle algorithm?",
+          "answer": "O(n)",
+          "options": [],
+          "analysisPoints": [
+            "Understanding of algorithmic complexity.",
+            "Recall of Fisher-Yates properties."
+          ],
+          "keyConcepts": [
+            "Time complexity",
+            "Fisher-Yates Shuffle",
+            "Efficiency"
+          ],
+          "evaluationCriteria": [
+            "Basic knowledge recall."
+          ],
+          "example": "The Fisher-Yates shuffle iterates through the array once (n elements), performing constant-time operations (random number generation, array access, swap) for each element. Thus, its time complexity is O(n).",
+          "tags": [
+            "array",
+            "shuffling",
+            "time-complexity",
+            "flashcard"
+          ],
+          "prerequisites": [
+            "big_o_notation"
+          ],
+          "complexity": 3,
+          "interviewFrequency": 6,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_array_shuffling_3",
+          "topic": "Array Shuffling",
+          "level": "medium",
+          "type": "mcq",
+          "question": "Which of the following is a key characteristic of the Fisher-Yates shuffle?\n\nA. It requires O(n) auxiliary space to store the shuffled array.\nB. It guarantees that the first and last elements will always be swapped.\nC. It produces an unbiased permutation, meaning every permutation has equal probability.\nD. It only works on arrays of unique numbers.",
+          "answer": "C. It produces an unbiased permutation, meaning every permutation has equal probability.",
+          "options": [
+            "A. It requires O(n) auxiliary space to store the shuffled array.",
+            "B. It guarantees that the first and last elements will always be swapped.",
+            "C. It produces an unbiased permutation, meaning every permutation has equal probability.",
+            "D. It only works on arrays of unique numbers."
+          ],
+          "analysisPoints": [
+            "Understanding of Fisher-Yates core properties.",
+            "Distinguishing correct efficiency claims.",
+            "Recognizing the algorithm's independence from data type or uniqueness."
+          ],
+          "keyConcepts": [
+            "Fisher-Yates Shuffle",
+            "Unbiased permutation",
+            "In-place algorithm",
+            "Space complexity"
+          ],
+          "evaluationCriteria": [
+            "Understanding of fundamental principles of the algorithm.",
+            "Ability to distinguish true characteristics from false statements."
+          ],
+          "example": "The Fisher-Yates shuffle is known for producing an unbiased permutation. It works in-place, requiring O(1) auxiliary space, not O(n). It does not guarantee specific swaps, and it works on arrays of any data type, whether unique or not.",
+          "tags": [
+            "array",
+            "shuffling",
+            "mcq",
+            "algorithm",
+            "properties"
+          ],
+          "prerequisites": [
+            "fisher_yates_algorithm"
+          ],
+          "complexity": 6,
+          "interviewFrequency": 7,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_array_shuffling_4",
+          "topic": "Array Shuffling",
+          "level": "hard",
+          "type": "open",
+          "question": "Explain why `array.sort(() => Math.random() - 0.5)` is not a statistically sound way to shuffle an array for production use, even though it appears to randomize the elements. What are its main flaws compared to Fisher-Yates?",
+          "answer": "While `array.sort(() => Math.random() - 0.5)` might seem like a quick way to shuffle, it is **not statistically sound** and should not be used for production applications requiring true randomness. Its main flaws compared to Fisher-Yates are:\n\n1.  **Non-Uniform Distribution (Bias):** The primary flaw is that it does not produce a uniform distribution of all possible permutations. Some permutations are far more likely to occur than others, while some may never occur at all. This bias is a consequence of how `Array.prototype.sort()` is implemented in various JavaScript engines (e.g., V8's Timsort or Quicksort variants), which are optimized for comparison sorting and not for producing truly random orderings. The comparison function, returning a random positive or negative value, doesn't provide the consistent ordering needed for these sorting algorithms to produce a uniform shuffle.\n2.  **Unpredictable Behavior Across Browsers/Engines:** The exact sorting algorithm used by `Array.prototype.sort()` is implementation-dependent and can vary between JavaScript engines (e.g., Chrome's V8, Firefox's SpiderMonkey, Safari's JavaScriptCore). This means the same code might produce different distributions of 'randomness' or even different results across environments, leading to inconsistent and unreliable behavior.\n3.  **Performance:** While often O(N log N) for typical sort algorithms, the constant overhead of `Math.random()` calls inside a comparison function, executed many times, can be surprisingly inefficient compared to the O(N) Fisher-Yates shuffle.\n\nIn contrast, the **Fisher-Yates shuffle** guarantees that every possible permutation of the array elements is equally likely to occur, making it a statistically sound method for generating random permutations. It achieves this in linear time (O(N)) and constant space (O(1) in-place).",
+          "options": [],
+          "analysisPoints": [
+            "Understanding of sorting algorithm guarantees vs. random sort behavior.",
+            "Knowledge of statistical bias in `sort(random)`.",
+            "Awareness of cross-browser inconsistencies with `sort()` implementation.",
+            "Comparison of time/space complexity with Fisher-Yates."
+          ],
+          "keyConcepts": [
+            "Fisher-Yates Shuffle",
+            "Randomness",
+            "Statistical bias",
+            "Array.prototype.sort()",
+            "Time complexity",
+            "Uniform distribution"
+          ],
+          "evaluationCriteria": [
+            "Depth of understanding of random algorithms.",
+            "Ability to articulate the pitfalls of common anti-patterns.",
+            "Knowledge of JavaScript engine behaviors.",
+            "Clarity and completeness of explanation."
+          ],
+          "example": "```typescript\nconst arr = [1, 2, 3, 4, 5];\n\n// This is NOT a reliable way to shuffle for true randomness\narr.sort(() => Math.random() - 0.5);\nconsole.log('Unreliable shuffle:', arr);\n\n// The issue is that the underlying sort algorithm (e.g., Quicksort, Timsort)\n// is designed for ordering, not random selection. A small number of comparisons\n// might be sufficient to 'settle' an element into a fixed position relative\n// to others, even if the comparisons are random. This leads to non-uniform distributions.\n\n// For example, some elements might have a higher probability of ending up at the beginning\n// or end of the array, or certain pairs of elements might be more likely to stay together.\n```",
+          "tags": [
+            "array",
+            "shuffling",
+            "randomness",
+            "best-practices",
+            "interview-question",
+            "statistical-bias"
+          ],
+          "prerequisites": [
+            "fisher_yates_algorithm",
+            "array_sort",
+            "math_random",
+            "algorithmic_bias"
+          ],
+          "complexity": 8,
+          "interviewFrequency": 8,
+          "learningPath": "advanced"
+        },
+        {
+          "id": "question_sum_nested_array_1",
+          "topic": "Recursion for Nested Structures",
+          "level": "medium",
+          "type": "mcq",
+          "question": "Consider the following nested array:\n```javascript\nconst data = [1, [2, [3, 4]], 5, [6]];\n```\nWhich of the following functions correctly calculates the sum of all numeric elements in `data`?\n\nA.\n```javascript\nfunction sumAll(arr) {\n  let total = 0;\n  for (const item of arr) {\n    if (typeof item === 'number') {\n      total += item;\n    } else if (Array.isArray(item)) {\n      total += sumAll(item);\n    }\n  }\n  return total;\n}\n```\nB.\n```javascript\nfunction sumAll(arr) {\n  let total = 0;\n  arr.forEach(item => {\n    if (Array.isArray(item)) {\n      total += item.reduce((acc, curr) => acc + curr, 0);\n    } else if (typeof item === 'number') {\n      total += item;\n    }\n  });\n  return total;\n}\n```\nC.\n```javascript\nfunction sumAll(arr) {\n  return arr.flat(Infinity).filter(item => typeof item === 'number').reduce((acc, curr) => acc + curr, 0);\n}\n```\nD. Both A and C are correct, and C is generally more concise.",
+          "answer": "D. Both A and C are correct, and C is generally more concise.",
+          "options": [
+            "A.",
+            "B.",
+            "C.",
+            "D. Both A and C are correct, and C is generally more concise."
+          ],
+          "analysisPoints": [
+            "Understanding of recursive function structure for nested data.",
+            "Knowledge of `Array.prototype.flat()` and its `Infinity` depth option.",
+            "Correct use of `Array.isArray()` for type checking.",
+            "Identifying incorrect recursive or iteration logic."
+          ],
+          "keyConcepts": [
+            "Recursion",
+            "Nested arrays",
+            "Array.prototype.flat()",
+            "Array.prototype.reduce()",
+            "Array.isArray()"
+          ],
+          "evaluationCriteria": [
+            "Ability to recognize correct recursive patterns.",
+            "Knowledge of modern array methods for flattening.",
+            "Understanding of functional programming approaches vs. imperative loops."
+          ],
+          "example": "Option A correctly implements a recursive solution: if an item is a number, it's added; if it's an array, the function calls itself on that sub-array. Option C uses `flat(Infinity)` to completely flatten the array, then `filter` to keep only numbers, and finally `reduce` to sum them. Both are valid. Option B is incorrect because `item.reduce()` on a nested array would only sum the first level of that sub-array, not recurse.",
+          "tags": [
+            "recursion",
+            "array",
+            "nested",
+            "mcq",
+            "functional_programming"
+          ],
+          "prerequisites": [
+            "recursion_basics",
+            "array_methods"
+          ],
+          "complexity": 7,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_sum_nested_array_2",
+          "topic": "Recursion for Nested Structures",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "What is the essential component of a recursive function that prevents infinite loops?",
+          "answer": "Base case(s)",
+          "options": [],
+          "analysisPoints": [
+            "Recall of fundamental recursion principles."
+          ],
+          "keyConcepts": [
+            "Recursion",
+            "Base case",
+            "Infinite loop"
+          ],
+          "evaluationCriteria": [
+            "Basic knowledge recall."
+          ],
+          "example": "A base case is a condition within a recursive function that stops the recursion and returns a result directly, without making further recursive calls. Without a base case, a recursive function would call itself indefinitely, leading to a stack overflow.",
+          "tags": [
+            "recursion",
+            "flashcard",
+            "fundamentals"
+          ],
+          "prerequisites": [
+            "recursion_basics"
+          ],
+          "complexity": 3,
+          "interviewFrequency": 7,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_sum_nested_array_3",
+          "topic": "Recursion for Nested Structures",
+          "level": "medium",
+          "type": "open",
+          "question": "When might an iterative approach (e.g., using a stack or queue) be preferred over a recursive approach for traversing a deeply nested array, and why?",
+          "answer": "An iterative approach using an explicit stack (for depth-first traversal) or a queue (for breadth-first traversal) might be preferred over a recursive approach for traversing a deeply nested array in the following scenarios:\n\n1.  **Stack Overflow Prevention:** Deep recursion can lead to a 'stack overflow' error if the nesting depth of the array exceeds the JavaScript engine's call stack limit. Iterative solutions manage their own stack/queue data structure, which is stored on the heap and can grow much larger than the call stack, thus avoiding this limitation.\n2.  **Performance/Efficiency:** While recursive calls are often concise, they incur overhead due to function call stack management. For very large or extremely deep structures, an iterative solution might offer better performance due to less overhead.\n3.  **Control over Traversal Order:** While recursion naturally lends itself to depth-first traversal, an iterative approach using a queue makes breadth-first traversal straightforward to implement, which might be required for specific problem types (e.g., level-order traversal).\n4.  **Readability for Non-Recursion Experts:** For developers less familiar or comfortable with recursion, an iterative approach using loops and an explicit stack/queue might be easier to understand and debug, although well-written recursion can also be very clear.",
+          "options": [],
+          "analysisPoints": [
+            "Understanding of call stack limitations.",
+            "Comparison of performance characteristics.",
+            "Awareness of different traversal strategies (DFS vs BFS).",
+            "Consideration of code readability and maintainability."
+          ],
+          "keyConcepts": [
+            "Recursion",
+            "Iteration",
+            "Call stack",
+            "Stack overflow",
+            "DFS",
+            "BFS",
+            "Performance"
+          ],
+          "evaluationCriteria": [
+            "Ability to analyze trade-offs between different algorithmic approaches.",
+            "Understanding of underlying computer science concepts (call stack).",
+            "Practical considerations for large data sets."
+          ],
+          "example": "```typescript\n// Iterative approach using a stack for DFS traversal\nfunction sumNestedArrayIterative(arr: (number | any[])[]): number {\n  let sum = 0;\n  const stack: (number | any[])[] = [...arr]; // Initialize stack with top-level elements\n\n  while (stack.length > 0) {\n    const item = stack.pop(); // Pop from end for DFS (or shift from beginning for BFS if using queue)\n\n    if (Array.isArray(item)) {\n      // Push elements in reverse order to maintain correct order when popping\n      // For example, if item is [a, b, c], push c, then b, then a so a is processed first.\n      for (let i = item.length - 1; i >= 0; i--) {\n        stack.push(item[i]);\n      }\n    } else if (typeof item === 'number') {\n      sum += item;\n    }\n  }\n  return sum;\n}\n\nconst nestedArray = [4, 5, 7, 8, [5, 7, 9, [3, 5, 7]]];\nconsole.log('Iterative sum:', sumNestedArrayIterative(nestedArray)); // 60\n```",
+          "tags": [
+            "recursion",
+            "iteration",
+            "data-structures",
+            "performance",
+            "stack",
+            "queue"
+          ],
+          "prerequisites": [
+            "recursion_basics",
+            "data_structures_stack_queue"
+          ],
+          "complexity": 8,
+          "interviewFrequency": 9,
+          "learningPath": "advanced"
+        },
+        {
+          "id": "question_sum_nested_array_4",
+          "topic": "Recursion for Nested Structures",
+          "level": "hard",
+          "type": "code",
+          "question": "Implement a function `deepFind(obj, key)` that traverses a deeply nested object (similar to a JSON structure) and returns an array of all values associated with the given `key`, regardless of their nesting depth. If the key is not found, return an empty array. Consider both objects and arrays as potential containers.",
+          "answer": "```typescript\nfunction deepFind(obj: any, key: string): any[] {\n  const results: any[] = [];\n\n  function traverse(current: any) {\n    if (typeof current !== 'object' || current === null) {\n      return; // Base case: not an object or array\n    }\n\n    if (Array.isArray(current)) {\n      for (const item of current) {\n        traverse(item);\n      }\n    } else { // It's an object\n      for (const prop in current) {\n        if (Object.prototype.hasOwnProperty.call(current, prop)) {\n          if (prop === key) {\n            results.push(current[prop]);\n          }\n          traverse(current[prop]);\n        }\n      }\n    }\n  }\n\n  traverse(obj);\n  return results;\n}\n\n// Test Cases:\nconst data1 = {\n  a: 1,\n  b: {\n    c: 2,\n    d: {\n      e: 3,\n      targetKey: 'value1'\n    }\n  },\n  f: [4, { targetKey: 'value2', g: 5 }],\n  h: {\n    i: [{ targetKey: 'value3' }, { j: 6 }]\n  }\n};\nconsole.log(\"deepFind(data1, 'targetKey'):\", deepFind(data1, 'targetKey')); // ['value1', 'value2', 'value3']\n\nconst data2 = {\n  items: [\n    { id: 1, name: 'Item A' },\n    { id: 2, name: 'Item B', details: { id: 100 } },\n    { id: 3, name: 'Item C' }\n  ]\n};\nconsole.log(\"deepFind(data2, 'id'):\", deepFind(data2, 'id')); // [1, 2, 100, 3]\n\nconst data3 = { prop: 'test' };\nconsole.log(\"deepFind(data3, 'nonExistent'):\", deepFind(data3, 'nonExistent')); // []\n\nconst data4 = [1, 2, 3];\nconsole.log(\"deepFind(data4, 'value'):\", deepFind(data4, 'value')); // []\n",
+          "options": [],
+          "analysisPoints": [
+            "Correctly identifies and handles both objects and arrays.",
+            "Properly uses recursion for deep traversal.",
+            "Collects all matching values, not just the first.",
+            "Handles edge cases like null, non-object values, and missing keys.",
+            "Uses `Object.prototype.hasOwnProperty.call` for robust property iteration."
+          ],
+          "keyConcepts": [
+            "Recursion",
+            "Object traversal",
+            "Array traversal",
+            "JSON parsing",
+            "Depth-First Search (DFS)"
+          ],
+          "evaluationCriteria": [
+            "Correctness of recursive logic for complex data structures.",
+            "Robustness in handling various data types and edge cases.",
+            "Efficiency of traversal.",
+            "Clarity of code."
+          ],
+          "example": "The `deepFind` function uses a helper `traverse` function to recursively explore the input structure. It distinguishes between arrays and objects. For arrays, it iterates through elements and recursively calls `traverse` on each. For objects, it iterates through properties. If a property's key matches the target `key`, its value is added to `results`. Then, `traverse` is called on the property's value to continue the deep search. This ensures all occurrences are found.",
+          "tags": [
+            "recursion",
+            "object",
+            "array",
+            "data-traversal",
+            "interview-question",
+            "hard"
+          ],
+          "prerequisites": [
+            "recursion",
+            "object_iteration",
+            "array_iteration"
+          ],
+          "complexity": 9,
+          "interviewFrequency": 8,
+          "learningPath": "advanced"
+        },
+        {
+          "id": "question_move_element_to_end_1",
+          "topic": "Two-Pointer Technique",
+          "level": "medium",
+          "type": "mcq",
+          "question": "Given an array `arr = [1, 2, 3, 2, 4, 2, 5]` and a target `element = 2`, what will be the state of `arr` after applying the `moveElementToEnd` function using the two-pointer approach described in the theory, if the fast pointer `j` reaches index 3 (value `2`) and the slow pointer `i` is at index 1 (value `2`) just before `j` advances?",
+          "answer": "A. `[1, 3, 2, 2, 4, 2, 5]` (after the next non-target swap happens, or `j` simply advances)",
+          "options": [
+            "A. `[1, 3, 2, 2, 4, 2, 5]` (after the next non-target swap happens, or `j` simply advances)",
+            "B. `[1, 2, 3, 4, 5, 2, 2]`",
+            "C. `[1, 2, 2, 3, 4, 2, 5]`",
+            "D. `[3, 1, 2, 2, 4, 2, 5]`"
+          ],
+          "analysisPoints": [
+            "Understanding of the two-pointer state changes.",
+            "Correctly identifying when swaps occur.",
+            "Tracing the execution step-by-step."
+          ],
+          "keyConcepts": [
+            "Two-pointer technique",
+            "In-place modification",
+            "Array manipulation"
+          ],
+          "evaluationCriteria": [
+            "Ability to mentally trace algorithm execution.",
+            "Understanding of pointer movement rules."
+          ],
+          "example": "Let's trace: `arr = [1, 2, 3, 2, 4, 2, 5]`, `target = 2`\n- Initial: `i=0`, `j=0`. `arr[0]=1` (not 2). Swap `arr[0]` and `arr[0]`. `arr = [1, 2, 3, 2, 4, 2, 5]`. `i=1`, `j=1`.\n- `j=1`. `arr[1]=2` (is 2). No swap. `i=1`, `j=2`.\n- `j=2`. `arr[2]=3` (not 2). Swap `arr[1]` and `arr[2]` (`2` and `3`). `arr = [1, 3, 2, 2, 4, 2, 5]`. `i=2`, `j=3`.\n- At this point, the state is `[1, 3, 2, 2, 4, 2, 5]`, `i=2`, `j=3`. Now `j` is at index 3 (value `2`). `arr[3]=2` (is 2). No swap. `i` remains `2`. `j` increments to `4`. The array remains `[1, 3, 2, 2, 4, 2, 5]` at this exact step. So, option A correctly shows the array state after the last non-target element (`3`) was moved to `arr[1]` and before `j` advances further from its position at `2`.",
+          "tags": [
+            "array",
+            "two-pointers",
+            "mcq",
+            "trace",
+            "algorithm"
+          ],
+          "prerequisites": [
+            "two_pointer_technique"
+          ],
+          "complexity": 6,
+          "interviewFrequency": 7,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_move_element_to_end_2",
+          "topic": "Two-Pointer Technique",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "What is the primary advantage of using a two-pointer approach for array manipulation problems, especially in interview settings?",
+          "answer": "It often allows for O(N) time complexity and O(1) space complexity (in-place modification), making it very efficient.",
+          "options": [],
+          "analysisPoints": [
+            "Understanding of algorithmic efficiency.",
+            "Recall of two-pointer benefits."
+          ],
+          "keyConcepts": [
+            "Two-pointer technique",
+            "Time complexity",
+            "Space complexity",
+            "In-place algorithm"
+          ],
+          "evaluationCriteria": [
+            "Basic knowledge recall and understanding of benefits."
+          ],
+          "example": "The two-pointer technique minimizes redundant operations by processing elements in a single or few passes and often modifying the array directly, thus saving space.",
+          "tags": [
+            "two-pointers",
+            "efficiency",
+            "flashcard",
+            "algorithm"
+          ],
+          "prerequisites": [
+            "big_o_notation"
+          ],
+          "complexity": 4,
+          "interviewFrequency": 8,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_move_element_to_end_3",
+          "topic": "Two-Pointer Technique",
+          "level": "medium",
+          "type": "code",
+          "question": "Modify the `moveElementToEnd` function to move all *even* numbers to the end of the array, while maintaining the relative order of both the odd numbers and the even numbers.",
+          "answer": "```typescript\nfunction moveEvenToEnd(array: number[]): number[] {\n  // This problem (maintaining relative order) cannot be solved with the simple\n  // two-pointer swap approach used for 'moveElementToEnd' if the order of the\n  // *non-target* elements must be preserved. A more complex approach is needed.\n  // This would typically involve iterating and shifting elements, or using an auxiliary array.\n\n  // Solution using auxiliary array to preserve relative order (simpler to implement):\n  const result: number[] = [];\n  const evens: number[] = [];\n  for (const num of array) {\n    if (num % 2 === 0) {\n      evens.push(num);\n    } else {\n      result.push(num);\n    }\n  }\n  return result.concat(evens);\n}\n\n// In-place solution (more complex, using insertion or similar logic):\n// This requires iterating and inserting/shifting, which has O(N^2) complexity\n// or O(N) if using operations like splice in specific ways, but it's not a direct two-pointer swap.\nfunction moveEvenToEndInPlacePreservingOrder(array: number[]): number[] {\n  if (!array || array.length <= 1) return array;\n\n  let writePointer = 0;\n  for (let readPointer = 0; readPointer < array.length; readPointer++) {\n    if (array[readPointer] % 2 !== 0) { // If it's an odd number\n      array[writePointer] = array[readPointer];\n      writePointer++;\n    }\n  }\n\n  // Fill the rest with even numbers, maintaining their original relative order.\n  // This requires a second pass or storing the even numbers as they are encountered\n  // and then appending them. The above simply moves odd numbers to the front.\n  // To maintain *even* numbers' order, we need to collect them first.\n\n  // A common approach for in-place + preserving order for one group:\n  // 1. Collect elements that need to be moved.\n  // 2. Shift remaining elements forward.\n  // 3. Append collected elements.\n\n  // This is typically O(N^2) for array shifts in general purpose languages\n  // like JS, unless specific data structures are used.\n  // Example of a truly O(N) in-place solution often involves multiple passes\n  // or complex index tracking, often not trivial without breaking relative order.\n\n  // For the sake of simplicity and adhering to common interview expectations for this variant,\n  // if 'maintaining relative order' is critical, a temporary array is often implied\n  // or a different algorithm (like stable partition). The original problem's two-pointer\n  // approach doesn't preserve relative order for the non-target elements.\n  \n  // Re-evaluating the prompt for 'moveEvenToEnd' with 'maintaining relative order':\n  // If we only need to move *all* evens to the end, the solution provided in the markdown\n  // (for 'moveElementToEnd') doesn't maintain relative order of non-target elements.\n  // For example, [2, 9, 1, 5, 2] -> target 2 -> [9, 1, 5, 2, 2]. Relative order 9,1,5 is preserved.\n  // But [2, 1, 3, 2] target 2 -> [1, 3, 2, 2]. Relative order 1,3 is preserved.\n  // The original markdown solution *does* preserve the relative order of elements that are NOT the target.\n  // So, the question implies adapting THAT two-pointer to *this* condition.\n  \n  // Let's adapt the original two-pointer to this scenario.\n  // If we want to maintain the relative order of both groups, it's more complex.\n  // The simplest two-pointer approach (like `moveElementToEnd`) *does* maintain the relative order\n  // of the elements that are *not* the target. It also does not change the relative order\n  // of the target elements among themselves (they just get dumped at the end).\n  \n  // Let's assume the question implicitly asks to apply the same technique, and acknowledge its limitation\n  // if it's meant to be truly stable for *both* groups which is harder in-place.\n  \n  let i = 0; // Slow pointer for odd numbers\n  let j = 0; // Fast pointer for iterating\n\n  while (j < array.length) {\n    if (array[j] % 2 !== 0) { // If it's an odd number\n      [array[i], array[j]] = [array[j], array[i]];\n      i++;\n    }\n    j++;\n  }\n  return array;\n}\n\nconst arr1 = [2, 9, 1, 5, 2, 3, 1, 2, 7, 4, 3, 8, 29, 2, 4, 6, 54, 32, 2, 100];\nconsole.log('Original arr1:', arr1);\nconsole.log('Moved evens (order NOT strictly preserved for evens):', moveEvenToEndInPlacePreservingOrder([...arr1]));\n// Example result with this in-place method: [9,1,5,3,1,7,29,3,2,4,8,2,4,6,54,32,2,100,2,2] (order of evens might change)\n// The problem statement for `moveElementToEnd` implies preserving relative order of non-target elements.\n// So, this solution is consistent with that behavior.\n\nconst arr2 = [1, 2, 3, 4, 5, 6, 7, 8];\nconsole.log('Original arr2:', arr2);\nconsole.log('Moved evens (order NOT strictly preserved for evens):', moveEvenToEndInPlacePreservingOrder([...arr2]));\n// Expected (for preserving odds): [1, 3, 5, 7, 2, 4, 6, 8]\n// The provided solution does exactly this: it moves odd numbers to the front, preserving their relative order.\n// The even numbers fill the remaining slots, potentially changing their relative order with each other.\n// If the problem meant *stable partition* for both groups, that's a different algorithm.\n```",
+          "options": [],
+          "analysisPoints": [
+            "Correct application of the two-pointer approach for a specific condition (even/odd).",
+            "Understanding of the nuances of 'maintaining relative order' in two-pointer problems.",
+            "Identifying if the simple two-pointer swap is sufficient or if a more complex (e.g., auxiliary array, stable partition) approach is needed.",
+            "Handling edge cases like empty arrays or arrays with only even/odd numbers."
+          ],
+          "keyConcepts": [
+            "Two-pointer technique",
+            "Array partitioning",
+            "In-place algorithm",
+            "Relative order",
+            "Parity"
+          ],
+          "evaluationCriteria": [
+            "Ability to adapt a known algorithm to new constraints.",
+            "Understanding of the limitations and specific guarantees of the algorithm.",
+            "Correct implementation of the modified logic."
+          ],
+          "example": "The most straightforward adaptation of the two-pointer `moveElementToEnd` to `moveEvenToEnd` (preserving the relative order of *non-target* elements, i.e., odd numbers) is to treat odd numbers as the 'non-target' elements. The `i` pointer tracks the next position for an odd number, and `j` iterates. If `array[j]` is odd, it's swapped with `array[i]`, and `i` increments. Even numbers are simply skipped by `i` and eventually reside at the end of the array. This solution is `O(N)` time and `O(1)` space. Note that the relative order *among* the even numbers might not be preserved by this method, only the relative order of the odd numbers.",
+          "tags": [
+            "array",
+            "two-pointers",
+            "algorithm",
+            "in-place",
+            "modification",
+            "medium"
+          ],
+          "prerequisites": [
+            "two_pointer_technique",
+            "modulo_operator"
+          ],
+          "complexity": 7,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_move_element_to_end_4",
+          "topic": "Two-Pointer Technique",
+          "level": "hard",
+          "type": "open",
+          "question": "Describe a scenario where a two-pointer approach would be significantly less efficient or unsuitable compared to other array manipulation techniques. Provide an alternative approach and justify your choice.",
+          "answer": "A two-pointer approach would be significantly less efficient or unsuitable in scenarios where:\n\n1.  **Maintaining Relative Order of *All* Elements in a Complex Partition:** The classic two-pointer for partitioning (like `moveElementToEnd`) typically only preserves the relative order of the *non-target* elements. If you need to partition an array into multiple groups and strictly maintain the relative order of elements *within each group*, the basic two-pointer swap approach is insufficient. Iteratively shifting elements to maintain order becomes an O(N^2) operation in many cases.\n\n    *   **Scenario:** You have an array of mixed types (numbers, strings, booleans), and you need to rearrange it such that all numbers come first, then all strings, then all booleans, and the relative order *within each type* must be preserved.\n\n    *   **Unsuitability of Two-Pointer:** While you could run multiple two-pointer passes (e.g., move strings after numbers, then booleans after strings), each pass would modify the array in a way that might break the relative order established by previous passes for certain groups, or it becomes an iterative shift-and-insert operation, which is typically O(N^2).\n\n    *   **Alternative Approach:**\n        *   **Auxiliary Array (Stable Partition):** Create three empty auxiliary arrays: `numbers`, `strings`, `booleans`. Iterate through the original array once, pushing each element into its corresponding auxiliary array. Finally, concatenate these auxiliary arrays (`numbers.concat(strings, booleans)`).\n        *   **Justification:** This approach is O(N) time complexity because each element is visited and placed once, and array concatenation is also efficient. It inherently preserves the relative order of elements within each group because they are added to the auxiliary arrays in their original sequence. The space complexity is O(N) (for the auxiliary arrays), which is a trade-off for maintaining stability and simplicity of implementation when compared to complex in-place stable partitioning algorithms (which are usually more involved to implement correctly and might still not be O(N) in practice for dynamic arrays).",
+          "options": [],
+          "analysisPoints": [
+            "Identifies limitations of the two-pointer technique (e.g., strict relative order across multiple partitions).",
+            "Proposes a suitable alternative algorithm.",
+            "Justifies the alternative based on complexity (time/space) and problem constraints (e.g., stability).",
+            "Demonstrates understanding of different array manipulation techniques."
+          ],
+          "keyConcepts": [
+            "Two-pointer limitations",
+            "Stable partition",
+            "Auxiliary array",
+            "Time complexity",
+            "Space complexity",
+            "Relative order",
+            "Multi-group partitioning"
+          ],
+          "evaluationCriteria": [
+            "Critical thinking about algorithmic applicability.",
+            "Knowledge of various data structure algorithms.",
+            "Ability to analyze trade-offs.",
+            "Clarity of explanation and solution."
+          ],
+          "example": "```typescript\n// Example for the 'Alternative Approach' (Auxiliary Array for Stable Partition)\nfunction stablePartitionByTypes(arr: any[]): any[] {\n  const numbers: number[] = [];\n  const strings: string[] = [];\n  const booleans: boolean[] = [];\n  const others: any[] = [];\n\n  for (const item of arr) {\n    if (typeof item === 'number') {\n      numbers.push(item);\n    } else if (typeof item === 'string') {\n      strings.push(item);\n    } else if (typeof item === 'boolean') {\n      booleans.push(item);\n    } else {\n      others.push(item);\n    }\n  }\n\n  return numbers.concat(strings, booleans, others);\n}\n\nconst mixedArray = [1, 'hello', true, 5, false, 'world', null, 3, undefined, 'foo'];\nconsole.log('Original mixed array:', mixedArray);\nconst partitionedArray = stablePartitionByTypes(mixedArray);\nconsole.log('Partitioned array (stable):', partitionedArray);\n// Expected: [1, 5, 3, 'hello', 'world', 'foo', true, false, null, undefined]\n// Note: null and undefined are typeof 'object' and 'undefined' respectively, handled by 'others'.\n```",
+          "tags": [
+            "two-pointers",
+            "limitations",
+            "algorithm",
+            "stable-partition",
+            "array-manipulation",
+            "hard"
+          ],
+          "prerequisites": [
+            "two_pointer_technique",
+            "time_space_complexity",
+            "array_methods"
+          ],
+          "complexity": 9,
+          "interviewFrequency": 7,
+          "learningPath": "advanced"
+        },
+        {
+          "id": "question_rotate_matrix_1",
+          "topic": "Matrix Operations: Rotation",
+          "level": "medium",
+          "type": "mcq",
+          "question": "Which two operations, when applied sequentially to a square matrix, result in a 90-degree clockwise rotation in-place?\n\nA. Transpose the matrix, then reverse each column.\nB. Transpose the matrix, then reverse each row.\nC. Reverse each row, then transpose the matrix.\nD. Rotate layers from outside inwards, then reverse the entire matrix.",
+          "answer": "B. Transpose the matrix, then reverse each row.",
+          "options": [
+            "A. Transpose the matrix, then reverse each column.",
+            "B. Transpose the matrix, then reverse each row.",
+            "C. Reverse each row, then transpose the matrix.",
+            "D. Rotate layers from outside inwards, then reverse the entire matrix."
+          ],
+          "analysisPoints": [
+            "Understanding of matrix rotation components.",
+            "Correct sequence of transposition and reversal.",
+            "Distinguishing between clockwise and counter-clockwise rotation effects."
+          ],
+          "keyConcepts": [
+            "Matrix rotation",
+            "Transpose",
+            "In-place algorithm",
+            "Clockwise rotation"
+          ],
+          "evaluationCriteria": [
+            "Knowledge of standard matrix rotation techniques.",
+            "Ability to recall specific steps for 90-degree clockwise rotation."
+          ],
+          "example": "Transposing `(matrix[i][j] becomes matrix[j][i])` flips the matrix over its main diagonal. This essentially gives a 90-degree counter-clockwise rotation if you imagine the elements shifting. Reversing each row then corrects this to a 90-degree clockwise rotation. Option A (reverse each column) would result in a 90-degree counter-clockwise rotation after transposition.",
+          "tags": [
+            "matrix",
+            "rotation",
+            "algorithm",
+            "mcq",
+            "data-structures"
+          ],
+          "prerequisites": [
+            "matrix_transpose"
+          ],
+          "complexity": 6,
+          "interviewFrequency": 8,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_rotate_matrix_2",
+          "topic": "Matrix Operations: Rotation",
+          "level": "easy",
+          "type": "flashcard",
+          "question": "What is the space complexity of an in-place 90-degree matrix rotation algorithm?",
+          "answer": "O(1)",
+          "options": [],
+          "analysisPoints": [
+            "Understanding of in-place algorithms.",
+            "Recall of space complexity for matrix rotations."
+          ],
+          "keyConcepts": [
+            "Space complexity",
+            "In-place algorithm",
+            "Matrix rotation"
+          ],
+          "evaluationCriteria": [
+            "Basic knowledge recall."
+          ],
+          "example": "An in-place algorithm modifies the input data structure directly without allocating significant additional memory. For matrix rotation, this means using only a few temporary variables for swaps, resulting in O(1) auxiliary space.",
+          "tags": [
+            "matrix",
+            "rotation",
+            "space-complexity",
+            "flashcard"
+          ],
+          "prerequisites": [
+            "big_o_notation"
+          ],
+          "complexity": 3,
+          "interviewFrequency": 6,
+          "learningPath": "beginner"
+        },
+        {
+          "id": "question_rotate_matrix_3",
+          "topic": "Matrix Operations: Rotation",
+          "level": "medium",
+          "type": "code",
+          "question": "Given the matrix `matrix = [[1, 2], [3, 4]]`, apply the `rotateMatrix` function. What are the intermediate states of the matrix after:\n1. Transposition?\n2. Reversing each row?",
+          "answer": "```typescript\nconst matrix = [[1, 2], [3, 4]];\n\n// 1. After Transposition:\n// Original: [[1, 2],\n//            [3, 4]]\n// Swap (0,0) with (0,0) -> no change\n// Swap (0,1) with (1,0) -> [[1, 3],\n//                         [2, 4]]\n// (j loop starts from i, so (1,1) with (1,1) -> no change)\nconsole.log('Matrix after Transposition:', JSON.stringify([\n  [1, 3],\n  [2, 4]\n]));\n\n// 2. After Reversing each row:\n// Current: [[1, 3],\n//           [2, 4]]\n// Row 0 reverse: [3, 1]\n// Row 1 reverse: [4, 2]\nconsole.log('Matrix after Reversing each row:', JSON.stringify([\n  [3, 1],\n  [4, 2]\n]));\n\n// Full function call for verification:\nfunction rotateMatrix(matrix: number[][]): number[][] {\n  const n = matrix.length;\n  for (let i = 0; i < n; i++) {\n    for (let j = i; j < n; j++) {\n      [matrix[i][j], matrix[j][i]] = [matrix[j][i], matrix[i][j]];\n    }\n  }\n  for (let i = 0; i < n; i++) {\n    matrix[i].reverse();\n  }\n  return matrix;\n}\n\nconst testMatrix = [[1, 2], [3, 4]];\nrotateMatrix(testMatrix);\nconsole.log('Final result from function:', JSON.stringify(testMatrix));\n```",
+          "options": [],
+          "analysisPoints": [
+            "Ability to trace matrix operations step-by-step.",
+            "Understanding of how transposition changes indices.",
+            "Correctly applying row reversal after transposition."
+          ],
+          "keyConcepts": [
+            "Matrix trace",
+            "Transposition",
+            "Row reversal",
+            "In-place algorithm"
+          ],
+          "evaluationCriteria": [
+            "Accuracy of step-by-step execution tracing.",
+            "Precision in showing intermediate matrix states."
+          ],
+          "example": "The example demonstrates the step-by-step transformation of a 2x2 matrix. After transposition, the element at `(0,1)` (value 2) moves to `(1,0)`, and `(1,0)` (value 3) moves to `(0,1)`. The matrix becomes `[[1, 3], [2, 4]]`. Then, reversing each row transforms `[1, 3]` to `[3, 1]` and `[2, 4]` to `[4, 2]`, resulting in the final rotated matrix `[[3, 1], [4, 2]]`.",
+          "tags": [
+            "matrix",
+            "rotation",
+            "trace",
+            "algorithm",
+            "medium"
+          ],
+          "prerequisites": [
+            "matrix_transpose",
+            "array_reverse"
+          ],
+          "complexity": 7,
+          "interviewFrequency": 7,
+          "learningPath": "intermediate"
+        },
+        {
+          "id": "question_rotate_matrix_4",
+          "topic": "Matrix Operations: Rotation",
+          "level": "hard",
+          "type": "open",
+          "question": "How would you modify the `rotateMatrix` function to perform a 90-degree counter-clockwise rotation in-place? Explain the logic and the change in steps.",
+          "answer": "To perform a 90-degree counter-clockwise rotation in-place, you have two primary methods that build upon transposition:\n\n**Method 1: Transpose then Reverse Columns**\n\n1.  **Transpose the matrix:** This step remains the same as for clockwise rotation. Swap `matrix[i][j]` with `matrix[j][i]` for `0 <= i < n` and `i <= j < n`.\n    *   *Logic:* Transposing effectively flips the matrix along its main diagonal, which results in a 90-degree *counter-clockwise* rotation IF you view it from a perspective where the original top row becomes the new leftmost column. However, it's typically easier to think of it as a flip, and then apply another operation.\n\n2.  **Reverse each Column:** After transposition, to achieve a 90-degree counter-clockwise rotation, you need to reverse each column. This means swapping `matrix[row][col]` with `matrix[n - 1 - row][col]` for each column `col` from `0` to `n-1` and for `row` from `0` to `(n-1)/2`.\n\n    *   *Logic:* After transposing, the elements are correctly positioned relative to rows/columns, but their order within columns is inverted for a counter-clockwise rotation. Reversing each column corrects this.\n\n**Method 2: Reverse Rows then Transpose**\n\n1.  **Reverse each Row:** First, reverse the order of elements in each row of the matrix. This is `matrix[i].reverse()` for all `i`.\n    *   *Logic:* This operation mirrors the matrix horizontally.\n\n2.  **Transpose the matrix:** Then, transpose the matrix (swap `matrix[i][j]` with `matrix[j][i]`).\n    *   *Logic:* After horizontal mirroring, transposing aligns the elements for a 90-degree counter-clockwise rotation.\n\n**Justification for Method 2 (often simpler to code in JS):**\nCompared to Method 1, Method 2 (Reverse Rows then Transpose) is often slightly more intuitive to implement in JavaScript because `Array.prototype.reverse()` directly operates on rows. Implementing column reversal in-place requires manual swapping across rows for each column, which can be less direct than `matrix[i].reverse()`. Both methods achieve the same O(N^2) time complexity and O(1) space complexity.\n\n**Code Example (using Method 2):**\n```typescript\nfunction rotateMatrixCounterClockwise(matrix: number[][]): number[][] {\n  const n = matrix.length;\n\n  // 1. Reverse each row\n  for (let i = 0; i < n; i++) {\n    matrix[i].reverse();\n  }\n  \n  // 2. Transpose the matrix\n  for (let i = 0; i < n; i++) {\n    for (let j = i; j < n; j++) {\n      [matrix[i][j], matrix[j][i]] = [matrix[j][i], matrix[i][j]];\n    }\n  }\n  \n  return matrix;\n}\n\nconst matrix = [\n  [1, 2, 3],\n  [4, 5, 6],\n  [7, 8, 9]\n];\nconsole.log('Original Matrix:', JSON.stringify(matrix));\nrotateMatrixCounterClockwise(matrix);\nconsole.log('Rotated 90 deg counter-clockwise:', JSON.stringify(matrix));\n// Expected: [[3, 6, 9], [2, 5, 8], [1, 4, 7]]\n```",
+          "options": [],
+          "analysisPoints": [
+            "Correctly identifies the algorithmic steps for counter-clockwise rotation.",
+            "Explains the logic behind each step (transposition, row/column reversal).",
+            "Compares different approaches if applicable.",
+            "Provides a clear code example for the modified function."
+          ],
+          "keyConcepts": [
+            "Matrix rotation",
+            "Counter-clockwise rotation",
+            "Transpose",
+            "Column reversal",
+            "Row reversal",
+            "In-place algorithm"
+          ],
+          "evaluationCriteria": [
+            "Depth of understanding of matrix transformation principles.",
+            "Ability to derive inverse operations.",
+            "Clarity of explanation and correctness of code."
+          ],
+          "example": "The explanation details two common methods for counter-clockwise rotation, emphasizing `Transpose then Reverse Columns` or `Reverse Rows then Transpose`. The provided code uses the `Reverse Rows then Transpose` method, which is often more straightforward with `Array.prototype.reverse()` in JavaScript. This method first horizontally flips the matrix, then transposing it correctly rotates it 90 degrees counter-clockwise.",
+          "tags": [
+            "matrix",
+            "rotation",
+            "algorithm",
+            "in-place",
+            "hard"
+          ],
+          "prerequisites": [
+            "matrix_rotation_clockwise"
+          ],
+          "complexity": 9,
+          "interviewFrequency": 8,
+          "learningPath": "advanced"
+        },
+        {
+          "id": "question_rotate_matrix_5",
+          "topic": "Matrix Operations: Rotation",
+          "level": "medium",
+          "type": "flashcard",
+          "question": "What is the time complexity of rotating an N x N matrix 90 degrees in-place?",
+          "answer": "O(N^2)",
+          "options": [],
+          "analysisPoints": [
+            "Recall of algorithmic complexity for matrix operations.",
+            "Understanding that operations iterate over all elements."
+          ],
+          "keyConcepts": [
+            "Time complexity",
+            "Matrix rotation",
+            "N-squared complexity",
+            "Efficiency"
+          ],
+          "evaluationCriteria": [
+            "Basic knowledge recall."
+          ],
+          "example": "Both transposition and reversing each row/column involve iterating through all `N * N` elements of the matrix. Therefore, the total time complexity is O(N^2).",
+          "tags": [
+            "matrix",
+            "rotation",
+            "time-complexity",
+            "flashcard"
+          ],
+          "prerequisites": [
+            "big_o_notation"
+          ],
+          "complexity": 5,
+          "interviewFrequency": 7,
+          "learningPath": "intermediate"
+        }
+      ],
+      "tasks": [
+        {
+          "id": "task_implement_fisher_yates_shuffle",
+          "title": "Implement a Secure Deck Shuffler",
+          "description": "\nImplement a function `shuffleDeck(deck: string[]): string[]` that shuffles an array of strings representing a deck of cards. The function must:\n\n1.  Use the Fisher-Yates (Knuth) shuffle algorithm.\n2.  Modify the input `deck` array *in-place*.\n3.  Ensure the shuffle is statistically unbiased, meaning every permutation has an equal probability.\n4.  Handle edge cases: an empty deck or a deck with a single card.\n\nYour solution should be efficient in terms of both time and space complexity.\n",
+          "difficulty": "medium",
+          "startingCode": "function shuffleDeck<T>(deck: T[]): T[] {\n  // TODO: Implement the Fisher-Yates shuffle algorithm here.\n  // Remember to shuffle in-place.\n  // Consider edge cases:\n  // 1. What if the deck is empty or has only one card?\n  \n  return deck; // Return the shuffled deck\n}\n\n// Example Usage:\n// const myDeck = ['Ace_Spades', 'King_Hearts', 'Queen_Diamonds', 'Jack_Clubs'];\n// shuffleDeck(myDeck);\n// console.log(myDeck); // A randomly shuffled version of the original deck\n",
+          "solutionCode": "function shuffleDeck<T>(deck: T[]): T[] {\n  let currentIndex = deck.length;\n  let randomIndex: number;\n\n  // While there remain elements to shuffle.\n  while (currentIndex !== 0) {\n    // Pick a remaining element.\n    randomIndex = Math.floor(Math.random() * currentIndex);\n    currentIndex--;\n\n    // And swap it with the current element.\n    [deck[currentIndex], deck[randomIndex]] = [\n      deck[randomIndex],\n      deck[currentIndex],\n    ];\n  }\n\n  return deck;\n}",
+          "testCases": [
+            "shuffleDeck([]) should return []",
+            "shuffleDeck(['A']) should return ['A']",
+            "shuffleDeck(['A', 'B']) should return either ['A', 'B'] or ['B', 'A'] with 50% probability each",
+            "shuffleDeck(['A', 'B', 'C', 'D']) should produce a different, valid permutation on multiple runs",
+            "Ensure the original array reference is modified, not a new array returned.",
+            "Test with a large array (e.g., 52 cards) for performance and correctness."
+          ],
+          "hints": [
+            "The Fisher-Yates algorithm typically iterates from the end of the array down to the beginning.",
+            "Remember to generate a random index `j` such that `0 <= j <= i` for the current element at index `i`.",
+            "Use array destructuring for efficient swapping: `[arr[a], arr[b]] = [arr[b], arr[a]]`."
+          ],
+          "tags": [
+            "array",
+            "algorithm",
+            "shuffling",
+            "in-place",
+            "randomization"
+          ],
+          "timeEstimate": 30,
+          "prerequisites": [
+            "arrays",
+            "loops",
+            "math_random"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 8,
+          "learningPath": "intermediate",
+          "relatedConcepts": [
+            "fisher_yates_algorithm",
+            "time_complexity",
+            "space_complexity"
+          ]
+        },
+        {
+          "id": "task_random_quiz_question_order",
+          "title": "Display Quiz Questions in Random Order",
+          "description": "\nDesign a small JavaScript module that can take a list of quiz questions and provide them in a randomly shuffled order for a quiz application. The module should provide a function `getShuffledQuestions(questions: Question[]): Question[]`.\n\n**Requirements:**\n1.  The input `questions` array should not be mutated. The function should return a *new* shuffled array.\n2.  Use a statistically sound shuffling algorithm (e.g., Fisher-Yates).\n3.  Ensure each question is presented exactly once.\n4.  Define a `Question` type with at least `id: string` and `text: string`.\n\n**Bonus:** Implement a function `getNextQuestion(): Question | null` that returns questions one by one from the shuffled list, and `resetQuiz(): void` to restart the quiz with a new shuffle.\n",
+          "difficulty": "medium",
+          "startingCode": "type Question = {\n  id: string;\n  text: string;\n  options?: string[];\n  answer?: string;\n};\n\nfunction getShuffledQuestions(questions: Question[]): Question[] {\n  const shuffledArray = [...questions]; // Create a copy\n\n  // TODO: Implement Fisher-Yates on `shuffledArray` here (in-place).\n\n  return shuffledArray;\n}\n\n// Bonus: Module for sequential access\nconst quizManager = (() => {\n  let currentShuffledQuestions: Question[] = [];\n  let currentIndex: number = 0;\n\n  function _shuffle(array: Question[]): Question[] {\n    let m = array.length, t, i;\n    while (m) {\n      i = Math.floor(Math.random() * m--);\n      t = array[m];\n      array[m] = array[i];\n      array[i] = t;\n    }\n    return array;\n  }\n\n  return {\n    initialize: (questions: Question[]) => {\n      currentShuffledQuestions = _shuffle([...questions]); // Ensure copy and shuffle\n      currentIndex = 0;\n    },\n    getNextQuestion: (): Question | null => {\n      // TODO: Return the next question or null if exhausted\n      return null;\n    },\n    resetQuiz: () => {\n      // TODO: Reset the quiz state (re-shuffle if necessary)\n    }\n  };\n})();\n\n// Example Usage:\n// const quizQuestions: Question[] = [\n//   { id: 'q1', text: 'What is 2+2?' },\n//   { id: 'q2', text: 'Capital of France?' },\n//   { id: 'q3', text: 'First programming language?' }\n// ];\n\n// const shuffled = getShuffledQuestions(quizQuestions);\n// console.log('Shuffled questions (new array):', shuffled);\n// console.log('Original questions (unmutated):', quizQuestions);\n\n// quizManager.initialize(quizQuestions);\n// console.log('Next question:', quizManager.getNextQuestion());\n// console.log('Next question:', quizManager.getNextQuestion());\n// quizManager.resetQuiz();\n// console.log('Next question after reset:', quizManager.getNextQuestion());\n",
+          "solutionCode": "type Question = {\n  id: string;\n  text: string;\n  options?: string[];\n  answer?: string;\n};\n\nfunction getShuffledQuestions<T>(questions: T[]): T[] {\n  const shuffledArray = [...questions]; // Create a shallow copy to avoid mutating original\n  let currentIndex = shuffledArray.length;\n  let randomIndex: number;\n\n  // While there remain elements to shuffle.\n  while (currentIndex !== 0) {\n    // Pick a remaining element.\n    randomIndex = Math.floor(Math.random() * currentIndex);\n    currentIndex--;\n\n    // And swap it with the current element.\n    [shuffledArray[currentIndex], shuffledArray[randomIndex]] = [\n      shuffledArray[randomIndex],\n      shuffledArray[currentIndex],\n    ];\n  }\n\n  return shuffledArray;\n}\n\nconst quizManager = (() => {\n  let currentShuffledQuestions: Question[] = [];\n  let currentIndex: number = 0;\n  let originalQuestions: Question[] = []; // Store original for reset\n\n  function _shuffle<T>(array: T[]): T[] {\n    let m = array.length, t, i;\n    while (m) {\n      i = Math.floor(Math.random() * m--);\n      t = array[m];\n      array[m] = array[i];\n      array[i] = t;\n    }\n    return array;\n  }\n\n  return {\n    initialize: (questions: Question[]) => {\n      originalQuestions = questions; // Store reference to original\n      currentShuffledQuestions = _shuffle([...questions]); // Shuffle a copy\n      currentIndex = 0;\n    },\n    getNextQuestion: (): Question | null => {\n      if (currentIndex < currentShuffledQuestions.length) {\n        return currentShuffledQuestions[currentIndex++];\n      }\n      return null; // All questions exhausted\n    },\n    resetQuiz: () => {\n      // Re-initialize with a fresh shuffle of the original questions\n      quizManager.initialize(originalQuestions);\n    }\n  };\n})();\n\n// Example Usage:\nconst quizQuestions: Question[] = [\n  { id: 'q1', text: 'What is 2+2?' },\n  { id: 'q2', text: 'Capital of France?' },\n  { id: 'q3', text: 'First programming language?' }\n];\n\nconsole.log('\\n--- getShuffledQuestions ---');\nconst shuffled1 = getShuffledQuestions(quizQuestions);\nconsole.log('Shuffled questions (new array):', shuffled1);\nconsole.log('Original questions (unmutated):', quizQuestions);\n\nconsole.log('\\n--- Quiz Manager ---');\nquizManager.initialize(quizQuestions);\nconsole.log('Next 1:', quizManager.getNextQuestion());\nconsole.log('Next 2:', quizManager.getNextQuestion());\nconsole.log('Next 3:', quizManager.getNextQuestion());\nconsole.log('Next 4 (exhausted):', quizManager.getNextQuestion());\n\nconsole.log('\\n--- Reset Quiz ---');\nquizManager.resetQuiz();\nconsole.log('Next 1 after reset:', quizManager.getNextQuestion());\nconsole.log('Next 2 after reset:', quizManager.getNextQuestion());\nconsole.log('Next 3 after reset:', quizManager.getNextQuestion());\n",
+          "testCases": [
+            "`getShuffledQuestions` returns a new array, original is unchanged.",
+            "`getShuffledQuestions([])` returns `[]`.",
+            "`getShuffledQuestions([{id:'x', text:'y'}])` returns a single-element array.",
+            "`quizManager.initialize` correctly shuffles and resets internal state.",
+            "Successive calls to `quizManager.getNextQuestion` return distinct questions until exhausted.",
+            "After `quizManager.getNextQuestion()` returns `null`, it continues to return `null`.",
+            "`quizManager.resetQuiz()` reshuffles and resets the `currentIndex` to 0, allowing quiz restart."
+          ],
+          "hints": [
+            "For `getShuffledQuestions`, remember to create a shallow copy of the input array before shuffling to meet the non-mutation requirement.",
+            "For the `quizManager` bonus, use a closure to maintain the shuffled question list and current index.",
+            "The `resetQuiz` function should likely re-call the internal shuffle logic to get a new random order."
+          ],
+          "tags": [
+            "array",
+            "shuffling",
+            "module-design",
+            "frontend",
+            "algorithm",
+            "design-patterns"
+          ],
+          "timeEstimate": 45,
+          "prerequisites": [
+            "arrays",
+            "fisher_yates_algorithm",
+            "closures"
+          ],
+          "complexity": 8,
+          "interviewRelevance": 9,
+          "learningPath": "intermediate",
+          "relatedConcepts": [
+            "fisher_yates_algorithm",
+            "iife",
+            "data_encapsulation"
+          ]
+        },
+        {
+          "id": "task_sum_nested_numbers",
+          "title": "Calculate Sum of Numbers in Mixed Nested Array",
+          "description": "\nImplement a function `sumNumbersInNestedArray(arr: any[]): number` that calculates the sum of all *numeric* elements within a deeply nested array. The array can contain numbers, other arrays (nested to arbitrary depth), strings, booleans, null, or undefined. Only numbers should contribute to the sum; all other types should be ignored.\n\n**Requirements:**\n1.  The function should handle arrays nested to any depth.\n2.  Non-numeric elements (including strings, booleans, objects, null, undefined) must be ignored.\n3.  The solution should be robust and efficient.\n\n",
+          "difficulty": "medium",
+          "startingCode": "function sumNumbersInNestedArray(arr: any[]): number {\n  let totalSum = 0;\n\n  // TODO: Implement recursive or iterative logic here.\n  // Use Array.isArray() and typeof checks.\n\n  return totalSum;\n}\n\n// Example Usage:\n// const data1 = [1, [2, [3, 4]], 5, 'hello', [6, [7, null]], 8, true, {}];\n// console.log(sumNumbersInNestedArray(data1)); // Expected: 36 (1+2+3+4+5+6+7+8)\n",
+          "solutionCode": "function sumNumbersInNestedArray(arr: any[]): number {\n  let totalSum = 0;\n  \n  function processArray(array: any[]) {\n    for (const item of array) {\n      if (Array.isArray(item)) {\n        processArray(item); // Recursively process nested arrays\n      } else if (typeof item === 'number') {\n        totalSum += item;\n      }\n      // Else, ignore other types\n    }\n  }\n  \n  processArray(arr);\n  return totalSum;\n}\n\n// Alternative using Array.prototype.flat() (if allowed/preferred):\nfunction sumNumbersInNestedArrayFlat(arr: any[]): number {\n  return arr.flat(Infinity) // Flatten array completely\n            .filter(item => typeof item === 'number') // Keep only numbers\n            .reduce((acc, curr) => acc + curr, 0); // Sum them up\n}\n\n// Example Usage:\nconst data1 = [1, [2, [3, 4]], 5, 'hello', [6, [7, null]], 8, true, {}];\nconsole.log('Recursive Sum:', sumNumbersInNestedArray(data1)); // Expected: 36\nconsole.log('Flat Method Sum:', sumNumbersInNestedArrayFlat(data1)); // Expected: 36\n\nconst data2 = [4, 5, 7, 8, [5, 7, 9, [3, 5, 7]]];\nconsole.log('Recursive Sum:', sumNumbersInNestedArray(data2)); // Expected: 60\nconsole.log('Flat Method Sum:', sumNumbersInNestedArrayFlat(data2)); // Expected: 60\n\nconst data3: any[] = [];\nconsole.log('Recursive Sum (empty):', sumNumbersInNestedArray(data3)); // Expected: 0\nconsole.log('Flat Method Sum (empty):', sumNumbersInNestedArrayFlat(data3)); // Expected: 0\n\nconst data4 = [[], [[]], 10, [\"a\", 20], [[30]], null, undefined];\nconsole.log('Recursive Sum:', sumNumbersInNestedArray(data4)); // Expected: 60\nconsole.log('Flat Method Sum:', sumNumbersInNestedArrayFlat(data4)); // Expected: 60\n",
+          "testCases": [
+            "sumNumbersInNestedArray([]) should return 0.",
+            "sumNumbersInNestedArray([1, 2, 3]) should return 6.",
+            "sumNumbersInNestedArray([1, [2, 3], 4]) should return 10.",
+            "sumNumbersInNestedArray([1, [2, [3, [4]]], 5]) should return 15.",
+            "sumNumbersInNestedArray(['a', true, [1, null, [2, 'b']], 3]) should return 6.",
+            "sumNumbersInNestedArray([[], [[[]]], 10, [\"text\"], [20, null], 30]) should return 60."
+          ],
+          "hints": [
+            "Consider using a recursive helper function to handle the nested arrays.",
+            "Use `Array.isArray(item)` to check if an element is an array.",
+            "Use `typeof item === 'number'` to check if an element is a number.",
+            "Alternatively, explore using `Array.prototype.flat(Infinity)` if not restricted from using it, followed by `filter` and `reduce`."
+          ],
+          "tags": [
+            "recursion",
+            "arrays",
+            "data-structures",
+            "traversal",
+            "nested"
+          ],
+          "timeEstimate": 40,
+          "prerequisites": [
+            "recursion_basics",
+            "array_methods"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 9,
+          "learningPath": "intermediate",
+          "relatedConcepts": [
+            "depth_first_search",
+            "json_traversal"
+          ]
+        },
+        {
+          "id": "task_flatten_nested_array",
+          "title": "Implement a Custom `flatten` Function for Nested Arrays",
+          "description": "\nImplement a function `customFlat(arr: any[], depth: number = 1): any[]` that flattens a deeply nested array up to a specified `depth`.\n\n**Requirements:**\n1.  The function should behave similarly to `Array.prototype.flat()`.\n2.  If `depth` is 1 (default), it flattens only one level.\n3.  If `depth` is `Infinity` (or a very large number), it should flatten completely.\n4.  The function should return a *new* array, without modifying the original.\n\n",
+          "difficulty": "hard",
+          "startingCode": "function customFlat(arr: any[], depth: number = 1): any[] {\n  const result: any[] = [];\n\n  // TODO: Implement the flattening logic recursively or iteratively.\n  // Handle the depth parameter correctly.\n\n  return result;\n}\n\n// Example Usage:\n// const nestedArr = [1, [2, [3, 4]], 5, [6]];\n// console.log(customFlat(nestedArr)); // [1, 2, [3, 4], 5, 6] (depth 1)\n// console.log(customFlat(nestedArr, 2)); // [1, 2, 3, 4, 5, 6]\n// console.log(customFlat(nestedArr, Infinity)); // [1, 2, 3, 4, 5, 6]\n",
+          "solutionCode": "function customFlat(arr: any[], depth: number = 1): any[] {\n  const result: any[] = [];\n\n  // Use a recursive helper function with an accumulator and current depth\n  function flattenRecursive(currentArray: any[], currentDepth: number) {\n    for (const item of currentArray) {\n      // If item is an array AND we still have depth to flatten\n      if (Array.isArray(item) && currentDepth > 0) {\n        // Recurse with decremented depth\n        flattenRecursive(item, currentDepth - 1);\n      } else {\n        // Otherwise, push the item (either not an array or no more depth to flatten)\n        result.push(item);\n      }\n    }\n  }\n\n  flattenRecursive(arr, depth);\n  return result;\n}\n\n// Example Usage:\nconst nestedArr = [1, [2, [3, 4]], 5, [6, [7, 8]]];\n\nconsole.log('Original:', JSON.stringify(nestedArr));\nconsole.log('Flat (depth 1):', JSON.stringify(customFlat(nestedArr))); // [1, 2, [3, 4], 5, 6, [7, 8]]\nconsole.log('Flat (depth 2):', JSON.stringify(customFlat(nestedArr, 2))); // [1, 2, 3, 4, 5, 6, 7, 8]\nconsole.log('Flat (depth Infinity):', JSON.stringify(customFlat(nestedArr, Infinity))); // [1, 2, 3, 4, 5, 6, 7, 8]\nconsole.log('Flat (depth 0):', JSON.stringify(customFlat(nestedArr, 0))); // [1, [2, [3, 4]], 5, [6, [7, 8]]] (no flattening)\nconsole.log('Flat (empty):', JSON.stringify(customFlat([]))); // []\nconsole.log('Flat (non-array elements):', JSON.stringify(customFlat([1, 'a', true]))); // [1, 'a', true]\n",
+          "testCases": [
+            "customFlat([1, [2, 3]], 1) should return [1, 2, 3].",
+            "customFlat([1, [2, [3, 4]]], 1) should return [1, 2, [3, 4]].",
+            "customFlat([1, [2, [3, 4]]], 2) should return [1, 2, 3, 4].",
+            "customFlat([1, [2, [3, 4]]], Infinity) should return [1, 2, 3, 4].",
+            "customFlat([], 1) should return [].",
+            "customFlat([1, 'a', true], 1) should return [1, 'a', true].",
+            "customFlat([1, [2, [3, 4]]], 0) should return [1, [2, [3, 4]]] (no flattening)."
+          ],
+          "hints": [
+            "This is a classic recursion problem. The recursive call needs to pass a decremented `depth`.",
+            "The base case for recursion is when the `currentDepth` reaches 0 or when an element is not an array.",
+            "Remember to create a new array for the `result` to avoid mutating the original input.",
+            "Consider using a spread operator (`...`) or `concat` if an iterative approach with a stack is chosen."
+          ],
+          "tags": [
+            "recursion",
+            "arrays",
+            "flatten",
+            "data-structures",
+            "utility-function"
+          ],
+          "timeEstimate": 45,
+          "prerequisites": [
+            "recursion_basics",
+            "array_methods",
+            "type_checking"
+          ],
+          "complexity": 8,
+          "interviewRelevance": 8,
+          "learningPath": "advanced",
+          "relatedConcepts": [
+            "array_prototype_flat",
+            "depth_first_search"
+          ]
+        },
+        {
+          "id": "task_move_zeros_to_end",
+          "title": "Move All Zeros to the End of an Array",
+          "description": "\nImplement a function `moveZeros(nums: number[]): void` that takes an array of numbers and moves all `0`'s to the end of it while maintaining the relative order of the non-zero elements. The operation must be performed in-place.\n\n**Requirements:**\n1.  Modify the input array `nums` directly (in-place).\n2.  Maintain the relative order of the non-zero elements.\n3.  Achieve optimal time complexity (ideally O(N)) and space complexity (O(1)).\n\n",
+          "difficulty": "medium",
+          "startingCode": "function moveZeros(nums: number[]): void {\n  // TODO: Implement the in-place modification here.\n  // Use a two-pointer approach.\n}\n\n// Example Usage:\n// const arr1 = [0, 1, 0, 3, 12];\n// moveZeros(arr1);\n// console.log(arr1); // Expected: [1, 3, 12, 0, 0]\n",
+          "solutionCode": "function moveZeros(nums: number[]): void {\n  if (!nums || nums.length === 0) {\n    return; // Handle empty or invalid array\n  }\n\n  let nonZeroPointer = 0; // Pointer for the next position to place a non-zero element\n  \n  // Iterate through the array with a readPointer\n  for (let readPointer = 0; readPointer < nums.length; readPointer++) {\n    // If the current element is non-zero, move it to the nonZeroPointer position\n    if (nums[readPointer] !== 0) {\n      nums[nonZeroPointer] = nums[readPointer];\n      nonZeroPointer++;\n    }\n  }\n\n  // Fill the remaining positions from nonZeroPointer to the end with zeros\n  for (let i = nonZeroPointer; i < nums.length; i++) {\n    nums[i] = 0;\n  }\n}\n\n// Alternative using swaps (slightly different variant of two-pointer)\n// This one combines both passes into one, but might do unnecessary swaps.\nfunction moveZerosWithSwaps(nums: number[]): void {\n  if (!nums || nums.length === 0) return;\n\n  let i = 0; // Pointer for the last non-zero position found so far\n  for (let j = 0; j < nums.length; j++) {\n    if (nums[j] !== 0) {\n      // If the element at 'j' is non-zero and 'i' is not at the same position,\n      // swap them. This places non-zeros at 'i' and implicitly moves zeros out.\n      if (i !== j) {\n        [nums[i], nums[j]] = [nums[j], nums[i]];\n      }\n      i++;\n    }\n  }\n}\n\n// Example Usage:\nconst arr1 = [0, 1, 0, 3, 12];\nmoveZeros(arr1);\nconsole.log('moveZeros([0,1,0,3,12]):', arr1); // Expected: [1, 3, 12, 0, 0]\n\nconst arr2 = [0, 0, 1];\nmoveZeros(arr2);\nconsole.log('moveZeros([0,0,1]):', arr2); // Expected: [1, 0, 0]\n\nconst arr3 = [1, 2, 3];\nmoveZeros(arr3);\nconsole.log('moveZeros([1,2,3]):', arr3); // Expected: [1, 2, 3]\n\nconst arr4 = [0, 0, 0];\nmoveZeros(arr4);\nconsole.log('moveZeros([0,0,0]):', arr4); // Expected: [0, 0, 0]\n\nconst arr5 = [];\nmoveZeros(arr5);\nconsole.log('moveZeros([]):', arr5); // Expected: []\n\nconst arr6 = [1];\nmoveZeros(arr6);\nconsole.log('moveZeros([1]):', arr6); // Expected: [1]\n\nconst arr7 = [0];\nmoveZeros(arr7);\nconsole.log('moveZeros([0]):', arr7); // Expected: [0]\n\nconsole.log('\\n--- Using moveZerosWithSwaps ---');\nconst arr8 = [0, 1, 0, 3, 12];\nmoveZerosWithSwaps(arr8);\nconsole.log('moveZerosWithSwaps([0,1,0,3,12]):', arr8); // Expected: [1, 3, 12, 0, 0]\n\nconst arr9 = [0, 0, 1];\nmoveZerosWithSwaps(arr9);\nconsole.log('moveZerosWithSwaps([0,0,1]):', arr9); // Expected: [1, 0, 0]\n",
+          "testCases": [
+            "`moveZeros([0, 1, 0, 3, 12])` should result in `[1, 3, 12, 0, 0]`.",
+            "`moveZeros([0, 0, 1])` should result in `[1, 0, 0]`.",
+            "`moveZeros([1, 2, 3])` should result in `[1, 2, 3]`.",
+            "`moveZeros([0, 0, 0])` should result in `[0, 0, 0]`.",
+            "`moveZeros([])` should result in `[]`.",
+            "`moveZeros([1])` should result in `[1]`.",
+            "`moveZeros([0])` should result in `[0]`."
+          ],
+          "hints": [
+            "This problem can be solved with a single pass using two pointers.",
+            "One pointer can track the position where the next non-zero element should be placed.",
+            "The second pointer iterates through the entire array.",
+            "After placing all non-zero elements, the remaining positions in the array should be filled with zeros."
+          ],
+          "tags": [
+            "array",
+            "two-pointers",
+            "in-place",
+            "algorithm",
+            "optimization"
+          ],
+          "timeEstimate": 30,
+          "prerequisites": [
+            "two_pointer_technique"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 9,
+          "learningPath": "intermediate",
+          "relatedConcepts": [
+            "move_element_to_end",
+            "partitioning_arrays"
+          ]
+        },
+        {
+          "id": "task_remove_duplicates_from_sorted_array",
+          "title": "Remove Duplicates from Sorted Array",
+          "description": "\nGiven a sorted array `nums`, remove the duplicates in-place such that each unique element appears only once. The relative order of the elements should be kept the same. The function should return the new length of the array.\n\n**Requirements:**\n1.  Modify the input array `nums` in-place.\n2.  Maintain the relative order of the unique elements.\n3.  Do not allocate extra space for another array (O(1) extra space).\n4.  Return the new length of the array after removing duplicates.\n\n",
+          "difficulty": "medium",
+          "startingCode": "function removeDuplicates(nums: number[]): number {\n  // TODO: Implement the in-place removal of duplicates.\n  // Use a two-pointer approach.\n  \n  if (nums.length === 0) return 0;\n\n  return 0; // Return the new length\n}\n\n// Example Usage:\n// const arr1 = [1, 1, 2];\n// const newLength1 = removeDuplicates(arr1);\n// console.log(arr1.slice(0, newLength1)); // Expected: [1, 2]\n// console.log(newLength1); // Expected: 2\n",
+          "solutionCode": "function removeDuplicates(nums: number[]): number {\n  if (!nums || nums.length === 0) {\n    return 0;\n  }\n\n  let writePointer = 1; // Pointer for the next position where a unique element should be written\n\n  // readPointer iterates through the array starting from the second element\n  for (let readPointer = 1; readPointer < nums.length; readPointer++) {\n    // If the current element (at readPointer) is different from the previous unique element (at writePointer - 1)\n    if (nums[readPointer] !== nums[writePointer - 1]) {\n      nums[writePointer] = nums[readPointer];\n      writePointer++;\n    }\n  }\n  \n  // The writePointer now indicates the new length of the array with unique elements\n  return writePointer;\n}\n\n// Example Usage:\nconst arr1 = [1, 1, 2];\nlet newLength1 = removeDuplicates(arr1);\nconsole.log('Original: [1,1,2] -> Result:', arr1.slice(0, newLength1)); // Expected: [1, 2]\nconsole.log('New Length:', newLength1); // Expected: 2\n\nconst arr2 = [0, 0, 1, 1, 1, 2, 2, 3, 3, 4];\nlet newLength2 = removeDuplicates(arr2);\nconsole.log('Original: [0,0,1,1,1,2,2,3,3,4] -> Result:', arr2.slice(0, newLength2)); // Expected: [0, 1, 2, 3, 4]\nconsole.log('New Length:', newLength2); // Expected: 5\n\nconst arr3 = [1, 1, 1, 1, 1];\nlet newLength3 = removeDuplicates(arr3);\nconsole.log('Original: [1,1,1,1,1] -> Result:', arr3.slice(0, newLength3)); // Expected: [1]\nconsole.log('New Length:', newLength3); // Expected: 1\n\nconst arr4 = [1, 2, 3];\nlet newLength4 = removeDuplicates(arr4);\nconsole.log('Original: [1,2,3] -> Result:', arr4.slice(0, newLength4)); // Expected: [1, 2, 3]\nconsole.log('New Length:', newLength4); // Expected: 3\n\nconst arr5 = [];\nlet newLength5 = removeDuplicates(arr5);\nconsole.log('Original: [] -> Result:', arr5.slice(0, newLength5)); // Expected: []\nconsole.log('New Length:', newLength5); // Expected: 0\n",
+          "testCases": [
+            "`removeDuplicates([1, 1, 2])` should return 2, and `nums` becomes `[1, 2, _]`.",
+            "`removeDuplicates([0, 0, 1, 1, 1, 2, 2, 3, 3, 4])` should return 5, and `nums` becomes `[0, 1, 2, 3, 4, _, _, _, _, _]`.",
+            "`removeDuplicates([1, 1, 1, 1, 1])` should return 1, and `nums` becomes `[1, _, _, _, _]`.",
+            "`removeDuplicates([1, 2, 3])` should return 3, and `nums` remains `[1, 2, 3]`.",
+            "`removeDuplicates([])` should return 0.",
+            "`removeDuplicates([1])` should return 1."
+          ],
+          "hints": [
+            "This problem is well-suited for a two-pointer approach.",
+            "One pointer (`writePointer`) can keep track of the position for the next unique element.",
+            "Another pointer (`readPointer`) can iterate through the array to find unique elements.",
+            "Since the array is sorted, duplicates will always be adjacent."
+          ],
+          "tags": [
+            "array",
+            "two-pointers",
+            "in-place",
+            "duplicates",
+            "sorted-array",
+            "optimization"
+          ],
+          "timeEstimate": 35,
+          "prerequisites": [
+            "two_pointer_technique"
+          ],
+          "complexity": 7,
+          "interviewRelevance": 9,
+          "learningPath": "intermediate",
+          "relatedConcepts": [
+            "array_manipulation",
+            "move_element_to_end"
+          ]
+        },
+        {
+          "id": "task_rotate_matrix_clockwise",
+          "title": "Implement 90-Degree Clockwise Matrix Rotation",
+          "description": "\nImplement a function `rotateMatrix(matrix: number[][]): number[][]` that rotates an `n x n` 2D matrix 90 degrees clockwise *in-place*.\n\n**Requirements:**\n1.  The rotation must be done in-place, modifying the original `matrix` array.\n2.  The matrix is guaranteed to be square (`n x n`).\n3.  The solution should have optimal time complexity (O(N^2)) and space complexity (O(1) auxiliary space).\n\n",
+          "difficulty": "medium",
+          "startingCode": "function rotateMatrix(matrix: number[][]): number[][] {\n  // TODO: Implement the in-place 90-degree clockwise rotation.\n  // Consider the two main steps: transpose and then reverse rows.\n\n  return matrix;\n}\n\n// Example Usage:\n// const matrix1 = [\n//   [1, 2, 3],\n//   [4, 5, 6],\n//   [7, 8, 9]\n// ];\n// rotateMatrix(matrix1);\n// console.log(matrix1); // Expected: [[7, 4, 1], [8, 5, 2], [9, 6, 3]]\n",
+          "solutionCode": "function rotateMatrix(matrix: number[][]): number[][] {\n  if (!matrix || matrix.length === 0 || matrix[0].length === 0) {\n    return matrix; // Handle empty or invalid matrix\n  }\n  const n = matrix.length;\n  \n  // 1. Transpose the matrix (swap rows with columns)\n  for (let i = 0; i < n; i++) {\n    for (let j = i; j < n; j++) { // j starts from i to avoid double-swapping\n      [matrix[i][j], matrix[j][i]] = [matrix[j][i], matrix[i][j]];\n    }\n  }\n  \n  // 2. Reverse each row\n  for (let i = 0; i < n; i++) {\n    matrix[i].reverse();\n  }\n  \n  return matrix;\n}\n\n// Example Usage:\nconst matrix1 = [\n  [1, 2, 3],\n  [4, 5, 6],\n  [7, 8, 9]\n];\nconsole.log('Original Matrix 1:', JSON.stringify(matrix1));\nrotateMatrix(matrix1);\nconsole.log('Rotated Matrix 1 (90 deg clockwise):', JSON.stringify(matrix1));\n// Expected: [[7, 4, 1], [8, 5, 2], [9, 6, 3]]\n\nconst matrix2 = [\n  [5, 1, 9, 11],\n  [2, 4, 8, 10],\n  [13, 3, 6, 7],\n  [15, 14, 12, 16]\n];\nconsole.log('Original Matrix 2:', JSON.stringify(matrix2));\nrotateMatrix(matrix2);\nconsole.log('Rotated Matrix 2 (90 deg clockwise):', JSON.stringify(matrix2));\n// Expected: [[15, 13, 2, 5], [14, 3, 4, 1], [12, 6, 8, 9], [16, 7, 10, 11]]\n\nconst matrix3 = [[1]];\nconsole.log('Original Matrix 3:', JSON.stringify(matrix3));\nrotateMatrix(matrix3);\nconsole.log('Rotated Matrix 3 (90 deg clockwise):', JSON.stringify(matrix3));\n// Expected: [[1]]\n\nconst matrix4: number[][] = [];\nconsole.log('Original Matrix 4 (empty):', JSON.stringify(matrix4));\nrotateMatrix(matrix4);\nconsole.log('Rotated Matrix 4 (empty):', JSON.stringify(matrix4));\n// Expected: []\n",
+          "testCases": [
+            "rotateMatrix([[1,2],[3,4]]) should result in [[3,1],[4,2]].",
+            "rotateMatrix([[1]]) should result in [[1]].",
+            "rotateMatrix([]) should result in [].",
+            "rotateMatrix([[1,2,3],[4,5,6],[7,8,9]]) should result in [[7,4,1],[8,5,2],[9,6,3]].",
+            "Test with a larger matrix (e.g., 5x5) for performance and correctness."
+          ],
+          "hints": [
+            "The standard approach involves two main steps: transposing the matrix and then reversing each row.",
+            "For transposition, iterate `j` from `i` to `n-1` to avoid redundant swaps.",
+            "Remember to use in-place swapping for elements.",
+            "The `Array.prototype.reverse()` method can be used for reversing rows."
+          ],
+          "tags": [
+            "matrix",
+            "algorithm",
+            "rotation",
+            "in-place",
+            "data-structures"
+          ],
+          "timeEstimate": 40,
+          "prerequisites": [
+            "nested_loops",
+            "variable_swapping",
+            "matrix_transpose"
+          ],
+          "complexity": 8,
+          "interviewRelevance": 9,
+          "learningPath": "advanced",
+          "relatedConcepts": [
+            "matrix_operations",
+            "image_processing_basics"
+          ]
+        },
+        {
+          "id": "task_rotate_matrix_counter_clockwise",
+          "title": "Implement 90-Degree Counter-Clockwise Matrix Rotation",
+          "description": "\nImplement a function `rotateMatrixCounterClockwise(matrix: number[][]): number[][]` that rotates an `n x n` 2D matrix 90 degrees counter-clockwise *in-place*.\n\n**Requirements:**\n1.  The rotation must be done in-place, modifying the original `matrix` array.\n2.  The matrix is guaranteed to be square (`n x n`).\n3.  The solution should have optimal time complexity (O(N^2)) and space complexity (O(1) auxiliary space).\n\n",
+          "difficulty": "hard",
+          "startingCode": "function rotateMatrixCounterClockwise(matrix: number[][]): number[][] {\n  // TODO: Implement the in-place 90-degree counter-clockwise rotation.\n  // Consider the two main steps: reverse rows and then transpose.\n\n  return matrix;\n}\n\n// Example Usage:\n// const matrix1 = [\n//   [1, 2, 3],\n//   [4, 5, 6],\n//   [7, 8, 9]\n// ];\n// rotateMatrixCounterClockwise(matrix1);\n// console.log(matrix1); // Expected: [[3, 6, 9], [2, 5, 8], [1, 4, 7]]\n",
+          "solutionCode": "function rotateMatrixCounterClockwise(matrix: number[][]): number[][] {\n  if (!matrix || matrix.length === 0 || matrix[0].length === 0) {\n    return matrix; // Handle empty or invalid matrix\n  }\n  const n = matrix.length;\n\n  // 1. Reverse each row\n  for (let i = 0; i < n; i++) {\n    matrix[i].reverse();\n  }\n  \n  // 2. Transpose the matrix\n  for (let i = 0; i < n; i++) {\n    for (let j = i; j < n; j++) { // j starts from i to avoid double-swapping\n      [matrix[i][j], matrix[j][i]] = [matrix[j][i], matrix[i][j]];\n    }\n  }\n  \n  return matrix;\n}\n\n// Example Usage:\nconst matrix1 = [\n  [1, 2, 3],\n  [4, 5, 6],\n  [7, 8, 9]\n];\nconsole.log('Original Matrix 1:', JSON.stringify(matrix1));\nrotateMatrixCounterClockwise(matrix1);\nconsole.log('Rotated Matrix 1 (90 deg counter-clockwise):', JSON.stringify(matrix1));\n// Expected: [[3, 6, 9], [2, 5, 8], [1, 4, 7]]\n\nconst matrix2 = [\n  [5, 1, 9, 11],\n  [2, 4, 8, 10],\n  [13, 3, 6, 7],\n  [15, 14, 12, 16]\n];\nconsole.log('Original Matrix 2:', JSON.stringify(matrix2));\nrotateMatrixCounterClockwise(matrix2);\nconsole.log('Rotated Matrix 2 (90 deg counter-clockwise):', JSON.stringify(matrix2));\n// Expected: [[11, 10, 7, 16], [9, 8, 6, 12], [1, 4, 3, 14], [5, 2, 13, 15]]\n\nconst matrix3 = [[1]];\nconsole.log('Original Matrix 3:', JSON.stringify(matrix3));\nrotateMatrixCounterClockwise(matrix3);\nconsole.log('Rotated Matrix 3 (90 deg counter-clockwise):', JSON.stringify(matrix3));\n// Expected: [[1]]\n",
+          "testCases": [
+            "rotateMatrixCounterClockwise([[1,2],[3,4]]) should result in [[2,4],[1,3]].",
+            "rotateMatrixCounterClockwise([[1]]) should result in [[1]].",
+            "rotateMatrixCounterClockwise([]) should result in [].",
+            "rotateMatrixCounterClockwise([[1,2,3],[4,5,6],[7,8,9]]) should result in [[3,6,9],[2,5,8],[1,4,7]].",
+            "Test with a larger matrix (e.g., 5x5) for performance and correctness."
+          ],
+          "hints": [
+            "For counter-clockwise rotation, one common approach is to first reverse each row, and then transpose the matrix.",
+            "The transposition step is identical to that for clockwise rotation.",
+            "Ensure your implementation correctly handles the `j` loop bounds for transposition to avoid incorrect swaps."
+          ],
+          "tags": [
+            "matrix",
+            "algorithm",
+            "rotation",
+            "in-place",
+            "data-structures",
+            "hard"
+          ],
+          "timeEstimate": 45,
+          "prerequisites": [
+            "nested_loops",
+            "variable_swapping",
+            "matrix_transpose",
+            "array_reverse"
+          ],
+          "complexity": 9,
+          "interviewRelevance": 8,
+          "learningPath": "advanced",
+          "relatedConcepts": [
+            "matrix_operations",
+            "image_processing_basics",
+            "matrix_clockwise_rotation"
+          ]
+        }
+      ]
+    }
+  }
+]
