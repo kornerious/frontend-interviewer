@@ -3,7 +3,7 @@
  * 
  * Handles communication with Gemini API for curriculum generation
  */
-import { GoogleGenerativeAI, GenerativeModel } from '@google/generative-ai';
+import { GoogleGenerativeAI, GenerativeModel, HarmCategory, HarmBlockThreshold } from '@google/generative-ai';
 
 /**
  * Configuration for AI client
@@ -20,7 +20,7 @@ export interface AIClientConfig {
  * Default configuration
  */
 const DEFAULT_CONFIG: AIClientConfig = {
-  apiKey: process.env.GEMINI_API_KEY || '',
+  apiKey: process.env.NEXT_PUBLIC_GEMINI_API_KEY || '',
   model: 'gemini-2.5-flash-preview-05-20',
   maxRetries: 3,
   retryDelayMs: 1000,
@@ -55,6 +55,77 @@ export class AIClient {
   }
   
   /**
+   * Send a prompt to the Gemini API
+   * @param prompt The prompt to send
+   * @returns The response from the API
+   */
+  async sendPrompt(prompt: string): Promise<any> {
+    try {
+      console.log(`AIClient: Sending prompt to ${this.model}`);
+      console.log('AIClient: Full prompt:', prompt);
+      
+      const generationConfig = {
+        temperature: 0.2,
+        topK: 32,
+        topP: 0.95,
+        maxOutputTokens: 8192,
+      };
+      
+      console.log('AIClient: Generation config:', JSON.stringify(generationConfig));
+      
+      const safetySettings = [
+        {
+          category: HarmCategory.HARM_CATEGORY_HARASSMENT,
+          threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+        },
+        {
+          category: HarmCategory.HARM_CATEGORY_HATE_SPEECH,
+          threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+        },
+        {
+          category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
+          threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+        },
+        {
+          category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
+          threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+        },
+      ];
+      
+      console.log('AIClient: Starting API request at:', new Date().toISOString());
+      
+      // Send the request
+      const result = await this.model.generateContent({
+        contents: [{ role: 'user', parts: [{ text: prompt }] }],
+        generationConfig,
+        safetySettings,
+      });
+      
+      console.log('AIClient: Completed API request at:', new Date().toISOString());
+      
+      const response = result.response;
+      const text = response.text();
+      
+      console.log(`AIClient: Received response from ${this.model}`);
+      console.log('AIClient: Raw response:', text.substring(0, 500) + '...' + text.substring(text.length - 500));
+      
+      // Parse the response as JSON
+      try {
+        const parsedResponse = JSON.parse(text);
+        console.log('AIClient: Parsed response structure:', JSON.stringify(Object.keys(parsedResponse)));
+        return parsedResponse;
+      } catch (parseError) {
+        console.error('AIClient: Failed to parse response as JSON:', parseError);
+        console.log('AIClient: Full raw response:', text);
+        throw new Error('Failed to parse AI response as JSON');
+      }
+    } catch (error) {
+      console.error('AIClient: Error sending prompt:', error);
+      throw error;
+    }
+  }
+  
+  /**
    * Process a prompt with Gemini
    * @param prompt Prompt to send to Gemini
    * @returns JSON response from Gemini
@@ -70,43 +141,10 @@ export class AIClient {
         attempt++;
         console.log(`AIClient: Attempt ${attempt} of ${this.config.maxRetries}`);
         
-        // Create a timeout promise
-        const timeoutPromise = new Promise((_, reject) => {
-          setTimeout(() => reject(new Error('AIClient: Request timed out')), this.config.timeoutMs);
-        });
+        // Try to get a response with enhanced logging
+        const response = await this.sendPrompt(prompt);
+        return response;
         
-        // Create the API call promise
-        const responsePromise = this.model.generateContent({
-          contents: [{ role: 'user', parts: [{ text: prompt }] }],
-          generationConfig: {
-            temperature: 0.1, // Low temperature for more deterministic results
-            topK: 40,
-            topP: 0.95,
-            maxOutputTokens: 8192,
-          },
-        });
-        
-        // Race the promises
-        const response = await Promise.race([responsePromise, timeoutPromise]) as any;
-        
-        // Extract the text response
-        const responseText = response.response.text();
-        
-        // Try to parse as JSON
-        try {
-          // Find JSON content (in case there's surrounding text)
-          const jsonMatch = responseText.match(/\{[\s\S]*\}/);
-          if (jsonMatch) {
-            return JSON.parse(jsonMatch[0]);
-          }
-          
-          // If no JSON object found, try parsing the whole response
-          return JSON.parse(responseText);
-        } catch (parseError) {
-          console.error('AIClient: Failed to parse JSON response:', parseError);
-          console.log('AIClient: Raw response:', responseText);
-          throw new Error('AIClient: Invalid JSON response from Gemini');
-        }
       } catch (error: any) {
         console.error(`AIClient: Error on attempt ${attempt}:`, error.message);
         lastError = error;

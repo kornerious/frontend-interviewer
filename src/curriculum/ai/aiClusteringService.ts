@@ -30,7 +30,7 @@ const DEFAULT_CONFIG: AIClusteringConfig = {
   chunksOutputDir: path.join(process.cwd(), 'curriculum', 'chunks'),
   resultsOutputDir: path.join(process.cwd(), 'curriculum', 'results'),
   chunkPrefix: 'chunk',
-  apiKey: process.env.GEMINI_API_KEY || '',
+  apiKey: process.env.NEXT_PUBLIC_GEMINI_API_KEY || '',
   model: 'gemini-2.5-flash-preview-05-20'
 };
 
@@ -87,90 +87,131 @@ export class AIClusteringService {
     totalClusters: number;
     chunkResults: ProcessedChunkResult[];
   }> {
-    console.log('AIClusteringService: Starting clustering process');
-    
-    // Step 1: Create chunks from database
-    const chunks = await this.chunkManager.createChunks();
-    console.log(`AIClusteringService: Created ${chunks.length} chunks`);
-    
-    // Step 2: Process each chunk with AI
-    const chunkResults: ProcessedChunkResult[] = [];
-    let totalItems = 0;
-    let totalClusters = 0;
-    
-    for (let i = 0; i < chunks.length; i++) {
-      const chunk = chunks[i];
-      console.log(`AIClusteringService: Processing chunk ${i + 1}/${chunks.length}: ${chunk.chunkId}`);
+    try {
+      console.log('AIClusteringService: Starting clustering process at', new Date().toISOString());
       
-      try {
-        // Read chunk data
-        const chunkData = JSON.parse(fs.readFileSync(chunk.filePath, 'utf-8'));
+      // Step 1: Create chunks from database
+      console.log('AIClusteringService: Creating chunks');
+      console.log('AIClusteringService: Database path:', this.config.databasePath);
+      console.log('AIClusteringService: Chunks output directory:', this.config.chunksOutputDir);
+      
+      const chunks = await this.chunkManager.createChunks();
+      console.log(`AIClusteringService: Created ${chunks.length} chunks`);
+      console.log('AIClusteringService: Chunk details:', chunks.map(c => ({ 
+        chunkId: c.chunkId, 
+        itemCount: c.itemCount, 
+        filePath: c.filePath 
+      })));
+      
+      // Step 2: Process each chunk with AI
+      console.log('AIClusteringService: Processing chunks with AI at', new Date().toISOString());
+      console.log('AIClusteringService: Using API key:', this.config.apiKey ? '****' + this.config.apiKey.substring(this.config.apiKey.length - 4) : 'undefined');
+      console.log('AIClusteringService: Using model:', this.config.model);
+      
+      const chunkResults: ProcessedChunkResult[] = [];
+      let totalItems = 0;
+      let totalClusters = 0;
+      
+      for (let i = 0; i < chunks.length; i++) {
+        const chunk = chunks[i];
+        console.log(`AIClusteringService: Processing chunk ${i + 1}/${chunks.length}: ${chunk.chunkId}`);
         
-        // Build prompt
-        const prompt = this.promptBuilder.buildPrompt(
-          chunkData,
-          chunk.startIndex,
-          chunk.endIndex
-        );
-        
-        // Process with AI
-        const aiResponse = await this.aiClient.processPrompt(prompt);
-        
-        // Analyze response
-        const processedResult = this.analyzer.processChunkResponse(
-          aiResponse,
-          chunk.chunkId,
-          chunk.startIndex,
-          chunk.endIndex
-        );
-        
-        // Save result
-        this.analyzer.saveChunkResult(
-          processedResult,
-          this.config.resultsOutputDir
-        );
-        
-        // Update totals
-        chunkResults.push(processedResult);
-        totalItems += processedResult.itemCount;
-        totalClusters += processedResult.clusterCount;
-        
-        console.log(`AIClusteringService: Successfully processed chunk ${chunk.chunkId}`);
-      } catch (error) {
-        console.error(`AIClusteringService: Error processing chunk ${chunk.chunkId}:`, error);
-        throw error;
+        try {
+          // Read chunk data
+          const chunkData = JSON.parse(fs.readFileSync(chunk.filePath, 'utf-8'));
+          console.log(`AIClusteringService: Read chunk data from ${chunk.filePath}, size: ${JSON.stringify(chunkData).length} bytes`);
+          
+          // Build prompt
+          console.log('AIClusteringService: Building prompt for chunk');
+          const prompt = this.promptBuilder.buildPrompt(
+            chunkData,
+            chunk.startIndex,
+            chunk.endIndex
+          );
+          console.log(`AIClusteringService: Built prompt, length: ${prompt.length} characters`);
+          
+          // Process with AI
+          console.log(`AIClusteringService: Sending prompt to AI at ${new Date().toISOString()}`);
+          const aiResponse = await this.aiClient.processPrompt(prompt);
+          console.log(`AIClusteringService: Received AI response at ${new Date().toISOString()}`);
+          
+          // Analyze response
+          console.log('AIClusteringService: Analyzing AI response');
+          const processedResult = this.analyzer.processChunkResponse(
+            aiResponse,
+            chunk.chunkId,
+            chunk.startIndex,
+            chunk.endIndex
+          );
+          
+          // Save result
+          console.log(`AIClusteringService: Saving result to ${this.config.resultsOutputDir}`);
+          this.analyzer.saveChunkResult(
+            processedResult,
+            this.config.resultsOutputDir
+          );
+          
+          // Update totals
+          chunkResults.push(processedResult);
+          totalItems += processedResult.itemCount;
+          totalClusters += processedResult.clusterCount;
+          
+          console.log(`AIClusteringService: Successfully processed chunk ${chunk.chunkId}`);
+          console.log(`AIClusteringService: Found ${processedResult.clusterCount} clusters for ${processedResult.itemCount} items`);
+        } catch (error) {
+          console.error(`AIClusteringService: Error processing chunk ${chunk.chunkId}:`, error);
+          throw error;
+        }
       }
+      
+      // Create summary file
+      const summary = {
+        timestamp: new Date().toISOString(),
+        chunkCount: chunks.length,
+        processedChunks: chunkResults.length,
+        totalItems,
+        totalClusters,
+        chunks: chunkResults.map(result => ({
+          chunkId: result.chunkId,
+          itemCount: result.itemCount,
+          clusterCount: result.clusterCount
+        }))
+      };
+      
+      // Create the results directory if it doesn't exist
+      if (!fs.existsSync(this.config.resultsOutputDir)) {
+        fs.mkdirSync(this.config.resultsOutputDir, { recursive: true });
+      }
+      
+      const summaryPath = path.join(this.config.resultsOutputDir, 'clustering-summary.json');
+      fs.writeFileSync(
+        summaryPath,
+        JSON.stringify(summary, null, 2),
+        'utf-8'
+      );
+      
+      // Also write a copy to the root directory for easy detection
+      const rootSummaryPath = path.join(process.cwd(), 'chunks-processed.json');
+      fs.writeFileSync(
+        rootSummaryPath,
+        JSON.stringify(summary, null, 2),
+        'utf-8'
+      );
+      
+      console.log(`AIClusteringService: Completed clustering process at ${new Date().toISOString()}`);
+      console.log(`AIClusteringService: Summary saved to ${summaryPath} and ${rootSummaryPath}`);
+      
+      return {
+        chunkCount: chunks.length,
+        processedChunks: chunkResults.length,
+        totalItems,
+        totalClusters,
+        chunkResults
+      };
+    } catch (error) {
+      console.error('AIClusteringService: Error in clustering process:', error);
+      throw error;
     }
-    
-    // Create summary file
-    const summary = {
-      chunkCount: chunks.length,
-      processedChunks: chunkResults.length,
-      totalItems,
-      totalClusters,
-      chunks: chunkResults.map(result => ({
-        chunkId: result.chunkId,
-        itemCount: result.itemCount,
-        clusterCount: result.clusterCount
-      }))
-    };
-    
-    const summaryPath = path.join(this.config.resultsOutputDir, 'clustering-summary.json');
-    fs.writeFileSync(
-      summaryPath,
-      JSON.stringify(summary, null, 2),
-      'utf-8'
-    );
-    
-    console.log(`AIClusteringService: Completed clustering process. Summary saved to ${summaryPath}`);
-    
-    return {
-      chunkCount: chunks.length,
-      processedChunks: chunkResults.length,
-      totalItems,
-      totalClusters,
-      chunkResults
-    };
   }
   
   /**

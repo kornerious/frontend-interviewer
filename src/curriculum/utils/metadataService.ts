@@ -326,37 +326,59 @@ export class MetadataService {
    */
   public static async processChunks(): Promise<any> {
     try {
-      console.log('MetadataService: Processing chunks with AI');
+      console.log('MetadataService: Processing chunks with AI at', new Date().toISOString());
+      console.log('MetadataService: Sending POST request to /api/curriculum/process-chunks');
       
-      const response = await fetch('/api/curriculum/process-chunks', {
+      // Log environment variable availability (not the actual value for security)
+      console.log('MetadataService: NEXT_PUBLIC_GEMINI_API_KEY exists:', !!process.env.NEXT_PUBLIC_GEMINI_API_KEY);
+      
+      // Create request object for logging
+      const requestOptions = {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         }
-      });
+      };
+      
+      console.log('MetadataService: Request options:', JSON.stringify(requestOptions));
+      
+      // Send the request with detailed logging
+      console.log('MetadataService: Sending fetch request at', new Date().toISOString());
+      console.log('MetadataService: ⚠️ NOTE: Server-side logs will only appear in the terminal, not in the browser console');
+      
+      const response = await fetch('/api/curriculum/process-chunks', requestOptions);
+      console.log('MetadataService: Received response at', new Date().toISOString());
+      
+      // Check if the request was initiated but no response was received
+      if (!response) {
+        console.error('MetadataService: ⚠️ No response received from server. Check terminal for server logs.');
+        throw new Error('No response received from server');
+      }
       
       console.log('MetadataService: API response status:', response.status);
+      console.log('MetadataService: API response status text:', response.statusText);
+      
+      // Log headers without using iteration
+      const headers: Record<string, string> = {};
+      response.headers.forEach((value, key) => {
+        headers[key] = value;
+      });
+      console.log('MetadataService: API response headers:', JSON.stringify(headers));
       
       if (!response.ok) {
         const errorText = await response.text();
         console.error('MetadataService: API error response:', errorText);
-        throw new Error(`Failed to process chunks with AI: ${response.statusText}`);
+        throw new Error(`Failed to process chunks: ${response.statusText} - ${errorText}`);
       }
       
+      console.log('MetadataService: Parsing response JSON');
       const data = await response.json();
-      console.log('MetadataService: Chunk processing complete, received data:', data);
+      console.log('MetadataService: API response data:', JSON.stringify(data, null, 2));
       
-      return {
-        stats: data.stats || {
-          chunkCount: 0,
-          processedChunks: 0,
-          totalItems: 0,
-          totalClusters: 0
-        },
-        outputDir: data.outputDir
-      };
-    } catch (error) {
-      console.error('MetadataService: Error processing chunks with AI:', error);
+      return data;
+    } catch (error: any) {
+      console.error('MetadataService: Error processing chunks:', error.message);
+      console.error('MetadataService: Full error:', error);
       throw error;
     }
   }

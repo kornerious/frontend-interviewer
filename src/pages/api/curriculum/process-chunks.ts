@@ -3,6 +3,7 @@
  */
 import { NextApiRequest, NextApiResponse } from 'next';
 import path from 'path';
+import fs from 'fs';
 import { AIClusteringService } from '../../../curriculum/ai/aiClusteringService';
 
 /**
@@ -21,12 +22,19 @@ export default async function handler(
   }
   
   try {
-    console.log('API: Starting AI-assisted chunk processing');
+    console.log('API: Starting AI-assisted chunk processing at', new Date().toISOString());
     
-    // Get API key from environment variables
-    const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
+    // Get API key from environment variables - try both server and client-side env vars
+    const apiKey = process.env.GEMINI_API_KEY || process.env.NEXT_PUBLIC_GEMINI_API_KEY;
+    
+    // Log environment variables (safely)
+    console.log('API: Environment variables check:');
+    console.log('- GEMINI_API_KEY exists:', !!process.env.GEMINI_API_KEY);
+    console.log('- NEXT_PUBLIC_GEMINI_API_KEY exists:', !!process.env.NEXT_PUBLIC_GEMINI_API_KEY);
+    console.log('- Using API key:', apiKey ? '****' + apiKey.substring(apiKey.length - 4) : 'undefined');
     
     if (!apiKey) {
+      console.error('API: Missing Gemini API key in environment variables');
       return res.status(400).json({ 
         error: 'Gemini API key is required. Set NEXT_PUBLIC_GEMINI_API_KEY environment variable.' 
       });
@@ -37,7 +45,24 @@ export default async function handler(
     const chunksOutputDir = path.join(process.cwd(), 'curriculum', 'chunks');
     const resultsOutputDir = path.join(process.cwd(), 'curriculum', 'results');
     
+    console.log('API: Paths configuration:');
+    console.log('  - Database path:', databasePath);
+    console.log('  - Chunks output directory:', chunksOutputDir);
+    console.log('  - Results output directory:', resultsOutputDir);
+    
+    // Check if database file exists
+    const databaseExists = fs.existsSync(databasePath);
+    console.log('API: Database file exists:', databaseExists);
+    
+    if (!databaseExists) {
+      console.error('API: Database file not found at', databasePath);
+      return res.status(400).json({ 
+        error: `Database file not found at ${databasePath}` 
+      });
+    }
+    
     // Initialize service
+    console.log('API: Initializing AIClusteringService');
     const clusteringService = new AIClusteringService({
       databasePath,
       chunksOutputDir,
@@ -47,7 +72,15 @@ export default async function handler(
     });
     
     // Run clustering process
+    console.log('API: Starting clustering process');
     const result = await clusteringService.runClustering();
+    console.log('API: Clustering process completed successfully');
+    console.log('API: Result statistics:', {
+      chunkCount: result.chunkCount,
+      processedChunks: result.processedChunks,
+      totalItems: result.totalItems,
+      totalClusters: result.totalClusters
+    });
     
     // Return success response
     return res.status(200).json({
