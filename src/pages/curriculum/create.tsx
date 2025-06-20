@@ -11,7 +11,8 @@ import {
   Alert,
   Card,
   CardContent,
-  Divider
+  Divider,
+  TextField
 } from '@mui/material';
 import Layout from '@/components/layout/Layout';
 import { useRouter } from 'next/router';
@@ -35,6 +36,7 @@ const CurriculumCreatePage: React.FC = () => {
   } | null>(null);
   const [graphStats, setGraphStats] = useState<any | null>(null);
   const [scoreStats, setScoreStats] = useState<any | null>(null);
+  const [chunkStats, setChunkStats] = useState<any | null>(null);
 
   const steps = [
     'Extract Metadata',
@@ -45,21 +47,98 @@ const CurriculumCreatePage: React.FC = () => {
     'Compose Final Curriculum'
   ];
 
-  // Check if metadata already exists on component mount
+  // Check for existing files and set the appropriate step on component mount
   useEffect(() => {
-    const checkMetadata = async () => {
+    const checkExistingFiles = async () => {
       try {
-        console.log('Checking if metadata exists...');
-        const exists = await MetadataService.checkMetadataExists();
-        console.log('Metadata exists:', exists);
+        console.log('Checking for existing files...');
         
-        if (exists) {
-          console.log('Getting metadata stats...');
+        // Check for AI-processed chunks first (highest priority)
+        const chunksExist = await MetadataService.checkChunksExist();
+        if (chunksExist) {
+          console.log('AI-processed chunks exist, setting step to 4');
+          
+          // Get metadata stats for display
+          const stats = await MetadataService.getMetadataStats();
+          if (stats) {
+            setMetadataStats(stats);
+          }
+          
+          // Get graph stats
+          const graphStats = await MetadataService.getGraphStats();
+          if (graphStats) {
+            setGraphStats({ stats: graphStats });
+          }
+          
+          // Get score stats
+          const scoreStats = await MetadataService.getScoreStats();
+          if (scoreStats) {
+            setScoreStats(scoreStats);
+          }
+          
+          // Set active step to AI-Assisted Clustering (completed)
+          setActiveStep(4);
+          return;
+        }
+        
+        // Check for scores (second priority)
+        const scoresExist = await MetadataService.checkScoresExist();
+        if (scoresExist) {
+          console.log('Scores exist, setting step to 3');
+          // Get metadata stats for display
+          const stats = await MetadataService.getMetadataStats();
+          if (stats) {
+            setMetadataStats(stats);
+          }
+          
+          // Get graph stats
+          const graphStats = await MetadataService.getGraphStats();
+          if (graphStats) {
+            setGraphStats({ stats: graphStats });
+          }
+          
+          // Get score stats
+          const scoreStats = await MetadataService.getScoreStats();
+          if (scoreStats) {
+            setScoreStats(scoreStats);
+          }
+          
+          // Set active step to Score & Order Items (completed)
+          setActiveStep(3);
+          return;
+        }
+        
+        // Check for graphs
+        const graphsExist = await MetadataService.checkGraphsExist();
+        if (graphsExist) {
+          console.log('Graphs exist, setting step to 2');
+          // Get metadata stats for display
+          const stats = await MetadataService.getMetadataStats();
+          if (stats) {
+            setMetadataStats(stats);
+          }
+          
+          // Get graph stats
+          const graphStats = await MetadataService.getGraphStats();
+          if (graphStats) {
+            setGraphStats({ stats: graphStats });
+          }
+          
+          // Set active step to Build Dependency Graphs (completed)
+          setActiveStep(2);
+          return;
+        }
+        
+        // Check for metadata
+        const metadataExists = await MetadataService.checkMetadataExists();
+        if (metadataExists) {
+          console.log('Metadata exists, setting step to 1');
           const stats = await MetadataService.getMetadataStats();
           console.log('Got metadata stats:', stats);
           
           if (stats) {
             setMetadataStats(stats);
+            // Set active step to Build Dependency Graphs
             setActiveStep(1);
           } else {
             console.error('Failed to get metadata stats');
@@ -67,12 +146,12 @@ const CurriculumCreatePage: React.FC = () => {
           }
         }
       } catch (err: any) {
-        console.error('Error checking metadata:', err);
-        setError(`Error checking metadata: ${err.message || 'Unknown error'}`);
+        console.error('Error checking existing files:', err);
+        setError(`Error checking existing files: ${err.message || 'Unknown error'}`);
       }
     };
     
-    checkMetadata();
+    checkExistingFiles();
   }, []);
 
   const handleExtractMetadata = async () => {
@@ -129,6 +208,26 @@ const CurriculumCreatePage: React.FC = () => {
       setActiveStep(3);
     } catch (err: any) {
       setError(`Failed to calculate scores: ${err.message || 'Unknown error'}`);
+      console.error(err);
+    } finally {
+      setProcessing(false);
+    }
+  };
+  
+  const handleProcessChunks = async () => {
+    try {
+      setProcessing(true);
+      setError(null);
+      
+      // Call the AI chunk processing service using environment variable for API key
+      const result = await MetadataService.processChunks();
+      
+      // Update chunk stats
+      setChunkStats(result);
+      
+      setActiveStep(4);
+    } catch (err: any) {
+      setError(`Failed to process chunks with AI: ${err.message || 'Unknown error'}`);
       console.error(err);
     } finally {
       setProcessing(false);
@@ -384,6 +483,75 @@ const CurriculumCreatePage: React.FC = () => {
                   </Card>
                 )}
                 
+                <Typography variant="body1" paragraph>
+                  Next, we'll use Google Gemini 2.5 Flash to process chunks of the database and identify thematic clusters.
+                </Typography>
+                
+                <Typography variant="body1" paragraph>
+                  This step will use the Gemini API key configured in your environment variables.
+                </Typography>
+                
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 3 }}>
+                  <Button 
+                    variant="outlined" 
+                    onClick={handleCancel}
+                  >
+                    Back to Modules
+                  </Button>
+                  
+                  <Button 
+                    variant="contained" 
+                    color="primary"
+                    onClick={handleProcessChunks}
+                    disabled={processing}
+                    startIcon={processing && <CircularProgress size={20} color="inherit" />}
+                  >
+                    {processing ? 'Processing Chunks...' : 'Process Chunks with AI'}
+                  </Button>
+                </Box>
+              </Box>
+            ) : activeStep === 4 ? (
+              <Box>
+                <Typography variant="h5" gutterBottom>
+                  AI-Assisted Clustering Complete
+                </Typography>
+                
+                {chunkStats && (
+                  <Alert severity="success" sx={{ mb: 3 }}>
+                    Successfully processed {chunkStats.stats?.processedChunks || 0} chunks with AI
+                  </Alert>
+                )}
+                
+                {chunkStats && (
+                  <Card variant="outlined" sx={{ mb: 3 }}>
+                    <CardContent>
+                      <Typography variant="subtitle1" gutterBottom>
+                        AI Clustering Results:
+                      </Typography>
+                      
+                      <Box sx={{ mb: 2 }}>
+                        <Typography variant="body2">Total Chunks: {chunkStats.stats?.chunkCount || 0}</Typography>
+                        <Typography variant="body2">Processed Chunks: {chunkStats.stats?.processedChunks || 0}</Typography>
+                        <Typography variant="body2">Total Items: {chunkStats.stats?.totalItems || 0}</Typography>
+                        <Typography variant="body2">Total Clusters: {chunkStats.stats?.totalClusters || 0}</Typography>
+                        <Typography variant="body2">Results Directory: {chunkStats.outputDir || 'curriculum/results'}</Typography>
+                      </Box>
+                      
+                      <Divider sx={{ my: 2 }} />
+                      
+                      <Typography variant="body2">
+                        AI has identified thematic clusters and proposed learning sequences for each chunk.
+                        The results are saved in {chunkStats.outputDir || 'curriculum/results'}.
+                      </Typography>
+                    </CardContent>
+                  </Card>
+                )}
+                
+                <Typography variant="body1" paragraph>
+                  Next, we'll merge the AI-processed chunks, resolve cross-chunk dependencies using the dependency graph,
+                  and create a cohesive curriculum sequence.
+                </Typography>
+                
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 3 }}>
                   <Button 
                     variant="outlined" 
@@ -397,7 +565,7 @@ const CurriculumCreatePage: React.FC = () => {
                     color="primary"
                     onClick={handleNextStep}
                   >
-                    Continue to Step 4: AI-Assisted Clustering
+                    Continue to Step 5: Merge & Resolve Dependencies
                   </Button>
                 </Box>
               </Box>

@@ -4,6 +4,7 @@
  * Frontend service for handling curriculum generation pipeline steps
  */
 import { ExtractedMetadata } from '../types/metadata';
+import { ProcessedChunkResult } from '../ai/analyzer';
 
 /**
  * Service for interacting with the curriculum generation API
@@ -75,6 +76,54 @@ export class MetadataService {
   }
   
   /**
+   * Check if graphs files exist
+   */
+  public static async checkGraphsExist(): Promise<boolean> {
+    try {
+      console.log('MetadataService: Checking if graphs exist');
+      const response = await fetch('/api/curriculum/check-graphs');
+      const data = await response.json();
+      console.log('MetadataService: Graphs exist:', data.exists);
+      return data.exists;
+    } catch (error) {
+      console.error('MetadataService: Error checking graphs existence:', error);
+      return false;
+    }
+  }
+  
+  /**
+   * Check if scores.json exists
+   */
+  public static async checkScoresExist(): Promise<boolean> {
+    try {
+      console.log('MetadataService: Checking if scores exist');
+      const response = await fetch('/api/curriculum/check-scores');
+      const data = await response.json();
+      console.log('MetadataService: Scores exist:', data.exists);
+      return data.exists;
+    } catch (error) {
+      console.error('MetadataService: Error checking scores existence:', error);
+      return false;
+    }
+  }
+  
+  /**
+   * Check if AI-processed chunks exist
+   */
+  public static async checkChunksExist(): Promise<boolean> {
+    try {
+      console.log('MetadataService: Checking if AI-processed chunks exist');
+      const response = await fetch('/api/curriculum/check-chunks');
+      const data = await response.json();
+      console.log('MetadataService: AI-processed chunks exist:', data.exists);
+      return data.exists;
+    } catch (error) {
+      console.error('MetadataService: Error checking chunks existence:', error);
+      return false;
+    }
+  }
+  
+  /**
    * Get metadata stats
    */
   public static async getMetadataStats(): Promise<{
@@ -103,6 +152,70 @@ export class MetadataService {
       };
     } catch (error) {
       console.error('MetadataService: Error getting metadata stats:', error);
+      return null;
+    }
+  }
+  
+  /**
+   * Get graph stats
+   */
+  public static async getGraphStats(): Promise<{
+    nodeCount: number;
+    dependencyEdgeCount: number;
+    similarityEdgeCount: number;
+  } | null> {
+    try {
+      console.log('MetadataService: Getting graph stats');
+      const response = await fetch('/api/curriculum/read-graphs-index');
+      
+      if (!response.ok) {
+        console.error('MetadataService: Failed to get graph stats:', response.statusText);
+        return null;
+      }
+      
+      const data = await response.json();
+      console.log('MetadataService: Got graph stats:', data);
+      
+      if (data && data.data) {
+        return {
+          nodeCount: data.data.nodeCount || 0,
+          dependencyEdgeCount: data.data.dependencyEdgeCount || 0,
+          similarityEdgeCount: data.data.similarityEdgeCount || 0
+        };
+      }
+      
+      return null;
+    } catch (error) {
+      console.error('MetadataService: Error getting graph stats:', error);
+      return null;
+    }
+  }
+  
+  /**
+   * Get score stats
+   */
+  public static async getScoreStats(): Promise<{
+    itemsScored: number;
+    scoresPath: string;
+  } | null> {
+    try {
+      console.log('MetadataService: Getting score stats');
+      const response = await fetch('/api/curriculum/score-stats');
+      
+      if (!response.ok) {
+        console.error('MetadataService: Failed to get score stats:', response.statusText);
+        return null;
+      }
+      
+      const data = await response.json();
+      console.log('MetadataService: Got score stats:', data);
+      
+      return {
+        itemsScored: data.itemsScored || 0,
+        scoresPath: data.scoresPath || 'scores.json'
+      };
+    } catch (error) {
+      console.error('MetadataService: Error getting score stats:', error);
       return null;
     }
   }
@@ -203,6 +316,47 @@ export class MetadataService {
       };
     } catch (error) {
       console.error('MetadataService: Error calculating scores:', error);
+      throw error;
+    }
+  }
+  
+  /**
+   * Step 4: Process chunks with AI
+   * Uses AI to process chunks of the database
+   */
+  public static async processChunks(): Promise<any> {
+    try {
+      console.log('MetadataService: Processing chunks with AI');
+      
+      const response = await fetch('/api/curriculum/process-chunks', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      console.log('MetadataService: API response status:', response.status);
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('MetadataService: API error response:', errorText);
+        throw new Error(`Failed to process chunks with AI: ${response.statusText}`);
+      }
+      
+      const data = await response.json();
+      console.log('MetadataService: Chunk processing complete, received data:', data);
+      
+      return {
+        stats: data.stats || {
+          chunkCount: 0,
+          processedChunks: 0,
+          totalItems: 0,
+          totalClusters: 0
+        },
+        outputDir: data.outputDir
+      };
+    } catch (error) {
+      console.error('MetadataService: Error processing chunks with AI:', error);
       throw error;
     }
   }
